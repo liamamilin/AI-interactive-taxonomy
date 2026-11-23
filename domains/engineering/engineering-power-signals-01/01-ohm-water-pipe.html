@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：水塔与细水管 · 欧姆定律 I = V / R</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 14px; }
+    svg { width: 100%; height: 225px; display: block; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .m-card { background: var(--tax-surface-2); border: 1px solid var(--tax-border); border-radius: 12px; padding: 12px; text-align: center; }
+    .m-val { font-size: 22px; font-weight: 900; color: var(--tax-primary); }
+    .m-lbl { font-size: 12px; color: var(--tax-muted); margin-top: 2px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>💧 水塔与细水管：2 分钟秒懂欧姆定律 I = V / R</h1>
+        <p>把<strong>电压 V</strong> 想象成水塔高度（推力），把<strong>电阻 R</strong> 想象成水管拧紧的阀门（阻力），流出来的水流速度就是<strong>电流 I</strong>！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div>
+          <label style="font-weight:850;font-size:14px;">🔋 电压 V（水塔水压）：<span id="vVal" style="color:#38bdf8">12</span> V</label>
+          <input id="vSl" type="range" min="3" max="24" step="1" value="12" style="width:100%;margin-top:6px;" />
+        </div>
+        <div>
+          <label style="font-weight:850;font-size:14px;">🚧 电阻 R（阀门阻力）：<span id="rVal" style="color:#f59e0b">4</span> Ω</label>
+          <input id="rSl" type="range" min="1" max="12" step="1" value="4" style="width:100%;margin-top:6px;" />
+        </div>
+      </div>
+
+      <div class="stage"><svg viewBox="0 0 560 220" id="ohmSvg"></svg></div>
+
+      <div class="metrics">
+        <div class="m-card"><div class="m-val" id="iOut">3.00 A</div><div class="m-lbl">电流 I = V / R</div></div>
+        <div class="m-card"><div class="m-val" id="pOut">36.0 W</div><div class="m-lbl">灯泡功率 P = V × I</div></div>
+        <div class="m-card"><div class="m-val" id="stOut">正常发光</div><div class="m-lbl">水轮 / 灯泡状态</div></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let phase = 0;
+    let interacts = 0;
+
+    function draw() {
+      const V = parseInt(document.getElementById("vSl").value, 10);
+      const R = parseInt(document.getElementById("rSl").value, 10);
+      const I = V / R;
+      const P = V * I;
+
+      document.getElementById("vVal").textContent = V;
+      document.getElementById("rVal").textContent = R;
+      document.getElementById("iOut").textContent = I.toFixed(2) + " A";
+      document.getElementById("pOut").textContent = P.toFixed(1) + " W";
+
+      const burn = I > 10;
+      const dim = I < 1.2;
+      document.getElementById("stOut").textContent = burn ? "🔥 过流烧毁" : dim ? "🕯️ 微弱昏暗" : I > 5 ? "⚡ 超亮强光" : "💡 正常发光";
+      document.getElementById("stOut").style.color = burn ? "#ef4444" : dim ? "#94a3b8" : "#10b981";
+
+      phase = (phase + Math.min(10, I * 0.7)) % 40;
+
+      // Water height in tank: 3V -> 22px, 24V -> 110px
+      const h = 18 + (V / 24) * 96;
+      const wy = 165 - h;
+      // Pipe constriction from R: 1 -> wide (34px), 12 -> narrow (8px)
+      const pinch = ((R - 1) / 11) * 14;
+      const glowOp = Math.min(1, P / 90);
+      const bulbColor = burn ? "#ef4444" : `rgba(250, 204, 21, ${0.2 + glowOp * 0.8})`;
+
+      let s = "";
+      // Water tank
+      s += `<rect x="36" y="45" width="90" height="125" rx="8" fill="#1e293b" stroke="#64748b" stroke-width="2"/>`;
+      s += `<rect x="38" y="${wy.toFixed(1)}" width="86" height="${(168 - wy).toFixed(1)}" rx="5" fill="#0284c7"/>`;
+      s += `<text x="81" y="34" text-anchor="middle" fill="#38bdf8" font-size="12" font-weight="800">电压水塔 ${V}V</text>`;
+
+      // Pipe with choke valve
+      s += `<path d="M126 122 L230 122 L255 ${(122 + pinch).toFixed(1)} L315 ${(122 + pinch).toFixed(1)} L340 122 L435 122" fill="none" stroke="#475569" stroke-width="3"/>`;
+      s += `<path d="M126 158 L230 158 L255 ${(158 - pinch).toFixed(1)} L315 ${(158 - pinch).toFixed(1)} L340 158 L435 158" fill="none" stroke="#475569" stroke-width="3"/>`;
+      // Valve indicator
+      s += `<rect x="278" y="${(88 + pinch).toFixed(1)}" width="14" height="${(34 - pinch * 0.2).toFixed(1)}" rx="3" fill="#f59e0b"/>`;
+      s += `<rect x="264" y="82" width="42" height="8" rx="4" fill="#fbbf24"/>`;
+      s += `<text x="285" y="72" text-anchor="middle" fill="#fcd34d" font-size="12" font-weight="800">电阻阀门 ${R}Ω</text>`;
+
+      // Animated current droplets
+      for (let x = 135 + (phase % 32); x < 430; x += 32) {
+        s += `<circle cx="${x.toFixed(1)}" cy="140" r="${Math.max(3, Math.min(7, 2.5 + I * 0.45)).toFixed(1)}" fill="${burn ? "#f87171" : "#38bdf8"}"/>`;
+      }
+
+      // Bulb / load
+      s += `<circle cx="485" cy="128" r="${(30 + glowOp * 16).toFixed(1)}" fill="${bulbColor}" opacity="${(0.18 + glowOp * 0.35).toFixed(2)}"/>`;
+      s += `<circle cx="485" cy="128" r="26" fill="${bulbColor}" stroke="#e2e8f0" stroke-width="2"/>`;
+      s += `<rect x="473" y="154" width="24" height="16" rx="4" fill="#64748b"/>`;
+      s += `<text x="485" y="134" text-anchor="middle" font-size="22">${burn ? "💥" : "💡"}</text>`;
+      s += `<text x="485" y="192" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">I = ${I.toFixed(2)} A</text>`;
+
+      document.getElementById("ohmSvg").innerHTML = s;
+
+      document.getElementById("ahaBox").innerHTML = burn
+        ? `💡 <strong>过流警告（I = ${I.toFixed(1)}A）：</strong>水压太高且电阻太小，水流像高压水枪一样冲断灯丝！现实里给 LED 灯必须串联一颗“限流电阻”，正是为了拧小阀门保护它。`
+        : `💡 <strong>欧姆定律直觉：</strong>水塔越高（V 越大）推力越猛，阀门越紧（R 越大）阻力越大。只有 <code>I = V / R</code> 这一个公式，就决定了所有电路里电流到底跑多快！`;
+    }
+
+    ["vSl", "rSl"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        interacts++;
+        if (interacts >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+      });
+    });
+
+    function loop() {
+      draw();
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+</body>
+</html>

@@ -6,10 +6,10 @@ window.TAXONOMY_DATA = {
   "stats": {
     "totalDomains": 10,
     "litDomains": 3,
-    "totalTopics": 79,
-    "totalPlannedTopics": 196,
+    "totalTopics": 83,
+    "totalPlannedTopics": 192,
     "totalBlueprintTopics": 275,
-    "totalToys": 237
+    "totalToys": 249
   },
   "tracks": [
     {
@@ -2440,24 +2440,7 @@ window.TAXONOMY_DATA = {
         {
           "id": "power-signals",
           "title": "4. 电力、能量与信号传输（Power, Circuits & Signals）",
-          "plannedTopics": [
-            {
-              "slug": "engineering-power-signals-01",
-              "title": "欧姆定律与串并联水流隐喻"
-            },
-            {
-              "slug": "engineering-power-signals-02",
-              "title": "高压输电与变压器降损"
-            },
-            {
-              "slug": "engineering-power-signals-03",
-              "title": "奈奎斯特采样定理（车轮倒转错觉）"
-            },
-            {
-              "slug": "engineering-power-signals-04",
-              "title": "汉明纠错码（自动修复错位比特）"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "reliability-safety",
@@ -2504,10 +2487,10 @@ window.TAXONOMY_DATA = {
           ]
         }
       ],
-      "liveTopicCount": 12,
-      "plannedTopicCount": 12,
+      "liveTopicCount": 16,
+      "plannedTopicCount": 8,
       "blueprintTopicCount": 24,
-      "liveToyCount": 36,
+      "liveToyCount": 48,
       "topics": [
         {
           "id": "engineering/engineering-control-feedback-01",
@@ -2653,6 +2636,55 @@ window.TAXONOMY_DATA = {
               "archetype": "builder",
               "concept": "动滑轮省力 · 功 W = F × s 守恒 · 没有免费永动机",
               "summary": "逐个给起重机挂上 1 到 4 个滑轮，实时对比手拉的力气和必须拉出的绳子长度，验证能量守恒！"
+            }
+          ]
+        },
+        {
+          "id": "engineering/engineering-power-signals-01",
+          "slug": "engineering-power-signals-01",
+          "domain": "engineering",
+          "branch": "power-signals",
+          "order": 1,
+          "title": "欧姆定律与串并联水流隐喻",
+          "icon": "⚡",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "电压、电流、电阻到底谁推着谁走？为什么家里插线板都是并联，而老式圣诞彩灯坏一颗就全灭？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-power-signals-02",
+            "engineering/engineering-reliability-safety-02"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-power-signals-01/01-ohm-water-pipe.html",
+              "file": "01-ohm-water-pipe.html",
+              "path": "./domains/engineering/engineering-power-signals-01/01-ohm-water-pipe.html",
+              "title": "水塔与细水管：2 分钟秒懂欧姆定律 I = V / R（SVG）",
+              "icon": "💧",
+              "archetype": "simulation",
+              "concept": "欧姆定律 I = V/R · 电压=水压 · 电阻=管径阀门 · 功率 P = V·I",
+              "summary": "调高水塔电压或拧紧管道电阻阀，实时看水流转速与灯泡亮度变化，彻底记住电学第一铁律！"
+            },
+            {
+              "id": "engineering/engineering-power-signals-01/02-series-vs-parallel.html",
+              "file": "02-series-vs-parallel.html",
+              "path": "./domains/engineering/engineering-power-signals-01/02-series-vs-parallel.html",
+              "title": "串联分压 vs 并联分流：点击烧坏一颗灯看看后果！（SVG）",
+              "icon": "💡",
+              "archetype": "spatial",
+              "concept": "串联总电阻相加 · 并联各支路独立 · 家庭电路并联原则",
+              "summary": "在串联与并联电路间一键切换，亲手点灭其中一颗灯泡，看清全灭灾难与独立供电的本质差异！"
+            },
+            {
+              "id": "engineering/engineering-power-signals-01/03-short-circuit-breaker.html",
+              "file": "03-short-circuit-breaker.html",
+              "path": "./domains/engineering/engineering-power-signals-01/03-short-circuit-breaker.html",
+              "title": "插线板过载与短路跳闸急救室",
+              "icon": "🔌",
+              "archetype": "scenario",
+              "concept": "并联总电流叠加 · 短路 R→0 电流爆炸 · 空气开关过载保护",
+              "summary": "往 220V/16A 家庭插座里陆续插满电水壶、吹风机甚至裸露短路导线，亲手触发空气开关跳闸！"
             }
           ]
         },
@@ -2804,6 +2836,55 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "engineering/engineering-power-signals-02",
+          "slug": "engineering-power-signals-02",
+          "domain": "engineering",
+          "branch": "power-signals",
+          "order": 2,
+          "title": "高压输电与变压器降损",
+          "icon": "🗼",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "发电厂发出的电为什么要先升压到 50 万伏特高压再送往城市？电压升 10 倍，输电线发热竟然能暴降 100 倍！",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-power-signals-01",
+            "engineering/engineering-systems-tradeoffs-01"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-power-signals-02/01-hv-line-loss.html",
+              "file": "01-hv-line-loss.html",
+              "path": "./domains/engineering/engineering-power-signals-02/01-hv-line-loss.html",
+              "title": "特高压输电塔：为什么非要升压到 50 万伏？（SVG）",
+              "icon": "⚡",
+              "archetype": "simulation",
+              "concept": "线损 P_loss = I²·R · 恒功率升压降流 · 平方级节能",
+              "summary": "向城市输送恒定 100MW 电力，拖动输电电压滑块，看电线从烧得通红瞬间冷却，城市灯火通明！"
+            },
+            {
+              "id": "engineering/engineering-power-signals-02/02-transformer-turns-ratio.html",
+              "file": "02-transformer-turns-ratio.html",
+              "path": "./domains/engineering/engineering-power-signals-02/02-transformer-turns-ratio.html",
+              "title": "电磁变压器工坊：绕线匝数比与交流电魔法（SVG）",
+              "icon": "🧲",
+              "archetype": "builder",
+              "concept": "法拉第电磁感应 · V₂/V₁ = N₂/N₁ · 交流电 vs 直流电",
+              "summary": "调节铁芯两侧线圈匝数并切换交流/直流电源，亲眼看清为何变压器只能给交流电“变身”！"
+            },
+            {
+              "id": "engineering/engineering-power-signals-02/03-ac-vs-dc-war.html",
+              "file": "03-ac-vs-dc-war.html",
+              "path": "./domains/engineering/engineering-power-signals-02/03-ac-vs-dc-war.html",
+              "title": "电流之战沙盘：爱迪生直流 vs 特斯拉交流远距离赛跑",
+              "icon": "🏁",
+              "archetype": "race",
+              "concept": "远距离输电效率 · 铜缆成本爆炸 · 交流电网胜出原因",
+              "summary": "把输电距离从 1 公里拉长到 200 公里，对比 110V 直流与 220kV 交流的送达率与铜线损耗！"
+            }
+          ]
+        },
+        {
           "id": "engineering/engineering-control-feedback-03",
           "slug": "engineering-control-feedback-03",
           "domain": "engineering",
@@ -2951,6 +3032,55 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "engineering/engineering-power-signals-03",
+          "slug": "engineering-power-signals-03",
+          "domain": "engineering",
+          "branch": "power-signals",
+          "order": 3,
+          "title": "奈奎斯特采样定理（车轮倒转错觉）",
+          "icon": "🎞️",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "为什么电影里高速前进的汽车轮子看起来在“倒着转”？CD 音乐为什么偏偏选 44.1kHz 采样率？",
+          "difficulty": "进阶",
+          "related": [
+            "engineering/engineering-power-signals-04",
+            "science/science-math-info-03"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-power-signals-03/01-wagon-wheel-aliasing.html",
+              "file": "01-wagon-wheel-aliasing.html",
+              "path": "./domains/engineering/engineering-power-signals-03/01-wagon-wheel-aliasing.html",
+              "title": "车轮倒转错觉实验：频闪相机下的时间混叠（SVG）",
+              "icon": "🛞",
+              "archetype": "simulation",
+              "concept": "车轮效应 Wagon-Wheel Effect · 采样频率 fs · 奈奎斯特极限 fs/2",
+              "summary": "左右同步对比真实旋转车轮与 10 FPS 相机拍到的画面，亲眼看转速超过 5 圈/秒后车轮瞬间“倒转”！"
+            },
+            {
+              "id": "engineering/engineering-power-signals-03/02-sine-wave-aliasing.html",
+              "file": "02-sine-wave-aliasing.html",
+              "path": "./domains/engineering/engineering-power-signals-03/02-sine-wave-aliasing.html",
+              "title": "波形混叠透视镜：采样点太稀，高频秒变低频！（SVG）",
+              "icon": "〰️",
+              "archetype": "spatial",
+              "concept": "奈奎斯特定理 fs ≥ 2·f_max · 频率混叠 Aliasing · 波形重构",
+              "summary": "拖动信号频率与采样率滑块，看离散红点如何连成一条完全失真的幽灵低频假波！"
+            },
+            {
+              "id": "engineering/engineering-power-signals-03/03-sampling-rate-quiz.html",
+              "file": "03-sampling-rate-quiz.html",
+              "path": "./domains/engineering/engineering-power-signals-03/03-sampling-rate-quiz.html",
+              "title": "数字录音与防混叠滤镜决策台",
+              "icon": "🎙️",
+              "archetype": "scenario",
+              "concept": "CD 44.1kHz 来源 · 电话 8kHz 语音 · 采样前低通防混叠滤波",
+              "summary": "面对人耳音乐、电话语音和心电监护 3 个真实工程场景，选出既不失真又不浪费带宽的采样率！"
+            }
+          ]
+        },
+        {
           "id": "engineering/engineering-control-feedback-04",
           "slug": "engineering-control-feedback-04",
           "domain": "engineering",
@@ -3094,6 +3224,55 @@ window.TAXONOMY_DATA = {
               "archetype": "simulation",
               "concept": "金属疲劳 Metal Fatigue · 客舱增压泄压循环 · S-N 曲线",
               "summary": "反复弯折一枚回形针（模拟客舱每次起飞增压/降落泄压），体验远低于屈服强度的循环应力如何悄悄攒出微裂纹！"
+            }
+          ]
+        },
+        {
+          "id": "engineering/engineering-power-signals-04",
+          "slug": "engineering-power-signals-04",
+          "domain": "engineering",
+          "branch": "power-signals",
+          "order": 4,
+          "title": "汉明纠错码（自动修复错位比特）",
+          "icon": "🛡️",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "太空探测器发回地球的 0 和 1 被宇宙射线劈翻了一位，计算机凭什么不用重传就能瞬间揪出哪一位错了并自动修好？",
+          "difficulty": "进阶",
+          "related": [
+            "engineering/engineering-power-signals-03",
+            "software/software-systems-os-01"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-power-signals-04/01-hamming-venn-svg.html",
+              "file": "01-hamming-venn-svg.html",
+              "path": "./domains/engineering/engineering-power-signals-04/01-hamming-venn-svg.html",
+              "title": "汉明(7,4)三圆维恩图：劈翻任意 1 bit，秒级自动定位！（SVG）",
+              "icon": "⭕",
+              "archetype": "spatial",
+              "concept": "汉明(7,4)码 · 交叉偶校验圆 · 单比特自愈 ECC",
+              "summary": "点击三圆维恩图里的任意一个比特发射宇宙射线，看哪几个校验圆瞬间变红，它们的交集直接锁死出错位！"
+            },
+            {
+              "id": "engineering/engineering-power-signals-04/02-parity-vs-hamming.html",
+              "file": "02-parity-vs-hamming.html",
+              "path": "./domains/engineering/engineering-power-signals-04/02-parity-vs-hamming.html",
+              "title": "奇偶校验 vs 汉明码：校正子直接报出出错位置！",
+              "icon": "🔢",
+              "archetype": "builder",
+              "concept": "校验位放在 2 的幂次位 · 校正子 Syndrome 二进制定位 · 冗余开销对比",
+              "summary": "在 7 位寄存器里任意翻转比特，亲眼看 3 个校验位拼出的二进制数，竟然就是出错位的精确编号！"
+            },
+            {
+              "id": "engineering/engineering-power-signals-04/03-deep-space-decoder.html",
+              "file": "03-deep-space-decoder.html",
+              "path": "./domains/engineering/engineering-power-signals-04/03-deep-space-decoder.html",
+              "title": "深空探测器纠错解码台（旅行者号盲解挑战）",
+              "icon": "🛰️",
+              "archetype": "blind-lab",
+              "concept": "前向纠错 FEC · 无重传深空通信 · 内存 ECC 纠错原理",
+              "summary": "收到一包被宇宙射线污染的深空遥测比特，根据 3 组校验结果亲自点出坏比特，拯救任务指令！"
             }
           ]
         }

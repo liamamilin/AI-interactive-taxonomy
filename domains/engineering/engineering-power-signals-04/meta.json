@@ -1,0 +1,33 @@
+{
+  "domain": "engineering",
+  "branch": "power-signals",
+  "order": 4,
+  "title": "汉明纠错码（自动修复错位比特）",
+  "icon": "🛡️",
+  "subtitle": "太空探测器发回地球的 0 和 1 被宇宙射线劈翻了一位，计算机凭什么不用重传就能瞬间揪出哪一位错了并自动修好？",
+  "difficulty": "进阶",
+  "related": ["engineering/engineering-power-signals-03", "software/software-systems-os-01"],
+  "toys": {
+    "01-hamming-venn-svg.html": {
+      "title": "汉明(7,4)三圆维恩图：劈翻任意 1 bit，秒级自动定位！（SVG）",
+      "icon": "⭕",
+      "archetype": "spatial",
+      "concept": "汉明(7,4)码 · 交叉偶校验圆 · 单比特自愈 ECC",
+      "summary": "点击三圆维恩图里的任意一个比特发射宇宙射线，看哪几个校验圆瞬间变红，它们的交集直接锁死出错位！"
+    },
+    "02-parity-vs-hamming.html": {
+      "title": "奇偶校验 vs 汉明码：校正子直接报出出错位置！",
+      "icon": "🔢",
+      "archetype": "builder",
+      "concept": "校验位放在 2 的幂次位 · 校正子 Syndrome 二进制定位 · 冗余开销对比",
+      "summary": "在 7 位寄存器里任意翻转比特，亲眼看 3 个校验位拼出的二进制数，竟然就是出错位的精确编号！"
+    },
+    "03-deep-space-decoder.html": {
+      "title": "深空探测器纠错解码台（旅行者号盲解挑战）",
+      "icon": "🛰️",
+      "archetype": "blind-lab",
+      "concept": "前向纠错 FEC · 无重传深空通信 · 内存 ECC 纠错原理",
+      "summary": "收到一包被宇宙射线污染的深空遥测比特，根据 3 组校验结果亲自点出坏比特，拯救任务指令！"
+    }
+  }
+}

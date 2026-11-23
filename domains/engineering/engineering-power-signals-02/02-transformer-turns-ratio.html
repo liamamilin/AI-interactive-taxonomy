@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：电磁变压器工坊 · 绕线匝数比与交流电魔法</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .mode-row { display: flex; gap: 10px; margin-top: 10px; }
+    .mode-btn { padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-2); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .mode-btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 220px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧲 电磁变压器工坊：绕线匝数比决定升降压</h1>
+        <p>左侧输入固定 <strong>100V</strong>。调节初级线圈匝数 <strong>N₁</strong> 与次级线圈匝数 <strong>N₂</strong>，再试着把电源切到“直流电”看看会发生什么！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div>
+          <label style="font-weight:850;font-size:14px;">🌀 初级线圈匝数 N₁：<span id="n1Val" style="color:#38bdf8">10</span> 匝</label>
+          <input id="n1Sl" type="range" min="2" max="20" step="2" value="10" style="width:100%;margin-top:6px;" />
+        </div>
+        <div>
+          <label style="font-weight:850;font-size:14px;">🌀 次级线圈匝数 N₂：<span id="n2Val" style="color:#f59e0b">20</span> 匝</label>
+          <input id="n2Sl" type="range" min="2" max="20" step="2" value="20" style="width:100%;margin-top:6px;" />
+        </div>
+      </div>
+
+      <div class="mode-row">
+        <button id="btnAC" class="mode-btn active" type="button">〰️ 交流电 AC（磁场周期翻转）</button>
+        <button id="btnDC" class="mode-btn" type="button">➖ 直流电 DC（磁场恒定不动）</button>
+      </div>
+
+      <div class="stage"><svg viewBox="0 0 560 215" id="trSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let isAC = true;
+    let t = 0;
+    let touches = 0;
+
+    function draw() {
+      const n1 = parseInt(document.getElementById("n1Sl").value, 10);
+      const n2 = parseInt(document.getElementById("n2Sl").value, 10);
+      document.getElementById("n1Val").textContent = n1;
+      document.getElementById("n2Val").textContent = n2;
+      document.getElementById("btnAC").classList.toggle("active", isAC);
+      document.getElementById("btnDC").classList.toggle("active", !isAC);
+
+      const v1 = 100;
+      const v2 = isAC ? v1 * (n2 / n1) : 0;
+      const ratio = n2 / n1;
+      t += 0.08;
+      const pulse = isAC ? Math.sin(t) : 0;
+
+      let s = "";
+      // Iron core ring
+      s += `<rect x="165" y="42" width="230" height="132" rx="14" fill="none" stroke="#475569" stroke-width="24"/>`;
+      // Pulsing magnetic flux dashed line inside core
+      const fluxCol = isAC ? (pulse >= 0 ? "#38bdf8" : "#a855f7") : "#64748b";
+      s += `<rect x="165" y="42" width="230" height="132" rx="14" fill="none" stroke="${fluxCol}" stroke-width="3" stroke-dasharray="10 8" stroke-dashoffset="${isAC ? (-t * 28).toFixed(1) : "0"}" opacity="${isAC ? "0.95" : "0.35"}"/>`;
+
+      // Primary coils on left leg (x=165)
+      for (let i = 0; i < n1; i++) {
+        const y = 56 + (i * 104) / Math.max(1, n1 - 1);
+        s += `<line x1="142" y1="${y.toFixed(1)}" x2="188" y2="${(y + 3).toFixed(1)}" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round"/>`;
+      }
+      // Secondary coils on right leg (x=395)
+      for (let i = 0; i < n2; i++) {
+        const y = 56 + (i * 104) / Math.max(1, n2 - 1);
+        s += `<line x1="372" y1="${y.toFixed(1)}" x2="418" y2="${(y + 3).toFixed(1)}" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>`;
+      }
+
+      // Labels
+      s += `<text x="72" y="96" text-anchor="middle" fill="#38bdf8" font-size="15" font-weight="900">输入 100 V</text>`;
+      s += `<text x="72" y="116" text-anchor="middle" fill="#94a3b8" font-size="11.5">${isAC ? "交流 AC" : "直流 DC"} · ${n1} 匝</text>`;
+
+      s += `<text x="488" y="96" text-anchor="middle" fill="${isAC ? "#fcd34d" : "#ef4444"}" font-size="16" font-weight="900">输出 ${v2.toFixed(0)} V</text>`;
+      s += `<text x="488" y="116" text-anchor="middle" fill="#94a3b8" font-size="11.5">${isAC ? (ratio > 1 ? `升压 ${ratio.toFixed(2)}×` : ratio < 1 ? `降压 ${ratio.toFixed(2)}×` : "1:1 隔离") : "❌ 无法感应"} · ${n2} 匝</text>`;
+
+      s += `<text x="280" y="113" text-anchor="middle" fill="${isAC ? "#e2e8f0" : "#fca5a5"}" font-size="12" font-weight="800">${isAC ? "交变磁通 Φ(t)" : "静止磁场（dΦ/dt = 0）"}</text>`;
+      document.getElementById("trSvg").innerHTML = s;
+
+      document.getElementById("ahaBox").innerHTML = !isAC
+        ? "💡 <strong>法拉第电磁感应铁律：</strong>只有<strong>变化的磁场</strong>才能在右侧线圈中切出电压！直流电产生的磁场纹丝不动，所以变压器输出瞬间归零——这就是特斯拉交流电击败爱迪生直流电的决定性武器！"
+        : `💡 <strong>匝数比魔法（V₂ / V₁ = N₂ / N₁）：</strong>右侧绕线是左侧的 <strong>${ratio.toFixed(2)} 倍</strong>，输出电压立刻变成 <strong>${v2.toFixed(0)}V</strong>！同时遵循能量守恒，电压升高的同时电流会等比例缩小。`;
+    }
+
+    ["n1Sl", "n2Sl"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        touches++;
+        if (touches >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+      });
+    });
+    document.getElementById("btnAC").addEventListener("click", () => { isAC = true; touches++; if (touches >= 2 && window.ToySDK) window.ToySDK.markCompleted(); });
+    document.getElementById("btnDC").addEventListener("click", () => { isAC = false; touches++; if (touches >= 2 && window.ToySDK) window.ToySDK.markCompleted(); });
+
+    function loop() {
+      draw();
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+</body>
+</html>

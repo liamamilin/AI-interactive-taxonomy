@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：数字录音与防混叠滤镜决策台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .case-box { background: var(--tax-surface-2); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; margin-top: 12px; }
+    .opt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 12px; }
+    .opt-btn { padding: 12px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-text); font-weight: 800; cursor: pointer; text-align: left; }
+    .opt-btn:hover { border-color: var(--tax-primary); }
+    .opt-btn.ok { border-color: #10b981; background: rgba(16, 185, 129, 0.14); }
+    .opt-btn.bad { border-color: #ef4444; background: rgba(239, 68, 68, 0.14); }
+    .fb { margin-top: 12px; font-size: 13.5px; font-weight: 700; min-height: 24px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎙️ 数字录音与防混叠滤镜决策台</h1>
+        <p>作为硬件信号工程师，为 3 个经典现实场景选出最合理的采样率与防混叠策略，看看工业界标准数字背后的数学！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div style="font-size:13px;font-weight:800;color:var(--tax-primary);">关卡 <span id="idxOut">1</span> / 3 · 已答对：<span id="okOut">0</span></div>
+      <div class="case-box">
+        <div id="qTitle" style="font-size:17px;font-weight:900;"></div>
+        <div id="qDesc" style="font-size:13.5px;color:var(--tax-muted);margin-top:6px;"></div>
+        <div class="opt-grid" id="optGrid"></div>
+        <div class="fb" id="fbBox"></div>
+      </div>
+      <div style="margin-top:12px;">
+        <button id="nextBtn" class="tax-btn" type="button" style="display:none;">下一关 →</button>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">💡 <strong>工程口诀：</strong>真实采样率永远要略高于 <code>2 × f_max</code>（留出过渡带给模拟低通滤波器），既不能低于 2 倍导致混叠，也没必要盲目拉到 100 倍浪费存储！</div>
+  </div>
+
+  <script>
+    const CASES = [
+      {
+        title: "💿 场景 1：制定全球音乐 CD 数字音频标准",
+        desc: "人类听觉上限约为 20 kHz。为了完整保留所有可听音乐且给防混叠滤波器留出一点余量，应该选哪个采样率？",
+        opts: [
+          { label: "20 kHz（和人耳上限一样）", ok: false, msg: "❌ 太低了！只能无损还原 10 kHz 以下，高音细节全部混叠成刺耳杂音。" },
+          { label: "44.1 kHz（略高于 2×20kHz）", ok: true, msg: "✅ 经典答案！2×20kHz = 40kHz，多出的 4.1kHz 正好给模拟低通滤波器切掉超声波，这就是 CD 44.1kHz 的由来！" },
+          { label: "1000 kHz（1 MHz 超高采样）", ok: false, msg: "⚠️ 不会混叠，但一张 CD 只能存不到 3 分钟音乐，带宽和成本彻底失控！" }
+        ]
+      },
+      {
+        title: "☎️ 场景 2：固定电话语音通话（PSTN）",
+        desc: "人声辨识度主要集中在 300 Hz ~ 3.4 kHz（超过 4 kHz 的泛音可以切掉以省带宽）。全球电信标准选了多少采样率？",
+        opts: [
+          { label: "4 kHz", ok: false, msg: "❌ 4 kHz 采样只能保留 2 kHz 以下声音，辅音（s/sh/f）全糊成一团听不清！" },
+          { label: "8 kHz（2 × 4kHz）", ok: true, msg: "✅ 完全正确！8 kHz 采样 + 每样本 8 bit = 经典的 64 kbps 电话信道标准，清晰又省钱！" },
+          { label: "48 kHz", ok: false, msg: "⚠️ 这是广播级电影音轨标准，拿来打语音电话浪费了 6 倍线路容量！" }
+        ]
+      },
+      {
+        title: "🛡️ 场景 3：超声波干扰防线放在哪里？",
+        desc: "录音乐时，环境里混进了 35 kHz 的超声波噪音（人耳听不见），用 44.1 kHz 采样。防混叠低通滤波器必须装在哪里？",
+        opts: [
+          { label: "采样之前（模拟电路端先滤掉）", ok: true, msg: "✅ 铁律！35kHz 一旦被 44.1kHz 采样，就会立刻混叠折返成 9.1kHz 的刺耳人耳可闻啸叫，必须在进 ADC 之前用模拟滤波器干掉！" },
+          { label: "采样之后（用软件算法滤掉）", ok: false, msg: "❌ 太晚了！一旦采完样，35kHz 已经永久伪装成 9.1kHz 和真音乐混在一起，神仙算法也分不开了！" },
+          { label: "不用滤，反正人耳听不见 35kHz", ok: false, msg: "❌ 大坑！混叠会把听不见的 35kHz 折返到 44.1 - 35 = 9.1kHz，正好落在人耳最敏感区！" }
+        ]
+      }
+    ];
+
+    let cur = 0, solved = 0, answered = false;
+
+    function render() {
+      const c = CASES[cur];
+      answered = false;
+      document.getElementById("idxOut").textContent = cur + 1;
+      document.getElementById("okOut").textContent = solved;
+      document.getElementById("qTitle").textContent = c.title;
+      document.getElementById("qDesc").textContent = c.desc;
+      document.getElementById("fbBox").textContent = "";
+      document.getElementById("nextBtn").style.display = "none";
+
+      const grid = document.getElementById("optGrid");
+      grid.innerHTML = c.opts.map((o, i) => `<button class="opt-btn" data-i="${i}" type="button">${o.label}</button>`).join("");
+      grid.querySelectorAll(".opt-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const o = c.opts[parseInt(btn.dataset.i, 10)];
+          btn.classList.add(o.ok ? "ok" : "bad");
+          document.getElementById("fbBox").textContent = o.msg;
+          document.getElementById("fbBox").style.color = o.ok ? "#10b981" : "#ef4444";
+          if (o.ok && !answered) {
+            answered = true;
+            solved++;
+            document.getElementById("okOut").textContent = solved;
+            if (cur < CASES.length - 1) {
+              document.getElementById("nextBtn").style.display = "inline-block";
+            } else {
+              document.getElementById("ahaBox").innerHTML = "🎉 <strong>全通关！</strong>你已经掌握了数字信号处理最核心的实战法则：先模拟低通滤除超频噪声，再以 ≥ 2·f_max 采样，世界从此无损数字化！";
+              if (window.ToySDK) window.ToySDK.markCompleted();
+            }
+          }
+        });
+      });
+    }
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      cur++;
+      render();
+    });
+    render();
+  </script>
+</body>
+</html>

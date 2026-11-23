@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：车轮倒转错觉实验 · SVG 频闪相机</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 225px; display: block; }
+    .preset-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .p-btn { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--tax-border); background: var(--tax-surface-2); color: var(--tax-text); font-weight: 750; font-size: 12.5px; cursor: pointer; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🛞 车轮倒转错觉实验：频闪相机下的时间混叠</h1>
+        <p>相机固定每秒拍 <strong>10 帧（fs = 10 Hz）</strong>，奈奎斯特极限为 <strong>5 圈/秒</strong>。拖动车轮真实转速，观察右侧相机拍出的画面方向！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:850;font-size:14.5px;">🏎️ 车轮真实顺时针转速：<span id="fVal" style="color:#38bdf8">2.0</span> 圈/秒（相机采样率固定 10 FPS）</label>
+      <input id="fSl" type="range" min="10" max="110" step="5" value="20" style="width:100%;margin-top:8px;" />
+      <div class="preset-row">
+        <button class="p-btn" data-v="20" type="button">2.0 圈/秒（正常顺转）</button>
+        <button class="p-btn" data-v="50" type="button">5.0 圈/秒（奈奎斯特临界）</button>
+        <button class="p-btn" data-v="85" type="button">8.5 圈/秒（惊现倒转！）</button>
+        <button class="p-btn" data-v="100" type="button">10.0 圈/秒（静止悬停！）</button>
+      </div>
+      <div class="stage"><svg viewBox="0 0 560 220" id="whSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const FS = 10; // 10 FPS camera
+    let realAngle = 0;
+    let camAngle = 0;
+    let lastTs = performance.now();
+    let sampleAccum = 0;
+    let interacts = 0;
+
+    function wheelGroup(cx, cy, deg, label, sub, col) {
+      let g = `<g transform="translate(${cx},${cy})">`;
+      g += `<circle r="64" fill="#1e293b" stroke="${col}" stroke-width="4"/>`;
+      g += `<g transform="rotate(${deg.toFixed(1)})">`;
+      for (let a = 0; a < 360; a += 60) {
+        g += `<line x1="0" y1="0" x2="${(Math.cos(a * Math.PI / 180) * 58).toFixed(1)}" y2="${(Math.sin(a * Math.PI / 180) * 58).toFixed(1)}" stroke="#475569" stroke-width="3"/>`;
+      }
+      // Red reference spoke
+      g += `<line x1="0" y1="0" x2="0" y2="-58" stroke="#ef4444" stroke-width="6" stroke-linecap="round"/>`;
+      g += `<circle cx="0" cy="-50" r="6" fill="#fde047"/>`;
+      g += `</g><circle r="9" fill="#cbd5e1"/>`;
+      g += `<text y="88" text-anchor="middle" fill="#f8fafc" font-size="13" font-weight="800">${label}</text>`;
+      g += `<text y="105" text-anchor="middle" fill="${col}" font-size="11.5" font-weight="700">${sub}</text></g>`;
+      return g;
+    }
+
+    function updateAha(f) {
+      let apparent = ((f % FS) + FS) % FS;
+      if (apparent > FS / 2) apparent -= FS;
+      const box = document.getElementById("ahaBox");
+      if (Math.abs(apparent) < 0.05) {
+        box.innerHTML = "💡 <strong>频闪静止奇观（f = fs = 10 Hz）：</strong>车轮每转完一整圈，相机才刚好按一次快门，每次拍到的红辐条都在 12 点钟方向——这就是直升机螺旋桨在视频里看起来“冻住不转”的原因！";
+      } else if (apparent < 0) {
+        box.innerHTML = `💡 <strong>车轮倒转错觉（混叠 Aliasing）！</strong>车轮真实顺时针转 <strong>${f.toFixed(1)} 圈/秒</strong>，但因为超过了采样率一半（5 圈/秒），每帧快门间车轮转了超过半圈，人脑会自动脑补成“逆时针倒转 <strong>${Math.abs(apparent).toFixed(1)} 圈/秒</strong>”！`;
+      } else if (Math.abs(f - 5) < 0.1) {
+        box.innerHTML = "💡 <strong>奈奎斯特临界点（f = fs / 2 = 5 Hz）：</strong>每拍一帧红辐条正好翻转 180°（上→下→上），你根本分不清它是在顺转还是逆转！";
+      } else {
+        box.innerHTML = `💡 <strong>安全采样区（f < fs/2）：</strong>转速 ${f.toFixed(1)} 圈/秒 低于奈奎斯特极限 5 圈/秒，相机能忠实还原顺时针方向。试着把滑块拉到 <strong>8.5 圈/秒</strong> 看看！`;
+      }
+    }
+
+    function loop(now) {
+      const dt = Math.min(0.05, (now - lastTs) / 1000);
+      lastTs = now;
+      const f = parseInt(document.getElementById("fSl").value, 10) / 10;
+      document.getElementById("fVal").textContent = f.toFixed(1);
+
+      realAngle = (realAngle + f * 360 * dt) % 360;
+      sampleAccum += dt;
+      if (sampleAccum >= 1 / FS) {
+        sampleAccum -= 1 / FS;
+        camAngle = realAngle;
+      }
+
+      let apparent = ((f % FS) + FS) % FS;
+      if (apparent > FS / 2) apparent -= FS;
+      const camCol = apparent < -0.05 ? "#ef4444" : Math.abs(apparent) < 0.05 ? "#f59e0b" : "#10b981";
+      const camSub = apparent < -0.05
+        ? `❌ 错觉：逆时针倒转 ${Math.abs(apparent).toFixed(1)} 圈/秒！`
+        : Math.abs(apparent) < 0.05
+          ? "⏸️ 错觉：静止不动！"
+          : `✅ 顺时针 ${apparent.toFixed(1)} 圈/秒`;
+
+      let s = wheelGroup(145, 96, realAngle, "真实世界（连续物理）", `顺时针 ${f.toFixed(1)} 圈/秒`, "#38bdf8");
+      s += `<text x="280" y="96" text-anchor="middle" fill="#64748b" font-size="22" font-weight="900">VS</text>`;
+      s += wheelGroup(415, 96, camAngle, "10 FPS 相机画面", camSub, camCol);
+      document.getElementById("whSvg").innerHTML = s;
+      requestAnimationFrame(loop);
+    }
+
+    document.getElementById("fSl").addEventListener("input", () => {
+      interacts++;
+      updateAha(parseInt(document.getElementById("fSl").value, 10) / 10);
+      if (interacts >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    document.querySelectorAll(".p-btn").forEach((b) => {
+      b.addEventListener("click", () => {
+        document.getElementById("fSl").value = b.dataset.v;
+        interacts++;
+        updateAha(parseInt(b.dataset.v, 10) / 10);
+        if (interacts >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+      });
+    });
+
+    updateAha(2.0);
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

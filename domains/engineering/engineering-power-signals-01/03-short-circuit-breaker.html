@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：插线板过载与短路跳闸急救室</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .app-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
+    .app-btn { padding: 12px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-2); color: var(--tax-text); cursor: pointer; text-align: left; transition: all 0.15s; }
+    .app-btn.on { border-color: #10b981; background: rgba(16, 185, 129, 0.12); }
+    .app-btn.danger.on { border-color: #ef4444; background: rgba(239, 68, 68, 0.18); }
+    .meter-wrap { margin-top: 16px; background: var(--tax-surface-2); border: 1px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .bar-bg { height: 22px; background: #1e293b; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+    .bar-fill { height: 100%; transition: width 0.2s, background 0.2s; }
+    .trip-banner { margin-top: 12px; padding: 12px 14px; border-radius: 12px; font-weight: 850; display: none; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔌 插线板过载与短路跳闸急救室</h1>
+        <p>家用插线板额定 <strong>220V / 16A（上限 3520W）</strong>。往同一个并联插线板上依次插上大功率电器——或者作死插一根裸铜线试试！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="app-grid" id="appGrid"></div>
+
+      <div class="meter-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;">
+          <div style="font-weight:850;font-size:15px;">干路总电流：<span id="iVal" style="color:var(--tax-primary)">0.0 A</span> / 16.0 A 上限</div>
+          <div style="font-size:13px;color:var(--tax-muted);">总功率：<strong id="wVal">0 W</strong> · 空气开关：<strong id="swVal">🟢 合闸供电</strong></div>
+        </div>
+        <div class="bar-bg"><div id="barFill" class="bar-fill" style="width:0%;background:#10b981;"></div></div>
+        <div id="tripBanner" class="trip-banner"></div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <button id="resetBtn" class="tax-btn" type="button">🔄 拔掉全部插头并重新合闸</button>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const APPLIANCES = [
+      { id: "laptop", icon: "💻", name: "笔记本电脑", w: 65, short: false },
+      { id: "tv", icon: "📺", name: "液晶电视", w: 180, short: false },
+      { id: "kettle", icon: "🫖", name: "电热水壶", w: 2000, short: false },
+      { id: "dryer", icon: "💨", name: "大功率吹风机", w: 1800, short: false },
+      { id: "heater", icon: "🔥", name: "电暖器", w: 2200, short: false },
+      { id: "wire", icon: "⚡", name: "裸铜线（短路！）", w: 484000, short: true }
+    ];
+    let active = new Set();
+    let tripped = false;
+
+    function render() {
+      const grid = document.getElementById("appGrid");
+      grid.innerHTML = APPLIANCES.map((a) => {
+        const isOn = active.has(a.id);
+        return `<button class="app-btn ${a.short ? "danger" : ""} ${isOn ? "on" : ""}" data-id="${a.id}" type="button">
+          <div style="font-size:22px;">${a.icon}</div>
+          <div style="font-weight:850;font-size:14px;margin-top:4px;">${a.name}</div>
+          <div style="font-size:12px;color:var(--tax-muted);">${a.short ? "R ≈ 0.1 Ω (极险)" : `${a.w}W · ${(a.w / 220).toFixed(1)}A`}</div>
+        </button>`;
+      }).join("");
+
+      grid.querySelectorAll(".app-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          if (tripped) return;
+          if (active.has(id)) active.delete(id);
+          else active.add(id);
+          render();
+        });
+      });
+
+      let totalW = 0;
+      let hasShort = false;
+      active.forEach((id) => {
+        const a = APPLIANCES.find((x) => x.id === id);
+        if (a) {
+          totalW += a.w;
+          if (a.short) hasShort = true;
+        }
+      });
+
+      const totalI = totalW / 220;
+      const pct = Math.min(100, (totalI / 16) * 100);
+      const fill = document.getElementById("barFill");
+      fill.style.width = pct.toFixed(1) + "%";
+      fill.style.background = totalI > 16 ? "#ef4444" : totalI > 12 ? "#f59e0b" : "#10b981";
+
+      document.getElementById("iVal").textContent = hasShort ? "2200+ A (瞬时爆表!)" : totalI.toFixed(1) + " A";
+      document.getElementById("wVal").textContent = hasShort ? "极高热失控" : totalW + " W";
+
+      const banner = document.getElementById("tripBanner");
+      if (totalI > 16) {
+        tripped = true;
+        document.getElementById("swVal").textContent = "🔴 已跳闸断电";
+        banner.style.display = "block";
+        banner.style.background = "rgba(239, 68, 68, 0.16)";
+        banner.style.color = "#ef4444";
+        banner.innerHTML = hasShort
+          ? "💥 <strong>磁脱扣瞬时跳闸（< 0.01 秒）！</strong>裸铜线电阻近乎 0，I = 220V / 0.1Ω = 2200A，电磁铁瞬间弹开开关保住了房子！"
+          : `🔥 <strong>热脱扣过载跳闸！</strong>并联电器总电流达到 ${totalI.toFixed(1)}A > 16A，双金属片受热弯曲切断电源，防止电线熔化起火！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      } else {
+        document.getElementById("swVal").textContent = "🟢 合闸供电";
+        banner.style.display = "none";
+      }
+
+      document.getElementById("ahaBox").innerHTML = tripped
+        ? "💡 <strong>工程安全底线：</strong>空气开关其实是两道保险——面对多个大电器缓慢过载靠<strong>热弯曲脱扣</strong>，面对短路瞬间几千安培靠<strong>电磁铁毫秒级弹开</strong>！"
+        : "💡 <strong>实验任务：</strong>试着同时插上「电热水壶 + 吹风机」触发过载跳闸，或者直接点「裸铜线」体验毫秒级短路保护！";
+    }
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      active.clear();
+      tripped = false;
+      render();
+    });
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：特高压输电塔 · I²R 降损沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 220px; display: block; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .m-card { background: var(--tax-surface-2); border: 1px solid var(--tax-border); border-radius: 12px; padding: 12px; text-align: center; }
+    .m-val { font-size: 20px; font-weight: 900; color: var(--tax-primary); }
+    .m-lbl { font-size: 12px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚡ 特高压输电塔：为什么非要升压到 50 万伏？</h1>
+        <p>电厂需要向远方城市输送恒定 <strong>100 MW（1 亿瓦）</strong> 电力，输电线总电阻 <strong>10 Ω</strong>。拖动电压滑块，看电线发热损耗如何暴跌！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:850;font-size:14.5px;">🗼 输电电压 V：<span id="vVal" style="color:#38bdf8">50</span> kV（<span id="vDesc">中高压</span>）</label>
+      <input id="vSl" type="range" min="35" max="500" step="5" value="50" style="width:100%;margin-top:8px;" />
+
+      <div class="stage"><svg viewBox="0 0 560 215" id="hvSvg"></svg></div>
+
+      <div class="metrics">
+        <div class="m-card"><div class="m-val" id="iOut">2000 A</div><div class="m-lbl">导线电流 I = P / V</div></div>
+        <div class="m-card"><div class="m-val" id="lossOut">40.0 MW</div><div class="m-lbl">发热浪费 P_loss = I²·R</div></div>
+        <div class="m-card"><div class="m-val" id="effOut">60.0%</div><div class="m-lbl">成功送达城市比例</div></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let moves = 0;
+    function render() {
+      const kV = parseInt(document.getElementById("vSl").value, 10);
+      const V = kV * 1000;
+      const P = 100e6; // 100 MW
+      const R = 10;    // 10 ohm
+      const I = P / V;
+      const lossW = Math.min(P, I * I * R);
+      const lossMW = lossW / 1e6;
+      const eff = Math.max(0, ((P - lossW) / P) * 100);
+
+      document.getElementById("vVal").textContent = kV;
+      document.getElementById("vDesc").textContent = kV >= 350 ? "特高压超低损" : kV >= 150 ? "高压输电" : "偏低电压（发热严重）";
+      document.getElementById("iOut").textContent = I.toFixed(0) + " A";
+      document.getElementById("lossOut").textContent = lossMW.toFixed(2) + " MW";
+      document.getElementById("lossOut").style.color = lossMW > 20 ? "#ef4444" : lossMW > 5 ? "#f59e0b" : "#10b981";
+      document.getElementById("effOut").textContent = eff.toFixed(1) + "%";
+      document.getElementById("effOut").style.color = eff > 95 ? "#10b981" : eff > 70 ? "#f59e0b" : "#ef4444";
+
+      const heatRatio = Math.min(1, lossMW / 60);
+      const wireCol = heatRatio > 0.5 ? "#ef4444" : heatRatio > 0.15 ? "#f59e0b" : "#38bdf8";
+
+      let s = "";
+      // Power plant
+      s += `<rect x="24" y="106" width="84" height="74" rx="8" fill="#1e293b" stroke="#64748b" stroke-width="2"/>`;
+      s += `<text x="66" y="142" text-anchor="middle" font-size="28">🏭</text>`;
+      s += `<text x="66" y="168" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="700">100 MW 电厂</text>`;
+
+      // Towers
+      [185, 365].forEach((tx) => {
+        s += `<polygon points="${tx},62 ${tx - 22},180 ${tx + 22},180" fill="none" stroke="#64748b" stroke-width="2"/>`;
+        s += `<line x1="${tx - 28}" y1="86" x2="${tx + 28}" y2="86" stroke="#94a3b8" stroke-width="2.5"/>`;
+      });
+
+      // Power line with heat glow
+      if (heatRatio > 0.08) {
+        s += `<path d="M108 112 Q146 95 185 86 Q275 112 365 86 Q410 96 452 112" fill="none" stroke="#ef4444" stroke-width="${(6 + heatRatio * 12).toFixed(1)}" opacity="${(heatRatio * 0.45).toFixed(2)}"/>`;
+      }
+      s += `<path d="M108 112 Q146 95 185 86 Q275 112 365 86 Q410 96 452 112" fill="none" stroke="${wireCol}" stroke-width="3.5"/>`;
+
+      if (lossMW > 8) {
+        s += `<text x="275" y="72" text-anchor="middle" fill="#fca5a5" font-size="12.5" font-weight="800">🔥 导线发烫浪费 ${lossMW.toFixed(1)} MW！</text>`;
+      } else {
+        s += `<text x="275" y="72" text-anchor="middle" fill="#6ee7b7" font-size="12.5" font-weight="800">❄️ 电流仅 ${I.toFixed(0)}A，线损暴降至 ${lossMW.toFixed(2)} MW！</text>`;
+      }
+
+      // City
+      const cityBright = 0.25 + (eff / 100) * 0.75;
+      s += `<rect x="452" y="106" width="84" height="74" rx="8" fill="#1e293b" stroke="${eff > 90 ? "#10b981" : "#64748b"}" stroke-width="2"/>`;
+      s += `<text x="494" y="142" text-anchor="middle" font-size="28" opacity="${cityBright.toFixed(2)}">🏙️</text>`;
+      s += `<text x="494" y="168" text-anchor="middle" fill="${eff > 90 ? "#6ee7b7" : "#fca5a5"}" font-size="11" font-weight="700">送达 ${(100 - lossMW).toFixed(1)} MW</text>`;
+
+      document.getElementById("hvSvg").innerHTML = s;
+
+      document.getElementById("ahaBox").innerHTML = kV >= 400
+        ? `💡 <strong>平方级降损奇迹：</strong>把电压从 50kV 升到 ${kV}kV（升高 ${(kV / 50).toFixed(1)} 倍），电流降为原来的 1/${(kV / 50).toFixed(1)}，而发热损耗 <code>P = I²R</code> 直接暴跌为原来的 <strong>1/${((kV / 50) ** 2).toFixed(0)}</strong>！`
+        : "💡 <strong>顿悟时刻：</strong>试着把电压拉到 <strong>500 kV（特高压）</strong>，亲眼看导线从浪费几十兆瓦骤降到仅 0.4 MW（效率 99.6%）！";
+    }
+
+    document.getElementById("vSl").addEventListener("input", () => {
+      moves++;
+      render();
+      if (moves >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

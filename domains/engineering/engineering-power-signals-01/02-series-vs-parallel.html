@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：串联分压 vs 并联分流 · SVG 电路拓扑</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .mode-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .mode-btn { padding: 9px 16px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-2); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .mode-btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 240px; display: block; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .s-box { background: var(--tax-surface-2); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .s-val { font-size: 19px; font-weight: 900; color: var(--tax-primary); }
+    .s-lbl { font-size: 12px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>💡 串联分压 vs 并联分流：点灭一颗灯看看后果！</h1>
+        <p>电源固定 <strong>12V</strong>，3 颗相同灯泡每颗电阻 <strong>4Ω</strong>。切换拓扑后，<strong>直接点击下方任意一颗灯泡</strong>模拟它烧坏断路！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="mode-row">
+        <button id="btnSeries" class="mode-btn active" type="button">🔗 串联电路（单行道）</button>
+        <button id="btnParallel" class="mode-btn" type="button">🔀 并联电路（三车道）</button>
+        <button id="btnReset" class="mode-btn" type="button">🔄 全部换新灯泡</button>
+      </div>
+
+      <div class="stage"><svg viewBox="0 0 560 235" id="cirSvg"></svg></div>
+
+      <div class="stats">
+        <div class="s-box"><div class="s-val" id="rTot">12.0 Ω</div><div class="s-lbl">等效总电阻</div></div>
+        <div class="s-box"><div class="s-val" id="iTot">1.00 A</div><div class="s-lbl">干路总电流</div></div>
+        <div class="s-box"><div class="s-val" id="litCnt">3 / 3 亮</div><div class="s-lbl">亮灯数量</div></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let mode = "series";
+    let broken = [false, false, false];
+    let actions = 0;
+
+    function toggleBulb(idx) {
+      broken[idx] = !broken[idx];
+      actions++;
+      render();
+      if (actions >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    window.toggleBulb = toggleBulb;
+
+    function render() {
+      document.getElementById("btnSeries").classList.toggle("active", mode === "series");
+      document.getElementById("btnParallel").classList.toggle("active", mode === "parallel");
+
+      const V = 12, R = 4;
+      const aliveCount = broken.filter((b) => !b).length;
+      let rTotText = "", iTot = 0, lit = 0;
+      let s = "";
+
+      // Battery on left
+      s += `<rect x="26" y="78" width="54" height="78" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>`;
+      s += `<text x="53" y="114" text-anchor="middle" fill="#38bdf8" font-size="14" font-weight="900">12V</text>`;
+      s += `<text x="53" y="132" text-anchor="middle" fill="#94a3b8" font-size="10">电源</text>`;
+
+      if (mode === "series") {
+        const anyBroken = broken.some(Boolean);
+        iTot = anyBroken ? 0 : V / (3 * R);
+        rTotText = anyBroken ? "∞ (断路)" : (3 * R).toFixed(1) + " Ω";
+        lit = anyBroken ? 0 : 3;
+
+        const wireCol = anyBroken ? "#475569" : "#38bdf8";
+        s += `<path d="M53 78 L53 46 L500 46 L500 186 L53 186 L53 156" fill="none" stroke="${wireCol}" stroke-width="4"/>`;
+        [170, 300, 430].forEach((cx, i) => {
+          const isB = broken[i];
+          const isOn = !anyBroken;
+          const fill = isB ? "#334155" : isOn ? "#facc15" : "#475569";
+          s += `<g style="cursor:pointer" onclick="toggleBulb(${i})">`;
+          s += `<circle cx="${cx}" cy="46" r="24" fill="${fill}" stroke="${isB ? "#ef4444" : "#e2e8f0"}" stroke-width="2.5"/>`;
+          s += `<text x="${cx}" y="53" text-anchor="middle" font-size="20">${isB ? "💥" : isOn ? "💡" : "⚫"}</text>`;
+          s += `<text x="${cx}" y="88" text-anchor="middle" fill="${isB ? "#fca5a5" : "#cbd5e1"}" font-size="11.5" font-weight="700">灯 ${i + 1}：${isB ? "已烧断" : isOn ? "分压 4V" : "无电流"}</text>`;
+          s += `</g>`;
+        });
+        s += `<text x="295" y="168" text-anchor="middle" fill="${anyBroken ? "#fca5a5" : "#93c5fd"}" font-size="12.5" font-weight="700">${anyBroken ? "❌ 串联单行道一处断开，整条回路电流归零，全部熄灭！" : "串联：3 颗灯平分 12V（每颗仅 4V，偏暗），电流处处相等 = 1A"}</text>`;
+      } else {
+        iTot = aliveCount * (V / R);
+        rTotText = aliveCount === 0 ? "∞ (全断)" : (R / aliveCount).toFixed(2) + " Ω";
+        lit = aliveCount;
+
+        // Top & bottom rails
+        s += `<path d="M53 78 L53 36 L470 36" fill="none" stroke="#38bdf8" stroke-width="4"/>`;
+        s += `<path d="M53 156 L53 196 L470 196" fill="none" stroke="#38bdf8" stroke-width="4"/>`;
+        [180, 315, 450].forEach((cx, i) => {
+          const isB = broken[i];
+          const branchCol = isB ? "#475569" : "#10b981";
+          s += `<line x1="${cx}" y1="36" x2="${cx}" y2="196" stroke="${branchCol}" stroke-width="3.5" ${isB ? 'stroke-dasharray="5 5"' : ""}/>`;
+          s += `<g style="cursor:pointer" onclick="toggleBulb(${i})">`;
+          s += `<circle cx="${cx}" cy="116" r="24" fill="${isB ? "#334155" : "#fde047"}" stroke="${isB ? "#ef4444" : "#fff"}" stroke-width="2.5"/>`;
+          s += `<text x="${cx}" y="123" text-anchor="middle" font-size="20">${isB ? "💥" : "🔆"}</text>`;
+          s += `<text x="${cx}" y="156" text-anchor="middle" fill="${isB ? "#fca5a5" : "#6ee7b7"}" font-size="11.5" font-weight="700">灯 ${i + 1}：${isB ? "断路" : "满血 12V / 3A"}</text>`;
+          s += `</g>`;
+        });
+        s += `<text x="295" y="222" text-anchor="middle" fill="#6ee7b7" font-size="12.5" font-weight="700">✅ 并联：每条支路独享 12V，坏掉任意灯泡，其余依然满亮度工作！</text>`;
+      }
+
+      document.getElementById("cirSvg").innerHTML = s;
+      document.getElementById("rTot").textContent = rTotText;
+      document.getElementById("iTot").textContent = iTot.toFixed(2) + " A";
+      document.getElementById("litCnt").textContent = `${lit} / 3 亮`;
+
+      document.getElementById("ahaBox").innerHTML = mode === "series"
+        ? "💡 <strong>串联的致命弱点：</strong>所有元件排成一条单行道，不仅要<strong>平分电压</strong>（越串越暗），只要其中任意一颗烧断，整条电路就立刻瘫痪！"
+        : "💡 <strong>并联为何统治家庭电路：</strong>每个插座独立跨接在 220V 火线与零线之间，关掉电视不会影响冰箱；但注意——并联的电器越多，<strong>等效总电阻越小，干路总电流越猛</strong>！";
+    }
+
+    document.getElementById("btnSeries").addEventListener("click", () => { mode = "series"; actions++; render(); if (actions >= 2 && window.ToySDK) window.ToySDK.markCompleted(); });
+    document.getElementById("btnParallel").addEventListener("click", () => { mode = "parallel"; actions++; render(); if (actions >= 2 && window.ToySDK) window.ToySDK.markCompleted(); });
+    document.getElementById("btnReset").addEventListener("click", () => { broken = [false, false, false]; render(); });
+    render();
+  </script>
+</body>
+</html>

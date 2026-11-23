@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：波形混叠透视镜 · 奈奎斯特采样 SVG</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 225px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>〰️ 波形混叠透视镜：采样点太稀，高频秒变低频！</h1>
+        <p>蓝线是<strong>真实高频信号</strong>，红点是离散采样点，橙色虚线是计算机根据红点强行还原出的<strong>重建波形</strong>。看看超过 <code>fs / 2</code> 会发生什么！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div>
+          <label style="font-weight:850;font-size:14px;">🎵 原始信号频率 f：<span id="sigVal" style="color:#38bdf8">2</span> Hz</label>
+          <input id="sigSl" type="range" min="1" max="11" step="1" value="2" style="width:100%;margin-top:6px;" />
+        </div>
+        <div>
+          <label style="font-weight:850;font-size:14px;">📸 采样率 fs：<span id="fsVal" style="color:#f59e0b">10</span> Hz（奈奎斯特上限 = <span id="nyqVal">5.0</span> Hz）</label>
+          <input id="fsSl" type="range" min="6" max="20" step="2" value="10" style="width:100%;margin-top:6px;" />
+        </div>
+      </div>
+
+      <div class="stage"><svg viewBox="0 0 560 220" id="waveSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let moves = 0;
+
+    function aliasFreq(f, fs) {
+      // Fold f into [-fs/2, fs/2]
+      const k = Math.round(f / fs);
+      return f - k * fs;
+    }
+
+    function render() {
+      const f = parseInt(document.getElementById("sigSl").value, 10);
+      const fs = parseInt(document.getElementById("fsSl").value, 10);
+      const nyq = fs / 2;
+      document.getElementById("sigVal").textContent = f;
+      document.getElementById("fsVal").textContent = fs;
+      document.getElementById("nyqVal").textContent = nyq.toFixed(1);
+
+      const fRec = aliasFreq(f, fs);
+      const aliased = f > nyq;
+
+      const x0 = 28, x1 = 532, w = x1 - x0, cy = 115, amp = 68;
+      let truePts = [];
+      let recPts = [];
+      for (let i = 0; i <= 260; i++) {
+        const t = i / 260; // 1 second window
+        const x = x0 + t * w;
+        const yTrue = cy - Math.sin(2 * Math.PI * f * t) * amp;
+        const yRec = cy - Math.sin(2 * Math.PI * fRec * t) * amp;
+        truePts.push(`${x.toFixed(1)},${yTrue.toFixed(1)}`);
+        recPts.push(`${x.toFixed(1)},${yRec.toFixed(1)}`);
+      }
+
+      let s = `<line x1="${x0}" y1="${cy}" x2="${x1}" y2="${cy}" stroke="#334155" stroke-width="1.5"/>`;
+      // True wave
+      s += `<polyline points="${truePts.join(" ")}" fill="none" stroke="#38bdf8" stroke-width="2.5" opacity="${aliased ? "0.45" : "0.9"}"/>`;
+      // Reconstructed wave
+      if (aliased) {
+        s += `<polyline points="${recPts.join(" ")}" fill="none" stroke="#f97316" stroke-width="3.5" stroke-dasharray="8 5"/>`;
+      }
+
+      // Sample points
+      for (let n = 0; n <= fs; n++) {
+        const t = n / fs;
+        const x = x0 + t * w;
+        const y = cy - Math.sin(2 * Math.PI * f * t) * amp;
+        s += `<line x1="${x.toFixed(1)}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#ef4444" stroke-width="1" opacity="0.45"/>`;
+        s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="#ef4444" stroke="#fff" stroke-width="1.5"/>`;
+      }
+
+      s += `<text x="280" y="24" text-anchor="middle" fill="${aliased ? "#fca5a5" : "#6ee7b7"}" font-size="13" font-weight="800">${
+        aliased
+          ? `⚠️ 发生频率混叠！真实 ${f}Hz 被误认成 ${Math.abs(fRec).toFixed(1)}Hz 幽灵波（橙色虚线）`
+          : `✅ 满足 fs ≥ 2f！红点完整锁定真实 ${f}Hz 波形，零失真！`
+      }</text>`;
+      document.getElementById("waveSvg").innerHTML = s;
+
+      document.getElementById("ahaBox").innerHTML = aliased
+        ? `💡 <strong>为什么高频会伪装成低频？</strong>你看红点刚好同时落在蓝线（${f}Hz）和橙线（${Math.abs(fRec).toFixed(1)}Hz）上！采样太稀时，还原算法无法区分它们，只能猜成频率更低的橙色假波——一旦混叠发生，后期软件永远修不回来！`
+        : "💡 <strong>奈奎斯特采样定理（fs ≥ 2·f_max）：</strong>只要每秒采样的点数不少于最高频率的 <strong>2 倍</strong>，离散的数字点就能 100% 完美无损还原连续模拟世界！试着把信号频率拉到大于采样率一半看看混叠吧。";
+    }
+
+    ["sigSl", "fsSl"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        moves++;
+        render();
+        if (moves >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+      });
+    });
+    render();
+  </script>
+</body>
+</html>

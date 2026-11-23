@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：奇偶校验 vs 汉明码校正子工坊</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .bit-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 12px; }
+    .bit-cell { padding: 12px 6px; border-radius: 12px; border: 2px solid var(--tax-border); background: var(--tax-surface-2); text-align: center; cursor: pointer; transition: all 0.15s; }
+    .bit-cell.parity { border-color: #6366f1; }
+    .bit-cell.data { border-color: #10b981; }
+    .bit-cell.err { background: rgba(239, 68, 68, 0.22); border-color: #ef4444; transform: translateY(-2px); }
+    .bit-val { font-size: 24px; font-weight: 900; }
+    .bit-idx { font-size: 11px; color: var(--tax-muted); font-weight: 700; }
+    .syn-box { margin-top: 14px; background: var(--tax-surface-2); border: 1px solid var(--tax-border); border-radius: 14px; padding: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔢 校正子魔法：3 个校验位直接拼出出错编号！</h1>
+        <p>理查德·汉明把校验位巧妙放在 <strong>2 的幂次位（#1、#2、#4）</strong>。点击下方 7 个比特中的任意 1 个翻转它，观察二进制校正子！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="bit-row" id="bitRow"></div>
+      <div class="syn-box">
+        <div>
+          <div style="font-size:12.5px;color:var(--tax-muted);">3 组校验结果（二进制 S = e4 e2 e1）</div>
+          <div id="synBin" style="font-size:24px;font-weight:900;color:var(--tax-primary);letter-spacing:3px;">000₂ = 0</div>
+        </div>
+        <div id="synMsg" style="font-weight:850;font-size:14.5px;"></div>
+        <button id="resetBtn" class="tax-btn" type="button">🔄 恢复干净数据</button>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const CLEAN = [0, 0, 1, 1, 0, 0, 1, 1]; // 1..7: D=1,0,1,1 -> P1=0,P2=1,P4=0
+    let bits = [...CLEAN];
+    let clicks = 0;
+
+    function render() {
+      const e1 = bits[1] ^ bits[3] ^ bits[5] ^ bits[7];
+      const e2 = bits[2] ^ bits[3] ^ bits[6] ^ bits[7];
+      const e4 = bits[4] ^ bits[5] ^ bits[6] ^ bits[7];
+      const pos = e4 * 4 + e2 * 2 + e1;
+
+      const labels = ["", "P1(001)", "P2(010)", "D1(011)", "P4(100)", "D2(101)", "D3(110)", "D4(111)"];
+      const row = document.getElementById("bitRow");
+      row.innerHTML = [1, 2, 3, 4, 5, 6, 7].map((i) => {
+        const isP = i === 1 || i === 2 || i === 4;
+        const isErr = pos === i;
+        return `<div class="bit-cell ${isP ? "parity" : "data"} ${isErr ? "err" : ""}" data-i="${i}">
+          <div class="bit-idx">#${i} ${labels[i]}</div>
+          <div class="bit-val">${bits[i]}</div>
+        </div>`;
+      }).join("");
+
+      row.querySelectorAll(".bit-cell").forEach((el) => {
+        el.addEventListener("click", () => {
+          const i = parseInt(el.dataset.i, 10);
+          bits[i] ^= 1;
+          clicks++;
+          render();
+          if (clicks >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+        });
+      });
+
+      document.getElementById("synBin").textContent = `${e4}${e2}${e1}₂ = ${pos}`;
+      const diffCount = [1, 2, 3, 4, 5, 6, 7].filter((i) => bits[i] !== CLEAN[i]).length;
+
+      if (diffCount === 0) {
+        document.getElementById("synMsg").textContent = "✅ 全部校验通过，无错位";
+        document.getElementById("synMsg").style.color = "#10b981";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>巧妙的二进制编号：</strong>为什么把校验位放在 #1(001)、#2(010)、#4(100)？因为任何位置 i 只要出错，触发的校验位组合正好就是 i 的二进制写法！点任意 1 个比特验证一下！";
+      } else if (diffCount === 1) {
+        document.getElementById("synMsg").textContent = `🎯 校正子直接指认：第 #${pos} 位出错！`;
+        document.getElementById("synMsg").style.color = "#ef4444";
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>直呼天才！</strong>你翻转了第 #${pos} 位（二进制 <code>${pos.toString(2).padStart(3, "0")}</code>），而 3 个校验位算出的报错码竟然分毫不差地拼出了 <code>${e4}${e2}${e1}₂ = ${pos}</code>！如果用笨办法“把每个比特发 3 遍”，1000 位数据要浪费 2000 位；而汉明码只需要 10 个校验位就能保护 1013 位数据（冗余不到 1%）！`;
+      } else {
+        document.getElementById("synMsg").textContent = `⚠️ 同时翻了 ${diffCount} 位！标准汉明(7,4)仅能纠正 1 位错误`;
+        document.getElementById("synMsg").style.color = "#f59e0b";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>纠错边界（汉明距离 = 3）：</strong>标准汉明(7,4)保证单比特必修，但同时错 2 位会指向错误下标！所以服务器 ECC 内存会再加第 8 位全局奇偶校验，升级成 SECDED（单错纠正 + 双错报警）！";
+      }
+    }
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      bits = [...CLEAN];
+      render();
+    });
+    render();
+  </script>
+</body>
+</html>

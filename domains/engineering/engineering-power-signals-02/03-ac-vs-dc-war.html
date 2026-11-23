@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：电流之战 · 爱迪生直流 vs 特斯拉交流</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .dist-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .dist-btn { padding: 9px 16px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-2); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .dist-btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .race-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 14px; }
+    .r-card { background: var(--tax-surface-2); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .bar-bg { height: 18px; background: #1e293b; border-radius: 999px; overflow: hidden; margin: 10px 0; }
+    .bar-fill { height: 100%; transition: width 0.35s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏁 电流之战：爱迪生 110V 直流 vs 特斯拉 220kV 交流</h1>
+        <p>19 世纪末的世纪对决！把电厂到城市的输电距离从 <strong>0.5 公里</strong> 拉长到 <strong>200 公里</strong>，看看哪套电网能撑住？</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="dist-row">
+        <button class="dist-btn active" data-km="0.5" type="button">🏘️ 0.5 km（同街区）</button>
+        <button class="dist-btn" data-km="3" type="button">🏙️ 3 km（跨城区）</button>
+        <button class="dist-btn" data-km="50" type="button">🚄 50 km（跨城市）</button>
+        <button class="dist-btn" data-km="200" type="button">🏔️ 200 km（水电站远送）</button>
+      </div>
+
+      <div class="race-grid">
+        <div class="r-card">
+          <div style="font-weight:900;font-size:16px;">💡 爱迪生方案（110V 直流直输）</div>
+          <div style="font-size:12.5px;color:var(--tax-muted);margin-top:4px;">当年无法用铁芯变压器升压，只能低压大电流硬扛</div>
+          <div class="bar-bg"><div id="dcBar" class="bar-fill" style="background:#ef4444;width:80%;"></div></div>
+          <div style="font-weight:850;font-size:15px;">有效送达率：<span id="dcEff">82%</span></div>
+          <div id="dcNote" style="font-size:12.5px;color:var(--tax-muted);margin-top:6px;"></div>
+        </div>
+
+        <div class="r-card">
+          <div style="font-weight:900;font-size:16px;">⚡ 特斯拉方案（变压器升压至 220kV 交流）</div>
+          <div style="font-size:12.5px;color:var(--tax-muted);margin-top:4px;">先升压远送，进城后再降回 220V 安全入户</div>
+          <div class="bar-bg"><div id="acBar" class="bar-fill" style="background:#10b981;width:99%;"></div></div>
+          <div style="font-weight:850;font-size:15px;">有效送达率：<span id="acEff">99.9%</span></div>
+          <div id="acNote" style="font-size:12.5px;color:var(--tax-muted);margin-top:6px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const SCENARIOS = {
+      "0.5": {
+        dc: 84, ac: 99.9,
+        dcNote: "0.5 公里内勉强可用，但已损失 16% 电能，需要手臂粗的昂贵铜缆。",
+        acNote: "几乎零损耗，细铝线即可轻松传输。",
+        aha: "💡 <strong>为什么爱迪生最初在曼哈顿能跑通？</strong>因为每隔 1 公里就建一座发电厂！一旦离开市中心，低压直流就会立刻崩盘。"
+      },
+      "3": {
+        dc: 22, ac: 99.6,
+        dcNote: "78% 的电都在半路烧成了电线发热，末端灯泡暗如萤火虫！",
+        acNote: "99.6% 完好送达，变压器一次投资换来全城覆盖。",
+        aha: "💡 <strong>3 公里分水岭：</strong>直流电如果硬要送到 3 公里外，铜线截面积必须加粗几十倍，买铜的钱直接让电厂破产！"
+      },
+      "50": {
+        dc: 0, ac: 97.5,
+        dcNote: "0% 送达——电还没出郊区就在电阻里全部耗尽！",
+        acNote: "跨城输电轻松胜任，效率依然高达 97.5%。",
+        aha: "💡 <strong>水电站革命：</strong>1895 年尼亚加拉大瀑布水电站采用特斯拉交流系统，成功把电送到 35 公里外的水牛城，一战终结电流之战！"
+      },
+      "200": {
+        dc: 0, ac: 92.0,
+        dcNote: "完全不可能实现。",
+        acNote: "220kV 交流依然送达 92%（现代 800kV 特高压直流 HVDC 则靠电力电子逆变器重新杀回超远距离赛场！）。",
+        aha: "💡 <strong>现代彩蛋（HVDC）：</strong>如今有了半导体电力电子技术，直流电也能升压到 ±1100kV，因此在 1000km+ 跨国/西电东送干线上，高压直流反而因为没有交流容抗损耗而卷土重来！"
+      }
+    };
+
+    let clicks = 0;
+    function selectKm(km) {
+      const d = SCENARIOS[km];
+      document.querySelectorAll(".dist-btn").forEach((b) => b.classList.toggle("active", b.dataset.km === km));
+      document.getElementById("dcBar").style.width = d.dc + "%";
+      document.getElementById("dcBar").style.background = d.dc > 50 ? "#f59e0b" : "#ef4444";
+      document.getElementById("dcEff").textContent = d.dc + "%";
+      document.getElementById("dcNote").textContent = d.dcNote;
+
+      document.getElementById("acBar").style.width = d.ac + "%";
+      document.getElementById("acEff").textContent = d.ac + "%";
+      document.getElementById("acNote").textContent = d.acNote;
+      document.getElementById("ahaBox").innerHTML = d.aha;
+    }
+
+    document.querySelectorAll(".dist-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        clicks++;
+        selectKm(btn.dataset.km);
+        if (clicks >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+      });
+    });
+    selectKm("0.5");
+  </script>
+</body>
+</html>
