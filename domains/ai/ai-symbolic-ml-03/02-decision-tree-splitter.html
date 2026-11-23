@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：决策树切刀工坊 · 基尼不纯度</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px; }
+    .seg { display: inline-flex; background: var(--tax-surface-alt); padding: 4px; border-radius: 12px; gap: 4px; border: 1px solid var(--tax-border); }
+    .seg button { border: none; background: transparent; color: var(--tax-muted); font-weight: 750; font-size: 13px; padding: 7px 12px; border-radius: 9px; cursor: pointer; }
+    .seg button.active { background: var(--tax-surface); color: var(--tax-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .layout { display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } }
+    .svg-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 12px; }
+    svg { width: 100%; height: 300px; display: block; }
+    .stat-panel { display: flex; flex-direction: column; gap: 12px; }
+    .box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 12px; padding: 14px; }
+    .big-num { font-size: 28px; font-weight: 850; font-family: ui-monospace, monospace; color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔪 决策树切刀工坊：怎么一刀切出最高“纯度”？</h1>
+        <p>移动切分阈值，把图里的“🟢 正常还款”与“🔴 违约风险”分开。越纯的一刀，加权基尼不纯度（Gini）越接近 0。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="controls">
+        <div class="seg" id="axisSeg">
+          <button data-axis="x" class="active">↕️ 按横轴切（收入水平）</button>
+          <button data-axis="y">↔️ 按纵轴切（负债比例）</button>
+        </div>
+        <div style="flex:1;min-width:180px;">
+          <label style="font-size:13px;font-weight:800;">切分阈值：<span id="cutVal" style="color:var(--tax-primary)">50</span></label>
+          <input id="cutSlider" type="range" min="10" max="90" value="50" style="width:100%;" />
+        </div>
+        <button class="tax-btn" id="bestBtn">🤖 帮我找最优一刀</button>
+      </div>
+
+      <div class="layout">
+        <div class="svg-box">
+          <svg id="treeSvg" viewBox="0 0 460 300"></svg>
+        </div>
+
+        <div class="stat-panel">
+          <div class="box">
+            <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">加权基尼不纯度（越低越纯，0 = 完美分开）</div>
+            <div class="big-num" id="giniVal">0.500</div>
+            <div style="font-size:12.5px;color:var(--tax-green);font-weight:750;margin-top:4px;" id="gainVal">纯度提升：+0.000</div>
+          </div>
+          <div class="box" id="sideA" style="font-size:13px;"></div>
+          <div class="box" id="sideB" style="font-size:13px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>决策树并不神秘——它只是在每个节点枚举所有特征和阈值，贪心地挑出让两侧子集合<strong>“最纯（红归红、绿归绿）”</strong>的那一刀，然后一层层递归切下去！
+    </div>
+  </div>
+
+  <script>
+    // Fixed clear dataset: x = income (0-100), y = debt ratio (0-100), cls: 1=safe(green), 0=risk(red)
+    const PTS = [
+      {x:14,y:78,c:0},{x:22,y:68,c:0},{x:28,y:85,c:0},{x:35,y:72,c:0},{x:18,y:52,c:0},
+      {x:32,y:45,c:0},{x:40,y:80,c:0},{x:25,y:34,c:0},{x:46,y:75,c:0},{x:16,y:25,c:0},
+      {x:58,y:30,c:1},{x:66,y:22,c:1},{x:72,y:38,c:1},{x:80,y:28,c:1},{x:88,y:18,c:1},
+      {x:62,y:55,c:1},{x:75,y:48,c:1},{x:84,y:42,c:1},{x:70,y:15,c:1},{x:90,y:35,c:1},
+      {x:52,y:62,c:0},{x:64,y:82,c:0},{x:48,y:28,c:1},{x:38,y:20,c:1}
+    ];
+
+    let axis = "x";
+    let moved = 0;
+
+    function gini(arr) {
+      if (!arr.length) return 0;
+      const p1 = arr.filter(p => p.c === 1).length / arr.length;
+      const p0 = 1 - p1;
+      return 1 - p1 * p1 - p0 * p0;
+    }
+
+    const baseGini = gini(PTS);
+
+    function evaluateSplit(ax, thresh) {
+      const A = PTS.filter(p => p[ax] <= thresh);
+      const B = PTS.filter(p => p[ax] > thresh);
+      const wGini = (A.length / PTS.length) * gini(A) + (B.length / PTS.length) * gini(B);
+      return { A, B, wGini, gain: baseGini - wGini };
+    }
+
+    function render() {
+      const thresh = parseInt(document.getElementById("cutSlider").value, 10);
+      document.getElementById("cutVal").textContent = thresh;
+      const { A, B, wGini, gain } = evaluateSplit(axis, thresh);
+
+      const toX = x => 40 + (x / 100) * 395;
+      const toY = y => 265 - (y / 100) * 240;
+
+      const svg = document.getElementById("treeSvg");
+      let html = `<rect x="40" y="25" width="395" height="240" rx="8" fill="var(--tax-surface)" stroke="var(--tax-border)"/>`;
+
+      if (axis === "x") {
+        const cx = toX(thresh);
+        html += `<rect x="40" y="25" width="${cx - 40}" height="240" fill="var(--tax-red-soft)" opacity="0.45"/>`;
+        html += `<rect x="${cx}" y="25" width="${435 - cx}" height="240" fill="var(--tax-green-soft)" opacity="0.45"/>`;
+        html += `<line x1="${cx}" y1="20" x2="${cx}" y2="270" stroke="var(--tax-primary)" stroke-width="3" stroke-dasharray="6,4"/>`;
+      } else {
+        const cy = toY(thresh);
+        html += `<rect x="40" y="25" width="395" height="${cy - 25}" fill="var(--tax-red-soft)" opacity="0.45"/>`;
+        html += `<rect x="40" y="${cy}" width="395" height="${265 - cy}" fill="var(--tax-green-soft)" opacity="0.45"/>`;
+        html += `<line x1="35" y1="${cy}" x2="440" y2="${cy}" stroke="var(--tax-primary)" stroke-width="3" stroke-dasharray="6,4"/>`;
+      }
+
+      html += `<text x="235" y="290" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)" font-weight="700">收入水平 (X) →</text>`;
+      html += `<text x="16" y="150" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)" font-weight="700" transform="rotate(-90 16 150)">负债比例 (Y) →</text>`;
+
+      for (const p of PTS) {
+        html += `<circle cx="${toX(p.x).toFixed(1)}" cy="${toY(p.y).toFixed(1)}" r="6.5" fill="${p.c ? "var(--tax-green)" : "var(--tax-red)"}" stroke="#fff" stroke-width="1.8"/>`;
+      }
+      svg.innerHTML = html;
+
+      document.getElementById("giniVal").textContent = wGini.toFixed(3);
+      document.getElementById("gainVal").textContent = `不纯度下降（增益）：+${gain.toFixed(3)}（切前 ${baseGini.toFixed(3)}）`;
+
+      const fmt = (name, arr) => {
+        const g = arr.filter(p => p.c === 1).length;
+        const r = arr.length - g;
+        return `<strong>${name}（共 ${arr.length} 人）</strong><br/>🟢 正常 ${g} 人 · 🔴 违约 ${r} 人 · 局部 Gini = <strong>${gini(arr).toFixed(3)}</strong>`;
+      };
+      document.getElementById("sideA").innerHTML = fmt(axis === "x" ? `左侧：收入 ≤ ${thresh}` : `下方：负债 ≤ ${thresh}`, A);
+      document.getElementById("sideB").innerHTML = fmt(axis === "x" ? `右侧：收入 > ${thresh}` : `上方：负债 > ${thresh}`, B);
+    }
+
+    document.getElementById("axisSeg").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      axis = e.target.dataset.axis;
+      document.querySelectorAll("#axisSeg button").forEach(b => b.classList.toggle("active", b === e.target));
+      render();
+    });
+
+    document.getElementById("cutSlider").addEventListener("input", () => {
+      moved++;
+      render();
+      if (moved >= 4 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    document.getElementById("bestBtn").addEventListener("click", () => {
+      let best = { ax: "x", t: 50, g: 99 };
+      for (const ax of ["x", "y"]) {
+        for (let t = 10; t <= 90; t++) {
+          const res = evaluateSplit(ax, t);
+          if (res.wGini < best.g) best = { ax, t, g: res.wGini };
+        }
+      }
+      axis = best.ax;
+      document.querySelectorAll("#axisSeg button").forEach(b => b.classList.toggle("active", b.dataset.axis === axis));
+      document.getElementById("cutSlider").value = best.t;
+      render();
+      document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（最优一刀）：</strong>算法遍历了全部 162 种切法，锁定 <strong>${axis === "x" ? "收入 ≤ " + best.t : "负债 ≤ " + best.t}</strong>，把加权基尼不纯度骤降到 <strong>${best.g.toFixed(3)}</strong>！`;
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    render();
+  </script>
+</body>
+</html>

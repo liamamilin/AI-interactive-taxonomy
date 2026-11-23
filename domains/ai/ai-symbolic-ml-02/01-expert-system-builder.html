@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：规则引擎装配台 · 前向链与组合爆炸</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .grid-2 { display: grid; grid-template-columns: 1fr 1.25fr; gap: 18px; align-items: start; }
+    @media (max-width: 780px) { .grid-2 { grid-template-columns: 1fr; } }
+    .fact-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 16px; }
+    .fact-chip {
+      padding: 8px 13px; border-radius: 999px; font-size: 13px; font-weight: 750;
+      border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-ink);
+      cursor: pointer; user-select: none; transition: all 0.14s ease;
+    }
+    .fact-chip.on { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .rule-card {
+      padding: 11px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border);
+      background: var(--tax-surface-alt); margin-bottom: 9px; font-size: 13px;
+      transition: all 0.18s ease;
+    }
+    .rule-card.fired { background: var(--tax-green-soft); border-color: var(--tax-green); }
+    .rule-card.conflict { background: var(--tax-red-soft); border-color: var(--tax-red); }
+    .badge { display: inline-block; padding: 2px 7px; border-radius: 6px; font-size: 11px; font-weight: 800; margin-right: 6px; }
+    .b-wait { background: var(--tax-surface); color: var(--tax-muted); }
+    .b-fire { background: var(--tax-green); color: #fff; }
+    .b-warn { background: var(--tax-red); color: #fff; }
+    .result-box {
+      padding: 14px 16px; border-radius: 14px; border: 1.5px solid var(--tax-border);
+      background: var(--tax-surface-alt); margin-top: 12px;
+    }
+    .exp-box { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--tax-border); }
+    .bar-bg { height: 12px; border-radius: 999px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); overflow: hidden; margin-top: 8px; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, var(--tax-primary), var(--tax-red)); transition: width 0.25s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚙️ 规则引擎装配台：为什么写死 if-else 无法穷尽真实世界？</h1>
+        <p>点选输入事实，观察专家系统如何通过「前向链（Forward Chaining）」逐条推导结论，再拉动特征数滑块感受组合爆炸。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="grid-2">
+        <div>
+          <div style="font-weight:800;font-size:14.5px;">1️⃣ 勾选当前观测到的事实（点击开关）</div>
+          <div class="fact-list" id="factList"></div>
+
+          <div class="result-box" id="conclusionBox"></div>
+
+          <div class="exp-box">
+            <div style="font-weight:800;font-size:14px;">2️⃣ 如果业务特征增加到 <span id="dimVal" style="color:var(--tax-primary)">5</span> 个：</div>
+            <input id="dimSlider" type="range" min="3" max="20" value="5" style="width:100%;margin-top:8px;" />
+            <div style="font-size:13px;color:var(--tax-muted);margin-top:6px;">
+              需要专家人工覆盖的状态组合数（2<sup>N</sup>）：<strong id="comboVal" style="color:var(--tax-red);font-family:monospace;font-size:16px;">32</strong> 种
+            </div>
+            <div class="bar-bg"><div class="bar-fill" id="comboBar" style="width:10%"></div></div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-weight:800;font-size:14.5px;margin-bottom:10px;">📜 规则库（IF → THEN 前向链推理）</div>
+          <div id="ruleList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>试着同时勾选「高热」「皮疹」「境外旅行史」触发多条规则冲突，或者把右侧特征数拖到 15+——你会立刻明白 1980 年代专家系统为何在现实复杂性面前撞墙。
+    </div>
+  </div>
+
+  <script>
+    const FACTS = [
+      { id: "fever", label: "🌡️ 持续高热" },
+      { id: "cough", label: "😷 干咳乏力" },
+      { id: "rash", label: "🔴 皮肤红疹" },
+      { id: "allergy", label: "🌸 花粉过敏史" },
+      { id: "travel", label: "✈️ 近期疫区旅行" },
+      { id: "weird", label: "❓ 罕见未知症状（味觉异常）" }
+    ];
+
+    const RULES = [
+      { id: "R1", cond: ["fever", "cough"], then: "derived_resp", text: "IF 持续高热 AND 干咳乏力 → THEN 判定【呼吸道感染风险】" },
+      { id: "R2", cond: ["derived_resp", "travel"], then: "action_isolate", text: "IF 【呼吸道感染风险】 AND 疫区旅行 → THEN 建议【立即隔离核酸排查】" },
+      { id: "R3", cond: ["rash", "allergy"], then: "action_antihistamine", text: "IF 皮肤红疹 AND 花粉过敏史 → THEN 建议【按过敏处理，无需隔离】" },
+      { id: "R4", cond: ["fever", "rash"], then: "action_er", text: "IF 持续高热 AND 皮肤红疹 → THEN 建议【急诊排查传染性出疹】" }
+    ];
+
+    const activeFacts = new Set(["fever", "cough"]);
+    let interacted = 0;
+
+    function render() {
+      const fl = document.getElementById("factList");
+      fl.innerHTML = FACTS.map(f =>
+        `<button class="fact-chip ${activeFacts.has(f.id) ? "on" : ""}" data-id="${f.id}">${f.label}</button>`
+      ).join("");
+
+      // Forward chaining loop
+      const workingMem = new Set(activeFacts);
+      const fired = new Set();
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (const r of RULES) {
+          if (!fired.has(r.id) && r.cond.every(c => workingMem.has(c))) {
+            fired.add(r.id);
+            workingMem.add(r.then);
+            changed = true;
+          }
+        }
+      }
+
+      const hasConflict = workingMem.has("action_isolate") && workingMem.has("action_antihistamine");
+      const rl = document.getElementById("ruleList");
+      rl.innerHTML = RULES.map(r => {
+        const isFired = fired.has(r.id);
+        const isConf = hasConflict && (r.id === "R2" || r.id === "R3");
+        const cls = isConf ? "rule-card conflict" : isFired ? "rule-card fired" : "rule-card";
+        const badge = isConf ? '<span class="badge b-warn">规则冲突</span>' : isFired ? '<span class="badge b-fire">已触发</span>' : '<span class="badge b-wait">未满足</span>';
+        return `<div class="${cls}">${badge}${r.text}</div>`;
+      }).join("");
+
+      const box = document.getElementById("conclusionBox");
+      const aha = document.getElementById("ahaBox");
+      if (hasConflict) {
+        box.innerHTML = `<strong style="color:var(--tax-red)">⚠️ 规则引擎冲突警报！</strong><br/><span style="font-size:13px;">R2 要求“立即隔离”，R3 却判定“按过敏无需隔离”。硬编码规则之间互相打架！</span>`;
+        aha.innerHTML = `💡 <strong>顿悟时刻（规则冲突）：</strong>规则引擎 100% 可追溯，但当规则库涨到几千条时，两条合理规则撞车会频发，维护优先级成了噩梦。`;
+      } else if (activeFacts.has("weird") && fired.size === 0) {
+        box.innerHTML = `<strong style="color:var(--tax-amber)">🤷 引擎沉默：无匹配规则</strong><br/><span style="font-size:13px;">规则库里没写过“味觉异常”，哪怕人类医生能联想，符号规则系统完全无法泛化。</span>`;
+        aha.innerHTML = `💡 <strong>顿悟时刻（脆弱性）：</strong>没被写进规则表的事实，在专家系统眼里就是完全隐形的——这就是符号派最致命的“泛化缺失”。`;
+      } else if (fired.size > 0) {
+        const outs = [];
+        if (workingMem.has("derived_resp")) outs.push("呼吸道感染风险");
+        if (workingMem.has("action_isolate")) outs.push("立即隔离核酸排查");
+        if (workingMem.has("action_antihistamine")) outs.push("按过敏处理");
+        if (workingMem.has("action_er")) outs.push("急诊排查传染性出疹");
+        box.innerHTML = `<strong style="color:var(--tax-green)">✅ 推导链条完成（触发 ${fired.size} 条规则）</strong><br/><span style="font-size:13px;">得出结论：<strong>${outs.join(" + ")}</strong>（每一步均可 100% 审计回溯）。</span>`;
+      } else {
+        box.innerHTML = `<span style="font-size:13px;color:var(--tax-muted);">当前事实不足以触发任何规则，请尝试勾选组合条件。</span>`;
+      }
+    }
+
+    function updateExplosion() {
+      const n = parseInt(document.getElementById("dimSlider").value, 10);
+      const combos = Math.pow(2, n);
+      document.getElementById("dimVal").textContent = n;
+      document.getElementById("comboVal").textContent = combos.toLocaleString();
+      document.getElementById("comboBar").style.width = Math.min(100, (n / 20) * 100) + "%";
+      if (n >= 15) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（组合爆炸）：</strong>仅仅 <strong>${n}</strong> 个是/否特征，就已经产生 <strong>${combos.toLocaleString()}</strong> 种组合！人类专家根本写不完，这正是机器学习（自动从数据学规律）崛起的根本原因。`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+
+    document.getElementById("factList").addEventListener("click", (e) => {
+      const btn = e.target.closest(".fact-chip");
+      if (!btn) return;
+      const id = btn.dataset.id;
+      if (activeFacts.has(id)) activeFacts.delete(id); else activeFacts.add(id);
+      interacted++;
+      render();
+      if (interacted >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    document.getElementById("dimSlider").addEventListener("input", updateExplosion);
+
+    render();
+    updateExplosion();
+  </script>
+</body>
+</html>

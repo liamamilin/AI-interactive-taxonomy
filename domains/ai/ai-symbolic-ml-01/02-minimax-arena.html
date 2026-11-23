@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：井字棋上帝视角 · Minimax 博弈树</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .arena { display: grid; grid-template-columns: 320px 1fr; gap: 22px; align-items: start; }
+    @media (max-width: 780px) { .arena { grid-template-columns: 1fr; } }
+    .ttt {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+      background: var(--tax-surface-alt); padding: 12px; border-radius: 16px; border: 1px solid var(--tax-border);
+    }
+    .sq {
+      aspect-ratio: 1; border-radius: 12px; background: var(--tax-surface);
+      border: 2px solid var(--tax-border); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 38px; font-weight: 900; position: relative; transition: border-color 0.15s ease, transform 0.12s ease;
+    }
+    .sq:hover:not(.filled) { border-color: var(--tax-primary); transform: translateY(-2px); }
+    .sq.x { color: var(--tax-primary); }
+    .sq.o { color: var(--tax-red); }
+    .sq.win { background: var(--tax-green-soft); border-color: var(--tax-green); }
+    .sq-score {
+      font-size: 11px; font-weight: 800; padding: 2px 6px; border-radius: 6px;
+      font-family: ui-monospace, monospace;
+    }
+    .sc-pos { background: var(--tax-green-soft); color: var(--tax-green); }
+    .sc-zero { background: var(--tax-amber-soft); color: var(--tax-amber); }
+    .sc-neg { background: var(--tax-red-soft); color: var(--tax-red); }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
+    .toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 700; cursor: pointer; background: var(--tax-surface-alt); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--tax-border); }
+    .log-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .status-pill { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; background: var(--tax-primary-soft); color: var(--tax-primary); margin-bottom: 12px; }
+    .tree-bars { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .bar-row { display: grid; grid-template-columns: 76px 1fr 56px; gap: 8px; align-items: center; font-size: 12.5px; }
+    .bar-track { height: 10px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); }
+    .bar-fill { height: 100%; border-radius: 999px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>♟️ 井字棋上帝视角：AI 靠推演未来立于不败之地</h1>
+        <p>你执蓝棋 X 先手，AI 执红棋 O。打开“上帝视角”查看每个空位的 Minimax 推演分。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="controls">
+        <label class="toggle">
+          <input type="checkbox" id="godMode" checked /> 👁️ 开启上帝视角（显示你每步的 Minimax 评分）
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="perfectAI" checked /> 🧠 AI 完全推演（取消勾选 = AI 只看 1 步）
+        </label>
+        <button class="tax-btn" id="resetBtn">🔄 重新开局</button>
+      </div>
+
+      <div class="arena">
+        <div class="ttt" id="board"></div>
+        <div class="log-box">
+          <div class="status-pill" id="statusPill">轮到你落子（蓝 X）</div>
+          <div id="explainText" style="font-size:13.5px;color:var(--tax-ink);margin-bottom:10px;">
+            格子上的数字是 <strong>Minimax 期望值</strong>：<code>0</code> 代表双方都走最优解时打平，<code>-10</code> 代表你走这里后，AI 存在<strong>必胜</strong>回应！
+          </div>
+          <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">AI 上一步推演统计：<span id="nodesEval">0</span> 种未来局面</div>
+          <div class="tree-bars" id="moveBreakdown"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>Minimax 的底层心态极其冷静——<strong>“我永远假设对手也是绝顶聪明，会挑对我最不利的走法，而我要在最坏情况里选出最好的保底方案。”</strong>
+    </div>
+  </div>
+
+  <script>
+    const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    let board = Array(9).fill("");
+    let gameOver = false;
+    let evalNodes = 0;
+    let gamesPlayed = 0;
+
+    function checkWinner(b) {
+      for (const line of WINS) {
+        const [a, c, d] = line;
+        if (b[a] && b[a] === b[c] && b[a] === b[d]) return { winner: b[a], line };
+      }
+      if (b.every(x => x)) return { winner: "DRAW", line: [] };
+      return null;
+    }
+
+    // Score from X (human) perspective: +10 X wins, -10 O wins, 0 draw
+    function minimax(b, isXTurn, depth, maxDepth) {
+      evalNodes++;
+      const res = checkWinner(b);
+      if (res) {
+        if (res.winner === "X") return 10 - depth;
+        if (res.winner === "O") return depth - 10;
+        return 0;
+      }
+      if (depth >= maxDepth) return 0;
+
+      if (isXTurn) {
+        let best = -99;
+        for (let i = 0; i < 9; i++) {
+          if (!b[i]) {
+            b[i] = "X";
+            best = Math.max(best, minimax(b, false, depth + 1, maxDepth));
+            b[i] = "";
+          }
+        }
+        return best;
+      } else {
+        let best = 99;
+        for (let i = 0; i < 9; i++) {
+          if (!b[i]) {
+            b[i] = "O";
+            best = Math.min(best, minimax(b, true, depth + 1, maxDepth));
+            b[i] = "";
+          }
+        }
+        return best;
+      }
+    }
+
+    function render() {
+      const el = document.getElementById("board");
+      const god = document.getElementById("godMode").checked;
+      const res = checkWinner(board);
+      const winSet = new Set(res ? res.line : []);
+      el.innerHTML = "";
+
+      for (let i = 0; i < 9; i++) {
+        const sq = document.createElement("div");
+        sq.className = "sq" + (board[i] ? " filled " + board[i].toLowerCase() : "") + (winSet.has(i) ? " win" : "");
+        if (board[i]) {
+          sq.textContent = board[i];
+        } else if (!gameOver && god) {
+          board[i] = "X";
+          const sc = minimax(board, false, 0, 9);
+          board[i] = "";
+          const badge = document.createElement("span");
+          badge.className = "sq-score " + (sc > 0 ? "sc-pos" : sc === 0 ? "sc-zero" : "sc-neg");
+          badge.textContent = sc > 0 ? `+${sc} 胜` : sc === 0 ? "0 平" : `${sc} 败`;
+          sq.appendChild(badge);
+        }
+        sq.addEventListener("click", () => handleHumanMove(i));
+        el.appendChild(sq);
+      }
+    }
+
+    function handleHumanMove(idx) {
+      if (gameOver || board[idx]) return;
+      board[idx] = "X";
+      let res = checkWinner(board);
+      if (res) { finishGame(res); render(); return; }
+
+      // AI turn (O minimizes score)
+      evalNodes = 0;
+      const perfect = document.getElementById("perfectAI").checked;
+      const maxDepth = perfect ? 9 : 1;
+      const candidates = [];
+      let bestMove = -1, bestScore = 99;
+      for (let i = 0; i < 9; i++) {
+        if (!board[i]) {
+          board[i] = "O";
+          const sc = minimax(board, true, 0, maxDepth);
+          board[i] = "";
+          candidates.push({ idx: i, sc });
+          if (sc < bestScore) { bestScore = sc; bestMove = i; }
+        }
+      }
+      if (bestMove !== -1) board[bestMove] = "O";
+      document.getElementById("nodesEval").textContent = evalNodes.toLocaleString();
+
+      const breakdown = document.getElementById("moveBreakdown");
+      breakdown.innerHTML = candidates.slice(0, 5).map(c => {
+        const label = `格 #${c.idx + 1}` + (c.idx === bestMove ? " ★" : "");
+        const pct = Math.min(100, Math.max(10, Math.round((10 - c.sc) * 5)));
+        const color = c.sc < 0 ? "var(--tax-red)" : c.sc === 0 ? "var(--tax-amber)" : "var(--tax-green)";
+        return `<div class="bar-row"><span>${label}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div><span style="font-family:monospace;font-weight:700;">${c.sc}</span></div>`;
+      }).join("");
+
+      res = checkWinner(board);
+      if (res) { finishGame(res); }
+      else {
+        document.getElementById("statusPill").textContent = `AI 落子格 #${bestMove + 1}，轮到你（蓝 X）`;
+      }
+      render();
+    }
+
+    function finishGame(res) {
+      gameOver = true;
+      gamesPlayed++;
+      const pill = document.getElementById("statusPill");
+      const aha = document.getElementById("ahaBox");
+      if (res.winner === "X") {
+        pill.textContent = "🎉 你赢了！";
+        aha.innerHTML = `💡 <strong>顿悟时刻：</strong>你抓住的是“浅视 1 步 AI”的盲区！一旦打开完全 Minimax 推演，井字棋在理论上是不可能被击败的。`;
+      } else if (res.winner === "O") {
+        pill.textContent = "🤖 AI 获胜！";
+        aha.innerHTML = `💡 <strong>顿悟时刻：</strong>你走入了一个被上帝视角标红（负分）的分支，AI 顺着博弈树把每一步必胜链条精准兑现了。`;
+      } else {
+        pill.textContent = "🤝 完美平局！";
+        aha.innerHTML = `💡 <strong>顿悟时刻：</strong>双方都避开了负分陷阱——这就是博弈论里的<strong>纳什均衡</strong>，在完全信息零和博弈中，最优对最优必然走向平局。`;
+      }
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      board = Array(9).fill(""); gameOver = false;
+      document.getElementById("statusPill").textContent = "轮到你落子（蓝 X）";
+      document.getElementById("moveBreakdown").innerHTML = "";
+      document.getElementById("nodesEval").textContent = "0";
+      render();
+    });
+    document.getElementById("godMode").addEventListener("change", render);
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：Alpha-Beta 剪枝手术台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
+    .seg { display: inline-flex; background: var(--tax-surface-alt); padding: 4px; border-radius: 12px; gap: 4px; border: 1px solid var(--tax-border); }
+    .seg button { border: none; background: transparent; color: var(--tax-muted); font-weight: 750; font-size: 13px; padding: 7px 12px; border-radius: 9px; cursor: pointer; }
+    .seg button.active { background: var(--tax-surface); color: var(--tax-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+    @media (max-width: 640px) { .metrics { grid-template-columns: 1fr; } }
+    .m-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 12px; padding: 12px; text-align: center; }
+    .m-lbl { font-size: 12px; color: var(--tax-muted); font-weight: 700; }
+    .m-val { font-size: 24px; font-weight: 850; font-family: ui-monospace, monospace; color: var(--tax-primary); }
+    .svg-wrap { width: 100%; overflow-x: auto; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    svg { width: 100%; min-width: 640px; height: 290px; display: block; }
+    .slider-row { display: flex; align-items: center; gap: 12px; margin-top: 14px; font-size: 13.5px; font-weight: 700; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>✂️ Alpha-Beta 剪枝手术台：砍掉一半计算，结果却分毫不差</h1>
+        <p>拖动进度滑块观察剪枝过程，再切换“叶子排序方式”，亲眼见证为什么好排序能让算力瞬间减半。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="controls">
+        <div class="seg" id="orderSeg">
+          <button data-mode="best" class="active">✨ 理想排序（高分在前）</button>
+          <button data-mode="typical">🎲 典型随机局面</button>
+          <button data-mode="worst">🐢 最差排序（低分在前）</button>
+        </div>
+        <button class="tax-btn" id="playBtn">▶ 自动演示剪枝</button>
+      </div>
+
+      <div class="metrics">
+        <div class="m-card"><div class="m-lbl">已检查叶节点 / 总数</div><div class="m-val" id="evalStat">0 / 9</div></div>
+        <div class="m-card"><div class="m-lbl">剪枝省掉的计算量</div><div class="m-val" id="saveStat" style="color:var(--tax-green)">0%</div></div>
+        <div class="m-card"><div class="m-lbl">最终根节点最优解</div><div class="m-val" id="rootVal">—</div></div>
+      </div>
+
+      <div class="svg-wrap">
+        <svg id="treeSvg" viewBox="0 0 760 280"></svg>
+      </div>
+
+      <div class="slider-row">
+        <span>推演步数：<strong id="stepLabel">0</strong></span>
+        <input id="stepSlider" type="range" min="0" max="9" value="9" style="flex:1;" />
+      </div>
+      <div id="stepDesc" style="margin-top:10px;font-size:13.5px;color:var(--tax-muted);"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>Alpha-Beta 剪枝<strong>不是近似偷懒</strong>！当 MIN 层已经发现一个比我方保底值 α 还差的走法时，无论后面藏着多好的数字，对手都不会给我选，所以整条分支可直接一刀剪掉。
+    </div>
+  </div>
+
+  <script>
+    // 3 MIN children under 1 MAX root, each MIN has 3 leaves (9 leaves total)
+    const PRESETS = {
+      best:    [[8, 9, 7], [5, 12, 15], [3, 20, 18]],
+      typical: [[5, 6, 4], [7, 3, 9],   [2, 8, 10]],
+      worst:   [[2, 3, 4], [5, 6, 7],   [8, 9, 10]]
+    };
+    let mode = "best";
+    let trace = [];
+    let anim = null;
+
+    function buildTrace(groups) {
+      const steps = [];
+      let alpha = -Infinity;
+      let rootBest = -Infinity;
+      const minVals = [null, null, null];
+      const leafState = groups.map(g => g.map(() => "pending")); // pending | eval | pruned
+
+      const cloneState = () => leafState.map(r => [...r]);
+
+      for (let m = 0; m < 3; m++) {
+        let beta = Infinity;
+        for (let l = 0; l < 3; l++) {
+          const val = groups[m][l];
+          leafState[m][l] = "eval";
+          beta = Math.min(beta, val);
+          minVals[m] = beta;
+          let msg = `评估分支 ${m + 1} 的叶节点 ${val} → MIN-${m + 1} 当前最小值 β = ${beta}（MAX 保底 α = ${alpha === -Infinity ? "-∞" : alpha}）。`;
+          if (beta <= alpha) {
+            for (let k = l + 1; k < 3; k++) leafState[m][k] = "pruned";
+            const prunedCount = 2 - l;
+            if (prunedCount > 0) {
+              msg += ` ✂️ 触发剪枝！β(${beta}) ≤ α(${alpha})，直接砍掉剩余 ${prunedCount} 个节点！`;
+            }
+            steps.push({ leafState: cloneState(), minVals: [...minVals], alpha, rootBest, active: [m, l], msg });
+            break;
+          }
+          steps.push({ leafState: cloneState(), minVals: [...minVals], alpha, rootBest, active: [m, l], msg });
+        }
+        if (beta > rootBest) {
+          rootBest = beta;
+          alpha = beta;
+          steps[steps.length - 1].alpha = alpha;
+          steps[steps.length - 1].rootBest = rootBest;
+          steps[steps.length - 1].msg += ` ⬆️ 更新 MAX 根节点保底 α = ${alpha}。`;
+        }
+      }
+      return steps;
+    }
+
+    function renderStep(idx) {
+      const groups = PRESETS[mode];
+      const s = trace[Math.min(idx, trace.length - 1)];
+      const svg = document.getElementById("treeSvg");
+      const rootPos = { x: 380, y: 38 };
+      const minPos = [{ x: 140, y: 130 }, { x: 380, y: 130 }, { x: 620, y: 130 }];
+      const leafX = [60, 140, 220, 300, 380, 460, 540, 620, 700];
+
+      let html = "";
+      // Edges root -> min
+      for (let m = 0; m < 3; m++) {
+        html += `<line x1="${rootPos.x}" y1="${rootPos.y + 22}" x2="${minPos[m].x}" y2="${minPos[m].y - 22}" stroke="var(--tax-border)" stroke-width="2.5"/>`;
+      }
+      // Edges min -> leaf
+      for (let m = 0; m < 3; m++) {
+        for (let l = 0; l < 3; l++) {
+          const lx = leafX[m * 3 + l], ly = 230;
+          const st = s.leafState[m][l];
+          const stroke = st === "pruned" ? "var(--tax-red)" : st === "eval" ? "var(--tax-primary)" : "var(--tax-border)";
+          const dash = st === "pruned" ? 'stroke-dasharray="5,5"' : "";
+          html += `<line x1="${minPos[m].x}" y1="${minPos[m].y + 20}" x2="${lx}" y2="${ly - 18}" stroke="${stroke}" stroke-width="2" ${dash}/>`;
+          if (st === "pruned") {
+            const mx = (minPos[m].x + lx) / 2, my = (minPos[m].y + ly) / 2;
+            html += `<text x="${mx}" y="${my + 4}" text-anchor="middle" font-size="14" fill="var(--tax-red)">✂️</text>`;
+          }
+        }
+      }
+      // Root node
+      html += `<rect x="${rootPos.x - 64}" y="${rootPos.y - 20}" width="128" height="40" rx="12" fill="var(--tax-primary)" />`;
+      html += `<text x="${rootPos.x}" y="${rootPos.y + 5}" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">MAX (α=${s.alpha === -Infinity ? "-∞" : s.alpha})</text>`;
+
+      // MIN nodes
+      for (let m = 0; m < 3; m++) {
+        const mv = s.minVals[m];
+        html += `<rect x="${minPos[m].x - 52}" y="${minPos[m].y - 18}" width="104" height="36" rx="10" fill="var(--tax-surface)" stroke="var(--tax-primary)" stroke-width="2" />`;
+        html += `<text x="${minPos[m].x}" y="${minPos[m].y + 5}" text-anchor="middle" fill="var(--tax-ink)" font-size="12.5" font-weight="800">MIN-${m+1}: ${mv === null ? "?" : mv}</text>`;
+      }
+
+      // Leaf nodes
+      let evalCount = 0, prunedCount = 0;
+      for (let m = 0; m < 3; m++) {
+        for (let l = 0; l < 3; l++) {
+          const lx = leafX[m * 3 + l], ly = 230;
+          const st = s.leafState[m][l];
+          if (st === "eval") evalCount++;
+          if (st === "pruned") prunedCount++;
+          const fill = st === "eval" ? "var(--tax-primary-soft)" : st === "pruned" ? "var(--tax-red-soft)" : "var(--tax-surface)";
+          const stroke = st === "eval" ? "var(--tax-primary)" : st === "pruned" ? "var(--tax-red)" : "var(--tax-border)";
+          const txtColor = st === "pruned" ? "var(--tax-red)" : "var(--tax-ink)";
+          html += `<circle cx="${lx}" cy="${ly}" r="18" fill="${fill}" stroke="${stroke}" stroke-width="2" />`;
+          html += `<text x="${lx}" y="${ly + 5}" text-anchor="middle" fill="${txtColor}" font-size="13" font-weight="800" ${st === "pruned" ? 'text-decoration="line-through"' : ""}>${groups[m][l]}</text>`;
+        }
+      }
+      svg.innerHTML = html;
+
+      document.getElementById("evalStat").textContent = `${evalCount} / 9`;
+      document.getElementById("saveStat").textContent = Math.round((prunedCount / 9) * 100) + "%";
+      document.getElementById("rootVal").textContent = s.rootBest === -Infinity ? "—" : s.rootBest;
+      document.getElementById("stepLabel").textContent = `${idx + 1} / ${trace.length}`;
+      document.getElementById("stepDesc").textContent = s.msg;
+    }
+
+    function initMode(m) {
+      if (anim) { clearInterval(anim); anim = null; }
+      mode = m;
+      trace = buildTrace(PRESETS[mode]);
+      const slider = document.getElementById("stepSlider");
+      slider.max = trace.length - 1;
+      slider.value = trace.length - 1;
+      renderStep(trace.length - 1);
+    }
+
+    document.getElementById("orderSeg").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      document.querySelectorAll("#orderSeg button").forEach(b => b.classList.toggle("active", b === e.target));
+      initMode(e.target.dataset.mode);
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    document.getElementById("stepSlider").addEventListener("input", (e) => {
+      if (anim) { clearInterval(anim); anim = null; }
+      renderStep(parseInt(e.target.value, 10));
+    });
+
+    document.getElementById("playBtn").addEventListener("click", () => {
+      if (anim) clearInterval(anim);
+      let cur = 0;
+      const slider = document.getElementById("stepSlider");
+      slider.value = 0; renderStep(0);
+      anim = setInterval(() => {
+        cur++;
+        if (cur >= trace.length) { clearInterval(anim); anim = null; if (window.ToySDK) window.ToySDK.markCompleted(); return; }
+        slider.value = cur; renderStep(cur);
+      }, 650);
+    });
+
+    initMode("best");
+  </script>
+</body>
+</html>

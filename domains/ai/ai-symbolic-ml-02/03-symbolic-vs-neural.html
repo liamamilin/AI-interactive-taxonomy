@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：符号派 vs 联结派擂台 · 神经符号融合</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .case-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .case-btn {
+      border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-ink);
+      border-radius: 12px; padding: 9px 14px; font-size: 13px; font-weight: 750; cursor: pointer;
+    }
+    .case-btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .duel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 820px) { .duel { grid-template-columns: 1fr; } }
+    .fighter {
+      background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border);
+      border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .fighter.win { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .f-head { font-size: 16px; font-weight: 850; display: flex; justify-content: space-between; align-items: center; }
+    .score-pill { font-size: 12px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: var(--tax-surface); border: 1px solid var(--tax-border); }
+    .metric { font-size: 12px; }
+    .m-bar { height: 8px; border-radius: 999px; background: var(--tax-surface); overflow: hidden; margin-top: 3px; border: 1px solid var(--tax-border); }
+    .m-fill { height: 100%; border-radius: 999px; background: var(--tax-primary); transition: width 0.3s ease; }
+    .verdict { font-size: 13px; color: var(--tax-ink); line-height: 1.5; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚖️ 符号派 vs 联结派擂台：大模型真的淘汰了规则和图谱吗？</h1>
+        <p>切换 4 道真实世界难题，实测「纯规则符号派」「纯神经网络派」和「神经符号融合派」谁能通关。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="case-tabs" id="caseTabs">
+        <button class="case-btn active" data-c="0">🐱 考题 1：逆光模糊照片辨认猫狗</button>
+        <button class="case-btn" data-c="1">🏦 考题 2：银行反洗钱合规审计</button>
+        <button class="case-btn" data-c="2">💊 考题 3：复杂病历 + 药物禁忌排查</button>
+        <button class="case-btn" data-c="3">✍️ 考题 4：写一首带隐喻的现代诗</button>
+      </div>
+
+      <div class="duel" id="duelGrid"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>AI 史上争论了 60 年的“符号主义 vs 联结主义”，最终不是谁消灭了谁——今天的 <strong>GraphRAG、Tool-Use Agent、代码解释器</strong>，本质都是让大模型负责理解模糊世界，让符号规则与图谱负责精确执行。
+    </div>
+  </div>
+
+  <script>
+    const CASES = [
+      {
+        sym: { score: 15, acc: 15, exp: 100, text: "惨败！人类根本写不出“像素满足什么 if 条件才算逆光下的猫耳朵”。" },
+        neu: { score: 96, acc: 96, exp: 25, text: "碾压级胜出！深度卷积/视觉模型从百万张图自动提取模糊统计特征，逆光也能秒认。" },
+        hyb: { score: 96, acc: 96, exp: 40, text: "视觉部分直接交给神经网络，无需硬写像素规则。" },
+        winner: "neu",
+        aha: "💡 <strong>顿悟时刻（感知类任务）：</strong>凡是无法用精确规则写清楚的模糊感知（看图、听声、辨情绪），联结派神经网络具有绝对统治力。"
+      },
+      {
+        sym: { score: 95, acc: 98, exp: 100, text: "稳如磐石！监管红线（如单笔 >5 万且跨境频次 >3）必须 100% 精确触发且可向监管出具审计链条。" },
+        neu: { score: 52, acc: 78, exp: 15, text: "高危！纯大模型可能把 49,999 误算成超标，且无法证明“为什么拒掉这笔交易”。" },
+        hyb: { score: 98, acc: 98, exp: 95, text: "最佳搭档：神经网络先挖掘隐蔽洗钱模式线索，最终拦截由确定性规则引擎精准拍板！" },
+        winner: "hyb",
+        aha: "💡 <strong>顿悟时刻（强合规任务）：</strong>金融、法律、航空控制领域容不得“概率性幻觉”，确定性规则引擎依然是不可替代的底座。"
+      },
+      {
+        sym: { score: 45, acc: 55, exp: 100, text: "卡在第一步：医生手写/口述的非结构化病历五花八门，纯图谱读不懂自然语言。" },
+        neu: { score: 65, acc: 72, exp: 30, text: "读得懂病历，但遇到冷门药理多跳禁忌时容易出现致命“自信胡说（幻觉）”。" },
+        hyb: { score: 97, acc: 97, exp: 92, text: "完胜（GraphRAG 范式）！大模型把自然语言病历抽取为实体，再交由医学知识图谱精确多跳核查禁忌。" },
+        winner: "hyb",
+        aha: "💡 <strong>顿悟时刻（神经符号融合）：</strong>“大模型读懂非结构化语言 + 知识图谱严密多跳核验”，正是现代企业级 AI 消除幻觉的黄金架构。"
+      },
+      {
+        sym: { score: 20, acc: 20, exp: 95, text: "只能套模板填词，生硬机械，毫无审美与语义张力。" },
+        neu: { score: 94, acc: 94, exp: 20, text: "大放异彩！海量语料学出的隐空间语义关联让大模型能自然生成意象与隐喻。" },
+        hyb: { score: 95, acc: 94, exp: 55, text: "若需严格平仄押韵（如七言律诗），可用规则校验器约束大模型的押韵格律！" },
+        winner: "neu",
+        aha: "💡 <strong>顿悟时刻（创造性任务）：</strong>开放式生成靠神经网络的联想力，若需要严格格律或格式（如 JSON/押韵），再叠加一层轻量符号校验器即可。"
+      }
+    ];
+
+    let seen = new Set([0]);
+
+    function render(idx) {
+      const c = CASES[idx];
+      const fighters = [
+        { key: "sym", title: "📜 符号规则派", sub: "规则引擎 / 知识图谱", data: c.sym },
+        { key: "neu", title: "🧠 联结神经派", sub: "深度学习 / 纯大模型", data: c.neu },
+        { key: "hyb", title: "⚡ 神经符号融合", sub: "LLM + 图谱/规则", data: c.hyb }
+      ];
+      document.getElementById("duelGrid").innerHTML = fighters.map(f => `
+        <div class="fighter ${c.winner === f.key ? "win" : ""}">
+          <div class="f-head">
+            <span>${f.title} ${c.winner === f.key ? "🏆" : ""}</span>
+            <span class="score-pill">${f.data.score} 分</span>
+          </div>
+          <div style="font-size:12px;color:var(--tax-muted);">${f.sub}</div>
+          <div class="metric">任务可靠度：${f.data.acc}%<div class="m-bar"><div class="m-fill" style="width:${f.data.acc}%"></div></div></div>
+          <div class="metric">可解释 / 可审计性：${f.data.exp}%<div class="m-bar"><div class="m-fill" style="width:${f.data.exp}%;background:var(--tax-green)"></div></div></div>
+          <div class="verdict">${f.data.text}</div>
+        </div>
+      `).join("");
+      document.getElementById("ahaBox").innerHTML = c.aha;
+    }
+
+    document.getElementById("caseTabs").addEventListener("click", (e) => {
+      const btn = e.target.closest(".case-btn");
+      if (!btn) return;
+      const idx = parseInt(btn.dataset.c, 10);
+      document.querySelectorAll(".case-btn").forEach(b => b.classList.toggle("active", b === btn));
+      seen.add(idx);
+      render(idx);
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    render(0);
+  </script>
+</body>
+</html>

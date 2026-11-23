@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：知识图谱多跳推理 · 三元组网络</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .q-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .q-btn {
+      border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-ink);
+      border-radius: 12px; padding: 9px 14px; font-size: 13px; font-weight: 750; cursor: pointer;
+    }
+    .q-btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .svg-stage { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 10px; overflow-x: auto; }
+    svg { width: 100%; min-width: 640px; height: 290px; display: block; }
+    .compare-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    @media (max-width: 720px) { .compare-row { grid-template-columns: 1fr; } }
+    .cmp-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 12px; padding: 14px; font-size: 13px; }
+    .triple { display: inline-block; padding: 3px 8px; border-radius: 7px; background: var(--tax-primary-soft); color: var(--tax-primary); font-family: monospace; font-size: 12px; font-weight: 700; margin: 3px 3px 3px 0; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🕸️ 知识图谱多跳推理：三元组怎么连成结构化大脑？</h1>
+        <p>选一个跨跃多段事实的提问，对比「传统关键词搜索」与「知识图谱沿边多跳推理」的本质差距。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="q-btns" id="qBtns">
+        <button class="q-btn active" data-q="0">🔍 问题 1：图灵的博士导师在哪所大学任教？（2 跳）</button>
+        <button class="q-btn" data-q="1">🔍 问题 2：图灵的“学术祖师爷”提出了什么著名理论？（3 跳）</button>
+        <button class="q-btn" data-q="2">🔍 问题 3：Transformer 论文作者任职公司的创始人是谁？（2 跳）</button>
+      </div>
+
+      <div class="svg-stage">
+        <svg id="kgSvg" viewBox="0 0 780 280"></svg>
+      </div>
+
+      <div class="compare-row">
+        <div class="cmp-card">
+          <div style="font-weight:800;color:var(--tax-red);margin-bottom:6px;">❌ 传统关键词搜索</div>
+          <div id="kwOut"></div>
+        </div>
+        <div class="cmp-card">
+          <div style="font-weight:800;color:var(--tax-green);margin-bottom:6px;">✅ 知识图谱多跳推理路径</div>
+          <div id="kgOut"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>知识图谱的最小原子是<strong>三元组 (头实体, 关系, 尾实体)</strong>。把孤立句子拆成实体和带方向的边之后，机器就能顺着关系链条完成 2 跳、3 跳甚至更深层的严密推理。
+    </div>
+  </div>
+
+  <script>
+    const NODES = {
+      turing: { label: "艾伦·图灵", x: 95, y: 75 },
+      church: { label: "阿隆佐·丘奇", x: 300, y: 75 },
+      princeton: { label: "普林斯顿大学", x: 525, y: 45 },
+      lambda: { label: "λ 演算", x: 525, y: 120 },
+      fp: { label: "函数式编程", x: 700, y: 120 },
+      vaswani: { label: "Transformer 论文", x: 115, y: 215 },
+      google: { label: "Google", x: 370, y: 215 },
+      larry: { label: "拉里·佩奇", x: 635, y: 215 }
+    };
+
+    const EDGES = [
+      { id: "e1", from: "turing", to: "church", rel: "博士导师" },
+      { id: "e2", from: "church", to: "princeton", rel: "任教于" },
+      { id: "e3", from: "church", to: "lambda", rel: "提出理论" },
+      { id: "e4", from: "lambda", to: "fp", rel: "奠基" },
+      { id: "e5", from: "vaswani", to: "google", rel: "诞生于" },
+      { id: "e6", from: "google", to: "larry", rel: "联合创始人" }
+    ];
+
+    const QUERIES = [
+      {
+        nodes: ["turing", "church", "princeton"],
+        edges: ["e1", "e2"],
+        kw: "搜索「图灵 + 任教大学」：文档里写的是图灵在剑桥和曼彻斯特工作，几乎搜不到“普林斯顿”与图灵导师的直接共现段落。",
+        triples: ["(艾伦·图灵, 博士导师, 阿隆佐·丘奇)", "(阿隆佐·丘奇, 任教于, 普林斯顿大学)"],
+        ans: "普林斯顿大学"
+      },
+      {
+        nodes: ["turing", "church", "lambda", "fp"],
+        edges: ["e1", "e3", "e4"],
+        kw: "搜索「图灵 + 导师理论 + 编程范式」：跨越 3 篇完全不同的百科词条，关键词匹配直接失效。",
+        triples: ["(艾伦·图灵, 博士导师, 阿隆佐·丘奇)", "(阿隆佐·丘奇, 提出理论, λ 演算)", "(λ 演算, 奠基, 函数式编程)"],
+        ans: "λ 演算（并奠基了函数式编程）"
+      },
+      {
+        nodes: ["vaswani", "google", "larry"],
+        edges: ["e5", "e6"],
+        kw: "Transformer 原论文里压根没有出现“拉里·佩奇”四个字，纯文本检索无法一步直达。",
+        triples: ["(Transformer 论文, 诞生于, Google)", "(Google, 联合创始人, 拉里·佩奇)"],
+        ans: "拉里·佩奇（与谢尔盖·布林）"
+      }
+    ];
+
+    let tried = new Set([0]);
+
+    function renderQuery(qIdx) {
+      const q = QUERIES[qIdx];
+      const activeNodes = new Set(q.nodes);
+      const activeEdges = new Set(q.edges);
+      const svg = document.getElementById("kgSvg");
+      let html = `<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--tax-primary)"/></marker></defs>`;
+
+      for (const e of EDGES) {
+        const a = NODES[e.from], b = NODES[e.to];
+        const on = activeEdges.has(e.id);
+        const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+        html += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${on ? "var(--tax-primary)" : "var(--tax-border)"}" stroke-width="${on ? 3.5 : 2}" ${on ? 'marker-end="url(#arr)"' : ""}/>`;
+        html += `<rect x="${mx - 36}" y="${my - 11}" width="72" height="20" rx="6" fill="${on ? "var(--tax-primary)" : "var(--tax-surface)"}" stroke="${on ? "var(--tax-primary)" : "var(--tax-border)"}"/>`;
+        html += `<text x="${mx}" y="${my + 3}" text-anchor="middle" font-size="11" font-weight="750" fill="${on ? "#fff" : "var(--tax-muted)"}">${e.rel}</text>`;
+      }
+
+      for (const [id, n] of Object.entries(NODES)) {
+        const on = activeNodes.has(id);
+        const isEnd = q.nodes[q.nodes.length - 1] === id;
+        const fill = isEnd ? "var(--tax-green)" : on ? "var(--tax-primary-soft)" : "var(--tax-surface)";
+        const stroke = isEnd ? "var(--tax-green)" : on ? "var(--tax-primary)" : "var(--tax-border)";
+        const textFill = isEnd ? "#fff" : "var(--tax-ink)";
+        html += `<rect x="${n.x - 66}" y="${n.y - 20}" width="132" height="40" rx="12" fill="${fill}" stroke="${stroke}" stroke-width="${on ? 2.5 : 1.5}"/>`;
+        html += `<text x="${n.x}" y="${n.y + 4}" text-anchor="middle" font-size="12.5" font-weight="800" fill="${textFill}">${n.label}</text>`;
+      }
+      svg.innerHTML = html;
+
+      document.getElementById("kwOut").textContent = q.kw;
+      document.getElementById("kgOut").innerHTML =
+        q.triples.map(t => `<span class="triple">${t}</span>`).join("") +
+        `<div style="margin-top:8px;">🎯 <strong>精准锁定答案：</strong>${q.ans}</div>`;
+    }
+
+    document.getElementById("qBtns").addEventListener("click", (e) => {
+      const btn = e.target.closest(".q-btn");
+      if (!btn) return;
+      const idx = parseInt(btn.dataset.q, 10);
+      document.querySelectorAll(".q-btn").forEach(b => b.classList.toggle("active", b === btn));
+      tried.add(idx);
+      renderQuery(idx);
+      if (tried.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    renderQuery(0);
+  </script>
+</body>
+</html>

@@ -5,10 +5,10 @@
   "stats": {
     "totalDomains": 10,
     "litDomains": 1,
-    "totalTopics": 16,
-    "totalPlannedTopics": 259,
+    "totalTopics": 19,
+    "totalPlannedTopics": 256,
     "totalBlueprintTopics": 275,
-    "totalToys": 48
+    "totalToys": 57
   },
   "tracks": [
     {
@@ -1501,18 +1501,6 @@
           "title": "1. 经典与符号智能（Symbolic AI & Classic ML）",
           "plannedTopics": [
             {
-              "slug": "ai-symbolic-ml-01",
-              "title": "搜索与博弈树（A* / Minimax）"
-            },
-            {
-              "slug": "ai-symbolic-ml-02",
-              "title": "规则引擎与知识图谱"
-            },
-            {
-              "slug": "ai-symbolic-ml-03",
-              "title": "监督学习（回归 / 决策树 / SVM）"
-            },
-            {
               "slug": "ai-symbolic-ml-04",
               "title": "无监督学习（聚类 / PCA 降维）"
             },
@@ -1653,11 +1641,60 @@
           ]
         }
       ],
-      "liveTopicCount": 16,
-      "plannedTopicCount": 27,
+      "liveTopicCount": 19,
+      "plannedTopicCount": 24,
       "blueprintTopicCount": 43,
-      "liveToyCount": 48,
+      "liveToyCount": 57,
       "topics": [
+        {
+          "id": "ai/ai-symbolic-ml-01",
+          "slug": "ai-symbolic-ml-01",
+          "domain": "ai",
+          "branch": "symbolic-ml",
+          "order": 1,
+          "title": "搜索与博弈树（A* / Minimax）",
+          "icon": "🧭",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "在神经网络诞生之前，AI 怎么靠“有方向地穷举”走出迷宫、下赢棋盘？",
+          "difficulty": "入门",
+          "related": [
+            "ai/reasoning-model-toys",
+            "ai/ai-rl-embodied-03"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-symbolic-ml-01/01-astar-maze.html",
+              "file": "01-astar-maze.html",
+              "path": "./domains/ai/ai-symbolic-ml-01/01-astar-maze.html",
+              "title": "A* 寻路迷宫",
+              "icon": "🗺️",
+              "archetype": "spatial",
+              "concept": "BFS 盲搜 · 贪心陷阱 · A* 启发函数 f=g+h",
+              "summary": "亲手画墙设障，直观对比 BFS、贪心与 A* 在迷宫中的探索范围与最短路径。"
+            },
+            {
+              "id": "ai/ai-symbolic-ml-01/02-minimax-arena.html",
+              "file": "02-minimax-arena.html",
+              "path": "./domains/ai/ai-symbolic-ml-01/02-minimax-arena.html",
+              "title": "井字棋上帝视角",
+              "icon": "♟️",
+              "archetype": "scenario",
+              "concept": "零和博弈 · 极小极大值 Minimax · 必不败策略",
+              "summary": "与开启上帝视角评分的 Minimax AI 对弈，看清它如何通过预判对手最优解来立于不败之地。"
+            },
+            {
+              "id": "ai/ai-symbolic-ml-01/03-alpha-beta-pruner.html",
+              "file": "03-alpha-beta-pruner.html",
+              "path": "./domains/ai/ai-symbolic-ml-01/03-alpha-beta-pruner.html",
+              "title": "Alpha-Beta 剪枝手术台",
+              "icon": "✂️",
+              "archetype": "simulation",
+              "concept": "等价剪枝 · α-β 窗口 · 节点排序加速",
+              "summary": "逐步观察博弈树如何砍掉 50%–70% 的无效分支，同时保证最终决策分毫不差。"
+            }
+          ]
+        },
         {
           "id": "ai/llm-interactive-toys",
           "slug": "llm-interactive-toys",
@@ -1670,7 +1707,11 @@
           "soft": "#eff6ff",
           "subtitle": "打破“查百科”错觉：亲手体验概率接龙、注意力聚光灯与 AI 幻觉",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/token-embedding-toys",
+            "ai/reasoning-model-toys",
+            "ai/long-context-memory-toys"
+          ],
           "toys": [
             {
               "id": "ai/llm-interactive-toys/01-text-slot-machine.html",
@@ -1705,6 +1746,55 @@
           ]
         },
         {
+          "id": "ai/ai-symbolic-ml-02",
+          "slug": "ai-symbolic-ml-02",
+          "domain": "ai",
+          "branch": "symbolic-ml",
+          "order": 2,
+          "title": "规则引擎与知识图谱",
+          "icon": "🕸️",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "在机器学习流行之前，人类曾试图把全世界的知识写成 if-else 规则和实体关系网。",
+          "difficulty": "入门",
+          "related": [
+            "ai/ai-symbolic-ml-01",
+            "ai/rag-deep-dive-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-symbolic-ml-02/01-expert-system-builder.html",
+              "file": "01-expert-system-builder.html",
+              "path": "./domains/ai/ai-symbolic-ml-02/01-expert-system-builder.html",
+              "title": "规则引擎装配台",
+              "icon": "⚙️",
+              "archetype": "builder",
+              "concept": "前向链推理 · 专家系统 · 规则组合爆炸",
+              "summary": "勾选输入事实并触发 IF-THEN 推理链，亲手撞上专家系统最致命的“规则冲突与组合爆炸”天花板。"
+            },
+            {
+              "id": "ai/ai-symbolic-ml-02/02-kg-multihop.html",
+              "file": "02-kg-multihop.html",
+              "path": "./domains/ai/ai-symbolic-ml-02/02-kg-multihop.html",
+              "title": "知识图谱多跳推理",
+              "icon": "🕸️",
+              "archetype": "spatial",
+              "concept": "三元组 (SPO) · 关系图谱 · 多跳推理",
+              "summary": "在实体关系网络上发起多跳提问，看知识图谱如何把分散的事实连成严密的推理路径。"
+            },
+            {
+              "id": "ai/ai-symbolic-ml-02/03-symbolic-vs-neural.html",
+              "file": "03-symbolic-vs-neural.html",
+              "path": "./domains/ai/ai-symbolic-ml-02/03-symbolic-vs-neural.html",
+              "title": "符号派 vs 联结派擂台",
+              "icon": "⚖️",
+              "archetype": "scenario",
+              "concept": "符号主义 · 联结主义 · 神经符号融合",
+              "summary": "把 4 道真实难题同时交给规则引擎和神经网络，悟懂为什么现代 AI 需要两者融合（如 GraphRAG）。"
+            }
+          ]
+        },
+        {
           "id": "ai/llm-training-toys",
           "slug": "llm-training-toys",
           "domain": "ai",
@@ -1716,7 +1806,11 @@
           "soft": "#ecfeff",
           "subtitle": "从随机乱码到高情商助手：亲历预训练、SFT 微调、RLHF 与 Scaling Law",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/llm-finetuning-toys",
+            "ai/reasoning-model-toys",
+            "ai/moe-architecture-toys"
+          ],
           "toys": [
             {
               "id": "ai/llm-training-toys/01-pretraining-dial.html",
@@ -1751,6 +1845,56 @@
           ]
         },
         {
+          "id": "ai/ai-symbolic-ml-03",
+          "slug": "ai-symbolic-ml-03",
+          "domain": "ai",
+          "branch": "symbolic-ml",
+          "order": 3,
+          "title": "监督学习（回归 / 决策树 / SVM）",
+          "icon": "📈",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "从手写规则跨越到“从标注数据自己学规律”——3 个玩具悟懂过拟合、信息增益与最大间隔。",
+          "difficulty": "入门",
+          "related": [
+            "ai/ai-symbolic-ml-02",
+            "ai/ai-symbolic-ml-04",
+            "ai/llm-training-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-symbolic-ml-03/01-overfitting-playground.html",
+              "file": "01-overfitting-playground.html",
+              "path": "./domains/ai/ai-symbolic-ml-03/01-overfitting-playground.html",
+              "title": "过拟合过山车",
+              "icon": "🎢",
+              "archetype": "simulation",
+              "concept": "欠拟合 · 过拟合 · 偏差-方差权衡",
+              "summary": "拖动模型复杂度滑块，亲眼看着训练误差跌到 0 的同时，测试集误差如何突然爆炸起飞。"
+            },
+            {
+              "id": "ai/ai-symbolic-ml-03/02-decision-tree-splitter.html",
+              "file": "02-decision-tree-splitter.html",
+              "path": "./domains/ai/ai-symbolic-ml-03/02-decision-tree-splitter.html",
+              "title": "决策树切刀工坊",
+              "icon": "🔪",
+              "archetype": "builder",
+              "concept": "决策树 · 基尼不纯度 · 信息增益",
+              "summary": "亲手移动横切/竖切刀线划分样本，实时计算两侧纯度，再一键对比算法算出的最优切法。"
+            },
+            {
+              "id": "ai/ai-symbolic-ml-03/03-svm-margin-kernel.html",
+              "file": "03-svm-margin-kernel.html",
+              "path": "./domains/ai/ai-symbolic-ml-03/03-svm-margin-kernel.html",
+              "title": "SVM 最大间隔与升维核技巧",
+              "icon": "🛸",
+              "archetype": "spatial",
+              "concept": "支持向量 · 最大间隔 Margin · 核技巧升维",
+              "summary": "对比普通分割线与最宽马路超平面，再把二维切不开的同心圆一键升维变成一刀切。"
+            }
+          ]
+        },
+        {
           "id": "ai/llm-finetuning-toys",
           "slug": "llm-finetuning-toys",
           "domain": "ai",
@@ -1762,7 +1906,11 @@
           "soft": "#faf5ff",
           "subtitle": "悟懂 LoRA 外挂贴纸、数据质量陷阱、灾难性遗忘与技术选型铁律",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/llm-training-toys",
+            "ai/rag-deep-dive-toys",
+            "ai/llm-evals-toys"
+          ],
           "toys": [
             {
               "id": "ai/llm-finetuning-toys/01-lora-sticker-shop.html",
@@ -1808,7 +1956,11 @@
           "soft": "#fff7ed",
           "subtitle": "揭秘百万并发不崩的三大黑科技：量化与 KV Cache、连续批处理与 PD 分离",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/moe-architecture-toys",
+            "ai/long-context-memory-toys",
+            "ai/llm-interactive-toys"
+          ],
           "toys": [
             {
               "id": "ai/llm-infra-toys/01-vram-kv-cache.html",
@@ -1854,7 +2006,11 @@
           "soft": "#eef2ff",
           "subtitle": "从只会动嘴到真的动手：装配工具、自主循环纠错与高危权限审批",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/mcp-protocol-toys",
+            "ai/agent-harness-toys",
+            "ai/multi-agent-toys"
+          ],
           "toys": [
             {
               "id": "ai/agent-interactive-toys/01-tool-calling-bench.html",
@@ -1900,7 +2056,11 @@
           "soft": "#f5f3ff",
           "subtitle": "为什么同一颗模型不同产品体验天差地别？揭秘运行时框架、内存管家与客观验收环",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/agent-interactive-toys",
+            "ai/mcp-protocol-toys",
+            "ai/llm-evals-toys"
+          ],
           "toys": [
             {
               "id": "ai/agent-harness-toys/01-harness-pit-stop.html",
@@ -1946,7 +2106,11 @@
           "soft": "#f0f9ff",
           "subtitle": "揭秘 AI 怎么“看”文字：切词显微镜、语义星座图与词义变色龙",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/llm-interactive-toys",
+            "ai/rag-deep-dive-toys",
+            "ai/multimodal-ai-toys"
+          ],
           "toys": [
             {
               "id": "ai/token-embedding-toys/01-tokenizer-microscope.html",
@@ -1992,7 +2156,11 @@
           "soft": "#eef2ff",
           "subtitle": "揭秘 o1 / DeepSeek-R1 为什么“多想几秒”数学与逻辑就暴涨：快慢思考、思考预算与 RLVR 顿悟",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/llm-training-toys",
+            "ai/llm-interactive-toys",
+            "ai/llm-evals-toys"
+          ],
           "toys": [
             {
               "id": "ai/reasoning-model-toys/01-fast-vs-slow-thinking.html",
@@ -2038,7 +2206,11 @@
           "soft": "#ecfdf5",
           "subtitle": "为什么加了知识库 AI 还是答非所问？亲手体验切块重叠、关键词 vs 向量检索与重排漏斗",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/token-embedding-toys",
+            "ai/long-context-memory-toys",
+            "ai/llm-evals-toys"
+          ],
           "toys": [
             {
               "id": "ai/rag-deep-dive-toys/01-chunking-slicer.html",
@@ -2084,7 +2256,11 @@
           "soft": "#fef2f2",
           "subtitle": "为什么简历里藏一句白字就能策反 AI？亲手体验间接提示词注入、越狱攻防与最小权限防线",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/agent-interactive-toys",
+            "ai/mcp-protocol-toys",
+            "ai/llm-evals-toys"
+          ],
           "toys": [
             {
               "id": "ai/ai-security-toys/01-prompt-injection-heist.html",
@@ -2130,7 +2306,11 @@
           "soft": "#f0fdfa",
           "subtitle": "为什么 DeepSeek 总参数几千亿，跑起来却很便宜？揭秘分诊台路由、稀疏激活与负载均衡",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/llm-interactive-toys",
+            "ai/llm-infra-toys",
+            "ai/llm-training-toys"
+          ],
           "toys": [
             {
               "id": "ai/moe-architecture-toys/01-moe-hospital-triage.html",
@@ -2176,7 +2356,11 @@
           "soft": "#eff6ff",
           "subtitle": "为什么大家都把 MCP 叫做“AI 世界的 USB-C 接口”？悟懂 M×N 灾难、自动发现握手与三大原语",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/agent-interactive-toys",
+            "ai/agent-harness-toys",
+            "ai/ai-security-toys"
+          ],
           "toys": [
             {
               "id": "ai/mcp-protocol-toys/01-mn-cable-nightmare.html",
@@ -2222,7 +2406,11 @@
           "soft": "#fff7ed",
           "subtitle": "为什么 3 个 AI 一起干活有时更强，有时反而更慢更乱？体验队形选择、传话失真与账单刺客",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/agent-interactive-toys",
+            "ai/agent-harness-toys",
+            "ai/ai-security-toys"
+          ],
           "toys": [
             {
               "id": "ai/multi-agent-toys/01-team-topologies.html",
@@ -2268,7 +2456,11 @@
           "soft": "#fdf2f8",
           "subtitle": "文字模型怎么突然能“看懂照片”和“听懂语气”？悟懂图片切块 Patch、CLIP 图文对齐与端到端语音",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/token-embedding-toys",
+            "ai/llm-interactive-toys",
+            "ai/agent-interactive-toys"
+          ],
           "toys": [
             {
               "id": "ai/multimodal-ai-toys/01-image-patch-slicer.html",
@@ -2314,7 +2506,11 @@
           "soft": "#f0f9ff",
           "subtitle": "为什么塞进 10 万字总漏掉中间？悟懂大海捞针 U 型曲线、长期记忆笔记本与 RoPE 位置外推",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/llm-interactive-toys",
+            "ai/rag-deep-dive-toys",
+            "ai/llm-infra-toys"
+          ],
           "toys": [
             {
               "id": "ai/long-context-memory-toys/01-lost-in-the-middle.html",
@@ -2360,7 +2556,11 @@
           "soft": "#fffbeb",
           "subtitle": "为什么榜单第一的模型用起来却很蠢？揭秘题库泄露刷榜、AI 判卷偏见与盲测 Elo 竞技场",
           "difficulty": "入门",
-          "related": [],
+          "related": [
+            "ai/rag-deep-dive-toys",
+            "ai/llm-finetuning-toys",
+            "ai/ai-security-toys"
+          ],
           "toys": [
             {
               "id": "ai/llm-evals-toys/01-benchmark-contamination.html",

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：SVM 最大间隔与升维核技巧</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px; }
+    .seg { display: inline-flex; background: var(--tax-surface-alt); padding: 4px; border-radius: 12px; gap: 4px; border: 1px solid var(--tax-border); }
+    .seg button { border: none; background: transparent; color: var(--tax-muted); font-weight: 750; font-size: 13px; padding: 7px 12px; border-radius: 9px; cursor: pointer; }
+    .seg button.active { background: var(--tax-surface); color: var(--tax-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .svg-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    svg { width: 100%; height: 320px; display: block; }
+    .info-bar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-top: 12px; font-size: 13.5px; font-weight: 700; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🛸 SVM 最大间隔与升维核技巧：平面分不开？升维一刀切！</h1>
+        <p>先感受线性模式下“最宽安全马路（最大间隔）”的意义，再切换到“同心圆难题”拉动升维滑块见证核技巧魔术！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="controls">
+        <div class="seg" id="modeSeg">
+          <button data-mode="linear" class="active">📏 场景 1：线性最大间隔（Support Vectors）</button>
+          <button data-mode="kernel">🌀 场景 2：同心圆核技巧升维（Kernel Trick）</button>
+        </div>
+        <div style="flex:1;min-width:220px;" id="sliderWrap">
+          <label style="font-size:13px;font-weight:800;" id="sliderLabel">边界倾斜角度：<span id="sliderVal">0</span></label>
+          <input id="mainSlider" type="range" min="-35" max="35" value="28" style="width:100%;" />
+        </div>
+      </div>
+
+      <div class="svg-box">
+        <svg id="svmSvg" viewBox="0 0 640 320"></svg>
+        <div class="info-bar" id="infoBar"></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>拖动滑块把线性边界摆到最居中位置，感受<strong>“支撑整条马路宽度的，其实只有边界边上的那几个支持向量（哨兵点）”</strong>；再切到场景 2 体验升维魔术！
+    </div>
+  </div>
+
+  <script>
+    let mode = "linear";
+    let triedKernel = false;
+
+    const RED_LIN = [{x:140,y:95},{x:175,y:135},{x:210,y:85},{x:225,y:165},{x:160,y:190},{x:240,y:120}];
+    const BLU_LIN = [{x:400,y:195},{x:435,y:145},{x:475,y:215},{x:420,y:245},{x:500,y:165},{x:460,y:115}];
+
+    const RING_PTS = [];
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      RING_PTS.push({ x: Math.cos(a) * 0.35, y: Math.sin(a) * 0.35, c: 0 });
+    }
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2 + 0.15;
+      RING_PTS.push({ x: Math.cos(a) * 0.85, y: Math.sin(a) * 0.85, c: 1 });
+    }
+
+    function renderLinear() {
+      const deg = parseInt(document.getElementById("mainSlider").value, 10);
+      document.getElementById("sliderVal").textContent = deg + "°";
+      const rad = (deg * Math.PI) / 180;
+      const cx = 320, cy = 160;
+      // Normal vector of line rotated by deg around vertical axis
+      const nx = Math.cos(rad), ny = Math.sin(rad);
+      const dx = -ny, dy = nx;
+
+      // Signed distances
+      const dRed = RED_LIN.map(p => (p.x - cx) * nx + (p.y - cy) * ny);
+      const dBlu = BLU_LIN.map(p => (p.x - cx) * nx + (p.y - cy) * ny);
+      const maxRed = Math.max(...dRed);
+      const minBlu = Math.min(...dBlu);
+      const margin = Math.max(0, Math.min(-maxRed, minBlu));
+      const valid = maxRed < 0 && minBlu > 0;
+
+      const x1 = cx + dx * 220, y1 = cy + dy * 220;
+      const x2 = cx - dx * 220, y2 = cy - dy * 220;
+
+      const svg = document.getElementById("svmSvg");
+      let html = "";
+      if (valid && margin > 4) {
+        const p1 = `${(x1 - nx * margin).toFixed(1)},${(y1 - ny * margin).toFixed(1)}`;
+        const p2 = `${(x2 - nx * margin).toFixed(1)},${(y2 - ny * margin).toFixed(1)}`;
+        const p3 = `${(x2 + nx * margin).toFixed(1)},${(y2 + ny * margin).toFixed(1)}`;
+        const p4 = `${(x1 + nx * margin).toFixed(1)},${(y1 + ny * margin).toFixed(1)}`;
+        html += `<polygon points="${p1} ${p2} ${p3} ${p4}" fill="var(--tax-primary-soft)" opacity="0.85"/>`;
+        html += `<line x1="${(x1 - nx*margin).toFixed(1)}" y1="${(y1 - ny*margin).toFixed(1)}" x2="${(x2 - nx*margin).toFixed(1)}" y2="${(y2 - ny*margin).toFixed(1)}" stroke="var(--tax-primary)" stroke-dasharray="5,5" stroke-width="1.5"/>`;
+        html += `<line x1="${(x1 + nx*margin).toFixed(1)}" y1="${(y1 + ny*margin).toFixed(1)}" x2="${(x2 + nx*margin).toFixed(1)}" y2="${(y2 + ny*margin).toFixed(1)}" stroke="var(--tax-primary)" stroke-dasharray="5,5" stroke-width="1.5"/>`;
+      }
+      html += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${valid ? "var(--tax-primary)" : "var(--tax-red)"}" stroke-width="3"/>`;
+
+      RED_LIN.forEach((p, idx) => {
+        const isSV = valid && Math.abs(dRed[idx] - maxRed) < 6;
+        if (isSV) html += `<circle cx="${p.x}" cy="${p.y}" r="13" fill="none" stroke="var(--tax-amber)" stroke-width="2.5"/>`;
+        html += `<circle cx="${p.x}" cy="${p.y}" r="7" fill="var(--tax-red)" stroke="#fff" stroke-width="1.8"/>`;
+      });
+      BLU_LIN.forEach((p, idx) => {
+        const isSV = valid && Math.abs(dBlu[idx] - minBlu) < 6;
+        if (isSV) html += `<circle cx="${p.x}" cy="${p.y}" r="13" fill="none" stroke="var(--tax-amber)" stroke-width="2.5"/>`;
+        html += `<circle cx="${p.x}" cy="${p.y}" r="7" fill="var(--tax-primary)" stroke="#fff" stroke-width="1.8"/>`;
+      });
+
+      svg.innerHTML = html;
+      document.getElementById("infoBar").innerHTML = valid
+        ? `<span>🛣️ 安全马路半宽（Margin）：<strong style="color:var(--tax-green)">${margin.toFixed(1)} px</strong></span><span>🟡 金圈高亮 = 决定边界的「支持向量」</span>`
+        : `<span style="color:var(--tax-red)">❌ 这条线切歪了，红蓝点混在了一起！</span><span>试着把角度调回 0° 附近</span>`;
+
+      if (Math.abs(deg) <= 8) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（最大间隔）：</strong>这就是 SVM 最优超平面！马路最宽（${margin.toFixed(1)} px），哪怕未来新样本带有一点噪声晃动，也最不容易跨过中线被分错！`;
+      }
+    }
+
+    function renderKernel() {
+      const lift = parseInt(document.getElementById("mainSlider").value, 10) / 100;
+      document.getElementById("sliderVal").textContent = Math.round(lift * 100) + "%";
+      const svg = document.getElementById("svmSvg");
+      let html = "";
+
+      // When lift=0: pure 2D top-down concentric circles; when lift=1: side projection showing z = x^2 + y^2 height!
+      if (lift > 0.65) {
+        html += `<line x1="60" y1="168" x2="580" y2="168" stroke="var(--tax-green)" stroke-width="3" stroke-dasharray="8,5"/>`;
+        html += `<text x="575" y="158" text-anchor="end" font-size="12.5" font-weight="800" fill="var(--tax-green)">🔪 3D 水平超平面一刀切开！</text>`;
+      }
+
+      for (const p of RING_PTS) {
+        const r2 = p.x * p.x + p.y * p.y; // ~0.12 for inner red, ~0.72 for outer blue
+        const sx = 320 + p.x * 165;
+        const y2d = 160 + p.y * 120;
+        const y3d = 265 - r2 * 230;
+        const sy = y2d * (1 - lift) + y3d * lift;
+        html += `<circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="7" fill="${p.c ? "var(--tax-primary)" : "var(--tax-red)"}" stroke="#fff" stroke-width="1.8"/>`;
+      }
+      svg.innerHTML = html;
+
+      document.getElementById("infoBar").innerHTML = lift < 0.65
+        ? `<span>🌀 2D 平面视角：任何一条直线都无法把内圈红点和外圈蓝点分开！</span><span>👉 继续向右拖动升维滑块</span>`
+        : `<span style="color:var(--tax-green)">✅ 升维成功（z = x² + y²）：外圈蓝点飞到高处，内圈红点留在低处，一刀平切 100% 分离！</span>`;
+
+      if (lift >= 0.85) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（核技巧 Kernel Trick）：</strong>低维空间拧成麻花的数据，只要加上一个新维度 <code>z = x² + y²</code>（升维），立刻变得线性可分！这就是 SVM 核函数能解决复杂非线性问题的秘密。`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+
+    function switchMode(m) {
+      mode = m;
+      const sl = document.getElementById("mainSlider");
+      const lbl = document.getElementById("sliderLabel");
+      if (mode === "linear") {
+        sl.min = -35; sl.max = 35; sl.value = 25;
+        lbl.innerHTML = '边界倾斜角度：<span id="sliderVal">25°</span>';
+        renderLinear();
+      } else {
+        triedKernel = true;
+        sl.min = 0; sl.max = 100; sl.value = 0;
+        lbl.innerHTML = '🚀 核函数升维程度（z = x² + y²）：<span id="sliderVal">0%</span>';
+        renderKernel();
+      }
+    }
+
+    document.getElementById("modeSeg").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      document.querySelectorAll("#modeSeg button").forEach(b => b.classList.toggle("active", b === e.target));
+      switchMode(e.target.dataset.mode);
+    });
+    document.getElementById("mainSlider").addEventListener("input", () => {
+      if (mode === "linear") renderLinear(); else renderKernel();
+    });
+
+    switchMode("linear");
+  </script>
+</body>
+</html>

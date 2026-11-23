@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：A* 寻路迷宫 · 启发式搜索原理</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
+    .seg { display: inline-flex; background: var(--tax-surface-alt); padding: 4px; border-radius: 12px; gap: 4px; border: 1px solid var(--tax-border); }
+    .seg button {
+      border: none; background: transparent; color: var(--tax-muted); font-weight: 750;
+      font-size: 13px; padding: 7px 12px; border-radius: 9px; cursor: pointer;
+    }
+    .seg button.active { background: var(--tax-surface); color: var(--tax-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .btn-ghost {
+      border: 1px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-ink);
+      border-radius: 10px; padding: 8px 13px; font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+    .layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 820px) { .layout { grid-template-columns: 1fr; } }
+    .grid-board {
+      display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px;
+      background: var(--tax-surface-alt); padding: 8px; border-radius: 14px;
+      border: 1px solid var(--tax-border); user-select: none; touch-action: none;
+    }
+    .cell {
+      aspect-ratio: 1; border-radius: 5px; background: var(--tax-surface);
+      border: 1px solid var(--tax-border); display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; cursor: pointer; transition: background 0.14s ease, transform 0.12s ease;
+    }
+    .cell.wall { background: #334155; border-color: #1e293b; }
+    [data-theme="dark"] .cell.wall { background: #475569; border-color: #64748b; }
+    .cell.start { background: var(--tax-green); color: #fff; font-size: 13px; }
+    .cell.goal { background: var(--tax-red); color: #fff; font-size: 13px; }
+    .cell.visited { background: var(--tax-primary-soft); color: var(--tax-primary); }
+    .cell.frontier { background: var(--tax-amber-soft); color: var(--tax-amber); }
+    .cell.path { background: var(--tax-primary); color: #fff; transform: scale(1.04); }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .stat-box { background: var(--tax-surface-alt); border-radius: 12px; padding: 12px; border: 1px solid var(--tax-border); }
+    .stat-label { font-size: 12px; color: var(--tax-muted); font-weight: 700; }
+    .stat-num { font-size: 24px; font-weight: 850; font-family: ui-monospace, monospace; color: var(--tax-primary); }
+    .formula-box { background: var(--tax-surface-alt); border-radius: 12px; padding: 14px; font-size: 13px; border: 1px solid var(--tax-border); }
+    .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--tax-muted); margin-top: 10px; }
+    .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🗺️ A* 寻路迷宫：AI 寻路不是“把每条路都试一遍”</h1>
+        <p>点击或拖动格子画墙，切换 3 种经典搜索算法，直观看到“启发式估价”如何让搜索长出眼睛。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="controls">
+        <div class="seg" id="algoSeg">
+          <button data-algo="bfs">BFS 盲目扩散</button>
+          <button data-algo="greedy">贪心（只看终点）</button>
+          <button data-algo="astar" class="active">A* 启发式（g + h）</button>
+        </div>
+        <button class="tax-btn" id="runBtn">▶ 开始寻路</button>
+        <button class="btn-ghost" id="presetBtn">🧱 切换“U型陷阱”迷宫</button>
+        <button class="btn-ghost" id="clearBtn">🧹 清空墙壁</button>
+      </div>
+
+      <div class="layout">
+        <div>
+          <div class="grid-board" id="board"></div>
+          <div class="legend">
+            <span><i class="dot" style="background:var(--tax-green)"></i>起点 S</span>
+            <span><i class="dot" style="background:var(--tax-red)"></i>终点 G</span>
+            <span><i class="dot" style="background:#334155"></i>障碍墙（点击可画/擦）</span>
+            <span><i class="dot" style="background:var(--tax-primary-soft);border:1px solid var(--tax-primary)"></i>已探索</span>
+            <span><i class="dot" style="background:var(--tax-primary)"></i>最终路径</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="stats">
+            <div class="stat-box">
+              <div class="stat-label">已探索格子数（算力）</div>
+              <div class="stat-num" id="visitedCount">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">最终路径步数</div>
+              <div class="stat-num" id="pathLen">—</div>
+            </div>
+          </div>
+          <div class="formula-box" id="formulaBox">
+            <strong>当前策略：A* 搜索</strong><br />
+            优先级公式：<code>f(n) = g(n) + h(n)</code><br />
+            • <code>g(n)</code>：从起点已走的实际步数<br />
+            • <code>h(n)</code>：到终点的曼哈顿直线估算距离<br />
+            <span style="color:var(--tax-muted);display:block;margin-top:6px;">兼顾“已经走了多远”和“离终点还有多远”，既不盲目乱撞，也不掉进贪心死胡同。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>点击「▶ 开始寻路」，再用同一个“U型陷阱”迷宫分别试试 <strong>BFS</strong>、<strong>贪心</strong> 和 <strong>A*</strong>，看看探索格数与路径长度的巨大差异！
+    </div>
+  </div>
+
+  <script>
+    const ROWS = 11, COLS = 15;
+    const START = [5, 1], GOAL = [5, 13];
+    let algo = "astar";
+    let walls = new Set();
+    let timer = null;
+    let drawing = false, drawMode = true;
+    let triedAlgos = new Set();
+
+    const key = (r, c) => `${r},${c}`;
+    const manhattan = (r, c) => Math.abs(r - GOAL[0]) + Math.abs(c - GOAL[1]);
+
+    function loadPresetTrap() {
+      walls.clear();
+      // Classic U-shaped trap in the middle that fools Greedy or shows BFS flooding
+      for (let r = 2; r <= 8; r++) walls.add(key(r, 9));
+      for (let c = 5; c <= 9; c++) { walls.add(key(2, c)); walls.add(key(8, c)); }
+      walls.add(key(4, 4)); walls.add(key(5, 4)); walls.add(key(6, 4));
+      renderBoard();
+    }
+
+    function renderBoard(visited = new Set(), frontier = new Set(), path = new Set()) {
+      const board = document.getElementById("board");
+      board.innerHTML = "";
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const k = key(r, c);
+          const div = document.createElement("div");
+          div.className = "cell";
+          if (r === START[0] && c === START[1]) { div.classList.add("start"); div.textContent = "S"; }
+          else if (r === GOAL[0] && c === GOAL[1]) { div.classList.add("goal"); div.textContent = "G"; }
+          else if (walls.has(k)) { div.classList.add("wall"); }
+          else if (path.has(k)) { div.classList.add("path"); }
+          else if (frontier.has(k)) { div.classList.add("frontier"); }
+          else if (visited.has(k)) { div.classList.add("visited"); }
+
+          div.addEventListener("pointerdown", () => {
+            if ((r === START[0] && c === START[1]) || (r === GOAL[0] && c === GOAL[1])) return;
+            stopAnim();
+            drawing = true;
+            drawMode = !walls.has(k);
+            if (drawMode) walls.add(k); else walls.delete(k);
+            renderBoard();
+          });
+          div.addEventListener("pointerenter", () => {
+            if (!drawing) return;
+            if ((r === START[0] && c === START[1]) || (r === GOAL[0] && c === GOAL[1])) return;
+            if (drawMode) walls.add(k); else walls.delete(k);
+            renderBoard();
+          });
+          board.appendChild(div);
+        }
+      }
+    }
+    window.addEventListener("pointerup", () => { drawing = false; });
+
+    function stopAnim() { if (timer) { clearInterval(timer); timer = null; } }
+
+    function updateFormula() {
+      const box = document.getElementById("formulaBox");
+      if (algo === "bfs") {
+        box.innerHTML = `<strong>当前策略：BFS 广度优先（盲目扩散）</strong><br/>优先级公式：<code>f(n) = g(n)</code><br/>像水波一样向四周均匀扩散，<strong>保证找到最短路径</strong>，但完全不知道终点在哪，浪费大量算力。`;
+      } else if (algo === "greedy") {
+        box.innerHTML = `<strong>当前策略：贪心最佳优先（只看终点）</strong><br/>优先级公式：<code>f(n) = h(n)</code><br/>眼里只有终点的直线距离，遇到 U 型死胡同会一头扎进去，<strong>往往找不到最短路径</strong>。`;
+      } else {
+        box.innerHTML = `<strong>当前策略：A* 启发式搜索</strong><br/>优先级公式：<code>f(n) = g(n) + h(n)</code><br/>同时考虑<strong>已走步数 g(n)</strong> 与<strong>估价距离 h(n)</strong>：既有方向感大幅减少探索，又严格保证找到最短路径。`;
+      }
+    }
+
+    function runSearch() {
+      stopAnim();
+      triedAlgos.add(algo);
+      const startK = key(START[0], START[1]);
+      const goalK = key(GOAL[0], GOAL[1]);
+      const open = [{ r: START[0], c: START[1], g: 0, f: manhattan(START[0], START[1]) }];
+      const gScore = { [startK]: 0 };
+      const parent = {};
+      const visited = new Set();
+      const steps = [];
+      let found = false;
+
+      while (open.length > 0) {
+        let bestIdx = 0;
+        if (algo !== "bfs") {
+          for (let i = 1; i < open.length; i++) {
+            if (open[i].f < open[bestIdx].f) bestIdx = i;
+          }
+        }
+        const cur = open.splice(bestIdx, 1)[0];
+        const ck = key(cur.r, cur.c);
+        if (visited.has(ck)) continue;
+        visited.add(ck);
+        steps.push({ visited: new Set(visited), frontier: new Set(open.map(x => key(x.r, x.c))) });
+
+        if (ck === goalK) { found = true; break; }
+        const dirs = [[0,1],[1,0],[0,-1],[-1,0]];
+        for (const [dr, dc] of dirs) {
+          const nr = cur.r + dr, nc = cur.c + dc;
+          if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+          const nk = key(nr, nc);
+          if (walls.has(nk) || visited.has(nk)) continue;
+          const ng = cur.g + 1;
+          if (gScore[nk] === undefined || ng < gScore[nk]) {
+            gScore[nk] = ng;
+            parent[nk] = ck;
+            const h = manhattan(nr, nc);
+            const f = algo === "bfs" ? ng : (algo === "greedy" ? h : ng + h);
+            open.push({ r: nr, c: nc, g: ng, f });
+          }
+        }
+      }
+
+      const finalPath = new Set();
+      let pathLen = 0;
+      if (found) {
+        let curr = goalK;
+        while (curr && curr !== startK) {
+          finalPath.add(curr);
+          curr = parent[curr];
+          pathLen++;
+        }
+      }
+
+      let idx = 0;
+      timer = setInterval(() => {
+        if (idx < steps.length) {
+          const s = steps[idx++];
+          document.getElementById("visitedCount").textContent = s.visited.size;
+          document.getElementById("pathLen").textContent = "搜索中...";
+          renderBoard(s.visited, s.frontier, new Set());
+        } else {
+          stopAnim();
+          const last = steps[steps.length - 1] || { visited: new Set(), frontier: new Set() };
+          renderBoard(last.visited, new Set(), finalPath);
+          document.getElementById("visitedCount").textContent = last.visited.size;
+          document.getElementById("pathLen").textContent = found ? pathLen + " 步" : "无解";
+          const aha = document.getElementById("ahaBox");
+          if (!found) {
+            aha.innerHTML = `💡 <strong>顿悟时刻：</strong>终点被完全封死了！算法探索了所有可达的 ${last.visited.size} 个格子后，确切证明“无解”。`;
+          } else if (algo === "bfs") {
+            aha.innerHTML = `💡 <strong>顿悟时刻（BFS）：</strong>找到了最短路径（${pathLen} 步），但为了确认它最短，盲目扫描了 <strong>${last.visited.size}</strong> 个格子！切换成 A* 试试看能省多少算力。`;
+          } else if (algo === "greedy") {
+            aha.innerHTML = `💡 <strong>顿悟时刻（贪心）：</strong>探索了 ${last.visited.size} 格，走出 ${pathLen} 步。因为它完全忽略已经走过的成本 g(n)，遇到障碍陷阱时常常绕远路！`;
+          } else {
+            aha.innerHTML = `💡 <strong>顿悟时刻（A*）：</strong>只探索了 <strong>${last.visited.size}</strong> 个格子，就精准锁定最短路径（<strong>${pathLen} 步</strong>）！启发函数 h(n) 就像指南针，让搜索既有方向又不失最优性。`;
+          }
+          if (triedAlgos.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }, 24);
+    }
+
+    document.getElementById("algoSeg").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      algo = e.target.dataset.algo;
+      document.querySelectorAll("#algoSeg button").forEach(b => b.classList.toggle("active", b.dataset.algo === algo));
+      updateFormula();
+      runSearch();
+    });
+    document.getElementById("runBtn").addEventListener("click", runSearch);
+    document.getElementById("presetBtn").addEventListener("click", () => { stopAnim(); loadPresetTrap(); runSearch(); });
+    document.getElementById("clearBtn").addEventListener("click", () => { stopAnim(); walls.clear(); renderBoard(); document.getElementById("visitedCount").textContent = "0"; document.getElementById("pathLen").textContent = "—"; });
+
+    updateFormula();
+    loadPresetTrap();
+  </script>
+</body>
+</html>

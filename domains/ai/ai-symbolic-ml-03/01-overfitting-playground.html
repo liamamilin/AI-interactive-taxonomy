@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：过拟合过山车 · 偏差与方差权衡</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px; align-items: center; margin-bottom: 16px; }
+    @media (max-width: 760px) { .ctrl-grid { grid-template-columns: 1fr; } }
+    .stage-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 800px) { .stage-grid { grid-template-columns: 1fr; } }
+    .svg-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 12px; }
+    svg { width: 100%; height: 300px; display: block; }
+    .err-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .err-num { font-size: 26px; font-weight: 850; font-family: ui-monospace, monospace; }
+    .bar-track { height: 12px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin-top: 4px; }
+    .bar-fill { height: 100%; border-radius: 999px; transition: width 0.2s ease; }
+    .status-tag { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎢 过拟合过山车：为什么练习题 100 分，大考反而砸锅？</h1>
+        <p>拖动「模型复杂度（多项式阶数）」，观察蓝色拟合曲线如何从呆板直线演变成贴着每个蓝点疯狂扭动的过拟合曲线。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div>
+          <label style="font-weight:800;font-size:14px;">🎛️ 模型复杂度（多项式阶数）：<span id="degVal" style="color:var(--tax-primary)">3</span> 阶</label>
+          <input id="degSlider" type="range" min="1" max="9" value="3" style="width:100%;margin-top:6px;" />
+        </div>
+        <div>
+          <label style="font-weight:800;font-size:14px;">🌫️ 现实数据噪声：<span id="noiseVal">中</span></label>
+          <input id="noiseSlider" type="range" min="1" max="3" value="2" style="width:100%;margin-top:6px;" />
+        </div>
+        <button class="tax-btn" id="resampleBtn">🎲 换一批考题</button>
+      </div>
+
+      <div class="stage-grid">
+        <div class="svg-box">
+          <svg id="plotSvg" viewBox="0 0 540 300"></svg>
+          <div style="font-size:12px;color:var(--tax-muted);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;">
+            <span>🔵 蓝点：训练集（模型见过）</span>
+            <span>🟠 橙点：测试集（模型没见过）</span>
+            <span>➖ 虚线：真实隐藏规律</span>
+          </div>
+        </div>
+
+        <div class="err-card">
+          <div><span class="status-tag" id="fitStatus">🎯 黄金甜点（泛化极佳）</span></div>
+          <div>
+            <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">📘 训练集误差（刷过的旧题）</div>
+            <div class="err-num" id="trainErr" style="color:var(--tax-primary)">0.00</div>
+            <div class="bar-track"><div class="bar-fill" id="trainBar" style="background:var(--tax-primary);width:20%"></div></div>
+          </div>
+          <div>
+            <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">📙 测试集误差（没见过的新考题）</div>
+            <div class="err-num" id="testErr" style="color:var(--tax-amber)">0.00</div>
+            <div class="bar-track"><div class="bar-fill" id="testBar" style="background:var(--tax-amber);width:25%"></div></div>
+          </div>
+          <div style="font-size:12.5px;color:var(--tax-muted);" id="diagNote"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>把复杂度依次拖到 <strong>1 阶（欠拟合）</strong>、<strong>3 阶（刚好）</strong> 和 <strong>9 阶（过拟合）</strong>，看清机器学习的核心目标：不是死背训练集，而是追求<strong>泛化能力</strong>！
+    </div>
+  </div>
+
+  <script>
+    let seed = 42;
+    function rand() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
+    const trueFn = (x) => Math.sin(x * Math.PI * 1.15) * 0.65 + 0.1 * x;
+
+    let trainPts = [], testPts = [];
+    const seenDegs = new Set();
+
+    function genData() {
+      const noiseLvl = parseInt(document.getElementById("noiseSlider").value, 10);
+      const amp = noiseLvl === 1 ? 0.08 : noiseLvl === 2 ? 0.22 : 0.40;
+      document.getElementById("noiseVal").textContent = noiseLvl === 1 ? "低" : noiseLvl === 2 ? "中" : "高";
+      trainPts = []; testPts = [];
+      for (let i = 0; i < 11; i++) {
+        const x = -0.92 + (1.84 * i) / 10;
+        trainPts.push({ x, y: trueFn(x) + (rand() - 0.5) * 2 * amp });
+      }
+      for (let i = 0; i < 10; i++) {
+        const x = -0.85 + (1.72 * i) / 9 + (rand() - 0.5) * 0.08;
+        testPts.push({ x, y: trueFn(x) + (rand() - 0.5) * 2 * amp });
+      }
+    }
+
+    // Solve Ridge-stabilized normal equations for polynomial regression of degree d
+    function fitPoly(pts, d) {
+      const m = d + 1;
+      const A = Array.from({ length: m }, () => Array(m).fill(0));
+      const b = Array(m).fill(0);
+      const reg = d >= 8 ? 1e-6 : 1e-5;
+      for (const p of pts) {
+        const xp = [1];
+        for (let k = 1; k < m; k++) xp.push(xp[k - 1] * p.x);
+        for (let i = 0; i < m; i++) {
+          b[i] += xp[i] * p.y;
+          for (let j = 0; j < m; j++) A[i][j] += xp[i] * xp[j];
+        }
+      }
+      for (let i = 0; i < m; i++) A[i][i] += reg;
+      // Gaussian elimination with partial pivoting
+      for (let i = 0; i < m; i++) {
+        let maxR = i;
+        for (let r = i + 1; r < m; r++) if (Math.abs(A[r][i]) > Math.abs(A[maxR][i])) maxR = r;
+        [A[i], A[maxR]] = [A[maxR], A[i]];
+        [b[i], b[maxR]] = [b[maxR], b[i]];
+        const piv = A[i][i] || 1e-12;
+        for (let r = i + 1; r < m; r++) {
+          const f = A[r][i] / piv;
+          b[r] -= f * b[i];
+          for (let c = i; c < m; c++) A[r][c] -= f * A[i][c];
+        }
+      }
+      const w = Array(m).fill(0);
+      for (let i = m - 1; i >= 0; i--) {
+        let sum = b[i];
+        for (let c = i + 1; c < m; c++) sum -= A[i][c] * w[c];
+        w[i] = sum / (A[i][i] || 1e-12);
+      }
+      return w;
+    }
+
+    function evalPoly(w, x) {
+      let y = 0, xp = 1;
+      for (let i = 0; i < w.length; i++) { y += w[i] * xp; xp *= x; }
+      return y;
+    }
+
+    function render() {
+      const deg = parseInt(document.getElementById("degSlider").value, 10);
+      document.getElementById("degVal").textContent = deg;
+      seenDegs.add(deg);
+      const w = fitPoly(trainPts, deg);
+
+      const toX = (x) => 36 + ((x + 1.05) / 2.1) * 470;
+      const toY = (y) => 150 - Math.max(-1.45, Math.min(1.45, y)) * 95;
+
+      let truePath = "", fitPath = "";
+      for (let i = 0; i <= 100; i++) {
+        const x = -1.0 + (2.0 * i) / 100;
+        const tx = toX(x), ty = toY(trueFn(x));
+        const fy = toY(evalPoly(w, x));
+        truePath += (i === 0 ? "M" : "L") + `${tx.toFixed(1)},${ty.toFixed(1)} `;
+        fitPath += (i === 0 ? "M" : "L") + `${tx.toFixed(1)},${fy.toFixed(1)} `;
+      }
+
+      const svg = document.getElementById("plotSvg");
+      let html = `<line x1="30" y1="150" x2="515" y2="150" stroke="var(--tax-border)" stroke-width="1.5"/>`;
+      html += `<path d="${truePath}" fill="none" stroke="var(--tax-muted)" stroke-width="2" stroke-dasharray="6,5" opacity="0.7"/>`;
+      html += `<path d="${fitPath}" fill="none" stroke="var(--tax-primary)" stroke-width="3"/>`;
+      for (const p of testPts) {
+        html += `<circle cx="${toX(p.x).toFixed(1)}" cy="${toY(p.y).toFixed(1)}" r="5" fill="var(--tax-amber)" stroke="#fff" stroke-width="1.5"/>`;
+      }
+      for (const p of trainPts) {
+        html += `<circle cx="${toX(p.x).toFixed(1)}" cy="${toY(p.y).toFixed(1)}" r="5.5" fill="var(--tax-primary)" stroke="#fff" stroke-width="1.5"/>`;
+      }
+      svg.innerHTML = html;
+
+      const rmse = (pts) => Math.sqrt(pts.reduce((s, p) => s + Math.pow(evalPoly(w, p.x) - p.y, 2), 0) / pts.length);
+      const trE = rmse(trainPts);
+      const teE = rmse(testPts);
+      document.getElementById("trainErr").textContent = trE.toFixed(3);
+      document.getElementById("testErr").textContent = teE.toFixed(3);
+      document.getElementById("trainBar").style.width = Math.min(100, trE * 120) + "%";
+      document.getElementById("testBar").style.width = Math.min(100, teE * 120) + "%";
+
+      const st = document.getElementById("fitStatus");
+      const note = document.getElementById("diagNote");
+      const aha = document.getElementById("ahaBox");
+      if (deg <= 2) {
+        st.textContent = "🐢 欠拟合（高偏差）";
+        st.style.background = "var(--tax-amber-soft)"; st.style.color = "var(--tax-amber)";
+        note.textContent = "模型太简单，连明显的波浪趋势都画不出来，训练集和测试集误差都很高。";
+        aha.innerHTML = `💡 <strong>顿悟时刻（欠拟合）：</strong>1~2 阶模型表达力不足，就像用一根直尺去量弯曲的河流——连真规律都没学到。`;
+      } else if (deg <= 5) {
+        st.textContent = "🎯 黄金甜点（泛化极佳）";
+        st.style.background = "var(--tax-green-soft)"; st.style.color = "var(--tax-green)";
+        note.textContent = "精准抓住了虚线背后的真实走势，同时自动忽略了样本里的随机噪声！";
+        aha.innerHTML = `💡 <strong>顿悟时刻（恰到好处）：</strong>${deg} 阶曲线虽不强行穿过每个蓝点，却在没见过的橙色测试点上误差最低！`;
+      } else {
+        st.textContent = "🚨 严重过拟合（高方差）";
+        st.style.background = "var(--tax-red-soft)"; st.style.color = "var(--tax-red)";
+        note.textContent = "曲线为了穿过每一个蓝点疯狂上下抽搐，把噪声当规律背了下来，遇到橙色新题瞬间崩盘！";
+        aha.innerHTML = `💡 <strong>顿悟时刻（过拟合陷阱）：</strong>训练误差降到 ${trE.toFixed(3)} 几乎完美，但测试误差反飙到 ${teE.toFixed(3)}！这就是为什么实战绝不能只看训练集分数。`;
+      }
+      if (seenDegs.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    document.getElementById("degSlider").addEventListener("input", render);
+    document.getElementById("noiseSlider").addEventListener("input", () => { genData(); render(); });
+    document.getElementById("resampleBtn").addEventListener("click", () => { seed += 7919; genData(); render(); });
+
+    genData();
+    render();
+  </script>
+</body>
+</html>
