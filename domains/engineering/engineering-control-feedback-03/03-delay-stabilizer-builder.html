@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：驯服延迟工具箱</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    @media (max-width: 720px) { .checks { grid-template-columns: 1fr; } }
+    .chk { display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-weight: 800; font-size: 13px; cursor: pointer; }
+    .res { padding: 16px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); text-align: center; }
+    .big { font-size: 28px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧰 驯服延迟工具箱：沃尔玛和 SHEIN 怎么把“牛鞭效应”彻底拉直？</h1>
+        <p>勾选下方 3 项系统工程解药，把上游工厂剧烈的库存波动幅度压回平稳直线！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="checks">
+        <label class="chk"><input type="checkbox" id="c1" onchange="render()" /> 📡 共享终端 POS 实时销量（消灭信息延迟）</label>
+        <label class="chk"><input type="checkbox" id="c2" onchange="render()" /> 🚚 柔性小单快反（缩短交付周期 Lead Time）</label>
+        <label class="chk"><input type="checkbox" id="c3" onchange="render()" /> 🧘 降低补货反应增益（小步平滑微调）</label>
+      </div>
+      <div class="res">
+        <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">上游工厂产能波动倍率（越接近 1.0× 越健康）</div>
+        <div class="big" id="ampOut" style="color:var(--tax-red);">9.5× 剧烈震荡 💥</div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    function render() {
+      const n = ["c1", "c2", "c3"].filter(id => document.getElementById(id).checked).length;
+      const vals = ["9.5× 剧烈震荡 💥", "4.2× 明显收敛 🟡", "1.9× 较为平稳 🔵", "1.1× 丝滑同步 ✅"];
+      const cols = ["var(--tax-red)", "var(--tax-amber)", "var(--tax-primary)", "var(--tax-green)"];
+      const el = document.getElementById("ampOut");
+      el.textContent = vals[n];
+      el.style.color = cols[n];
+      document.getElementById("ahaBox").innerHTML = n === 3
+        ? "💡 <strong>现代敏捷供应链的三大支柱：</strong>让工厂直接看见超市扫码枪（消信息延迟）+ 小批量高频补货（消物流延迟）+ 平滑下单（降反馈增益），牛鞭效应瞬间瓦解！"
+        : "💡 <strong>顿悟时刻：</strong>把上方 3 项治理措施全部勾上，看 9.5 倍的库存过山车如何平滑降到 1.1 倍！";
+      if (n === 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+  </script>
+</body>
+</html>

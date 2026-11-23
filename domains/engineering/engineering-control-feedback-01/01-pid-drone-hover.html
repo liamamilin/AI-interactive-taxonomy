@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：PID 无人机悬停物理沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
+    @media (max-width: 720px) { .ctrls { grid-template-columns: 1fr; } }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; }
+    svg { width: 100%; height: 220px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚁 PID 无人机悬停沙盘：只用 3 个旋钮，驯服狂抖的飞行器！</h1>
+        <p>虚线是目标悬停高度（100m），重力一直在把无人机往下拽。调动 <strong>P（现在差多少）</strong>、<strong>I（过去欠多少）</strong>、<strong>D（踩刹车阻尼）</strong> 看曲线变化！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <div>
+          <label style="font-weight:850;font-size:13.5px;">⚡ Kp（比例推力）：<span id="pVal" style="color:var(--tax-primary)">1.2</span></label>
+          <input id="pSl" type="range" min="1" max="30" value="12" style="width:100%;margin-top:6px;" />
+        </div>
+        <div>
+          <label style="font-weight:850;font-size:13.5px;">🔋 Ki（消除重力欠账）：<span id="iVal" style="color:var(--tax-amber)">0.0</span></label>
+          <input id="iSl" type="range" min="0" max="15" value="0" style="width:100%;margin-top:6px;" />
+        </div>
+        <div>
+          <label style="font-weight:850;font-size:13.5px;">🛑 Kd（微分阻尼刹车）：<span id="dVal" style="color:var(--tax-green)">0.0</span></label>
+          <input id="dSl" type="range" min="0" max="25" value="0" style="width:100%;margin-top:6px;" />
+        </div>
+      </div>
+
+      <div class="stage"><svg viewBox="0 0 540 210" id="pidSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function simulate(kp, ki, kd) {
+      const target = 100, dt = 0.08, g = 18;
+      let y = 10, v = 0, integral = 0, prevErr = target - y;
+      const pts = [y];
+      for (let step = 0; step < 90; step++) {
+        const err = target - y;
+        integral = Math.max(-200, Math.min(200, integral + err * dt));
+        const deriv = (err - prevErr) / dt;
+        const thrust = kp * err + ki * integral + kd * deriv;
+        const acc = thrust - g;
+        v += acc * dt;
+        y = Math.max(0, Math.min(180, y + v * dt));
+        prevErr = err;
+        pts.push(y);
+      }
+      return pts;
+    }
+
+    function render() {
+      const kp = parseInt(document.getElementById("pSl").value, 10) / 10;
+      const ki = parseInt(document.getElementById("iSl").value, 10) / 10;
+      const kd = parseInt(document.getElementById("dSl").value, 10) / 10;
+      document.getElementById("pVal").textContent = kp.toFixed(1);
+      document.getElementById("iVal").textContent = ki.toFixed(1);
+      document.getElementById("dVal").textContent = kd.toFixed(1);
+
+      const pts = simulate(kp, ki, kd);
+      const toY = h => 195 - (h / 180) * 175;
+      const poly = pts.map((h, i) => `${(30 + i * 5.4).toFixed(1)},${toY(h).toFixed(1)}`).join(" ");
+      const endY = pts[pts.length - 1];
+      const maxY = Math.max(...pts);
+      const errEnd = Math.abs(100 - endY);
+      const settled = errEnd < 3 && maxY < 122;
+
+      let s = `<line x1="30" y1="${toY(100).toFixed(1)}" x2="520" y2="${toY(100).toFixed(1)}" stroke="#10b981" stroke-dasharray="6,4" stroke-width="2"/>`;
+      s += `<text x="36" y="${(toY(100) - 6).toFixed(1)}" fill="#34d399" font-size="11" font-weight="800">目标悬停线：100m</text>`;
+      s += `<polyline points="${poly}" fill="none" stroke="${settled ? "#38bdf8" : "#f59e0b"}" stroke-width="3.5" stroke-linejoin="round"/>`;
+      s += `<text x="505" y="${(toY(endY) - 6).toFixed(1)}" text-anchor="end" fill="#fff" font-size="14">🚁 ${endY.toFixed(0)}m</text>`;
+      document.getElementById("pidSvg").innerHTML = s;
+
+      let aha;
+      if (settled) {
+        aha = "💡 <strong>完美调参通关（稳准狠）！</strong><code>P</code> 提供快速爬升推力，<code>I</code> 消除重力导致的永远低一截（稳态误差），<code>D</code> 预判速度提前踩刹车消灭震荡——全人类 90% 以上的工业控制（火箭、定速巡航、温控）靠的都是这三行极简公式！";
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      } else if (kd < 0.6) {
+        aha = "💡 <strong>缺少 D（阻尼刹车）导致疯狂震荡！</strong>只有 P 没有 D 就像弹簧没装减震器，冲过 100m 刹不住车来回画波浪！试着把 <strong>Kd 拉到 1.2 左右</strong>，再加一点 <strong>Ki (0.5)</strong> 抵消重力！";
+      } else if (ki === 0) {
+        aha = "💡 <strong>稳态误差现身！</strong>现在不抖了，但因为重力一直往下拽，纯 P+D 永远停在 100m 下面一截（约 " + endY.toFixed(0) + "m）！把 <strong>Ki 拉到 0.4~0.8</strong> 补齐重力欠账！";
+      } else {
+        aha = "💡 <strong>微调三旋钮：</strong>推荐黄金组合参考 <code>Kp ≈ 1.5, Ki ≈ 0.5, Kd ≈ 1.4</code>，看曲线瞬间丝滑贴死在 100m 绿线上！";
+      }
+      document.getElementById("ahaBox").innerHTML = aha;
+    }
+
+    ["pSl", "iSl", "dSl"].forEach(id => document.getElementById(id).addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 4 && window.ToySDK) window.ToySDK.markCompleted();
+    }));
+    render();
+  </script>
+</body>
+</html>

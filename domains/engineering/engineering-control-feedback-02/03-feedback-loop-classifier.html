@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：生活中的反馈回路识别器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .row { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    select { padding: 8px 10px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-text); font-weight: 800; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔎 反馈回路识别器：打破“正反馈=好事、负反馈=坏事”的字面陷阱！</h1>
+        <p>判断下面 4 个现实世界现象分别属于<strong>正反馈（越演越烈）</strong>还是<strong>负反馈（自动收敛纠偏）</strong>！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div id="rows"></div>
+      <div style="font-weight:850;font-size:15px;margin-top:10px;">识别得分：<span id="scoreOut" style="color:var(--tax-primary)">0 / 4</span></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const ITEMS = [
+      { id: "i1", txt: "🏦 传言银行要倒闭 → 储户恐慌排队取钱 → 银行真的现金流枯竭", ans: "pos" },
+      { id: "i2", txt: "🧊 北极白冰融化 → 露出深色海水吸收更多热量 → 冰化得更快", ans: "pos" },
+      { id: "i3", txt: "🚽 抽水马桶水箱浮球上升 → 慢慢堵住进水口 → 水满自动停水", ans: "neg" },
+      { id: "i4", txt: "🍎 苹果大涨价 → 果农蜂拥扩大种植 → 明年丰收价格回落", ans: "neg" }
+    ];
+    const picks = { i1: "", i2: "", i3: "", i4: "" };
+
+    function setP(id, v) { picks[id] = v; render(); }
+
+    function render() {
+      document.getElementById("rows").innerHTML = ITEMS.map(it => `
+        <div class="row">
+          <div style="font-weight:800;font-size:13.5px;">${it.txt}</div>
+          <select onchange="setP('${it.id}', this.value)">
+            <option value="">-- 请判断 --</option>
+            <option value="pos" ${picks[it.id] === "pos" ? "selected" : ""}>正反馈（自我放大/失控）</option>
+            <option value="neg" ${picks[it.id] === "neg" ? "selected" : ""}>负反馈（自动纠偏/稳态）</option>
+          </select>
+        </div>
+      `).join("");
+
+      const ok = ITEMS.filter(it => picks[it.id] === it.ans).length;
+      document.getElementById("scoreOut").textContent = `${ok} / 4`;
+      document.getElementById("ahaBox").innerHTML = ok === 4
+        ? "💡 <strong>全对通关！</strong>看懂系统动力学的第一步：<strong>增长引擎与灾难崩盘背后都是正反馈，稳定秩序与长治久安背后全是负反馈！</strong>"
+        : "💡 <strong>顿悟时刻：</strong>把 4 个真实案例全部分类正确，从此一眼看穿任何复杂系统的底层驱动力！";
+      if (ok === 4 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+  </script>
+</body>
+</html>

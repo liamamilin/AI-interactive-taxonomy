@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：负反馈自动稳态仪 · 抗外界干扰</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.hot { background: var(--tax-red); border-color: var(--tax-red); }
+    .btn.cold { background: #0284c7; border-color: #0284c7; }
+    .meter { padding: 18px; border-radius: 16px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); text-align: center; }
+    .big { font-size: 36px; font-weight: 900; font-family: ui-monospace, monospace; color: var(--tax-green); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚖️ 负反馈自动稳态仪：外面零下 10℃ 还是 40℃ 酷暑，人体怎么总稳在 37.0℃？</h1>
+        <p>负反馈的核心永远只有一句话：<strong>发现偏离目标，就立刻施加一个“反方向”的修正动作</strong>！点击给人体施加冷热冲击试试！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn hot" onclick="shock(1.8)">🔥 走进 42℃ 桑拿房（+1.8℃ 冲击）</button>
+        <button class="btn cold" onclick="shock(-1.8)">❄️ 跳进冰水池（-1.8℃ 冲击）</button>
+      </div>
+      <div class="meter">
+        <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">当前核心体温（目标稳态：37.0℃）</div>
+        <div class="big" id="tempOut">37.0℃</div>
+        <div id="actOut" style="font-size:14px;font-weight:800;margin-top:8px;color:var(--tax-primary);">🟢 稳态平衡中，下丘脑安静巡航</div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let temp = 37.0;
+    const seen = new Set();
+
+    function shock(delta) {
+      temp = Math.max(34.5, Math.min(39.5, temp + delta));
+      seen.add(delta > 0 ? "hot" : "cold");
+      render();
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    setInterval(() => {
+      const err = 37.0 - temp;
+      if (Math.abs(err) > 0.04) {
+        temp += err * 0.22;
+        render();
+      } else if (temp !== 37.0) {
+        temp = 37.0;
+        render();
+      }
+    }, 240);
+
+    function render() {
+      document.getElementById("tempOut").textContent = temp.toFixed(1) + "℃";
+      let act = "🟢 稳态平衡中，下丘脑安静巡航";
+      if (temp > 37.2) act = "💦 负反馈纠偏中：血管扩张 + 大量排汗散热（反向降温！）";
+      else if (temp < 36.8) act = "🥶 负反馈纠偏中：血管收缩 + 肌肉打寒颤产热（反向升温！）";
+      document.getElementById("actOut").textContent = act;
+
+      document.getElementById("ahaBox").innerHTML = seen.size >= 2
+        ? "💡 <strong>负反馈 = 生命与工程系统的“定海神针”：</strong>工程学里的“负（Negative）”不是贬义词，而是指<strong>与偏差方向相反</strong>！正是靠无数个负反馈环，人体体温、血糖、飞机自动驾驶才能在狂风暴雨里稳如泰山！"
+        : "💡 <strong>顿悟时刻：</strong>分别点击 <strong>🔥 桑拿房</strong> 和 <strong>❄️ 冰水池</strong> 制造扰动，观察负反馈回路如何自动把体温精准拉回 37.0℃！";
+    }
+    render();
+  </script>
+</body>
+</html>

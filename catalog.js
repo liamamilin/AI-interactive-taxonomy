@@ -5,11 +5,11 @@ window.TAXONOMY_DATA = {
   "subtitle": "围绕“人”的 10 大认知领域 · 每个复杂概念 2 分钟玩懂",
   "stats": {
     "totalDomains": 10,
-    "litDomains": 2,
-    "totalTopics": 67,
-    "totalPlannedTopics": 208,
+    "litDomains": 3,
+    "totalTopics": 71,
+    "totalPlannedTopics": 204,
     "totalBlueprintTopics": 275,
-    "totalToys": 201
+    "totalToys": 213
   },
   "tracks": [
     {
@@ -2425,24 +2425,7 @@ window.TAXONOMY_DATA = {
         {
           "id": "control-feedback",
           "title": "1. 控制论与自动反馈（Control Theory & Feedback）",
-          "plannedTopics": [
-            {
-              "slug": "engineering-control-feedback-01",
-              "title": "PID 自动控制（无人机悬停调参）"
-            },
-            {
-              "slug": "engineering-control-feedback-02",
-              "title": "正反馈失控 vs 负反馈稳态"
-            },
-            {
-              "slug": "engineering-control-feedback-03",
-              "title": "反馈延迟与牛鞭效应（调淋浴水温）"
-            },
-            {
-              "slug": "engineering-control-feedback-04",
-              "title": "卡尔曼滤波（传感器融合）"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "flow-queues",
@@ -2555,11 +2538,208 @@ window.TAXONOMY_DATA = {
           ]
         }
       ],
-      "liveTopicCount": 0,
-      "plannedTopicCount": 24,
+      "liveTopicCount": 4,
+      "plannedTopicCount": 20,
       "blueprintTopicCount": 24,
-      "liveToyCount": 0,
-      "topics": []
+      "liveToyCount": 12,
+      "topics": [
+        {
+          "id": "engineering/engineering-control-feedback-01",
+          "slug": "engineering-control-feedback-01",
+          "domain": "engineering",
+          "branch": "control-feedback",
+          "order": 1,
+          "title": "PID 自动控制（无人机悬停调参）",
+          "icon": "🚁",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "一阵大风吹过，无人机、定速巡航和火箭怎么靠 P、I、D 三个神秘旋钮，瞬间稳稳钉在半空中纹丝不动？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-control-feedback-02",
+            "ai/ai-rl-embodied-04"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-control-feedback-01/01-pid-drone-hover.html",
+              "file": "01-pid-drone-hover.html",
+              "path": "./domains/engineering/engineering-control-feedback-01/01-pid-drone-hover.html",
+              "title": "PID 无人机悬停物理沙盘",
+              "icon": "🚁",
+              "archetype": "simulation",
+              "concept": "比例 P · 积分 I · 微分 D · 过冲震荡与阻尼稳定",
+              "summary": "亲手调节 Kp、Ki、Kd 三个旋钮，实时看 SVG 高度曲线与无人机如何从狂抖过冲变得稳如泰山！"
+            },
+            {
+              "id": "engineering/engineering-control-feedback-01/02-bangbang-vs-pid-race.html",
+              "file": "02-bangbang-vs-pid-race.html",
+              "path": "./domains/engineering/engineering-control-feedback-01/02-bangbang-vs-pid-race.html",
+              "title": "控温竞速：傻瓜开关（Bang-Bang）vs PID 平滑控温",
+              "icon": "🌡️",
+              "archetype": "race",
+              "concept": "开关控制滞回震荡 · 连续比例调节 · 节能与舒适度",
+              "summary": "对比老式冰箱“冷了停、热了满载开”的锯齿震荡，与变频 PID 空调提前收油门精准锁温的能耗和波动差距。"
+            },
+            {
+              "id": "engineering/engineering-control-feedback-01/03-pid-tuning-clinic.html",
+              "file": "03-pid-tuning-clinic.html",
+              "path": "./domains/engineering/engineering-control-feedback-01/03-pid-tuning-clinic.html",
+              "title": "PID 调参急诊室：一秒认出 P/I/D 谁调歪了",
+              "icon": "🩺",
+              "archetype": "scenario",
+              "concept": "稳态误差 · 剧烈超调震荡 · 响应迟缓排障",
+              "summary": "面对“永远差 5 厘米到不了目标”“来回剧烈画波浪”等 3 种经典病症曲线，开出正确的调参处方！"
+            }
+          ]
+        },
+        {
+          "id": "engineering/engineering-control-feedback-02",
+          "slug": "engineering-control-feedback-02",
+          "domain": "engineering",
+          "branch": "control-feedback",
+          "order": 2,
+          "title": "正反馈失控 vs 负反馈稳态",
+          "icon": "🔄",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "为什么麦克风凑近音箱瞬间尖叫刺耳（正反馈），而人体体温却能常年稳在 37℃（负反馈）？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-control-feedback-01",
+            "engineering/engineering-control-feedback-03"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-control-feedback-02/01-mic-howling-positive.html",
+              "file": "01-mic-howling-positive.html",
+              "path": "./domains/engineering/engineering-control-feedback-02/01-mic-howling-positive.html",
+              "title": "麦克风啸叫失控沙盘（正反馈增益 > 1）",
+              "icon": "🎤",
+              "archetype": "simulation",
+              "concept": "正反馈放大 · 环路增益 Loop Gain > 1 · 指数爆炸",
+              "summary": "调高音箱音量让环路增益突破 1.0 红线，亲眼看一丝微弱杂音如何在 10 个循环内滚雪球炸成刺耳啸叫！"
+            },
+            {
+              "id": "engineering/engineering-control-feedback-02/02-negative-homeostasis-sim.html",
+              "file": "02-negative-homeostasis-sim.html",
+              "path": "./domains/engineering/engineering-control-feedback-02/02-negative-homeostasis-sim.html",
+              "title": "负反馈自动稳态仪：体温、血糖与恒温器",
+              "icon": "⚖️",
+              "archetype": "spatial",
+              "concept": "负反馈纠偏 · 动态平衡 Homeostasis · 抗外界干扰",
+              "summary": "往系统里注入极端高温或严寒扰动，观察负反馈回路如何自动反向纠偏，把状态死死拉回稳态中轴线！"
+            },
+            {
+              "id": "engineering/engineering-control-feedback-02/03-feedback-loop-classifier.html",
+              "file": "03-feedback-loop-classifier.html",
+              "path": "./domains/engineering/engineering-control-feedback-02/03-feedback-loop-classifier.html",
+              "title": "生活中的反馈回路识别器（暴雪崩 vs 恒温）",
+              "icon": "🔎",
+              "archetype": "scenario",
+              "concept": "银行挤兑 / 病毒裂变 · 价格供需调节 · 识别系统动力学",
+              "summary": "快速辨别银行挤兑、冰川融化变暖、空调控温、股票踩踏分别属于正反馈还是负反馈！"
+            }
+          ]
+        },
+        {
+          "id": "engineering/engineering-control-feedback-03",
+          "slug": "engineering-control-feedback-03",
+          "domain": "engineering",
+          "branch": "control-feedback",
+          "order": 3,
+          "title": "反馈延迟与牛鞭效应（调淋浴水温）",
+          "icon": "🚿",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "为什么酒店洗澡调水温总是一会儿烫成猪头、一会儿冻成冰棍？超市多卖 10 箱啤酒，上游工厂怎么会狂产 200 箱？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-control-feedback-02",
+            "software/software-distributed-04"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-control-feedback-03/01-shower-delay-oscillation.html",
+              "file": "01-shower-delay-oscillation.html",
+              "path": "./domains/engineering/engineering-control-feedback-03/01-shower-delay-oscillation.html",
+              "title": "酒店淋浴调温灾难（水管延迟导致的剧烈震荡）",
+              "icon": "🚿",
+              "archetype": "simulation",
+              "concept": "纯滞后时间 Dead Time · 过度修正 · 相位滞后震荡",
+              "summary": "调节热水器水管长度（延迟秒数）与调温手速，亲眼看“延迟 + 性子急”如何把原本平稳的负反馈变成冰火两重天！"
+            },
+            {
+              "id": "engineering/engineering-control-feedback-03/02-bullwhip-supply-chain.html",
+              "file": "02-bullwhip-supply-chain.html",
+              "path": "./domains/engineering/engineering-control-feedback-03/02-bullwhip-supply-chain.html",
+              "title": "供应链牛鞭效应放大器（啤酒游戏）",
+              "icon": "📦",
+              "archetype": "spatial",
+              "concept": "牛鞭效应 Bullwhip Effect · 信息延迟 · 恐慌囤货逐级放大",
+              "summary": "在消费者端制造仅仅 +10% 的微小需求波动，看订单经过零售→批发→工厂三级延迟后如何滚雪球炸成 +140% 产能过剩！"
+            },
+            {
+              "id": "engineering/engineering-control-feedback-03/03-delay-stabilizer-builder.html",
+              "file": "03-delay-stabilizer-builder.html",
+              "path": "./domains/engineering/engineering-control-feedback-03/03-delay-stabilizer-builder.html",
+              "title": "驯服延迟工具箱：小步慢调与共享实时数据",
+              "icon": "🧰",
+              "archetype": "builder",
+              "concept": "降低反馈增益 · 消除信息孤岛 · 前馈控制 Feedforward",
+              "summary": "组装“小步慢调”“共享 POS 实时销量”与“缩短交付周期”三件套，把剧烈震荡的供应链瞬间拉直！"
+            }
+          ]
+        },
+        {
+          "id": "engineering/engineering-control-feedback-04",
+          "slug": "engineering-control-feedback-04",
+          "domain": "engineering",
+          "branch": "control-feedback",
+          "order": 4,
+          "title": "卡尔曼滤波（传感器融合）",
+          "icon": "📡",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "GPS 信号乱跳、加速度计越算越漂，阿波罗登月飞船和自动驾驶汽车怎么把两个“不靠谱的传感器”融合成精准定位？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/ai-rl-embodied-05",
+            "engineering/engineering-control-feedback-01"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-control-feedback-04/01-kalman-gain-fusion.html",
+              "file": "01-kalman-gain-fusion.html",
+              "path": "./domains/engineering/engineering-control-feedback-04/01-kalman-gain-fusion.html",
+              "title": "卡尔曼增益（K）加权融合沙盘",
+              "icon": "🎯",
+              "archetype": "simulation",
+              "concept": "预测 Prediction · 观测 Measurement · 卡尔曼增益 K · 高斯分布相乘",
+              "summary": "调节“物理预测噪声”与“GPS 观测噪声”，看卡尔曼滤波如何自动算出最优权重 K，融出比两者都更窄更准的绿色曲线！"
+            },
+            {
+              "id": "engineering/engineering-control-feedback-04/02-tunnel-gps-loss-scenario.html",
+              "file": "02-tunnel-gps-loss-scenario.html",
+              "path": "./domains/engineering/engineering-control-feedback-04/02-tunnel-gps-loss-scenario.html",
+              "title": "进隧道 GPS 断网演练：纯 GPS vs 传感器融合",
+              "icon": "🚇",
+              "archetype": "scenario",
+              "concept": "传感器互补 · IMU 惯性推算 · 隧道航位推算 Dead Reckoning",
+              "summary": "开车驶入信号全无的隧道！切换纯 GPS 与卡尔曼融合导航，亲眼看车标如何在断网时丝滑前进不乱飘。"
+            },
+            {
+              "id": "engineering/engineering-control-feedback-04/03-noisy-signal-smoother.html",
+              "file": "03-noisy-signal-smoother.html",
+              "path": "./domains/engineering/engineering-control-feedback-04/03-noisy-signal-smoother.html",
+              "title": "一维噪点轨迹追踪演示（SVG 实时滤波）",
+              "icon": "📈",
+              "archetype": "spatial",
+              "concept": "去噪追踪 · 滞后 vs 平滑权衡 · 实时状态估计",
+              "summary": "拖动滤波信任度 K，实时对比满屏乱跳的红色 GPS 原始点与贴着真实轨迹走的绿色卡尔曼估计曲线！"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "ai",

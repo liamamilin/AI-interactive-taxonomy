@@ -1,0 +1,33 @@
+{
+  "domain": "engineering",
+  "branch": "control-feedback",
+  "order": 4,
+  "title": "卡尔曼滤波（传感器融合）",
+  "icon": "📡",
+  "subtitle": "GPS 信号乱跳、加速度计越算越漂，阿波罗登月飞船和自动驾驶汽车怎么把两个“不靠谱的传感器”融合成精准定位？",
+  "difficulty": "进阶",
+  "related": ["ai/ai-rl-embodied-05", "engineering/engineering-control-feedback-01"],
+  "toys": {
+    "01-kalman-gain-fusion.html": {
+      "title": "卡尔曼增益（K）加权融合沙盘",
+      "icon": "🎯",
+      "archetype": "simulation",
+      "concept": "预测 Prediction · 观测 Measurement · 卡尔曼增益 K · 高斯分布相乘",
+      "summary": "调节“物理预测噪声”与“GPS 观测噪声”，看卡尔曼滤波如何自动算出最优权重 K，融出比两者都更窄更准的绿色曲线！"
+    },
+    "02-tunnel-gps-loss-scenario.html": {
+      "title": "进隧道 GPS 断网演练：纯 GPS vs 传感器融合",
+      "icon": "🚇",
+      "archetype": "scenario",
+      "concept": "传感器互补 · IMU 惯性推算 · 隧道航位推算 Dead Reckoning",
+      "summary": "开车驶入信号全无的隧道！切换纯 GPS 与卡尔曼融合导航，亲眼看车标如何在断网时丝滑前进不乱飘。"
+    },
+    "03-noisy-signal-smoother.html": {
+      "title": "一维噪点轨迹追踪演示（SVG 实时滤波）",
+      "icon": "📈",
+      "archetype": "spatial",
+      "concept": "去噪追踪 · 滞后 vs 平滑权衡 · 实时状态估计",
+      "summary": "拖动滤波信任度 K，实时对比满屏乱跳的红色 GPS 原始点与贴着真实轨迹走的绿色卡尔曼估计曲线！"
+    }
+  }
+}

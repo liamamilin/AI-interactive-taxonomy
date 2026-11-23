@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：一维噪点轨迹追踪演示 · SVG 实时滤波</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 210px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📈 噪点轨迹追踪：从满屏乱跳的红点里，提炼出紧贴真相的平滑绿线！</h1>
+        <p>虚线是物体真实路径，红点是带剧烈噪点的传感器读数。拖动卡尔曼增益 <code>K</code>（信任新测量值的比例），在“跟噪点狂抖”与“反应太慢滞后”之间找到最优平衡！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:850;font-size:14.5px;">🎛️ 滤波增益 K（信任传感器读数权重）：<span id="kVal" style="color:var(--tax-primary)">0.30</span></label>
+      <input id="kSl" type="range" min="3" max="98" value="30" style="width:100%;margin-top:8px;" />
+      <div class="stage"><svg viewBox="0 0 540 200" id="trSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const TRUE_Y = Array.from({ length: 32 }, (_, i) => 100 - Math.sin(i * 0.22) * 52);
+    const NOISY = TRUE_Y.map((y, i) => y + Math.sin(i * 7.3) * 26 + Math.cos(i * 3.1) * 14);
+    let drags = 0;
+
+    function render() {
+      const K = parseInt(document.getElementById("kSl").value, 10) / 100;
+      document.getElementById("kVal").textContent = K.toFixed(2);
+
+      const est = [NOISY[0]];
+      for (let i = 1; i < NOISY.length; i++) {
+        est.push(est[i - 1] + K * (NOISY[i] - est[i - 1]));
+      }
+      const mse = Math.sqrt(est.reduce((acc, v, i) => acc + Math.pow(v - TRUE_Y[i], 2), 0) / est.length);
+
+      const toX = i => 24 + i * 16;
+      const truePts = TRUE_Y.map((y, i) => `${toX(i)},${y.toFixed(1)}`).join(" ");
+      const estPts = est.map((y, i) => `${toX(i)},${y.toFixed(1)}`).join(" ");
+      let dots = NOISY.map((y, i) => `<circle cx="${toX(i)}" cy="${Math.max(15, Math.min(185, y)).toFixed(1)}" r="3.5" fill="#ef4444" opacity="0.75"/>`).join("");
+
+      let s = `<polyline points="${truePts}" fill="none" stroke="#94a3b8" stroke-dasharray="5,4" stroke-width="2"/>`;
+      s += dots;
+      s += `<polyline points="${estPts}" fill="none" stroke="#10b981" stroke-width="3.5" stroke-linejoin="round"/>`;
+      s += `<text x="270" y="18" text-anchor="middle" fill="#6ee7b7" font-size="11.5" font-weight="800">灰虚线=真相 · 红点=噪点测量 · 绿线=滤波追踪（均方根误差 RMSE = ${mse.toFixed(1)}）</text>`;
+      document.getElementById("trSvg").innerHTML = s;
+
+      document.getElementById("ahaBox").innerHTML = K > 0.7
+        ? "💡 <strong>K 太大（盲信噪点）：</strong>绿线几乎跟着红点上蹿下跳，起不到去噪作用！"
+        : K < 0.12
+          ? "💡 <strong>K 太小（过度固执）：</strong>绿线虽然极度平滑，但严重滞后于真实波峰，反应慢半拍！"
+          : "💡 <strong>黄金滤波区间（K ≈ 0.25~0.45）：</strong>既滤掉了大部分随机跳动毛刺，又紧跟真实趋势！真实卡尔曼滤波的伟大之处就在于——它每一步都在<strong>自动算出最完美的动态 K</strong>！";
+    }
+
+    document.getElementById("kSl").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

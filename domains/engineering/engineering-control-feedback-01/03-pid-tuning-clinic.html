@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：PID 调参急诊室</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .case { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    select { padding: 8px 10px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-text); font-weight: 800; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🩺 PID 调参急诊室：机器抽风了，该拧 P、I、D 哪颗旋钮？</h1>
+        <p>为下面 3 个经典工控故障开出最对症的调参处方，2 分钟掌握工程师口诀！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div id="cases"></div>
+      <div style="font-weight:850;font-size:15px;margin-top:10px;">诊断得分：<span id="scoreOut" style="color:var(--tax-primary)">0 / 3</span></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const CASES = [
+      { id: "c1", txt: "① 汽车定速巡航反应慢吞吞，踩了半天油门才慢悠悠加速", ans: "P" },
+      { id: "c2", txt: "② 遇到持续上坡阻力，车速永远稳稳停在 96km/h，死活够不到 100", ans: "I" },
+      { id: "c3", txt: "③ 无人机冲到目标高度刹不住车，上下剧烈超调晃个不停", ans: "D" }
+    ];
+    const picks = { c1: "", c2: "", c3: "" };
+
+    function setPick(id, v) { picks[id] = v; render(); }
+
+    function render() {
+      document.getElementById("cases").innerHTML = CASES.map(c => `
+        <div class="case">
+          <div style="font-weight:800;font-size:14px;">${c.txt}</div>
+          <select onchange="setPick('${c.id}', this.value)">
+            <option value="">-- 选调参处方 --</option>
+            <option value="P" ${picks[c.id] === "P" ? "selected" : ""}>调大 P（增强当前响应推力）</option>
+            <option value="I" ${picks[c.id] === "I" ? "selected" : ""}>调大 I（积分消除持久稳态误差）</option>
+            <option value="D" ${picks[c.id] === "D" ? "selected" : ""}>调大 D（增加微分阻尼防过冲震荡）</option>
+          </select>
+        </div>
+      `).join("");
+
+      const ok = CASES.filter(c => picks[c.id] === c.ans).length;
+      document.getElementById("scoreOut").textContent = `${ok} / 3`;
+      document.getElementById("ahaBox").innerHTML = ok === 3
+        ? "💡 <strong>满分控制工程师！</strong>背下这句万能口诀：<strong>P 管现在（快不快）、I 管过去（准不准）、D 管未来（稳不稳）</strong>！"
+        : "💡 <strong>顿悟时刻：</strong>把 3 个故障全部匹配到对应的 P / I / D 旋钮上！";
+      if (ok === 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+  </script>
+</body>
+</html>

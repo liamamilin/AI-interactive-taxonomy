@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>卡尔曼滤波（传感器融合）· 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📡 卡尔曼滤波（传感器融合）</h1>
+        <p>GPS 信号乱跳、加速度计越算越漂，阿波罗登月飞船和自动驾驶汽车怎么把两个“不靠谱的传感器”融合成精准定位？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-kalman-gain-fusion.html">
+        <div class="hub-icon">🎯</div>
+        <div class="hub-tag">玩具 01 · 融合沙盘（Simulation）</div>
+        <div class="hub-title">卡尔曼增益（K）加权融合沙盘</div>
+        <div class="hub-desc">调节预测误差与 GPS 观测误差，看两条宽胖钟形曲线如何相乘融出更窄更精准的融合估计！</div>
+      </a>
+      <a class="hub-card" href="./02-tunnel-gps-loss-scenario.html">
+        <div class="hub-icon">🚇</div>
+        <div class="hub-tag">玩具 02 · 隧道演练（Scenario）</div>
+        <div class="hub-title">进隧道 GPS 断网演练：纯 GPS vs 融合导航</div>
+        <div class="hub-desc">体验进隧道失联时 IMU 惯性预测如何无缝接棒、出隧道瞬间用 GPS 校准漂移的绝妙配合。</div>
+      </a>
+      <a class="hub-card" href="./03-noisy-signal-smoother.html">
+        <div class="hub-icon">📈</div>
+        <div class="hub-tag">玩具 03 · 轨迹滤波（Spatial）</div>
+        <div class="hub-title">一维噪点轨迹追踪演示（SVG 滤波）</div>
+        <div class="hub-desc">调节增益 K 观察估计轨迹如何在“跟着噪点狂抖”与“反应滞后太慢”之间找到黄金最优解。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

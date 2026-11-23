@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：酒店淋浴调温灾难 · 延迟震荡沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    @media (max-width: 700px) { .ctrls { grid-template-columns: 1fr; } }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; }
+    svg { width: 100%; height: 210px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚿 酒店淋浴调温灾难：为什么越心急拧水龙头，越是在冰水和开水间疯狂横跳？</h1>
+        <p>目标舒适水温 <strong>40℃</strong>。拖动 <strong>水管延迟秒数</strong> 与 <strong>你拧龙头的急躁程度</strong>，观察水温 SVG 波形如何从平滑变成剧烈冰火震荡！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <div>
+          <label style="font-weight:850;font-size:14px;">🚰 水管反馈延迟：<span id="dVal" style="color:var(--tax-primary)">4</span> 秒</label>
+          <input id="dSl" type="range" min="0" max="8" value="4" style="width:100%;margin-top:6px;" />
+        </div>
+        <div>
+          <label style="font-weight:850;font-size:14px;">😤 拧龙头急躁度（增益）：<span id="gVal" style="color:var(--tax-amber)">0.65</span></label>
+          <input id="gSl" type="range" min="10" max="100" value="65" style="width:100%;margin-top:6px;" />
+        </div>
+      </div>
+
+      <div class="stage"><svg viewBox="0 0 540 200" id="shSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const delay = parseInt(document.getElementById("dSl").value, 10);
+      const gain = parseInt(document.getElementById("gSl").value, 10) / 100;
+      document.getElementById("dVal").textContent = delay;
+      document.getElementById("gVal").textContent = gain.toFixed(2);
+
+      // Simulate discrete delay feedback loop around 40C
+      const hist = Array(10).fill(22);
+      const out = [];
+      let valve = 22;
+      for (let t = 0; t < 48; t++) {
+        const felt = hist[hist.length - 1 - delay];
+        const err = 40 - felt;
+        valve = Math.max(10, Math.min(70, valve + err * gain * 0.45));
+        hist.push(valve);
+        out.push(felt);
+      }
+
+      const toY = c => 185 - ((c - 10) / 60) * 165;
+      const poly = out.map((c, i) => `${(30 + i * 10.4).toFixed(1)},${toY(c).toFixed(1)}`).join(" ");
+      const swing = Math.max(...out.slice(-16)) - Math.min(...out.slice(-16));
+      const wild = swing > 12;
+
+      let s = `<line x1="30" y1="${toY(40).toFixed(1)}" x2="520" y2="${toY(40).toFixed(1)}" stroke="#10b981" stroke-dasharray="6,4" stroke-width="2"/>`;
+      s += `<text x="36" y="${(toY(40) - 6).toFixed(1)}" fill="#34d399" font-size="11" font-weight="800">理想水温 40℃</text>`;
+      s += `<polyline points="${poly}" fill="none" stroke="${wild ? "#ef4444" : "#38bdf8"}" stroke-width="3.5" stroke-linejoin="round"/>`;
+      s += `<text x="515" y="22" text-anchor="end" fill="${wild ? "#fca5a5" : "#6ee7b7"}" font-size="12" font-weight="800">${wild ? "🥵🥶 冰火两重天剧烈震荡！" : "✅ 温柔收敛至 40℃ 舒适区"}</text>`;
+      document.getElementById("shSvg").innerHTML = s;
+
+      document.getElementById("ahaBox").innerHTML = wild
+        ? "💡 <strong>负反馈 + 长延迟 + 大步猛调 = 剧烈震荡！</strong>热水还在管子里没流出来，你因为嫌冷已经把龙头拧到最热，3 秒后开水喷涌而出又逼得你猛拧最冷！把<strong>急躁度降到 0.25 以下（小步慢调）</strong>立刻稳住！"
+        : "💡 <strong>驯服延迟的铁律：</strong>面对存在信息滞后的系统（淋浴、央行加息、公司裁员扩招），<strong>延迟越长，单次修正动作就必须越轻柔耐心</strong>！";
+    }
+
+    ["dSl", "gSl"].forEach(id => document.getElementById(id).addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }));
+    render();
+  </script>
+</body>
+</html>

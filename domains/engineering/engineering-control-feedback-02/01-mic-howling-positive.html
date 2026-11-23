@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：麦克风啸叫失控沙盘 · 正反馈增益</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 200px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎤 麦克风啸叫（正反馈）：为什么音量只调大了一毫米，瞬间就刺耳爆音？</h1>
+        <p>声音进入话筒 → 音箱放大 <code>G</code> 倍 → 再被话筒收进去放大 <code>G</code> 倍！把环路增益 <code>G</code> 拖过 <strong>1.0</strong> 临界线看看指数爆炸！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">🔊 环路增益 Gain (G)：<span id="gVal" style="color:var(--tax-primary)">0.85</span>（<code>G &lt; 1</code> 衰减消失，<code>G &gt; 1</code> 指数啸叫！）</label>
+      <input id="gSlider" type="range" min="50" max="150" value="85" style="width:100%;margin-top:8px;" />
+      <div class="stage"><svg viewBox="0 0 540 190" id="fbSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const g = parseInt(document.getElementById("gSlider").value, 10) / 100;
+      document.getElementById("gVal").textContent = g.toFixed(2);
+      const pts = [];
+      let v = 10;
+      for (let i = 0; i < 16; i++) {
+        pts.push(Math.min(100, v));
+        v *= g;
+      }
+      const boom = g > 1.0;
+      let s = `<line x1="30" y1="168" x2="515" y2="168" stroke="#334155" stroke-width="2"/>`;
+      pts.forEach((val, i) => {
+        const h = (val / 100) * 140;
+        const x = 36 + i * 30;
+        s += `<rect x="${x}" y="${(168 - h).toFixed(1)}" width="20" height="${h.toFixed(1)}" rx="4" fill="${boom && val >= 80 ? "#ef4444" : boom ? "#f59e0b" : "#10b981"}"/>`;
+      });
+      s += `<text x="270" y="22" text-anchor="middle" fill="${boom ? "#fca5a5" : "#6ee7b7"}" font-size="12.5" font-weight="800">${boom ? "🚨 正反馈失控！10 个循环内音量瞬间冲顶爆音啸叫！" : "✅ 增益 < 1：回声逐轮衰减消失，安静清晰"}</text>`;
+      document.getElementById("fbSvg").innerHTML = s;
+
+      document.getElementById("ahaBox").innerHTML = boom
+        ? "💡 <strong>正反馈的本质是“自我强化、强者愈强/坏者愈坏”：</strong>工程学里的“正反馈”绝不等于表扬！只要环路增益 <code>G &gt; 1</code>，一粒尘埃般的噪声就会在几毫秒内被 <code>Gⁿ</code> 放大到系统崩溃（核链式反应、金融踩踏同理）！"
+        : "💡 <strong>顿悟时刻：</strong>把环路增益 G 轻轻往右拖过 <strong>1.05</strong>，亲眼看温和衰减的绿柱子瞬间翻红炸屏！";
+    }
+    document.getElementById("gSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

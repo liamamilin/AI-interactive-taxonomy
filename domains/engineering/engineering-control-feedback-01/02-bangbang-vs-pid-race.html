@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：控温竞速 · 傻瓜开关 vs PID 变频</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .duel { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; line-height: 1.65; font-size: 13.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🌡️ 定频开关 vs PID 变频空调：为什么变频空调既不忽冷忽热，还更省电？</h1>
+        <p>设定室温目标 <strong>26.0℃</strong>。切换对比老式“非 0 即 100% 满载开关（Bang-Bang）”与现代“PID 连续变频”的表现！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="mBang" onclick="pick('bang')">🔌 定频开关（Bang-Bang Control）</button>
+        <button class="btn" id="mPid" onclick="pick('pid')">⚡ 变频 PID 连续控制</button>
+      </div>
+      <div class="duel" id="duelBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["bang"]);
+    function pick(m) {
+      seen.add(m);
+      document.getElementById("mBang").classList.toggle("active", m === "bang");
+      document.getElementById("mPid").classList.toggle("active", m === "pid");
+      const pid = m === "pid";
+      document.getElementById("duelBox").innerHTML = pid
+        ? `
+          <div class="card" style="border-color:var(--tax-green);"><strong>🌡️ 室温波动：25.9℃ ~ 26.1℃</strong><br>离目标越近，压缩机功率按比例丝滑收油门，最后只用 15% 微功率稳稳抵消房间散热！</div>
+          <div class="card"><strong>⚡ 耗电与噪音：极省电 · 极安静</strong><br>避免压缩机频繁启停的峰值浪涌电流，体感丝滑如春风！</div>
+        `
+        : `
+          <div class="card" style="border-color:var(--tax-red);"><strong>🌡️ 室温波动：24.2℃ ⇄ 27.8℃ 锯齿狂摆</strong><br>高于 27℃ 就 100% 狂吹冷风，冷到 24.5℃ 才突然停机，人盖被子热、踢被子冷！</div>
+          <div class="card"><strong>⚡ 耗电与噪音：高耗电 · 频繁启停轰鸣</strong><br>每次压缩机从 0 重新拉满启动都要消耗巨大启动电流，费电又伤机械寿命！</div>
+        `;
+      document.getElementById("ahaBox").innerHTML = pid
+        ? "💡 <strong>连续反馈（PID）的优雅：</strong>根据误差大小“按需给力”而不是一刀切地全开全关，是现代变频空调、咖啡机恒温与汽车巡航系统的核心价值！"
+        : "💡 <strong>Bang-Bang 控制的局限：</strong>最便宜简单（一个双金属片温控器就行），但天生逃不掉冷热过冲的锯齿震荡！切换到 <strong>⚡ 变频 PID</strong> 对比一下。";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("bang");
+  </script>
+</body>
+</html>

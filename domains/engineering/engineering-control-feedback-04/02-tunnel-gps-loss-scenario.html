@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：进隧道 GPS 断网演练 · 传感器融合</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; line-height: 1.7; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚇 进隧道 GPS 失联演练：手机没卫星信号了，导航怎么还知道你在哪？</h1>
+        <p>车辆以 80km/h 钻进 3 公里长的海底隧道（GPS 彻底中断）。切换下面三种定位策略看导航车标怎么走！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="m1" onclick="pick(1)">🛰️ 仅用 GPS 卫星定位</button>
+        <button class="btn" id="m2" onclick="pick(2)">🧭 仅用 IMU 陀螺仪 + 车速推算</button>
+        <button class="btn" id="m3" onclick="pick(3)">✨ 卡尔曼融合（IMU 预测 + GPS 校准）</button>
+      </div>
+      <div class="box" id="outBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const DATA = {
+      1: {
+        txt: "💥 <strong>纯 GPS 瞬间趴窝：</strong>刚进隧道口信号归零，导航箭头卡在洞口一动不动，你完全错过隧道里的岔路口！",
+        aha: "💡 <strong>GPS 的优缺点：</strong>长期绝不累积漂移，但频率低、遮挡即失联、高楼间多径反射乱跳。"
+      },
+      2: {
+        txt: "⚠️ <strong>纯 IMU 越跑越歪（积分漂移）：</strong>进隧道头 10 秒很丝滑，但加速度计的微小零偏误差随时间平方累积，开出 10 公里后车标已经飘到隔壁海里去了！",
+        aha: "💡 <strong>IMU 惯导的优缺点：</strong>100Hz 极高频、不怕任何遮挡，但天生会随时间累积漂移！"
+      },
+      3: {
+        txt: "✅ <strong>卡尔曼滤波黄金搭档：</strong>隧道内 GPS 噪声设为 ∞（K→0），自动 100% 信赖 IMU 平滑航位推算；一出隧道口搜到卫星，K 立刻抬高，一秒把刚才累积的 3 米小漂移温柔校准归零！",
+        aha: "💡 <strong>传感器融合的哲学：</strong>世界上没有完美无缺的单一传感器！卡尔曼滤波让<strong>“短跑冠军 IMU”和“长跑冠军 GPS”取长补短</strong>，造就了高德/Google 隧道导航与自动驾驶定位奇迹！"
+      }
+    };
+    const seen = new Set([1]);
+    function pick(n) {
+      seen.add(n);
+      [1, 2, 3].forEach(i => document.getElementById("m" + i).classList.toggle("active", i === n));
+      document.getElementById("outBox").innerHTML = DATA[n].txt;
+      document.getElementById("ahaBox").innerHTML = DATA[n].aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(1);
+  </script>
+</body>
+</html>

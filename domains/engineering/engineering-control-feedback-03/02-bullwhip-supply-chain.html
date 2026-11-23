@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：供应链牛鞭效应放大器 · 啤酒游戏</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+    @media (max-width: 720px) { .tiers { grid-template-columns: 1fr 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; text-align: center; }
+    .bar-wrap { height: 110px; display: flex; align-items: flex-end; justify-content: center; margin: 10px 0; }
+    .bar { width: 42px; border-radius: 8px 8px 0 0; transition: height 0.25s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📦 牛鞭效应（Bullwhip Effect）：超市只多卖了 10% 啤酒，工厂怎么扩产了 150%？</h1>
+        <p>就像甩牛鞭时手腕只轻轻抖一下，鞭梢却划出巨大弧度！拖动终端消费者的微小需求波动，看订单沿着供应链逐级疯狂放大！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">🛒 终端消费者需求突增：<span id="dVal" style="color:var(--tax-primary)">+10%</span>（平时基准：100 箱/周）</label>
+      <input id="dSl" type="range" min="0" max="30" value="10" style="width:100%;margin-top:8px;" />
+      <div class="tiers" id="tierRow"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const inc = parseInt(document.getElementById("dSl").value, 10);
+      document.getElementById("dVal").textContent = "+" + inc + "%";
+      const stages = [
+        { name: "🛒 消费者需求", pct: inc, col: "var(--tax-green)", note: "真实微幅增长" },
+        { name: "🏪 零售商订货", pct: Math.round(inc * 2.2), col: "var(--tax-primary)", note: "怕断货，多囤安全库存" },
+        { name: "🚚 批发商订货", pct: Math.round(inc * 4.8), col: "var(--tax-amber)", note: "误以为爆火，加倍囤货" },
+        { name: "🏭 上游工厂排产", pct: Math.round(inc * 9.5), col: "var(--tax-red)", note: "建新产线，随后库存崩盘！" }
+      ];
+      document.getElementById("tierRow").innerHTML = stages.map(st => {
+        const h = Math.min(100, 18 + st.pct * 0.42);
+        return `
+          <div class="card">
+            <div style="font-weight:850;font-size:13.5px;">${st.name}</div>
+            <div class="bar-wrap"><div class="bar" style="height:${h}%;background:${st.col};"></div></div>
+            <div style="font-family:monospace;font-weight:900;font-size:16px;color:${st.col};">+${st.pct}%</div>
+            <div style="font-size:11.5px;color:var(--tax-muted);margin-top:4px;">${st.note}</div>
+          </div>
+        `;
+      }).join("");
+
+      document.getElementById("ahaBox").innerHTML = inc >= 15
+        ? `💡 <strong>牛鞭效应大爆发！</strong>消费者只多买了 <strong>+${inc}%</strong>，但因为每一级都看不到真实终端销量、又都有配送延迟，层层加码防断货后，传到上游芯片/啤酒工厂已经扭曲成了 <strong>+${Math.round(inc * 9.5)}%</strong> 的假繁荣——紧接着就是全行业产能过剩大暴雷！`
+        : "💡 <strong>顿悟时刻：</strong>把消费者微小波动拉到 <strong>+15% ~ +25%</strong>，亲眼看鞭梢（上游工厂）的惊人振幅！";
+    }
+    document.getElementById("dSl").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>
