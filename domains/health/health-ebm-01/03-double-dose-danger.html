@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚠️ 漏服后翻倍补吃？肝肾峰值冲击测试</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚠️ 漏服后翻倍补吃？肝肾峰值冲击测试</h1><p>误区：昨天忘了吃药，今天早上干脆一口气吃两顿的量补上，保证一天总药量不变。真相：对于降糖药、抗凝药或抗心律失常药，一次吃两倍会直接冲破中毒线引发低血糖昏迷或大出血！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>药物安全宽度 (治疗指数 TI)</span><span id="vTi">窄窗高危药</span></label><input type="range" id="sTi" min="15" max="80" value="25" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>补服剂量倍数</span><span id="vMul">2.0x (吃两顿)</span></label><input type="range" id="sMul" min="10" max="20" step="2" value="20" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">中毒红线阈值</div><div class="k-val" id="kTox">—</div></div>
+        <div class="kpi"><div class="k-lbl">补服瞬间峰值</div><div class="k-val" id="kCur" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const ti=+document.getElementById('sTi').value, mul=+document.getElementById('sMul').value/10;
+  document.getElementById('vTi').textContent=ti<35?'窄治疗窗 (高危)':(ti<60?'中等':'宽安全窗');
+  document.getElementById('vMul').textContent=mul.toFixed(1)+'x';
+  const toxLine=50+ti;
+  const peak=Math.round(50*mul);
+  const bad=peak>toxLine;
+  document.getElementById('kTox').textContent=toxLine+' 单位';
+  document.getElementById('kCur').textContent=peak+' 单位'+(bad?' (中毒!)':' (安全)');
+  document.getElementById('kCur').style.color=bad?'#ef4444':'#059669';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#64748b">药物中毒红线上限: ${toxLine} 单位</text>
+    <rect x="20" y="44" width="${toxLine*4}" height="24" rx="6" fill="#64748b" opacity="0.4"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${bad?'#ef4444':'#059669'}">当前 ${mul.toFixed(1)}x 补服峰值: ${peak} 单位</text>
+    <rect x="20" y="112" width="${Math.min(540,peak*4)}" height="24" rx="6" fill="${bad?'#ef4444':'#059669'}"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">医学铁律：漏服时间已过半时，宁可跳过这一顿也绝不翻倍补服！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>记住药理学常识：对于治疗窗窄的药物（红线 ${toxLine}），一次吃两倍直接把峰值推到 ${peak} 导致急性毒性反应；漏服时请按“过半跳过、未过半单倍补”原则处理！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

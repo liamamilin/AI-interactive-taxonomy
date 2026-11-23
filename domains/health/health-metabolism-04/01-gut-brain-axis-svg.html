@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧠 脑肠轴生态与神经递质工厂（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧠 脑肠轴生态与神经递质工厂（SVG）</h1><p>误区：肠道只是消化吸收营养的管道，情绪和食欲全归大脑管。真相：肠道住着能分泌血清素、GABA 并通过迷走神经直接给大脑发指令的“第二大脑”菌群！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>每日蔬菜/益生元纤维摄入</span><span id="vFib">25 克</span></label><input type="range" id="sFib" min="5" max="45" value="25" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>超加工食品/高糖冲击度</span><span id="vJunk">35%</span></label><input type="range" id="sJunk" min="0" max="100" value="35" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">益生菌丰度与肠壁完整度</div><div class="k-val" id="kGut" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">血清素与情绪稳定度</div><div class="k-val" id="kMood" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const fib=+document.getElementById('sFib').value, junk=+document.getElementById('sJunk').value;
+  document.getElementById('vFib').textContent=fib+' 克'; document.getElementById('vJunk').textContent=junk+'%';
+  const gut=Math.max(15, Math.min(98, Math.round(45 + fib*1.4 - junk*0.42)));
+  const mood=Math.max(20, Math.min(96, Math.round(gut*0.85 + 10)));
+  document.getElementById('kGut').textContent=gut+' 分';
+  document.getElementById('kMood').textContent=mood+' 分';
+  document.getElementById('svg').innerHTML=`
+    <rect x="30" y="45" width="160" height="90" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/>
+    <text x="110" y="82" text-anchor="middle" font-size="14" font-weight="850" fill="#047857">🦠 肠道生态</text>
+    <text x="110" y="108" text-anchor="middle" font-size="13" font-weight="800" fill="#059669">完整度: ${gut} 分</text>
+    <line x1="190" y1="90" x2="380" y2="90" stroke="#0284c7" stroke-width="${Math.max(2,gut/20)}"/>
+    <text x="285" y="75" text-anchor="middle" font-size="12" font-weight="800" fill="#0284c7">迷走神经 + 血清素信号</text>
+    <rect x="380" y="45" width="180" height="90" rx="14" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5"/>
+    <text x="470" y="82" text-anchor="middle" font-size="14" font-weight="850" fill="#0369a1">🧠 大脑情绪</text>
+    <text x="470" y="108" text-anchor="middle" font-size="13" font-weight="800" fill="#0284c7">稳定度: ${mood} 分</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>益生菌以膳食纤维为口粮，发酵产出的短链脂肪酸（SCFA）不仅能修复肠漏屏障，还能顺着迷走神经把情绪稳在 <strong>${mood} 分</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

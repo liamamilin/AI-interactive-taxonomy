@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>☀️ 视交叉上核与褪黑素节律曲线（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>☀️ 视交叉上核与褪黑素节律曲线（SVG）</h1><p>误区：只要每天睡够 8 小时，凌晨 3 点睡到上午 11 点和晚上 11 点睡到早上 7 点毫无区别。真相：褪黑素和皮质醇按昼夜节律工作，睡前蓝光会直接欺骗大脑“现在还是中午”并推迟整套激素节律！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>晨间户外自然光暴露</span><span id="vSun">20 分钟</span></label><input type="range" id="sSun" min="0" max="60" value="20" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>睡前 2 小时蓝光屏幕强度</span><span id="vBlu">70%</span></label><input type="range" id="sBlu" min="0" max="100" value="70" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">褪黑素分泌峰值</div><div class="k-val" id="kMel" style="color:#8b5cf6;">—</div></div>
+        <div class="kpi"><div class="k-lbl">入睡时钟相位偏移</div><div class="k-val" id="kLag" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const sun=+document.getElementById('sSun').value, blu=+document.getElementById('sBlu').value;
+  document.getElementById('vSun').textContent=sun+' 分钟'; document.getElementById('vBlu').textContent=blu+'%';
+  const peak=Math.max(15, Math.min(98, Math.round(55 + sun*0.65 - blu*0.48)));
+  const lag=((blu*0.025) - (sun*0.015)).toFixed(1);
+  document.getElementById('kMel').textContent=peak+'%';
+  document.getElementById('kLag').textContent=(lag>0?'推迟 +':'提前 ')+lag+' 小时';
+  let pts='';
+  for(let h=18;h<=30;h+=0.4){
+    const x=40+(h-18)/12*520;
+    const center=25.5 + parseFloat(lag);
+    const val=peak*Math.exp(-Math.pow((h-center)/2.2,2));
+    pts+=`${x.toFixed(1)},${158-val*1.25} `;
+  }
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
+    <polyline fill="none" stroke="#8b5cf6" stroke-width="3" points="${pts}"/>
+    <text x="50" y="28" font-size="12" font-weight="800" fill="#8b5cf6">18:00 ~ 次日06:00 褪黑素分泌曲线（峰值 ${peak}%）</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>早上晒 ${sun} 分钟真太阳是在“拧紧发条”（提前并放大晚上的褪黑素），而睡前刷蓝光则像把发条倒拔了 <strong>${lag} 小时</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

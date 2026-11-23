@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔋 代谢灵活性：你的身体会丝滑切换“双燃料”吗？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔋 代谢灵活性：你的身体会丝滑切换“双燃料”吗？</h1><p>误区：一顿不吃主食就低血糖心慌，说明我天生身体虚、必须顿顿吃满碳水。真相：这是“代谢僵化”——你的线粒体长期只烧糖，把烧脂肪的酶系荒废了，一断糖就当场断电！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>空腹有氧/低糖耐受训练度</span><span id="vTr">60%</span></label><input type="range" id="sTr" min="10" max="100" value="60" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>距离上一餐断碳水小时数</span><span id="vHr">10 小时</span></label><input type="range" id="sHr" min="2" max="20" value="10" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">脂肪快速接管能力</div><div class="k-val" id="kFlex" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">当前精神供能状态</div><div class="k-val" id="kSt">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const tr=+document.getElementById('sTr').value, hr=+document.getElementById('sHr').value;
+  document.getElementById('vTr').textContent=tr+'%'; document.getElementById('vHr').textContent=hr+' 小时';
+  const energy=Math.max(15, Math.min(98, Math.round(95 - Math.max(0, hr-6)*(100-tr)/35)));
+  document.getElementById('kFlex').textContent=tr+' 分';
+  document.getElementById('kSt').textContent=energy>70?'丝滑切换燃脂 (清醒)':(energy>45?'轻微乏力过渡':'代谢卡顿 (心慌饿)');
+  document.getElementById('kSt').style.color=energy>70?'#059669':(energy>45?'#f59e0b':'#ef4444');
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">混动双燃料切换灵活度: ${tr} 分</text>
+    <rect x="20" y="44" width="${tr*5.2}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${energy>70?'#0284c7':'#ef4444'}">断餐 ${hr} 小时大脑能量稳定度: ${energy}%</text>
+    <rect x="20" y="112" width="${energy*5.2}" height="24" rx="6" fill="${energy>70?'#0284c7':'#ef4444'}"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">健康的身体像混动汽车：有糖烧糖，糖用完毫秒级切入脂肪电池</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>健康的代谢就像油电混动车，而不是“没充电就抛锚的纯电车”。锻炼脂肪氧化灵活性（${tr} 分），能让你在空腹 ${hr} 小时后依然神清气爽！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

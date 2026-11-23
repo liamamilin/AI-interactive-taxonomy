@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📈 血药浓度治疗窗与半衰期锯齿波（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📈 血药浓度治疗窗与半衰期锯齿波（SVG）</h1><p>误区：药吃下去以后浓度是恒定不变的；漏服一顿后下次吃两倍就能完美补回来。真相：血药浓度呈锯齿波衰减，翻倍补服极易直接冲破“最低中毒浓度”引发肝肾损伤！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>药物半衰期 t1/2</span><span id="vHalf">6 小时</span></label><input type="range" id="sHalf" min="2" max="16" value="6" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>每次给药间隔时长</span><span id="vInt">8 小时</span></label><input type="range" id="sInt" min="4" max="24" step="2" value="8" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">峰值最高浓度</div><div class="k-val" id="kPeak">—</div></div>
+        <div class="kpi"><div class="k-lbl">谷底最低浓度</div><div class="k-val" id="kTrough">—</div></div>
+        <div class="kpi"><div class="k-lbl">治疗窗评估</div><div class="k-val" id="kWin">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const half=+document.getElementById('sHalf').value, inter=+document.getElementById('sInt').value;
+  document.getElementById('vHalf').textContent=half+' 小时'; document.getElementById('vInt').textContent=inter+' 小时';
+  let c=0, pts='', peak=0, trough=999;
+  for(let h=0;h<=48;h++){
+    if(h%inter===0) c+=35;
+    if(h>=24){ if(c>peak) peak=c; if(c<trough) trough=c; }
+    pts+=`${40+h/48*520},${165-Math.min(135,c*1.15)} `;
+    c=c*Math.pow(0.5, 1/half);
+  }
+  const tox=peak>85, low=trough<25;
+  document.getElementById('kPeak').textContent=Math.round(peak)+' mg/L';
+  document.getElementById('kTrough').textContent=Math.round(trough)+' mg/L';
+  document.getElementById('kWin').textContent=tox?'⚠️ 冲破中毒线!':(low?'⚠️ 跌破有效线':'✅ 稳卡治疗窗');
+  document.getElementById('kWin').style.color=(tox||low)?'#ef4444':'#059669';
+  document.getElementById('svg').innerHTML=`
+    <rect x="40" y="67" width="520" height="69" fill="#059669" opacity="0.12"/>
+    <line x1="40" y1="67" x2="560" y2="67" stroke="#ef4444" stroke-dasharray="4 3"/>
+    <line x1="40" y1="136" x2="560" y2="136" stroke="#f59e0b" stroke-dasharray="4 3"/>
+    <polyline fill="none" stroke="#0284c7" stroke-width="2.5" points="${pts}"/>
+    <text x="45" y="62" font-size="11" font-weight="750" fill="#ef4444">红线: 最低中毒线 (85)</text>
+    <text x="45" y="150" font-size="11" font-weight="750" fill="#f59e0b">橙线: 最低有效线 (25)</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>半衰期决定了服药节奏！药师算好每 ${half} 小时半衰配 ${inter} 小时吃一次，就是为了让锯齿波稳稳落在绿色“治疗窗”里，既不中毒也不失效！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

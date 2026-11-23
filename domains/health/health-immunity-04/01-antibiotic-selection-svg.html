@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🦠 抗生素半途停药：人工筛选超级细菌（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🦠 抗生素半途停药：人工筛选超级细菌（SVG）</h1><p>误区：症状好了就赶紧停药，少吃两天抗生素既省钱又“减少药物伤身”。真相：前 3 天杀死的只是 95% 的老实弱细菌；你一停药，剩下的 5% 耐药突变体没有竞争对手，立刻繁殖成全军覆没的超级细菌！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>实际服药坚持天数 (满疗程 7 天)</span><span id="vDay">3 天 (提前停药)</span></label><input type="range" id="sDay" min="1" max="7" value="3" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>细菌初始耐药突变比例</span><span id="vMut">5%</span></label><input type="range" id="sMut" min="1" max="15" value="5" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">第10天残留细菌量</div><div class="k-val" id="kTot">—</div></div>
+        <div class="kpi"><div class="k-lbl">耐药超级细菌占比</div><div class="k-val" id="kRes" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const day=+document.getElementById('sDay').value, mut=+document.getElementById('sMut').value;
+  document.getElementById('vDay').textContent=day+(day<7?' 天 (提前停药!)':' 天 (规范完赛)');
+  document.getElementById('vMut').textContent=mut+'%';
+  let norm=100-mut, res=mut;
+  for(let d=1;d<=10;d++){
+    if(d<=day){ norm*=0.42; res*=0.72; }
+    else { norm*=1.25; res*=1.65; }
+    const cap=norm+res; if(cap>120){ norm=norm/cap*120; res=res/cap*120; }
+  }
+  const tot=Math.round(norm+res);
+  const resPct=tot>0?Math.round(res/tot*100):0;
+  document.getElementById('kTot').textContent=tot+' 单位';
+  document.getElementById('kRes').textContent=resPct+'%';
+  let dots='';
+  const nNorm=Math.round(norm/120*24), nRes=Math.round(res/120*24);
+  for(let i=0;i<24;i++){
+    const col=i<nRes?'#ef4444':(i<nRes+nNorm?'#0284c7':'#e2e8f0');
+    const x=42+(i%12)*45, y=45+Math.floor(i/12)*45;
+    dots+=`<circle cx="${x}" cy="${y}" r="13" fill="${col}"/>`;
+  }
+  document.getElementById('svg').innerHTML=dots+`<text x="35" y="152" font-size="13" font-weight="800" fill="${day<7?'#ef4444':'#059669'}">红点=耐药突变超级菌 (${resPct}%) · 蓝点=普通菌 · 灰点=已清空</text>`;
+  document.getElementById('ahaBox').innerHTML=day<7
+    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>第 ${day} 天退烧就停药是最危险的半吊子！你替耐药菌清掉了全部普通竞争对手，第 10 天卷土重来的全军里有 <strong>${resPct}% 是耐药超级菌</strong>！`
+    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>吃满 7 天高血药浓度才能连那 5% 的硬骨头耐药菌也一并压死到免疫系统能彻底清零的阈值以下！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

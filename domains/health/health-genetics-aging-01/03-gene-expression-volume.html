@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎛️ 同样的 DNA，为什么脑细胞和肝细胞长得完全不同？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎛️ 同样的 DNA，为什么脑细胞和肝细胞长得完全不同？</h1><p>误区：肝细胞之所以长成肝细胞，是因为它把不需要的大脑基因全都删掉了。真相：你脚趾甲和大脑里的 DNA 几乎 100% 一模一样！细胞分化的秘密在于“基因调音台”——各自只打开需要的那几百个推子！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>神经元突触基因推子</span><span id="vNeu">90%</span></label><input type="range" id="sNeu" min="0" max="100" value="90" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>肝解毒代谢酶基因推子</span><span id="vLiv">10%</span></label><input type="range" id="sLiv" min="0" max="100" value="10" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">共享 DNA 底本</div><div class="k-val">100% 完全相同</div></div>
+        <div class="kpi"><div class="k-lbl">当前分化细胞身份</div><div class="k-val" id="kCell" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const neu=+document.getElementById('sNeu').value, liv=+document.getElementById('sLiv').value;
+  document.getElementById('vNeu').textContent=neu+'%'; document.getElementById('vLiv').textContent=liv+'%';
+  const cell=neu>liv+25?'🧠 高度特化神经元':(liv>neu+25?'🧪 肝解毒代谢细胞':'🌱 混合/未分化状态');
+  document.getElementById('kCell').textContent=cell;
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">脑神经元专属基因表达量: ${neu}%</text>
+    <rect x="20" y="44" width="${Math.max(6,neu*5.2)}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">肝脏解毒酶专属基因表达量: ${liv}%</text>
+    <rect x="20" y="112" width="${Math.max(6,liv*5.2)}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">同一份乐谱 (DNA)，不同的指挥家 (转录因子) 演奏出完全不同的器官！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>DNA 就像一台装好全套交响乐总谱的钢琴，而细胞之所以形态各异，全靠转录因子推子决定“此刻拉响哪几根弦、静音哪几万根弦”！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

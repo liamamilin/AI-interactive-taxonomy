@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚡ 三大供能系统接力赛（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚡ 三大供能系统接力赛（SVG）</h1><p>误区：运动时前 30 分钟先烧糖、30 分钟之后才开始有氧供能。真相：从迈出第一步的第 1 秒起三大系统就同时开机，只是前 10 秒磷酸原占主力，随后无氧糖酵解接棒，2 分钟后有氧氧化才成为绝对主角！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>全力持续运动时长 (对数刻度)</span><span id="vSec">45 秒</span></label><input type="range" id="sSec" min="3" max="1800" value="45" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>当前心肺/线粒体有氧能力</span><span id="vFit">65%</span></label><input type="range" id="sFit" min="30" max="100" value="65" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">磷酸原 (爆发)</div><div class="k-val" id="kP" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">无氧糖酵解 (酸痛)</div><div class="k-val" id="kG" style="color:#f59e0b;">—</div></div>
+        <div class="kpi"><div class="k-lbl">有氧氧化 (耐力)</div><div class="k-val" id="kA" style="color:#059669;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const sec=+document.getElementById('sSec').value, fit=+document.getElementById('sFit').value;
+  document.getElementById('vSec').textContent=sec>=60?(sec/60).toFixed(1)+' 分钟':sec+' 秒';
+  document.getElementById('vFit').textContent=fit+'%';
+  const p=Math.round(90*Math.exp(-sec/15));
+  const aer=Math.min(95, Math.round((1-Math.exp(-sec/95))*(75+fit*0.2)));
+  const gly=Math.max(2, 100-p-aer);
+  document.getElementById('kP').textContent=p+'%';
+  document.getElementById('kG').textContent=gly+'%';
+  document.getElementById('kA').textContent=aer+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="32" font-size="13" font-weight="800" fill="#ef4444">磷酸原 ATP-CP (极速爆发 · 无乳酸): ${p}%</text>
+    <rect x="20" y="40" width="${p*5.2}" height="20" rx="5" fill="#ef4444"/>
+    <text x="20" y="84" font-size="13" font-weight="800" fill="#f59e0b">无氧糖酵解 (400米冲刺 · 产乳酸): ${gly}%</text>
+    <rect x="20" y="92" width="${gly*5.2}" height="20" rx="5" fill="#f59e0b"/>
+    <text x="20" y="136" font-size="13" font-weight="800" fill="#059669">有氧氧化 (长跑燃脂 · 最持久): ${aer}%</text>
+    <rect x="20" y="144" width="${aer*5.2}" height="20" rx="5" fill="#059669"/>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>爆发力靠 10 秒见底的磷酸原，中间 30~90 秒最累人的是无氧糖酵解，2 分钟后有氧发动机占比爬上 <strong>${aer}%</strong>，所以长跑刚起步最喘、跑开反而顺了！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

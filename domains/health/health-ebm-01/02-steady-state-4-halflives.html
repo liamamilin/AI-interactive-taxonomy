@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⛰️ 稳态爬坡律：为什么慢病药要连吃 4 个半衰期才见效？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⛰️ 稳态爬坡律：为什么慢病药要连吃 4 个半衰期才见效？</h1><p>误区：吃降压药或抗抑郁药第一天没感觉，说明这药对我完全没效，赶紧换药。真相：规律服药需要经过 4~5 个半衰期，体内累积与排泄才能打平达到“稳态浓度”——半衰期 3 天的药，两周后才到峰值！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>药物半衰期长度</span><span id="vH">24 小时</span></label><input type="range" id="sH" min="6" max="72" step="6" value="24" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>首日是否采用“首剂加倍负荷”</span><span id="vLoad">1x 常规量</span></label><input type="range" id="sLoad" min="1" max="2" value="1" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">达到 94% 稳态所需天数</div><div class="k-val" id="kDay" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">24小时起效进度</div><div class="k-val" id="k24">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const h=+document.getElementById('sH').value, ld=+document.getElementById('sLoad').value;
+  document.getElementById('vH').textContent=h+' 小时'; document.getElementById('vLoad').textContent=ld===2?'2x 首剂加倍':'1x 常规量';
+  const ssDays=(4.3*h/24).toFixed(1);
+  const p24=Math.min(100, Math.round((1-Math.pow(0.5,24/h))*100*ld));
+  document.getElementById('kDay').textContent=(ld===2?0.5:ssDays)+' 天';
+  document.getElementById('k24').textContent=p24+'%';
+  let pts='';
+  for(let t=0;t<=120;t+=3){
+    const val=ld===2?Math.min(100, 95*(1-Math.pow(0.5,t/h)*0.5)):(100*(1-Math.pow(0.5,t/h)));
+    pts+=`${40+t/120*520},${158-val*1.25} `;
+  }
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
+    <polyline fill="none" stroke="#059669" stroke-width="3" points="${pts}"/>
+    <text x="50" y="28" font-size="12.5" font-weight="800" fill="#059669">稳态爬坡曲线 (4.3 个半衰期到达 95% 稳态平台)</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>长半衰期药物（${h}h）常规吃法要 ${ssDays} 天才到稳态，所以急救或部分抗生素会专门注明“首剂加倍”（负荷剂量）让你一步到位！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

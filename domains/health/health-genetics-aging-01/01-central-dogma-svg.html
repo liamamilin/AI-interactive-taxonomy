@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏭 DNA → mRNA → 蛋白质 车间流水线（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏭 DNA → mRNA → 蛋白质 车间流水线（SVG）</h1><p>误区：打进体内的 mRNA 疫苗会钻进细胞核里永久修改我们的 DNA。真相：mRNA 只在细胞质里的核糖体工厂当“一次性临时施工图”，用完几小时就降解了，根本进不去细胞核碰不到 DNA！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setMode('dna',this)">常规模式：DNA 转录出 mRNA 图纸</button>
+        <button class="btn" onclick="setMode('mrna',this)">mRNA 疫苗：直接空降图纸到车间</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>核糖体工厂翻译组装速度</span><span id="vSpd">75%</span></label><input type="range" id="sSpd" min="20" max="100" value="75" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">DNA 原版蓝图安全性</div><div class="k-val" style="color:#059669;">100% 锁死未改</div></div>
+        <div class="kpi"><div class="k-lbl">目标蛋白日产量</div><div class="k-val" id="kOut" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let mode='dna';
+function setMode(m,btn){ mode=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const spd=+document.getElementById('sSpd').value; document.getElementById('vSpd').textContent=spd+'%';
+  document.getElementById('kOut').textContent=Math.round(spd*1.2)+' 万个';
+  document.getElementById('svg').innerHTML=`
+    <rect x="25" y="45" width="145" height="90" rx="12" fill="#e0f2fe" stroke="#0284c7" stroke-width="${mode==='dna'?3:1.5}" opacity="${mode==='dna'?1:0.45}"/>
+    <text x="97" y="84" text-anchor="middle" font-size="14" font-weight="850" fill="#0369a1">🧬 DNA 母版</text>
+    <text x="97" y="108" text-anchor="middle" font-size="11.5" fill="#0369a1">${mode==='dna'?'细胞核内转录':'门禁紧闭(未接触)'}</text>
+    <line x1="170" y1="90" x2="225" y2="90" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="${mode==='dna'?'0':'5 3'}"/>
+    <rect x="225" y="52" width="145" height="76" rx="12" fill="#fef3c7" stroke="#f59e0b" stroke-width="2.5"/>
+    <text x="297" y="84" text-anchor="middle" font-size="14" font-weight="850" fill="#b45309">📜 mRNA 图纸</text>
+    <text x="297" y="108" text-anchor="middle" font-size="11.5" fill="#b45309">${mode==='mrna'?'外部空降 · 用完即毁':'拷贝传递到细胞质'}</text>
+    <line x1="370" y1="90" x2="425" y2="90" stroke="#059669" stroke-width="3"/>
+    <rect x="425" y="45" width="150" height="90" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/>
+    <text x="500" y="84" text-anchor="middle" font-size="14" font-weight="850" fill="#047857">🧱 核糖体产蛋白</text>
+    <text x="500" y="108" text-anchor="middle" font-size="12" font-weight="800" fill="#059669">产能 ${Math.round(spd*1.2)} 万/天</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>细胞核里的 DNA 是绝不外借的“镇馆孤本”，mRNA 只是送去车间的“一次性复印件”；信息流是单向的（DNA → RNA → 蛋白），不会逆向篡改你的基因！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

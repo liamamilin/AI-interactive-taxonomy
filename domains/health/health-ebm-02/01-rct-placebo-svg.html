@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📊 三臂对比拆解：自然自愈 + 安慰剂 + 真药净效（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📊 三臂对比拆解：自然自愈 + 安慰剂 + 真药净效（SVG）</h1><p>误区：只要吃了一款偏方或保健品后 70% 的人症状好转了，就证明它非常有效。真相：感冒和很多疼痛本来自己就会好（自愈），加上花钱吃药的仪式感（安慰剂），加起来就能占掉 60% 好转率——不设对照组全是自欺欺人！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>疾病自然自愈 + 均值回归比例</span><span id="vNat">35%</span></label><input type="range" id="sNat" min="10" max="60" value="35" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>安慰剂仪式感心理暗示效应</span><span id="vPla">25%</span></label><input type="range" id="sPla" min="5" max="40" value="25" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>真药分子额外净疗效</span><span id="vDrug">15%</span></label><input type="range" id="sDrug" min="0" max="40" value="15" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">安慰剂组总好转率</div><div class="k-val" id="kPla">—</div></div>
+        <div class="kpi"><div class="k-lbl">真药组总好转率</div><div class="k-val" id="kTrt" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">真药净增量</div><div class="k-val" id="kNet" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const nat=+document.getElementById('sNat').value, pla=+document.getElementById('sPla').value, drg=+document.getElementById('sDrug').value;
+  document.getElementById('vNat').textContent=nat+'%'; document.getElementById('vPla').textContent=pla+'%'; document.getElementById('vDrug').textContent=drg+'%';
+  const gPla=Math.min(100,nat+pla), gTrt=Math.min(100,nat+pla+drg);
+  document.getElementById('kPla').textContent=gPla+'%';
+  document.getElementById('kTrt').textContent=gTrt+'%';
+  document.getElementById('kNet').textContent='+'+drg+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="32" font-size="13" font-weight="800" fill="#64748b">空白组 (只靠自然自愈): ${nat}%</text>
+    <rect x="20" y="40" width="${nat*5}" height="20" rx="5" fill="#64748b"/>
+    <text x="20" y="84" font-size="13" font-weight="800" fill="#f59e0b">安慰剂组 (自愈 + 吃假药暗示): ${gPla}%</text>
+    <rect x="20" y="92" width="${gPla*5}" height="20" rx="5" fill="#f59e0b"/>
+    <text x="20" y="136" font-size="13" font-weight="800" fill="#059669">真药组总好转 (${gTrt}% = 安慰剂 ${gPla}% + 净疗效 ${drg}%)</text>
+    <rect x="20" y="144" width="${gPla*5}" height="20" rx="5" fill="#f59e0b"/>
+    <rect x="${20+gPla*5}" y="144" width="${drg*5}" height="20" rx="5" fill="#059669"/>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“个人亲测有效”是最不靠谱的证据！就算真药净疗效为 0%，靠自然自愈（${nat}%）+ 安慰剂心理（${pla}%）也能让 ${gPla}% 的人觉得“神药显灵了”！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

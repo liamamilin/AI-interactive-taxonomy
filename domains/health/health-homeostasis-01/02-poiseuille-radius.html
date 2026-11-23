@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚰 泊肃叶四次方定律：血管堵一半，血压飙 16 倍？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚰 泊肃叶四次方定律：血管堵一半，血压飙 16 倍？</h1><p>误区：血管壁上长斑块堵住了一半管径，血压也就大概上升个 50% 左右吧。真相：血管阻力与半径的“四次方”成反比！管径只缩窄一半，维持同等血流所需的推力暴增 16 倍！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>动脉管腔剩余通畅半径 r</span><span id="vR">80%</span></label><input type="range" id="sR" min="50" max="100" value="80" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>血液黏稠度/血脂水平</span><span id="vVis">1.0x</span></label><input type="range" id="sVis" min="10" max="16" value="10" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">血流阻力放大倍数</div><div class="k-val" id="kRes" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">心脏泵血负荷</div><div class="k-val" id="kLoad">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const r=+document.getElementById('sR').value/100, vis=+document.getElementById('sVis').value/10;
+  document.getElementById('vR').textContent=(r*100).toFixed(0)+'%'; document.getElementById('vVis').textContent=vis.toFixed(1)+'x';
+  const res=(vis/Math.pow(r,4)).toFixed(1);
+  document.getElementById('kRes').textContent=res+'x';
+  document.getElementById('kLoad').textContent=parseFloat(res)>4?'极度过载 (危险!)':'可代偿';
+  const outer=55, inner=55*r;
+  document.getElementById('svg').innerHTML=`
+    <circle cx="140" cy="92" r="${outer}" fill="#fef08a" stroke="#ca8a04" stroke-width="3"/>
+    <circle cx="140" cy="92" r="${inner}" fill="#ef4444"/>
+    <text x="140" y="96" text-anchor="middle" font-size="13" font-weight="850" fill="#fff">通畅 ${(r*100).toFixed(0)}%</text>
+    <text x="240" y="72" font-size="14" font-weight="850" fill="var(--tax-text)">黄色: 动脉粥样硬化斑块挤压</text>
+    <text x="240" y="106" font-size="22" font-weight="900" fill="#ef4444">血流阻力 = ${res} 倍 (1/r⁴)</text>
+    <text x="240" y="140" font-size="12.5" fill="var(--tax-muted)">半径每缩窄 20%，阻力翻倍再翻倍！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>泊肃叶定律 <code>R ∝ 1/r⁴</code> 是心血管最大的物理噩梦：哪怕只剩 ${(r*100).toFixed(0)}% 半径，血流阻力也已飙升到 <strong>${res} 倍</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

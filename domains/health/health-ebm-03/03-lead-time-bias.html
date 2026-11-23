@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⏳ 领先时间偏倚：早查出癌症真的让你多活了 3 年吗？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⏳ 领先时间偏倚：早查出癌症真的让你多活了 3 年吗？</h1><p>误区：某种癌症早筛让“确诊后 5 年生存率”从 20% 飙升到 80%，就绝对证明早筛拯救了生命。真相：如果 60 岁死于癌症不变，仅仅因为早筛在 53 岁（而不是 57 岁）就提前查出来，你只是多背了 4 年恐慌，5 年生存率却在数学上虚高了！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>无症状早筛提前确诊年数</span><span id="vLead">4 年</span></label><input type="range" id="sLead" min="0" max="6" value="4" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>早期干预实际延长的真实寿命</span><span id="vReal">0.5 年</span></label><input type="range" id="sReal" min="0" max="5" step="0.5" value="0.5" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">统计账面“确诊后存活”</div><div class="k-val" id="kApp" style="color:#f59e0b;">—</div></div>
+        <div class="kpi"><div class="k-lbl">真实净多活寿命</div><div class="k-val" id="kReal" style="color:#059669;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const lead=+document.getElementById('sLead').value, real=+document.getElementById('sReal').value;
+  document.getElementById('vLead').textContent=lead+' 年'; document.getElementById('vReal').textContent=real.toFixed(1)+' 年';
+  const app=(2.5+lead+real).toFixed(1);
+  document.getElementById('kApp').textContent=app+' 年 (过5年大关!)';
+  document.getElementById('kReal').textContent='+'+real.toFixed(1)+' 年';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#64748b">未筛查: 60岁出现症状确诊 → 62.5岁去世 (存活 2.5 年)</text>
+    <rect x="260" y="46" width="90" height="22" rx="5" fill="#64748b"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#f59e0b">早筛组: 提前 ${lead} 年确诊 → 账面存活 ${app} 年 (实际只延寿 ${real.toFixed(1)} 年)</text>
+    <rect x="${260-lead*35}" y="114" width="${90+lead*35+real*35}" height="22" rx="5" fill="#f59e0b"/>
+    <rect x="350" y="114" width="${Math.max(4,real*35)}" height="22" rx="5" fill="#059669"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">真正评估筛查是否有效，必须看“全因死亡率有没有降”，而不是“5年生存率”</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>早筛如果不能提供真正有效的早期治疗（真实延寿仅 ${real.toFixed(1)} 年），提前 ${lead} 年查出惰性肿瘤只会凭空刷高“5年生存率”，却让患者提前数年活在恐惧和过度手术里！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

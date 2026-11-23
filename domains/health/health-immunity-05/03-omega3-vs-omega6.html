@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐟 餐桌上的抗炎杠杆：Omega-6 vs Omega-3 比例</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🐟 餐桌上的抗炎杠杆：Omega-6 vs Omega-3 比例</h1><p>误区：只要少吃肥肉猪油，天天吃大豆油/玉米油炒的外卖就绝对健康清淡。真相：现代外卖精炼植物油把 Omega-6:3 比例推到了 20:1，而人类演化适应的比例是 4:1 以下，失衡本身就在助燃炎症！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>外卖精炼植物油 (Omega-6) 比例</span><span id="vO6">16 份</span></label><input type="range" id="sO6" min="4" max="24" value="16" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>深海鱼/鱼油 (Omega-3) 摄入量</span><span id="vO3">1 份</span></label><input type="range" id="sO3" min="1" max="6" value="1" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">当前 O6 : O3 比值</div><div class="k-val" id="kRat">—</div></div>
+        <div class="kpi"><div class="k-lbl">细胞膜炎症倾向</div><div class="k-val" id="kTend">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const o6=+document.getElementById('sO6').value, o3=+document.getElementById('sO3').value;
+  document.getElementById('vO6').textContent=o6+' 份'; document.getElementById('vO3').textContent=o3+' 份';
+  const rat=(o6/o3).toFixed(1);
+  const good=parseFloat(rat)<=4.5;
+  document.getElementById('kRat').textContent=rat+' : 1';
+  document.getElementById('kRat').style.color=good?'#059669':'#ef4444';
+  document.getElementById('kTend').textContent=good?'抗炎均衡态':'高度促炎倾向';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#f59e0b">促炎前体原料 Omega-6 (大豆/玉米油): ${o6} 份</text>
+    <rect x="20" y="44" width="${o6*20}" height="24" rx="6" fill="#f59e0b"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">抗炎消退原料 Omega-3 (深海鱼/EPA): ${o3} 份</text>
+    <rect x="20" y="112" width="${o3*45}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">理想比值 ≤ 4:1；少吃外卖油炸并每周吃 2 次深海鱼能迅速扭转失衡</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>Omega-6 和 Omega-3 共用同一套代谢酶！当外卖植物油把比值推到 <strong>${rat}:1</strong> 时，抗炎通道被彻底挤占，补充 Omega-3 与换用橄榄油能一键降温！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

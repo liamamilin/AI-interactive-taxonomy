@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⏱️ 断食 24 小时代谢开关时间轴（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⏱️ 断食 24 小时代谢开关时间轴（SVG）</h1><p>误区：只要睡前少吃一顿（空腹 8 小时），身体就已经在疯狂燃烧内脏脂肪和清理衰老细胞了。真相：肝糖原能撑 12~16 小时，只有糖原与胰岛素双双跌入谷底后，自噬和生酮才真正全面接管！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>距最后一餐禁食时长</span><span id="vHr">16 小时</span></label><input type="range" id="sHr" min="0" max="36" value="16" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>期间有氧消耗加速糖原排空</span><span id="vAcc">25%</span></label><input type="range" id="sAcc" min="0" max="60" value="25" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">剩余肝糖原</div><div class="k-val" id="kGly">—</div></div>
+        <div class="kpi"><div class="k-lbl">细胞自噬清理激活度</div><div class="k-val" id="kAuto" style="color:#059669;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const hr=+document.getElementById('sHr').value, acc=+document.getElementById('sAcc').value;
+  document.getElementById('vHr').textContent=hr+' 小时'; document.getElementById('vAcc').textContent=acc+'%';
+  const effHr=hr*(1+acc/100);
+  const gly=Math.max(0, Math.round(100*Math.exp(-effHr/8.5)));
+  const auto=Math.min(98, Math.round(100/(1+Math.exp(-(effHr-18)/3.5))));
+  document.getElementById('kGly').textContent=gly+'%';
+  document.getElementById('kAuto').textContent=auto+'%';
+  const px=40+hr/36*520;
+  document.getElementById('svg').innerHTML=`
+    <rect x="40" y="55" width="170" height="44" rx="6" fill="#38bdf8" opacity="0.3"/><text x="125" y="82" text-anchor="middle" font-size="12" font-weight="800" fill="#0369a1">0-12h 消化与烧糖</text>
+    <rect x="215" y="55" width="145" height="44" rx="6" fill="#f59e0b" opacity="0.3"/><text x="287" y="82" text-anchor="middle" font-size="12" font-weight="800" fill="#b45309">12-20h 糖尽生酮</text>
+    <rect x="365" y="55" width="195" height="44" rx="6" fill="#10b981" opacity="0.3"/><text x="462" y="82" text-anchor="middle" font-size="12" font-weight="800" fill="#047857">20h+ 自噬深度大扫除</text>
+    <line x1="${px}" y1="30" x2="${px}" y2="130" stroke="#ef4444" stroke-width="3"/>
+    <text x="${px}" y="22" text-anchor="middle" font-size="12" font-weight="850" fill="#ef4444">${hr}h</text>
+    <text x="40" y="162" font-size="12.5" font-weight="800" fill="var(--tax-text)">肝糖原剩 ${gly}% · 细胞自噬激活率 ${auto}%</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>16:8 轻断食（停在 16 小时）刚好跨过胰岛素低谷、撬动生酮与温和自噬（${auto}%）；期间散步运动能等效延长禁食窗口，加速糖原清零！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

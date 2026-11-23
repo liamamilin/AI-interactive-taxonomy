@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚖️ 多巴胺快感与痛苦跷跷板（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 多巴胺快感与痛苦跷跷板（SVG）</h1><p>误区：多巴胺就是“快乐分子”，刺激越多我就越开心。真相：大脑把多巴胺基线当成恒温器——你每次人为把它推上高潮，大脑就会反向往痛苦端压秤砣来恢复平衡，结果越刷越空虚！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>单次多巴胺刺激峰值 (如短视频/游戏)</span><span id="vPeak">85 分</span></label><input type="range" id="sPeak" min="20" max="100" value="85" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>每日高频连续刺激时长</span><span id="vDur">4 小时</span></label><input type="range" id="sDur" min="0.5" max="8" step="0.5" value="4" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">刺激后多巴胺基线跌落</div><div class="k-val" id="kDip" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">对读书/散步等低刺激兴致</div><div class="k-val" id="kInt">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const pk=+document.getElementById('sPeak').value, dur=+document.getElementById('sDur').value;
+  document.getElementById('vPeak').textContent=pk+' 分'; document.getElementById('vDur').textContent=dur+' 小时';
+  const baseDrop=Math.round(pk*0.4 + dur*5.5);
+  const interest=Math.max(5, 100-baseDrop);
+  document.getElementById('kDip').textContent='-'+baseDrop+'%';
+  document.getElementById('kInt').textContent=interest+'%';
+  let pts='40,95 ';
+  for(let t=1;t<=20;t++){
+    const x=40+t*26;
+    let y=95;
+    if(t<=6) y=95 - pk*0.65*Math.sin(t/6*Math.PI);
+    else y=95 + baseDrop*0.85*Math.exp(-(t-7)/7);
+    pts+=`${x.toFixed(1)},${y.toFixed(1)} `;
+  }
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="95" x2="560" y2="95" stroke="#94a3b8" stroke-dasharray="4 3"/>
+    <text x="45" y="88" font-size="11" fill="var(--tax-muted)">多巴胺正常平衡基线</text>
+    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${pts}"/>
+    <text x="550" y="168" text-anchor="end" font-size="12" font-weight="800" fill="#ef4444">快感飙升越大，事后跌入基线以下的空虚痛感就越深！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>刷完 ${dur} 小时高刺激内容后，大脑把你的多巴胺基线狠狠压低了 <strong>-${baseDrop}%</strong>——此时只有更刺激的东西才能让你回本，看书工作只剩 ${interest}% 兴致！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

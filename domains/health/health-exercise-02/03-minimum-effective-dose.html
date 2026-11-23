@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📦 增肌最小有效剂量 vs 垃圾容量 (Junk Volume)</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📦 增肌最小有效剂量 vs 垃圾容量 (Junk Volume)</h1><p>误区：练得越狠组数越多越好，一次练胸做 30 组才叫拼命。真相：科学研究发现单肌群每周 10~20 组接近增肌上限，超过 22 组后不仅不再多长肉，还会变成拖垮中枢神经的“垃圾容量”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>单肌群每周训练组数</span><span id="vSets">14 组</span></label><input type="range" id="sSets" min="2" max="32" value="14" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>每组接近力竭的扎实程度</span><span id="vRpe">85%</span></label><input type="range" id="sRpe" min="50" max="100" value="85" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">增肌合成净收益</div><div class="k-val" id="kGain" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">疲劳代价区间</div><div class="k-val" id="kZone">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const sets=+document.getElementById('sSets').value, rpe=+document.getElementById('sRpe').value/100;
+  document.getElementById('vSets').textContent=sets+' 组'; document.getElementById('vRpe').textContent=(rpe*100).toFixed(0)+'%';
+  const fn=s=>Math.round(95*(1-Math.exp(-s/7))*rpe - Math.max(0,s-18)*3.8);
+  const g=fn(sets);
+  document.getElementById('kGain').textContent=g+' 分';
+  document.getElementById('kZone').textContent=sets<6?'维持期 (太少)':(sets<=20?'黄金增肌区':'垃圾容量过载!');
+  document.getElementById('kZone').style.color=sets>20?'#ef4444':'#059669';
+  let pts='';
+  for(let s=2;s<=32;s++){ pts+=`${40+(s-2)/30*520},${160-Math.max(0,fn(s))*1.4} `; }
+  const cx=40+(sets-2)/30*520, cy=160-Math.max(0,g)*1.4;
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="160" x2="560" y2="160" stroke="#94a3b8"/>
+    <polyline fill="none" stroke="#059669" stroke-width="3" points="${pts}"/>
+    <circle cx="${cx}" cy="${cy}" r="6" fill="${sets>20?'#ef4444':'#0284c7'}"/>
+    <text x="50" y="28" font-size="12" font-weight="800" fill="#059669">每周 10~20 组达到平台峰值，20 组后进入“垃圾容量”下行区</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只需每周高质量完成 12~16 组就能拿下 90% 的增肌红利！硬凑到 25 组以上不仅不涨肉，还会把关节和恢复力掏空！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

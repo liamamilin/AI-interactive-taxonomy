@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧟 僵尸细胞 SASP 传染：一颗坏苹果烂一筐</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧟 僵尸细胞 SASP 传染：一颗坏苹果烂一筐</h1><p>误区：衰老细胞只是自己停止干活安静退休，不会害别人。真相：该凋亡却赖着不死的“僵尸细胞”会疯狂喷吐 SASP 炎性毒液，把附近健康的年轻细胞也诱发炎症甚至一起变老！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>衰老僵尸细胞比例</span><span id="vZom">20%</span></label><input type="range" id="sZom" min="0" max="50" value="20" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>NK 自然杀伤细胞清扫力度</span><span id="vNk">60%</span></label><input type="range" id="sNk" min="10" max="100" value="60" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">周围受牵连受损细胞</div><div class="k-val" id="kInf" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">组织整体年轻活力</div><div class="k-val" id="kVit" style="color:#059669;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const zom=+document.getElementById('sZom').value, nk=+document.getElementById('sNk').value;
+  document.getElementById('vZom').textContent=zom+'%'; document.getElementById('vNk').textContent=nk+'%';
+  const effZom=Math.max(1, Math.round(zom*(1-nk/150)));
+  const inf=Math.min(85, Math.round(effZom*1.8));
+  const vit=Math.max(10, 100-inf);
+  document.getElementById('kInf').textContent=inf+'%';
+  document.getElementById('kVit').textContent=vit+' 分';
+  let dots='';
+  for(let i=0;i<24;i++){
+    const isZ=i<Math.round(effZom/4), isS=i>=Math.round(effZom/4) && i<Math.round(inf/4);
+    const col=isZ?'#8b5cf6':(isS?'#f59e0b':'#059669');
+    dots+=`<circle cx="${42+(i%12)*45}" cy="${45+Math.floor(i/12)*45}" r="13" fill="${col}"/>`;
+  }
+  document.getElementById('svg').innerHTML=dots+`<text x="35" y="152" font-size="13" font-weight="800" fill="var(--tax-text)">紫=僵尸细胞喷毒液 · 橙=被牵连发炎邻居 · 绿=健康细胞 (活力 ${vit}分)</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕体内只有 ${effZom}% 的僵尸细胞，它们喷出的 SASP 炎性因子也会波及 ${inf}% 的周围健康组织！这就是为什么前沿抗衰研究重点开发清除僵尸细胞的 Senolytics 药物！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

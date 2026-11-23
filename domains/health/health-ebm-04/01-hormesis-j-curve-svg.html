@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📈 毒物兴奋效应 (Hormesis) J 型反应曲线（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📈 毒物兴奋效应 (Hormesis) J 型反应曲线（SVG）</h1><p>误区：所有压力和微毒都是有害的，人应该住在绝对零压力、恒温恒湿的无菌温室里。真相：没有适度微刺激（Hormesis），细胞就会关掉修复酶躺平退化；低剂量微压力恰恰是激活长寿防御体系的钥匙！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>外部生理刺激剂量 (如冷/热/运动强度)</span><span id="vDos">35%</span></label><input type="range" id="sDos" min="0" max="100" value="35" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>个人恢复修复基础储备</span><span id="vRes">75%</span></label><input type="range" id="sRes" min="30" max="100" value="75" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">身体净健康增益</div><div class="k-val" id="kNet">—</div></div>
+        <div class="kpi"><div class="k-lbl">所处剂量区间</div><div class="k-val" id="kZone">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function hormFn(x,res){
+  const opt=res*0.48;
+  return Math.round(35*Math.exp(-Math.pow((x-opt)/18,2)) - Math.max(0, x-opt*1.6)*1.4);
+}
+function upd(){
+  const dos=+document.getElementById('sDos').value, res=+document.getElementById('sRes').value;
+  document.getElementById('vDos').textContent=dos+'%'; document.getElementById('vRes').textContent=res+'%';
+  const net=hormFn(dos,res);
+  document.getElementById('kNet').textContent=(net>0?'+':'')+net+' 分';
+  document.getElementById('kNet').style.color=net>15?'#059669':(net<0?'#ef4444':'#f59e0b');
+  document.getElementById('kZone').textContent=dos<10?'温室退化区':(net>15?'Hormesis 强身黄金区':(net<0?'过量损伤中毒区':'过渡区'));
+  let pts='';
+  for(let x=0;x<=100;x+=2){ pts+=`${40+x*5.2},${115-hormFn(x,res)*2.2} `; }
+  const cx=40+dos*5.2, cy=115-net*2.2;
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="115" x2="560" y2="115" stroke="#94a3b8" stroke-dasharray="4 3"/>
+    <polyline fill="none" stroke="#059669" stroke-width="3" points="${pts}"/>
+    <circle cx="${cx}" cy="${cy}" r="6" fill="${net<0?'#ef4444':'#0284c7'}"/>
+    <text x="50" y="28" font-size="12" font-weight="800" fill="#059669">倒 J 型 Hormesis 曲线：低剂量微刺激变强，高剂量直接受损！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“杀不死你的微刺激让你更强大”是有精确剂量窗口的！超出恢复储备（${res}%）的过量硬撑只会跌破 0 线变成纯伤害！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

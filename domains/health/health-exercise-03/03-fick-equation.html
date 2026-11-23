@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚙️ 菲克公式：心脏泵血 × 肌肉抽氧双引擎</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚙️ 菲克公式：心脏泵血 × 肌肉抽氧双引擎</h1><p>误区：提升最大摄氧量全靠肺活量大，跟腿部肌肉没关系。真相：肺部吸氧很少成为瓶颈，真正的木桶短板在于心脏每跳一次泵出多少血，以及肌肉里的线粒体能从血液里抢走多少氧！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>心脏泵血输出量 Q</span><span id="vQ">20 L/min</span></label><input type="range" id="sQ" min="12" max="32" value="20" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>肌肉动静脉氧差 (抽氧率)</span><span id="vO">14 ml/dL</span></label><input type="range" id="sO" min="10" max="18" value="14" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">总摄氧量 (Q × ΔO2)</div><div class="k-val" id="kTot" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">相对普通人倍率</div><div class="k-val" id="kMul">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const q=+document.getElementById('sQ').value, o=+document.getElementById('sO').value;
+  document.getElementById('vQ').textContent=q+' L/min'; document.getElementById('vO').textContent=o+' ml/dL';
+  const tot=(q*o/100).toFixed(2);
+  const mul=(q*o/220).toFixed(1)+'x';
+  document.getElementById('kTot').textContent=tot+' L/min';
+  document.getElementById('kMul').textContent=mul;
+  document.getElementById('svg').innerHTML=`
+    <rect x="40" y="45" width="170" height="85" rx="12" fill="#fee2e2" stroke="#ef4444" stroke-width="2.5"/>
+    <text x="125" y="80" text-anchor="middle" font-size="14" font-weight="850" fill="#b91c1c">❤️ 心脏水泵 Q</text>
+    <text x="125" y="106" text-anchor="middle" font-size="13" font-weight="800" fill="#ef4444">${q} L/min</text>
+    <text x="245" y="95" text-anchor="middle" font-size="22" font-weight="900" fill="var(--tax-text)">×</text>
+    <rect x="280" y="45" width="170" height="85" rx="12" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5"/>
+    <text x="365" y="80" text-anchor="middle" font-size="14" font-weight="850" fill="#0369a1">🦵 肌肉抽氧率</text>
+    <text x="365" y="106" text-anchor="middle" font-size="13" font-weight="800" fill="#0284c7">${o} ml/dL</text>
+    <text x="520" y="95" text-anchor="middle" font-size="16" font-weight="900" fill="#059669">= ${tot} L</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>菲克公式告诉我们，运动耐力是中央心脏水泵与外周肌肉毛细血管的乘积（当前相当于普通人的 ${mul}）——两边一起练才能突破平台！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

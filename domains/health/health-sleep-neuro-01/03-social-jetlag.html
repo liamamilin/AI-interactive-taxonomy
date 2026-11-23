@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✈️ 周末补觉的“社交时差”陷阱</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>✈️ 周末补觉的“社交时差”陷阱</h1><p>误区：平时每天只睡 6 小时没关系，周末一口气睡到中午 12 点就能把睡眠债全补回来。真相：周末晚起 3 小时等价于每周末强行飞一趟东京到迪拜的时差，导致周一早上像被卡车碾过一样昏沉！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>工作日早晨起床时间</span><span id="vWk">07:00</span></label><input type="range" id="sWk" min="5" max="9" step="0.5" value="7" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>周末自然醒起床时间</span><span id="vWe">10:30</span></label><input type="range" id="sWe" min="6" max="13" step="0.5" value="10.5" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">等效跨国时差</div><div class="k-val" id="kJet" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">周一综合征严重度</div><div class="k-val" id="kMon">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function fmtH(h){ const hh=Math.floor(h), mm=(h%1)?'30':'00'; return (hh<10?'0':'')+hh+':'+mm; }
+function upd(){
+  const wk=+document.getElementById('sWk').value, we=+document.getElementById('sWe').value;
+  document.getElementById('vWk').textContent=fmtH(wk); document.getElementById('vWe').textContent=fmtH(we);
+  const diff=Math.abs(we-wk);
+  const sev=diff<=1?'节律极稳':(diff<=2?'轻度时差':'重度社交时差 (周一暴毙)');
+  document.getElementById('kJet').textContent=diff.toFixed(1)+' 小时时差';
+  document.getElementById('kMon').textContent=sev;
+  document.getElementById('kMon').style.color=diff>2?'#ef4444':'#059669';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">工作日节律锚点: ${fmtH(wk)}</text>
+    <rect x="40" y="46" width="${wk*35}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${diff>2?'#ef4444':'#059669'}">周末节律漂移: ${fmtH(we)} (撕裂 ${diff.toFixed(1)} 小时)</text>
+    <rect x="40" y="114" width="${we*35}" height="24" rx="6" fill="${diff>2?'#ef4444':'#059669'}"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">补觉最好靠“提前 1 小时早睡”或“午睡 20 分钟”，周末起床波动 ≤ 1 小时</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>周末赖床 ${diff.toFixed(1)} 小时等同于每周一次跨国倒时差！固定起床时间比固定入睡时间更能锁定生物钟！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

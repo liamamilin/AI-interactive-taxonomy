@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍩 嗜糖菌的“大脑劫持”正反馈</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🍩 嗜糖菌的“大脑劫持”正反馈</h1><p>误区：半夜疯狂想吃炸鸡奶茶纯属个人意志力薄弱。真相：高糖饮食养肥了嗜糖菌，它们会通过迷走神经发送“饿急了、快喂糖”的焦虑信号，熬过 7~14 天菌群更替期后渴求会自动消失！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>坚持低糖天然饮食天数</span><span id="vDay">5 天</span></label><input type="range" id="sDay" min="0" max="21" value="5" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>初始嗜糖菌定植比例</span><span id="vInit">75%</span></label><input type="range" id="sInit" min="20" max="95" value="75" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">当前垃圾食品渴求度</div><div class="k-val" id="kCrav" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">菌群重塑进度</div><div class="k-val" id="kProg" style="color:#059669;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const day=+document.getElementById('sDay').value, init=+document.getElementById('sInit').value;
+  document.getElementById('vDay').textContent=day+' 天'; document.getElementById('vInit').textContent=init+'%';
+  const crav=Math.max(8, Math.round(init*Math.exp(-day/6.5)));
+  const prog=Math.min(100, Math.round((1-crav/init)*100));
+  document.getElementById('kCrav').textContent=crav+'%';
+  document.getElementById('kProg').textContent=prog+'%';
+  let pts='';
+  for(let d=0;d<=21;d++){
+    pts+=`${40+d*24.5},${155-init*Math.exp(-d/6.5)*1.25} `;
+  }
+  const cx=40+day*24.5, cy=155-crav*1.25;
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="155" x2="560" y2="155" stroke="#94a3b8"/>
+    <polyline fill="none" stroke="#ef4444" stroke-width="3" points="${pts}"/>
+    <circle cx="${cx}" cy="${cy}" r="6" fill="#059669"/>
+    <text x="50" y="30" font-size="12" font-weight="800" fill="#ef4444">坚持到第 ${day} 天：嗜糖信号衰减至 ${crav}%</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“戒糖头 3 天最痛苦”是因为饿极了的嗜糖菌在向大脑疯狂报警！只要挺过第 7~14 天的菌群换代，信号就会降到 ${crav}%，你对甜食的执念自然烟消云散！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

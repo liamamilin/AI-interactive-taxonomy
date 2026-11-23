@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌬️ 生理叹气法 (Physiological Sigh)：快速降压原理</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌬️ 生理叹气法 (Physiological Sigh)：快速降压原理</h1><p>误区：紧张心跳加速时，必须用力大口快速深呼吸吸进更多氧气。真相：快速喘气反而会导致过度通气；真正激活副交感迷走神经刹车、迅速降低心率的动作是“把呼气拖得比吸气长”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>呼气时长 / 吸气时长比</span><span id="vRat">2.0x</span></label><input type="range" id="sRat" min="0.8" max="3.0" step="0.2" value="2.0" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>执行生理叹气循环次数</span><span id="vCyc">3 次</span></label><input type="range" id="sCyc" min="1" max="8" value="3" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">迷走神经刹车激活度</div><div class="k-val" id="kVag" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">心率即时回落幅度</div><div class="k-val" id="kHR">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const rat=+document.getElementById('sRat').value, cyc=+document.getElementById('sCyc').value;
+  document.getElementById('vRat').textContent=rat.toFixed(1)+'x'; document.getElementById('vCyc').textContent=cyc+' 次';
+  const vag=Math.min(98, Math.round((rat-0.5)*30 + cyc*5));
+  const drop=Math.min(22, Math.round(vag*0.22));
+  document.getElementById('kVag').textContent=vag+'%';
+  document.getElementById('kHR').textContent='-'+drop+' bpm';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">副交感神经刹车信号 (心率 -${drop} bpm): ${vag}%</text>
+    <rect x="20" y="44" width="${vag*5.4}" height="24" rx="6" fill="#059669"/>
+    <path d="M40,145 L100,100 L125,85 L280,145" fill="none" stroke="#0284c7" stroke-width="3.5"/>
+    <text x="112" y="76" text-anchor="middle" font-size="12" font-weight="800" fill="#0284c7">两段深吸 (撑开肺泡)</text>
+    <text x="240" y="130" font-size="12" font-weight="800" fill="#059669">长长慢呼 (排 CO2 + 降心率)</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>不用等心理开导，直接通过“两吸一长呼”的物理呼吸模式就能在 30 秒内用迷走神经踩下压力刹车，让心率回落 ${drop} 下！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

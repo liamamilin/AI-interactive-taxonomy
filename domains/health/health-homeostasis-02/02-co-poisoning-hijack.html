@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>☠️ 一氧化碳中毒：240 倍亲和力的霸道抢座</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>☠️ 一氧化碳中毒：240 倍亲和力的霸道抢座</h1><p>误区：煤气中毒是因为一氧化碳把房间里的氧气全烧光了。真相：一氧化碳和血红蛋白的亲和力是氧气的 240 倍——只要空气里有 0.1% 的 CO，它就会死死霸占全部血红蛋白座位且锁死剩下的氧气不准卸货！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>空气中 CO 浓度 (万分之一)</span><span id="vCo">8 ppm×100</span></label><input type="range" id="sCo" min="0" max="20" value="8" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>是否使用高压氧仓抢救</span><span id="vHbo">常压空气</span></label><input type="range" id="sHbo" min="1" max="3" value="1" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">被 CO 死锁座位比例</div><div class="k-val" id="kLock" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">组织真实可用供氧</div><div class="k-val" id="kAvail">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const co=+document.getElementById('sCo').value, hbo=+document.getElementById('sHbo').value;
+  document.getElementById('vCo').textContent=(co*0.01).toFixed(2)+'%';
+  document.getElementById('vHbo').textContent=['常压空气','吸纯氧','高压氧仓 (3大气压)'][hbo-1];
+  const lock=Math.min(92, Math.round(co*7.5 / hbo));
+  const avail=Math.max(5, 100-lock);
+  document.getElementById('kLock').textContent=lock+'%';
+  document.getElementById('kAvail').textContent=avail+'%';
+  document.getElementById('kAvail').style.color=avail<50?'#ef4444':'#059669';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">被 CO 死锁的血红蛋白: ${lock}% (且阻碍余下氧气释放!)</text>
+    <rect x="20" y="44" width="${lock*5.2}" height="24" rx="6" fill="#ef4444"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">实际有效供氧能力: ${avail}%</text>
+    <rect x="20" y="112" width="${avail*5.2}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">高压氧仓用物理溶解氧绕过被锁死的血红蛋白，并把 CO 竞争挤下座位</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>一氧化碳中毒最可怕的不是“少载了氧”，而是 240 倍霸占座位后还会让没被占的血红蛋白把氧抓得更死！高压氧仓正是用超高氧分压把 CO 硬挤下来！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

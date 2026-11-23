@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚶 餐后散步 15 分钟的奇效</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚶 餐后散步 15 分钟的奇效</h1><p>误区：饭后散步那点热量消耗才几十千卡，对控糖减肥毫无帮助。真相：哪怕只是饭后慢走 15 分钟，收缩的腿部肌肉就会不经胰岛素直接吸走血液里的葡萄糖，把血糖尖峰削掉三成！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>餐后散步时长</span><span id="vMin">15 分钟</span></label><input type="range" id="sMin" min="0" max="45" value="15" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>本餐主食碳水量</span><span id="vCarb">80 克</span></label><input type="range" id="sCarb" min="30" max="150" value="80" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">躺平血糖峰值</div><div class="k-val" id="kSit" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">散步后血糖峰值</div><div class="k-val" id="kWlk" style="color:#059669;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const mins=+document.getElementById('sMin').value, carb=+document.getElementById('sCarb').value;
+  document.getElementById('vMin').textContent=mins+' 分钟'; document.getElementById('vCarb').textContent=carb+' 克';
+  const sit=(5.0 + carb*0.048).toFixed(1);
+  const drop=Math.min(0.38, mins*0.011);
+  const wlk=(5.0 + carb*0.048*(1-drop)).toFixed(1);
+  document.getElementById('kSit').textContent=sit+' mmol/L';
+  document.getElementById('kWlk').textContent=wlk+' mmol/L';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">餐后直接瘫坐: 峰值 ${sit} mmol/L</text>
+    <rect x="20" y="44" width="${Math.min(540,parseFloat(sit)*42)}" height="24" rx="6" fill="#ef4444"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">餐后慢走 ${mins} 分钟: 峰值降至 ${wlk} mmol/L (-${(drop*100).toFixed(0)}%)</text>
+    <rect x="20" y="112" width="${Math.min(540,parseFloat(wlk)*42)}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">不用跑步流汗，只需饭后 20 分钟内起身慢走即可大幅削平糖峰</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>餐后 30 分钟是血糖爬坡窗口！只散步 ${mins} 分钟，就能让肌肉当场吸走 ${(drop*100).toFixed(0)}% 的尖峰糖负荷，性价比极高！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

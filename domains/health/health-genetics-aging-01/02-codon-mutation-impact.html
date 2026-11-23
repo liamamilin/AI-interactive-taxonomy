@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔠 碱基突变影响仪：同义突变 vs 移码灾难</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔠 碱基突变影响仪：同义突变 vs 移码灾难</h1><p>误区：DNA 上哪怕只错了一个字母，整个人就会得严重遗传病。真相：密码子具有“简并性”，改最后一个字母常常还是同一个氨基酸（静默无事）；但如果不小心多/少了一个字母导致“移码”，后面整句话就全成了乱码！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setMut('syn',this)">同义突变 (改密码子第3位)</button>
+        <button class="btn" onclick="setMut('miss',this)">错义突变 (换掉1个氨基酸)</button>
+        <button class="btn" onclick="setMut('frame',this)">移码突变 (删掉1个字母!)</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>突变发生在基因序列中的位置</span><span id="vPos">靠前 (第20%)</span></label><input type="range" id="sPos" min="10" max="90" value="20" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">蛋白质功能保留度</div><div class="k-val" id="kFun">—</div></div>
+        <div class="kpi"><div class="k-lbl">后果严重度</div><div class="k-val" id="kSev">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let mtype='syn';
+function setMut(t,btn){ mtype=t; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const pos=+document.getElementById('sPos').value;
+  document.getElementById('vPos').textContent='第 '+pos+'% 处';
+  const fun=mtype==='syn'?100:(mtype==='miss'?72:Math.max(5, pos-10));
+  document.getElementById('kFun').textContent=fun+'%';
+  document.getElementById('kFun').style.color=fun>80?'#059669':(fun>40?'#f59e0b':'#ef4444');
+  document.getElementById('kSev').textContent=mtype==='syn'?'完全无害 (静默)':(mtype==='miss'?'局部微调':'毁灭性全段乱码!');
+  let txt='';
+  if(mtype==='syn') txt='THE BIG CAT ATE THE RAT → 意思完全不变！';
+  else if(mtype==='miss') txt='THE BIG BAT ATE THE RAT → 只改了一个词';
+  else txt='THE BIC ATA TET HER AT... → 少1字母后面全错位!';
+  document.getElementById('svg').innerHTML=`
+    <rect x="30" y="34" width="540" height="52" rx="10" fill="#f8fafc" stroke="var(--tax-border)"/>
+    <text x="300" y="66" text-anchor="middle" font-size="16" font-weight="850" fill="${mtype==='frame'?'#ef4444':'#0284c7'}">${txt}</text>
+    <text x="30" y="122" font-size="13" font-weight="800" fill="var(--tax-text)">蛋白功能保留率: ${fun}%</text>
+    <rect x="30" y="132" width="${fun*5.4}" height="22" rx="6" fill="${fun>80?'#059669':(fun>40?'#f59e0b':'#ef4444')}"/>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>三个字母读成一个词！只要删掉或插入 1 个字母（移码突变），从第 ${pos}% 位置往后的所有三联体阅读框全部错位，整条蛋白质瞬间废掉！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

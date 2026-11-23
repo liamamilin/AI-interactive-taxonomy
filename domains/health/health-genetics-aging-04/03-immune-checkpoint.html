@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🪪 免疫检查点 PD-1：癌细胞是怎么“伪造良民证”的？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🪪 免疫检查点 PD-1：癌细胞是怎么“伪造良民证”的？</h1><p>误区：肿瘤患者体内没有能杀死癌细胞的免疫部队，只能靠化疗无差别毒杀。真相：T 细胞其实早就冲到了肿瘤旁边，只是狡猾的癌细胞举起一张 PD-L1“假良民证”，骗得 T 细胞踩下刹车不敢开火！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setDrug(false,this)">未用药：癌细胞举起假良民证 (PD-L1)</button>
+        <button class="btn" onclick="setDrug(true,this)">注射 PD-1 阻断药：撕掉假证件!</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>肿瘤微环境 T 细胞浸润数量</span><span id="vTc">75%</span></label><input type="range" id="sTc" min="20" max="100" value="75" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">T 细胞实际开火杀伤率</div><div class="k-val" id="kKill" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">免疫检查点状态</div><div class="k-val" id="kSt">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let drug=false;
+function setDrug(d,btn){ drug=d; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const tc=+document.getElementById('sTc').value; document.getElementById('vTc').textContent=tc+'%';
+  const kill=drug?Math.round(tc*0.88):Math.round(tc*0.12);
+  document.getElementById('kKill').textContent=kill+'%';
+  document.getElementById('kSt').textContent=drug?'刹车已松开 · 全力清剿!':'被假证件欺骗休眠';
+  document.getElementById('kSt').style.color=drug?'#059669':'#ef4444';
+  document.getElementById('svg').innerHTML=`
+    <circle cx="140" cy="92" r="38" fill="#e0f2fe" stroke="#0284c7" stroke-width="3"/>
+    <text x="140" y="88" text-anchor="middle" font-size="14" font-weight="850" fill="#0369a1">🛡️ T 细胞</text>
+    <text x="140" y="108" text-anchor="middle" font-size="12" fill="#0284c7">兵力 ${tc}%</text>
+    <line x1="178" y1="92" x2="380" y2="92" stroke="${drug?'#059669':'#ef4444'}" stroke-width="4" stroke-dasharray="${drug?'0':'6 4'}"/>
+    <text x="279" y="75" text-anchor="middle" font-size="12.5" font-weight="850" fill="${drug?'#059669':'#ef4444'}">${drug?'💊 PD-1 阻断握手失败 → 开火!':'🪪 握手成功 → T细胞被骗停手'}</text>
+    <circle cx="425" cy="92" r="42" fill="#fee2e2" stroke="#ef4444" stroke-width="3"/>
+    <text x="425" y="88" text-anchor="middle" font-size="14" font-weight="850" fill="#b91c1c">👾 癌细胞</text>
+    <text x="425" y="108" text-anchor="middle" font-size="12" fill="#ef4444">被清除率 ${kill}%</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>PD-1 免疫疗法并不直接毒死癌细胞，而是用单抗把癌细胞的“伪造良民证”挡住，让身体原本自带的 T 细胞军团瞬间恢复 <strong>${kill}% 杀伤力</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

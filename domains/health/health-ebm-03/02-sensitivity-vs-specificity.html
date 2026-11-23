@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎛️ 灵敏度 vs 特异度：安检门槛往哪边调？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎛️ 灵敏度 vs 特异度：安检门槛往哪边调？</h1><p>误区：好医生和好仪器可以同时做到零漏诊和零误诊。真相：就像机场安检门——调太敏感连皮带扣都响（特异度暴跌），调太松真带刀过去也不响（灵敏度暴跌），两头永远互相拉扯！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>化验单判定阈值严松度 (左=极敏, 右=极严)</span><span id="vCut">45 分</span></label><input type="range" id="sCut" min="15" max="85" value="45" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>病症与健康指标区分清晰度</span><span id="vSep">70%</span></label><input type="range" id="sSep" min="30" max="95" value="70" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">灵敏度 (真病人检出率)</div><div class="k-val" id="kSen" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">特异度 (健康人放行率)</div><div class="k-val" id="kSpe" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const cut=+document.getElementById('sCut').value, sep=+document.getElementById('sSep').value;
+  document.getElementById('vCut').textContent=cut+' 分'; document.getElementById('vSep').textContent=sep+'%';
+  const spread=40 - sep*0.25;
+  const sen=Math.round(100/(1+Math.exp((cut-62)/spread)));
+  const spe=Math.round(100/(1+Math.exp((38-cut)/spread)));
+  document.getElementById('kSen').textContent=sen+'%';
+  document.getElementById('kSpe').textContent=spe+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">灵敏度 (不错放真病人 · 初筛指标): ${sen}%</text>
+    <rect x="20" y="44" width="${sen*5.2}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">特异度 (不误伤健康人 · 确诊指标): ${spe}%</text>
+    <rect x="20" y="112" width="${spe*5.2}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">两步法策略：先用高灵敏度初筛捞出全部嫌疑，再用高特异度确诊排除假阳性</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>初筛试纸（如核酸/血压初测）必须高灵敏（${sen}%），宁可错报也别漏掉；而动手术切器官前的活检确诊则必须高特异（${spe}%），绝不能切错好人！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

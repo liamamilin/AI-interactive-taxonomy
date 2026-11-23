@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔥 群体免疫阈值：1 - 1/R0 防火墙计算器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔥 群体免疫阈值：1 - 1/R0 防火墙计算器</h1><p>误区：不管什么传染病，只要 60% 的人打了疫苗就肯定能实现群体免疫保护全城。真相：群体免疫阈值等于 1 - 1/R0——越容易传染的病毒（如麻疹 R0=15），需要的防火墙覆盖率就越接近 95%！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>病毒传染再生数 R0</span><span id="vR0">4.0</span></label><input type="range" id="sR0" min="1.5" max="12" step="0.5" value="4.0" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>全城实际疫苗免疫率</span><span id="vVac">70%</span></label><input type="range" id="sVac" min="0" max="98" value="70" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">所需群体免疫门槛</div><div class="k-val" id="kThr" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">实际有效再生数 Re</div><div class="k-val" id="kRe">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const r0=+document.getElementById('sR0').value, vac=+document.getElementById('sVac').value/100;
+  document.getElementById('vR0').textContent=r0.toFixed(1); document.getElementById('vVac').textContent=(vac*100).toFixed(0)+'%';
+  const thr=Math.round((1-1/r0)*100);
+  const re=(r0*(1-vac)).toFixed(2);
+  const safe=parseFloat(re)<1.0;
+  document.getElementById('kThr').textContent=thr+'%';
+  document.getElementById('kRe').textContent=re+(safe?' (<1 熄灭!)':' (≥1 扩散)');
+  document.getElementById('kRe').style.color=safe?'#059669':'#ef4444';
+  let dots='';
+  for(let i=0;i<24;i++){
+    const imm=i < Math.round(24*vac);
+    const x=42+(i%12)*45, y=45+Math.floor(i/12)*45;
+    dots+=`<circle cx="${x}" cy="${y}" r="13" fill="${imm?'#059669':(safe?'#94a3b8':'#ef4444')}"/>`;
+  }
+  document.getElementById('svg').innerHTML=dots+`<text x="35" y="152" font-size="13" font-weight="800" fill="${safe?'#059669':'#ef4444'}">${safe?'✅ 绿色防火墙已切断传播链，没打疫苗的弱者也被间接保护了！':'❌ 防火墙有缺口，病毒仍在人群中穿梭传染'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>免疫率跨过 <strong>${thr}%</strong>（<code>1 - 1/${r0.toFixed(1)}</code>）的那一刻，有效传染数跌破 1.0，病毒找不到下家就会自然熄灭——这保护了无法打疫苗的新生儿和老人！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⛓️ 相邻关节假说：为什么膝盖痛往往是髋关节的锅？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⛓️ 相邻关节假说：为什么膝盖痛往往是髋关节的锅？</h1><p>误区：深蹲膝盖痛就只贴膝盖膏药，腰痛就只按腰。真相：人体关节是“灵活-稳定-灵活”交替串起来的！只要髋关节或脚踝死硬，夹在中间的膝盖和下腰部就会被迫乱晃代偿直到受伤！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>髋关节与脚踝灵活度</span><span id="vMob">45%</span></label><input type="range" id="sMob" min="15" max="100" value="45" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>核心深层肌肉稳定能力</span><span id="vStb">60%</span></label><input type="range" id="sStb" min="20" max="100" value="60" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">腰椎与膝盖代偿剪切力</div><div class="k-val" id="kCmp" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">解决思路</div><div class="k-val" id="kFix">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const mob=+document.getElementById('sMob').value, stb=+document.getElementById('sStb').value;
+  document.getElementById('vMob').textContent=mob+'%'; document.getElementById('vStb').textContent=stb+'%';
+  const comp=Math.max(5, Math.round((100-mob)*0.75 + (100-stb)*0.25));
+  document.getElementById('kCmp').textContent=comp+'%';
+  document.getElementById('kCmp').style.color=comp>45?'#ef4444':'#059669';
+  document.getElementById('kFix').textContent=mob<60?'优先松解髋与踝!':'强化核心稳定';
+  const joints=[['脚踝 (需灵活)',mob,'#0284c7'],['膝盖 (需稳定)',100-comp,'#ef4444'],['髋部 (需灵活)',mob,'#0284c7'],['下腰 (需稳定)',100-comp,'#f59e0b']];
+  let svg='';
+  joints.forEach(([nm,val,col],i)=>{
+    const x=45+i*135;
+    svg+=`<rect x="${x}" y="45" width="115" height="80" rx="12" fill="${col}" opacity="0.18" stroke="${col}" stroke-width="2"/>
+    <text x="${x+57}" y="78" text-anchor="middle" font-size="12.5" font-weight="800" fill="${col}">${nm}</text>
+    <text x="${x+57}" y="106" text-anchor="middle" font-size="14" font-weight="850" fill="var(--tax-text)">${val}%</text>`;
+  });
+  document.getElementById('svg').innerHTML=svg+`<text x="45" y="162" font-size="12.5" font-weight="750" fill="var(--tax-muted)">痛点往往是“受害者”，上下游僵硬的邻居才是“罪魁祸首”</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>下腰痛和膝盖痛很多时候是“替罪羊”！因为久坐把髋关节锁死了（灵活度仅 ${mob}%），弯腰和下蹲时腰椎膝盖被迫接手工作，代偿压力飙到 ${comp}%！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🥗 菌群多样性：单调饮食 vs 30 种植物挑战</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🥗 菌群多样性：单调饮食 vs 30 种植物挑战</h1><p>误区：只要每天吃同一种“最健康的减肥餐”（比如水煮鸡胸+西兰花），肠道就最健康。真相：单一食谱会饿死 80% 的有益菌种，让肠道变成脆弱的荒漠，一旦遇上病菌或抗生素立刻崩溃！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>每周不重样天然植物种类</span><span id="vDiv">18 种</span></label><input type="range" id="sDiv" min="3" max="35" value="18" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>突发广谱抗生素/熬夜冲击</span><span id="vHit">40%</span></label><input type="range" id="sHit" min="0" max="90" value="40" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">菌群生态韧性</div><div class="k-val" id="kRes" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">致病菌趁虚占比</div><div class="k-val" id="kBad" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const div=+document.getElementById('sDiv').value, hit=+document.getElementById('sHit').value;
+  document.getElementById('vDiv').textContent=div+' 种'; document.getElementById('vHit').textContent=hit+'%';
+  const res=Math.max(10, Math.min(98, Math.round(div*2.8 - hit*0.4)));
+  const bad=Math.max(2, 100-res);
+  document.getElementById('kRes').textContent=res+' 分';
+  document.getElementById('kBad').textContent=bad+'%';
+  let dots='';
+  for(let i=0;i<24;i++){
+    const x=42+(i%12)*45, y=45+Math.floor(i/12)*50;
+    const isGood=i < Math.round(24*res/100);
+    dots+=`<circle cx="${x}" cy="${y}" r="14" fill="${isGood?`hsl(${140+i*11},65%,45%)`:'#ef4444'}"/>`;
+  }
+  document.getElementById('svg').innerHTML=dots+`<text x="35" y="155" font-size="13" font-weight="800" fill="var(--tax-text)">彩色为多样有益菌群，红色为趁虚而入的致病菌 (${bad}%)</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>营养学前沿的“每周 30 种植物原则”不是玄学——物种越丰富的肠道热带雨林（当前 ${div} 种），越不会给坏细菌留出空生态位！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

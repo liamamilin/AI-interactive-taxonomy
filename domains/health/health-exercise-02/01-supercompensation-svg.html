@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📈 超量恢复黄金窗口曲线（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📈 超量恢复黄金窗口曲线（SVG）</h1><p>误区：肌肉是在健身房举铁的那一小时里长出来的，练得越勤快长越快。真相：训练只是在“微损伤破坏肌肉”，真正的生长发生在吃饱睡足的休息日——练太勤会越练越弱，歇太久又会打回原形！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>两次高强度训练间隔天数</span><span id="vRest">3 天</span></label><input type="range" id="sRest" min="1" max="10" value="3" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>单次训练破坏刺激强度</span><span id="vStim">70%</span></label><input type="range" id="sStim" min="30" max="100" value="70" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">下次开练时体能基线</div><div class="k-val" id="kBase">—</div></div>
+        <div class="kpi"><div class="k-lbl">长期演化趋势</div><div class="k-val" id="kTr">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const rest=+document.getElementById('sRest').value, stim=+document.getElementById('sStim').value;
+  document.getElementById('vRest').textContent=rest+' 天'; document.getElementById('vStim').textContent=stim+'%';
+  const peakDay=1.5 + stim/45;
+  const curve=d=>{
+    if(d<peakDay*0.6) return 100 - stim*0.4*(1-d/(peakDay*0.6));
+    return 100 + stim*0.25*Math.exp(-Math.pow((d-peakDay)/1.8,2));
+  };
+  const nextVal=Math.round(curve(rest));
+  const gain=nextVal-100;
+  document.getElementById('kBase').textContent=(gain>=0?'+':'')+gain+'% ('+nextVal+')';
+  document.getElementById('kBase').style.color=gain>=5?'#059669':(gain<0?'#ef4444':'#f59e0b');
+  document.getElementById('kTr').textContent=gain>=5?'螺旋上升 (超量恢复)':(gain<0?'过度训练滑坡!':'原地踏步 (歇太久)');
+  let pts='';
+  for(let d=0;d<=10;d+=0.25){ pts+=`${40+d*52},${125-(curve(d)-100)*2.2} `; }
+  const cx=40+rest*52, cy=125-(nextVal-100)*2.2;
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="125" x2="560" y2="125" stroke="#94a3b8" stroke-dasharray="4 3"/>
+    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${pts}"/>
+    <circle cx="${cx}" cy="${cy}" r="6" fill="${gain>=5?'#059669':'#ef4444'}"/>
+    <text x="50" y="28" font-size="12" font-weight="800" fill="#0284c7">先降(疲劳) → 后升(超量峰值在第 ${peakDay.toFixed(1)} 天) → 再回落(消退)</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>超量恢复窗口就在训练后第 <strong>${peakDay.toFixed(1)} 天</strong>！间隔 ${rest} 天开练刚好踩在 ${gain>=0?'+':''}${gain}% 位置，这才是科学的螺旋上升节奏！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

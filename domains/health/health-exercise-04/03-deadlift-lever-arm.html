@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📦 搬重物弯腰 vs 屈髋：腰椎力矩灾难对比</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📦 搬重物弯腰 vs 屈髋：腰椎力矩灾难对比</h1><p>误区：搬个 20 公斤快递而已，我弯腰直接拎起来腰肌也就出 20 公斤力。真相：因为竖脊肌距离脊柱力臂极短（仅 5 厘米），重物离身体只要远 40 厘米，腰椎椎间盘瞬间承受高达 160 公斤以上的恐怖挤压力！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>箱子离腰椎重心的水平距离</span><span id="vDist">40 cm</span></label><input type="range" id="sDist" min="15" max="60" value="40" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>手里搬运的箱子重量</span><span id="vWt">20 kg</span></label><input type="range" id="sWt" min="5" max="40" value="20" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">腰椎肌肉被迫拉力</div><div class="k-val" id="kForce" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">力矩放大倍数</div><div class="k-val" id="kMul">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const dist=+document.getElementById('sDist').value, wt=+document.getElementById('sWt').value;
+  document.getElementById('vDist').textContent=dist+' cm'; document.getElementById('vWt').textContent=wt+' kg';
+  const mul=(dist/5).toFixed(1), force=Math.round(wt*dist/5);
+  document.getElementById('kForce').textContent=force+' kg';
+  document.getElementById('kForce').style.color=force>150?'#ef4444':'#059669';
+  document.getElementById('kMul').textContent=mul+'x';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#64748b">物品实际重量: ${wt} kg</text>
+    <rect x="20" y="44" width="${wt*1.2}" height="22" rx="6" fill="#64748b"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${force>150?'#ef4444':'#059669'}">腰椎 L5/S1 承受等效压力 (${mul}x 杠杆): ${force} kg</text>
+    <rect x="20" y="112" width="${Math.min(540,force*1.2)}" height="24" rx="6" fill="${force>150?'#ef4444':'#059669'}"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">搬重物铁律：把箱子贴紧小腿肚（缩力臂）+ 屈髋下蹲用臀腿发力！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只需把箱子拉近身体（从 50cm 缩到 20cm），腰椎压力瞬间暴降 60%！这就是为什么运动科学强调“贴紧重心、屈髋发力”！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

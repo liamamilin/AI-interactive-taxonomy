@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏗️ 80/20 黄金耐力配比：Zone 2 地基 + 间歇尖塔</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏗️ 80/20 黄金耐力配比：Zone 2 地基 + 间歇尖塔</h1><p>误区：每次跑步都跑到喘得要死（Zone 3~4），心肺进步才最快。真相：职业运动员 80% 时间都在能轻松聊天的 Zone 2 扩建线粒体地基，只留 20% 冲最高强度拔尖塔！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>温和 Zone 2 有氧时长占比</span><span id="vZ2">80%</span></label><input type="range" id="sZ2" min="20" max="95" value="80" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>每周总耐力训练小时数</span><span id="vHr">4.5 小时</span></label><input type="range" id="sHr" min="1" max="10" step="0.5" value="4.5" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">线粒体地基增厚</div><div class="k-val" id="kBase" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">年度 VO2 Max 涨幅</div><div class="k-val" id="kGain" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const z2=+document.getElementById('sZ2').value, hr=+document.getElementById('sHr').value;
+  document.getElementById('vZ2').textContent=z2+'%'; document.getElementById('vHr').textContent=hr+' 小时';
+  const base=Math.round(z2*0.6 + hr*4);
+  const hiit=100-z2;
+  const gain=( (100-Math.abs(z2-80)*1.2)/100 * hr * 1.4 ).toFixed(1);
+  document.getElementById('kBase').textContent=base+' 分';
+  document.getElementById('kGain').textContent='+'+gain+' ml/kg/min';
+  document.getElementById('svg').innerHTML=`
+    <rect x="40" y="60" width="${z2*5.2}" height="42" rx="6" fill="#059669"/>
+    <rect x="${40+z2*5.2}" y="60" width="${hiit*5.2}" height="42" rx="6" fill="#ef4444"/>
+    <text x="45" y="46" font-size="13" font-weight="800" fill="#059669">绿区 Zone 2 地基 (${z2}%)：扩建毛细血管与线粒体</text>
+    <text x="560" y="124" text-anchor="end" font-size="13" font-weight="800" fill="#ef4444">红区高强度间歇 (${hiit}%)：拉升心脏每搏输出上限</text>
+    <text x="40" y="164" font-size="12.5" font-weight="750" fill="var(--tax-muted)">80/20 极化训练兼顾“不伤膝盖、可持续积累”与“拔高天花板”</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>天天硬冲高强度不仅极易疲劳受伤，线粒体地基也打不牢；稳住 80% 轻松说话的 Zone 2 + 20% 短冲间歇，VO2 Max 年涨幅反而最高（+${gain}）！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

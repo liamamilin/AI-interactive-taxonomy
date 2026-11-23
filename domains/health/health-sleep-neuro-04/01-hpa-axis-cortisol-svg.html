@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📈 HPA 压力轴：急性应激 vs 慢性皮质醇内耗（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📈 HPA 压力轴：急性应激 vs 慢性皮质醇内耗（SVG）</h1><p>误区：压力越大越让人清醒，长期高压只会让人“习惯了抗压”。真相：人类演化出皮质醇是为了应付 5 分钟的逃命（临时拆免疫、升血糖）；如果心理压力 24 小时不关闭，高皮质醇会直接杀死海马体神经元！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>工作/焦虑精神内耗持续度</span><span id="vStr">75%</span></label><input type="range" id="sStr" min="10" max="100" value="75" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>下班后冥想/运动释放度</span><span id="vRel">25%</span></label><input type="range" id="sRel" min="0" max="100" value="25" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">夜间皮质醇残留</div><div class="k-val" id="kCor" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">海马体记忆与免疫受损度</div><div class="k-val" id="kDmg">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const str=+document.getElementById('sStr').value, rel=+document.getElementById('sRel').value;
+  document.getElementById('vStr').textContent=str+'%'; document.getElementById('vRel').textContent=rel+'%';
+  const cor=Math.max(10, Math.round(str*(1-rel/130)));
+  const dmg=Math.max(5, Math.round(cor*0.85));
+  document.getElementById('kCor').textContent=cor+' 单位';
+  document.getElementById('kDmg').textContent=dmg+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="${cor>50?'#ef4444':'#059669'}">慢性皮质醇滞留水平: ${cor} 单位</text>
+    <rect x="20" y="44" width="${cor*5.4}" height="24" rx="6" fill="${cor>50?'#ef4444':'#059669'}"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#f59e0b">海马体记忆压抑 + 免疫防线削弱: ${dmg}%</text>
+    <rect x="20" y="112" width="${dmg*5.4}" height="24" rx="6" fill="#f59e0b"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">大脑分不清“真的老虎在追”还是“明天要交的 PPT”，照样拉响战时警报</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>动物跑完步就把压力荷尔蒙抖干净了，只有人类会在床上反复反刍！通过深呼吸或运动把压力反应“物理闭环”，才能让夜间皮质醇回落到 ${cor} 以下！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

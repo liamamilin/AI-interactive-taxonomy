@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚨 水中毒警告：马拉松后只猛灌纯净水为什么致命？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚨 水中毒警告：马拉松后只猛灌纯净水为什么致命？</h1><p>误区：运动出大汗后口渴，只要疯狂灌冰镇纯净水就能最快恢复体力，水喝越多越安全。真相：出汗丢了大量钠盐，如果只狂灌不含盐的纯水，血钠浓度骤降会让脑细胞吸水肿胀，严重时甚至引发抽搐昏迷（水中毒）！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>大量出汗后狂饮纯水升数</span><span id="vW">3.0 升</span></label><input type="range" id="sW" min="0.5" max="5.0" step="0.5" value="3.0" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>随水补充电解质/盐分</span><span id="vNa">0% (纯白水)</span></label><input type="range" id="sNa" min="0" max="100" value="0" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">血钠浓度</div><div class="k-val" id="kNa">—</div></div>
+        <div class="kpi"><div class="k-lbl">脑细胞水肿风险</div><div class="k-val" id="kRisk">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const w=+document.getElementById('sW').value, na=+document.getElementById('sNa').value;
+  document.getElementById('vW').textContent=w.toFixed(1)+' 升'; document.getElementById('vNa').textContent=na===0?'0% (纯白水)':na+'%';
+  const naLevel=Math.max(118, Math.round(140 - Math.max(0,w-1.0)*5.5*(1-na/115)));
+  const danger=naLevel<132;
+  document.getElementById('kNa').textContent=naLevel+' mmol/L';
+  document.getElementById('kNa').style.color=danger?'#ef4444':'#059669';
+  document.getElementById('kRisk').textContent=naLevel<125?'极危 (脑水肿/抽搐!)':(danger?'低钠头晕预警':'渗透压安全');
+  const r=32+(140-naLevel)*1.2;
+  document.getElementById('svg').innerHTML=`
+    <circle cx="130" cy="92" r="${r}" fill="${danger?'#fee2e2':'#e0f2fe'}" stroke="${danger?'#ef4444':'#0284c7'}" stroke-width="3"/>
+    <text x="130" y="96" text-anchor="middle" font-size="13" font-weight="850" fill="${danger?'#b91c1c':'#0369a1'}">细胞 ${danger?'吸水膨胀':'正常态'}</text>
+    <text x="230" y="70" font-size="14" font-weight="850" fill="var(--tax-text)">血钠正常基线: 135~145 mmol/L</text>
+    <text x="230" y="104" font-size="22" font-weight="900" fill="${danger?'#ef4444':'#059669'}">当前血钠: ${naLevel} mmol/L</text>
+    <text x="230" y="138" font-size="12.5" fill="var(--tax-muted)">水总是从低盐流向高盐：血被稀释后，水会疯狂灌进细胞里</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>水本身也有剂量毒性！剧烈出汗后连灌 ${w.toFixed(1)} 升纯白水而不补盐，血钠跌到 <strong>${naLevel}</strong> 时细胞会像气球一样吸水涨破！大汗补水务必加电解质！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

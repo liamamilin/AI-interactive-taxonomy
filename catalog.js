@@ -5,11 +5,11 @@ window.TAXONOMY_DATA = {
   "subtitle": "围绕“人”的 10 大认知领域 · 每个复杂概念 2 分钟玩懂",
   "stats": {
     "totalDomains": 10,
-    "litDomains": 7,
-    "totalTopics": 187,
-    "totalPlannedTopics": 88,
+    "litDomains": 8,
+    "totalTopics": 219,
+    "totalPlannedTopics": 56,
     "totalBlueprintTopics": 275,
-    "totalToys": 561
+    "totalToys": 657
   },
   "tracks": [
     {
@@ -74,179 +74,1613 @@ window.TAXONOMY_DATA = {
         {
           "id": "metabolism",
           "title": "1. 能量代谢与营养（Metabolism & Nutrition）",
-          "plannedTopics": [
-            {
-              "slug": "health-metabolism-01",
-              "title": "血糖与胰岛素过山车"
-            },
-            {
-              "slug": "health-metabolism-02",
-              "title": "热量赤字与代谢适应"
-            },
-            {
-              "slug": "health-metabolism-03",
-              "title": "三大营养素供能切换"
-            },
-            {
-              "slug": "health-metabolism-04",
-              "title": "肠道菌群与脑肠轴"
-            },
-            {
-              "slug": "health-metabolism-05",
-              "title": "断食、糖原耗尽与自噬"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "sleep-neuro",
           "title": "2. 睡眠、节律与神经化学（Sleep & Neurochemistry）",
-          "plannedTopics": [
-            {
-              "slug": "health-sleep-neuro-01",
-              "title": "昼夜节律与褪黑素"
-            },
-            {
-              "slug": "health-sleep-neuro-02",
-              "title": "睡眠周期与咖啡因半衰期"
-            },
-            {
-              "slug": "health-sleep-neuro-03",
-              "title": "多巴胺奖赏回路与耐受"
-            },
-            {
-              "slug": "health-sleep-neuro-04",
-              "title": "压力轴（皮质醇与慢性内耗）"
-            },
-            {
-              "slug": "health-sleep-neuro-05",
-              "title": "神经可塑性与髓鞘化"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "exercise",
           "title": "3. 运动生理与生物力学（Exercise & Biomechanics）",
-          "plannedTopics": [
-            {
-              "slug": "health-exercise-01",
-              "title": "有氧 vs 无氧供能切换"
-            },
-            {
-              "slug": "health-exercise-02",
-              "title": "渐进超负荷与超量恢复"
-            },
-            {
-              "slug": "health-exercise-03",
-              "title": "最大摄氧量（VO2 Max）储备"
-            },
-            {
-              "slug": "health-exercise-04",
-              "title": "关节杠杆与体态代偿"
-            },
-            {
-              "slug": "health-exercise-05",
-              "title": "拉伸与牵张反射"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "immunity",
           "title": "4. 免疫系统与微生物攻防（Immunity & Pathogens）",
-          "plannedTopics": [
-            {
-              "slug": "health-immunity-01",
-              "title": "先天免疫 vs 适应性免疫"
-            },
-            {
-              "slug": "health-immunity-02",
-              "title": "疫苗与免疫记忆秒杀"
-            },
-            {
-              "slug": "health-immunity-03",
-              "title": "过敏与自身免疫失衡"
-            },
-            {
-              "slug": "health-immunity-04",
-              "title": "抗生素耐药性与演化"
-            },
-            {
-              "slug": "health-immunity-05",
-              "title": "慢性低度炎症"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "homeostasis",
           "title": "5. 循环、呼吸与内稳态（Cardio & Homeostasis）",
-          "plannedTopics": [
-            {
-              "slug": "health-homeostasis-01",
-              "title": "血压、血管弹性与硬化"
-            },
-            {
-              "slug": "health-homeostasis-02",
-              "title": "血红蛋白与气体交换"
-            },
-            {
-              "slug": "health-homeostasis-03",
-              "title": "自主神经跷跷板与 HRV"
-            },
-            {
-              "slug": "health-homeostasis-04",
-              "title": "水盐平衡与肾脏滤过"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "genetics-aging",
           "title": "6. 遗传、细胞与衰老科学（Genetics & Longevity）",
-          "plannedTopics": [
-            {
-              "slug": "health-genetics-aging-01",
-              "title": "DNA 中心法则流水线"
-            },
-            {
-              "slug": "health-genetics-aging-02",
-              "title": "表观遗传开关"
-            },
-            {
-              "slug": "health-genetics-aging-03",
-              "title": "端粒缩短与僵尸细胞"
-            },
-            {
-              "slug": "health-genetics-aging-04",
-              "title": "癌症的多重打击模型"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "ebm",
           "title": "7. 循证医学与健康决策（Evidence-Based Medicine）",
-          "plannedTopics": [
+          "plannedTopics": []
+        }
+      ],
+      "liveTopicCount": 32,
+      "plannedTopicCount": 0,
+      "blueprintTopicCount": 32,
+      "liveToyCount": 96,
+      "topics": [
+        {
+          "id": "health/health-ebm-01",
+          "slug": "health-ebm-01",
+          "domain": "health",
+          "branch": "ebm",
+          "order": 1,
+          "title": "药物半衰期与血药浓度窗",
+          "icon": "💊",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么有的药一天吃一次、有的必须 8 小时吃一次？自己漏服后把两顿并成一顿为什么会中毒？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-immunity-04",
+            "health/health-sleep-neuro-02"
+          ],
+          "toys": [
             {
-              "slug": "health-ebm-01",
-              "title": "药物半衰期与血药浓度窗"
+              "id": "health/health-ebm-01/01-therapeutic-window-svg.html",
+              "file": "01-therapeutic-window-svg.html",
+              "path": "./domains/health/health-ebm-01/01-therapeutic-window-svg.html",
+              "title": "血药浓度治疗窗与半衰期锯齿波（SVG）",
+              "icon": "📈",
+              "archetype": "simulation",
+              "concept": "治疗窗 (Therapeutic Window) · 稳态浓度 · 半衰期",
+              "summary": "调节给药间隔小时数与药物半衰期，观察血药浓度如何稳稳卡在“有效线”与“中毒线”之间！"
             },
             {
-              "slug": "health-ebm-02",
-              "title": "安慰剂效应与双盲试验"
+              "id": "health/health-ebm-01/02-steady-state-4-halflives.html",
+              "file": "02-steady-state-4-halflives.html",
+              "path": "./domains/health/health-ebm-01/02-steady-state-4-halflives.html",
+              "title": "稳态爬坡律：为什么慢病药要连吃 4 个半衰期才见效？",
+              "icon": "⛰️",
+              "archetype": "simulation",
+              "concept": "稳态血药浓度 · 4-5个半衰期法则 · 负荷剂量",
+              "summary": "调节药物半衰期与是否采用“首剂加倍负荷量”，看血药浓度要爬多久才稳定！"
             },
             {
-              "slug": "health-ebm-03",
-              "title": "体检筛查与过度诊疗（灵敏度 vs 特异度）"
+              "id": "health/health-ebm-01/03-double-dose-danger.html",
+              "file": "03-double-dose-danger.html",
+              "path": "./domains/health/health-ebm-01/03-double-dose-danger.html",
+              "title": "漏服后翻倍补吃？肝肾峰值冲击测试",
+              "icon": "⚠️",
+              "archetype": "tradeoff",
+              "concept": "安全指数 (治疗指数 TI) · 漏服处理规则",
+              "summary": "调节药物的安全窗口宽窄（治疗指数 TI），看为什么有的药漏吃绝对不能下次吃两粒！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-exercise-01",
+          "slug": "health-exercise-01",
+          "domain": "health",
+          "branch": "exercise",
+          "order": 1,
+          "title": "有氧 vs 无氧供能切换",
+          "icon": "🏃",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么百米冲刺只能撑 10 秒，慢跑却能跑几小时？身体里藏着几台发动机？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-metabolism-03",
+            "health/health-exercise-03"
+          ],
+          "toys": [
+            {
+              "id": "health/health-exercise-01/01-atp-energy-systems-svg.html",
+              "file": "01-atp-energy-systems-svg.html",
+              "path": "./domains/health/health-exercise-01/01-atp-energy-systems-svg.html",
+              "title": "三大供能系统接力赛（SVG）",
+              "icon": "⚡",
+              "archetype": "simulation",
+              "concept": "磷酸原 ATP-CP · 无氧糖酵解 · 有氧氧化",
+              "summary": "拖动持续运动的时间轴（1 秒到 30 分钟），观察三大供能系统是如何无缝交接班的！"
             },
             {
-              "slug": "health-ebm-04",
-              "title": "剂量决定毒性（Hormesis）"
+              "id": "health/health-exercise-01/02-lactate-threshold.html",
+              "file": "02-lactate-threshold.html",
+              "path": "./domains/health/health-exercise-01/02-lactate-threshold.html",
+              "title": "乳酸阈值：为什么不是乳酸让你腿酸？",
+              "icon": "🧪",
+              "archetype": "tradeoff",
+              "concept": "乳酸阈值 · 氢离子 H+ 堆积 · 乳酸穿梭",
+              "summary": "调节配速强度与线粒体乳酸清除率，观察“产酸 vs 清酸”何时突破乳酸拐点！"
+            },
+            {
+              "id": "health/health-exercise-01/03-epoc-afterburn.html",
+              "file": "03-epoc-afterburn.html",
+              "path": "./domains/health/health-exercise-01/03-epoc-afterburn.html",
+              "title": "EPOC 后燃效应：运动完躺着也在多烧多少卡？",
+              "icon": "🔥",
+              "archetype": "comparison",
+              "concept": "运动后过量氧耗 (EPOC) · 恢复期耗能",
+              "summary": "调节运动强度与时长，揭秘高强度间歇 (HIIT) 到底能带来多大的“躺着后燃”红利！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-genetics-aging-01",
+          "slug": "health-genetics-aging-01",
+          "domain": "health",
+          "branch": "genetics-aging",
+          "order": 1,
+          "title": "DNA 中心法则流水线",
+          "icon": "🧬",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "细胞是怎么把细胞核里的 DNA 密码纸条变成手脚里的肌肉蛋白的？mRNA 疫苗又是怎么借用这条产线的？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-genetics-aging-02",
+            "health/health-immunity-02"
+          ],
+          "toys": [
+            {
+              "id": "health/health-genetics-aging-01/01-central-dogma-svg.html",
+              "file": "01-central-dogma-svg.html",
+              "path": "./domains/health/health-genetics-aging-01/01-central-dogma-svg.html",
+              "title": "DNA → mRNA → 蛋白质 车间流水线（SVG）",
+              "icon": "🏭",
+              "archetype": "spatial",
+              "concept": "中心法则 · 转录 · 翻译 · 核糖体",
+              "summary": "切换“正常基因表达”或“mRNA 外来图纸注入”，调节核糖体产能，看蛋白质是如何组装出厂的！"
+            },
+            {
+              "id": "health/health-genetics-aging-01/02-codon-mutation-impact.html",
+              "file": "02-codon-mutation-impact.html",
+              "path": "./domains/health/health-genetics-aging-01/02-codon-mutation-impact.html",
+              "title": "碱基突变影响仪：同义突变 vs 移码灾难",
+              "icon": "🔠",
+              "archetype": "comparison",
+              "concept": "三联体密码子 · 同义突变 · 移码突变",
+              "summary": "调节基因突变类型（改第3个字母 vs 删掉1个字母），看为什么有些突变毫无影响、有些却让整条蛋白全乱套！"
+            },
+            {
+              "id": "health/health-genetics-aging-01/03-gene-expression-volume.html",
+              "file": "03-gene-expression-volume.html",
+              "path": "./domains/health/health-genetics-aging-01/03-gene-expression-volume.html",
+              "title": "同样的 DNA，为什么脑细胞和肝细胞长得完全不同？",
+              "icon": "🎛️",
+              "archetype": "sandbox",
+              "concept": "细胞分化 · 转录因子 · 基因表达调控",
+              "summary": "调节“神经发育开关”与“肝酶开关”的开启度，体验 2 万个基因不变、只靠调音台就变出 200 种细胞！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-homeostasis-01",
+          "slug": "health-homeostasis-01",
+          "domain": "health",
+          "branch": "homeostasis",
+          "order": 1,
+          "title": "血压、血管弹性与硬化",
+          "icon": "❤️",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么医生量血压要看“高压”和“低压”两个数？血管变硬后脉压差为什么会突然拉大？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-immunity-05",
+            "health/health-exercise-03"
+          ],
+          "toys": [
+            {
+              "id": "health/health-homeostasis-01/01-windkessel-artery-svg.html",
+              "file": "01-windkessel-artery-svg.html",
+              "path": "./domains/health/health-homeostasis-01/01-windkessel-artery-svg.html",
+              "title": "弹性血管缓冲器 (Windkessel) 模拟器（SVG）",
+              "icon": "🩸",
+              "archetype": "simulation",
+              "concept": "动脉弹性储器效应 · 收缩压 vs 舒张压 · 脉压差",
+              "summary": "调节大动脉弹性（软橡皮管 vs 硬化铁管）与外周阻力，实时看见血压高压/低压波形如何撕裂！"
+            },
+            {
+              "id": "health/health-homeostasis-01/02-poiseuille-radius.html",
+              "file": "02-poiseuille-radius.html",
+              "path": "./domains/health/health-homeostasis-01/02-poiseuille-radius.html",
+              "title": "泊肃叶四次方定律：血管堵一半，血压飙 16 倍？",
+              "icon": "🚰",
+              "archetype": "tradeoff",
+              "concept": "泊肃叶定律 · 血管半径 r^4 · 斑块狭窄",
+              "summary": "调节动脉管腔有效通畅半径（100% 缩窄到 50%），体验流体力学里最恐怖的四次方阻力暴涨！"
+            },
+            {
+              "id": "health/health-homeostasis-01/03-baroreceptor-reflex.html",
+              "file": "03-baroreceptor-reflex.html",
+              "path": "./domains/health/health-homeostasis-01/03-baroreceptor-reflex.html",
+              "title": "压力感受器反射：蹲久了猛站起来为什么眼前一黑？",
+              "icon": "💫",
+              "archetype": "simulation",
+              "concept": "颈动脉窦压力感受器 · 体位性低血压 · 负反馈",
+              "summary": "调节起身速度与血管自主神经反应速度，看身体如何在 2 秒内把掉进腿里的血泵回大脑！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-immunity-01",
+          "slug": "health-immunity-01",
+          "domain": "health",
+          "branch": "immunity",
+          "order": 1,
+          "title": "先天免疫 vs 适应性免疫",
+          "icon": "🛡️",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么发烧鼻涕第 1 小时就来了，而针对病毒的特效抗体却要等 7 天后才上场？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-immunity-02",
+            "health/health-immunity-05"
+          ],
+          "toys": [
+            {
+              "id": "health/health-immunity-01/01-innate-vs-adaptive-svg.html",
+              "file": "01-innate-vs-adaptive-svg.html",
+              "path": "./domains/health/health-immunity-01/01-innate-vs-adaptive-svg.html",
+              "title": "免疫双防线时间轴接力（SVG）",
+              "icon": "⚔️",
+              "archetype": "timeline",
+              "concept": "先天免疫 (边防军) · 适应性免疫 (特种部队)",
+              "summary": "拖动病毒入侵后的天数（0~14天）与病毒复制速度，看两支军队如何配合清场！"
+            },
+            {
+              "id": "health/health-immunity-01/02-fever-thermostat.html",
+              "file": "02-fever-thermostat.html",
+              "path": "./domains/health/health-immunity-01/02-fever-thermostat.html",
+              "title": "发烧的演化智慧：为什么免疫系统故意调高体温？",
+              "icon": "🌡️",
+              "archetype": "tradeoff",
+              "concept": "发热反应 · 酶促免疫加速 · 病原体抑制",
+              "summary": "调节体温上升幅度与退烧药干预时机，权衡“高温杀敌增速”与“高热惊厥风险”！"
+            },
+            {
+              "id": "health/health-immunity-01/03-clonal-selection.html",
+              "file": "03-clonal-selection.html",
+              "path": "./domains/health/health-immunity-01/03-clonal-selection.html",
+              "title": "B细胞克隆选择：百万分之一钥匙怎么配出？",
+              "icon": "🔑",
+              "archetype": "spatial",
+              "concept": "克隆选择理论 · V(D)J基因重排 · 抗体库",
+              "summary": "调节免疫库随机抗体种类数与抗原匹配度，体验人类如何用有限基因盲猜出全宇宙的病毒钥匙！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-metabolism-01",
+          "slug": "health-metabolism-01",
+          "domain": "health",
+          "branch": "metabolism",
+          "order": 1,
+          "title": "血糖与胰岛素过山车",
+          "icon": "🎢",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么喝完一杯奶茶一小时后反而饿得发慌、困得睁不开眼？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-metabolism-02",
+            "health/health-metabolism-03"
+          ],
+          "toys": [
+            {
+              "id": "health/health-metabolism-01/01-glucose-spike-svg.html",
+              "file": "01-glucose-spike-svg.html",
+              "path": "./domains/health/health-metabolism-01/01-glucose-spike-svg.html",
+              "title": "餐后血糖过山车曲线（SVG）",
+              "icon": "📈",
+              "archetype": "simulation",
+              "concept": "升糖指数 GI · 胰岛素过冲 · 反应性低血糖",
+              "summary": "调节碳水升糖指数 GI 与膳食纤维/蛋白质缓冲比例，看血糖是如何飙升又跌破基线的！"
+            },
+            {
+              "id": "health/health-metabolism-01/02-insulin-resistance-lock.html",
+              "file": "02-insulin-resistance-lock.html",
+              "path": "./domains/health/health-metabolism-01/02-insulin-resistance-lock.html",
+              "title": "胰岛素抵抗：细胞门锁是如何生锈的？",
+              "icon": "🔐",
+              "archetype": "simulation",
+              "concept": "胰岛素抵抗 · 受体脱敏 · 代偿性高胰岛素血症",
+              "summary": "调节长期高频吃糖次数与肌肉运动耗糖量，看细胞门锁脱敏后胰腺是如何被迫“加班过劳”的！"
+            },
+            {
+              "id": "health/health-metabolism-01/03-walking-after-meal.html",
+              "file": "03-walking-after-meal.html",
+              "path": "./domains/health/health-metabolism-01/03-walking-after-meal.html",
+              "title": "餐后散步 15 分钟的奇效",
+              "icon": "🚶",
+              "archetype": "comparison",
+              "concept": "餐后微运动 · 肌肉非胰岛素摄糖",
+              "summary": "调节餐后起身走动的时间与强度，对比“躺平刷手机”和“慢走 15 分钟”的血糖曲线差距！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-sleep-neuro-01",
+          "slug": "health-sleep-neuro-01",
+          "domain": "health",
+          "branch": "sleep-neuro",
+          "order": 1,
+          "title": "昼夜节律与褪黑素",
+          "icon": "🌙",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么白天晒不到太阳、晚上刷 2 小时蓝光手机，就会把大脑的生物钟直接拔慢三小时？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-sleep-neuro-02",
+            "health/health-sleep-neuro-04"
+          ],
+          "toys": [
+            {
+              "id": "health/health-sleep-neuro-01/01-circadian-melatonin-svg.html",
+              "file": "01-circadian-melatonin-svg.html",
+              "path": "./domains/health/health-sleep-neuro-01/01-circadian-melatonin-svg.html",
+              "title": "视交叉上核与褪黑素节律曲线（SVG）",
+              "icon": "☀️",
+              "archetype": "simulation",
+              "concept": "昼夜节律 · 蓝光抑制褪黑素 · 晨光锚定",
+              "summary": "调节早晨晒太阳时长与睡前看手机蓝光强度，看夜间褪黑素峰值如何被压扁和推迟！"
+            },
+            {
+              "id": "health/health-sleep-neuro-01/02-two-process-sleep.html",
+              "file": "02-two-process-sleep.html",
+              "path": "./domains/health/health-sleep-neuro-01/02-two-process-sleep.html",
+              "title": "睡眠双过程模型：腺苷睡压 vs 昼夜唤醒波",
+              "icon": "🌊",
+              "archetype": "simulation",
+              "concept": "睡眠双过程模型 · 腺苷积累 · 睡前第二波精神",
+              "summary": "调节白天清醒时长与午睡时长，看为什么明明熬了一整天到晚上 9 点却突然不困了（Forbidden Zone）！"
+            },
+            {
+              "id": "health/health-sleep-neuro-01/03-social-jetlag.html",
+              "file": "03-social-jetlag.html",
+              "path": "./domains/health/health-sleep-neuro-01/03-social-jetlag.html",
+              "title": "周末补觉的“社交时差”陷阱",
+              "icon": "✈️",
+              "archetype": "tradeoff",
+              "concept": "社交时差 (Social Jetlag) · 节律撕裂",
+              "summary": "调节工作日与周末起床时间的温差，算一算你每个周一其实相当于飞了一趟几小时的跨国红眼航班！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-ebm-02",
+          "slug": "health-ebm-02",
+          "domain": "health",
+          "branch": "ebm",
+          "order": 2,
+          "title": "安慰剂效应与双盲试验",
+          "icon": "🧪",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么“我喝了之后确实感觉好了”不能证明这药有效？双盲随机对照试验怎么抓出假疗效？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-ebm-01",
+            "health/health-ebm-03"
+          ],
+          "toys": [
+            {
+              "id": "health/health-ebm-02/01-rct-placebo-svg.html",
+              "file": "01-rct-placebo-svg.html",
+              "path": "./domains/health/health-ebm-02/01-rct-placebo-svg.html",
+              "title": "三臂对比拆解：自然自愈 + 安慰剂 + 真药净效（SVG）",
+              "icon": "📊",
+              "archetype": "comparison",
+              "concept": "随机对照试验 (RCT) · 安慰剂效应 · 均值回归",
+              "summary": "调节疾病自然自愈率与安慰剂心理暗示强度，看“吃了药 70% 人好转”里到底有多少是真药的功劳！"
+            },
+            {
+              "id": "health/health-ebm-02/02-double-blind-bias.html",
+              "file": "02-double-blind-bias.html",
+              "path": "./domains/health/health-ebm-02/02-double-blind-bias.html",
+              "title": "为什么要“双盲”？连医生自己也不知道真假",
+              "icon": "🕶️",
+              "archetype": "tradeoff",
+              "concept": "双盲设计 · 观察者偏倚 · 霍桑效应",
+              "summary": "对比单盲（仅病人不知）与双盲（医生和病人都不知道分组），看医生眼神和评估是如何偷偷注水结果的！"
+            },
+            {
+              "id": "health/health-ebm-02/03-regression-to-mean.html",
+              "file": "03-regression-to-mean.html",
+              "path": "./domains/health/health-ebm-02/03-regression-to-mean.html",
+              "title": "均值回归陷阱：为什么偏方总在“最痛那天”显灵？",
+              "icon": "📉",
+              "archetype": "simulation",
+              "concept": "均值回归 (Regression to the Mean) · 症状自然波动",
+              "summary": "调节病情自然波动幅度与你忍到第几分痛才肯吃药，看“最低谷后必然反弹”怎么把功劳送给假药！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-exercise-02",
+          "slug": "health-exercise-02",
+          "domain": "health",
+          "branch": "exercise",
+          "order": 2,
+          "title": "渐进超负荷与超量恢复",
+          "icon": "🏋️",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么每天练同一组动作肌肉会越练越停滞？休息太短或休息太长怎么都会掉实力？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-exercise-01",
+            "health/health-sleep-neuro-05"
+          ],
+          "toys": [
+            {
+              "id": "health/health-exercise-02/01-supercompensation-svg.html",
+              "file": "01-supercompensation-svg.html",
+              "path": "./domains/health/health-exercise-02/01-supercompensation-svg.html",
+              "title": "超量恢复黄金窗口曲线（SVG）",
+              "icon": "📈",
+              "archetype": "simulation",
+              "concept": "超量恢复 (Supercompensation) · 过度训练 · 消退",
+              "summary": "调节两次训练之间的休息天数与单次训练刺激强度，踩准“体能爬到比上次更高”的那一天再开练！"
+            },
+            {
+              "id": "health/health-exercise-02/02-progressive-overload.html",
+              "file": "02-progressive-overload.html",
+              "path": "./domains/health/health-exercise-02/02-progressive-overload.html",
+              "title": "渐进超负荷：为什么必须记录每次重量/次数？",
+              "icon": "📓",
+              "archetype": "simulation",
+              "concept": "渐进超负荷 · 适应性阈值 · 增肌信号",
+              "summary": "对比“每次永远举同一重量”和“每周微增 2.5% 负荷”在 12 周后的肌肉与力量差距！"
+            },
+            {
+              "id": "health/health-exercise-02/03-minimum-effective-dose.html",
+              "file": "03-minimum-effective-dose.html",
+              "path": "./domains/health/health-exercise-02/03-minimum-effective-dose.html",
+              "title": "增肌最小有效剂量 vs 垃圾容量 (Junk Volume)",
+              "icon": "📦",
+              "archetype": "tradeoff",
+              "concept": "周训练容量 · 收益递减 · 垃圾容量",
+              "summary": "调节单个肌群每周的有效力竭组数（2~30 组），看什么时候边际收益变成负的“纯消耗恢复力”！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-genetics-aging-02",
+          "slug": "health-genetics-aging-02",
+          "domain": "health",
+          "branch": "genetics-aging",
+          "order": 2,
+          "title": "表观遗传开关",
+          "icon": "🎚️",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么同卵双胞胎 DNA 100% 一模一样，长大后却一个健康长寿、一个患上糖尿病？",
+          "difficulty": "进阶",
+          "related": [
+            "health/health-genetics-aging-01",
+            "health/health-genetics-aging-03"
+          ],
+          "toys": [
+            {
+              "id": "health/health-genetics-aging-02/01-epigenetic-methylation-svg.html",
+              "file": "01-epigenetic-methylation-svg.html",
+              "path": "./domains/health/health-genetics-aging-02/01-epigenetic-methylation-svg.html",
+              "title": "DNA 甲基化与组蛋白松紧调音台（SVG）",
+              "icon": "🔐",
+              "archetype": "spatial",
+              "concept": "表观遗传 · DNA 甲基化锁 · 组蛋白乙酰化",
+              "summary": "调节“运动饮食等正向表观刺激”与“抽烟熬夜压力负向甲基化”，看长寿基因是怎么被贴上封条锁死的！"
+            },
+            {
+              "id": "health/health-genetics-aging-02/02-twins-divergence.html",
+              "file": "02-twins-divergence.html",
+              "path": "./domains/health/health-genetics-aging-02/02-twins-divergence.html",
+              "title": "同卵双胞胎人生分岔路模拟器",
+              "icon": "👯",
+              "archetype": "simulation",
+              "concept": "表观漂移 · 环境变量累积 · 同基因不同命",
+              "summary": "调节双胞胎成年后生活环境差异度与共同生活年数，看原本 100% 相同的表观图谱如何逐年拉大鸿沟！"
+            },
+            {
+              "id": "health/health-genetics-aging-02/03-epigenetic-clock.html",
+              "file": "03-epigenetic-clock.html",
+              "path": "./domains/health/health-genetics-aging-02/03-epigenetic-clock.html",
+              "title": "霍瓦特表观遗传时钟：衰老其实是“信息丢失”？",
+              "icon": "🕰️",
+              "archetype": "tradeoff",
+              "concept": "DNA 甲基化时钟 · 信息论衰老 · 表观噪声",
+              "summary": "调节细胞遭受 DNA 双链断裂修复次数与表观噪音累积，看为什么衰老像一张被划花读不出磁道的光盘！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-homeostasis-02",
+          "slug": "health-homeostasis-02",
+          "domain": "health",
+          "branch": "homeostasis",
+          "order": 2,
+          "title": "血红蛋白与气体交换",
+          "icon": "🌬️",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么血红蛋白在肺里疯狂抢氧、一到运动腿部就立刻慷慨松手？一氧化碳为什么剧毒？",
+          "difficulty": "进阶",
+          "related": [
+            "health/health-exercise-03",
+            "health/health-homeostasis-01"
+          ],
+          "toys": [
+            {
+              "id": "health/health-homeostasis-02/01-bohr-effect-svg.html",
+              "file": "01-bohr-effect-svg.html",
+              "path": "./domains/health/health-homeostasis-02/01-bohr-effect-svg.html",
+              "title": "氧解离 S 型曲线与波尔效应（SVG）",
+              "icon": "📈",
+              "archetype": "simulation",
+              "concept": "氧解离曲线 · 协同结合 · 波尔效应 (Bohr Effect)",
+              "summary": "调节组织局部 CO2/酸性度与体温，看血红蛋白 S 型曲线如何“右移”精准向工作肌肉卸货！"
+            },
+            {
+              "id": "health/health-homeostasis-02/02-co-poisoning-hijack.html",
+              "file": "02-co-poisoning-hijack.html",
+              "path": "./domains/health/health-homeostasis-02/02-co-poisoning-hijack.html",
+              "title": "一氧化碳中毒：240 倍亲和力的霸道抢座",
+              "icon": "☠️",
+              "archetype": "tradeoff",
+              "concept": "一氧化碳 CO · 240倍亲和力 · 碳氧血红蛋白",
+              "summary": "调节空气中微量一氧化碳浓度，看为什么明明房间里氧气还很充足，人却会瞬间窒息！"
+            },
+            {
+              "id": "health/health-homeostasis-02/03-altitude-acclimatization.html",
+              "file": "03-altitude-acclimatization.html",
+              "path": "./domains/health/health-homeostasis-02/03-altitude-acclimatization.html",
+              "title": "高原反应与 EPO 红细胞代偿适应",
+              "icon": "🏔️",
+              "archetype": "simulation",
+              "concept": "低压缺氧 · 促红细胞生成素 EPO · 高原习服",
+              "summary": "调节到达海拔高度与停留适应天数，看肾脏如何分泌 EPO 疯狂造新红细胞来补齐稀薄氧气！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-immunity-02",
+          "slug": "health-immunity-02",
+          "domain": "health",
+          "branch": "immunity",
+          "order": 2,
+          "title": "疫苗与免疫记忆秒杀",
+          "icon": "💉",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么打过疫苗后同一款病毒再进门，连发烧都还没来得及就被直接按死在门口？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-immunity-01",
+            "society/society-public-incentives-02"
+          ],
+          "toys": [
+            {
+              "id": "health/health-immunity-02/01-vaccine-memory-svg.html",
+              "file": "01-vaccine-memory-svg.html",
+              "path": "./domains/health/health-immunity-02/01-vaccine-memory-svg.html",
+              "title": "初次感染 vs 疫苗后二次秒杀曲线（SVG）",
+              "icon": "🚀",
+              "archetype": "comparison",
+              "concept": "记忆 B/T 细胞 · 二次免疫应答 · 100倍速提效",
+              "summary": "切换“未接种首次硬扛”与“接种过疫苗记忆秒杀”，对比抗体爬升速度与发病症状严重度！"
+            },
+            {
+              "id": "health/health-immunity-02/02-herd-immunity-r0.html",
+              "file": "02-herd-immunity-r0.html",
+              "path": "./domains/health/health-immunity-02/02-herd-immunity-r0.html",
+              "title": "群体免疫阈值：1 - 1/R0 防火墙计算器",
+              "icon": "🔥",
+              "archetype": "simulation",
+              "concept": "群体免疫阈值 · 基本再生数 R0 · 传播链阻断",
+              "summary": "调节病毒的传染力 R0 与人群疫苗接种率，看为什么麻疹需要 95% 接种率而流感只需要 50%！"
+            },
+            {
+              "id": "health/health-immunity-02/03-booster-spacing.html",
+              "file": "03-booster-spacing.html",
+              "path": "./domains/health/health-immunity-02/03-booster-spacing.html",
+              "title": "加强针时机：为什么间隔太近反而白打？",
+              "icon": "🗓️",
+              "archetype": "tradeoff",
+              "concept": "生发中心亲和力成熟 · 抗体消退与回忆唤醒",
+              "summary": "调节加强针与第一针的间隔周数，看“生发中心”在什么时候最适合接受第二次刺激！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-metabolism-02",
+          "slug": "health-metabolism-02",
+          "domain": "health",
+          "branch": "metabolism",
+          "order": 2,
+          "title": "热量赤字与代谢适应",
+          "icon": "⚖️",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么每天少吃 500 大卡，前两周掉秤飞快，三个月后却纹丝不动还冷得发抖？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-metabolism-01",
+            "health/health-metabolism-05"
+          ],
+          "toys": [
+            {
+              "id": "health/health-metabolism-02/01-metabolic-adaptation-svg.html",
+              "file": "01-metabolic-adaptation-svg.html",
+              "path": "./domains/health/health-metabolism-02/01-metabolic-adaptation-svg.html",
+              "title": "平台期真相：基础代谢与 NEAT 滑坡曲线（SVG）",
+              "icon": "📉",
+              "archetype": "simulation",
+              "concept": "热量赤字 · 代谢适应 · 非运动消耗 NEAT",
+              "summary": "调节每日节食赤字幅度与蛋白/力量保护度，看身体如何通过偷偷降低日常小动作消耗来抵消饥饿！"
+            },
+            {
+              "id": "health/health-metabolism-02/02-neat-vs-exercise.html",
+              "file": "02-neat-vs-exercise.html",
+              "path": "./domains/health/health-metabolism-02/02-neat-vs-exercise.html",
+              "title": "健身 1 小时 vs 全天 NEAT 日常消耗",
+              "icon": "🪑",
+              "archetype": "comparison",
+              "concept": "TDEE 总消耗 · NEAT 非运动性产热",
+              "summary": "调节每天故意去健身房的时长与其余 15 小时“站立/走动/做家务”活跃度，看谁才是减脂大头！"
+            },
+            {
+              "id": "health/health-metabolism-02/03-muscle-vs-fat-bmr.html",
+              "file": "03-muscle-vs-fat-bmr.html",
+              "path": "./domains/health/health-metabolism-02/03-muscle-vs-fat-bmr.html",
+              "title": "肌肉 vs 脂肪：为什么“节食掉肌肉”最亏？",
+              "icon": "💪",
+              "archetype": "tradeoff",
+              "concept": "瘦体重保护 · 静息代谢率 · 复胖反弹",
+              "summary": "调节减重过程中“纯掉脂肪”与“混掉肌肉”的比例，看一年后复胖率有多恐怖！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-sleep-neuro-02",
+          "slug": "health-sleep-neuro-02",
+          "domain": "health",
+          "branch": "sleep-neuro",
+          "order": 2,
+          "title": "睡眠周期与咖啡因半衰期",
+          "icon": "☕",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么下午 3 点喝的一杯美式，到了半夜 12 点还有 1/4 在霸占你的大脑受体？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-sleep-neuro-01",
+            "health/health-ebm-01"
+          ],
+          "toys": [
+            {
+              "id": "health/health-sleep-neuro-02/01-caffeine-halflife-svg.html",
+              "file": "01-caffeine-halflife-svg.html",
+              "path": "./domains/health/health-sleep-neuro-02/01-caffeine-halflife-svg.html",
+              "title": "咖啡因 5 小时半衰期残余曲线（SVG）",
+              "icon": "☕",
+              "archetype": "simulation",
+              "concept": "咖啡因半衰期 · 腺苷受体拮抗 · 深度睡眠削减",
+              "summary": "调节喝咖啡的时间点与杯数，实时计算到了晚上 11 点入睡时血液里还剩多少毫克咖啡因！"
+            },
+            {
+              "id": "health/health-sleep-neuro-02/02-sleep-cycles-90min.html",
+              "file": "02-sleep-cycles-90min.html",
+              "path": "./domains/health/health-sleep-neuro-02/02-sleep-cycles-90min.html",
+              "title": "90 分钟睡眠周期与“起床惯性”避坑",
+              "icon": "⏰",
+              "archetype": "spatial",
+              "concept": "90分钟超昼夜节律 · NREM深睡 · REM梦境",
+              "summary": "调节总睡眠时长（5.5h ~ 8.5h），看闹钟响在“深睡谷底”还是“浅睡/REM 周期边缘”有多大差别！"
+            },
+            {
+              "id": "health/health-sleep-neuro-02/03-sleep-debt-glymphatic.html",
+              "file": "03-sleep-debt-glymphatic.html",
+              "path": "./domains/health/health-sleep-neuro-02/03-sleep-debt-glymphatic.html",
+              "title": "大脑“类淋巴洗脑系统”夜间清理实验",
+              "icon": "🧼",
+              "archetype": "simulation",
+              "concept": "胶质淋巴系统 · 深睡洗脑 · β-淀粉样蛋白",
+              "summary": "调节每晚深度睡眠占比与连续熬夜天数，看大脑夜晚“冲厕所”清理代谢废物的效率！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-ebm-03",
+          "slug": "health-ebm-03",
+          "domain": "health",
+          "branch": "ebm",
+          "order": 3,
+          "title": "体检筛查与过度诊疗（灵敏度 vs 特异度）",
+          "icon": "🔬",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "肿瘤标志物灵敏度 99%、误报率仅 1%——为什么健康人体检呈阳性时，90% 以上其实是虚惊一场？",
+          "difficulty": "进阶",
+          "related": [
+            "society/society-legal-procedure-02",
+            "science/science-probability-stats-01"
+          ],
+          "toys": [
+            {
+              "id": "health/health-ebm-03/01-screening-bayes-svg.html",
+              "file": "01-screening-bayes-svg.html",
+              "path": "./domains/health/health-ebm-03/01-screening-bayes-svg.html",
+              "title": "低患病率下的体检“假阳性爆炸”（SVG）",
+              "icon": "📊",
+              "archetype": "spatial",
+              "concept": "阳性预测值 PPV · 灵敏度 vs 特异度 · 基础患病率",
+              "summary": "调节人群真实患病率与仪器假阳性率，亲眼看见为什么对全人群普筛罕见病会产生大量冤枉开刀！"
+            },
+            {
+              "id": "health/health-ebm-03/02-sensitivity-vs-specificity.html",
+              "file": "02-sensitivity-vs-specificity.html",
+              "path": "./domains/health/health-ebm-03/02-sensitivity-vs-specificity.html",
+              "title": "灵敏度 vs 特异度：安检门槛往哪边调？",
+              "icon": "🎛️",
+              "archetype": "tradeoff",
+              "concept": "ROC 曲线 · 灵敏度 (防漏诊) · 特异度 (防误诊)",
+              "summary": "拖动诊断仪器报警阈值滑块，看“宁可错杀一百不放一个（高灵敏）”与“绝不冤枉好人（高特异）”的死对头权衡！"
+            },
+            {
+              "id": "health/health-ebm-03/03-lead-time-bias.html",
+              "file": "03-lead-time-bias.html",
+              "path": "./domains/health/health-ebm-03/03-lead-time-bias.html",
+              "title": "领先时间偏倚：早查出癌症真的让你多活了 3 年吗？",
+              "icon": "⏳",
+              "archetype": "comparison",
+              "concept": "领先时间偏倚 (Lead-Time Bias) · 过度诊断",
+              "summary": "调节早筛提前发现的年数，拆穿“筛查让 5 年生存率飙升，其实死亡时间根本没变”的统计幻觉！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-exercise-03",
+          "slug": "health-exercise-03",
+          "domain": "health",
+          "branch": "exercise",
+          "order": 3,
+          "title": "最大摄氧量（VO2 Max）储备",
+          "icon": "🫁",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么长寿医学把 VO2 Max 排在预测寿命指标的第一位，甚至超过不抽烟和降血压？",
+          "difficulty": "进阶",
+          "related": [
+            "health/health-exercise-01",
+            "health/health-homeostasis-02"
+          ],
+          "toys": [
+            {
+              "id": "health/health-exercise-03/01-vo2max-longevity-svg.html",
+              "file": "01-vo2max-longevity-svg.html",
+              "path": "./domains/health/health-exercise-03/01-vo2max-longevity-svg.html",
+              "title": "VO2 Max 与全因死亡率悬崖曲线（SVG）",
+              "icon": "❤️",
+              "archetype": "simulation",
+              "concept": "最大摄氧量 VO2 Max · 心肺储备 · 百年老人十项全能",
+              "summary": "调节当前的 VO2 Max 数值与年龄，看心肺储备从“垫底 25%”升到“前 25%”时死亡风险如何断崖暴跌！"
+            },
+            {
+              "id": "health/health-exercise-03/02-zone2-vs-vo2-intervals.html",
+              "file": "02-zone2-vs-vo2-intervals.html",
+              "path": "./domains/health/health-exercise-03/02-zone2-vs-vo2-intervals.html",
+              "title": "80/20 黄金耐力配比：Zone 2 地基 + 间歇尖塔",
+              "icon": "🏗️",
+              "archetype": "tradeoff",
+              "concept": "Zone 2 线粒体密度 · 挪威 4x4 间歇 · 极化训练",
+              "summary": "调节温和 Zone 2 有氧与高强度间歇的比例，看如何避免“天天中强度垃圾跑”把心肺卡死在瓶颈！"
+            },
+            {
+              "id": "health/health-exercise-03/03-fick-equation.html",
+              "file": "03-fick-equation.html",
+              "path": "./domains/health/health-exercise-03/03-fick-equation.html",
+              "title": "菲克公式：心脏泵血 × 肌肉抽氧双引擎",
+              "icon": "⚙️",
+              "archetype": "spatial",
+              "concept": "菲克公式 (VO2 = Q × Δa-vO2) · 心脏每搏输出量",
+              "summary": "调节“心脏泵血能力”与“外周肌肉毛细血管抽氧能力”，看两者如何相乘决定你的耐力天花板！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-genetics-aging-03",
+          "slug": "health-genetics-aging-03",
+          "domain": "health",
+          "branch": "genetics-aging",
+          "order": 3,
+          "title": "端粒缩短与僵尸细胞",
+          "icon": "🧬",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么正常细胞分裂 50 次就会自动停工？赖着不死也不干活的“僵尸细胞”是怎么毒害邻居的？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-genetics-aging-02",
+            "health/health-immunity-05"
+          ],
+          "toys": [
+            {
+              "id": "health/health-genetics-aging-03/01-telomere-hayflick-svg.html",
+              "file": "01-telomere-hayflick-svg.html",
+              "path": "./domains/health/health-genetics-aging-03/01-telomere-hayflick-svg.html",
+              "title": "海弗利克极限：染色体端粒鞋带头磨损（SVG）",
+              "icon": "👟",
+              "archetype": "simulation",
+              "concept": "端粒缩短 · 海弗利克极限 · 细胞衰老",
+              "summary": "拖动细胞分裂代数（0~60次）与慢性氧化压力，看染色体末端的“端粒保护帽”是如何越剪越短的！"
+            },
+            {
+              "id": "health/health-genetics-aging-03/02-zombie-cells-sasp.html",
+              "file": "02-zombie-cells-sasp.html",
+              "path": "./domains/health/health-genetics-aging-03/02-zombie-cells-sasp.html",
+              "title": "僵尸细胞 SASP 传染：一颗坏苹果烂一筐",
+              "icon": "🧟",
+              "archetype": "simulation",
+              "concept": "衰老细胞 (Zombie Cells) · SASP 炎性旁分泌",
+              "summary": "调节体内未清除的“僵尸细胞比例”与免疫清扫效率，看衰老细胞如何把周围好细胞也拖下水！"
+            },
+            {
+              "id": "health/health-genetics-aging-03/03-telomerase-paradox.html",
+              "file": "03-telomerase-paradox.html",
+              "path": "./domains/health/health-genetics-aging-03/03-telomerase-paradox.html",
+              "title": "端粒酶悖论：为什么不能直接全身无限加长端粒？",
+              "icon": "⚖️",
+              "archetype": "tradeoff",
+              "concept": "端粒酶激活 · 细胞永生 vs 癌症风险",
+              "summary": "调节端粒酶人工激活强度与 DNA 突变纠错力，看把所有细胞变“永生”会带来什么恐怖副作用！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-homeostasis-03",
+          "slug": "health-homeostasis-03",
+          "domain": "health",
+          "branch": "homeostasis",
+          "order": 3,
+          "title": "自主神经跷跷板与 HRV",
+          "icon": "💓",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么健康的心脏跳动节奏不是像机械节拍器一样绝对精准，反而“越乱一点越健康”？",
+          "difficulty": "进阶",
+          "related": [
+            "health/health-sleep-neuro-04",
+            "health/health-homeostasis-01"
+          ],
+          "toys": [
+            {
+              "id": "health/health-homeostasis-03/01-hrv-beat-variation-svg.html",
+              "file": "01-hrv-beat-variation-svg.html",
+              "path": "./domains/health/health-homeostasis-03/01-hrv-beat-variation-svg.html",
+              "title": "HRV 心率变异性：节拍器 vs 敏捷呼吸波形（SVG）",
+              "icon": "📈",
+              "archetype": "simulation",
+              "concept": "心率变异性 (HRV) · 交感油门 vs 副交感刹车",
+              "summary": "调节心理压力与副交感恢复力，对比“僵硬像机器人”和“随着呼吸灵动微调”的 R-R 间期！"
+            },
+            {
+              "id": "health/health-homeostasis-03/02-rsa-breathing-coupling.html",
+              "file": "02-rsa-breathing-coupling.html",
+              "path": "./domains/health/health-homeostasis-03/02-rsa-breathing-coupling.html",
+              "title": "呼吸性窦性心律不齐：6次/分钟共振呼吸",
+              "icon": "🌬️",
+              "archetype": "tradeoff",
+              "concept": "呼吸性窦性心律不齐 (RSA) · 0.1Hz 共振频率",
+              "summary": "调节每分钟呼吸次数（4~16次/分），找准让心脏和呼吸完美同频共振的 6 次/分钟“黄金节拍”！"
+            },
+            {
+              "id": "health/health-homeostasis-03/03-overtraining-detector.html",
+              "file": "03-overtraining-detector.html",
+              "path": "./domains/health/health-homeostasis-03/03-overtraining-detector.html",
+              "title": "用清晨 HRV 抓出隐形“过度训练与生病前兆”",
+              "icon": "🩺",
+              "archetype": "simulation",
+              "concept": "过度训练监控 · 免疫与交感预警 · 训练负荷调整",
+              "summary": "调节连续高强度训练负荷与 HRV 晨测跌落幅度，决定今天该“继续冲大重量”还是“立刻减量休息”！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-immunity-03",
+          "slug": "health-immunity-03",
+          "domain": "health",
+          "branch": "immunity",
+          "order": 3,
+          "title": "过敏与自身免疫失衡",
+          "icon": "🤧",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么免疫系统有时候连一粒无害的花粉都要拉响核弹警报，甚至对自己关节开火？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-immunity-01",
+            "health/health-metabolism-04"
+          ],
+          "toys": [
+            {
+              "id": "health/health-immunity-03/01-hygiene-hypothesis-svg.html",
+              "file": "01-hygiene-hypothesis-svg.html",
+              "path": "./domains/health/health-immunity-03/01-hygiene-hypothesis-svg.html",
+              "title": "卫生假说：免疫系统“太闲了”就会乱开枪（SVG）",
+              "icon": "🧼",
+              "archetype": "tradeoff",
+              "concept": "卫生假说 · Th1/Th2 失衡 · IgE 肥大细胞脱颗粒",
+              "summary": "调节童年早期接触泥土/微生物的多样性与过敏原暴露，看 Th2 过敏开关是如何被调到过高的！"
+            },
+            {
+              "id": "health/health-immunity-03/02-autoimmune-friendly-fire.html",
+              "file": "02-autoimmune-friendly-fire.html",
+              "path": "./domains/health/health-immunity-03/02-autoimmune-friendly-fire.html",
+              "title": "自身免疫误伤：胸腺“新兵政审”漏网之鱼",
+              "icon": "🎯",
+              "archetype": "spatial",
+              "concept": "中枢耐受 · 分子模拟 (Molecular Mimicry) · 友军误伤",
+              "summary": "调节免疫细胞“识别精度严格度”与病毒伪装相似度，看免疫部队如何在追杀病毒时顺手误伤自己器官！"
+            },
+            {
+              "id": "health/health-immunity-03/03-desensitization-ladder.html",
+              "file": "03-desensitization-ladder.html",
+              "path": "./domains/health/health-immunity-03/03-desensitization-ladder.html",
+              "title": "脱敏疗法阶梯：微剂量诱导“免疫耐受”",
+              "icon": "🪜",
+              "archetype": "simulation",
+              "concept": "口服/舌下脱敏 · IgG4 阻断抗体 · 耐受阈值",
+              "summary": "调节脱敏起始微剂量与坚持递增周数，看免疫系统如何从“见了花生就休克”被训化成和平共处！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-metabolism-03",
+          "slug": "health-metabolism-03",
+          "domain": "health",
+          "branch": "metabolism",
+          "order": 3,
+          "title": "三大营养素供能切换",
+          "icon": "⛽",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "碳水、脂肪、蛋白质在身体里怎么排班供能？为什么有人跑完步脂肪一点没动？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-metabolism-01",
+            "health/health-exercise-01"
+          ],
+          "toys": [
+            {
+              "id": "health/health-metabolism-03/01-fuel-crossover-svg.html",
+              "file": "01-fuel-crossover-svg.html",
+              "path": "./domains/health/health-metabolism-03/01-fuel-crossover-svg.html",
+              "title": "代谢交叉点：运动强度 vs 碳水脂肪供能比（SVG）",
+              "icon": "🔀",
+              "archetype": "simulation",
+              "concept": "交叉概念 (Crossover Concept) · 脂肪氧化 vs 糖酵解",
+              "summary": "调节运动心率强度（散步到百米冲刺）与空腹状态，实时观察脂肪和糖原两条供能曲线的交汇切换！"
+            },
+            {
+              "id": "health/health-metabolism-03/02-tef-thermic-effect.html",
+              "file": "02-tef-thermic-effect.html",
+              "path": "./domains/health/health-metabolism-03/02-tef-thermic-effect.html",
+              "title": "食物热效应 (TEF)：同样吃 100 大卡，谁净剩最少？",
+              "icon": "🥩",
+              "archetype": "comparison",
+              "concept": "食物热效应 · 蛋白质消化耗能",
+              "summary": "调节一顿饭里蛋白质、碳水和脂肪的配比，算算身体光是为了消化这顿饭就要烧掉多少热量！"
+            },
+            {
+              "id": "health/health-metabolism-03/03-metabolic-flexibility.html",
+              "file": "03-metabolic-flexibility.html",
+              "path": "./domains/health/health-metabolism-03/03-metabolic-flexibility.html",
+              "title": "代谢灵活性：你的身体会丝滑切换“双燃料”吗？",
+              "icon": "🔋",
+              "archetype": "tradeoff",
+              "concept": "代谢灵活性 · 脂质氧化能力 · 酮体切换",
+              "summary": "调节久坐高糖习惯与有氧/间歇断食训练度，测试身体“断糖后会不会立刻头晕手抖”的切换能力！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-sleep-neuro-03",
+          "slug": "health-sleep-neuro-03",
+          "domain": "health",
+          "branch": "sleep-neuro",
+          "order": 3,
+          "title": "多巴胺奖赏回路与耐受",
+          "icon": "🎰",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么刷短视频越刷越空虚？“多巴胺快感跷跷板”是怎么让你对正常生活彻底失去兴趣的？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-sleep-neuro-01",
+            "health/health-sleep-neuro-04"
+          ],
+          "toys": [
+            {
+              "id": "health/health-sleep-neuro-03/01-dopamine-seesaw-svg.html",
+              "file": "01-dopamine-seesaw-svg.html",
+              "path": "./domains/health/health-sleep-neuro-03/01-dopamine-seesaw-svg.html",
+              "title": "多巴胺快感与痛苦跷跷板（SVG）",
+              "icon": "⚖️",
+              "archetype": "simulation",
+              "concept": "多巴胺基线 · 对立过程理论 · 成瘾耐受",
+              "summary": "调节高刺激快感强度（刷手机/甜食）与频次，亲眼看见大脑为了平衡而猛压出更深的痛苦空虚谷！"
+            },
+            {
+              "id": "health/health-sleep-neuro-03/02-anticipation-vs-reward.html",
+              "file": "02-anticipation-vs-reward.html",
+              "path": "./domains/health/health-sleep-neuro-03/02-anticipation-vs-reward.html",
+              "title": "多巴胺的真相：渴望 (Wanting) ≠ 享受 (Liking)",
+              "icon": "🎁",
+              "archetype": "tradeoff",
+              "concept": "奖赏预测误差 (RPE) · 随机间歇性强化",
+              "summary": "调节奖励的“不确定性随机程度”，看为什么老虎机和盲盒比确定给糖更让人上瘾！"
+            },
+            {
+              "id": "health/health-sleep-neuro-03/03-dopamine-detox-reset.html",
+              "file": "03-dopamine-detox-reset.html",
+              "path": "./domains/health/health-sleep-neuro-03/03-dopamine-detox-reset.html",
+              "title": "多巴胺受体敏感度重置（21天戒断曲线）",
+              "icon": "🌿",
+              "archetype": "simulation",
+              "concept": "D2受体上调 · 多巴胺排毒 · 基线恢复",
+              "summary": "调节戒除廉价多巴胺（短平快刺激）的天数与主动拥抱“轻微枯燥/运动”力度，看快乐能力何时恢复！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-ebm-04",
+          "slug": "health-ebm-04",
+          "domain": "health",
+          "branch": "ebm",
+          "order": 4,
+          "title": "剂量决定毒性（Hormesis）",
+          "icon": "⚗️",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么适度的紫外线、运动损伤、桑拿和断食反而让人更强壮，过量却会要命？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-exercise-02",
+            "health/health-metabolism-05"
+          ],
+          "toys": [
+            {
+              "id": "health/health-ebm-04/01-hormesis-j-curve-svg.html",
+              "file": "01-hormesis-j-curve-svg.html",
+              "path": "./domains/health/health-ebm-04/01-hormesis-j-curve-svg.html",
+              "title": "毒物兴奋效应 (Hormesis) J 型反应曲线（SVG）",
+              "icon": "📈",
+              "archetype": "simulation",
+              "concept": "毒物兴奋效应 Hormesis · 低剂量刺激适应 · 剂量毒性",
+              "summary": "拖动外部刺激剂量（运动/冷暴露/热桑拿/白藜芦醇），观察身体从“躺平退化”到“变强峰值”再到“中毒崩盘”的 J 型反转！"
+            },
+            {
+              "id": "health/health-ebm-04/02-water-coffee-ld50.html",
+              "file": "02-water-coffee-ld50.html",
+              "path": "./domains/health/health-ebm-04/02-water-coffee-ld50.html",
+              "title": "万物皆有毒：咖啡、水与维生素的致死剂量尺",
+              "icon": "📏",
+              "archetype": "comparison",
+              "concept": "帕拉塞尔苏斯毒理学 · 半数致死量 LD50 · 安全边际",
+              "summary": "切换日常常见物质（水、咖啡因、食盐、维D）并拖动摄入倍数，看“纯天然健康物质”过量后如何照样致命！"
+            },
+            {
+              "id": "health/health-ebm-04/03-sauna-cold-plunge.html",
+              "file": "03-sauna-cold-plunge.html",
+              "path": "./domains/health/health-ebm-04/03-sauna-cold-plunge.html",
+              "title": "冰水浴与桑拿：利用可控微应激激活长寿蛋白",
+              "icon": "🧊",
+              "archetype": "tradeoff",
+              "concept": "冷热交替应激 · 热休克蛋白 HSP · 冷休克蛋白",
+              "summary": "调节冷暴露/桑拿温度与单次坚持分钟数，看如何用“短时极温刺激”安全唤醒热休克蛋白而不失温冻伤！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-exercise-04",
+          "slug": "health-exercise-04",
+          "domain": "health",
+          "branch": "exercise",
+          "order": 4,
+          "title": "关节杠杆与体态代偿",
+          "icon": "🦴",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么“低头看手机 60 度”时，你的脖子其实正在扛着一个 27 公斤的保龄球？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-exercise-02",
+            "health/health-exercise-05"
+          ],
+          "toys": [
+            {
+              "id": "health/health-exercise-04/01-tech-neck-torque-svg.html",
+              "file": "01-tech-neck-torque-svg.html",
+              "path": "./domains/health/health-exercise-04/01-tech-neck-torque-svg.html",
+              "title": "低头看手机颈椎力矩放大器（SVG）",
+              "icon": "📱",
+              "archetype": "spatial",
+              "concept": "力矩杠杆原理 · 颈椎剪切力 · 前倾代偿",
+              "summary": "拖动低头角度（0° 到 60°），实时计算头部重力力臂如何把 5 公斤的脑袋变成 27 公斤重担！"
+            },
+            {
+              "id": "health/health-exercise-04/02-joint-by-joint.html",
+              "file": "02-joint-by-joint.html",
+              "path": "./domains/health/health-exercise-04/02-joint-by-joint.html",
+              "title": "相邻关节假说：为什么膝盖痛往往是髋关节的锅？",
+              "icon": "⛓️",
+              "archetype": "spatial",
+              "concept": "相邻关节假说 · 灵活度 vs 稳定度 · 运动链代偿",
+              "summary": "调节“髋关节/踝关节灵活性”僵硬程度，看被夹在中间的稳定关节（膝盖/腰椎）如何被迫替人擦屁股！"
+            },
+            {
+              "id": "health/health-exercise-04/03-deadlift-lever-arm.html",
+              "file": "03-deadlift-lever-arm.html",
+              "path": "./domains/health/health-exercise-04/03-deadlift-lever-arm.html",
+              "title": "搬重物弯腰 vs 屈髋：腰椎力矩灾难对比",
+              "icon": "📦",
+              "archetype": "comparison",
+              "concept": "腰椎L5/S1力臂 · 屈髋硬拉姿态",
+              "summary": "调节重物离身体重心的水平距离，算一算搬起一个 20 公斤箱子时腰椎要扛多大压力！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-genetics-aging-04",
+          "slug": "health-genetics-aging-04",
+          "domain": "health",
+          "branch": "genetics-aging",
+          "order": 4,
+          "title": "癌症的多重打击模型",
+          "icon": "🎯",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "人体每天都有上万个细胞发生 DNA 突变，为什么大部分人几十年都没得癌症？需要集齐几道防线被击穿？",
+          "difficulty": "进阶",
+          "related": [
+            "health/health-genetics-aging-03",
+            "health/health-immunity-01"
+          ],
+          "toys": [
+            {
+              "id": "health/health-genetics-aging-04/01-multi-hit-knudson-svg.html",
+              "file": "01-multi-hit-knudson-svg.html",
+              "path": "./domains/health/health-genetics-aging-04/01-multi-hit-knudson-svg.html",
+              "title": "诺德森“多重打击”防线击穿模拟（SVG）",
+              "icon": "🛡️",
+              "archetype": "simulation",
+              "concept": "多重打击模型 · 原癌基因油门 · 抑癌基因刹车",
+              "summary": "调节致癌物暴露强度与遗传防线完整度，看一个正常细胞要连过多少道安检故障才会变成肿瘤！"
+            },
+            {
+              "id": "health/health-genetics-aging-04/02-oncogene-vs-tsg.html",
+              "file": "02-oncogene-vs-tsg.html",
+              "path": "./domains/health/health-genetics-aging-04/02-oncogene-vs-tsg.html",
+              "title": "油门踩死 vs 刹车失灵：原癌基因与抑癌基因",
+              "icon": "🚗",
+              "archetype": "comparison",
+              "concept": "原癌基因 (油门) · 抑癌基因 (双刹车) · 隐性遗传",
+              "summary": "调节“油门突变数”与“两条抑癌刹车损坏数”，理解为什么一个遗传坏基因就会让人更容易中招！"
+            },
+            {
+              "id": "health/health-genetics-aging-04/03-immune-checkpoint.html",
+              "file": "03-immune-checkpoint.html",
+              "path": "./domains/health/health-genetics-aging-04/03-immune-checkpoint.html",
+              "title": "免疫检查点 PD-1：癌细胞是怎么“伪造良民证”的？",
+              "icon": "🪪",
+              "archetype": "spatial",
+              "concept": "免疫逃逸 · PD-1/PD-L1 检查点 · 免疫治疗",
+              "summary": "切换“肿瘤伪装度”与“PD-1 免疫检查点阻断药”，看为什么诺贝尔奖级新药能让 T 细胞重新睁开眼杀癌！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-homeostasis-04",
+          "slug": "health-homeostasis-04",
+          "domain": "health",
+          "branch": "homeostasis",
+          "order": 4,
+          "title": "水盐平衡与肾脏滤过",
+          "icon": "💧",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "每天肾脏竟要过滤 180 升原尿（相当于 360 瓶矿泉水）？吃太咸或猛喝白水为什么都会出事？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-homeostasis-01",
+            "health/health-metabolism-01"
+          ],
+          "toys": [
+            {
+              "id": "health/health-homeostasis-04/01-nephron-filtration-svg.html",
+              "file": "01-nephron-filtration-svg.html",
+              "path": "./domains/health/health-homeostasis-04/01-nephron-filtration-svg.html",
+              "title": "肾小球 180L 超滤与 99% 重吸收流水线（SVG）",
+              "icon": "🔄",
+              "archetype": "spatial",
+              "concept": "肾小球滤过 GFR · 肾小管重吸收 · 原尿 vs 终尿",
+              "summary": "调节肾脏每日滤过原尿总量与抗利尿激素 (ADH) 浓缩率，直观看见 180 升液体是如何只剩 1.5 升尿液的！"
+            },
+            {
+              "id": "health/health-homeostasis-04/02-sodium-potassium-balance.html",
+              "file": "02-sodium-potassium-balance.html",
+              "path": "./domains/health/health-homeostasis-04/02-sodium-potassium-balance.html",
+              "title": "钠钾水泵失衡：为什么“多吃咸就水肿、血压飙”？",
+              "icon": "🧂",
+              "archetype": "tradeoff",
+              "concept": "钠水潴留 · 钠钾比例 · 细胞外液渗透压",
+              "summary": "调节每日食盐钠摄入量与蔬菜水果钾摄入量，看血管为了稀释高盐是如何被迫狂吸水扩充血容量的！"
+            },
+            {
+              "id": "health/health-homeostasis-04/03-hyponatremia-water-intox.html",
+              "file": "03-hyponatremia-water-intox.html",
+              "path": "./domains/health/health-homeostasis-04/03-hyponatremia-water-intox.html",
+              "title": "水中毒警告：马拉松后只猛灌纯净水为什么致命？",
+              "icon": "🚨",
+              "archetype": "tradeoff",
+              "concept": "低钠血症 (水中毒) · 细胞渗透压胀破 · 电解质",
+              "summary": "调节大量出汗后补充的纯水量与钠盐补给，看细胞外液被稀释后红细胞和脑细胞如何吸水膨胀！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-immunity-04",
+          "slug": "health-immunity-04",
+          "domain": "health",
+          "branch": "immunity",
+          "order": 4,
+          "title": "抗生素耐药性与演化",
+          "icon": "💊",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么医生总叮嘱“就算吃 3 天不发烧了也必须把整盒抗生素吃完”？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-immunity-01",
+            "health/health-ebm-01"
+          ],
+          "toys": [
+            {
+              "id": "health/health-immunity-04/01-antibiotic-selection-svg.html",
+              "file": "01-antibiotic-selection-svg.html",
+              "path": "./domains/health/health-immunity-04/01-antibiotic-selection-svg.html",
+              "title": "抗生素半途停药：人工筛选超级细菌（SVG）",
+              "icon": "🦠",
+              "archetype": "simulation",
+              "concept": "自然选择 · 耐药突变体 · 抗生素疗程完整性",
+              "summary": "调节你吃满疗程的天数（3天停药 vs 7天全疗程），亲眼看见耐药菌如何趁你停药把地盘全部占领！"
+            },
+            {
+              "id": "health/health-immunity-04/02-virus-vs-bacteria.html",
+              "file": "02-virus-vs-bacteria.html",
+              "path": "./domains/health/health-immunity-04/02-virus-vs-bacteria.html",
+              "title": "普通感冒吃阿莫西林？病毒 vs 细菌靶点图",
+              "icon": "🎯",
+              "archetype": "comparison",
+              "concept": "细胞壁靶点 · 病毒无细胞结构 · 菌群误杀",
+              "summary": "切换病原体类型（病毒 vs 细菌）并调节滥用抗生素频次，看吃错药是怎么“敌军零伤亡、友军全团灭”的！"
+            },
+            {
+              "id": "health/health-immunity-04/03-plasmid-gene-transfer.html",
+              "file": "03-plasmid-gene-transfer.html",
+              "path": "./domains/health/health-immunity-04/03-plasmid-gene-transfer.html",
+              "title": "细菌的“耐药外挂共享”：质粒水平转移",
+              "icon": "📡",
+              "archetype": "simulation",
+              "concept": "质粒水平基因转移 · 跨菌种耐药传播",
+              "summary": "调节医院/养殖场环境中抗生素的长期低剂量暴露，看细菌之间如何像发微信文件一样互相传输耐药基因！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-metabolism-04",
+          "slug": "health-metabolism-04",
+          "domain": "health",
+          "branch": "metabolism",
+          "order": 4,
+          "title": "肠道菌群与脑肠轴",
+          "icon": "🦠",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "人体 90% 的血清素竟在肠道制造？几万亿细菌怎么遥控你的情绪和食欲？",
+          "difficulty": "进阶",
+          "related": [
+            "health/health-metabolism-01",
+            "health/health-immunity-05"
+          ],
+          "toys": [
+            {
+              "id": "health/health-metabolism-04/01-gut-brain-axis-svg.html",
+              "file": "01-gut-brain-axis-svg.html",
+              "path": "./domains/health/health-metabolism-04/01-gut-brain-axis-svg.html",
+              "title": "脑肠轴生态与神经递质工厂（SVG）",
+              "icon": "🧠",
+              "archetype": "simulation",
+              "concept": "肠道菌群 · 短链脂肪酸 SCFA · 迷走神经",
+              "summary": "调节膳食纤维摄入与精制糖/抗生素冲击，看肠道益生菌、肠壁屏障与大脑情绪如何联动！"
+            },
+            {
+              "id": "health/health-metabolism-04/02-microbiome-diversity.html",
+              "file": "02-microbiome-diversity.html",
+              "path": "./domains/health/health-metabolism-04/02-microbiome-diversity.html",
+              "title": "菌群多样性：单调饮食 vs 30 种植物挑战",
+              "icon": "🥗",
+              "archetype": "tradeoff",
+              "concept": "菌群α多样性 · 生态位竞争 · 抗扰动韧性",
+              "summary": "调节每周摄入的天然植物食材种类数，看肠道微观热带雨林是如何抵御致病菌入侵的！"
+            },
+            {
+              "id": "health/health-metabolism-04/03-craving-hijack.html",
+              "file": "03-craving-hijack.html",
+              "path": "./domains/health/health-metabolism-04/03-craving-hijack.html",
+              "title": "嗜糖菌的“大脑劫持”正反馈",
+              "icon": "🍩",
+              "archetype": "simulation",
+              "concept": "菌群食欲操纵 · 正反馈循环 · 戒糖重塑",
+              "summary": "调节嗜糖坏菌占比与坚持清淡饮食的天数，看“想吃垃圾食品”到底是你馋还是肚子里的细菌馋！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-sleep-neuro-04",
+          "slug": "health-sleep-neuro-04",
+          "domain": "health",
+          "branch": "sleep-neuro",
+          "order": 4,
+          "title": "压力轴（皮质醇与慢性内耗）",
+          "icon": "🔥",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么原始人遇到老虎跑 5 分钟就没事，现代人坐在工位上胡思乱想却能把身体熬垮？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-sleep-neuro-01",
+            "health/health-homeostasis-03"
+          ],
+          "toys": [
+            {
+              "id": "health/health-sleep-neuro-04/01-hpa-axis-cortisol-svg.html",
+              "file": "01-hpa-axis-cortisol-svg.html",
+              "path": "./domains/health/health-sleep-neuro-04/01-hpa-axis-cortisol-svg.html",
+              "title": "HPA 压力轴：急性应激 vs 慢性皮质醇内耗（SVG）",
+              "icon": "📈",
+              "archetype": "comparison",
+              "concept": "HPA 轴 · 皮质醇 · 海马体萎缩与免疫抑制",
+              "summary": "调节心理压力源持续时长与下班后“真正心理抽离度”，看慢性皮质醇如何长期腐蚀免疫与记忆！"
+            },
+            {
+              "id": "health/health-sleep-neuro-04/02-yerkes-dodson-stress.html",
+              "file": "02-yerkes-dodson-stress.html",
+              "path": "./domains/health/health-sleep-neuro-04/02-yerkes-dodson-stress.html",
+              "title": "耶克斯-多德森倒 U 曲线：适度压力 vs 崩溃过载",
+              "icon": "🏔️",
+              "archetype": "tradeoff",
+              "concept": "耶克斯-多德森定律 · 最佳唤醒水平",
+              "summary": "调节当前唤醒压力值与任务复杂度，找准从“无聊摸鱼”到“心流巅峰”再到“大脑宕机”的临界点！"
+            },
+            {
+              "id": "health/health-sleep-neuro-04/03-physiological-sigh.html",
+              "file": "03-physiological-sigh.html",
+              "path": "./domains/health/health-sleep-neuro-04/03-physiological-sigh.html",
+              "title": "生理叹气法 (Physiological Sigh)：快速降压原理",
+              "icon": "🌬️",
+              "archetype": "simulation",
+              "concept": "肺泡复张 · CO2 排空 · 迷走神经刹车",
+              "summary": "调节呼气相对吸气的延长比例，看为什么“两次吸气 + 一次长呼气”能在 30 秒内物理拉低心率！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-exercise-05",
+          "slug": "health-exercise-05",
+          "domain": "health",
+          "branch": "exercise",
+          "order": 5,
+          "title": "拉伸与牵张反射",
+          "icon": "🧘",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么猛地狠狠往下压腿反而越压越紧？高尔基腱器官是怎么在 30 秒后才肯放行的？",
+          "difficulty": "入门",
+          "related": [
+            "health/health-exercise-04",
+            "health/health-sleep-neuro-04"
+          ],
+          "toys": [
+            {
+              "id": "health/health-exercise-05/01-stretch-reflex-gto-svg.html",
+              "file": "01-stretch-reflex-gto-svg.html",
+              "path": "./domains/health/health-exercise-05/01-stretch-reflex-gto-svg.html",
+              "title": "肌梭拉警报 vs 高尔基腱器放行时间轴（SVG）",
+              "icon": "⏱️",
+              "archetype": "simulation",
+              "concept": "牵张反射 (肌梭) · 自生抑制 (高尔基腱器 GTO)",
+              "summary": "调节拉伸速度与静态保持秒数，看为什么弹震猛拉只会让肌梭拼命反抗，静待 30 秒才会彻底放松！"
+            },
+            {
+              "id": "health/health-exercise-05/02-pnf-contract-relax.html",
+              "file": "02-pnf-contract-relax.html",
+              "path": "./domains/health/health-exercise-05/02-pnf-contract-relax.html",
+              "title": "PNF 神经拉伸术：先发力再放松的黑科技",
+              "icon": "⚡",
+              "archetype": "comparison",
+              "concept": "PNF 拉伸 · 交互抑制 · 神经肌肉本体感觉",
+              "summary": "调节“先主动绷紧对抗 6 秒”的发力强度，对比普通硬拉与 PNF 拉伸瞬间的活动度突破！"
+            },
+            {
+              "id": "health/health-exercise-05/03-static-before-sprint.html",
+              "file": "03-static-before-sprint.html",
+              "path": "./domains/health/health-exercise-05/03-static-before-sprint.html",
+              "title": "热身雷区：赛前狂做静态拉伸反而跑更慢？",
+              "icon": "🏃",
+              "archetype": "tradeoff",
+              "concept": "动态热身 vs 静态拉伸 · 肌肉刚度弹簧效应",
+              "summary": "调节赛前静态拉长秒数与动态热身度，看过度拉松肌腱弹簧是如何让爆发力跳高掉水准的！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-immunity-05",
+          "slug": "health-immunity-05",
+          "domain": "health",
+          "branch": "immunity",
+          "order": 5,
+          "title": "慢性低度炎症",
+          "icon": "🕯️",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "急性炎症能救命，为什么看不见摸不着、像小火苗一样烧几十年的“慢性炎症”却是百病之源？",
+          "difficulty": "进阶",
+          "related": [
+            "health/health-metabolism-01",
+            "health/health-genetics-aging-03"
+          ],
+          "toys": [
+            {
+              "id": "health/health-immunity-05/01-chronic-inflammation-svg.html",
+              "file": "01-chronic-inflammation-svg.html",
+              "path": "./domains/health/health-immunity-05/01-chronic-inflammation-svg.html",
+              "title": "炎症闷烧雷达：内脏脂肪 + 熬夜 + 久坐（SVG）",
+              "icon": "🔥",
+              "archetype": "simulation",
+              "concept": "慢性低度炎症 (Inflammaging) · IL-6/TNF-α 细胞因子",
+              "summary": "调节内脏脂肪堆积、长期熬夜和 Omega-3/运动抗炎习惯，看体内看不见的“慢火”烧得有多旺！"
+            },
+            {
+              "id": "health/health-immunity-05/02-acute-vs-chronic.html",
+              "file": "02-acute-vs-chronic.html",
+              "path": "./domains/health/health-immunity-05/02-acute-vs-chronic.html",
+              "title": "急性炎症救命 vs 慢性炎症伤身",
+              "icon": "🚒",
+              "archetype": "comparison",
+              "concept": "急性炎症修复 · 慢性炎症组织纤维化",
+              "summary": "切换“急性扭伤/感染冲锋”与“十年不熄的慢性小火”，对比两种炎症截然相反的结局！"
+            },
+            {
+              "id": "health/health-immunity-05/03-omega3-vs-omega6.html",
+              "file": "03-omega3-vs-omega6.html",
+              "path": "./domains/health/health-immunity-05/03-omega3-vs-omega6.html",
+              "title": "餐桌上的抗炎杠杆：Omega-6 vs Omega-3 比例",
+              "icon": "🐟",
+              "archetype": "tradeoff",
+              "concept": "脂肪酸平衡 · 花生四烯酸促炎 · EPA/DHA 抗炎",
+              "summary": "调节外卖精炼植物油（Omega-6）与深海鱼/亚麻籽（Omega-3）的摄入比，看细胞膜炎症倾向如何反转！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-metabolism-05",
+          "slug": "health-metabolism-05",
+          "domain": "health",
+          "branch": "metabolism",
+          "order": 5,
+          "title": "断食、糖原耗尽与自噬",
+          "icon": "🧹",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么说“饿一饿”能启动细胞大扫除？身体从吃进最后一顿饭到开启自噬要经历几道开关？",
+          "difficulty": "进阶",
+          "related": [
+            "health/health-metabolism-01",
+            "health/health-genetics-aging-03"
+          ],
+          "toys": [
+            {
+              "id": "health/health-metabolism-05/01-fasting-timeline-svg.html",
+              "file": "01-fasting-timeline-svg.html",
+              "path": "./domains/health/health-metabolism-05/01-fasting-timeline-svg.html",
+              "title": "断食 24 小时代谢开关时间轴（SVG）",
+              "icon": "⏱️",
+              "archetype": "timeline",
+              "concept": "糖原耗尽 · 生酮切换 · 细胞自噬 (Autophagy)",
+              "summary": "拖动距离上一顿饭的禁食小时数（0~36h）与运动加速度，观察胰岛素、肝糖原与自噬的接力！"
+            },
+            {
+              "id": "health/health-metabolism-05/02-autophagy-vs-mtor.html",
+              "file": "02-autophagy-vs-mtor.html",
+              "path": "./domains/health/health-metabolism-05/02-autophagy-vs-mtor.html",
+              "title": "生长开关 mTOR vs 清理开关 AMPK 跷跷板",
+              "icon": "⚖️",
+              "archetype": "tradeoff",
+              "concept": "mTOR 通路 · AMPK 通路 · 合成与自噬平衡",
+              "summary": "调节进食频率与抗阻训练强度，看身体如何在“长肌肉合成 (mTOR)”和“细胞自噬修补 (AMPK)”间切换！"
+            },
+            {
+              "id": "health/health-metabolism-05/03-refeed-trap.html",
+              "file": "03-refeed-trap.html",
+              "path": "./domains/health/health-metabolism-05/03-refeed-trap.html",
+              "title": "断食复食暴食陷阱：为什么饿完一顿反而更胖？",
+              "icon": "🍔",
+              "archetype": "tradeoff",
+              "concept": "报复性复食 · 饥饿素反扑 · 热量补偿",
+              "summary": "调节禁食后的“复食暴饮暴食冲动”与第一口食物选择，看错误复食如何一小时毁掉 16 小时成果！"
+            }
+          ]
+        },
+        {
+          "id": "health/health-sleep-neuro-05",
+          "slug": "health-sleep-neuro-05",
+          "domain": "health",
+          "branch": "sleep-neuro",
+          "order": 5,
+          "title": "神经可塑性与髓鞘化",
+          "icon": "⚡",
+          "color": "#059669",
+          "soft": "#ecfdf5",
+          "subtitle": "为什么成年后学新技能越来越慢，而刻意练习却能把大脑里的乡间小路修成光纤高速路？",
+          "difficulty": "进阶",
+          "related": [
+            "health/health-sleep-neuro-01",
+            "health/health-exercise-02"
+          ],
+          "toys": [
+            {
+              "id": "health/health-sleep-neuro-05/01-myelination-highway-svg.html",
+              "file": "01-myelination-highway-svg.html",
+              "path": "./domains/health/health-sleep-neuro-05/01-myelination-highway-svg.html",
+              "title": "髓鞘化：大脑神经从土路升级光纤（SVG）",
+              "icon": "🛣️",
+              "archetype": "simulation",
+              "concept": "髓鞘化 (Myelination) · 跳跃传导 · 刻意练习",
+              "summary": "调节“高专注度刻意练习次数”与“夜间睡眠巩固度”，看少突胶质细胞如何把信号速度提升 50 倍！"
+            },
+            {
+              "id": "health/health-sleep-neuro-05/02-hebbian-wiring.html",
+              "file": "02-hebbian-wiring.html",
+              "path": "./domains/health/health-sleep-neuro-05/02-hebbian-wiring.html",
+              "title": "赫布定律：一起激发的神经元连在一起",
+              "icon": "🔗",
+              "archetype": "spatial",
+              "concept": "赫布学习规则 · 突触长时程增强 (LTP) · 用进废退",
+              "summary": "调节两个脑区同时激活的同步率与闲置天数，看神经突触权重是如何变粗或被修剪掉的！"
+            },
+            {
+              "id": "health/health-sleep-neuro-05/03-adult-plasticity-focus.html",
+              "file": "03-adult-plasticity-focus.html",
+              "path": "./domains/health/health-sleep-neuro-05/03-adult-plasticity-focus.html",
+              "title": "成年人可塑性双钥匙：肾上腺素 + 乙酰胆碱",
+              "icon": "🔑",
+              "archetype": "tradeoff",
+              "concept": "成年神经可塑性 · 紧迫感 + 专注聚焦 + 睡眠",
+              "summary": "调节“适度紧张紧迫感”与“注意力聚焦度”，看成年大脑为什么必须先有“犯错的烦躁感”才能启动重塑！"
             }
           ]
         }
-      ],
-      "liveTopicCount": 0,
-      "plannedTopicCount": 32,
-      "blueprintTopicCount": 32,
-      "liveToyCount": 0,
-      "topics": []
+      ]
     },
     {
       "id": "mind",

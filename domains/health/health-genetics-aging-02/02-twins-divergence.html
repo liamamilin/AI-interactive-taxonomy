@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>👯 同卵双胞胎人生分岔路模拟器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>👯 同卵双胞胎人生分岔路模拟器</h1><p>误区：只要双胞胎基因一模一样，到了 60 岁得不得大病也必然同步。真相：随着年龄增长和生活习惯分化，表观遗传漂移逐年累积，50 岁双胞胎的基因表达差异可以高达数倍！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>双胞胎各自生活环境差异度</span><span id="vDiff">70%</span></label><input type="range" id="sDiff" min="10" max="100" value="70" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>当前观测年龄</span><span id="vAge">50 岁</span></label><input type="range" id="sAge" min="5" max="80" step="5" value="50" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">表观图谱重合度</div><div class="k-val" id="kSim" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">健康结局分化度</div><div class="k-val" id="kDiv">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const diff=+document.getElementById('sDiff').value, age=+document.getElementById('sAge').value;
+  document.getElementById('vDiff').textContent=diff+'%'; document.getElementById('vAge').textContent=age+' 岁';
+  const sim=Math.max(15, Math.round(100*Math.exp(-age*diff/5500)));
+  document.getElementById('kSim').textContent=sim+'%';
+  document.getElementById('kDiv').textContent=sim<55?'显著分化 (表观漂移)':'高度一致';
+  let pA='', pB='';
+  for(let a=5;a<=age;a+=5){
+    const x=40+(a-5)/75*520;
+    const gap=(100-100*Math.exp(-a*diff/5500))*0.6;
+    pA+=`${x},${95-gap} `; pB+=`${x},${95+gap} `;
+  }
+  document.getElementById('svg').innerHTML=`
+    <polyline fill="none" stroke="#059669" stroke-width="3" points="${pA}"/>
+    <polyline fill="none" stroke="#ef4444" stroke-width="3" points="${pB}"/>
+    <text x="50" y="28" font-size="12" font-weight="800" fill="var(--tax-text)">5 岁重合出发 → ${age} 岁时表观图谱重合度仅剩 ${sim}%</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>5 岁时你们几乎是同一张白纸，但 ${age} 年的饮食、压力和环境差异把相同的基因调出了完全不同的命运轨迹！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

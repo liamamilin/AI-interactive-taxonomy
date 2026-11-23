@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🕰️ 霍瓦特表观遗传时钟：衰老其实是“信息丢失”？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🕰️ 霍瓦特表观遗传时钟：衰老其实是“信息丢失”？</h1><p>误区：衰老只是因为细胞零件纯粹用旧磨损了。真相：哈佛辛克莱团队提出的“衰老信息论”认为，年轻细胞里的基因开关原本干干净净，每次修复 DNA 损伤都会留下表观划痕噪声——细胞忘了自己是谁，衰老就开始了！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>累积 DNA 损伤与修复折腾次数</span><span id="vHit">60 次</span></label><input type="range" id="sHit" min="10" max="100" value="60" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>细胞核表观清洁重置力</span><span id="vCln">35%</span></label><input type="range" id="sCln" min="10" max="90" value="35" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">表观划痕噪音率</div><div class="k-val" id="kNoise" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">细胞身份保真度</div><div class="k-val" id="kFid" style="color:#059669;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const hit=+document.getElementById('sHit').value, cln=+document.getElementById('sCln').value;
+  document.getElementById('vHit').textContent=hit+' 次'; document.getElementById('vCln').textContent=cln+'%';
+  const noise=Math.max(5, Math.min(95, Math.round(hit*(1-cln/140))));
+  const fid=100-noise;
+  document.getElementById('kNoise').textContent=noise+'%';
+  document.getElementById('kFid').textContent=fid+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">表观遗传划痕噪音 (光盘刮花度): ${noise}%</text>
+    <rect x="20" y="44" width="${noise*5.2}" height="24" rx="6" fill="#ef4444"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">细胞身份记忆保真度: ${fid}%</text>
+    <rect x="20" y="112" width="${fid*5.2}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">基因本身还在，只是光盘被划花导致“读错开关”——这解释了为何部分重编程能逆转表观年龄</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>如果衰老主要是软件层面的“表观光盘划痕噪声（${noise}%）”而非硬件彻底报废，那抗衰的核心思路就是减少无谓损伤 + 给光盘抛光重置！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

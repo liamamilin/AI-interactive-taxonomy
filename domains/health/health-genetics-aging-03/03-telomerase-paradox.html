@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚖️ 端粒酶悖论：为什么不能直接全身无限加长端粒？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 端粒酶悖论：为什么不能直接全身无限加长端粒？</h1><p>误区：既然端粒变短让人衰老，那发明一种药把全身细胞的端粒酶全开到最大就能长生不老。真相：癌细胞之所以杀不死，正是因为它偷偷重启了端粒酶！盲目全局激活端粒酶等于拆掉防癌安全锁！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>全局端粒酶强行激活度</span><span id="vTel">65%</span></label><input type="range" id="sTel" min="0" max="100" value="65" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>p53 基因防癌纠错审查力</span><span id="vP53">70%</span></label><input type="range" id="sP53" min="20" max="100" value="70" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">组织再生年轻度</div><div class="k-val" id="kReg" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">失控癌变风险</div><div class="k-val" id="kCan" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const tel=+document.getElementById('sTel').value, p53=+document.getElementById('sP53').value;
+  document.getElementById('vTel').textContent=tel+'%'; document.getElementById('vP53').textContent=p53+'%';
+  const reg=Math.round(35 + tel*0.62);
+  const can=Math.max(4, Math.round(tel*0.85 - p53*0.45));
+  document.getElementById('kReg').textContent=reg+' 分';
+  document.getElementById('kCan').textContent=can+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">细胞无限分裂再生活力: ${reg} 分</text>
+    <rect x="20" y="44" width="${reg*5.2}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#ef4444">受损突变细胞趁机永生化癌变风险: ${can}%</text>
+    <rect x="20" y="112" width="${can*5.2}" height="24" rx="6" fill="#ef4444"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">衰老与癌症是生物演化的一枚硬币两面：怕癌才设了寿命上限</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>人体本来就有端粒酶（只在生殖细胞和干细胞里开启），之所以在普通细胞里关掉它，是因为多活几十年的代价会让受损细胞带着错误一直分裂下去（癌变风险 ${can}%）！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

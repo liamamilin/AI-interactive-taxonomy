@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔥 炎症闷烧雷达：内脏脂肪 + 熬夜 + 久坐（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔥 炎症闷烧雷达：内脏脂肪 + 熬夜 + 久坐（SVG）</h1><p>误区：只要身上没有红肿热痛、没有发烧，体内就没有炎症。真相：内脏脂肪、高糖饮食和睡眠剥夺会让巨噬细胞像永不关火的闷烧灶一样，24 小时持续释放低浓度炎性因子，悄悄腐蚀血管和大脑！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>腰围/内脏脂肪与精制糖负荷</span><span id="vVis">65%</span></label><input type="range" id="sVis" min="10" max="100" value="65" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>抗炎生活习惯 (睡眠+运动+Omega3)</span><span id="vAnti">40%</span></label><input type="range" id="sAnti" min="10" max="100" value="40" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">慢性炎症闷烧指数</div><div class="k-val" id="kInf" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">血管/代谢衰老加速</div><div class="k-val" id="kAg">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const vis=+document.getElementById('sVis').value, anti=+document.getElementById('sAnti').value;
+  document.getElementById('vVis').textContent=vis+'%'; document.getElementById('vAnti').textContent=anti+'%';
+  const inf=Math.max(8, Math.min(98, Math.round(vis*0.75 - anti*0.45 + 30)));
+  const ag=(1 + inf/100*0.8).toFixed(2)+'x';
+  document.getElementById('kInf').textContent=inf+' 分';
+  document.getElementById('kInf').style.color=inf>55?'#ef4444':'#059669';
+  document.getElementById('kAg').textContent=ag;
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="${inf>55?'#ef4444':'#059669'}">体内慢性低度炎症 (CRP / IL-6) 闷烧水平: ${inf} 分</text>
+    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="44" width="${inf*5.4}" height="24" rx="6" fill="${inf>55?'#ef4444':'#059669'}"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">抗炎灭火系统储备: ${anti}%</text>
+    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${anti*5.4}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">减掉内脏脂肪 + 规律深睡 + 肌肉收缩释放抗炎肌因子，是最高效的灭火器</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>心脑血管病、糖尿病和神经退行性变的共同底层推手正是“炎性衰老”！把内脏脂肪和垃圾睡眠的火源压低，器官衰老速度能立刻从 ${ag} 回落！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📱 低头看手机颈椎力矩放大器（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📱 低头看手机颈椎力矩放大器（SVG）</h1><p>误区：脑袋才 5 公斤左右，低个头看看手机能有多重。真相：颈椎是典型的费力短臂杠杆！每前倾 15 度，颈后肌群和椎间盘承受的等效拉力就会翻倍，60 度低头直接等效扛着一个 8 岁小孩！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>低头前倾角度</span><span id="vAng">45°</span></label><input type="range" id="sAng" min="0" max="60" step="5" value="45" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>每日保持该姿势累计小时</span><span id="vHr">3.5 小时</span></label><input type="range" id="sHr" min="0.5" max="8" step="0.5" value="3.5" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">颈椎等效承重</div><div class="k-val" id="kLoad" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">椎间盘劳损风险</div><div class="k-val" id="kRisk">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const ang=+document.getElementById('sAng').value, hr=+document.getElementById('sHr').value;
+  document.getElementById('vAng').textContent=ang+'°'; document.getElementById('vHr').textContent=hr+' 小时';
+  const load=Math.round(5 + ang*0.37);
+  const risk=Math.min(98, Math.round(load*hr*0.95));
+  document.getElementById('kLoad').textContent=load+' kg';
+  document.getElementById('kLoad').style.color=load>18?'#ef4444':'#059669';
+  document.getElementById('kRisk').textContent=risk>60?'高危 (肌肉僵硬/反弓)':'安全可控';
+  const rad=ang*Math.PI/180, hx=130+Math.sin(rad)*65, hy=125-Math.cos(rad)*65;
+  document.getElementById('svg').innerHTML=`
+    <line x1="130" y1="165" x2="130" y2="125" stroke="#64748b" stroke-width="8" stroke-linecap="round"/>
+    <line x1="130" y1="125" x2="${hx}" y2="${hy}" stroke="#0284c7" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="${hx}" cy="${hy}" r="22" fill="${load>18?'#ef4444':'#0284c7'}" opacity="0.85"/>
+    <text x="270" y="64" font-size="14" font-weight="850" fill="var(--tax-text)">头颅前倾 ${ang}° → 力臂暴增</text>
+    <text x="270" y="102" font-size="24" font-weight="900" fill="${load>18?'#ef4444':'#059669'}">等效承重 = ${load} kg</text>
+    <text x="270" y="140" font-size="12.5" fill="var(--tax-muted)">0°=5kg | 15°=12kg | 30°=18kg | 45°=22kg | 60°=27kg</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>把手机举高到视线平齐，只要把低头角度从 45° 降回 15°，脖子瞬间卸掉 <strong>10 公斤</strong>重担！物理杠杆才不管你累不累！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

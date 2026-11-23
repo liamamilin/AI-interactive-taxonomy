@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚀 初次感染 vs 疫苗后二次秒杀曲线（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚀 初次感染 vs 疫苗后二次秒杀曲线（SVG）</h1><p>误区：打完疫苗就等于身体里有一道永久物理屏障，病毒根本进不来。真相：病毒照样能进鼻腔，但疫苗提前演习留下了大量“记忆细胞”，真病毒一来 24 小时内抗体就暴涨 100 倍当场秒杀！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setVac(false,this)">未打疫苗：首次遭遇真病毒</button>
+        <button class="btn" onclick="setVac(true,this)">打过疫苗：免疫记忆秒杀</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>当前病毒变异逃逸率</span><span id="vMut">15%</span></label><input type="range" id="sMut" min="0" max="60" value="15" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">抗体起效达峰时间</div><div class="k-val" id="kTime">—</div></div>
+        <div class="kpi"><div class="k-lbl">重症/症状持续天数</div><div class="k-val" id="kSym">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let vac=false;
+function setVac(v,btn){ vac=v; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const mut=+document.getElementById('sMut').value; document.getElementById('vMut').textContent=mut+'%';
+  const eff=vac?(1-mut/130):0;
+  let pAb='', pVir='';
+  for(let d=0;d<=14;d+=0.5){
+    const x=40+d/14*520;
+    const ab=vac ? (95*eff/(1+Math.exp(-(d-1.5)/0.6))) : (55/(1+Math.exp(-(d-7)/1.0)));
+    const vir=vac ? (30*(1-eff*0.65)*Math.exp(-Math.pow((d-1.8)/1.2,2))) : (92*Math.exp(-Math.pow((d-5)/2.5,2)));
+    pAb+=`${x.toFixed(1)},${158-ab*1.25} `; pVir+=`${x.toFixed(1)},${158-vir*1.25} `;
+  }
+  document.getElementById('kTime').textContent=vac?'1.5 天极速达峰':'7~10 天慢速爬坡';
+  document.getElementById('kSym').textContent=vac?(mut>40?'轻症 2 天':'几乎无感'):'高烧难受 7 天';
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
+    <polyline fill="none" stroke="#059669" stroke-width="3" points="${pAb}"/>
+    <polyline fill="none" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4 3" points="${pVir}"/>
+    <text x="50" y="28" font-size="12" font-weight="800" fill="#059669">绿线: 特异性抗体水平</text>
+    <text x="230" y="28" font-size="12" font-weight="800" fill="#ef4444">红虚线: 病毒复制载量</text>`;
+  document.getElementById('ahaBox').innerHTML=vac
+    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>疫苗相当于让免疫系统提前拿“假病毒通缉令”打了一遍实战演习！真病毒现身时，记忆细胞 1.5 天内就把抗体拉满，病毒根本掀不起风浪！`
+    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>没打疫苗时，前 7 天身体一边烧着一边现学造抗体，病毒已经趁机把肺泡和气管折腾了个遍！切换上方“打过疫苗”看看速度差！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

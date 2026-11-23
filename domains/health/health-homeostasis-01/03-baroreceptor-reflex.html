@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💫 压力感受器反射：蹲久了猛站起来为什么眼前一黑？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💫 压力感受器反射：蹲久了猛站起来为什么眼前一黑？</h1><p>误区：站起来眼前一黑全都是因为“贫血”或者“低血糖”。真相：更多时候只是重力瞬间把 500 毫升血液扯进双腿，而你的颈动脉压力感受器反射慢了半拍，导致大脑短暂缺血 2 秒！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>站起身动作突兀度</span><span id="vSpd">80%</span></label><input type="range" id="sSpd" min="20" max="100" value="80" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>压力感受器血管收缩反应敏锐度</span><span id="vRef">55%</span></label><input type="range" id="sRef" min="20" max="100" value="55" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">脑部血压瞬间跌落</div><div class="k-val" id="kDip" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">症状判定</div><div class="k-val" id="kSym">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const spd=+document.getElementById('sSpd').value, ref=+document.getElementById('sRef').value;
+  document.getElementById('vSpd').textContent=spd+'%'; document.getElementById('vRef').textContent=ref+'%';
+  const dip=Math.max(4, Math.round(spd*0.35 - ref*0.22));
+  document.getElementById('kDip').textContent='-'+dip+' mmHg';
+  document.getElementById('kSym').textContent=dip>18?'眼前发黑晕眩 (体位性低血压)':'瞬间稳住清晰';
+  document.getElementById('kSym').style.color=dip>18?'#ef4444':'#059669';
+  let pts='40,55 ';
+  for(let t=1;t<=15;t++){
+    const drop=dip*Math.exp(-Math.pow((t-3)/2.2,2))*(1-ref/140);
+    pts+=`${40+t*34},${55+drop*3.2} `;
+  }
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="55" x2="560" y2="55" stroke="#94a3b8" stroke-dasharray="4 3"/>
+    <polyline fill="none" stroke="${dip>18?'#ef4444':'#059669'}" stroke-width="3" points="${pts}"/>
+    <text x="50" y="30" font-size="12.5" font-weight="800" fill="var(--tax-text)">起身瞬间脑灌注压先跌后拉回曲线（负反馈闭环约 3 秒完成）</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>喝水不够、熬夜或服降压药后，压力感受器响应变慢；起身前先勾几下脚尖把小腿血泵上去，就能防止血压骤降 -${dip} mmHg 导致发黑！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

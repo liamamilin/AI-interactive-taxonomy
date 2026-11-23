@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍔 断食复食暴食陷阱：为什么饿完一顿反而更胖？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🍔 断食复食暴食陷阱：为什么饿完一顿反而更胖？</h1><p>误区：只要坚持 16:8 断食，进食窗口里想吃多少炸鸡蛋糕都无所谓。真相：过度饥饿后直接灌入高糖高油，在空腹低血糖状态下会引发疯狂暴食与更猛烈的脂肪合成反弹！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>复食第一餐热量补偿率</span><span id="vComp">125%</span></label><input type="range" id="sComp" min="70" max="160" value="125" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>复食餐中精制碳水比例</span><span id="vSug">60%</span></label><input type="range" id="sSug" min="10" max="90" value="60" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">全天净热量盈亏</div><div class="k-val" id="kNet">—</div></div>
+        <div class="kpi"><div class="k-lbl">断食结果</div><div class="k-val" id="kRes">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const comp=+document.getElementById('sComp').value, sug=+document.getElementById('sSug').value;
+  document.getElementById('vComp').textContent=comp+'%'; document.getElementById('vSug').textContent=sug+'%';
+  const net=Math.round((comp-100)*20 + sug*2);
+  const ok=net<0;
+  document.getElementById('kNet').textContent=(net>0?'+':'')+net+' kcal';
+  document.getElementById('kNet').style.color=ok?'#059669':'#ef4444';
+  document.getElementById('kRes').textContent=ok?'成功减脂':'越断食越胖!';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#64748b">日常基准摄入: 2000 kcal</text>
+    <rect x="20" y="44" width="360" height="24" rx="6" fill="#64748b"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${ok?'#059669':'#ef4444'}">断食后复食总摄入: ${2000+net} kcal (${net>0?'超标 +'+net:'赤字 '+net})</text>
+    <rect x="20" y="112" width="${Math.min(540,(2000+net)/2000*360)}" height="24" rx="6" fill="${ok?'#059669':'#ef4444'}"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">第一口复食必须先喝汤吃蛋白蔬菜，切忌空腹直接灌高糖奶茶</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>断食不是热量豁免证！复食时如果因为“觉得自己忍得很辛苦”而狂吃 125% 并猛炫甜食，全天净盈余反而多出 <strong>+${net} kcal</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

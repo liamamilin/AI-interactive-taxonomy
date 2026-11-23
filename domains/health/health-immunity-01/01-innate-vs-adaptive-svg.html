@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚔️ 免疫双防线时间轴接力（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚔️ 免疫双防线时间轴接力（SVG）</h1><p>误区：发烧流鼻涕是病毒直接把身体弄坏了。真相：前 3 天的红肿发烧全是先天免疫“边防军”在无差别开火拖延时间，好为 7 天后赶来的适应性“特种导弹”争取研发时间！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>感染后经过天数</span><span id="vDay">5 天</span></label><input type="range" id="sDay" min="0" max="14" value="5" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>入侵病原体繁殖速度</span><span id="vVir">60%</span></label><input type="range" id="sVir" min="20" max="100" value="60" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">先天边防军火力</div><div class="k-val" id="kInn" style="color:#f59e0b;">—</div></div>
+        <div class="kpi"><div class="k-lbl">特异性抗体导弹</div><div class="k-val" id="kAdp" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">体内病毒载量</div><div class="k-val" id="kLoad" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const day=+document.getElementById('sDay').value, vir=+document.getElementById('sVir').value;
+  document.getElementById('vDay').textContent=day+' 天'; document.getElementById('vVir').textContent=vir+'%';
+  const inn=d=>Math.round(85*Math.exp(-Math.pow((d-2.5)/2.8,2)));
+  const adp=d=>Math.round(95/(1+Math.exp(-(d-7.2)/1.1)));
+  const load=d=>Math.max(0, Math.round(vir*1.2*Math.exp(-Math.pow((d-4.8)/2.6,2)) - adp(d)*0.3));
+  document.getElementById('kInn').textContent=inn(day)+'%';
+  document.getElementById('kAdp').textContent=adp(day)+'%';
+  document.getElementById('kLoad').textContent=load(day)+' 单位';
+  let p1='', p2='', p3='';
+  for(let d=0;d<=14;d+=0.5){
+    const x=40+d/14*520;
+    p1+=`${x.toFixed(1)},${158-inn(d)*1.25} `;
+    p2+=`${x.toFixed(1)},${158-adp(d)*1.25} `;
+    p3+=`${x.toFixed(1)},${158-load(d)*1.1} `;
+  }
+  const cx=40+day/14*520;
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
+    <polyline fill="none" stroke="#f59e0b" stroke-width="2.5" points="${p1}"/>
+    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${p2}"/>
+    <polyline fill="none" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4 3" points="${p3}"/>
+    <line x1="${cx}" y1="20" x2="${cx}" y2="158" stroke="#059669" stroke-width="2"/>
+    <text x="50" y="28" font-size="11.5" font-weight="800" fill="#f59e0b">橙线: 先天免疫</text>
+    <text x="170" y="28" font-size="11.5" font-weight="800" fill="#0284c7">蓝线: 抗体特种兵</text>
+    <text x="310" y="28" font-size="11.5" font-weight="800" fill="#ef4444">红虚线: 病毒载量</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>先天免疫（0~4天）反应快但无精准识别能力；等到第 7 天适应性免疫定制出精确抗体后，病毒载量才会彻底清零！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

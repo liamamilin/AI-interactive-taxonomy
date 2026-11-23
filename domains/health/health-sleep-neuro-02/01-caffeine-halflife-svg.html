@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>☕ 咖啡因 5 小时半衰期残余曲线（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>☕ 咖啡因 5 小时半衰期残余曲线（SVG）</h1><p>误区：只要喝完咖啡晚上还能睡着，就说明咖啡因完全不影响我的睡眠质量。真相：咖啡因哪怕没让你失眠，也会把你最修复脑力的深睡期（N3）活活砍掉 20%，让你睡醒依然像没睡！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>最后一杯咖啡饮用时间</span><span id="vT">15:00</span></label><input type="range" id="sT" min="8" max="20" value="15" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>摄入咖啡因总量</span><span id="vMg">200 mg (约1大杯)</span></label><input type="range" id="sMg" min="50" max="400" step="25" value="200" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">23:00 睡前体内残留</div><div class="k-val" id="kRem" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">深睡期受损估算</div><div class="k-val" id="kLoss">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const t=+document.getElementById('sT').value, mg=+document.getElementById('sMg').value;
+  document.getElementById('vT').textContent=(t<10?'0':'')+t+':00';
+  document.getElementById('vMg').textContent=mg+' mg';
+  const hrs=Math.max(0, 23-t), rem=Math.round(mg*Math.pow(0.5, hrs/5));
+  const loss=Math.min(45, Math.round(rem*0.25));
+  document.getElementById('kRem').textContent=rem+' mg';
+  document.getElementById('kRem').style.color=rem>50?'#ef4444':'#059669';
+  document.getElementById('kLoss').textContent=loss>10?'-'+loss+'% 深睡':'影响极微';
+  let pts='';
+  for(let h=t;h<=25;h+=0.5){
+    const x=40+(h-8)/17*520, y=158-(mg*Math.pow(0.5,(h-t)/5))/400*125;
+    pts+=`${x.toFixed(1)},${y.toFixed(1)} `;
+  }
+  const x23=40+(23-8)/17*520, y23=158-rem/400*125;
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
+    <line x1="${x23}" y1="20" x2="${x23}" y2="158" stroke="#8b5cf6" stroke-dasharray="4 3"/>
+    <text x="${x23-6}" y="30" text-anchor="end" font-size="11.5" font-weight="800" fill="#8b5cf6">23:00 睡前</text>
+    <polyline fill="none" stroke="#b45309" stroke-width="3" points="${pts}"/>
+    <circle cx="${x23}" cy="${y23}" r="6" fill="#ef4444"/>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>咖啡因半衰期长达 5 小时！下午 ${t}:00 喝的 ${mg} mg，到了晚上 11 点还剩 <strong>${rem} mg</strong> 死死堵在腺苷受体上，建议把最后一杯咖啡锁死在午后 2 点前！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

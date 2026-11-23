@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔥 EPOC 后燃效应：运动完躺着也在多烧多少卡？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔥 EPOC 后燃效应：运动完躺着也在多烧多少卡？</h1><p>误区：做完 20 分钟高强度间歇，接下来 24 小时身体会“疯狂后燃”多烧好几百大卡。真相：科学实测 EPOC 通常只有总运动消耗的 6%~15%（几十大卡），真正的后燃红利是微调而非奇迹！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>运动平均强度</span><span id="vInt">80%</span></label><input type="range" id="sInt" min="40" max="95" value="80" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>单次训练总消耗</span><span id="vCal">300 kcal</span></label><input type="range" id="sCal" min="150" max="600" step="50" value="300" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">运动中直接消耗</div><div class="k-val" id="kEx">—</div></div>
+        <div class="kpi"><div class="k-lbl">真实 EPOC 后燃加成</div><div class="k-val" id="kEpoc" style="color:#f59e0b;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const inten=+document.getElementById('sInt').value, cal=+document.getElementById('sCal').value;
+  document.getElementById('vInt').textContent=inten+'%'; document.getElementById('vCal').textContent=cal+' kcal';
+  const epocPct=Math.round(4 + Math.pow((inten-40)/55, 1.8)*11);
+  const epoc=Math.round(cal*epocPct/100);
+  document.getElementById('kEx').textContent=cal+' kcal';
+  document.getElementById('kEpoc').textContent=`+${epoc} kcal (${epocPct}%)`;
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">训练中实打实消耗: ${cal} kcal</text>
+    <rect x="20" y="44" width="${cal/700*520}" height="26" rx="6" fill="#0284c7"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#f59e0b">运动后 EPOC 后燃效应 (+${epocPct}%): +${epoc} kcal</text>
+    <rect x="20" y="112" width="${Math.max(8,epoc/700*520)}" height="26" rx="6" fill="#f59e0b"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">减脂别迷信“后燃神话”（不过喝半口奶茶），稳扎稳打的训练总量才是王道</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕在 ${inten}% 高强度下，${cal} 大卡训练带来的真实后燃只有 <strong>+${epoc} kcal</strong>（不到半个苹果）；HIIT 的真价值在于省时间与提升心肺上限，而非魔法燃脂！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

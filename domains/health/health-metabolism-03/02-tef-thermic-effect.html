@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🥩 食物热效应 (TEF)：同样吃 100 大卡，谁净剩最少？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🥩 食物热效应 (TEF)：同样吃 100 大卡，谁净剩最少？</h1><p>误区：吃进去 500 大卡的食物，身体就实打实吸收 500 大卡，三大营养素全一样。真相：蛋白质需要消耗自身 25%~30% 的热量去拆解消化，而脂肪只需要 2%——吃同样热量，高蛋白净吸收少得多！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>蛋白质供能占比</span><span id="vP">35%</span></label><input type="range" id="sP" min="10" max="60" value="35" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>脂肪供能占比</span><span id="vF">25%</span></label><input type="range" id="sF" min="10" max="60" value="25" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">消化过程白烧掉 (TEF)</div><div class="k-val" id="kTef" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">实际净吸收热量 (每1000kcal)</div><div class="k-val" id="kNet">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const p=+document.getElementById('sP').value;
+  let f=+document.getElementById('sF').value;
+  if(p+f>90){ f=90-p; document.getElementById('sF').value=f; }
+  const c=100-p-f;
+  document.getElementById('vP').textContent=p+'%'; document.getElementById('vF').textContent=f+'%';
+  const tef=Math.round(10*(p*0.28 + c*0.08 + f*0.02));
+  const net=1000-tef;
+  document.getElementById('kTef').textContent=tef+' kcal';
+  document.getElementById('kNet').textContent=net+' kcal';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">食物热效应 (消化自己消耗的热量): ${tef} kcal (${(tef/10).toFixed(1)}%)</text>
+    <rect x="20" y="44" width="${tef*1.8}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">净吸收热量 (蛋白质 ${p}% · 碳水 ${c}% · 脂肪 ${f}%): ${net} kcal</text>
+    <rect x="20" y="112" width="${net*0.54}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">蛋白质 TEF ≈ 25-30% | 碳水 ≈ 8% | 脂肪 ≈ 2%</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>同样标着 1000 大卡的食谱，把蛋白质拉到 ${p}% 时，光是胃肠消化拆解氨基酸就替你白烧掉了 <strong>${tef} 大卡</strong>，外加极强饱腹感！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

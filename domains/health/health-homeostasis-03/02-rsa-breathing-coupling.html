@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌬️ 呼吸性窦性心律不齐：6次/分钟共振呼吸</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌬️ 呼吸性窦性心律不齐：6次/分钟共振呼吸</h1><p>误区：呼吸频率和心跳毫无关系，每分钟喘 18 次还是 6 次都一样。真相：吸气心率升、呼气心率降！放慢到每分钟 5.5~6 次共振呼吸时，血压波与心率波完美叠加，能把 HRV 拉到峰值！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>每分钟呼吸节拍次数</span><span id="vBr">6 次/分</span></label><input type="range" id="sBr" min="4" max="16" value="6" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>腹式呼吸深沉度</span><span id="vDep">85%</span></label><input type="range" id="sDep" min="30" max="100" value="85" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">心肺共振振幅</div><div class="k-val" id="kAmp" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">压力缓解效率</div><div class="k-val" id="kEff">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const br=+document.getElementById('sBr').value, dep=+document.getElementById('sDep').value;
+  document.getElementById('vBr').textContent=br+' 次/分'; document.getElementById('vDep').textContent=dep+'%';
+  const res=Math.round((100*Math.exp(-Math.pow((br-6)/3.5,2)))*(dep/100));
+  document.getElementById('kAmp').textContent=res+' 分';
+  document.getElementById('kEff').textContent=res>75?'触发 0.1Hz 共振巅峰!':'普通呼吸态';
+  let pts='';
+  for(let t=0;t<=40;t++){
+    const x=40+t*13;
+    const y=95 - (res*0.55)*Math.sin(t*br/15);
+    pts+=`${x},${y.toFixed(1)} `;
+  }
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="95" x2="560" y2="95" stroke="#94a3b8" stroke-dasharray="4 3"/>
+    <polyline fill="none" stroke="#059669" stroke-width="3" points="${pts}"/>
+    <text x="50" y="28" font-size="12.5" font-weight="800" fill="#059669">心率随呼吸起伏波（6次/分钟 = 吸5秒呼5秒，共振振幅 ${res} 分）</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“吸气 5 秒、呼气 5 秒”（每分钟 6 次）刚好吻合人体血压压力反射的 0.1Hz 固有频率，相当于给自主神经系统做共振按摩！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🕶️ 为什么要“双盲”？连医生自己也不知道真假</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🕶️ 为什么要“双盲”？连医生自己也不知道真假</h1><p>误区：只要不告诉病人他吃的是真药还是淀粉片（单盲），实验结果就绝对客观了。真相：如果负责打分的医生知道谁吃了新药，他会下意识多问两句、打分更宽容，硬生生把无效药吹出 20% 假疗效！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setBlind('open',this)">不设盲 (医生病人都知道)</button>
+        <button class="btn" onclick="setBlind('single',this)">单盲 (医生知道，病人不知道)</button>
+        <button class="btn" onclick="setBlind('double',this)">黄金标准：双盲 (全都不知道)</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>疗效评估的主观打分成分 (如疼痛/抑郁)</span><span id="vSub">75%</span></label><input type="range" id="sSub" min="10" max="100" value="75" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">虚假偏倚注水幅度</div><div class="k-val" id="kBias" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">实验结论可信度</div><div class="k-val" id="kTrust" style="color:#059669;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let blind='open';
+function setBlind(b,btn){ blind=b; document.querySelectorAll('.btn').forEach(x=>x.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const sub=+document.getElementById('sSub').value; document.getElementById('vSub').textContent=sub+'%';
+  const bias=blind==='open'?Math.round(sub*0.5):(blind==='single'?Math.round(sub*0.25):2);
+  const trust=100-bias;
+  document.getElementById('kBias').textContent='+'+bias+'% 假疗效';
+  document.getElementById('kTrust').textContent=trust+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">期待偏倚造成的虚假注水: +${bias}%</text>
+    <rect x="20" y="44" width="${bias*5.4}" height="24" rx="6" fill="#ef4444"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">结论真实可信度: ${trust}%</text>
+    <rect x="20" y="112" width="${trust*5.4}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">双盲彻底切断了“病人自我暗示”和“医生热情期待”两条污染通道</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>医生也是人！哪怕医生本意绝不想作假，只要知道谁吃了新药，他在记录症状时就会不自觉偏向乐观（注水 +${bias}%）。唯有“双盲”才能逼出真实药效！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

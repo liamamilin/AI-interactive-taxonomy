@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔗 赫布定律：一起激发的神经元连在一起</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔗 赫布定律：一起激发的神经元连在一起</h1><p>误区：记不住东西是因为脑容量满了，需要少记点。真相：大脑遵循“用进废退”原则，不用的连接会被小胶质细胞主动修剪，经常同步激发的连接才会越长越粗！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>两神经元同步触发频率</span><span id="vSync">75%</span></label><input type="range" id="sSync" min="5" max="100" value="75" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>最近连续闲置未使用天数</span><span id="vIdle">5 天</span></label><input type="range" id="sIdle" min="0" max="60" value="5" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">突触连接强度</div><div class="k-val" id="kW" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">小胶质修剪状态</div><div class="k-val" id="kPr">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const sync=+document.getElementById('sSync').value, idle=+document.getElementById('sIdle').value;
+  document.getElementById('vSync').textContent=sync+'%'; document.getElementById('vIdle').textContent=idle+' 天';
+  const w=Math.max(5, Math.min(98, Math.round(sync - idle*1.1)));
+  document.getElementById('kW').textContent=w+'%';
+  document.getElementById('kPr').textContent=w<25?'触发突触修剪 (遗忘)':'稳固强化 (LTP)';
+  document.getElementById('kPr').style.color=w<25?'#ef4444':'#059669';
+  document.getElementById('svg').innerHTML=`
+    <circle cx="140" cy="92" r="34" fill="#e0f2fe" stroke="#0284c7" stroke-width="3"/>
+    <text x="140" y="97" text-anchor="middle" font-size="14" font-weight="850" fill="#0369a1">神经元 A</text>
+    <line x1="174" y1="92" x2="426" y2="92" stroke="${w<25?'#ef4444':'#059669'}" stroke-width="${Math.max(1.5,w/6)}" stroke-dasharray="${w<25?'6 4':'0'}"/>
+    <text x="300" y="72" text-anchor="middle" font-size="13" font-weight="800" fill="${w<25?'#ef4444':'#059669'}">突触连接权重: ${w}%</text>
+    <circle cx="460" cy="92" r="34" fill="#ecfdf5" stroke="#059669" stroke-width="3"/>
+    <text x="460" y="97" text-anchor="middle" font-size="14" font-weight="850" fill="#047857">神经元 B</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“Fire together, wire together.” 每一次主动回忆和跨概念联想都在加粗突触连线；闲置 ${idle} 天不复习，连接就会跌回 ${w}% 并被大脑当成废线剪掉！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

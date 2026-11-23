@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🪑 健身 1 小时 vs 全天 NEAT 日常消耗</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🪑 健身 1 小时 vs 全天 NEAT 日常消耗</h1><p>误区：只要每天去健身房狂跑 1 小时，剩下 23 小时躺着刷剧也能瘦。真相：运动消耗往往只占全天总消耗的 10%~15%，而无意识坐着不动会让 NEAT 暴跌 400 大卡，直接把跑步全白跑了！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>每日健身房高强度运动</span><span id="vEx">45 分钟</span></label><input type="range" id="sEx" min="0" max="90" value="45" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>日常步数与站立活跃度 (NEAT)</span><span id="vNeat">8000 步</span></label><input type="range" id="sNeat" min="1500" max="15000" step="500" value="8000" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">运动消耗 (EAT)</div><div class="k-val" id="kEx">—</div></div>
+        <div class="kpi"><div class="k-lbl">日常非运动消耗 (NEAT)</div><div class="k-val" id="kNeat" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">全天总消耗 TDEE</div><div class="k-val" id="kTot">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const ex=+document.getElementById('sEx').value, neat=+document.getElementById('sNeat').value;
+  document.getElementById('vEx').textContent=ex+' 分钟'; document.getElementById('vNeat').textContent=neat+' 步';
+  const bmr=1450, eat=Math.round(ex*7.5), nCal=Math.round(neat*0.045), tot=bmr+eat+nCal;
+  document.getElementById('kEx').textContent=eat+' kcal';
+  document.getElementById('kNeat').textContent=nCal+' kcal';
+  document.getElementById('kTot').textContent=tot+' kcal';
+  const rows=[['基础代谢 BMR',bmr,'#64748b'],['日常活动 NEAT',nCal,'#059669'],['刻意运动 EAT',eat,'#0284c7']];
+  let svg='';
+  rows.forEach(([nm,val,col],i)=>{
+    const y=26+i*50, w=val/1800*360;
+    svg+=`<text x="16" y="${y+17}" font-size="13" font-weight="800" fill="var(--tax-text)">${nm}</text>
+    <rect x="145" y="${y}" width="360" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="145" y="${y}" width="${w}" height="24" rx="6" fill="${col}"/>
+    <text x="${155+w}" y="${y+17}" font-size="12.5" font-weight="800" fill="${col}">${val} kcal</text>`;
+  });
+  document.getElementById('svg').innerHTML=svg;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>基础代谢占了 ${Math.round(bmr/tot*100)}%，而碎片化的日常走动 NEAT（${nCal} kcal）往往比咬牙苦练 45 分钟（${eat} kcal）贡献还大！别因为跑完步就瘫一天！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

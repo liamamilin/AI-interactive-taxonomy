@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏃 热身雷区：赛前狂做静态拉伸反而跑更慢？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏃 热身雷区：赛前狂做静态拉伸反而跑更慢？</h1><p>误区：跑步或打球前，应该找个栏杆把腿静态压到最软最松才不容易拉伤、跑得最快。真相：赛前长时间静态拉伸（>60秒）会暂时削弱肌腱刚度和神经兴奋度，让你起跑爆发力下降；动态热身才是赛前正解！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>赛前单一部位静态压腿时长</span><span id="vSt">60 秒</span></label><input type="range" id="sSt" min="0" max="120" step="10" value="60" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>动态热身激活 (高抬腿/摆腿)</span><span id="vDyn">30%</span></label><input type="range" id="sDyn" min="0" max="100" value="30" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">爆发力/弹跳保留率</div><div class="k-val" id="kPow">—</div></div>
+        <div class="kpi"><div class="k-lbl">热身方案建议</div><div class="k-val" id="kAdv">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const st=+document.getElementById('sSt').value, dyn=+document.getElementById('sDyn').value;
+  document.getElementById('vSt').textContent=st+' 秒'; document.getElementById('vDyn').textContent=dyn+'%';
+  const pow=Math.max(65, Math.min(108, Math.round(92 - Math.max(0,st-30)*0.18 + dyn*0.14)));
+  document.getElementById('kPow').textContent=pow+'%';
+  document.getElementById('kPow').style.color=pow>=95?'#059669':'#ef4444';
+  document.getElementById('kAdv').textContent=st>45&&dyn<50?'快停下静态拉，改动态热身!':'备战状态良好';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="${pow>=95?'#059669':'#ef4444'}">比赛瞬时爆发力表现: ${pow}%</text>
+    <rect x="20" y="44" width="${pow*4.5}" height="24" rx="6" fill="${pow>=95?'#059669':'#ef4444'}"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">动态热身血流与神经激活度: ${dyn}%</text>
+    <rect x="20" y="112" width="${dyn*5.2}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">黄金顺序：运动前“动态热身”拉紧弹簧，运动后“静态拉伸”放松恢复！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>肌肉和肌腱就像起跳的弹簧——赛前长时间静态拉伸会把弹簧扯松，爆发力降到 ${pow}%；记住“<strong>赛前动态热身，赛后静态拉伸</strong>”！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

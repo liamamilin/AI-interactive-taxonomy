@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📓 渐进超负荷：为什么必须记录每次重量/次数？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📓 渐进超负荷：为什么必须记录每次重量/次数？</h1><p>误区：只要每次去健身房出了一身大汗、肌肉酸痛了，就一定在进步。真相：身体极其精明且节能——如果今天的重量和上个月一模一样，身体会觉得“现有肌肉已经够用了”，立刻停止生长！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>每周渐进微增负荷幅度</span><span id="vInc">2.5%</span></label><input type="range" id="sInc" min="0" max="6" step="0.5" value="2.5" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>营养与恢复执行率</span><span id="vRec">85%</span></label><input type="range" id="sRec" min="40" max="100" value="85" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">12周后力量指数</div><div class="k-val" id="kEnd" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">受伤/崩盘风险</div><div class="k-val" id="kInj">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const inc=+document.getElementById('sInc').value, rec=+document.getElementById('sRec').value;
+  document.getElementById('vInc').textContent=inc+'%'; document.getElementById('vRec').textContent=rec+'%';
+  const maxSafe=rec/22;
+  const inj=inc>maxSafe;
+  let pts='';
+  let cur=100;
+  for(let w=0;w<=12;w++){
+    pts+=`${40+w*43},${160-Math.min(140,(cur-80)*1.4)} `;
+    cur = inj && w>6 ? cur*0.95 : cur*(1+inc/100*0.8);
+  }
+  document.getElementById('kEnd').textContent=Math.round(cur)+' 分';
+  document.getElementById('kInj').textContent=inj?'激进加码拉伤!':'稳步安全突破';
+  document.getElementById('kInj').style.color=inj?'#ef4444':'#059669';
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="160" x2="560" y2="160" stroke="#94a3b8"/>
+    <polyline fill="none" stroke="${inj?'#ef4444':'#059669'}" stroke-width="3" points="${pts}"/>
+    <text x="50" y="28" font-size="12" font-weight="800" fill="${inj?'#ef4444':'#059669'}">12周力量成长曲线 (每周 +${inc}% → 终点 ${Math.round(cur)})</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只靠“小步微增”（哪怕每次多举 1 公斤或 1 次），12 周复利下来就能涨到 ${Math.round(cur)} 分；但一旦超过恢复上限（>${maxSafe.toFixed(1)}%），贪快反而会拉伤倒退！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

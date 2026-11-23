@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📈 氧解离 S 型曲线与波尔效应（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📈 氧解离 S 型曲线与波尔效应（SVG）</h1><p>误区：血红蛋白抓氧气抓得越死、亲和力越高越好。真相：抓得太死到了肌肉放不下来照样缺氧！血红蛋白靠“S 型协同效应”和“波尔效应”，在肺里拼命抢氧、到缺氧偏酸的肌肉里自动松手卸货！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>组织局部酸度/CO2 浓度 (运动产酸)</span><span id="vAcid">60%</span></label><input type="range" id="sAcid" min="10" max="100" value="60" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>组织氧气分压 PO2</span><span id="vPo2">40 mmHg</span></label><input type="range" id="sPo2" min="15" max="100" value="40" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">血红蛋白当前携氧饱和度</div><div class="k-val" id="kSat" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">向肌肉实际卸氧释放量</div><div class="k-val" id="kRel" style="color:#059669;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function satFn(po2,acid){
+  const p50=20 + acid*0.18;
+  return 100*(Math.pow(po2,2.7)/(Math.pow(po2,2.7)+Math.pow(p50,2.7)));
+}
+function upd(){
+  const acid=+document.getElementById('sAcid').value, po2=+document.getElementById('sPo2').value;
+  document.getElementById('vAcid').textContent=acid+'%'; document.getElementById('vPo2').textContent=po2+' mmHg';
+  const sat=Math.round(satFn(po2,acid)), rel=Math.max(0, 98-sat);
+  document.getElementById('kSat').textContent=sat+'%';
+  document.getElementById('kRel').textContent=rel+'% 卸给肌肉';
+  let pts='';
+  for(let p=5;p<=100;p+=3){ pts+=`${40+(p-5)/95*520},${158-satFn(p,acid)*1.25} `; }
+  const cx=40+(po2-5)/95*520, cy=158-sat*1.25;
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
+    <polyline fill="none" stroke="#ef4444" stroke-width="3" points="${pts}"/>
+    <circle cx="${cx}" cy="${cy}" r="6" fill="#059669"/>
+    <text x="50" y="28" font-size="12" font-weight="800" fill="#ef4444">酸度/CO2 升高使 S 型曲线右移 → 同一氧压下主动多卸下氧气！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪块肌肉在干活产酸（酸度 ${acid}%），血红蛋白路过时就能自动感应并右移曲线，慷慨卸下 <strong>${rel}%</strong> 的氧气——这就是精妙的“按需配送”波尔效应！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

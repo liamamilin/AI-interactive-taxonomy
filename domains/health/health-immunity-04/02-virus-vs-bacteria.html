@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎯 普通感冒吃阿莫西林？病毒 vs 细菌靶点图</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎯 普通感冒吃阿莫西林？病毒 vs 细菌靶点图</h1><p>误区：感冒发烧吃点阿莫西林或头孢，就算不对症也能当“消炎药”压一压。真相：抗生素专门攻击细菌的细胞壁和核糖体——病毒压根没有这些结构！吃抗生素治感冒等于用鱼网抓空气，顺手把自己肠道益生菌全杀光！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setPath('virus',this)">普通感冒 / 流感（病毒入侵）</button>
+        <button class="btn" onclick="setPath('bacteria',this)">化脓性链球菌肺炎（细菌入侵）</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>服用抗生素剂量强度</span><span id="vDos">80%</span></label><input type="range" id="sDos" min="0" max="100" value="80" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">敌军被消灭率</div><div class="k-val" id="kKill">—</div></div>
+        <div class="kpi"><div class="k-lbl">肠道有益菌误杀率</div><div class="k-val" id="kGut" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let ptype='virus';
+function setPath(t,btn){ ptype=t; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const dos=+document.getElementById('sDos').value; document.getElementById('vDos').textContent=dos+'%';
+  const kill=ptype==='virus'?0:Math.round(dos*0.95);
+  const gut=Math.round(dos*0.65);
+  document.getElementById('kKill').textContent=kill+'%';
+  document.getElementById('kKill').style.color=kill>50?'#059669':'#ef4444';
+  document.getElementById('kGut').textContent=gut+'% 惨遭团灭';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="${kill>50?'#059669':'#ef4444'}">对当前入侵者 (${ptype==='virus'?'病毒 · 无细胞壁':'细菌 · 有靶点'}) 杀伤率: ${kill}%</text>
+    <rect x="20" y="44" width="${Math.max(8,kill*5.2)}" height="24" rx="6" fill="${kill>50?'#059669':'#ef4444'}"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#f59e0b">对体内有益肠道菌群的附带误杀: ${gut}%</text>
+    <rect x="20" y="112" width="${Math.max(8,gut*5.2)}" height="24" rx="6" fill="#f59e0b"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">${ptype==='virus'?'❌ 病毒没有细胞壁，抗生素完全无效且白白摧毁益生菌！':'✅ 确认细菌感染后，抗生素能精准击穿细菌防线'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>90% 的普通感冒和喉咙痛都是病毒引起的！这时候吃抗生素对病毒杀伤率为 <strong>0%</strong>，却会误杀 <strong>${gut}%</strong> 的肠道友军，顺带培养出耐药菌！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

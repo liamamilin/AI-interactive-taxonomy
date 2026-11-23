@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧼 大脑“类淋巴洗脑系统”夜间清理实验</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧼 大脑“类淋巴洗脑系统”夜间清理实验</h1><p>误区：晚上少睡一点，只要白天靠喝浓咖啡撑住不困，大脑就不会受损。真相：大脑只有在夜间深睡时，胶质细胞才会收缩腾出 60% 空间让脑脊液冲刷代谢废物——咖啡因只能屏蔽困意，洗不掉垃圾！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>平均每晚有效深睡时长</span><span id="vDeep">90 分钟</span></label><input type="range" id="sDeep" min="20" max="140" value="90" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>连续睡眠不足天数</span><span id="vDays">3 天</span></label><input type="range" id="sDays" min="0" max="14" value="3" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">夜间脑脊液冲刷率</div><div class="k-val" id="kWash" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">脑雾代谢垃圾残留</div><div class="k-val" id="kTrash" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const deep=+document.getElementById('sDeep').value, days=+document.getElementById('sDays').value;
+  document.getElementById('vDeep').textContent=deep+' 分钟'; document.getElementById('vDays').textContent=days+' 天';
+  const wash=Math.min(98, Math.round(deep/110*100));
+  const trash=Math.min(95, Math.round(Math.max(0, 100-wash)*0.5 + days*4.2));
+  document.getElementById('kWash').textContent=wash+'%';
+  document.getElementById('kTrash').textContent=trash+' 单位';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">类淋巴系统脑脊液冲刷效率: ${wash}%</text>
+    <rect x="20" y="44" width="${wash*5.4}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#ef4444">累积 β-淀粉样蛋白/代谢残留: ${trash} 单位</text>
+    <rect x="20" y="112" width="${trash*5.4}" height="24" rx="6" fill="#ef4444"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">清醒时脑细胞间隙紧闭，只有深睡才会打开 60% 排污通道</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>睡眠不是关机待机，而是大脑的强制清洁工时！连续 ${days} 天深睡不足会累积 <strong>${trash} 单位</strong>代谢垃圾，直接表现为次日的注意力涣散与“脑雾”。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

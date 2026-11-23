@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔑 B细胞克隆选择：百万分之一钥匙怎么配出？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔑 B细胞克隆选择：百万分之一钥匙怎么配出？</h1><p>误区：人类基因提前写好了每种病毒的抗体图纸，遇到新病毒才会临时现写。真相：我们体内早就随机洗牌造出了几亿把不同形状的 B 细胞钥匙；新病毒一来，只挑中刚好卡住它的那一把疯狂复制几百万份！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>抗体库多样性规模 (基因洗牌度)</span><span id="vLib">80%</span></label><input type="range" id="sLib" min="20" max="100" value="80" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>克隆扩增复制代数</span><span id="vGen">12 代</span></label><input type="range" id="sGen" min="1" max="18" value="12" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">精准锁住新病毒概率</div><div class="k-val" id="kHit" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">复制出的特效兵数量</div><div class="k-val" id="kCnt" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const lib=+document.getElementById('sLib').value, gen=+document.getElementById('sGen').value;
+  document.getElementById('vLib').textContent=lib+'%'; document.getElementById('vGen').textContent=gen+' 代';
+  const hit=Math.min(99, Math.round(lib*0.95+4));
+  const cnt=Math.pow(2,gen);
+  document.getElementById('kHit').textContent=hit+'%';
+  document.getElementById('kCnt').textContent=cnt.toLocaleString()+' 个';
+  let cells='';
+  for(let i=0;i<14;i++){
+    const win=i===6;
+    cells+=`<circle cx="${45+i*38}" cy="70" r="${win?20:11}" fill="${win?'#059669':'#cbd5e1'}"/>
+    ${win?'<text x="'+(45+i*38)+'" y="74" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">命中</text>':''}`;
+  }
+  document.getElementById('svg').innerHTML=cells+`
+    <text x="30" y="135" font-size="13" font-weight="800" fill="#059669">14 种随机钥匙中刚好第 7 号卡住病毒 → 指数分裂 ${gen} 代变成 ${cnt.toLocaleString()} 个精确打击部队！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>免疫系统靠“先盲造亿万随机钥匙，命中一个再疯狂克隆 ${gen} 代（${cnt.toLocaleString()} 个）”的暴力美学，连从未见过的人造新分子都能精准狙击！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

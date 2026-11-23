@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔐 DNA 甲基化与组蛋白松紧调音台（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔐 DNA 甲基化与组蛋白松紧调音台（SVG）</h1><p>误区：基因序列一出生就决定了全部命运，后天生活习惯改不了基因表达。真相：生活方式虽不改 DNA 字母，却会往 DNA 上狂贴“甲基化封条”，把好基因锁进黑盒、把坏基因放出来！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>不良环境/压力/抽烟导致的错误甲基化封条</span><span id="vMeth">55%</span></label><input type="range" id="sMeth" min="5" max="95" value="55" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>规律运动与植物多酚打开组蛋白活力</span><span id="vAcet">60%</span></label><input type="range" id="sAcet" min="10" max="100" value="60" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">长寿修复基因可读率</div><div class="k-val" id="kRead" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">表观年龄 vs 实际年龄</div><div class="k-val" id="kBio">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const meth=+document.getElementById('sMeth').value, acet=+document.getElementById('sAcet').value;
+  document.getElementById('vMeth').textContent=meth+'%'; document.getElementById('vAcet').textContent=acet+'%';
+  const read=Math.max(10, Math.min(98, Math.round(50 + acet*0.5 - meth*0.45)));
+  const bioDiff=Math.round((55-read)/5);
+  document.getElementById('kRead').textContent=read+'%';
+  document.getElementById('kBio').textContent=(bioDiff>0?'显老 +':'年轻 ')+bioDiff+' 岁';
+  document.getElementById('kBio').style.color=bioDiff>0?'#ef4444':'#059669';
+  let locks='';
+  for(let i=0;i<8;i++){
+    const locked=i < Math.round(meth/12);
+    const x=55+i*64;
+    locks+=`<rect x="${x}" y="68" width="46" height="44" rx="8" fill="${locked?'#ef4444':'#059669'}" opacity="0.22" stroke="${locked?'#ef4444':'#059669'}" stroke-width="2"/>
+    <text x="${x+23}" y="95" text-anchor="middle" font-size="13" font-weight="850" fill="${locked?'#ef4444':'#059669'}">${locked?'🔒锁':'🔓开'}</text>`;
+  }
+  document.getElementById('svg').innerHTML=locks+`
+    <text x="35" y="36" font-size="13" font-weight="800" fill="var(--tax-text)">长寿修复基因片段上的“表观开关”状态 (可读率 ${read}%)</text>
+    <text x="35" y="152" font-size="12.5" font-weight="750" fill="var(--tax-muted)">DNA 是硬件代码，表观遗传是动态配置文件——且这份配置是可逆的！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“基因上膛，生活方式扣动扳机。”通过运动与健康作息把表观封条撕掉，你的生物表观年龄就能直接比身份证年轻/显老 <strong>${Math.abs(bioDiff)} 岁</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

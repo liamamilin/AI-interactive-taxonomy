@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧂 钠钾水泵失衡：为什么“多吃咸就水肿、血压飙”？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧂 钠钾水泵失衡：为什么“多吃咸就水肿、血压飙”？</h1><p>误区：吃太咸只是嘴巴渴、多喝两杯水冲下去就没事了。真相：钠离子把水死死锁在血管和组织间隙里（钠水潴留），血容量瞬间胀大顶破血管壁，而蔬菜里的钾才是把多余钠排出去的天然解药！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>每日食盐摄入量 (世卫建议 ≤5g)</span><span id="vSalt">10 克</span></label><input type="range" id="sSalt" min="2" max="16" value="10" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>高钾蔬果摄入充足度</span><span id="vK">35%</span></label><input type="range" id="sK" min="10" max="100" value="35" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">血管潴留多余水分</div><div class="k-val" id="kWat" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">血压/水肿额外推力</div><div class="k-val" id="kBP" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const salt=+document.getElementById('sSalt').value, k=+document.getElementById('sK').value;
+  document.getElementById('vSalt').textContent=salt+' 克'; document.getElementById('vK').textContent=k+'%';
+  const excess=Math.max(0, salt-5*(0.8+k/200));
+  const wat=(excess*0.28).toFixed(2);
+  const bp=Math.round(excess*2.4);
+  document.getElementById('kWat').textContent='+'+wat+' 升';
+  document.getElementById('kBP').textContent='+'+bp+' mmHg';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#f59e0b">钠负荷 vs 钾排钠平衡 (吃盐 ${salt}g / 补钾 ${k}%)</text>
+    <rect x="20" y="46" width="${salt*32}" height="24" rx="6" fill="#f59e0b"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${bp>8?'#ef4444':'#059669'}">额外水肿潴留 +${wat} L → 推高血压 +${bp} mmHg</text>
+    <rect x="20" y="114" width="${Math.max(8,bp*16)}" height="24" rx="6" fill="${bp>8?'#ef4444':'#059669'}"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">减盐的同时多吃香蕉/菠菜/土豆补钾，双管齐下消水肿降压</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>人体为了保持血液渗透压恒定，每多留 1 克没排掉的盐就得配套存下近 150 毫升水！靠多吃高钾蔬果（${k}%）能激活肾脏把多余的钠请出去！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

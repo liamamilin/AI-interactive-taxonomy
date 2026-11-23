@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💪 肌肉 vs 脂肪：为什么“节食掉肌肉”最亏？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💪 肌肉 vs 脂肪：为什么“节食掉肌肉”最亏？</h1><p>误区：体重秤上数字掉得越快越好，不管是水分还是肌肉，轻了就是赢。真相：肌肉是全身最耗能的火炉；节食饿掉 5 斤肌肉后，基础代谢永久塌陷，恢复正常饮食立刻报复性反弹成易胖体质！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>减掉 10kg 体重中“流失肌肉占比”</span><span id="vMus">40%</span></label><input type="range" id="sMus" min="5" max="65" value="40" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>减重后恢复正常饮食程度</span><span id="vEat">70%</span></label><input type="range" id="sEat" min="20" max="100" value="70" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">基础代谢永久损伤</div><div class="k-val" id="kLoss" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">半年后复胖概率</div><div class="k-val" id="kReb">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const mus=+document.getElementById('sMus').value, eat=+document.getElementById('sEat').value;
+  document.getElementById('vMus').textContent=mus+'%'; document.getElementById('vEat').textContent=eat+'%';
+  const loss=Math.round(mus*4.5);
+  const reb=Math.min(96, Math.round(mus*0.9 + eat*0.45));
+  document.getElementById('kLoss').textContent='-'+loss+' kcal/天';
+  document.getElementById('kReb').textContent=reb+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">基础代谢永久下降: -${loss} kcal/天</text>
+    <rect x="20" y="44" width="${Math.min(540,loss*1.8)}" height="24" rx="6" fill="#ef4444"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${reb>60?'#ef4444':'#059669'}">复胖反弹风险: ${reb}%</text>
+    <rect x="20" y="112" width="${reb*5.4}" height="24" rx="6" fill="${reb>60?'#ef4444':'#059669'}"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">减脂期必须吃够蛋白质并做抗阻训练，死守肌肉引擎不掉</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只靠饿瘦掉的体重里有 ${mus}% 是珍贵的肌肉，每天直接少烧 ${loss} 大卡！减脂的本质是“减脂保肌”，而不是和体重秤上的水分肌肉较劲。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

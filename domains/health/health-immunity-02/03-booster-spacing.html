@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🗓️ 加强针时机：为什么间隔太近反而白打？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🗓️ 加强针时机：为什么间隔太近反而白打？</h1><p>误区：为了快点满级，疫苗两针隔得越近（比如隔 3 天连打两针）效果越强。真相：刚打完第一针时现有抗体会直接中和掉第二针抗原，且记忆细胞还没来得及在生发中心完成亲和力进化，隔太近等于浪费！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>两针疫苗接种间隔</span><span id="vWk">4 周</span></label><input type="range" id="sWk" min="1" max="24" value="4" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>加强针抗原剂量</span><span id="vDos">100%</span></label><input type="range" id="sDos" min="30" max="100" value="100" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">二次抗体滴度高度</div><div class="k-val" id="kTit" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">生发中心成熟度</div><div class="k-val" id="kMat">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const wk=+document.getElementById('sWk').value, dos=+document.getElementById('sDos').value;
+  document.getElementById('vWk').textContent=wk+' 周'; document.getElementById('vDos').textContent=dos+'%';
+  const mat=Math.min(98, Math.round(100*(1-Math.exp(-wk/4))));
+  const tit=Math.round(mat*(0.6+dos/250));
+  document.getElementById('kTit').textContent=tit+' 倍基线';
+  document.getElementById('kMat').textContent=wk<3?'太早 (被旧抗体中和)':(wk<=12?'黄金成熟窗口':'长期长效记忆');
+  let pts='';
+  for(let w=1;w<=24;w++){
+    const m=100*(1-Math.exp(-w/4))*(0.6+dos/250);
+    pts+=`${40+(w-1)/23*520},${158-m*1.25} `;
+  }
+  const cx=40+(wk-1)/23*520, cy=158-tit*1.25;
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
+    <polyline fill="none" stroke="#059669" stroke-width="3" points="${pts}"/>
+    <circle cx="${cx}" cy="${cy}" r="6" fill="${wk<3?'#ef4444':'#0284c7'}"/>
+    <text x="50" y="28" font-size="12" font-weight="800" fill="#059669">间隔 ${wk} 周接种 → 抗体跃升 ${tit} 倍</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>免疫系统需要 3~8 周时间在淋巴结里精选出最高精度的 B 细胞！隔太近打针会被原有抗体拦截，拉足 ${wk} 周再打才能打出 ${tit} 倍超级记忆！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

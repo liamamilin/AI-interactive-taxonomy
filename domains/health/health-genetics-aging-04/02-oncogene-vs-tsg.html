@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚗 油门踩死 vs 刹车失灵：原癌基因与抑癌基因</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚗 油门踩死 vs 刹车失灵：原癌基因与抑癌基因</h1><p>误区：所有致癌基因突变都只需要坏掉一条染色体就会失控。真相：原癌基因像油门，只要一条突变卡死就狂飙；抑癌基因像左右两套刹车，必须两条染色体同时坏掉才会彻底失灵！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setGas(false,this)">油门正常</button>
+        <button class="btn" onclick="setGas(true,this)">油门卡死 (原癌基因激活)</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>两侧抑癌刹车损坏条数 (0=完好, 2=全断)</span><span id="vBrk">1 条坏</span></label><input type="range" id="sBrk" min="0" max="2" value="1" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">细胞失控增殖速度</div><div class="k-val" id="kSpd">—</div></div>
+        <div class="kpi"><div class="k-lbl">安全阀状态</div><div class="k-val" id="kSt">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let gas=false;
+function setGas(g,btn){ gas=g; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const brk=+document.getElementById('sBrk').value;
+  document.getElementById('vBrk').textContent=brk+' 条坏 (剩 '+(2-brk)+' 条)';
+  const spd=(gas?70:20) + (brk===2?80:brk*10);
+  const crash=gas && brk===2;
+  document.getElementById('kSpd').textContent=spd+' mph';
+  document.getElementById('kSt').textContent=crash?'🚨 油门卡死 + 双刹车全断!':(brk===1?'单刹车兜底 (遗传易感)':'正常受控');
+  document.getElementById('kSt').style.color=crash?'#ef4444':'#059669';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="${gas?'#ef4444':'#059669'}">油门状态: ${gas?'🔥 踩死狂飙 (只需1次突变!)':'✅ 正常受控'}</text>
+    <text x="20" y="72" font-size="13" font-weight="800" fill="${brk===2?'#ef4444':'#0284c7'}">双保险刹车 (如 BRCA/p53): ${2-brk}/2 完好</text>
+    <rect x="20" y="95" width="${Math.min(540,spd*3.5)}" height="28" rx="6" fill="${crash?'#ef4444':(spd>70?'#f59e0b':'#059669')}"/>
+    <text x="20" y="160" font-size="12.5" font-weight="750" fill="var(--tax-muted)">遗传带 1 条坏刹车的人并不一定会得癌，只是失去了“第一道备份”</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>为什么家族遗传癌症风险高？因为你天生少了一条备用刹车（${2-brk}/2 完好），别人需要撞坏两套刹车才失控，你只要再坏一次就彻底没了刹车！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

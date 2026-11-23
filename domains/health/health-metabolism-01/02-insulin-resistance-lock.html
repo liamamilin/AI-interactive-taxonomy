@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔐 胰岛素抵抗：细胞门锁是如何生锈的？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔐 胰岛素抵抗：细胞门锁是如何生锈的？</h1><p>误区：只要空腹血糖还没超标，我的糖代谢就完全健康。真相：在血糖升高前 5~10 年，胰腺就已经在用 3 倍剂量的胰岛素硬压血糖了——这就是隐蔽的“胰岛素抵抗”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>每日高糖加餐/零食频次</span><span id="vFreq">5 次/天</span></label><input type="range" id="sFreq" min="1" max="8" value="5" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>每周肌肉力量/有氧耗糖量</span><span id="vEx">20 分</span></label><input type="range" id="sEx" min="0" max="100" value="20" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">细胞胰岛素敏感度</div><div class="k-val" id="kSens" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">胰腺被迫代偿倍率</div><div class="k-val" id="kLoad" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const freq=+document.getElementById('sFreq').value, ex=+document.getElementById('sEx').value;
+  document.getElementById('vFreq').textContent=freq+' 次/天'; document.getElementById('vEx').textContent=ex+' 分';
+  const sens=Math.max(15, Math.min(98, Math.round(90 - freq*8.5 + ex*0.35)));
+  const load=(100/sens).toFixed(1)+'x';
+  document.getElementById('kSens').textContent=sens+'%';
+  document.getElementById('kLoad').textContent=load;
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">细胞门锁敏感度 (GLUT4 开门效率): ${sens}%</text>
+    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="44" width="${sens*5.4}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${sens<50?'#ef4444':'#f59e0b'}">胰腺 β 细胞被迫分泌倍率: ${load}</text>
+    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${Math.min(540, (100/sens)*120)}" height="24" rx="6" fill="${sens<50?'#ef4444':'#f59e0b'}"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">肌肉收缩无需胰岛素也能开糖门——运动是最好的门锁除锈剂</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>天天泡在高频胰岛素里，细胞门锁会脱敏生锈（敏感度跌至 ${sens}%）；少加餐 + 肌肉运动能瞬间重启门锁，给过劳的胰腺放个大假！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

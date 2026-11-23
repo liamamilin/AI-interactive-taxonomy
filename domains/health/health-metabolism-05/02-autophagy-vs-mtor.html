@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚖️ 生长开关 mTOR vs 清理开关 AMPK 跷跷板</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 生长开关 mTOR vs 清理开关 AMPK 跷跷板</h1><p>误区：既然细胞自噬这么抗衰老，那就应该一直断食让自噬天天开着。真相：长肌肉、合成抗体、修复伤口全靠进食唤醒 mTOR；长寿的秘诀是“周期性在工作合成与断食清理之间交替”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>每日进食窗口时长</span><span id="vWin">8 小时</span></label><input type="range" id="sWin" min="4" max="16" value="8" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>蛋白质充足度</span><span id="vPro">75%</span></label><input type="range" id="sPro" min="20" max="100" value="75" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">合成生长 (mTOR) 活力</div><div class="k-val" id="kMtor" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">清理修复 (AMPK) 活力</div><div class="k-val" id="kAmpk" style="color:#059669;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const win=+document.getElementById('sWin').value, pro=+document.getElementById('sPro').value;
+  document.getElementById('vWin').textContent=win+' 小时'; document.getElementById('vPro').textContent=pro+'%';
+  const mtor=Math.min(98, Math.round(win*4.2 + pro*0.35));
+  const ampk=Math.min(98, Math.round((24-win)*4.8));
+  document.getElementById('kMtor').textContent=mtor+' 分';
+  document.getElementById('kAmpk').textContent=ampk+' 分';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">合成生长 (mTOR - 长肌肉/免疫细胞): ${mtor} 分</text>
+    <rect x="20" y="44" width="${mtor*5.4}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">清理修复 (AMPK - 回收破损蛋白): ${ampk} 分</text>
+    <rect x="20" y="112" width="${ampk*5.4}" height="24" rx="6" fill="#059669"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">白天进食练肌打开 mTOR，夜间空腹拉长打开 AMPK，两者不可偏废</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>一天 24 小时从早吃到晚（进食窗 15 小时）会让 mTOR 一直卡死、细胞垃圾没时间倒；把进食集中在 ${win} 小时内并吃够蛋白，就能兼得合成与清理！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

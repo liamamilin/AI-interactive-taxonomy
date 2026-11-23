@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📡 细菌的“耐药外挂共享”：质粒水平转移</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📡 细菌的“耐药外挂共享”：质粒水平转移</h1><p>误区：耐药性只能等细菌自己慢慢突变，传给自己的后代，不会传给别的细菌。真相：细菌可以通过“质粒接合”把耐药基因像 U 盘一样直接插给旁边的陌生菌种，几小时内全群秒变耐药！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>环境低剂量抗生素污染/滥用度</span><span id="vEnv">65%</span></label><input type="range" id="sEnv" min="5" max="100" value="65" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>细菌密度 (如养殖场/污水)</span><span id="vDen">75%</span></label><input type="range" id="sDen" min="10" max="100" value="75" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">耐药质粒扩散速度</div><div class="k-val" id="kSpd" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">跨菌种耐药流行率</div><div class="k-val" id="kPrev">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const env=+document.getElementById('sEnv').value, den=+document.getElementById('sDen').value;
+  document.getElementById('vEnv').textContent=env+'%'; document.getElementById('vDen').textContent=den+'%';
+  const spd=Math.round(env*den/100);
+  const prev=Math.min(98, Math.round(15 + spd*0.85));
+  document.getElementById('kSpd').textContent=spd+' 分';
+  document.getElementById('kPrev').textContent=prev+'%';
+  document.getElementById('svg').innerHTML=`
+    <circle cx="130" cy="88" r="32" fill="#fee2e2" stroke="#ef4444" stroke-width="3"/>
+    <text x="130" y="92" text-anchor="middle" font-size="12.5" font-weight="850" fill="#b91c1c">耐药菌 A</text>
+    <line x1="162" y1="88" x2="398" y2="88" stroke="#ef4444" stroke-width="${Math.max(2,spd/12)}" stroke-dasharray="6 3"/>
+    <text x="280" y="72" text-anchor="middle" font-size="12.5" font-weight="800" fill="#ef4444">质粒 U 盘拷贝 (扩散度 ${spd})</text>
+    <circle cx="430" cy="88" r="32" fill="${prev>50?'#fee2e2':'#e0f2fe'}" stroke="${prev>50?'#ef4444':'#0284c7'}" stroke-width="3"/>
+    <text x="430" y="92" text-anchor="middle" font-size="12.5" font-weight="850" fill="${prev>50?'#b91c1c':'#0369a1'}">陌生菌 B (${prev}%转化)</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>滥用抗生素不仅伤自己，更是在给全人类共用的细菌库做耐药演化筛选！通过质粒水平转移，耐药外挂能在不同菌种间疯狂复制（流行率 ${prev}%）！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>
