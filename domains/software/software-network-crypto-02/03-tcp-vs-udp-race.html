@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：协议擂台 · TCP 严谨快递 vs UDP 直播弹幕</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .duel { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; line-height: 1.65; font-size: 13.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📦 TCP vs UDP：为什么银行转账死守 TCP，而游戏语音和 HTTP/3 纷纷拥抱 UDP？</h1>
+        <p>假设当前网络存在 <strong>10% 随机丢包</strong>。切换两大典型场景，对比 TCP 队头阻塞与 UDP 极速直发的真实体验！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="s1" onclick="pick(1)">💰 场景 A：银行转账 10,000 元 / 下载安装包</button>
+        <button class="btn" id="s2" onclick="pick(2)">🎮 场景 B：多人射击游戏语音 / 体育直播</button>
+      </div>
+      <div class="duel" id="duelBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const DATA = {
+      1: {
+        t: "🏆 <strong>TCP 完胜！</strong><br>丢了第 3 号包就立刻暂停重传，确保 1→2→3→4 一个字节都不差、顺序绝对精准，绝不会把 10,000 元转成 100 元！",
+        u: "💥 <strong>UDP 灾难！</strong><br>发完就不管，丢了第 3 号包直接跳过，安装包损坏无法运行，财务账目直接错乱！",
+        aha: "💡 <strong>可靠性至上（选 TCP）：</strong>文件下载、网页文档、支付指令宁可多等 200 毫秒重传，也绝不容许丢一个比特。"
+      },
+      2: {
+        t: "😵 <strong>TCP 队头阻塞（Head-of-Line Blocking）：</strong><br>3 秒前的一帧画面丢了，TCP 强行把后面已经到达的 20 帧最新画面全部扣住死等重传，结果玩家卡成 PPT 瞬间阵亡！",
+        u: "🏆 <strong>UDP 完胜！</strong><br>3 秒前的过时语音丢了就丢了，绝不耽误播放此刻最新的位置与语音，延迟死死压在 20ms 内！",
+        aha: "💡 <strong>实时性至上（选 UDP / QUIC）：</strong>语音通话、游戏同步宁可轻微掉帧也绝不卡顿；现代 <strong>HTTP/3（QUIC）</strong> 更是直接在 UDP 上自己重做了独立多路复用，既可靠又彻底消灭了 TCP 队头阻塞！"
+      }
+    };
+    const seen = new Set([1]);
+    function pick(n) {
+      seen.add(n);
+      document.getElementById("s1").classList.toggle("active", n === 1);
+      document.getElementById("s2").classList.toggle("active", n === 2);
+      const d = DATA[n];
+      document.getElementById("duelBox").innerHTML = `<div class="card">${d.t}</div><div class="card">${d.u}</div>`;
+      document.getElementById("ahaBox").innerHTML = d.aha;
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(1);
+  </script>
+</body>
+</html>

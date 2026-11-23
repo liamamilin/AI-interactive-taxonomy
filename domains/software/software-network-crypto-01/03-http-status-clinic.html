@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：HTTP 状态码急诊室 · 4xx vs 5xx</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .case { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    select { padding: 8px 10px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-text); font-weight: 800; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🩺 HTTP 状态码急诊室：页面报错了，这口锅到底归前端还是后端？</h1>
+        <p>为下面 4 个真实线上故障选出最精准的 HTTP 状态码，一秒记住 <strong>3xx 搬家 · 4xx 你的错 · 5xx 服务器的锅</strong>！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div id="cases"></div>
+      <div style="font-weight:850;font-size:15px;margin-top:12px;">诊断得分：<span id="scoreOut" style="color:var(--tax-primary)">0 / 4</span></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const CASES = [
+      { id: "c1", txt: "① 网站换了新域名，需要浏览器永久自动跳转到新地址", ans: "301" },
+      { id: "c2", txt: "② 普通用户已登录，但试图访问“管理员删库后台”被拒", ans: "403" },
+      { id: "c3", txt: "③ 用户手滑把 URL 拼错了，服务器上根本没有这个页面", ans: "404" },
+      { id: "c4", txt: "④ Nginx 网关好好的，但它后面连着的业务进程崩了没回话", ans: "502" }
+    ];
+    const picks = { c1: "", c2: "", c3: "", c4: "" };
+
+    function setPick(id, v) { picks[id] = v; render(); }
+
+    function render() {
+      document.getElementById("cases").innerHTML = CASES.map(c => `
+        <div class="case">
+          <div style="font-weight:800;font-size:14px;">${c.txt}</div>
+          <select onchange="setPick('${c.id}', this.value)">
+            <option value="">-- 选状态码 --</option>
+            <option value="301" ${picks[c.id] === "301" ? "selected" : ""}>301 Moved Permanently</option>
+            <option value="403" ${picks[c.id] === "403" ? "selected" : ""}>403 Forbidden</option>
+            <option value="404" ${picks[c.id] === "404" ? "selected" : ""}>404 Not Found</option>
+            <option value="502" ${picks[c.id] === "502" ? "selected" : ""}>502 Bad Gateway</option>
+          </select>
+        </div>
+      `).join("");
+
+      const ok = CASES.filter(c => picks[c.id] === c.ans).length;
+      document.getElementById("scoreOut").textContent = `${ok} / 4`;
+      document.getElementById("ahaBox").innerHTML = ok === 4
+        ? "💡 <strong>全对通关！</strong>记住黄金口诀：<strong>2xx 一切正常 · 3xx 搬家跳转 · 4xx 客户端请求有问题（401 没登录 / 403 没权限 / 404 路径不存在）· 5xx 服务端挂了（500 内部异常 / 502 网关后方挂了）</strong>！"
+        : "💡 <strong>顿悟时刻：</strong>把 4 个真实场景全部配上正确的 HTTP 状态码，从此看报错日志不再抓瞎！";
+      if (ok === 4 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+  </script>
+</body>
+</html>

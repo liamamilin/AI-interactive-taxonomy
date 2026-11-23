@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：数字签名防篡改实验室 · Hash 雪崩效应</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-size: 14.5px; font-weight: 750; resize: none; }
+    .hash-box { margin-top: 12px; padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-family: ui-monospace, monospace; font-size: 13px; line-height: 1.7; word-break: break-all; }
+    .btn { margin-top: 10px; padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>✍️ 数字签名防篡改：把转账金额加个 0，为什么立刻露馅？</h1>
+        <p>Alice 用私钥给下面这份合同签了名。试着偷偷把 <strong>100 元</strong> 改成 <strong>1000 元</strong>（哪怕只多加一个空格！），看看哈希摘要和验签结果！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:13.5px;font-weight:800;">📄 电子合同正文（可自由编辑篡改）：</label>
+      <textarea id="docInput" rows="2" oninput="check()">甲方 Alice 向乙方 Bob 转账 100 元人民币。</textarea>
+      <button class="btn" onclick="restore()">↺ 恢复原版合同</button>
+
+      <div class="hash-box" id="hashOut"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const ORIG = "甲方 Alice 向乙方 Bob 转账 100 元人民币。";
+
+    function fastHashHex(str) {
+      let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+      for (let i = 0; i < str.length; i++) {
+        const ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return (h1 >>> 0).toString(16).padStart(8, "0") + (h2 >>> 0).toString(16).padStart(8, "0") + ((h1 ^ h2) >>> 0).toString(16).padStart(8, "0");
+    }
+
+    const ORIG_HASH = fastHashHex(ORIG);
+
+    function restore() {
+      document.getElementById("docInput").value = ORIG;
+      check();
+    }
+
+    function check() {
+      const cur = document.getElementById("docInput").value;
+      const curHash = fastHashHex(cur);
+      const ok = curHash === ORIG_HASH;
+      document.getElementById("hashOut").innerHTML = `
+        原签名锁定摘要：<strong>${ORIG_HASH}</strong><br>
+        当前正文新摘要：<strong style="color:${ok ? "var(--tax-green)" : "var(--tax-red)"}">${curHash}</strong><br>
+        公钥验签结果：<strong style="color:${ok ? "var(--tax-green)" : "var(--tax-red)"}">${ok ? "✅ 验签通过！文件一字未改且确为 Alice 签署" : "🚨 验签失败！文件内容已被篡改！"}</strong>
+      `;
+      document.getElementById("ahaBox").innerHTML = ok
+        ? "💡 <strong>试试篡改合同：</strong>往文本框里随便加一个 <code>0</code> 或标点，亲眼见证密码学哈希的<strong>雪崩效应</strong>——改动 1 个字符，整串摘要面目全非！"
+        : "💡 <strong>雪崩效应立功！</strong>数字签名 = <strong>私钥加密文件哈希摘要</strong>。因为没有 Alice 的私钥，黑客绝对造不出新内容对应的合法签名；银行用公开的 Alice 公钥一核对，篡改瞬间现形！";
+      if (!ok && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    check();
+  </script>
+</body>
+</html>

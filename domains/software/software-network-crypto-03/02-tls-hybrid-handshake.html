@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：TLS 混合加密握手台 · 非对称 + 对称</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .steps { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 18px; line-height: 1.7; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔑 TLS 混合加密：为什么 HTTPS 不全程用“非对称加密”传网页？</h1>
+        <p>非对称加密（RSA / ECDH）安全但极慢（慢 1000 倍），对称加密（AES）极快但不敢明文发钥匙。依次点击 3 步，看 TLS 如何把两者的优点完美缝合！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="steps">
+        <button class="btn active" id="s1" onclick="go(1)">① 服务器亮出数字证书与公钥</button>
+        <button class="btn" id="s2" onclick="go(2)">② 用非对称算法安全协商出“会话密钥”</button>
+        <button class="btn" id="s3" onclick="go(3)">③ 切回极速 AES 对称加密传数据！</button>
+      </div>
+      <div class="box" id="boxOut"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const ST = {
+      1: {
+        txt: "📜 <strong>Server Hello + Certificate：</strong>服务器发来自己的 CA 签名证书（里面装着公开的公钥），浏览器查验无误，确认对面是真的银行官网。",
+        aha: "💡 <strong>第 1 步（验明正身）：</strong>公钥可以满大街发，私钥死锁在服务器机房里绝不出门。"
+      },
+      2: {
+        txt: "🔐 <strong>非对称密钥交换（ECDH / RSA）：</strong>浏览器和服务器用非对称加密，当着黑客的面安全敲定一把本次会话专属的 <strong>256 位随机对称密钥</strong>（比如 <code>K = 9F3A...</code>）。",
+        aha: "💡 <strong>好钢用在刀刃上：</strong>昂贵慢速的非对称加密，在整个 HTTPS 连接里<strong>只干这一件事</strong>——安全递交对称钥匙！"
+      },
+      3: {
+        txt: "⚡ <strong>AES-GCM 高速对称传输：</strong>钥匙到手后，后续的 HTML、4K 视频、聊天记录全部改用硬件加速的 <strong>AES 对称加密</strong> 飞速加解密，吞吐高达每秒几十 GB！",
+        aha: "💡 <strong>HTTPS 的黄金混合架构：</strong><strong>非对称加密解决“陌生人如何安全交钥匙”的难题，对称加密解决“海量数据如何高速传输”的性能难题</strong>——两者合体才造就了地址栏里那把小绿锁！"
+      }
+    };
+    const seen = new Set([1]);
+    function go(n) {
+      seen.add(n);
+      [1, 2, 3].forEach(i => document.getElementById("s" + i).classList.toggle("active", i === n));
+      document.getElementById("boxOut").innerHTML = ST[n].txt;
+      document.getElementById("ahaBox").innerHTML = ST[n].aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    go(1);
+  </script>
+</body>
+</html>

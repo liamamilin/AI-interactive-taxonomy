@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：SQL 注入攻防台 · 万能密码绕过登录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .btn { padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.warn { background: var(--tax-red); border-color: var(--tax-red); }
+    .sql { padding: 14px; border-radius: 12px; background: #0f172a; color: #e2e8f0; font-family: ui-monospace, monospace; font-size: 13.5px; line-height: 1.65; }
+    .res { margin-top: 12px; padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-weight: 850; font-size: 14.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>💉 SQL 注入（SQL Injection）：为什么输一句 <code>' OR 1=1--</code> 就能免密登进管理员账号？</h1>
+        <p>点击向用户名输入框注入经典黑客 payload，实时观察后台拼接出来的 SQL 语句，再勾选 <strong>参数化查询（Prepared Statement）</strong> 一键免疫！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" onclick="setInput('alice')">👤 正常用户输入：alice</button>
+        <button class="btn warn" onclick="setInput(`admin' OR 1=1--`)">💉 注入黑客载荷：admin' OR 1=1--</button>
+        <label style="display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px;cursor:pointer;">
+          <input id="prepChk" type="checkbox" onchange="render()" /> 🛡️ 开启参数化查询（代码与数据彻底隔离）
+        </label>
+      </div>
+
+      <div class="sql" id="sqlOut"></div>
+      <div class="res" id="resOut"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let userVal = "alice";
+    let injected = false;
+
+    function setInput(v) {
+      userVal = v;
+      if (v.includes("OR 1=1")) injected = true;
+      render();
+    }
+
+    function render() {
+      const safe = document.getElementById("prepChk").checked;
+      const isAtk = userVal.includes("OR 1=1");
+
+      if (!safe) {
+        document.getElementById("sqlOut").innerHTML = `实际执行的危险拼接 SQL：<br>SELECT * FROM users WHERE name = '<span style="color:#f87171">${userVal}</span>' AND pwd = '******';`;
+      } else {
+        document.getElementById("sqlOut").innerHTML = `预编译参数化 SQL（结构已锁死）：<br>SELECT * FROM users WHERE name = <span style="color:#34d399">?</span> AND pwd = <span style="color:#34d399">?</span>;<br><span style="color:#94a3b8">// 绑定纯文本参数 1 = "${userVal}"（绝不会被当成 SQL 语法解析！）</span>`;
+      }
+
+      if (isAtk && !safe) {
+        document.getElementById("resOut").innerHTML = "💥 <span style='color:var(--tax-red)'>登录防线告破！</span><code>--</code> 把后面的密码校验直接注释掉了，<code>OR 1=1</code> 恒为真，黑客直接免密拿走 admin 权限！";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>注入漏洞的本质（跟 AI 提示词注入同源！）：</strong>程序把用户输入的“数据”直接拼进了“指令”里，让数据反客为主篡改了逻辑！快勾选上方 <strong>🛡️ 开启参数化查询</strong> 修复它！";
+      } else if (isAtk && safe) {
+        document.getElementById("resOut").innerHTML = "✅ <span style='color:var(--tax-green)'>攻击彻底失效！</span>数据库只是老老实实去查有没有人真的起名叫 <code>admin' OR 1=1--</code>，查无此人，拒绝登录！";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>根治 SQL 注入的唯一银弹：</strong>永远不要手动用字符串拼接 SQL！使用 <strong>Prepared Statement（预编译参数化查询）</strong> 把 SQL 语法树提前锁死，让用户输入永远只能当纯数据对待！";
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      } else {
+        document.getElementById("resOut").innerHTML = "🟢 正常查询用户 alice，等待核对密码。";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>顿悟时刻：</strong>先点击红色按钮注入 <code>admin' OR 1=1--</code> 看防线如何瞬间崩塌，再勾选参数化查询彻底防御！";
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

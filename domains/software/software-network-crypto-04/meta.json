@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "network-crypto",
+  "order": 4,
+  "title": "数字签名与 SQL 注入 / XSS",
+  "icon": "🛡️",
+  "subtitle": "电子合同改一个标点符号为什么瞬间验签失败？黑客又是怎么在登录框里敲一句 ' OR 1=1-- 就绕过密码的？",
+  "difficulty": "入门",
+  "related": ["software/software-network-crypto-03", "ai/ai-security-toys"],
+  "toys": {
+    "01-digital-signature-tamper.html": {
+      "title": "数字签名防篡改实验室（SHA-256 雪崩效应）",
+      "icon": "✍️",
+      "archetype": "blind-lab",
+      "concept": "哈希雪崩效应 · 私钥签名 / 公钥验签 · 不可抵赖性",
+      "summary": "修改电子转账合同里的任意一个数字或标点，亲眼看 SHA-256 摘要瞬间面目全非并触发验签红灯报警！"
+    },
+    "02-sql-injection-sandbox.html": {
+      "title": "SQL 注入攻防台：' OR 1=1-- 绕过密码",
+      "icon": "💉",
+      "archetype": "scenario",
+      "concept": "字符串拼接漏洞 · SQL Injection · 参数化查询 Prepared Statement",
+      "summary": "一键向登录框注入经典万能密码，实时透视后台 SQL 语句如何被劫持，再开启参数化查询彻底免疫！"
+    },
+    "03-xss-escape-shield.html": {
+      "title": "XSS 跨站脚本攻防与转义护盾",
+      "icon": "🧹",
+      "archetype": "builder",
+      "concept": "XSS 跨站脚本 · HTML 实体转义 · CSP 内容安全策略",
+      "summary": "在评论区提交藏着 <script> 偷 Cookie 的恶意留言，勾选 HTML 转义与 HttpOnly Cookie 筑起防线。"
+    }
+  }
+}

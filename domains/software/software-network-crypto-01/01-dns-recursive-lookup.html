@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：DNS 递归查号台 · 根→顶级→权威服务器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .hops { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    @media (max-width: 720px) { .hops { grid-template-columns: 1fr 1fr; } }
+    .hop { padding: 14px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); text-align: center; opacity: 0.45; transition: all 0.2s ease; }
+    .hop.on { opacity: 1; border-color: var(--tax-primary); background: rgba(99,102,241,0.12); transform: translateY(-2px); }
+    .hop.hit { opacity: 1; border-color: var(--tax-green); background: rgba(16,185,129,0.14); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📞 DNS 全球问路接力：浏览器怎么把 “shop.example.com” 翻译成 IP 地址？</h1>
+        <p>网络底层只认数字 IP（如 <code>93.184.216.34</code>）。点击 <strong>“推进问路”</strong> 走完冷查询 4 步，再试一次 <strong>“开启本地缓存”</strong>！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" onclick="step()">📡 推进下一步问路</button>
+        <button class="btn sec" onclick="hitCache()">⚡ 模拟命中本地 TTL 缓存</button>
+        <button class="btn sec" onclick="resetSim()">↺ 重置</button>
+        <span style="margin-left:auto;font-family:monospace;font-weight:850;">累计耗时：<span id="msOut" style="color:var(--tax-primary)">0 ms</span></span>
+      </div>
+      <div class="hops" id="hopRow"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const HOPS = [
+      { title: "1. 本地递归解析器", sub: "1.1.1.1 / 运营商 DNS", msg: "查缓存没找到 → 帮你去问根服务器！" },
+      { title: "2. 根服务器 (.)", sub: "全球 13 组逻辑根", msg: "“我不知道具体 IP，但 .com 归右边这位管！”" },
+      { title: "3. 顶级域 (.com)", sub: "TLD 服务器", msg: "“example.com 的专属权威服务器在这里！”" },
+      { title: "4. 权威 DNS", sub: "example.com 管家", msg: "✅ 找到了！IP 是 93.184.216.34（TTL=300秒）" }
+    ];
+    let cur = 0, cached = false;
+
+    function step() {
+      cached = false;
+      if (cur < 4) cur++;
+      render();
+      if (cur >= 4 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function hitCache() {
+      cached = true;
+      cur = 1;
+      render();
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function resetSim() { cur = 0; cached = false; render(); }
+
+    function render() {
+      const ms = cached ? 1 : cur * 28;
+      document.getElementById("msOut").textContent = ms + " ms";
+      document.getElementById("hopRow").innerHTML = HOPS.map((h, i) => {
+        const cls = cached && i === 0 ? "hit" : i < cur ? "on" : "";
+        const txt = cached && i === 0 ? "⚡ 缓存直接命中！1ms 返回 93.184.216.34，根本不用出国问根服务器！" : h.msg;
+        return `
+          <div class="hop ${cls}">
+            <div style="font-weight:850;font-size:13.5px;">${h.title}</div>
+            <div style="font-size:11.5px;color:var(--tax-primary);margin:3px 0;">${h.sub}</div>
+            <div style="font-size:12px;color:var(--tax-muted);margin-top:6px;line-height:1.45;">${txt}</div>
+          </div>
+        `;
+      }).join("");
+
+      document.getElementById("ahaBox").innerHTML = cached
+        ? "💡 <strong>TTL 缓存是互联网不瘫痪的秘密：</strong>全球每天有几万亿次域名查询，靠各级 DNS 按 TTL（生存时间）记在小本本上，99% 的查询在 1 毫秒内就被本地拦截回答了！"
+        : cur === 4
+          ? "💡 <strong>分而治之的全球电话簿：</strong>没有任何一台服务器存得下全世界的域名！DNS 把域名从右往左分层委托（根 → .com → example.com），既去中心化又抗单点故障！"
+          : "💡 <strong>顿悟时刻：</strong>连续点击 <strong>推进下一步问路</strong> 走完 4 站，再点 <strong>模拟命中本地 TTL 缓存</strong> 对比速度！";
+    }
+    render();
+  </script>
+</body>
+</html>

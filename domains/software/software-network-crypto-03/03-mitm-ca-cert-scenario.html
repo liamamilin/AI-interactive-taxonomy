@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：咖啡馆中间人攻击（MITM）与 CA 证书防线</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 18px; line-height: 1.7; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🕵️ 中间人攻击（MITM）：如果黑客把银行的“公钥”偷换成自己的怎么办？</h1>
+        <p>你在咖啡馆连了黑客架设的免费 Wi-Fi。切换下方两种验证模式，看浏览器为什么必须内置 <strong>CA 根证书</strong>！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="mNo" onclick="setM('no')">😱 无 CA 证书验真（裸公钥传输）</button>
+        <button class="btn" id="mCa" onclick="setM('ca')">🛡️ 开启 CA 数字证书信任链验证</button>
+      </div>
+      <div class="card" id="boxOut"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["no"]);
+    function setM(m) {
+      seen.add(m);
+      document.getElementById("mNo").classList.toggle("active", m === "no");
+      document.getElementById("mCa").classList.toggle("active", m === "ca");
+      const ca = m === "ca";
+      document.getElementById("boxOut").innerHTML = ca
+        ? "🛡️ <strong>CA 验真拦截成功！</strong><br>黑客发来伪造公钥，但浏览器用操作系统出厂自带的 <strong>权威 CA 根公钥</strong> 一验签——发现没有权威公证处盖章，立刻弹出全屏红色警告 <code>NET::ERR_CERT_AUTHORITY_INVALID</code>，强行掐断连接保住银行密码！"
+        : "💀 <strong>中间人偷梁换柱得逞！</strong><br>黑客拦下银行发来的真公钥，换成<strong>黑客自己的公钥</strong>发给你。你用黑客公钥加密密码发出去，黑客解密偷走密码，再用真公钥重新加密发给银行——全程神不知鬼不觉！";
+      document.getElementById("ahaBox").innerHTML = ca
+        ? "💡 <strong>CA 证书的本质就是“公安部盖章的身份证”：</strong>光靠加密防窃听不够，还必须证明“这把公钥确实属于 bank.com 而不是隔壁桌黑客”——所以千万不要在公共 Wi-Fi 下随便点击“继续前往不安全网站”！"
+        : "💡 <strong>只加密不验身份 = 给小偷送保险箱钥匙！</strong>点击上方 <strong>🛡️ 开启 CA 数字证书验证</strong> 看现代浏览器如何一秒识破假冒者。";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    setM("no");
+  </script>
+</body>
+</html>

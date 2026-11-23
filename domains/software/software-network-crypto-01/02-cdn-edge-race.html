@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：CDN 边缘加速竞速 · 跨洋回源 vs 家门口节点</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 14px; }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+    .track { height: 16px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin: 8px 0; }
+    .fill { height: 100%; width: 0%; transition: width 0.14s linear; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚀 CDN 边缘加速竞速：为什么光速也救不了“跨洋直连”？</h1>
+        <p>上海用户访问托管在美国东海岸的网站图片。光在光纤里的速度约 20 万公里/秒，物理距离写死了延迟！点击发车对比直连与 CDN！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="btn" onclick="go()">▶ 同时加载首页大图（上海 → 美东 vs 同城 CDN）</button>
+
+      <div class="lane">
+        <div style="font-weight:850;font-size:14px;">⚡ 命中同城 CDN 边缘节点（距离 15 km）</div>
+        <div class="track"><div class="fill" id="f1" style="background:var(--tax-green);"></div></div>
+        <div id="s1" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+      </div>
+
+      <div class="lane">
+        <div style="font-weight:850;font-size:14px;">🌊 直连美东源站（海底光缆往返 26,000 km）</div>
+        <div class="track"><div class="fill" id="f2" style="background:var(--tax-amber);"></div></div>
+        <div id="s2" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>点击加载按钮，体验把静态资源提前铺到“用户家门口便利店（CDN）”如何轻松提速 15 倍！
+    </div>
+  </div>
+
+  <script>
+    let timer = null;
+    function go() {
+      if (timer) clearInterval(timer);
+      let p1 = 0, p2 = 0;
+      timer = setInterval(() => {
+        p1 = Math.min(100, p1 + 50);
+        p2 = Math.min(100, p2 + 7);
+        document.getElementById("f1").style.width = p1 + "%";
+        document.getElementById("f2").style.width = p2 + "%";
+        document.getElementById("s1").textContent = p1 >= 100 ? "✅ 耗时 14 ms（秒开！还没眨眼图就出来了）" : `同城秒取 ${p1}%`;
+        document.getElementById("s2").textContent = p2 >= 100 ? "🐢 耗时 240 ms（TCP + TLS + HTTP 多次跨洋往返）" : `穿越太平洋海底光缆中 ${p2}%`;
+        if (p2 >= 100) {
+          clearInterval(timer);
+          document.getElementById("ahaBox").innerHTML = "💡 <strong>物理定律打不破，但可以把数据搬近！</strong>CDN（内容分发网络）就像快递前置仓：把热门视频、图片、JS 提前缓存到全球几百个城市边缘机房，用户就近取货，既省源站带宽又砍掉跨洋延迟！";
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }, 110);
+    }
+  </script>
+</body>
+</html>

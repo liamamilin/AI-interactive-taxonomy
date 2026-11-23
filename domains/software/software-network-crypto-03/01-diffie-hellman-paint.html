@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：颜料混合魔法 · Diffie-Hellman 密钥交换</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    @media (max-width: 700px) { .ctrls { grid-template-columns: 1fr; } }
+    .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; text-align: center; }
+    .swatch { height: 48px; border-radius: 10px; margin: 8px 0; border: 1.5px solid rgba(255,255,255,0.2); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎨 颜料混合魔法（Diffie-Hellman）：当着黑客的面，凭空商量出共同密码！</h1>
+        <p>规则：<strong>把两种颜料混在一起很容易，但把混合色拆回原色几乎不可能</strong>！任意拖动 Alice 和 Bob 的私密色相，观察两人的最终绝密色！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <div>
+          <label style="font-weight:850;font-size:14px;">👩 Alice 的私密数 a：<span id="aVal" style="color:var(--tax-primary)">6</span>（绝不公开）</label>
+          <input id="aSlider" type="range" min="1" max="15" value="6" style="width:100%;margin-top:6px;" />
+        </div>
+        <div>
+          <label style="font-weight:850;font-size:14px;">👨 Bob 的私密数 b：<span id="bVal" style="color:var(--tax-green)">11</span>（绝不公开）</label>
+          <input id="bSlider" type="range" min="1" max="15" value="11" style="width:100%;margin-top:6px;" />
+        </div>
+      </div>
+
+      <div class="grid" id="swatchRow"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const P = 23, G = 5;
+    let drags = 0;
+
+    function modPow(base, exp, mod) {
+      let r = 1;
+      for (let i = 0; i < exp; i++) r = (r * base) % mod;
+      return r;
+    }
+
+    function colorOf(v) {
+      const hue = (v * 37) % 360;
+      return `hsl(${hue}, 78%, 52%)`;
+    }
+
+    function render() {
+      const a = parseInt(document.getElementById("aSlider").value, 10);
+      const b = parseInt(document.getElementById("bSlider").value, 10);
+      document.getElementById("aVal").textContent = a;
+      document.getElementById("bVal").textContent = b;
+
+      const pubA = modPow(G, a, P);
+      const pubB = modPow(G, b, P);
+      const secA = modPow(pubB, a, P);
+      const secB = modPow(pubA, b, P);
+
+      document.getElementById("swatchRow").innerHTML = `
+        <div class="card">
+          <div style="font-weight:850;font-size:13.5px;">👩 Alice 算出的共同密钥</div>
+          <div class="swatch" style="background:${colorOf(secA)}"></div>
+          <div style="font-family:monospace;font-size:12.5px;">公开值 A=${pubA} → 密钥 = <strong>${secA}</strong></div>
+        </div>
+        <div class="card" style="border-color:var(--tax-red);">
+          <div style="font-weight:850;font-size:13.5px;">🕵️ 黑客偷看到的公开信息</div>
+          <div class="swatch" style="background:linear-gradient(90deg, ${colorOf(pubA)}, ${colorOf(pubB)})"></div>
+          <div style="font-family:monospace;font-size:12px;color:var(--tax-muted);">只看到 g=5, p=23, A=${pubA}, B=${pubB}<br>反推不出私钥，算不出密钥！</div>
+        </div>
+        <div class="card">
+          <div style="font-weight:850;font-size:13.5px;">👨 Bob 算出的共同密钥</div>
+          <div class="swatch" style="background:${colorOf(secB)}"></div>
+          <div style="font-family:monospace;font-size:12.5px;">公开值 B=${pubB} → 密钥 = <strong>${secB}</strong></div>
+        </div>
+      `;
+
+      document.getElementById("ahaBox").innerHTML = `💡 <strong>数学奇迹（模幂交换律）：</strong>无论你怎么调 a 和 b，因为 <code>(gᵃ)ᵇ ≡ (gᵇ)ᵃ (mod p)</code>，Alice 和 Bob 永远会得到<strong>一模一样的绝密密钥（${secA}）</strong>，而中间窃听的黑客面对真实 2048 位大素数（或椭圆曲线 ECDH），算到太阳熄灭也反推不出密钥！`;
+    }
+
+    ["aSlider", "bSlider"].forEach(id => document.getElementById(id).addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }));
+    render();
+  </script>
+</body>
+</html>

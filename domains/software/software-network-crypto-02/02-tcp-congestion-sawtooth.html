@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：TCP 拥塞控制锯齿波 · AIMD 沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.warn { background: var(--tax-red); border-color: var(--tax-red); }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; }
+    svg { width: 100%; height: 210px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📉 TCP 拥塞控制锯齿波（AIMD）：全网几亿台设备没人指挥，怎么不把互联网挤瘫痪？</h1>
+        <p>TCP 靠 <strong>“慢启动翻倍试探 → 慢加探索 → 一旦丢包立刻砍半”</strong> 的绅士礼让协议运转。点击推进发送轮次，再试着注入一次丢包！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" onclick="nextRtt()">⏩ 推进 1 轮正常发送（RTT +1）</button>
+        <button class="btn warn" onclick="dropPacket()">💥 注入一次网络丢包！</button>
+        <button class="btn sec" onclick="resetSim()">↺ 重置</button>
+        <span style="margin-left:auto;font-family:monospace;font-weight:850;">当前窗口 cwnd = <span id="cwndOut" style="color:var(--tax-primary)">1</span> 包</span>
+      </div>
+      <div class="stage"><svg viewBox="0 0 540 200" id="waveSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let hist = [1];
+    let ssthresh = 16;
+    let cwnd = 1;
+    let dropped = false;
+
+    function nextRtt() {
+      if (cwnd < ssthresh) cwnd = Math.min(ssthresh, cwnd * 2);
+      else cwnd = Math.min(32, cwnd + 1);
+      hist.push(cwnd);
+      if (hist.length > 18) hist.shift();
+      render();
+      if (hist.length >= 5 && dropped && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function dropPacket() {
+      dropped = true;
+      ssthresh = Math.max(2, Math.floor(cwnd / 2));
+      cwnd = ssthresh;
+      hist.push(cwnd);
+      if (hist.length > 18) hist.shift();
+      render();
+      if (hist.length >= 4 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function resetSim() { hist = [1]; ssthresh = 16; cwnd = 1; dropped = false; render(); }
+
+    function render() {
+      document.getElementById("cwndOut").textContent = cwnd;
+      const pts = hist.map((v, i) => {
+        const x = 35 + i * 28;
+        const y = 175 - (v / 32) * 145;
+        return `${x},${y.toFixed(1)}`;
+      }).join(" ");
+      const thY = 175 - (ssthresh / 32) * 145;
+      let s = `<line x1="30" y1="175" x2="520" y2="175" stroke="#334155" stroke-width="2"/>`;
+      s += `<line x1="30" y1="${thY.toFixed(1)}" x2="520" y2="${thY.toFixed(1)}" stroke="#f59e0b" stroke-dasharray="5,4" stroke-width="1.5"/>`;
+      s += `<text x="36" y="${(thY - 5).toFixed(1)}" fill="#fbbf24" font-size="11">慢启动阈值 ssthresh = ${ssthresh}</text>`;
+      s += `<polyline points="${pts}" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linejoin="round"/>`;
+      hist.forEach((v, i) => {
+        const x = 35 + i * 28, y = 175 - (v / 32) * 145;
+        s += `<circle cx="${x}" cy="${y.toFixed(1)}" r="4.5" fill="#6366f1" stroke="#fff" stroke-width="1.5"/>`;
+      });
+      document.getElementById("waveSvg").innerHTML = s;
+
+      document.getElementById("ahaBox").innerHTML = dropped
+        ? "💡 <strong>经典锯齿波诞生（AIMD：加性增、乘性减）：</strong>一发现丢包就立刻把发送速率<strong>直接砍半</strong>，等路不堵了再每次 +1 温和试探——正是全世界的 TCP 都在自觉遵守这条礼让法则，互联网才没有在流量高峰期彻底死锁崩溃！"
+        : "💡 <strong>顿悟时刻：</strong>先连续点击 <strong>推进发送</strong> 看指数慢启动（1→2→4→8→16）与线性试探，再点击 <strong>💥 注入丢包</strong> 亲眼画出经典的拥塞控制锯齿波！";
+    }
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：三次握手对话剧场 · TCP Handshake</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .steps { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .stage { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 18px; line-height: 1.7; font-size: 14.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🤝 TCP 三次握手：为什么非要说三句话，少一句会出什么事？</h1>
+        <p>想象两人在山谷里用对讲机确认“你能听见我，我也能听见你”。依次点击下面 3 步完成建连！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="steps">
+        <button class="btn active" id="s1" onclick="go(1)">① Client → Server：SYN</button>
+        <button class="btn" id="s2" onclick="go(2)">② Server → Client：SYN-ACK</button>
+        <button class="btn" id="s3" onclick="go(3)">③ Client → Server：ACK</button>
+      </div>
+      <div class="stage" id="stageBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const ST = {
+      1: {
+        txt: "📱 <strong>客户端（Client）→ 服务器（Server）：</strong><br><code>SYN (seq=100)</code>：“喂！听得见吗？我想建连，我的初始序号是 100！”<br><span style='color:var(--tax-muted)'>此时：双方都还不确定对方能不能收到。</span>",
+        aha: "💡 <strong>第 1 次握手：</strong>服务器收到后，只确认了「客户端会发、我会收」。"
+      },
+      2: {
+        txt: "🖥️ <strong>服务器（Server）→ 客户端（Client）：</strong><br><code>SYN-ACK (ack=101, seq=500)</code>：“听得很清楚！我也准备好了，我的初始序号是 500，你听得见我吗？”<br><span style='color:var(--tax-muted)'>此时：客户端已经确认双向都通了，但<strong>服务器还不知道客户端到底听没听见自己！</strong></span>",
+        aha: "💡 <strong>为什么两次握手不够？</strong>如果一个 10 秒前卡在半路的旧 SYN 包突然晃到服务器，两次握手会让服务器傻傻白开一条连接干等一辈子，直接被耗干内存！"
+      },
+      3: {
+        txt: "📱 <strong>客户端（Client）→ 服务器（Server）：</strong><br><code>ACK (ack=501)</code>：“我也听清你的 500 啦！正式开始传数据吧！”<br><span style='color:var(--tax-green)'>✅ ESTABLISHED：双向收发能力与初始序号全部确认完毕！</span>",
+        aha: "💡 <strong>三次握手的极简数学：</strong>确认双向 4 个能力（客发、服收、服发、客收）的最少通信次数就是 <strong>3 次</strong>（把服务器的 ACK 和 SYN 合并成第 2 次）！多一次浪费，少一次不安全！"
+      }
+    };
+    const seen = new Set([1]);
+    function go(n) {
+      seen.add(n);
+      [1, 2, 3].forEach(i => document.getElementById("s" + i).classList.toggle("active", i === n));
+      document.getElementById("stageBox").innerHTML = ST[n].txt;
+      document.getElementById("ahaBox").innerHTML = ST[n].aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    go(1);
+  </script>
+</body>
+</html>

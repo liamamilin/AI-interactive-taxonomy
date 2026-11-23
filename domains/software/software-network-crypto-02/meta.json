@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "network-crypto",
+  "order": 2,
+  "title": "TCP 握手与丢包拥塞控制",
+  "icon": "🤝",
+  "subtitle": "为什么 TCP 建连非要“三次握手”而不是两次？网络一卡顿，TCP 又是怎么像老司机一样踩刹车防全网堵死的？",
+  "difficulty": "进阶",
+  "related": ["software/software-network-crypto-01", "software/software-distributed-04"],
+  "toys": {
+    "01-tcp-three-way-handshake.html": {
+      "title": "三次握手对话剧场：为什么两次不行？",
+      "icon": "🤝",
+      "archetype": "scenario",
+      "concept": "SYN / SYN-ACK / ACK · 双工收发确认 · 历史迷途包",
+      "summary": "单步走完三次握手，并模拟“如果只握两次，一个迟到的旧连接包如何把服务器资源白白耗死”！"
+    },
+    "02-tcp-congestion-sawtooth.html": {
+      "title": "拥塞控制锯齿波（AIMD 慢启动与拥塞避免）",
+      "icon": "📉",
+      "archetype": "simulation",
+      "concept": "慢启动指数翻倍 · 丢包直接砍半 · 锯齿状 cwnd 曲线",
+      "summary": "点击推进传输轮次并在任意时刻注入一次丢包，亲眼画出著名的 TCP 拥塞窗口锯齿波！"
+    },
+    "03-tcp-vs-udp-race.html": {
+      "title": "协议擂台：TCP 严谨快递 vs UDP 直播弹幕",
+      "icon": "📦",
+      "archetype": "race",
+      "concept": "TCP 队头阻塞 · UDP 极速无连接 · QUIC (HTTP/3)",
+      "summary": "在“银行转账”与“fps 联机开黑”两大场景下注入 10% 丢包，对比 TCP 与 UDP 的体验代差。"
+    }
+  }
+}

@@ -5,10 +5,10 @@
   "stats": {
     "totalDomains": 10,
     "litDomains": 2,
-    "totalTopics": 51,
-    "totalPlannedTopics": 224,
+    "totalTopics": 55,
+    "totalPlannedTopics": 220,
     "totalBlueprintTopics": 275,
-    "totalToys": 153
+    "totalToys": 165
   },
   "tracks": [
     {
@@ -1209,24 +1209,7 @@
         {
           "id": "network-crypto",
           "title": "3. 网络协议与密码安全（Networking & Cryptography）",
-          "plannedTopics": [
-            {
-              "slug": "software-network-crypto-01",
-              "title": "DNS 寻址与网页请求奇幻漂流"
-            },
-            {
-              "slug": "software-network-crypto-02",
-              "title": "TCP 握手与丢包拥塞控制"
-            },
-            {
-              "slug": "software-network-crypto-03",
-              "title": "HTTPS 非对称加密传纸条"
-            },
-            {
-              "slug": "software-network-crypto-04",
-              "title": "数字签名与 SQL 注入 / XSS"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "database-cache",
@@ -1295,10 +1278,10 @@
           ]
         }
       ],
-      "liveTopicCount": 8,
-      "plannedTopicCount": 16,
+      "liveTopicCount": 12,
+      "plannedTopicCount": 12,
       "blueprintTopicCount": 24,
-      "liveToyCount": 24,
+      "liveToyCount": 36,
       "topics": [
         {
           "id": "software/software-dsa-01",
@@ -1346,6 +1329,55 @@
               "archetype": "builder",
               "concept": "暴力双循环 O(n²) · 哈希缓存 O(n) · 空间换时间",
               "summary": "在经典的“两数之和（Two Sum）”考题里一键切换暴力嵌套循环与哈希表备忘录，体验 1000 倍提速。"
+            }
+          ]
+        },
+        {
+          "id": "software/software-network-crypto-01",
+          "slug": "software-network-crypto-01",
+          "domain": "software",
+          "branch": "network-crypto",
+          "order": 1,
+          "title": "DNS 寻址与网页请求奇幻漂流",
+          "icon": "🌐",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "在浏览器地址栏敲下 google.com 回车的那 0.1 秒里，数据包到底在全球跑了多少趟才把网页搬回来？",
+          "difficulty": "入门",
+          "related": [
+            "software/software-network-crypto-02",
+            "software/software-swe-web-02"
+          ],
+          "toys": [
+            {
+              "id": "software/software-network-crypto-01/01-dns-recursive-lookup.html",
+              "file": "01-dns-recursive-lookup.html",
+              "path": "./domains/software/software-network-crypto-01/01-dns-recursive-lookup.html",
+              "title": "DNS 递归查号台：根→顶级→权威服务器",
+              "icon": "📞",
+              "archetype": "spatial",
+              "concept": "DNS 域名系统 · 根服务器 / TLD / 权威 DNS · TTL 缓存",
+              "summary": "单步追踪一次域名查询从本地缓存到全球根服务器的接力路线，再体验命中 TTL 缓存如何瞬间省掉 4 趟往返！"
+            },
+            {
+              "id": "software/software-network-crypto-01/02-cdn-edge-race.html",
+              "file": "02-cdn-edge-race.html",
+              "path": "./domains/software/software-network-crypto-01/02-cdn-edge-race.html",
+              "title": "CDN 边缘加速竞速：跨洋回源 vs 家门口节点",
+              "icon": "🚀",
+              "archetype": "race",
+              "concept": "CDN 内容分发网络 · 物理光速延迟 · 边缘缓存命中",
+              "summary": "同屏起跑加载一张 4K 高清图，对比横跨太平洋回源与从同城 CDN 机房秒取的毫秒差距。"
+            },
+            {
+              "id": "software/software-network-crypto-01/03-http-status-clinic.html",
+              "file": "03-http-status-clinic.html",
+              "path": "./domains/software/software-network-crypto-01/03-http-status-clinic.html",
+              "title": "HTTP 状态码急诊室（200 / 301 / 403 / 404 / 502）",
+              "icon": "🩺",
+              "archetype": "scenario",
+              "concept": "HTTP 语义 · 4xx 客户端错 vs 5xx 服务端锅 · 重定向与网关",
+              "summary": "面对 4 个真实网页打不开的故障现场，亲手开出正确的 HTTP 状态码，一秒分清该甩锅给前端还是后端！"
             }
           ]
         },
@@ -1448,6 +1480,55 @@
           ]
         },
         {
+          "id": "software/software-network-crypto-02",
+          "slug": "software-network-crypto-02",
+          "domain": "software",
+          "branch": "network-crypto",
+          "order": 2,
+          "title": "TCP 握手与丢包拥塞控制",
+          "icon": "🤝",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "为什么 TCP 建连非要“三次握手”而不是两次？网络一卡顿，TCP 又是怎么像老司机一样踩刹车防全网堵死的？",
+          "difficulty": "进阶",
+          "related": [
+            "software/software-network-crypto-01",
+            "software/software-distributed-04"
+          ],
+          "toys": [
+            {
+              "id": "software/software-network-crypto-02/01-tcp-three-way-handshake.html",
+              "file": "01-tcp-three-way-handshake.html",
+              "path": "./domains/software/software-network-crypto-02/01-tcp-three-way-handshake.html",
+              "title": "三次握手对话剧场：为什么两次不行？",
+              "icon": "🤝",
+              "archetype": "scenario",
+              "concept": "SYN / SYN-ACK / ACK · 双工收发确认 · 历史迷途包",
+              "summary": "单步走完三次握手，并模拟“如果只握两次，一个迟到的旧连接包如何把服务器资源白白耗死”！"
+            },
+            {
+              "id": "software/software-network-crypto-02/02-tcp-congestion-sawtooth.html",
+              "file": "02-tcp-congestion-sawtooth.html",
+              "path": "./domains/software/software-network-crypto-02/02-tcp-congestion-sawtooth.html",
+              "title": "拥塞控制锯齿波（AIMD 慢启动与拥塞避免）",
+              "icon": "📉",
+              "archetype": "simulation",
+              "concept": "慢启动指数翻倍 · 丢包直接砍半 · 锯齿状 cwnd 曲线",
+              "summary": "点击推进传输轮次并在任意时刻注入一次丢包，亲眼画出著名的 TCP 拥塞窗口锯齿波！"
+            },
+            {
+              "id": "software/software-network-crypto-02/03-tcp-vs-udp-race.html",
+              "file": "03-tcp-vs-udp-race.html",
+              "path": "./domains/software/software-network-crypto-02/03-tcp-vs-udp-race.html",
+              "title": "协议擂台：TCP 严谨快递 vs UDP 直播弹幕",
+              "icon": "📦",
+              "archetype": "race",
+              "concept": "TCP 队头阻塞 · UDP 极速无连接 · QUIC (HTTP/3)",
+              "summary": "在“银行转账”与“fps 联机开黑”两大场景下注入 10% 丢包，对比 TCP 与 UDP 的体验代差。"
+            }
+          ]
+        },
+        {
           "id": "software/software-systems-os-02",
           "slug": "software-systems-os-02",
           "domain": "software",
@@ -1546,6 +1627,55 @@
           ]
         },
         {
+          "id": "software/software-network-crypto-03",
+          "slug": "software-network-crypto-03",
+          "domain": "software",
+          "branch": "network-crypto",
+          "order": 3,
+          "title": "HTTPS 非对称加密传纸条",
+          "icon": "🔐",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "在满是窃听者的公共 Wi-Fi 里，你和银行从未提前见过面，怎么商量出一个黑客绝对破译不了的秘密暗号？",
+          "difficulty": "入门",
+          "related": [
+            "software/software-network-crypto-04",
+            "ai/ai-infra-safety-04"
+          ],
+          "toys": [
+            {
+              "id": "software/software-network-crypto-03/01-diffie-hellman-paint.html",
+              "file": "01-diffie-hellman-paint.html",
+              "path": "./domains/software/software-network-crypto-03/01-diffie-hellman-paint.html",
+              "title": "颜料混合魔法（Diffie-Hellman 密钥交换）",
+              "icon": "🎨",
+              "archetype": "simulation",
+              "concept": "Diffie-Hellman 密钥交换 · 单向混合不可逆 · 公开协商密钥",
+              "summary": "调配你和对方的私密颜料，亲眼看两人只公开交换混合色，最后竟然凭空调出完全一模一样的绝密颜色！"
+            },
+            {
+              "id": "software/software-network-crypto-03/02-tls-hybrid-handshake.html",
+              "file": "02-tls-hybrid-handshake.html",
+              "path": "./domains/software/software-network-crypto-03/02-tls-hybrid-handshake.html",
+              "title": "TLS 混合加密握手台：非对称传钥匙 + 对称传数据",
+              "icon": "🔑",
+              "archetype": "builder",
+              "concept": "非对称加密 RSA/ECDH · 对称加密 AES · HTTPS 性能与安全兼得",
+              "summary": "一步步走通浏览器与服务器的 TLS 握手，秒懂为什么 HTTPS 既要用公钥私钥、又要切回对称密钥传输。"
+            },
+            {
+              "id": "software/software-network-crypto-03/03-mitm-ca-cert-scenario.html",
+              "file": "03-mitm-ca-cert-scenario.html",
+              "path": "./domains/software/software-network-crypto-03/03-mitm-ca-cert-scenario.html",
+              "title": "咖啡馆中间人攻击（MITM）与 CA 证书防线",
+              "icon": "🕵️",
+              "archetype": "scenario",
+              "concept": "中间人攻击 MITM · 数字证书 CA 信任链 · 浏览器红屏警告",
+              "summary": "黑客在公共 Wi-Fi 里把银行公钥偷梁换柱换成自己的！开启 CA 根证书验真瞬间揪出假网站！"
+            }
+          ]
+        },
+        {
           "id": "software/software-systems-os-03",
           "slug": "software-systems-os-03",
           "domain": "software",
@@ -1640,6 +1770,55 @@
               "archetype": "simulation",
               "concept": "二叉堆 Binary Heap · O(log n) 上浮下沉 · Top-K 问题",
               "summary": "往急诊分诊堆里插入不同危重等级的病人，实时观察最小堆如何用极少交换永远把最危重病人顶在堆顶。"
+            }
+          ]
+        },
+        {
+          "id": "software/software-network-crypto-04",
+          "slug": "software-network-crypto-04",
+          "domain": "software",
+          "branch": "network-crypto",
+          "order": 4,
+          "title": "数字签名与 SQL 注入 / XSS",
+          "icon": "🛡️",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "电子合同改一个标点符号为什么瞬间验签失败？黑客又是怎么在登录框里敲一句 ' OR 1=1-- 就绕过密码的？",
+          "difficulty": "入门",
+          "related": [
+            "software/software-network-crypto-03",
+            "ai/ai-security-toys"
+          ],
+          "toys": [
+            {
+              "id": "software/software-network-crypto-04/01-digital-signature-tamper.html",
+              "file": "01-digital-signature-tamper.html",
+              "path": "./domains/software/software-network-crypto-04/01-digital-signature-tamper.html",
+              "title": "数字签名防篡改实验室（SHA-256 雪崩效应）",
+              "icon": "✍️",
+              "archetype": "blind-lab",
+              "concept": "哈希雪崩效应 · 私钥签名 / 公钥验签 · 不可抵赖性",
+              "summary": "修改电子转账合同里的任意一个数字或标点，亲眼看 SHA-256 摘要瞬间面目全非并触发验签红灯报警！"
+            },
+            {
+              "id": "software/software-network-crypto-04/02-sql-injection-sandbox.html",
+              "file": "02-sql-injection-sandbox.html",
+              "path": "./domains/software/software-network-crypto-04/02-sql-injection-sandbox.html",
+              "title": "SQL 注入攻防台：' OR 1=1-- 绕过密码",
+              "icon": "💉",
+              "archetype": "scenario",
+              "concept": "字符串拼接漏洞 · SQL Injection · 参数化查询 Prepared Statement",
+              "summary": "一键向登录框注入经典万能密码，实时透视后台 SQL 语句如何被劫持，再开启参数化查询彻底免疫！"
+            },
+            {
+              "id": "software/software-network-crypto-04/03-xss-escape-shield.html",
+              "file": "03-xss-escape-shield.html",
+              "path": "./domains/software/software-network-crypto-04/03-xss-escape-shield.html",
+              "title": "XSS 跨站脚本攻防与转义护盾",
+              "icon": "🧹",
+              "archetype": "builder",
+              "concept": "XSS 跨站脚本 · HTML 实体转义 · CSP 内容安全策略",
+              "summary": "在评论区提交藏着 <script> 偷 Cookie 的恶意留言，勾选 HTML 转义与 HttpOnly Cookie 筑起防线。"
             }
           ]
         },
