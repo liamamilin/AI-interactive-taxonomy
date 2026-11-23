@@ -32,6 +32,40 @@
     .reply.ok { background:var(--green-soft); border-color:#a7f3d0; color:#065f46; }
     .reply.bad { background:var(--red-soft); border-color:#fecaca; color:#991b1b; }
   </style>
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style data-tax-compat="1">
+    body.in-iframe .back-link { display: none !important; }
+    html[data-theme="dark"] {
+      --bg: #0b1120;
+      --surface: #111827;
+      --card: #111827;
+      --ink: #f1f5f9;
+      --muted: #94a3b8;
+      --border: #1e293b;
+    }
+    html[data-theme="dark"] body {
+      background: #0b1120 !important;
+      color: #f1f5f9 !important;
+    }
+  </style>
+  <script>
+    (function () {
+      let acts = 0, reported = false;
+      function onInteract(e) {
+        if (reported) return;
+        const el = e.target && e.target.closest ? e.target.closest("button, input, select, textarea, [onclick], [role='button']") : null;
+        if (!el) return;
+        acts++;
+        if (acts >= 2 && window.ToySDK) {
+          reported = true;
+          window.ToySDK.markCompleted();
+        }
+      }
+      document.addEventListener("click", onInteract, true);
+      document.addEventListener("input", onInteract, true);
+      document.addEventListener("change", onInteract, true);
+    })();
+  </script>
 </head>
 <body>
   <div class="wrap">
