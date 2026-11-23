@@ -6,10 +6,10 @@ window.TAXONOMY_DATA = {
   "stats": {
     "totalDomains": 10,
     "litDomains": 1,
-    "totalTopics": 25,
-    "totalPlannedTopics": 250,
+    "totalTopics": 28,
+    "totalPlannedTopics": 247,
     "totalBlueprintTopics": 275,
-    "totalToys": 75
+    "totalToys": 84
   },
   "tracks": [
     {
@@ -1505,31 +1505,17 @@ window.TAXONOMY_DATA = {
         {
           "id": "dl-foundations",
           "title": "2. 神经网络与深度学习基石（Deep Learning）",
-          "plannedTopics": [
-            {
-              "slug": "ai-dl-foundations-05",
-              "title": "Transformer 完整解剖"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "llm-foundations",
           "title": "3. 大语言模型核心与表示（LLM Foundations）",
-          "plannedTopics": [
-            {
-              "slug": "ai-llm-foundations-01",
-              "title": "非 Transformer 序列架构（Mamba / SSM）"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "training-alignment",
           "title": "4. 训练、微调与对齐（Training & Alignment）",
           "plannedTopics": [
-            {
-              "slug": "ai-training-alignment-01",
-              "title": "合成数据与模型蒸馏（Distillation）"
-            },
             {
               "slug": "ai-training-alignment-02",
               "title": "偏好对齐进阶（DPO / GRPO / 宪法 AI）"
@@ -1617,10 +1603,10 @@ window.TAXONOMY_DATA = {
           ]
         }
       ],
-      "liveTopicCount": 25,
-      "plannedTopicCount": 18,
+      "liveTopicCount": 28,
+      "plannedTopicCount": 15,
       "blueprintTopicCount": 43,
-      "liveToyCount": 75,
+      "liveToyCount": 84,
       "topics": [
         {
           "id": "ai/ai-dl-foundations-01",
@@ -2167,6 +2153,56 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "ai/ai-training-alignment-01",
+          "slug": "ai-training-alignment-01",
+          "domain": "ai",
+          "branch": "training-alignment",
+          "order": 4,
+          "title": "合成数据与模型蒸馏（Distillation）",
+          "icon": "🧪",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "互联网高质量人类文本快被吃光了——AI 怎么靠“大老师教小徒弟”和高质量合成数据继续进化？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/llm-training-toys",
+            "ai/llm-finetuning-toys",
+            "ai/reasoning-model-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-training-alignment-01/01-soft-labels-teacher.html",
+              "file": "01-soft-labels-teacher.html",
+              "path": "./domains/ai/ai-training-alignment-01/01-soft-labels-teacher.html",
+              "title": "软标签温度计：暗知识蒸馏",
+              "icon": "🌡️",
+              "archetype": "simulation",
+              "concept": "知识蒸馏 · Softmax 温度 T · 暗知识 Dark Knowledge",
+              "summary": "调节蒸馏温度 T，看清为什么教师模型给出的“错题概率分布”比非 0 即 1 的标准答案更有营养。"
+            },
+            {
+              "id": "ai/ai-training-alignment-01/02-model-collapse-loop.html",
+              "file": "02-model-collapse-loop.html",
+              "path": "./domains/ai/ai-training-alignment-01/02-model-collapse-loop.html",
+              "title": "模型崩溃传话循环",
+              "icon": "🌀",
+              "archetype": "scenario",
+              "concept": "模型崩溃 Model Collapse · 长尾多样性丢失 · 数据污染",
+              "summary": "逐代模拟 AI 用自己生成的数据反复训练自己，亲眼见证语言多样性在 5 代内塌缩成复读机。"
+            },
+            {
+              "id": "ai/ai-training-alignment-01/03-synthetic-pipeline-builder.html",
+              "file": "03-synthetic-pipeline-builder.html",
+              "path": "./domains/ai/ai-training-alignment-01/03-synthetic-pipeline-builder.html",
+              "title": "高质量合成数据流水线",
+              "icon": "🏭",
+              "archetype": "builder",
+              "concept": "合成数据 · 可验证推理 Verifier · 教师 CoT 蒸馏",
+              "summary": "勾选组装 CoT 重写、沙箱校验器、语义去重等工序，看合成数据如何反向把 7B 小模型练成学霸。"
+            }
+          ]
+        },
+        {
           "id": "ai/llm-infra-toys",
           "slug": "llm-infra-toys",
           "domain": "ai",
@@ -2263,6 +2299,106 @@ window.TAXONOMY_DATA = {
               "archetype": "interactive",
               "concept": "任务拆解 · Human-in-the-Loop",
               "summary": "对比手把手副驾驶、高危刹车与 YOLO 全自动 3 秒删老板合同的职场社死现场。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-dl-foundations-05",
+          "slug": "ai-dl-foundations-05",
+          "domain": "ai",
+          "branch": "dl-foundations",
+          "order": 5,
+          "title": "Transformer 完整解剖",
+          "icon": "🤖",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "拆开改变整个 AI 时代的引擎盖：QKV 注意力相亲、位置旋转时钟与防偷看因果遮罩。",
+          "difficulty": "进阶",
+          "related": [
+            "ai/ai-dl-foundations-04",
+            "ai/llm-interactive-toys",
+            "ai/ai-llm-foundations-01"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-dl-foundations-05/01-qkv-attention-matcher.html",
+              "file": "01-qkv-attention-matcher.html",
+              "path": "./domains/ai/ai-dl-foundations-05/01-qkv-attention-matcher.html",
+              "title": "QKV 注意力相亲局",
+              "icon": "💘",
+              "archetype": "spatial",
+              "concept": "Query-Key-Value · 点积注意力 · 动态指代消歧",
+              "summary": "切换句尾一个形容词，亲眼看着代词“它”的注意力连线瞬间从“动物”跳到“马路”。"
+            },
+            {
+              "id": "ai/ai-dl-foundations-05/02-positional-encoding-clock.html",
+              "file": "02-positional-encoding-clock.html",
+              "path": "./domains/ai/ai-dl-foundations-05/02-positional-encoding-clock.html",
+              "title": "位置编码时钟（RoPE）",
+              "icon": "🕰️",
+              "archetype": "simulation",
+              "concept": "词袋盲区 · 正弦/旋转位置编码 · 相对距离感知",
+              "summary": "对比无位置编码时的“狗咬人=人咬狗”困局，并用旋转指针直观理解 RoPE 如何编码相对距离。"
+            },
+            {
+              "id": "ai/ai-dl-foundations-05/03-causal-mask-curtain.html",
+              "file": "03-causal-mask-curtain.html",
+              "path": "./domains/ai/ai-dl-foundations-05/03-causal-mask-curtain.html",
+              "title": "因果遮罩幕布（Causal Mask）",
+              "icon": "🎭",
+              "archetype": "builder",
+              "concept": "下三角遮罩 · -∞ Softmax 归零 · BERT vs GPT 架构分叉",
+              "summary": "切换双向理解与单向生成模式，点击注意力矩阵任意一行，看 GPT 如何彻底封死“偷看未来词”。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-llm-foundations-01",
+          "slug": "ai-llm-foundations-01",
+          "domain": "ai",
+          "branch": "llm-foundations",
+          "order": 5,
+          "title": "非 Transformer 序列架构（Mamba / SSM）",
+          "icon": "🐍",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "当上下文拉长到 100 万字，Transformer 的二次方注意力开始吃不消——Mamba 靠什么做到 O(N) 线性狂飙？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/ai-dl-foundations-05",
+            "ai/long-context-memory-toys",
+            "ai/llm-infra-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-llm-foundations-01/01-quadratic-vs-linear-race.html",
+              "file": "01-quadratic-vs-linear-race.html",
+              "path": "./domains/ai/ai-llm-foundations-01/01-quadratic-vs-linear-race.html",
+              "title": "O(N²) vs O(N) 复杂度大逃杀",
+              "icon": "⚡",
+              "archetype": "race",
+              "concept": "二次方注意力瓶颈 · 线性状态空间 · KV Cache 显存",
+              "summary": "把上下文从 4K 拉到 100 万 Token，同屏对比 Transformer 显存爆表与 Mamba 恒定显存狂飙。"
+            },
+            {
+              "id": "ai/ai-llm-foundations-01/02-selective-ssm-filter.html",
+              "file": "02-selective-ssm-filter.html",
+              "path": "./domains/ai/ai-llm-foundations-01/02-selective-ssm-filter.html",
+              "title": "Mamba 选择性滤网",
+              "icon": "🎛️",
+              "archetype": "builder",
+              "concept": "选择性状态空间 · 动态步长 Δ · 关键记忆过滤",
+              "summary": "向压缩状态槽喂入混杂密码与废话的文本流，对比传统 SSM 与 Mamba 选择性门控的记忆保真度。"
+            },
+            {
+              "id": "ai/ai-llm-foundations-01/03-hybrid-jamba-tradeoff.html",
+              "file": "03-hybrid-jamba-tradeoff.html",
+              "path": "./domains/ai/ai-llm-foundations-01/03-hybrid-jamba-tradeoff.html",
+              "title": "架构选型模拟器：纯注意力 vs Mamba vs 混合",
+              "icon": "🔀",
+              "archetype": "scenario",
+              "concept": "大海捞针回忆 · 吞吐与显存权衡 · Jamba 混合架构",
+              "summary": "在 3 道真实极限场景下实测三种架构的短板，悟懂为什么前沿模型走向 Mamba + Attention 混血。"
             }
           ]
         },

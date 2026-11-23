@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：软标签温度计 · 知识蒸馏与暗知识</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    @media (max-width: 740px) { .duel { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; }
+    .bar-row { display: grid; grid-template-columns: 78px 1fr 56px; gap: 8px; align-items: center; margin: 10px 0; font-size: 13px; font-weight: 750; }
+    .track { height: 14px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); }
+    .fill { height: 100%; border-radius: 999px; transition: width 0.2s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🌡️ 软标签温度计：为什么“错了多少”比“对不对”更有营养？</h1>
+        <p>输入一张「🐱 橘猫」照片，向右调高知识蒸馏温度 <code>T</code>，看教师大模型的概率分布如何把“猫像豹子和狗、但绝不像卡车”的暗知识暴露给小模型！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div>
+        <label style="font-size:14.5px;font-weight:850;">🔥 蒸馏温度 Temperature (T)：<span id="tVal" style="color:var(--tax-primary)">1.0</span>（T=1 接近硬标签，T=4~6 释放丰富暗知识）</label>
+        <input id="tSlider" type="range" min="10" max="60" value="10" style="width:100%;margin-top:8px;" />
+      </div>
+
+      <div class="duel">
+        <div class="card">
+          <div style="font-size:15px;font-weight:850;margin-bottom:8px;">📋 传统硬标签（Hard Label）</div>
+          <div style="font-size:12px;color:var(--tax-muted);margin-bottom:10px;">只告诉小模型唯一标准答案，其他类别全当成 0：</div>
+          <div id="hardBars"></div>
+        </div>
+
+        <div class="card" style="border-color:var(--tax-primary);">
+          <div style="font-size:15px;font-weight:850;margin-bottom:8px;">🧠 教师模型软标签（Soft Label, T=<span id="tTag">1.0</span>）</div>
+          <div style="font-size:12px;color:var(--tax-muted);margin-bottom:10px;">Softmax(logits / T) 平滑后，暴露隐藏的类间亲疏关系：</div>
+          <div id="softBars"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>把温度 <code>T</code> 拉到 <strong>4.0 以上</strong>！在硬标签眼里，豹子、狗和卡车全是冰冷的 <code>0%</code>；而高温软标签告诉小模型：“这虽然是猫，但它有 25% 像豹子、12% 像狗，只有 1% 像卡车！”——这些隐藏在次要选项里的丰富结构信息，就是 Geoffrey Hinton 命名的<strong>暗知识（Dark Knowledge）</strong>！
+    </div>
+  </div>
+
+  <script>
+    const ITEMS = [
+      { label: "🐱 橘猫", logit: 8.2, hard: 100, col: "var(--tax-primary)" },
+      { label: "🐆 豹子", logit: 5.4, hard: 0, col: "var(--tax-amber)" },
+      { label: "🐶 柴犬", logit: 3.6, hard: 0, col: "var(--tax-green)" },
+      { label: "🚚 卡车", logit: -2.0, hard: 0, col: "var(--tax-red)" }
+    ];
+    let moved = 0;
+
+    function render() {
+      const T = parseInt(document.getElementById("tSlider").value, 10) / 10;
+      document.getElementById("tVal").textContent = T.toFixed(1);
+      document.getElementById("tTag").textContent = T.toFixed(1);
+
+      const exps = ITEMS.map(it => Math.exp(it.logit / T));
+      const sum = exps.reduce((a, b) => a + b, 0);
+      const probs = exps.map(e => (e / sum) * 100);
+
+      document.getElementById("hardBars").innerHTML = ITEMS.map(it => `
+        <div class="bar-row">
+          <span>${it.label}</span>
+          <div class="track"><div class="fill" style="width:${it.hard}%;background:${it.col}"></div></div>
+          <span style="font-family:monospace;text-align:right;">${it.hard.toFixed(1)}%</span>
+        </div>
+      `).join("");
+
+      document.getElementById("softBars").innerHTML = ITEMS.map((it, i) => `
+        <div class="bar-row">
+          <span>${it.label}</span>
+          <div class="track"><div class="fill" style="width:${probs[i].toFixed(1)}%;background:${it.col}"></div></div>
+          <span style="font-family:monospace;text-align:right;">${probs[i].toFixed(1)}%</span>
+        </div>
+      `).join("");
+
+      if (T >= 3.5) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（暗知识浮现！）：</strong>在 <strong>T = ${T.toFixed(1)}</strong> 下，「豹子 ${probs[1].toFixed(1)}% > 柴犬 ${probs[2].toFixed(1)}% >> 卡车 ${probs[3].toFixed(1)}%」的层级相似性一目了然！小模型每学 1 张图，吸收的信息量相当于传统硬标签的好几倍！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+
+    document.getElementById("tSlider").addEventListener("input", () => { moved++; render(); if (moved >= 3 && window.ToySDK) window.ToySDK.markCompleted(); });
+    render();
+  </script>
+</body>
+</html>

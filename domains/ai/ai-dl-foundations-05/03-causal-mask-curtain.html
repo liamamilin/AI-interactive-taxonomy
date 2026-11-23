@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：因果遮罩幕布 · BERT vs GPT 架构分叉</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .seg { display: inline-flex; background: var(--tax-surface-alt); padding: 4px; border-radius: 12px; gap: 4px; border: 1px solid var(--tax-border); margin-bottom: 16px; }
+    .seg button { border: none; background: transparent; color: var(--tax-muted); font-weight: 750; font-size: 13px; padding: 8px 14px; border-radius: 9px; cursor: pointer; }
+    .seg button.active { background: var(--tax-surface); color: var(--tax-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .layout { display: grid; grid-template-columns: 1.25fr 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } }
+    .mat-grid { display: grid; grid-template-columns: 58px repeat(5, 1fr); gap: 5px; }
+    .m-head { font-size: 12px; font-weight: 800; color: var(--tax-muted); display: flex; align-items: center; justify-content: center; }
+    .m-row-lbl { font-size: 12.5px; font-weight: 850; cursor: pointer; border-radius: 8px; padding: 6px 4px; text-align: center; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); }
+    .m-row-lbl.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .m-cell {
+      aspect-ratio: 1.15; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; font-family: ui-monospace, monospace; cursor: pointer;
+      border: 1.5px solid var(--tax-border); transition: all 0.16s ease;
+    }
+    .m-cell.open { background: var(--tax-green-soft); color: var(--tax-green); border-color: var(--tax-green); }
+    .m-cell.masked { background: #1e293b; color: #94a3b8; border-color: #334155; }
+    .m-cell.row-hi { box-shadow: 0 0 0 2px var(--tax-primary); }
+    .info { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 16px; font-size: 13.5px; line-height: 1.65; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎭 因果遮罩幕布：GPT 写作文时怎么防止“偷看后面的词”？</h1>
+        <p>切换「GPT 单向因果遮罩」与「BERT 双向全透视」，再点击左侧任意一行词，看看它被允许偷看哪些上下文！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="seg" id="modeSeg">
+        <button data-m="causal" class="active">✍️ Decoder 单向因果遮罩（GPT / Claude / DeepSeek）</button>
+        <button data-m="bidir">📖 Encoder 双向全透视（BERT / 向量检索）</button>
+      </div>
+
+      <div class="layout">
+        <div class="mat-grid" id="matGrid"></div>
+        <div class="info" id="infoBox"></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>在 Softmax 之前，GPT 会把矩阵右上角（所有未来位置）强行加上 <strong><code>-∞</code></strong>，经过 <code>e<sup>-∞</sup> = 0</code> 后未来词的权重彻底归零！正是这块小小的下三角黑幕，把 Transformer 分叉成了擅长理解的 BERT 与擅长续写生成的 GPT 两大阵营。
+    </div>
+  </div>
+
+  <script>
+    const TOKS = ["我", "今天", "想吃", "一碗", "拉面"];
+    let mode = "causal";
+    let selRow = 2; // "想吃"
+    const seen = new Set(["causal"]);
+
+    function render() {
+      const grid = document.getElementById("matGrid");
+      let html = `<div class="m-head">当前\\看</div>` + TOKS.map(t => `<div class="m-head">${t}</div>`).join("");
+
+      for (let r = 0; r < TOKS.length; r++) {
+        html += `<div class="m-row-lbl ${r === selRow ? "active" : ""}" data-r="${r}">${TOKS[r]}</div>`;
+        for (let c = 0; c < TOKS.length; c++) {
+          const masked = mode === "causal" && c > r;
+          const hi = r === selRow ? "row-hi" : "";
+          html += `<div class="m-cell ${masked ? "masked" : "open"} ${hi}" data-r="${r}">${masked ? "-∞ 🚫" : "可见 ✓"}</div>`;
+        }
+      }
+      grid.innerHTML = html;
+
+      const visible = TOKS.filter((_, c) => !(mode === "causal" && c > selRow));
+      const hidden = TOKS.filter((_, c) => mode === "causal" && c > selRow);
+      const box = document.getElementById("infoBox");
+      if (mode === "causal") {
+        box.innerHTML = `
+          <div style="font-weight:850;color:var(--tax-primary);margin-bottom:8px;">✍️ 当前聚焦第 ${selRow + 1} 词：「${TOKS[selRow]}」</div>
+          • <strong>允许参考的已知历史</strong>：${visible.map(w => `<code>${w}</code>`).join("、")}<br/>
+          • <strong>被 -∞ 黑幕封死的未来</strong>：${hidden.length ? hidden.map(w => `<code>${w}</code>`).join("、") : "（已是句尾，无后续词）"}<br/>
+          <div style="margin-top:10px;color:var(--tax-muted);font-size:12.5px;">训练时整句话是一次性并行送进 GPU 的；有了下三角遮罩，第 3 步预测“一碗”时绝对偷看不到后面的“拉面”，实现并行训练与自回归推理的完美统一！</div>
+        `;
+      } else {
+        box.innerHTML = `
+          <div style="font-weight:850;color:var(--tax-green);margin-bottom:8px;">📖 当前聚焦第 ${selRow + 1} 词：「${TOKS[selRow]}」（全双向可见）</div>
+          • <strong>参考范围</strong>：整句话全部 5 个词 <code>${TOKS.join("、")}</code> 互相都能看见！<br/>
+          <div style="margin-top:10px;color:var(--tax-muted);font-size:12.5px;">非常适合做<strong>语义理解、文本分类、RAG 向量 Embedding</strong>（完形填空），但不能直接拿来做从左到右续写生成（因为训练时已经偷看过答案了）。</div>
+        `;
+      }
+    }
+
+    document.getElementById("modeSeg").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      mode = e.target.dataset.m;
+      seen.add(mode);
+      document.querySelectorAll("#modeSeg button").forEach(b => b.classList.toggle("active", b === e.target));
+      render();
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    document.getElementById("matGrid").addEventListener("click", (e) => {
+      const t = e.target.closest("[data-r]");
+      if (!t) return;
+      selRow = parseInt(t.dataset.r, 10);
+      render();
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    render();
+  </script>
+</body>
+</html>

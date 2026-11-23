@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：Mamba 选择性滤网 · 动态步长 Δ</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .seg { display: inline-flex; background: var(--tax-surface-alt); padding: 4px; border-radius: 12px; gap: 4px; border: 1px solid var(--tax-border); margin-bottom: 16px; flex-wrap: wrap; }
+    .seg button { border: none; background: transparent; color: var(--tax-muted); font-weight: 750; font-size: 13px; padding: 8px 14px; border-radius: 9px; cursor: pointer; }
+    .seg button.active { background: var(--tax-surface); color: var(--tax-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .stream { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .tok-pill {
+      padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 800;
+      border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt);
+    }
+    .tok-pill.key { background: var(--tax-primary-soft); border-color: var(--tax-primary); color: var(--tax-primary); }
+    .tok-pill.ignored { opacity: 0.45; text-decoration: line-through; }
+    .slot-box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .bar-track { height: 20px; border-radius: 999px; background: var(--tax-surface); border: 1px solid var(--tax-border); overflow: hidden; display: flex; margin: 10px 0; }
+    .b-key { height: 100%; background: var(--tax-primary); transition: width 0.3s ease; }
+    .b-noise { height: 100%; background: var(--tax-amber); transition: width 0.3s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎛️ Mamba 选择性滤网：为什么加了“动态开关 Δ”，SSM 突然逆袭了？</h1>
+        <p>把一段混有核心密码和大量废话的文本流喂进固定容量状态槽，切换两种架构，看谁能把密码完整留到句尾！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="seg" id="archSeg">
+        <button data-a="lti" class="active">🧱 传统固定 SSM（S4：所有词一视同仁）</button>
+        <button data-a="mamba">🐍 Mamba 选择性 SSM（看内容动态调节写入步长 Δ）</button>
+      </div>
+
+      <div style="font-size:13px;font-weight:800;color:var(--tax-muted);margin-bottom:8px;">🌊 流式输入 Token 序列（下方标注每个词的写入权重 Δ）：</div>
+      <div class="stream" id="streamRow"></div>
+
+      <div class="slot-box">
+        <div style="font-size:14px;font-weight:850;">📦 固定大小的隐藏状态槽（最终残余成分）</div>
+        <div class="bar-track">
+          <div class="b-key" id="keyBar" style="width:20%"></div>
+          <div class="b-noise" id="noiseBar" style="width:80%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:13px;font-weight:750;">
+          <span style="color:var(--tax-primary)">🔑 核心密码「8848」信噪比：<strong id="keyPct">18%</strong></span>
+          <span id="outRes"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>传统状态空间模型（S4）的转移矩阵是<strong>固定不变的（LTI）</strong>，管你是密码还是废话统统按固定比例塞进状态槽，结果密码迅速被冲淡；Mamba 的核心突破就是让步长参数 <code>Δ = f(当前词)</code> 随内容动态变化——遇到重要词大步写入，遇到废话 <code>Δ → 0</code> 直接跳过！
+    </div>
+  </div>
+
+  <script>
+    const STREAM = [
+      { t: "🔑 密钥=8848", isKey: true },
+      { t: "嗯...", isKey: false },
+      { t: "今天", isKey: false },
+      { t: "天气", isKey: false },
+      { t: "不错", isKey: false },
+      { t: "顺便", isKey: false },
+      { t: "喝杯", isKey: false },
+      { t: "美式", isKey: false },
+      { t: "咖啡", isKey: false }
+    ];
+    let arch = "lti";
+    const seen = new Set(["lti"]);
+
+    function render() {
+      const isMamba = arch === "mamba";
+      document.getElementById("streamRow").innerHTML = STREAM.map(s => {
+        const delta = isMamba ? (s.isKey ? "Δ=0.95 写入!" : "Δ=0.02 忽略") : "Δ=0.40 固定";
+        const cls = s.isKey ? "key" : (isMamba ? "ignored" : "");
+        return `<div class="tok-pill ${cls}">${s.t}<div style="font-size:10.5px;font-family:monospace;opacity:0.8;margin-top:2px;">${delta}</div></div>`;
+      }).join("");
+
+      const keyPct = isMamba ? 88 : 16;
+      const noisePct = 100 - keyPct;
+      document.getElementById("keyBar").style.width = keyPct + "%";
+      document.getElementById("noiseBar").style.width = noisePct + "%";
+      document.getElementById("keyPct").textContent = keyPct + "%";
+      document.getElementById("outRes").innerHTML = isMamba
+        ? `<span style="color:var(--tax-green)">✅ 成功复述密钥：8848！</span>`
+        : `<span style="color:var(--tax-red)">❌ 密钥被 8 个废话词冲烂，输出乱码！</span>`;
+    }
+
+    document.getElementById("archSeg").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      arch = e.target.dataset.a;
+      seen.add(arch);
+      document.querySelectorAll("#archSeg button").forEach(b => b.classList.toggle("active", b === e.target));
+      render();
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    render();
+  </script>
+</body>
+</html>

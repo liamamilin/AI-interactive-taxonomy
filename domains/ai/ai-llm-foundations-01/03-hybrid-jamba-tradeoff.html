@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：架构选型模拟器 · Transformer vs Mamba vs 混合架构</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .t-btn { border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-ink); border-radius: 12px; padding: 9px 14px; font-size: 13px; font-weight: 750; cursor: pointer; }
+    .t-btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 820px) { .cards { grid-template-columns: 1fr; } }
+    .c { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .c.best { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .bar-row { font-size: 12px; }
+    .bar-bg { height: 8px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin-top: 3px; }
+    .bar-fill { height: 100%; border-radius: 999px; background: var(--tax-primary); transition: width 0.25s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔀 架构选型模拟器：纯 Transformer、纯 Mamba 还是混血 Jamba？</h1>
+        <p>没有万能架构！切换 3 道极端工程考题，看清为什么最新一代大模型走向「7 层 Mamba + 1 层 Attention」的混合路线。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs" id="sceneTabs">
+        <button class="t-btn active" data-s="0">🪡 考题 1：10 万字合同里精确抄写 18 位订单号</button>
+        <button class="t-btn" data-s="1">📡 考题 2：DNA 基因序列 / 百万级流式日志实时吞吐</button>
+        <button class="t-btn" data-s="2">📱 考题 3：企业级长文档问答（既要精准又要省显存）</button>
+      </div>
+      <div class="cards" id="cardGrid"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>Transformer 像“把整本书摊开在桌上随时翻原页（精准但占桌子）”，Mamba 像“边读边记精炼笔记（省桌子但容易漏掉生僻数字）”——<strong>Hybrid 混合架构</strong>把 85% 的层换成 Mamba 省显存，每隔几层插 1 层 Attention 负责精准翻书，吃尽两边红利！
+    </div>
+  </div>
+
+  <script>
+    const SCENES = [
+      {
+        winner: "tf",
+        items: [
+          { k: "tf", name: "🤖 纯 Transformer", recall: 99, speed: 45, mem: 35, desc: "完胜精准抄写！全量 KV Cache 原封不动存着那 18 位数字，注意力头一眼就能直接复制出来。" },
+          { k: "mb", name: "🐍 纯 Mamba / SSM", recall: 58, speed: 95, mem: 98, desc: "速度极快，但固定大小的压缩状态很难一字不差地记住随机 18 位无规律数字。" },
+          { k: "hy", name: "🔀 Hybrid 混合架构", recall: 95, speed: 82, mem: 80, desc: "仅靠间隔插入的少量注意力层，就几乎追平了纯 Transformer 的大海捞针精度！" }
+        ],
+        aha: "💡 <strong>顿悟时刻（精确回忆是注意力的护城河）：</strong>只要涉及“跨十万字精确复制无规律字符串”，纯压缩状态的 Mamba 天生吃亏，必须保留注意力层。"
+      },
+      {
+        winner: "mb",
+        items: [
+          { k: "tf", name: "🤖 纯 Transformer", recall: 95, speed: 12, mem: 10, desc: "惨遭 O(N²) 拖垮！百万级流式序列直接把显存撑爆，延迟飙升到无法实时响应。" },
+          { k: "mb", name: "🐍 纯 Mamba / SSM", recall: 88, speed: 98, mem: 99, desc: "绝对主场！O(N) 线性扫描 + O(1) 恒定显存，吞吐量比 Transformer 高出一个数量级！" },
+          { k: "hy", name: "🔀 Hybrid 混合架构", recall: 92, speed: 85, mem: 82, desc: "依然非常能打，但那几层注意力在超长百万流式输入下仍会带来少量 KV Cache 负担。" }
+        ],
+        aha: "💡 <strong>顿悟时刻（超长流式数据的王者）：</strong>在音频、基因组学、传感器实时日志等超长连续信号上，纯线性复杂度让 Mamba 展现出压倒性效率。"
+      },
+      {
+        winner: "hy",
+        items: [
+          { k: "tf", name: "🤖 纯 Transformer", recall: 98, speed: 40, mem: 30, desc: "效果虽好，但高并发长文档场景下 KV Cache 显存账单极其昂贵，单卡并发数极低。" },
+          { k: "mb", name: "🐍 纯 Mamba / SSM", recall: 70, speed: 95, mem: 96, desc: "部署成本极低，但遇到复杂多跳逻辑和精确表格数字引用时偶尔会失真。" },
+          { k: "hy", name: "🔀 Hybrid 混合（Jamba / MiniMax）", recall: 96, speed: 88, mem: 86, desc: "🏆 工程最优解！80% 以上 Mamba 层把显存砍掉 6–8 倍，穿插的注意力层牢牢兜住精准回忆与推理！" }
+        ],
+        aha: "💡 <strong>顿悟时刻（工业界大合流）：</strong>如今的架构之争早已不是“谁消灭谁”，而是像 Jamba、Qwen3-Next、Nemotron-H 那样把 Mamba 与 Attention 按比例混搭，兼得线性速度与精准记忆！"
+      }
+    ];
+
+    const seen = new Set([0]);
+    function render(idx) {
+      const s = SCENES[idx];
+      document.getElementById("cardGrid").innerHTML = s.items.map(it => `
+        <div class="c ${s.winner === it.k ? "best" : ""}">
+          <div style="font-size:15.5px;font-weight:850;">${it.name} ${s.winner === it.k ? "🏆" : ""}</div>
+          <div class="bar-row">精确回忆能力：${it.recall}%<div class="bar-bg"><div class="bar-fill" style="width:${it.recall}%"></div></div></div>
+          <div class="bar-row">长序列吞吐速度：${it.speed}%<div class="bar-bg"><div class="bar-fill" style="width:${it.speed}%;background:var(--tax-green)"></div></div></div>
+          <div class="bar-row">显存友好度：${it.mem}%<div class="bar-bg"><div class="bar-fill" style="width:${it.mem}%;background:var(--tax-amber)"></div></div></div>
+          <div style="font-size:13px;line-height:1.55;">${it.desc}</div>
+        </div>
+      `).join("");
+      document.getElementById("ahaBox").innerHTML = s.aha;
+    }
+
+    document.getElementById("sceneTabs").addEventListener("click", (e) => {
+      const btn = e.target.closest(".t-btn");
+      if (!btn) return;
+      const i = parseInt(btn.dataset.s, 10);
+      seen.add(i);
+      document.querySelectorAll(".t-btn").forEach(b => b.classList.toggle("active", b === btn));
+      render(i);
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    render(0);
+  </script>
+</body>
+</html>

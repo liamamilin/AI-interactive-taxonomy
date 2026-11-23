@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：模型崩溃传话循环 · Model Collapse</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
+    .seg { display: inline-flex; background: var(--tax-surface-alt); padding: 4px; border-radius: 12px; gap: 4px; border: 1px solid var(--tax-border); }
+    .seg button { border: none; background: transparent; color: var(--tax-muted); font-weight: 750; font-size: 13px; padding: 7px 12px; border-radius: 9px; cursor: pointer; }
+    .seg button.active { background: var(--tax-surface); color: var(--tax-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .btn-ghost { border: 1px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-ink); border-radius: 10px; padding: 9px 14px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .svg-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    svg { width: 100%; height: 245px; display: block; }
+    .sample-box { margin-top: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 12px; padding: 14px; font-size: 13.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🌀 模型崩溃传话循环：AI 吃自己生成的数据，5 代后会变傻吗？</h1>
+        <p>反复点击「▶ 迭代下一代模型」，对比「纯 AI 合成数据循环」与「混入真实数据 + 质量过滤」下，语言分布多样性的命运！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="controls">
+        <div class="seg" id="modeSeg">
+          <button data-m="inbreed" class="active">☠️ 100% 纯 AI 自产自销（无过滤）</button>
+          <button data-m="healthy">🛡️ 真实数据锚定 + 质量验证器</button>
+        </div>
+        <button class="tax-btn" id="nextBtn">▶ 训练下一代（当前第 <span id="genNum">0</span> 代）</button>
+        <button class="btn-ghost" id="resetBtn">🔄 重置到第 0 代</button>
+      </div>
+
+      <div class="svg-box">
+        <svg id="distSvg" viewBox="0 0 600 240"></svg>
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--tax-muted);margin-top:6px;flex-wrap:wrap;gap:8px;">
+          <span>➖ 灰虚线：人类原始丰富表达分布（第 0 代）</span>
+          <span>当前长尾知识保留率：<strong id="divVal" style="color:var(--tax-primary)">100%</strong></span>
+        </div>
+      </div>
+
+      <div class="sample-box" id="sampleOut"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>每次 AI 生成数据时，采样都会天然偏好高概率主流词、裁掉小众长尾表达。如果下一代模型只吃上一代 AI 产出的“二手数据”，长尾知识会像复印机反复复印一样逐代截断消失，最终退化成单调胡言乱语的<strong>模型崩溃（Model Collapse）</strong>！
+    </div>
+  </div>
+
+  <script>
+    let mode = "inbreed";
+    let gen = 0;
+
+    const SAMPLES_BAD = [
+      "【第 0 代 · 人类原生】：描写秋天的银杏、晚霞、桂花香、古诗词与冷门典故，表达极其丰富多元。",
+      "【第 1 代】：秋天的树叶变黄了，天空很美，微风吹过让人感到非常舒适和惬意。",
+      "【第 2 代】：秋天是一个美好的季节，金黄的树叶非常美丽，总而言之秋天很美好。",
+      "【第 3 代】：秋天很美好，总而言之秋天是一个很美好的季节，金黄的树叶很美好。",
+      "【第 4 代】：总而言之，这是一个非常美好、非常美好、非常美好的金黄季节。",
+      "【第 5 代 · 彻底崩溃】：美好美好美好……（长尾词汇与事实多样性几乎归零，彻底沦为复读机！）"
+    ];
+
+    function gauss(x, mu, sigma) {
+      return Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2)) / (sigma * 2.5);
+    }
+
+    function render() {
+      document.getElementById("genNum").textContent = gen;
+      const sigma0 = 1.05;
+      const sigmaCur = mode === "inbreed" ? Math.max(0.16, sigma0 * Math.pow(0.68, gen)) : Math.max(0.88, sigma0 * Math.pow(0.97, gen));
+      const muCur = mode === "inbreed" ? gen * 0.14 : 0;
+      const diversity = Math.round((sigmaCur / sigma0) * 100);
+
+      const toX = x => 300 + x * 82;
+      const toY = y => 215 - Math.min(2.2, y) * 85;
+
+      let p0 = "", pCur = "";
+      for (let i = 0; i <= 120; i++) {
+        const x = -3.3 + (6.6 * i) / 120;
+        const sx = toX(x);
+        p0 += (i === 0 ? "M" : "L") + `${sx.toFixed(1)},${toY(gauss(x, 0, sigma0)).toFixed(1)} `;
+        pCur += (i === 0 ? "M" : "L") + `${sx.toFixed(1)},${toY(gauss(x, muCur, sigmaCur)).toFixed(1)} `;
+      }
+
+      const col = mode === "inbreed" && gen >= 3 ? "var(--tax-red)" : mode === "healthy" ? "var(--tax-green)" : "var(--tax-primary)";
+      const svg = document.getElementById("distSvg");
+      svg.innerHTML = `
+        <line x1="25" y1="215" x2="575" y2="215" stroke="var(--tax-border)" stroke-width="1.5"/>
+        <path d="${p0}" fill="none" stroke="var(--tax-muted)" stroke-width="2" stroke-dasharray="6,5"/>
+        <path d="${pCur}" fill="none" stroke="${col}" stroke-width="3.5"/>
+        <text x="65" y="232" font-size="11" fill="var(--tax-muted)">← 稀有长尾知识</text>
+        <text x="300" y="232" text-anchor="middle" font-size="11" fill="var(--tax-muted)">高频套话区</text>
+        <text x="535" y="232" text-anchor="end" font-size="11" fill="var(--tax-muted)">小众专业知识 →</text>
+      `;
+
+      document.getElementById("divVal").textContent = diversity + "%";
+      document.getElementById("divVal").style.color = col;
+
+      const box = document.getElementById("sampleOut");
+      if (mode === "inbreed") {
+        box.innerHTML = `<strong>模型输出抽样：</strong>${SAMPLES_BAD[Math.min(5, gen)]}`;
+      } else {
+        box.innerHTML = `<strong>模型输出抽样（第 ${gen} 代）：</strong>由于保留了真实人类语料锚点并用验证器过滤掉重复低质样本，分布宽度依然稳稳维持在 <strong>${diversity}%</strong>，完全没有崩溃！`;
+      }
+
+      if (gen >= 4 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    document.getElementById("modeSeg").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      mode = e.target.dataset.m;
+      document.querySelectorAll("#modeSeg button").forEach(b => b.classList.toggle("active", b === e.target));
+      render();
+    });
+    document.getElementById("nextBtn").addEventListener("click", () => { if (gen < 5) gen++; render(); });
+    document.getElementById("resetBtn").addEventListener("click", () => { gen = 0; render(); });
+    render();
+  </script>
+</body>
+</html>

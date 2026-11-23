@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：高质量合成数据流水线</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .pipe-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 780px) { .pipe-grid { grid-template-columns: 1fr; } }
+    .mod-card {
+      display: flex; gap: 12px; align-items: flex-start; padding: 13px 15px;
+      border-radius: 14px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt);
+      margin-bottom: 10px; cursor: pointer; transition: all 0.15s ease;
+    }
+    .mod-card.on { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .dash { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+    .big-score { font-size: 38px; font-weight: 900; font-family: ui-monospace, monospace; color: var(--tax-primary); }
+    .bar-bg { height: 12px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin-top: 5px; }
+    .bar-fill { height: 100%; border-radius: 999px; transition: width 0.25s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏭 高质量合成数据流水线：为什么好合成数据能让 7B 小模型逆袭？</h1>
+        <p>不是所有合成数据都会导致崩溃！勾选组装 4 道现代大模型实验室的质检工序，把 7B 学生模型的数学推理准确率从 38% 拉到 82%+！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="pipe-grid">
+        <div id="modList"></div>
+
+        <div class="dash">
+          <div>
+            <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">🎓 蒸馏后 7B 学生模型数学推理准确率</div>
+            <div class="big-score" id="accVal">38%</div>
+            <div class="bar-bg"><div class="bar-fill" id="accBar" style="width:38%;background:var(--tax-primary)"></div></div>
+          </div>
+          <div>
+            <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">💎 合成教材含金量（无错率与多样性）</div>
+            <div style="font-size:22px;font-weight:850;font-family:monospace;color:var(--tax-green);" id="qualVal">30%</div>
+            <div class="bar-bg"><div class="bar-fill" id="qualBar" style="width:30%;background:var(--tax-green)"></div></div>
+          </div>
+          <div style="font-size:13px;color:var(--tax-muted);line-height:1.55;" id="diagText"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>合成数据本身不是毒药，<strong>“未经验证的盲目自产自销”</strong>才是！一旦引入外部确定性校验器（比如代码必须跑通单测、数学题答案必须验算正确），AI 就能给自己批量写出超越普通网页质量的“奥赛级教科书”！
+    </div>
+  </div>
+
+  <script>
+    const MODULES = [
+      { id: "cot", title: "🧠 教师大模型 CoT 慢思考展开", desc: "让 671B 强推理教师不仅给答案，还把每一步草稿推演写清楚。", acc: 16, qual: 18 },
+      { id: "verify", title: "✅ 代码沙箱 / 数学校验器（Rejection Sampling）", desc: "自动运行代码单测与答案核验，把老师胡说八道的错题 100% 踢掉！", acc: 18, qual: 32 },
+      { id: "dedup", title: "🧹 语义去重与多样性采样", desc: "用向量聚类砍掉千篇一律的套话，防止模型崩溃成复读机。", acc: 6, qual: 14 },
+      { id: "curr", title: "📚 难度阶梯课程编排（教科书级重写）", desc: "像微软 Phi 系列一样，把杂乱网页改写成由浅入深的清晰例题。", acc: 7, qual: 6 }
+    ];
+
+    const active = new Set(["cot"]);
+    let clicks = 0;
+
+    function render() {
+      document.getElementById("modList").innerHTML = MODULES.map(m => {
+        const on = active.has(m.id);
+        return `
+          <div class="mod-card ${on ? "on" : ""}" data-id="${m.id}">
+            <input type="checkbox" ${on ? "checked" : ""} style="margin-top:4px;pointer-events:none;" />
+            <div>
+              <div style="font-weight:850;font-size:14px;">${m.title}</div>
+              <div style="font-size:12.5px;color:var(--tax-muted);margin-top:2px;">${m.desc}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      let acc = 38, qual = 30;
+      MODULES.forEach(m => { if (active.has(m.id)) { acc += m.acc; qual += m.qual; } });
+
+      document.getElementById("accVal").textContent = acc + "%";
+      document.getElementById("accBar").style.width = acc + "%";
+      document.getElementById("qualVal").textContent = qual + "%";
+      document.getElementById("qualBar").style.width = qual + "%";
+
+      const diag = document.getElementById("diagText");
+      if (active.size === 4) {
+        diag.innerHTML = "🏆 <strong>满配现代合成数据产线！</strong>这就是 DeepSeek-R1-Distill 与 Phi-4 能让小小 7B/14B 模型越级打赢昔日千亿巨兽的核心工程秘密！";
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      } else if (!active.has("verify")) {
+        diag.innerHTML = "⚠️ 缺少「校验器过滤」：教师模型偶尔也会算错题，不把错题剔除，小模型就会把错误推导背下来！";
+      } else {
+        diag.innerHTML = "👍 产线已具雏形，继续勾选剩余质检模块，把准确率推上 85%！";
+      }
+    }
+
+    document.getElementById("modList").addEventListener("click", (e) => {
+      const card = e.target.closest(".mod-card");
+      if (!card) return;
+      const id = card.dataset.id;
+      if (active.has(id)) active.delete(id); else active.add(id);
+      clicks++;
+      render();
+      if (clicks >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    render();
+  </script>
+</body>
+</html>

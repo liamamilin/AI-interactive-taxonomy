@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：位置编码时钟（RoPE）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px; }
+    .toggle { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-size: 13.5px; font-weight: 800; cursor: pointer; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 720px) { .pair { grid-template-columns: 1fr; } }
+    .sent-card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; }
+    .clocks { display: flex; justify-content: space-around; margin: 14px 0; }
+    .clk-wrap { text-align: center; font-size: 13px; font-weight: 800; }
+    .verdict { padding: 12px 14px; border-radius: 12px; font-size: 13.5px; font-weight: 750; margin-top: 14px; text-align: center; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🕰️ 位置编码时钟（RoPE）：没有它，“狗咬人”等于“人咬狗”！</h1>
+        <p>自注意力是全员并行打分，天生分不清谁先谁后。切换下方开关，看看“旋转时钟指针”如何把词序与相对距离刻进向量里！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="controls">
+        <label class="toggle">
+          <input type="checkbox" id="ropeToggle" /> 🌀 开启旋转位置编码（RoPE：按位置旋转向量角度）
+        </label>
+        <div style="flex:1;min-width:180px;">
+          <label style="font-size:13px;font-weight:800;">⏱️ 整体平移句首偏移量（测试相对距离不变性）：+<span id="shiftVal">0</span> 格</label>
+          <input id="shiftSlider" type="range" min="0" max="6" value="0" style="width:100%;" />
+        </div>
+      </div>
+
+      <div class="pair">
+        <div class="sent-card">
+          <div style="font-weight:850;font-size:15px;">🐶 句子 1：狗 咬 人</div>
+          <div class="clocks" id="clk1"></div>
+        </div>
+        <div class="sent-card">
+          <div style="font-weight:850;font-size:15px;">🧑 句子 2：人 咬 狗</div>
+          <div class="clocks" id="clk2"></div>
+        </div>
+      </div>
+
+      <div class="verdict" id="verdictBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>先保持开关关闭，再勾选「开启旋转位置编码（RoPE）」并拖动平移滑块——无论整句话整体后移多少格，“狗”和“咬”之间的<strong>指针夹角差（相对距离）永远恒定</strong>，这就是 RoPE 称霸 LLaMA、DeepSeek 等现代大模型的数学优雅之处！
+    </div>
+  </div>
+
+  <script>
+    function clockSvg(word, pos, angleDeg, color) {
+      const rad = ((angleDeg - 90) * Math.PI) / 180;
+      const x2 = 34 + Math.cos(rad) * 24;
+      const y2 = 34 + Math.sin(rad) * 24;
+      return `
+        <div class="clk-wrap">
+          <svg width="68" height="68" viewBox="0 0 68 68">
+            <circle cx="34" cy="34" r="30" fill="var(--tax-surface)" stroke="${color}" stroke-width="2.5"/>
+            <line x1="34" y1="34" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${color}" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="34" cy="34" r="3.5" fill="${color}"/>
+          </svg>
+          <div>${word} <span style="color:var(--tax-muted);font-size:11px;">(位${pos})</span></div>
+          <div style="font-family:monospace;font-size:11px;color:${color};">${angleDeg}°</div>
+        </div>
+      `;
+    }
+
+    function render() {
+      const on = document.getElementById("ropeToggle").checked;
+      const shift = parseInt(document.getElementById("shiftSlider").value, 10);
+      document.getElementById("shiftVal").textContent = shift;
+
+      const s1 = ["狗", "咬", "人"];
+      const s2 = ["人", "咬", "狗"];
+      const cols = { "狗": "var(--tax-primary)", "咬": "var(--tax-amber)", "人": "var(--tax-green)" };
+
+      document.getElementById("clk1").innerHTML = s1.map((w, i) => {
+        const p = i + shift;
+        return clockSvg(w, p, on ? (p * 45) % 360 : 0, cols[w]);
+      }).join("");
+
+      document.getElementById("clk2").innerHTML = s2.map((w, i) => {
+        const p = i + shift;
+        return clockSvg(w, p, on ? (p * 45) % 360 : 0, cols[w]);
+      }).join("");
+
+      const v = document.getElementById("verdictBox");
+      if (!on) {
+        v.style.background = "var(--tax-red-soft)"; v.style.color = "var(--tax-red)";
+        v.innerHTML = "🚨 无位置编码：两句话的 3 个指针全指向 0°！在 Transformer 眼里「狗咬人」和「人咬狗」的集合完全一模一样（退化成词袋）！";
+      } else {
+        const dAngle = 90; // pos(人)-pos(狗) = +2*45 = +90° vs -90°
+        v.style.background = "var(--tax-green-soft)"; v.style.color = "var(--tax-green)";
+        v.innerHTML = `✅ RoPE 已生效：句子 1 中「狗 → 人」顺时针差 +${dAngle}°，句子 2 中变成 -${dAngle}°，彻底区分词序！且无论整体平移 +${shift} 格，相对夹角始终恒定为 ${dAngle}°！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+
+    document.getElementById("ropeToggle").addEventListener("change", render);
+    document.getElementById("shiftSlider").addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>

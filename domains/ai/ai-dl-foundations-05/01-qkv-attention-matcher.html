@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：QKV 注意力相亲局 · 动态指代消歧</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
+    .seg { display: inline-flex; background: var(--tax-surface-alt); padding: 4px; border-radius: 12px; gap: 4px; border: 1px solid var(--tax-border); }
+    .seg button { border: none; background: transparent; color: var(--tax-muted); font-weight: 750; font-size: 13px; padding: 8px 14px; border-radius: 9px; cursor: pointer; }
+    .seg button.active { background: var(--tax-surface); color: var(--tax-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .svg-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 14px; overflow-x: auto; }
+    svg { width: 100%; min-width: 620px; height: 225px; display: block; }
+    .bars { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 14px; }
+    .b-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .b-track { height: 8px; border-radius: 999px; background: var(--tax-surface); overflow: hidden; margin-top: 6px; border: 1px solid var(--tax-border); }
+    .b-fill { height: 100%; background: var(--tax-primary); transition: width 0.25s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>💘 QKV 注意力相亲局：代词“它”怎么知道自己指谁？</h1>
+        <p>切换句尾的形容词（「太累了」vs「太宽了」），看「它」发出的 <strong>Query（寻找对象）</strong> 如何与前面每个词的 <strong>Key（身份标签）</strong> 打分匹配！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="controls">
+        <div class="seg" id="sentSeg">
+          <button data-s="tired" class="active">🐾 句子 A：“动物 没过 马路 ，因为 【它】 太累了”</button>
+          <button data-s="wide">🛣️ 句子 B：“动物 没过 马路 ，因为 【它】 太宽了”</button>
+        </div>
+      </div>
+
+      <div class="svg-box">
+        <svg id="attSvg" viewBox="0 0 700 220"></svg>
+      </div>
+
+      <div class="bars" id="weightBars"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>Self-Attention 就像一场相亲局：每个词同时扮演 <strong>Query（我要找什么）</strong>、<strong>Key（我有什么特征）</strong> 和 <strong>Value（我能贡献什么语义）</strong>。当句尾变成“太宽了”，“它”的 Query 与“马路”的 Key 点积分数暴涨，瞬间就把马路的语义混进了“它”的向量里！
+    </div>
+  </div>
+
+  <script>
+    const SCENES = {
+      tired: {
+        tokens: ["动物", "没过", "马路", "因为", "它", "太累了"],
+        focusIdx: 4,
+        weights: [0.64, 0.05, 0.09, 0.03, 0.04, 0.15],
+        aha: "💡 <strong>顿悟时刻（指向“动物”）：</strong>因为后文出现「太累了」（生物属性），「它」的注意力权重 <strong>64%</strong> 牢牢锁定在「动物」上，准确完成了指代消歧！"
+      },
+      wide: {
+        tokens: ["动物", "没过", "马路", "因为", "它", "太宽了"],
+        focusIdx: 4,
+        weights: [0.08, 0.04, 0.68, 0.03, 0.04, 0.13],
+        aha: "💡 <strong>顿悟时刻（瞬间跳向“马路”！）：</strong>只换了一个字变成「太宽了」（空间属性），「它」的注意力瞬间有 <strong>68%</strong> 甩向了「马路」！这就是上下文动态词义的精髓。"
+      }
+    };
+
+    let cur = "tired";
+    const seen = new Set(["tired"]);
+
+    function render() {
+      const sc = SCENES[cur];
+      const xs = [70, 180, 290, 400, 510, 625];
+      const qx = xs[sc.focusIdx];
+      const svg = document.getElementById("attSvg");
+      let html = "";
+
+      // Draw curved attention arcs from focusIdx ("它") to all tokens
+      sc.tokens.forEach((tok, i) => {
+        const w = sc.weights[i];
+        const tx = xs[i];
+        if (i !== sc.focusIdx) {
+          const midX = (qx + tx) / 2;
+          const arcY = 148 - Math.abs(qx - tx) * 0.28;
+          const sw = Math.max(1.2, w * 14);
+          const col = w > 0.4 ? "var(--tax-primary)" : "var(--tax-muted)";
+          html += `<path d="M ${qx} 148 Q ${midX} ${arcY} ${tx} 148" fill="none" stroke="${col}" stroke-width="${sw.toFixed(1)}" opacity="${(0.2 + w * 0.85).toFixed(2)}"/>`;
+          if (w > 0.12) {
+            html += `<text x="${midX}" y="${(arcY + 148) / 2 + 12}" text-anchor="middle" font-size="12" font-weight="900" fill="${col}">${Math.round(w * 100)}%</text>`;
+          }
+        }
+      });
+
+      // Draw token boxes
+      sc.tokens.forEach((tok, i) => {
+        const x = xs[i];
+        const isQ = i === sc.focusIdx;
+        const isTop = sc.weights[i] > 0.4;
+        const fill = isQ ? "var(--tax-primary)" : isTop ? "var(--tax-green-soft)" : "var(--tax-surface)";
+        const stroke = isQ ? "var(--tax-primary)" : isTop ? "var(--tax-green)" : "var(--tax-border)";
+        const txt = isQ ? "#fff" : "var(--tax-ink)";
+        html += `<rect x="${x - 42}" y="148" width="84" height="44" rx="12" fill="${fill}" stroke="${stroke}" stroke-width="${isQ || isTop ? 2.5 : 1.5}"/>`;
+        html += `<text x="${x}" y="175" text-anchor="middle" font-size="14" font-weight="850" fill="${txt}">${tok}</text>`;
+        if (isQ) html += `<text x="${x}" y="208" text-anchor="middle" font-size="11" font-weight="800" fill="var(--tax-primary)">Query 提问者</text>`;
+        if (isTop) html += `<text x="${x}" y="208" text-anchor="middle" font-size="11" font-weight="800" fill="var(--tax-green)">★ 最佳 Key 匹配</text>`;
+      });
+      svg.innerHTML = html;
+
+      document.getElementById("weightBars").innerHTML = sc.tokens.map((t, i) => `
+        <div class="b-card">
+          <div style="font-weight:800;font-size:13.5px;">${t}</div>
+          <div style="font-size:12px;color:var(--tax-primary);font-family:monospace;font-weight:800;">${(sc.weights[i] * 100).toFixed(0)}%</div>
+          <div class="b-track"><div class="b-fill" style="width:${(sc.weights[i] * 100).toFixed(0)}%"></div></div>
+        </div>
+      `).join("");
+
+      document.getElementById("ahaBox").innerHTML = sc.aha;
+    }
+
+    document.getElementById("sentSeg").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      cur = e.target.dataset.s;
+      seen.add(cur);
+      document.querySelectorAll("#sentSeg button").forEach(b => b.classList.toggle("active", b === e.target));
+      render();
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    render();
+  </script>
+</body>
+</html>

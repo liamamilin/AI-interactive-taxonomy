@@ -1,0 +1,33 @@
+{
+  "domain": "ai",
+  "branch": "llm-foundations",
+  "order": 5,
+  "title": "非 Transformer 序列架构（Mamba / SSM）",
+  "icon": "🐍",
+  "subtitle": "当上下文拉长到 100 万字，Transformer 的二次方注意力开始吃不消——Mamba 靠什么做到 O(N) 线性狂飙？",
+  "difficulty": "进阶",
+  "related": ["ai/ai-dl-foundations-05", "ai/long-context-memory-toys", "ai/llm-infra-toys"],
+  "toys": {
+    "01-quadratic-vs-linear-race.html": {
+      "title": "O(N²) vs O(N) 复杂度大逃杀",
+      "icon": "⚡",
+      "archetype": "race",
+      "concept": "二次方注意力瓶颈 · 线性状态空间 · KV Cache 显存",
+      "summary": "把上下文从 4K 拉到 100 万 Token，同屏对比 Transformer 显存爆表与 Mamba 恒定显存狂飙。"
+    },
+    "02-selective-ssm-filter.html": {
+      "title": "Mamba 选择性滤网",
+      "icon": "🎛️",
+      "archetype": "builder",
+      "concept": "选择性状态空间 · 动态步长 Δ · 关键记忆过滤",
+      "summary": "向压缩状态槽喂入混杂密码与废话的文本流，对比传统 SSM 与 Mamba 选择性门控的记忆保真度。"
+    },
+    "03-hybrid-jamba-tradeoff.html": {
+      "title": "架构选型模拟器：纯注意力 vs Mamba vs 混合",
+      "icon": "🔀",
+      "archetype": "scenario",
+      "concept": "大海捞针回忆 · 吞吐与显存权衡 · Jamba 混合架构",
+      "summary": "在 3 道真实极限场景下实测三种架构的短板，悟懂为什么前沿模型走向 Mamba + Attention 混血。"
+    }
+  }
+}
