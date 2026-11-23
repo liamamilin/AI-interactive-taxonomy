@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：CFG 提示词听话度旋钮 · Classifier-Free Guidance</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .preview { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+    @media (max-width: 720px) { .preview { grid-template-columns: 1fr; } }
+    .art { height: 170px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 46px; border: 2px solid var(--tax-border); transition: all 0.2s ease; }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; font-size: 13.5px; line-height: 1.6; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎛️ CFG 旋钮（Classifier-Free Guidance）：为什么参数拉太高，画风会“烤焦”？</h1>
+        <p>提示词：<code>“一只戴墨镜的赛博橘猫”</code>。CFG 决定了模型有多听提示词的话：向右拉高 <code>CFG Scale</code>，看画面如何从自由发散变成完美听话、再跌入过度饱和的“深炸表情包”！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">🎚️ CFG 引导系数：<span id="cfgVal" style="color:var(--tax-primary)">7.0</span>（公式：<code>无条件预测 + CFG × (有条件 - 无条件)</code>）</label>
+      <input id="cfgSlider" type="range" min="1" max="20" value="7" style="width:100%;margin-top:8px;" />
+
+      <div class="preview">
+        <div class="art" id="artBox">🕶️🐱</div>
+        <div class="card" id="descBox"></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const cfg = parseInt(document.getElementById("cfgSlider").value, 10);
+      document.getElementById("cfgVal").textContent = cfg.toFixed(1);
+      const art = document.getElementById("artBox");
+      let desc, aha;
+
+      if (cfg <= 2) {
+        art.innerHTML = "🌫️🪴<div style='font-size:12px;margin-top:6px;'>随便画了盆模糊绿植</div>";
+        art.style.filter = "saturate(0.4) contrast(0.8)";
+        art.style.background = "var(--tax-surface-alt)";
+        desc = "<strong>CFG = 1~2（几乎无视提示词）</strong><br>画面自然柔和、多样性极高，但模型基本在做自由梦游，忘了你要画墨镜橘猫。";
+        aha = "💡 <strong>CFG 过低：</strong>当 CFG=1 时没有外推放大，提示词信号太弱，模型按训练集的平均分布随便发挥。";
+      } else if (cfg <= 10) {
+        art.innerHTML = "🕶️🐱<div style='font-size:12px;margin-top:6px;'>光影自然 · 精准听话</div>";
+        art.style.filter = `saturate(${0.9 + cfg * 0.05}) contrast(1.05)`;
+        art.style.background = "linear-gradient(135deg, rgba(99,102,241,0.18), rgba(245,158,11,0.18))";
+        desc = "<strong>CFG = 4~10（黄金甜点区 ✅）</strong><br>既准确画出了赛博墨镜与橘猫，又保留了自然的光影过渡与构图美感。";
+        aha = "💡 <strong>黄金甜点区：</strong>CFG 本质是算两次去噪（有提示词 vs 空提示词），然后把它们的<strong>差值向量放大 CFG 倍</strong>，强行推向提示词语义方向！";
+      } else {
+        art.innerHTML = "🔥🕶️🐱🔥<div style='font-size:12px;margin-top:6px;'>色彩爆表 · 边缘锯齿烤焦</div>";
+        art.style.filter = `saturate(${1.8 + (cfg - 10) * 0.25}) contrast(${1.4 + (cfg - 10) * 0.12})`;
+        art.style.background = "linear-gradient(135deg, rgba(239,68,68,0.35), rgba(234,179,8,0.45))";
+        desc = "<strong>CFG > 12（过曝“烤焦”崩坏 💥）</strong><br>外推步子迈太大，像素值疯狂撞墙截断，出现刺眼霓虹色块和生硬伪影。";
+        aha = "💡 <strong>为什么拉满 CFG 会糊掉？</strong>因为数学外推把隐向量推出了真实图像流形之外，颜色和对比度被无限放大——这就是生图界面里默认把 CFG 设在 5~7.5 的原因！";
+      }
+      document.getElementById("descBox").innerHTML = desc;
+      document.getElementById("ahaBox").innerHTML = aha;
+    }
+
+    document.getElementById("cfgSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

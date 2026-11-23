@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：3 秒声音克隆解耦台 · Zero-Shot TTS</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
+    @media (max-width: 740px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    select { width: 100%; padding: 8px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-text); font-weight: 750; margin-top: 8px; }
+    .out { padding: 16px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-primary); font-size: 14.5px; line-height: 1.65; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎭 3 秒声音克隆解耦台：为什么不用重新训练，就能学会任何人的声音？</h1>
+        <p>现代 Zero-Shot TTS 把语音拆解成了三个互相独立的向量：<strong>说什么（语义）+ 谁在说（音色）+ 怎么说（韵律）</strong>。任意混搭下面 3 个维度试试！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="grid">
+        <div class="card">
+          <div style="font-weight:850;font-size:13.5px;">📝 1. 语义内容（Text）</div>
+          <select id="txtSel" onchange="render()">
+            <option value="今天的晚霞真美，一起去散步吧。">今天的晚霞真美，一起去散步吧。</option>
+            <option value="紧急通知：服务器负载已超过警戒线！">紧急通知：服务器负载已超过警戒线！</option>
+          </select>
+        </div>
+        <div class="card">
+          <div style="font-weight:850;font-size:13.5px;">🎤 2. 3 秒参考音色（Timbre）</div>
+          <select id="spkSel" onchange="render()">
+            <option value="磁性播音男声（低频浑厚）">磁性播音男声（低频浑厚）</option>
+            <option value="元气动漫少女（高频清脆）">元气动漫少女（高频清脆）</option>
+            <option value="沙哑摇滚大叔（颗粒感）">沙哑摇滚大叔（颗粒感）</option>
+          </select>
+        </div>
+        <div class="card">
+          <div style="font-weight:850;font-size:13.5px;">😄 3. 情绪韵律（Prosody）</div>
+          <select id="emoSel" onchange="render()">
+            <option value="轻柔耳语 · 语速 0.85×">轻柔耳语 · 语速 0.85×</option>
+            <option value="兴奋大笑 · 语调上扬">兴奋大笑 · 语调上扬</option>
+            <option value="严肃播报 · 停顿铿锵">严肃播报 · 停顿铿锵</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="out" id="outBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let changes = 0;
+    function render() {
+      const t = document.getElementById("txtSel").value;
+      const s = document.getElementById("spkSel").value;
+      const e = document.getElementById("emoSel").value;
+      document.getElementById("outBox").innerHTML = `
+        <strong>🔊 合成特征向量融合结果：</strong><br>
+        以 <strong>【${s}】</strong> 的声纹基因，叠加 <strong>【${e}】</strong> 的韵律曲线，念出：<br>
+        <span style="color:var(--tax-primary);font-weight:850;">“${t}”</span>
+      `;
+      document.getElementById("ahaBox").innerHTML = "💡 <strong>Zero-Shot 克隆的真相：</strong>模型把那 3 秒参考录音当成“上文提示词（Audio Prompt）”，就像文本大模型做 Few-Shot 续写一样，顺着参考录音的音色特征把新文字自然续写出来，根本不需要微调权重！";
+      changes++;
+      if (changes >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+  </script>
+</body>
+</html>

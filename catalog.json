@@ -5,10 +5,10 @@
   "stats": {
     "totalDomains": 10,
     "litDomains": 1,
-    "totalTopics": 34,
-    "totalPlannedTopics": 241,
+    "totalTopics": 38,
+    "totalPlannedTopics": 237,
     "totalBlueprintTopics": 275,
-    "totalToys": 102
+    "totalToys": 114
   },
   "tracks": [
     {
@@ -1519,24 +1519,7 @@
         {
           "id": "multimodal-gen",
           "title": "5. 多模态与生成式媒体（Multimodal & GenMedia）",
-          "plannedTopics": [
-            {
-              "slug": "ai-multimodal-gen-01",
-              "title": "扩散模型去噪画图（Diffusion & CFG）"
-            },
-            {
-              "slug": "ai-multimodal-gen-02",
-              "title": "视频生成与世界模型（DiT）"
-            },
-            {
-              "slug": "ai-multimodal-gen-03",
-              "title": "语音合成与克隆（TTS / ASR）"
-            },
-            {
-              "slug": "ai-multimodal-gen-04",
-              "title": "3D 生成与空间智能（NeRF / 3DGS）"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "rl-embodied",
@@ -1575,10 +1558,10 @@
           "plannedTopics": []
         }
       ],
-      "liveTopicCount": 34,
-      "plannedTopicCount": 9,
+      "liveTopicCount": 38,
+      "plannedTopicCount": 5,
       "blueprintTopicCount": 43,
-      "liveToyCount": 102,
+      "liveToyCount": 114,
       "topics": [
         {
           "id": "ai/ai-dl-foundations-01",
@@ -1778,6 +1761,55 @@
           ]
         },
         {
+          "id": "ai/ai-multimodal-gen-01",
+          "slug": "ai-multimodal-gen-01",
+          "domain": "ai",
+          "branch": "multimodal-gen",
+          "order": 2,
+          "title": "扩散模型去噪画图（Diffusion & CFG）",
+          "icon": "🎨",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "AI 画图不是像人类一样一笔一划勾线，而是从一团电视雪花噪声里“雕刻”出高清画面！",
+          "difficulty": "入门",
+          "related": [
+            "ai/multimodal-ai-toys",
+            "ai/ai-dl-foundations-03"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-multimodal-gen-01/01-denoising-sculptor.html",
+              "file": "01-denoising-sculptor.html",
+              "path": "./domains/ai/ai-multimodal-gen-01/01-denoising-sculptor.html",
+              "title": "反向去噪雕刻机（DDPM / Flow）",
+              "icon": "❄️",
+              "archetype": "simulation",
+              "concept": "前向加噪 · 反向去噪 Denoising · 潜空间 Latent Diffusion",
+              "summary": "拖动去噪时间步 t 从 50 走到 0，亲眼见证一团纯随机雪花噪点如何一步步浮现出清晰图案。"
+            },
+            {
+              "id": "ai/ai-multimodal-gen-01/02-cfg-guidance-dial.html",
+              "file": "02-cfg-guidance-dial.html",
+              "path": "./domains/ai/ai-multimodal-gen-01/02-cfg-guidance-dial.html",
+              "title": "CFG 提示词听话度旋钮",
+              "icon": "🎛️",
+              "archetype": "blind-lab",
+              "concept": "Classifier-Free Guidance · 听话度 vs 多样性 · 过饱和烤焦",
+              "summary": "调节 CFG Scale（1 到 20），对比模型从“完全无视提示词”到“完美听话”再到“色彩烤焦崩坏”的全过程。"
+            },
+            {
+              "id": "ai/ai-multimodal-gen-01/03-sampler-steps-race.html",
+              "file": "03-sampler-steps-race.html",
+              "path": "./domains/ai/ai-multimodal-gen-01/03-sampler-steps-race.html",
+              "title": "采样器步数竞速：DDPM vs DDIM vs Flow",
+              "icon": "🏎️",
+              "archetype": "race",
+              "concept": "1000 步 DDPM · 20 步 DDIM · 4 步蒸馏 / Rectified Flow",
+              "summary": "让三代扩散采样器同时起跑画同一张图，直击为什么现代文生图能从几分钟加速到 1 秒出图。"
+            }
+          ]
+        },
+        {
           "id": "ai/ai-symbolic-ml-02",
           "slug": "ai-symbolic-ml-02",
           "domain": "ai",
@@ -1922,6 +1954,55 @@
               "archetype": "scenario",
               "concept": "最大池化 Max Pooling · 平移不变性 · 空间压缩",
               "summary": "把画面中的特征轻微平移 1 像素，对比无池化与最大池化的输出稳定性，秒懂 CNN 为何不怕抖动。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-multimodal-gen-02",
+          "slug": "ai-multimodal-gen-02",
+          "domain": "ai",
+          "branch": "multimodal-gen",
+          "order": 3,
+          "title": "视频生成与世界模型（DiT）",
+          "icon": "🎬",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "Sora 背后的 DiT 架构到底把视频切成了什么？为什么 AI 画视频会突然“穿模”违背物理规律？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/ai-multimodal-gen-01",
+            "ai/ai-dl-foundations-05"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-multimodal-gen-02/01-spacetime-patches-spatial.html",
+              "file": "01-spacetime-patches-spatial.html",
+              "path": "./domains/ai/ai-multimodal-gen-02/01-spacetime-patches-spatial.html",
+              "title": "时空补丁（Spacetime Patches）切片机",
+              "icon": "🧊",
+              "archetype": "spatial",
+              "concept": "DiT (Diffusion Transformer) · 时空 Patch · 统一 Token 化",
+              "summary": "把一段连续视频切成一个个 3D 时空小方块，看 Transformer 如何像处理文字 Token 一样同时理解画面与时间。"
+            },
+            {
+              "id": "ai/ai-multimodal-gen-02/02-world-model-physics-scenario.html",
+              "file": "02-world-model-physics-scenario.html",
+              "path": "./domains/ai/ai-multimodal-gen-02/02-world-model-physics-scenario.html",
+              "title": "世界模型物理常识大考场",
+              "icon": "🍎",
+              "archetype": "scenario",
+              "concept": "世界模拟器 World Model · 遮挡一致性 · 物理幻觉",
+              "summary": "测试视频模型在“玻璃杯摔落”“人物穿过柱子”等物理场景的表现，区分表面像素统计与真物理理解。"
+            },
+            {
+              "id": "ai/ai-multimodal-gen-02/03-video-compute-budget.html",
+              "file": "03-video-compute-budget.html",
+              "path": "./domains/ai/ai-multimodal-gen-02/03-video-compute-budget.html",
+              "title": "视频算力爆炸计算器（3D 注意力）",
+              "icon": "🔥",
+              "archetype": "simulation",
+              "concept": "3D Full Attention 平方爆炸 · 时空压缩 VAE · 算力成本",
+              "summary": "调节分辨率与视频时长，直观感受 3D 时空 Token 数量如何让注意力计算量瞬间暴涨几百倍。"
             }
           ]
         },
@@ -2121,6 +2202,55 @@
               "archetype": "spatial",
               "concept": "Tensor Core · 脉动阵列 Systolic Array · 数据复用",
               "summary": "单步推进 3×3 脉动阵列时钟脉冲，直观观察权重驻留芯片内、激活值如心跳般波浪传递的零搬运魔法。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-multimodal-gen-03",
+          "slug": "ai-multimodal-gen-03",
+          "domain": "ai",
+          "branch": "multimodal-gen",
+          "order": 4,
+          "title": "语音合成与克隆（TTS / ASR）",
+          "icon": "🎙️",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "为什么现在的语音 AI 只要听你 3 秒钟就能克隆你的声音，还能像真人一样带着笑声和停顿随时被打断？",
+          "difficulty": "入门",
+          "related": [
+            "ai/multimodal-ai-toys",
+            "ai/ai-dl-foundations-04"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-multimodal-gen-03/01-audio-codec-tokenizer.html",
+              "file": "01-audio-codec-tokenizer.html",
+              "path": "./domains/ai/ai-multimodal-gen-03/01-audio-codec-tokenizer.html",
+              "title": "声音切片机：波形 → 梅尔谱 → 音频 Token",
+              "icon": "🌊",
+              "archetype": "builder",
+              "concept": "Mel-Spectrogram · 神经音频编解码器 RVQ · 语音 Token 化",
+              "summary": "一步步把连续声波转换成频谱图和离散音频码本，看懂语音大模型怎么像写字一样“吐”出声音。"
+            },
+            {
+              "id": "ai/ai-multimodal-gen-03/02-voice-cloning-disentangle.html",
+              "file": "02-voice-cloning-disentangle.html",
+              "path": "./domains/ai/ai-multimodal-gen-03/02-voice-cloning-disentangle.html",
+              "title": "3 秒声音克隆解耦台（内容 vs 音色）",
+              "icon": "🎭",
+              "archetype": "simulation",
+              "concept": "Zero-Shot 声音克隆 · 说话人嵌入 Speaker Embedding · 情绪韵律",
+              "summary": "自由组合“文字内容 + 3 秒参考音色 + 情绪强度”，直观理解现代 TTS 如何将“说什么”与“谁在说”彻底解耦。"
+            },
+            {
+              "id": "ai/ai-multimodal-gen-03/03-cascade-vs-e2e-voice-race.html",
+              "file": "03-cascade-vs-e2e-voice-race.html",
+              "path": "./domains/ai/ai-multimodal-gen-03/03-cascade-vs-e2e-voice-race.html",
+              "title": "全双工延迟竞速：级联流水线 vs 原生端到端",
+              "icon": "⚡",
+              "archetype": "race",
+              "concept": "ASR+LLM+TTS 级联延迟 · 原生语音大模型 · 随时打断 Barge-in",
+              "summary": "对比传统三段式语音助手与原生端到端语音模型的响应毫秒数，秒懂为什么端到端能实现 300ms 真人对话感。"
             }
           ]
         },
@@ -2470,6 +2600,55 @@
               "archetype": "scenario",
               "concept": "大海捞针回忆 · 吞吐与显存权衡 · Jamba 混合架构",
               "summary": "在 3 道真实极限场景下实测三种架构的短板，悟懂为什么前沿模型走向 Mamba + Attention 混血。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-multimodal-gen-04",
+          "slug": "ai-multimodal-gen-04",
+          "domain": "ai",
+          "branch": "multimodal-gen",
+          "order": 5,
+          "title": "3D 生成与空间智能（NeRF / 3DGS）",
+          "icon": "🌐",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "拍几张手机照片就能瞬间重建可自由漫游的 3D 场景？NeRF 的隐式光线追踪和 3D 高斯泼溅到底怎么变魔术的？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/ai-multimodal-gen-01",
+            "ai/ai-dl-foundations-03"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-multimodal-gen-04/01-nerf-ray-marching-spatial.html",
+              "file": "01-nerf-ray-marching-spatial.html",
+              "path": "./domains/ai/ai-multimodal-gen-04/01-nerf-ray-marching-spatial.html",
+              "title": "NeRF 神经辐射场光线步进图谱",
+              "icon": "🔦",
+              "archetype": "spatial",
+              "concept": "NeRF 隐式神经场 · 体渲染 Ray Marching · 视角相关颜色",
+              "summary": "转动虚拟相机视角，看一条射线穿过 3D 空间时如何在沿途采样点查询神经网络并积分合成像素颜色。"
+            },
+            {
+              "id": "ai/ai-multimodal-gen-04/02-nerf-vs-3dgs-race.html",
+              "file": "02-nerf-vs-3dgs-race.html",
+              "path": "./domains/ai/ai-multimodal-gen-04/02-nerf-vs-3dgs-race.html",
+              "title": "实时渲染竞速：NeRF vs 3D 高斯泼溅（3DGS）",
+              "icon": "💨",
+              "archetype": "race",
+              "concept": "3D Gaussian Splatting · 显式椭球光栅化 · 120 FPS 实时渲染",
+              "summary": "对比 NeRF 逐像素查神经网络与 3DGS 直接把彩色半透明椭球拍到屏幕上的帧率差距，秒懂 3DGS 为什么火出圈。"
+            },
+            {
+              "id": "ai/ai-multimodal-gen-04/03-spatial-depth-parallax.html",
+              "file": "03-spatial-depth-parallax.html",
+              "path": "./domains/ai/ai-multimodal-gen-04/03-spatial-depth-parallax.html",
+              "title": "单目深度估计与 3D 视差沙盘",
+              "icon": "👓",
+              "archetype": "simulation",
+              "concept": "空间智能 Spatial Intelligence · 单目深度 · 运动视差 Parallax",
+              "summary": "左右移动虚拟观察者头部位置，观察前景、中景、远景按真实深度产生视差位移，理解 AI 如何从 2D 还原 3D 世界。"
             }
           ]
         },

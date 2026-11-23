@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：世界模型物理常识大考场 · World Model</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .box { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; line-height: 1.65; font-size: 13.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🍎 世界模型物理考场：视频 AI 真的懂牛顿定律，还是在“背画册”？</h1>
+        <p>依次点选 3 道经典物理与因果考题，对比“表面像素统计模型”与“具备物理一致性的世界模型”的表现差异！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="q1" onclick="pick(1)">考题 1：人物走过石柱背后</button>
+        <button class="btn" id="q2" onclick="pick(2)">考题 2：玻璃杯从桌沿滑落</button>
+        <button class="btn" id="q3" onclick="pick(3)">考题 3：咬一口汉堡包</button>
+      </div>
+      <div class="box" id="boxOut"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const QS = {
+      1: {
+        bad: "❌ <strong>像素统计幻觉：</strong>人物躲到石柱后面 1 秒再走出来时，红衣服突然变成了蓝衣服，甚至凭空多长出一条手臂。",
+        good: "✅ <strong>物体恒常性（Object Permanence）：</strong>即便目标被短暂遮挡，时空注意力依然记住它的三维身份，走出柱子后衣着与步态完美连贯。",
+        aha: "💡 <strong>遮挡一致性：</strong>能穿过障碍物还保持身份不变，说明模型内部隐式学到了超越单帧的 3D 空间表征！"
+      },
+      2: {
+        bad: "❌ <strong>违背动量与流体守恒：</strong>杯子掉在地上突然融化成水，或者碎片还没落地就先凭空浮在空中。",
+        good: "✅ <strong>因果动力学：</strong>重力加速 → 撞击硬地 → 脆性碎裂与液体飞溅，遵循时间单向箭头。",
+        aha: "💡 <strong>为什么物理因果最难学？</strong>人类视频里充满复杂接触与碰撞，仅靠海量像素预测还不够，业界正在将物理引擎反馈与 3D 几何先验融入世界模型！"
+      },
+      3: {
+        bad: "❌ <strong>状态不更新：</strong>人张嘴狠狠咬了一口汉堡，结果拿开嘴一看，汉堡竟然完好无损没有牙印！",
+        good: "✅ <strong>世界状态持久更新：</strong>咬完后汉堡边缘留下清晰缺口，并在后续 5 秒镜头移动中始终保留这个缺口。",
+        aha: "💡 <strong>什么是真正的“世界模型”？</strong>不仅画得像电影，更要能准确预测<strong>“如果我施加一个动作，世界下一秒会变成什么状态”</strong>——这正是通往具身机器人与自动驾驶模拟器的终极底座！"
+      }
+    };
+    const seen = new Set([1]);
+    function pick(n) {
+      seen.add(n);
+      [1, 2, 3].forEach(i => document.getElementById("q" + i).classList.toggle("active", i === n));
+      const d = QS[n];
+      document.getElementById("boxOut").innerHTML = `
+        <div class="card" style="border-color:var(--tax-red);">${d.bad}</div>
+        <div class="card" style="border-color:var(--tax-green);">${d.good}</div>
+      `;
+      document.getElementById("ahaBox").innerHTML = d.aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(1);
+  </script>
+</body>
+</html>

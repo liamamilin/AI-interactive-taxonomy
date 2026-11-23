@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：声音切片机 · 波形 → 梅尔谱 → 音频 Token</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .viz { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 18px; min-height: 150px; display: flex; flex-direction: column; justify-content: center; }
+    .toks { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .tok { padding: 8px 12px; border-radius: 10px; background: var(--tax-surface); border: 1.5px solid var(--tax-primary); font-family: ui-monospace, monospace; font-weight: 800; font-size: 13px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🌊 声音切片机：大模型看不懂声波，怎么像写字一样“吐”出声音？</h1>
+        <p>原始音频每秒有 24,000 个采样点，太长了根本没法直接塞进注意力层！依次点击下面 3 个阶段，看声音如何被压缩成优雅的 <strong>音频 Token</strong>！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="s1" onclick="go(1)">① 原始波形（24,000 点/秒）</button>
+        <button class="btn" id="s2" onclick="go(2)">② 梅尔频谱图（Whisper 听声方式）</button>
+        <button class="btn" id="s3" onclick="go(3)">③ RVQ 离散音频 Token（50 词/秒）</button>
+      </div>
+      <div class="viz" id="vizBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set([1]);
+    function go(n) {
+      seen.add(n);
+      [1, 2, 3].forEach(i => document.getElementById("s" + i).classList.toggle("active", i === n));
+      const box = document.getElementById("vizBox");
+      if (n === 1) {
+        box.innerHTML = `<svg viewBox="0 0 400 80" style="width:100%;height:90px;"><path d="M0,40 Q20,5 40,40 T80,40 T120,40 T160,40 T200,40 T240,40 T280,40 T320,40 T360,40 T400,40" fill="none" stroke="var(--tax-primary)" stroke-width="3"/></svg><div style="text-align:center;font-size:13px;color:var(--tax-muted);margin-top:6px;">连续起伏的空气气压采样：1 秒 = 24,000 个浮点数，序列过长！</div>`;
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>第 1 步（原始波形）：</strong>直接预测每秒 24,000 个数字会让 Transformer 显存瞬间爆炸，必须先做时频变换或神经压缩！";
+      } else if (n === 2) {
+        const bars = Array.from({ length: 16 }, (_, i) => `<div style="flex:1;height:${24 + ((i * 19) % 56)}px;background:linear-gradient(to top, var(--tax-primary), var(--tax-amber));border-radius:4px;"></div>`).join("");
+        box.innerHTML = `<div style="display:flex;align-items:flex-end;gap:6px;height:90px;padding:0 12px;">${bars}</div><div style="text-align:center;font-size:13px;color:var(--tax-muted);margin-top:8px;">梅尔频谱（Mel-Spectrogram）：横轴时间、纵轴频率，把“听声音”变成“看图像”！</div>`;
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>第 2 步（梅尔频谱）：</strong>像 Whisper 这类 ASR 语音识别模型，本质上就是把声音画成“声纹热力图”，再喂给视觉/序列编码器读出文字！";
+      } else {
+        box.innerHTML = `<div class="toks"><span class="tok">#4082 (语义:你)</span><span class="tok">#119 (音色:清亮)</span><span class="tok">#772 (语义:好)</span><span class="tok">#305 (气声笑意)</span><span class="tok">#901 (尾音上扬)</span></div><div style="text-align:center;font-size:13px;color:var(--tax-muted);margin-top:12px;">神经音频编解码器（如 EnCodec / Mimi）把每秒声波压缩成仅 50 个离散整数 Token！</div>`;
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>终极统一（音频 Token 化）：</strong>一旦声音变成离散整数 ID，它就和文字 Token 没有任何区别了！同一个 LLM 可以直接实现<strong>文字与语音混合自回归预测</strong>，连叹气、笑声都能原生生成！";
+      }
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    go(1);
+  </script>
+</body>
+</html>

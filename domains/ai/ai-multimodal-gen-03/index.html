@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>语音合成与克隆（TTS / ASR）· 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎙️ 语音合成与克隆（TTS / ASR）</h1>
+        <p>为什么现在的语音 AI 只要听你 3 秒钟就能克隆你的声音，还能像真人一样带着笑声和停顿随时被打断？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-audio-codec-tokenizer.html">
+        <div class="hub-icon">🌊</div>
+        <div class="hub-tag">玩具 01 · 流水线装配（Builder）</div>
+        <div class="hub-title">声音切片机：波形 → 梅尔谱 → 音频 Token</div>
+        <div class="hub-desc">切换音频在神经网络里的三种形态，看清语音如何变成离散码本被 Transformer 预测。</div>
+      </a>
+      <a class="hub-card" href="./02-voice-cloning-disentangle.html">
+        <div class="hub-icon">🎭</div>
+        <div class="hub-tag">玩具 02 · 解耦沙盘（Simulation）</div>
+        <div class="hub-title">3 秒声音克隆解耦台（内容 vs 音色）</div>
+        <div class="hub-desc">混搭文本、3 秒参考声纹与情绪滑块，拆解 Zero-Shot 声音克隆的底层原理。</div>
+      </a>
+      <a class="hub-card" href="./03-cascade-vs-e2e-voice-race.html">
+        <div class="hub-icon">⚡</div>
+        <div class="hub-tag">玩具 03 · 延迟竞速（Race）</div>
+        <div class="hub-title">全双工延迟竞速：级联流水线 vs 原生端到端</div>
+        <div class="hub-desc">对比传统 ASR→LLM→TTS 接力与原生语音大模型的首字延迟，看懂“像真人一样聊”的秘诀。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

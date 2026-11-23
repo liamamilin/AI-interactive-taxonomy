@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：视频算力爆炸计算器 · 3D 注意力成本</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media (max-width: 720px) { .ctrls { grid-template-columns: 1fr; } }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 720px) { .metrics { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .num { font-size: 24px; font-weight: 900; font-family: ui-monospace, monospace; color: var(--tax-primary); margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔥 视频算力爆炸计算器：为什么生成 10 秒 1080p 视频这么贵？</h1>
+        <p>DiT 的全时空自注意力复杂度是 <code>O(N²)</code>，而 <code>N = 时长 × 像素面积</code>。拖动滑块把视频从 2 秒 480p 拉到 16 秒 1080p，看看算力怎么瞬间起飞！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <div>
+          <label style="font-weight:850;font-size:14px;">⏱️ 视频时长：<span id="secVal" style="color:var(--tax-primary)">4</span> 秒</label>
+          <input id="secSlider" type="range" min="2" max="16" step="2" value="4" style="width:100%;margin-top:8px;" />
+        </div>
+        <div>
+          <label style="font-weight:850;font-size:14px;">📺 分辨率档位：<span id="resVal" style="color:var(--tax-primary)">720p</span></label>
+          <input id="resSlider" type="range" min="1" max="3" value="2" style="width:100%;margin-top:8px;" />
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="card">
+          <div style="font-size:12px;color:var(--tax-muted);font-weight:750;">3D 时空 Token 总数 (N)</div>
+          <div class="num" id="tokOut">0</div>
+        </div>
+        <div class="card">
+          <div style="font-size:12px;color:var(--tax-muted);font-weight:750;">相对基准算力倍数（N²）</div>
+          <div class="num" id="flopOut" style="color:var(--tax-amber);">1×</div>
+        </div>
+        <div class="card">
+          <div style="font-size:12px;color:var(--tax-muted);font-weight:750;">单次 50 步推理成本感</div>
+          <div class="num" id="costOut" style="font-size:18px;">中等</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const RES = {
+      1: { label: "480p (标清)", factor: 1 },
+      2: { label: "720p (高清)", factor: 2.25 },
+      3: { label: "1080p (全高清)", factor: 5.06 }
+    };
+    let drags = 0;
+
+    function render() {
+      const sec = parseInt(document.getElementById("secSlider").value, 10);
+      const r = RES[parseInt(document.getElementById("resSlider").value, 10)];
+      document.getElementById("secVal").textContent = sec;
+      document.getElementById("resVal").textContent = r.label;
+
+      const tokens = Math.round(sec * 1200 * r.factor);
+      const base = 2 * 1200;
+      const mult = Math.pow(tokens / base, 2);
+
+      document.getElementById("tokOut").textContent = tokens.toLocaleString();
+      document.getElementById("flopOut").textContent = mult >= 100 ? Math.round(mult) + "×" : mult.toFixed(1) + "×";
+      document.getElementById("costOut").textContent = mult > 120 ? "🔥 显卡燃烧级" : mult > 20 ? "⚡ 昂贵集群级" : "✅ 单卡可跑";
+
+      document.getElementById("ahaBox").innerHTML = mult > 100
+        ? `💡 <strong>O(N²) 算力雪崩！</strong>时长和清晰度只翻了几倍，但 3D 注意力计算量暴涨到了基准的 <strong>${Math.round(mult)} 倍</strong>！这就是为什么视频模型必须先用 3D VAE 狠狠压缩时空维度，并采用稀疏注意力与并行切分！`
+        : "💡 <strong>顿悟时刻：</strong>试着把时长拉到 <strong>12 秒以上</strong> 且把分辨率调到 <strong>1080p</strong>，亲眼见证 3D 时空注意力的平方爆炸！";
+    }
+
+    ["secSlider", "resSlider"].forEach(id => document.getElementById(id).addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }));
+    render();
+  </script>
+</body>
+</html>

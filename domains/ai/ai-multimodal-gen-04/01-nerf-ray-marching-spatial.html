@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：NeRF 神经辐射场光线步进图谱</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .stage { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 14px; margin-top: 12px; }
+    svg { width: 100%; height: 210px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔦 NeRF 光线步进（Ray Marching）：把整座房子塞进一个 5MB 神经网络！</h1>
+        <p>NeRF 里没有任何三角形网格！转动虚拟相机角度 <code>θ</code>，看它怎么沿着射线打点，逐点问神经网络“这里有没有东西（密度 σ）、是什么颜色（RGB）”！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">🎥 虚拟相机观察角度 θ：<span id="angVal" style="color:var(--tax-primary)">0°</span>（查询函数：<code>MLP(x, y, z, θ) → RGB + σ</code>）</label>
+      <input id="angSlider" type="range" min="-45" max="45" value="0" style="width:100%;margin-top:8px;" />
+
+      <div class="stage">
+        <svg viewBox="0 0 420 200" id="svgScene">
+          <circle cx="290" cy="100" r="42" fill="rgba(99,102,241,0.22)" stroke="var(--tax-primary)" stroke-width="2.5" />
+          <text x="262" y="104" fill="var(--tax-text)" font-size="12" font-weight="800">3D 物体</text>
+          <line id="rayLine" x1="60" y1="100" x2="360" y2="100" stroke="var(--tax-amber)" stroke-width="2.5" stroke-dasharray="5,4" />
+          <circle id="camDot" cx="60" cy="100" r="10" fill="var(--tax-primary)" />
+          <g id="sampleDots"></g>
+        </svg>
+        <div id="rayInfo" style="font-size:13.5px;color:var(--tax-muted);margin-top:6px;text-align:center;"></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const ang = parseInt(document.getElementById("angSlider").value, 10);
+      document.getElementById("angVal").textContent = ang + "°";
+      const rad = (ang * Math.PI) / 180;
+      const cx = 60, cy = 100 - Math.sin(rad) * 75;
+      const ex = 365, ey = 100 + Math.sin(rad) * 20;
+
+      document.getElementById("camDot").setAttribute("cx", cx);
+      document.getElementById("camDot").setAttribute("cy", cy.toFixed(1));
+      document.getElementById("rayLine").setAttribute("x1", cx);
+      document.getElementById("rayLine").setAttribute("y1", cy.toFixed(1));
+      document.getElementById("rayLine").setAttribute("x2", ex);
+      document.getElementById("rayLine").setAttribute("y2", ey.toFixed(1));
+
+      let dots = "";
+      let hits = 0;
+      for (let i = 1; i <= 8; i++) {
+        const t = i / 9;
+        const px = cx + (ex - cx) * t;
+        const py = cy + (ey - cy) * t;
+        const inside = Math.hypot(px - 290, py - 100) <= 44;
+        if (inside) hits++;
+        dots += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${inside ? 6 : 3.5}" fill="${inside ? "var(--tax-green)" : "var(--tax-muted)"}" />`;
+      }
+      document.getElementById("sampleDots").innerHTML = dots;
+      document.getElementById("rayInfo").textContent = `射线沿途采样 8 个点：空气点（σ≈0）直接穿透，命中物体表面 ${hits} 个高密度点并累加反光颜色！`;
+      document.getElementById("ahaBox").innerHTML = "💡 <strong>隐式表示的优雅与代价：</strong>NeRF 把整个 3D 场景变成一个连续数学函数，连金属随视角变化的高光都能完美还原！但每渲染 1 个像素都要调用神经网络查询上百次，因此实时渲染很慢——下一关看看 <strong>3DGS</strong> 如何彻底破局！";
+    }
+
+    document.getElementById("angSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

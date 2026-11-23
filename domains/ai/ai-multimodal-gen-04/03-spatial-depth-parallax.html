@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：单目深度估计与 3D 视差沙盘 · Spatial Intelligence</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .viewport { position: relative; height: 210px; border-radius: 16px; overflow: hidden; border: 1.5px solid var(--tax-border); background: linear-gradient(180deg, #1e293b 0%, #334155 60%, #475569 100%); margin-top: 14px; }
+    .layer { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; transition: left 0.06s linear; user-select: none; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>👓 单目深度与 3D 视差：空间智能如何从一张平面照片“看穿”远近纵深？</h1>
+        <p>AI 模型先为平面图的每个像素预测出深度值（Depth Map），再按“近快远慢”的几何规律移动各层。左右拖动 <strong>观察者视角</strong>，亲手体验 2D 变 3D 的立体视差！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">👀 观察者水平位移：<span id="xVal" style="color:var(--tax-primary)">0</span>（前景位移大、远山几乎不动）</label>
+      <input id="xSlider" type="range" min="-100" max="100" value="0" style="width:100%;margin-top:8px;" />
+
+      <div class="viewport">
+        <div class="layer" id="far" style="top:22px;font-size:48px;opacity:0.75;">🏔️ ⛰️ 🏔️</div>
+        <div class="layer" id="mid" style="top:78px;font-size:44px;">🌲 🏠 🌲</div>
+        <div class="layer" id="near" style="top:132px;font-size:52px;">🐕 🪴</div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const x = parseInt(document.getElementById("xSlider").value, 10);
+      document.getElementById("xVal").textContent = x;
+      document.getElementById("far").style.left = `calc(50% + ${(-x * 0.12).toFixed(1)}px)`;
+      document.getElementById("mid").style.left = `calc(50% + ${(-x * 0.45).toFixed(1)}px)`;
+      document.getElementById("near").style.left = `calc(50% + ${(-x * 1.05).toFixed(1)}px)`;
+
+      document.getElementById("ahaBox").innerHTML = Math.abs(x) >= 50
+        ? "💡 <strong>三维视差立现！</strong>因为有了准确的深度估计（Depth Anything / VGGT 等模型），AI 就能区分 1 米外的小狗和 1000 米外的雪山——这正是李飞飞等学者强调的<strong>空间智能（Spatial Intelligence）</strong>，也是机器人抓取和 AR 遮挡的基础！"
+        : "💡 <strong>顿悟时刻：</strong>把滑块大幅向左、向右来回拖动，感受前景（近）、中景、远景（远）截然不同的运动视差速度！";
+    }
+
+    document.getElementById("xSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

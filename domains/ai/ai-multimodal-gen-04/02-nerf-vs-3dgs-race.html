@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：实时渲染竞速 · NeRF vs 3D 高斯泼溅（3DGS）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 14px; }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+    .track { height: 16px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin: 8px 0; }
+    .fill { height: 100%; width: 0%; transition: width 0.14s linear; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>💨 NeRF vs 3D 高斯泼溅（3DGS）：为什么“彩色云团”让 3D 渲染提速 100 倍？</h1>
+        <p>渲染一张 1080p 新视角画面（约 200 万像素），点击发车，对比两代 3D 重建架构的渲染耗时与帧率！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="btn" onclick="go()">▶ 渲染 1080p 自由视角画面</button>
+
+      <div class="lane">
+        <div style="font-weight:850;font-size:14px;">✨ 3D Gaussian Splatting（显式椭球直接光栅化）</div>
+        <div class="track"><div class="fill" id="f1" style="background:var(--tax-green);"></div></div>
+        <div id="s1" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+      </div>
+
+      <div class="lane">
+        <div style="font-weight:850;font-size:14px;">🐢 原始 NeRF（200 万像素 × 128 采样点 = 2.5 亿次 MLP 前向计算）</div>
+        <div class="track"><div class="fill" id="f2" style="background:var(--tax-red);"></div></div>
+        <div id="s2" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>点击上方按钮开始渲染，看清为什么 3DGS 成了 VR、数字孪生和空间视频的绝对主流！
+    </div>
+  </div>
+
+  <script>
+    let timer = null;
+    function go() {
+      if (timer) clearInterval(timer);
+      let p1 = 0, p2 = 0;
+      timer = setInterval(() => {
+        p1 = Math.min(100, p1 + 50);
+        p2 = Math.min(100, p2 + 6);
+        document.getElementById("f1").style.width = p1 + "%";
+        document.getElementById("f2").style.width = p2 + "%";
+        document.getElementById("s1").textContent = p1 >= 100 ? "✅ 耗时 ~8 ms（120+ FPS 丝滑实时漫游！）" : `GPU 光栅化泼溅 ${p1}%`;
+        document.getElementById("s2").textContent = p2 >= 100 ? "😵 耗时 ~1,500 ms（不到 1 FPS 幻灯片）" : `逐点查神经网络中 ${p2}%`;
+        if (p2 >= 100) {
+          clearInterval(timer);
+          document.getElementById("ahaBox").innerHTML = "💡 <strong>3DGS 的降维打击：</strong>它抛弃了慢吞吞的神经网络查询，改用几十万颗带位置、形状、透明度和颜色的<strong>半透明 3D 高斯椭球</strong>表示场景，直接利用 GPU 硬件光栅化像泼墨一样“拍”到屏幕上，画质逼真还能跑出 120 FPS！";
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }, 120);
+    }
+  </script>
+</body>
+</html>

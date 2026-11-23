@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：反向去噪雕刻机 · Diffusion Denoising</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .stage { display: grid; grid-template-columns: 240px 1fr; gap: 18px; align-items: center; margin-top: 14px; }
+    @media (max-width: 720px) { .stage { grid-template-columns: 1fr; } }
+    canvas { width: 220px; height: 220px; border-radius: 16px; border: 2px solid var(--tax-border); image-rendering: pixelated; background: #111; display: block; margin: 0 auto; }
+    .info { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; line-height: 1.65; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>❄️ 反向去噪雕刻机：AI 画画不是“动笔”，而是“擦掉多余的噪点”！</h1>
+        <p>向右拖动去噪进度滑块（从纯随机雪花 <code>t=50</code> 一步步去噪到 <code>t=0</code>），看神经网络如何先定构图轮廓、再雕细节纹理！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">🪄 去噪步数进度：<span id="stepOut" style="color:var(--tax-primary)">0 / 50</span>（剩余噪声比例：<span id="noiseOut">100%</span>）</label>
+      <input id="tSlider" type="range" min="0" max="50" value="0" style="width:100%;margin-top:8px;" />
+
+      <div class="stage">
+        <canvas id="cv" width="24" height="24"></canvas>
+        <div class="info" id="phaseInfo"></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const N = 24;
+    // 固定一幅像素“笑脸太阳”目标图与固定高斯噪声种子，确保拖动可逆平滑
+    const target = [];
+    const noise = [];
+    let seed = 42;
+    function rand() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
+
+    for (let y = 0; y < N; y++) {
+      for (let x = 0; x < N; x++) {
+        const dx = x - 11.5, dy = y - 11.5;
+        const d = Math.hypot(dx, dy);
+        let r = 30, g = 45, b = 95;
+        if (d < 8.5) { r = 250; g = 195; b = 45; }
+        if ((Math.hypot(x - 8.5, y - 9.5) < 1.3) || (Math.hypot(x - 14.5, y - 9.5) < 1.3)) { r = 30; g = 30; b = 40; }
+        if (d > 3.5 && d < 5.5 && y > 13) { r = 210; g = 65; b = 55; }
+        target.push([r, g, b]);
+        noise.push([Math.floor(rand() * 255), Math.floor(rand() * 255), Math.floor(rand() * 255)]);
+      }
+    }
+
+    const ctx = document.getElementById("cv").getContext("2d");
+    let drags = 0;
+
+    function render() {
+      const s = parseInt(document.getElementById("tSlider").value, 10);
+      const alpha = s / 50;
+      const noisePct = Math.round((1 - alpha) * 100);
+      document.getElementById("stepOut").textContent = `${s} / 50`;
+      document.getElementById("noiseOut").textContent = noisePct + "%";
+
+      const img = ctx.createImageData(N, N);
+      for (let i = 0; i < N * N; i++) {
+        const w = Math.pow(alpha, 1.35);
+        img.data[i * 4] = Math.round(target[i][0] * w + noise[i][0] * (1 - w));
+        img.data[i * 4 + 1] = Math.round(target[i][1] * w + noise[i][1] * (1 - w));
+        img.data[i * 4 + 2] = Math.round(target[i][2] * w + noise[i][2] * (1 - w));
+        img.data[i * 4 + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+
+      let phase, aha;
+      if (s < 12) {
+        phase = "<strong>阶段 1：纯雪花与宏观构图</strong><br>神经网络只预测最粗糙的低频色调与主体位置（深蓝背景 + 中央暖黄圆团），完全不关心五官细节。";
+        aha = "💡 <strong>顿悟时刻：</strong>把滑块一路向右拉到 <strong>50</strong>！训练时我们不断给真图撒噪点，让网络学会“猜出这步加了什么噪声”，画图时倒着放电影就能无中生有！";
+      } else if (s < 36) {
+        phase = "<strong>阶段 2：主体轮廓浮现</strong><br>中频结构开始清晰，圆形轮廓、双眼和嘴巴的几何位置被稳稳锁定。";
+        aha = "💡 <strong>由粗到细（Coarse-to-Fine）：</strong>早期大噪声步决定构图布局，中期步决定五官形状，后期步只负责高频锐化与皮肤纹理。";
+      } else {
+        phase = "<strong>阶段 3：高频精雕完成 ✅</strong><br>最后几步只做微米级去噪与边缘锐化，高清画面最终成型！";
+        aha = "💡 <strong>本质揭秘：</strong>扩散模型（Stable Diffusion / Flux）甚至不在像素上直接去噪，而是先用 VAE 压缩成小 64 倍的<strong>潜空间（Latent Space）</strong>再去噪，所以显存省了几十倍！";
+      }
+      document.getElementById("phaseInfo").innerHTML = phase;
+      document.getElementById("ahaBox").innerHTML = aha;
+    }
+
+    document.getElementById("tSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>
