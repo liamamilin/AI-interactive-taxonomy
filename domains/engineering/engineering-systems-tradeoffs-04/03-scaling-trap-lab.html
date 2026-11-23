@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：工程等比缩放陷阱台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .case-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tab-btn { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; cursor: pointer; font-weight: 700; }
+    .tab-btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .opt-list { display: grid; gap: 10px; margin-top: 14px; }
+    .opt-btn { text-align: left; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; cursor: pointer; font-size: 14px; }
+    .opt-btn.ok { border-color: #10b981; background: rgba(16,185,129,0.1); }
+    .opt-btn.bad { border-color: #ef4444; background: rgba(239,68,68,0.1); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧪 工程等比缩放陷阱台：模型放大 10 倍直接造真机为何会炸？</h1>
+        <p>误区：小试模型跑通了，按 CAD 图纸等比例放大 10 倍就能量产。真相：物理规律是非线性的，放大必须重构拓扑！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="case-tabs" id="tabs"></div>
+      <div id="caseBody"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>攻克全部 3 个缩放陷阱，掌握工程界对抗平方-立方定律的核心手段！
+    </div>
+  </div>
+
+  <script>
+    const cases = [
+      {
+        title: "陷阱 1：1:10 遥控航模放大造真飞机",
+        desc: "航模用实心轻木机翼飞得极稳，团队决定严格按 10 倍比例直接放大翼梁结构制造真机。",
+        opts: [
+          { text: "A. 直接按 10 倍等比放大，材料和几何形状完全不变", ok: false, msg: "❌ 惨剧！飞机重量暴增 1000 倍，而翼面积只增 100 倍，起飞时翼梁直接折断！" },
+          { text: "B. 改用中空蒙皮 + 高强铝合金/碳纤维桁架结构，而非实心放大", ok: true, msg: "✅ 正确破局！通过拓扑空心化与高比强度材料，打破死重按 k³ 增长的魔咒。" }
+        ]
+      },
+      {
+        title: "陷阱 2：烧杯放热反应放大 100 倍进工厂",
+        desc: "实验室 500mL 玻璃烧杯里的放热反应很温和，工厂直接造了一个放大版 50 吨巨型反应釜。",
+        opts: [
+          { text: "A. 靠反应釜外壁自然散热就行，跟烧杯一样", ok: false, msg: "❌ 热失控爆炸！体积产热翻了万倍，外壁散热面积增速远低于产热，釜内瞬间过热冲料。" },
+          { text: "B. 釜内加装盘管冷却器、多级搅拌或改用微通道连续流反应器（人为拉高比表面积）", ok: true, msg: "✅ 化工放大核心！微通道反应器就是为了把 L 重新做小、把 S/V 重新拉高。" }
+        ]
+      },
+      {
+        title: "陷阱 3：单层小木屋放大成 30 层摩天大楼",
+        desc: "承重墙按建筑高度等比例加厚，结果底层全部被墙体占满，根本留不出房间。",
+        opts: [
+          { text: "A. 放弃底层承重墙，改用高强钢筋混凝土框架/核心筒承重", ok: true, msg: "✅ 结构演进！摩天大楼的骨架与小木屋完全不是同一物种，尺度变了，架构必须重写。" },
+          { text: "B. 继续加厚砖墙，底层改成实心砖墩", ok: false, msg: "❌ 建筑失去使用空间，且自重进一步恶化地基沉降。" }
+        ]
+      }
+    ];
+    let cur = 0; const solved = new Set();
+    function render() {
+      document.getElementById("tabs").innerHTML = cases.map((c,i)=>`<button class="tab-btn ${i===cur?'active':''}" onclick="cur=${i};render()">${solved.has(i)?'✅ ':''}${c.title}</button>`).join("");
+      const c = cases[cur];
+      document.getElementById("caseBody").innerHTML = `<h3 style="margin:0 0 8px;">${c.title}</h3><p style="color:var(--tax-muted);margin:0;">${c.desc}</p><div class="opt-list">${c.opts.map((o,idx)=>`<button class="opt-btn" onclick="pick(${idx},this)">${o.text}</button>`).join("")}</div><div id="fb" style="margin-top:12px;font-weight:700;font-size:14px;"></div>`;
+    }
+    function pick(idx, btn) {
+      const o = cases[cur].opts[idx];
+      document.querySelectorAll(".opt-btn").forEach(b=>b.classList.remove("ok","bad"));
+      btn.classList.add(o.ok?"ok":"bad");
+      document.getElementById("fb").textContent = o.msg;
+      if (o.ok) {
+        solved.add(cur);
+        if (solved.size === cases.length) {
+          document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>全部通关！记住这条系统工程铁律：<strong>尺度改变一个数量级，架构就必须重写</strong>（空心拓扑、微通道散热、核心筒骨架都是为了对抗平方-立方定律）。`;
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+        document.getElementById("tabs").innerHTML = cases.map((c,i)=>`<button class="tab-btn ${i===cur?'active':''}" onclick="cur=${i};render()">${solved.has(i)?'✅ ':''}${c.title}</button>`).join("");
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

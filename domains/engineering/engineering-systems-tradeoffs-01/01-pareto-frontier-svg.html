@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：帕累托前沿透视镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+    .svg-box { width: 100%; background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 14px; padding: 10px; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .tax-btn { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; cursor: pointer; font-weight: 700; font-size: 13px; }
+    .tax-btn.primary { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .stat-card { padding: 12px; border-radius: 12px; border: 1px solid var(--tax-border); margin-bottom: 10px; }
+    .stat-num { font-size: 26px; font-weight: 850; color: var(--tax-primary); font-family: ui-monospace, monospace; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📊 帕累托前沿透视镜：别再拿“被支配劣解”当权衡</h1>
+        <p>误区：以为所有方案都在做权衡。真相：只有站在前沿线上的方案才值得选，其余方案既慢又贵！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="tax-btn primary" onclick="addRandom()">+ 随机投放 3 个工程方案</button>
+        <button class="tax-btn" onclick="resetPts()">重置初始方案</button>
+        <span style="font-size:13px;color:var(--tax-muted);align-self:center;">💡 也可直接在左侧画布点击添加自定义方案</span>
+      </div>
+      <div class="layout">
+        <div class="svg-box">
+          <svg id="chart" viewBox="0 0 520 340" style="width:100%;height:auto;cursor:crosshair;display:block;"></svg>
+        </div>
+        <div>
+          <div class="stat-card">
+            <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">帕累托最优方案（前沿点）</div>
+            <div class="stat-num" id="paretoCount">0</div>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">被支配劣解（Dominated）</div>
+            <div class="stat-num" id="domCount" style="color:#ef4444;">0</div>
+          </div>
+          <div style="font-size:13px;color:var(--tax-muted);line-height:1.6;">
+            <strong>判定规则：</strong>越往<strong>左下角</strong>越好（耗时更短、成本更低）。如果存在另一个方案在两个维度上都不比你差，且至少有一项严格更好，你就被“支配”了。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>点击画布投放几个新方案，看看它们是把帕累托前沿向外推进了，还是沦为了被支配的“智商税方案”！
+    </div>
+  </div>
+
+  <script>
+    const initialPts = [
+      { x: 18, y: 82, name: "外包极速版" },
+      { x: 32, y: 58, name: "敏捷 MVP" },
+      { x: 54, y: 38, name: "标准架构" },
+      { x: 78, y: 20, name: "自研开源省钱版" },
+      { x: 60, y: 72, name: "臃肿重构版" },
+      { x: 45, y: 65, name: "低效外包" }
+    ];
+    let pts = JSON.parse(JSON.stringify(initialPts));
+    let interactions = 0;
+
+    function computePareto(points) {
+      return points.map((p, i) => {
+        const dominated = points.some((q, j) => i !== j && q.x <= p.x && q.y <= p.y && (q.x < p.x || q.y < p.y));
+        return { ...p, dominated };
+      });
+    }
+
+    function render() {
+      const svg = document.getElementById("chart");
+      const W = 520, H = 340, padL = 52, padB = 42, padT = 20, padR = 24;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const sx = x => padL + (x / 100) * plotW;
+      const sy = y => padT + plotH - (y / 100) * plotH;
+
+      const res = computePareto(pts);
+      const front = res.filter(p => !p.dominated).sort((a, b) => a.x - b.x);
+      const doms = res.filter(p => p.dominated);
+
+      document.getElementById("paretoCount").textContent = front.length + " 个";
+      document.getElementById("domCount").textContent = doms.length + " 个";
+
+      let html = `<rect x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="none" stroke="var(--tax-border)" stroke-width="1"/>`;
+      for (let g = 20; g <= 80; g += 20) {
+        html += `<line x1="${sx(g)}" y1="${padT}" x2="${sx(g)}" y2="${padT+plotH}" stroke="var(--tax-border)" stroke-dasharray="3,4" opacity="0.5"/>`;
+        html += `<line x1="${padL}" y1="${sy(g)}" x2="${padL+plotW}" y2="${sy(g)}" stroke="var(--tax-border)" stroke-dasharray="3,4" opacity="0.5"/>`;
+      }
+      html += `<text x="${padL + plotW/2}" y="${H - 8}" text-anchor="middle" fill="var(--tax-muted)" font-size="12" font-weight="700">交付耗时（天）→ 越左越快</text>`;
+      html += `<text x="16" y="${padT + plotH/2}" text-anchor="middle" fill="var(--tax-muted)" font-size="12" font-weight="700" transform="rotate(-90 16 ${padT + plotH/2})">研发成本（万）→ 越下越省</text>`;
+
+      if (front.length >= 2) {
+        const d = front.map((p, idx) => `${idx === 0 ? "M" : "L"}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(" ");
+        html += `<path d="${d}" fill="none" stroke="var(--tax-primary)" stroke-width="3" stroke-linecap="round"/>`;
+      }
+
+      doms.forEach(p => {
+        html += `<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="6" fill="#ef4444" opacity="0.65"/>`;
+        html += `<text x="${sx(p.x)+9}" y="${sy(p.y)+4}" font-size="11" fill="var(--tax-muted)">${p.name}</text>`;
+      });
+      front.forEach(p => {
+        html += `<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="8" fill="var(--tax-primary)" stroke="#fff" stroke-width="2"/>`;
+        html += `<text x="${sx(p.x)+10}" y="${sy(p.y)-6}" font-size="11.5" font-weight="800" fill="var(--tax-primary)">${p.name}</text>`;
+      });
+
+      svg.innerHTML = html;
+
+      if (interactions >= 1) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>当前共有 <strong>${front.length}</strong> 个方案站在帕累托前沿上——它们之间没有绝对胜负，只能按业务优先级权衡；而其余 <strong>${doms.length}</strong> 个红点既更慢又更贵，属于必须直接淘汰的被支配劣解！`;
+        if (interactions >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+
+    document.getElementById("chart").addEventListener("click", (e) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const vx = ((e.clientX - rect.left) / rect.width) * 520;
+      const vy = ((e.clientY - rect.top) / rect.height) * 340;
+      const x = Math.max(5, Math.min(95, Math.round(((vx - 52) / (520 - 76)) * 100)));
+      const y = Math.max(5, Math.min(95, Math.round((1 - (vy - 20) / (340 - 62)) * 100)));
+      pts.push({ x, y, name: "方案#" + (pts.length + 1) });
+      interactions++;
+      render();
+    });
+
+    function addRandom() {
+      for (let i = 0; i < 3; i++) {
+        pts.push({
+          x: Math.floor(10 + Math.random() * 82),
+          y: Math.floor(10 + Math.random() * 82),
+          name: "随机#" + (pts.length + 1)
+        });
+      }
+      interactions++;
+      render();
+    }
+
+    function resetPts() {
+      pts = JSON.parse(JSON.stringify(initialPts));
+      render();
+    }
+    render();
+  </script>
+</body>
+</html>

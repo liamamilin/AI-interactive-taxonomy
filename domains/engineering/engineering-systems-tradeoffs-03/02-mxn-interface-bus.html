@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：M×N 接口爆炸消除器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .top-ctrl { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .tax-btn { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; cursor: pointer; font-weight: 700; }
+    .tax-btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔌 M×N 接口爆炸消除器：点对点直连 vs 统一标准接口</h1>
+        <p>误区：加一个标准中间层纯属多此一举。真相：没有标准接口时，M 个上游与 N 个下游需要维护 M×N 条适配链路！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="top-ctrl">
+        <label style="font-weight:750;font-size:14px;">左侧系统数 M：<span id="mOut">5</span> <input id="mS" type="range" min="2" max="8" value="5" oninput="render()" /></label>
+        <label style="font-weight:750;font-size:14px;">右侧系统数 N：<span id="nOut">5</span> <input id="nS" type="range" min="2" max="8" value="5" oninput="render()" /></label>
+        <button id="modeBtn" class="tax-btn active" onclick="toggleMode()">当前：点对点直连（M×N）</button>
+      </div>
+      <svg id="topo" viewBox="0 0 560 280" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+      <div style="margin-top:10px;font-weight:800;font-size:15px;">所需适配接口 / 线缆总数：<span id="edgeCount" style="color:var(--tax-primary);font-size:20px;">25</span> 条</div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>先把 M 和 N 拉到 7 或 8，再点击按钮切换到「统一标准接口」，亲眼看看蜘蛛网是如何瞬间清零的！
+    </div>
+  </div>
+
+  <script>
+    let busMode = false;
+    let toggled = false;
+    function toggleMode() {
+      busMode = !busMode;
+      toggled = true;
+      const btn = document.getElementById("modeBtn");
+      btn.textContent = busMode ? "当前：统一标准接口（M+N）" : "当前：点对点直连（M×N）";
+      btn.classList.toggle("active", busMode);
+      render();
+    }
+    function render() {
+      const m = +document.getElementById("mS").value;
+      const n = +document.getElementById("nS").value;
+      document.getElementById("mOut").textContent = m;
+      document.getElementById("nOut").textContent = n;
+      const edges = busMode ? (m + n) : (m * n);
+      document.getElementById("edgeCount").textContent = edges;
+
+      const leftY = Array.from({length: m}, (_, i) => 30 + (i + 0.5) * (220 / m));
+      const rightY = Array.from({length: n}, (_, i) => 30 + (i + 0.5) * (220 / n));
+      let html = "";
+
+      if (!busMode) {
+        leftY.forEach(y1 => rightY.forEach(y2 => {
+          html += `<line x1="90" y1="${y1}" x2="470" y2="${y2}" stroke="#ef4444" stroke-width="1.4" opacity="0.55"/>`;
+        }));
+      } else {
+        html += `<rect x="245" y="26" width="70" height="228" rx="14" fill="var(--tax-primary)" fill-opacity="0.16" stroke="var(--tax-primary)" stroke-width="2.5"/>`;
+        html += `<text x="280" y="144" text-anchor="middle" font-size="13" font-weight="850" fill="var(--tax-primary)">标准接口</text>`;
+        leftY.forEach(y1 => html += `<line x1="90" y1="${y1}" x2="245" y2="${y1}" stroke="#10b981" stroke-width="2.2"/>`);
+        rightY.forEach(y2 => html += `<line x1="315" y1="${y2}" x2="470" y2="${y2}" stroke="#10b981" stroke-width="2.2"/>`);
+      }
+
+      leftY.forEach((y, i) => html += `<circle cx="76" cy="${y}" r="12" fill="var(--tax-primary)"/><text x="76" y="${y+4}" text-anchor="middle" font-size="11" fill="#fff" font-weight="700">A${i+1}</text>`);
+      rightY.forEach((y, i) => html += `<circle cx="484" cy="${y}" r="12" fill="#0ea5e9"/><text x="484" y="${y+4}" text-anchor="middle" font-size="11" fill="#fff" font-weight="700">B${i+1}</text>`);
+      document.getElementById("topo").innerHTML = html;
+
+      if (toggled) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>当 M=${m}, N=${n} 时，点对点直连需要 <strong>${m*n}</strong> 条适配线，而统一标准接口只需要 <strong>${m+n}</strong> 条！这就是 USB-C、集装箱、TCP/IP 协议栈统治世界的数学本质。`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

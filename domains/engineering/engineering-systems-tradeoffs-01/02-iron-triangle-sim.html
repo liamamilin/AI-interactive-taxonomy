@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：快 / 好 / 省不可能三角拉扯器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tri-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center; }
+    @media (max-width: 780px) { .tri-grid { grid-template-columns: 1fr; } }
+    .ctrl { margin-bottom: 14px; }
+    .ctrl label { display: flex; justify-content: space-between; font-weight: 750; font-size: 14px; margin-bottom: 6px; }
+    .debt-bar { height: 14px; border-radius: 999px; background: var(--tax-border); overflow: hidden; margin-top: 8px; }
+    .debt-fill { height: 100%; transition: width 0.2s ease, background 0.2s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔺 快 / 好 / 省不可能三角：强行“全都要”会发生什么？</h1>
+        <p>误区：只要团队够拼，速度、质量、省钱可以同时拉满。真相：工程总产能有上限，超额索取只会变成隐性技术债！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tri-grid">
+        <div>
+          <div class="ctrl">
+            <label><span>⚡ 交付速度（Fast）</span><span id="vFast">60</span></label>
+            <input id="sFast" type="range" min="10" max="100" value="60" style="width:100%;" oninput="update()" />
+          </div>
+          <div class="ctrl">
+            <label><span>💎 工程质量（Good）</span><span id="vGood">60</span></label>
+            <input id="sGood" type="range" min="10" max="100" value="60" style="width:100%;" oninput="update()" />
+          </div>
+          <div class="ctrl">
+            <label><span>💰 省钱程度（Cheap）</span><span id="vCheap">60</span></label>
+            <input id="sCheap" type="range" min="10" max="100" value="60" style="width:100%;" oninput="update()" />
+          </div>
+          <div style="margin-top:16px;padding:12px;border-radius:12px;border:1px solid var(--tax-border);">
+            <div style="display:flex;justify-content:space-between;font-weight:750;font-size:13.5px;">
+              <span>隐性技术债 / 返工风险</span>
+              <span id="debtText">0%</span>
+            </div>
+            <div class="debt-bar"><div id="debtFill" class="debt-fill"></div></div>
+          </div>
+        </div>
+        <div>
+          <svg id="triSvg" viewBox="0 0 360 300" style="width:100%;max-width:360px;display:block;margin:auto;"></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>试着把三个滑块同时拉到 80 以上，观察三角形是如何撑破工程能力边界的！
+    </div>
+  </div>
+
+  <script>
+    let moves = 0;
+    function update() {
+      const f = +document.getElementById("sFast").value;
+      const g = +document.getElementById("sGood").value;
+      const c = +document.getElementById("sCheap").value;
+      document.getElementById("vFast").textContent = f;
+      document.getElementById("vGood").textContent = g;
+      document.getElementById("vCheap").textContent = c;
+
+      const sum = f + g + c;
+      const budget = 180;
+      const over = Math.max(0, sum - budget);
+      const debt = Math.min(100, Math.round((over / 120) * 100));
+
+      document.getElementById("debtText").textContent = debt + "%";
+      const fill = document.getElementById("debtFill");
+      fill.style.width = debt + "%";
+      fill.style.background = debt === 0 ? "#10b981" : debt < 45 ? "#f59e0b" : "#ef4444";
+
+      const cx = 180, cy = 165, R = 110;
+      const p1 = [cx, cy - R * (f / 100)];
+      const p2 = [cx + R * (g / 100) * Math.cos(Math.PI / 6), cy + R * (g / 100) * Math.sin(Math.PI / 6)];
+      const p3 = [cx - R * (c / 100) * Math.cos(Math.PI / 6), cy + R * (c / 100) * Math.sin(Math.PI / 6)];
+
+      const o1 = [cx, cy - R], o2 = [cx + R * Math.cos(Math.PI/6), cy + R * Math.sin(Math.PI/6)], o3 = [cx - R * Math.cos(Math.PI/6), cy + R * Math.sin(Math.PI/6)];
+      const color = debt > 30 ? "#ef4444" : "var(--tax-primary)";
+
+      document.getElementById("triSvg").innerHTML = `
+        <polygon points="${o1} ${o2} ${o3}" fill="none" stroke="var(--tax-border)" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <circle cx="${cx}" cy="${cy}" r="66" fill="none" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6"/>
+        <polygon points="${p1} ${p2} ${p3}" fill="${color}" fill-opacity="0.22" stroke="${color}" stroke-width="2.5"/>
+        <text x="${o1[0]}" y="${o1[1]-10}" text-anchor="middle" font-size="13" font-weight="800" fill="currentColor">⚡ 快 (${f})</text>
+        <text x="${o2[0]+10}" y="${o2[1]+18}" text-anchor="middle" font-size="13" font-weight="800" fill="currentColor">💎 好 (${g})</text>
+        <text x="${o3[0]-10}" y="${o3[1]+18}" text-anchor="middle" font-size="13" font-weight="800" fill="currentColor">💰 省 (${c})</text>
+      `;
+
+      moves++;
+      if (debt >= 50) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>三项总需求达到 ${sum}（超出工程能力上限 ${budget}），系统正在以 <strong>${debt}% 的隐性技术债</strong> 透支未来——上线后必然遭遇频繁故障与天价返工！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      } else if (moves > 1) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>当前处于帕累托可行域内（总需求 ${sum}/${budget}）。主动放弃其中一角，才能稳稳保住另外两角！`;
+      }
+    }
+    update();
+  </script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：架构师需求谈判台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .case-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tab-btn { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; cursor: pointer; font-weight: 700; }
+    .tab-btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .opt-list { display: grid; gap: 10px; margin-top: 14px; }
+    .opt-btn { text-align: left; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; cursor: pointer; font-size: 14px; transition: border-color 0.15s; }
+    .opt-btn:hover { border-color: var(--tax-primary); }
+    .opt-btn.ok { border-color: #10b981; background: rgba(16,185,129,0.1); }
+    .opt-btn.bad { border-color: #ef4444; background: rgba(239,68,68,0.1); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎯 架构师需求谈判台：面对“全都要”，怎么选出帕累托最优？</h1>
+        <p>误区：好架构师能满足所有互相冲突的指标。真相：好架构师懂得把隐藏代价摆上桌面，用分阶段权衡换取最优解。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="case-tabs" id="tabs"></div>
+      <div id="caseBody"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>逐一解决 3 个高压业务场景，体会如何把“不可能三角”转化为清晰的工程取舍！
+    </div>
+  </div>
+
+  <script>
+    const cases = [
+      {
+        title: "场景 1：双11 大促倒计时 7 天",
+        desc: "老板要求 7 天内上线新秒杀页，预算不能超，且不能崩溃。",
+        opts: [
+          { text: "A. 7 天内从零手写高并发微服务集群，预算和质量都不妥协", ok: false, msg: "❌ 违反铁三角！7 天手写分布式集群必然留下致命 Bug，线上必崩。" },
+          { text: "B. 保【快】与【省】：采用成熟云托管静态页 + 排队限流降级，砍掉个性化推荐等非核心功能", ok: true, msg: "✅ 帕累托最优！通过缩减非核心范围，在 7 天与原预算内保住了系统可用性。" },
+          { text: "C. 招 20 个外包连夜堆代码，先上线再说", ok: false, msg: "❌ 人月神话陷阱：新进人员沟通成本反而拖慢进度，且引入大量技术债。" }
+        ]
+      },
+      {
+        title: "场景 2：医院 ICU 生命监护系统",
+        desc: "客户要求 99.999% 极高可靠性，同时希望价格比竞品便宜一半、下个月交付。",
+        opts: [
+          { text: "A. 保【好】：明确告知安全关键系统不可省钱抢工期，建议先按合规冗余标准交付核心监护模块", ok: true, msg: "✅ 工程底线思维！在生命安全领域，质量是硬约束，只能通过分期交付（牺牲部分速度）和合理定价来达成帕累托最优。" },
+          { text: "B. 砍掉双机热备和自动告警测试，把价格降一半按期交付", ok: false, msg: "❌ 灾难性劣解：省钱换来的是不可接受的生命安全风险。" },
+          { text: "C. 答应客户全部要求，后续靠加班压缩测试周期", ok: false, msg: "❌ 压缩测试等于把隐患留给临床现场。" }
+        ]
+      },
+      {
+        title: "场景 3：初创团队验证新点子（PMF）",
+        desc: "团队只有 2 个工程师和极少启动资金，老板却要求照着大厂标准做全套高并发中台。",
+        opts: [
+          { text: "A. 严格按大厂规范搭建 K8s + 服务网格 + 多活数据库，哪怕半年才上线", ok: false, msg: "❌ 过设计（Over-engineering）：还没验证用户是否需要，资金和窗口期已经耗尽。" },
+          { text: "B. 保【快】与【省】：单体应用 + SaaS 托管数据库，1 周上线验证核心假设，跑通后再重构", ok: true, msg: "✅ 精准权衡！早期验证阶段最大的风险不是并发崩溃，而是做错方向，牺牲远期扩展性换取极速验证才是帕累托最优。" },
+          { text: "C. 先不做后端，全靠人工微信接单半年", ok: false, msg: "❌ 完全脱离软件验证目标，无法测试真实产品交互。" }
+        ]
+      }
+    ];
+
+    let cur = 0;
+    const solved = new Set();
+
+    function render() {
+      document.getElementById("tabs").innerHTML = cases.map((c, i) =>
+        `<button class="tab-btn ${i===cur?'active':''}" onclick="cur=${i};render()">${solved.has(i)?'✅ ':''}${c.title}</button>`
+      ).join("");
+
+      const c = cases[cur];
+      document.getElementById("caseBody").innerHTML = `
+        <h3 style="margin:0 0 8px;">${c.title}</h3>
+        <p style="color:var(--tax-muted);margin:0;">${c.desc}</p>
+        <div class="opt-list">
+          ${c.opts.map((o, idx) => `<button class="opt-btn" onclick="pick(${idx}, this)">${o.text}</button>`).join("")}
+        </div>
+        <div id="feedback" style="margin-top:12px;font-weight:700;font-size:14px;"></div>
+      `;
+    }
+
+    function pick(idx, btn) {
+      const o = cases[cur].opts[idx];
+      document.querySelectorAll(".opt-btn").forEach(b => b.classList.remove("ok", "bad"));
+      btn.classList.add(o.ok ? "ok" : "bad");
+      document.getElementById("feedback").textContent = o.msg;
+      if (o.ok) {
+        solved.add(cur);
+        if (solved.size === cases.length) {
+          document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>3 个场景全部通关！真正的工程权衡不是“硬着头皮全都要”，而是识别哪一项是<strong>不可妥协的硬约束</strong>，用范围裁剪或分期演进站上帕累托前沿！`;
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+        renderTabsOnly();
+      }
+    }
+
+    function renderTabsOnly() {
+      document.getElementById("tabs").innerHTML = cases.map((c, i) =>
+        `<button class="tab-btn ${i===cur?'active':''}" onclick="cur=${i};render()">${solved.has(i)?'✅ ':''}${c.title}</button>`
+      ).join("");
+    }
+    render();
+  </script>
+</body>
+</html>

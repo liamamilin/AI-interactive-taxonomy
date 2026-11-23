@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：系统模块化切分装配台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .blocks { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; min-height: 90px; padding: 14px; border: 1px dashed var(--tax-border); border-radius: 12px; }
+    .mod-box { padding: 10px 14px; border-radius: 10px; background: var(--tax-primary); color: #fff; font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 680px) { .metrics { grid-template-columns: 1fr; } }
+    .mcard { padding: 12px; border: 1px solid var(--tax-border); border-radius: 12px; }
+    .mnum { font-size: 24px; font-weight: 850; font-family: monospace; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧱 系统模块化切分装配台：模块拆得越细越好吗？</h1>
+        <p>误区：模块化就是把系统拆成越多小块越好。真相：过度拆分会让“跨模块接口序列化/沟通税”反过来压垮系统！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:750;font-size:14px;">🎛️ 独立模块切分数量：<span id="cntOut">4</span> 个
+        <input id="cnt" type="range" min="1" max="16" value="4" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <div class="blocks" id="blocks"></div>
+      <div class="metrics">
+        <div class="mcard"><div style="font-size:12px;color:var(--tax-muted);">单模块内部纠缠度</div><div class="mnum" id="cohesion" style="color:#f59e0b;">0</div></div>
+        <div class="mcard"><div style="font-size:12px;color:var(--tax-muted);">跨模块接口/通信税</div><div class="mnum" id="tax" style="color:#ef4444;">0</div></div>
+        <div class="mcard"><div style="font-size:12px;color:var(--tax-muted);">系统总维护与运行成本</div><div class="mnum" id="tot" style="color:var(--tax-primary);">0</div></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>从 1（巨石单体）拉到 16（过度微服务化），寻找那个总成本最低的模块化甜蜜点！
+    </div>
+  </div>
+
+  <script>
+    let moves = 0;
+    function render() {
+      const n = +document.getElementById("cnt").value;
+      document.getElementById("cntOut").textContent = n;
+      const internal = Math.round(240 / Math.pow(n, 0.85));
+      const tax = Math.round((n - 1) * 14 + Math.pow(n - 1, 1.45) * 3);
+      const tot = internal + tax;
+
+      document.getElementById("cohesion").textContent = internal;
+      document.getElementById("tax").textContent = tax;
+      document.getElementById("tot").textContent = tot;
+
+      document.getElementById("blocks").innerHTML = Array.from({length: n}, (_, i) =>
+        `<div class="mod-box">📦 模块 ${i+1}</div>`
+      ).join("");
+
+      moves++;
+      if (moves > 2) {
+        if (n === 1) {
+          document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>1 个巨石单体虽然零接口开销，但内部纠缠度高达 ${internal}，改一行代码牵动全身！`;
+        } else if (n >= 12) {
+          document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>拆成 ${n} 个碎片模块后，跨模块接口通信税飙升到 <strong>${tax}</strong>（分布式单体陷阱）！`;
+        } else {
+          document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>3~6 个高内聚模块区间总成本最低（当前总成本 ${tot}）——好的边界是沿着业务变化轴切分，而不是切得越碎越好！`;
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

@@ -10,7 +10,7 @@
     .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
     .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
     .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
-    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
     @media (max-width: 720px) { .duel { grid-template-columns: 1fr; } }
     .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; line-height: 1.65; font-size: 13.5px; }
   </style>
@@ -20,7 +20,7 @@
     <div class="tax-topbar">
       <div>
         <h1>🌡️ 定频开关 vs PID 变频空调：为什么变频空调既不忽冷忽热，还更省电？</h1>
-        <p>设定室温目标 <strong>26.0℃</strong>。切换对比老式“非 0 即 100% 满载开关（Bang-Bang）”与现代“PID 连续变频”的表现！</p>
+        <p>设定室温目标 <strong>26.0℃</strong>。切换对比老式“非 0 即 100% 满载开关（Bang-Bang）”与现代“PID 连续变频”的温度曲线！</p>
       </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
@@ -30,6 +30,7 @@
         <button class="btn active" id="mBang" onclick="pick('bang')">🔌 定频开关（Bang-Bang Control）</button>
         <button class="btn" id="mPid" onclick="pick('pid')">⚡ 变频 PID 连续控制</button>
       </div>
+      <svg id="waveSvg" viewBox="0 0 600 220" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
       <div class="duel" id="duelBox"></div>
     </div>
 
@@ -38,11 +39,49 @@
 
   <script>
     const seen = new Set(["bang"]);
+    function drawWave(isPid) {
+      const W = 600, H = 220, padL = 52, padR = 20, padT = 22, padB = 34;
+      const pw = W - padL - padR, ph = H - padT - padB;
+      const sx = t => padL + (t / 60) * pw;
+      const sy = temp => padT + ((29 - temp) / 6) * ph; // 23C..29C
+
+      let pts = [];
+      let tRoom = 28.5, integral = 0, prevErr = 0;
+      for (let t = 0; t <= 60; t += 0.5) {
+        pts.push([t, tRoom]);
+        if (isPid) {
+          const err = 26.0 - tRoom;
+          integral += err * 0.5;
+          const deriv = (err - prevErr) / 0.5;
+          prevErr = err;
+          const u = 0.55 * err + 0.14 * integral + 0.25 * deriv;
+          tRoom += u * 0.45 + 0.04; // slight ambient heat gain
+        } else {
+          const cool = tRoom > 27.0 ? -0.42 : (tRoom < 24.5 ? 0.22 : (pts.length > 1 && pts[pts.length-1][1] < pts[pts.length-2][1] ? -0.42 : 0.22));
+          tRoom += cool;
+        }
+      }
+      const d = pts.map((p, i) => `${i===0?'M':'L'}${sx(p[0]).toFixed(1)},${sy(p[1]).toFixed(1)}`).join(" ");
+      const targetY = sy(26.0);
+      document.getElementById("waveSvg").innerHTML = `
+        <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+ph}" stroke="var(--tax-border)"/>
+        <line x1="${padL}" y1="${padT+ph}" x2="${padL+pw}" y2="${padT+ph}" stroke="var(--tax-border)"/>
+        <line x1="${padL}" y1="${targetY}" x2="${padL+pw}" y2="${targetY}" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5,4"/>
+        <text x="${padL+6}" y="${targetY-6}" font-size="11" font-weight="800" fill="#10b981">目标室温 26.0℃</text>
+        <text x="16" y="${sy(28)}" font-size="11" fill="var(--tax-muted)">28℃</text>
+        <text x="16" y="${sy(26)}" font-size="11" fill="var(--tax-muted)">26℃</text>
+        <text x="16" y="${sy(24)}" font-size="11" fill="var(--tax-muted)">24℃</text>
+        <path d="${d}" fill="none" stroke="${isPid ? '#3b82f6' : '#ef4444'}" stroke-width="3" stroke-linecap="round"/>
+        <text x="${padL + pw/2}" y="${H - 8}" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">运行时间（分钟）</text>
+      `;
+    }
+
     function pick(m) {
       seen.add(m);
       document.getElementById("mBang").classList.toggle("active", m === "bang");
       document.getElementById("mPid").classList.toggle("active", m === "pid");
       const pid = m === "pid";
+      drawWave(pid);
       document.getElementById("duelBox").innerHTML = pid
         ? `
           <div class="card" style="border-color:var(--tax-green);"><strong>🌡️ 室温波动：25.9℃ ~ 26.1℃</strong><br>离目标越近，压缩机功率按比例丝滑收油门，最后只用 15% 微功率稳稳抵消房间散热！</div>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：巨型蚂蚁崩溃模拟器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 18px; align-items: center; }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+    .stat { padding: 10px 14px; border: 1px solid var(--tax-border); border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; }
+    .stat strong { font-size: 18px; font-family: monospace; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>💥 巨型蚂蚁崩溃模拟器：为什么没有恐龙大小的蚂蚁？</h1>
+        <p>误区：只要按比例放大，小蚂蚁能扛起 50 倍体重，大蚂蚁就能掀翻卡车。真相：体重按 k³ 暴涨，腿骨承重只按 k² 增长！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:750;font-size:14px;">🔍 等比例放大倍数 k：<span id="kVal">1×</span>
+        <input id="kS" type="range" min="1" max="25" value="1" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <div class="grid" style="margin-top:14px;">
+        <div>
+          <div class="stat"><span>📏 体长倍数 (k)</span><strong id="lenOut">1×</strong></div>
+          <div class="stat"><span>🦴 腿骨截面积 / 力量 (k²)</span><strong id="areaOut" style="color:#10b981;">1×</strong></div>
+          <div class="stat"><span>⚖️ 身体总重量 (k³)</span><strong id="volOut" style="color:#f59e0b;">1×</strong></div>
+          <div class="stat"><span>💥 单位腿骨承受压强 (k³/k² = k)</span><strong id="stressOut" style="color:var(--tax-primary);">1×</strong></div>
+        </div>
+        <div>
+          <svg id="antSvg" viewBox="0 0 360 240" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>向右拖动放大倍数滑块，观察蚂蚁腿骨承重极限何时被自身体重彻底压断！
+    </div>
+  </div>
+
+  <script>
+    function render() {
+      const k = +document.getElementById("kS").value;
+      const area = k * k;
+      const vol = k * k * k;
+      const broken = k >= 12;
+
+      document.getElementById("kVal").textContent = k + "×";
+      document.getElementById("lenOut").textContent = k + "×";
+      document.getElementById("areaOut").textContent = area.toLocaleString() + "×";
+      document.getElementById("volOut").textContent = vol.toLocaleString() + "×";
+      document.getElementById("stressOut").textContent = k + "×" + (broken ? "（已骨折崩溃！）" : "");
+      document.getElementById("stressOut").style.color = broken ? "#ef4444" : "var(--tax-primary)";
+
+      const barW = Math.min(240, (k / 25) * 240);
+      const limitX = 40 + (12 / 25) * 240;
+      document.getElementById("antSvg").innerHTML = `
+        <text x="180" y="34" text-anchor="middle" font-size="34">${broken ? "💀🐜💥" : "🐜"}</text>
+        <text x="180" y="62" text-anchor="middle" font-size="13" font-weight="800" fill="${broken?'#ef4444':'var(--tax-primary)'}">
+          ${broken ? "骨骼应力超过极限，已被自身体重压垮！" : "当前尚可站立，但相对力量已衰减至 1/" + k}
+        </text>
+        <text x="40" y="110" font-size="12" font-weight="700" fill="var(--tax-muted)">腿部骨骼承受压强（极限阈值 = 12×）</text>
+        <rect x="40" y="122" width="240" height="26" rx="6" fill="var(--tax-border)"/>
+        <rect x="40" y="122" width="${barW}" height="26" rx="6" fill="${broken ? '#ef4444' : '#10b981'}"/>
+        <line x1="${limitX}" y1="115" x2="${limitX}" y2="156" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4,3"/>
+        <text x="${limitX}" y="174" text-anchor="middle" font-size="11.5" font-weight="800" fill="#ef4444">断裂临界线 (12×)</text>
+      `;
+
+      if (broken) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>放大 ${k} 倍时，体重暴涨了 <strong>${vol.toLocaleString()} 倍</strong>，而腿骨截面积只长了 <strong>${area} 倍</strong>！大象之所以腿粗如柱、不再像蚂蚁那样细长，正是为了对抗平方-立方定律。`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

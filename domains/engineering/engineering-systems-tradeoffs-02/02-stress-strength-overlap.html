@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：应力-强度干涉透视镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
+    @media (max-width: 700px) { .ctrl-row { grid-template-columns: 1fr; } }
+    .ctrl label { display: flex; justify-content: space-between; font-weight: 750; font-size: 14px; margin-bottom: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📉 应力-强度干涉透视镜：平均够用为什么还会断？</h1>
+        <p>误区：零件平均强度 200MPa，承受平均载荷 100MPa 就绝对安全。真相：真正杀死结构的，是极端载荷尾部与劣质材料尾部的重叠区！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrl-row">
+        <div class="ctrl">
+          <label><span>🛡️ 名义安全系数（强度均值 / 载荷均值）</span><span id="sfOut">1.8×</span></label>
+          <input id="sf" type="range" min="1.1" max="3.0" step="0.1" value="1.8" style="width:100%;" oninput="render()" />
+        </div>
+        <div class="ctrl">
+          <label><span>🎲 工艺与工况离散度（方差 σ）</span><span id="sigOut">18</span></label>
+          <input id="sig" type="range" min="6" max="32" step="1" value="18" style="width:100%;" oninput="render()" />
+        </div>
+      </div>
+      <svg id="distSvg" viewBox="0 0 600 260" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+      <div style="margin-top:10px;display:flex;justify-content:space-between;font-size:14px;font-weight:750;">
+        <span>🟦 实际外部载荷分布</span>
+        <span>🟥 干涉重叠区（断裂风险）：<span id="riskPct" style="color:#ef4444;">0%</span></span>
+        <span>🟩 材料极限强度分布</span>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>试着把安全系数保持在 1.5×，但把“工艺离散度 σ”拉大，看看为什么品控不稳时哪怕平均余量够大也会频繁断裂！
+    </div>
+  </div>
+
+  <script>
+    let count = 0;
+    function gauss(x, mu, s) {
+      return Math.exp(-0.5 * Math.pow((x - mu) / s, 2)) / (s * Math.sqrt(2 * Math.PI));
+    }
+    function render() {
+      const sf = parseFloat(document.getElementById("sf").value);
+      const sig = parseFloat(document.getElementById("sig").value);
+      document.getElementById("sfOut").textContent = sf.toFixed(1) + "×";
+      document.getElementById("sigOut").textContent = sig;
+
+      const muLoad = 100;
+      const muStr = muLoad * sf;
+      const maxVal = 360;
+      const sx = x => 30 + (x / maxVal) * 540;
+      const sy = y => 225 - y * 4200;
+
+      let pLoad = [], pStr = [], pOverlap = [];
+      let overlapArea = 0;
+      for (let x = 0; x <= maxVal; x += 3) {
+        const y1 = gauss(x, muLoad, sig * 0.85);
+        const y2 = gauss(x, muStr, sig);
+        pLoad.push(`${x===0?'M':'L'}${sx(x).toFixed(1)},${sy(y1).toFixed(1)}`);
+        pStr.push(`${x===0?'M':'L'}${sx(x).toFixed(1)},${sy(y2).toFixed(1)}`);
+        const ymin = Math.min(y1, y2);
+        pOverlap.push([sx(x), sy(ymin)]);
+        overlapArea += ymin * 3;
+      }
+
+      const risk = Math.min(99, (overlapArea * 100)).toFixed(1);
+      document.getElementById("riskPct").textContent = risk + "%";
+
+      const ovPath = `M${pOverlap[0][0].toFixed(1)},225 ` + pOverlap.map(p => `L${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ") + ` L${pOverlap[pOverlap.length-1][0].toFixed(1)},225 Z`;
+
+      document.getElementById("distSvg").innerHTML = `
+        <line x1="30" y1="225" x2="570" y2="225" stroke="var(--tax-border)"/>
+        <path d="${ovPath}" fill="#ef4444" fill-opacity="0.45"/>
+        <path d="${pLoad.join(' ')}" fill="none" stroke="#3b82f6" stroke-width="2.5"/>
+        <path d="${pStr.join(' ')}" fill="none" stroke="#10b981" stroke-width="2.5"/>
+        <text x="${sx(muLoad)}" y="244" text-anchor="middle" font-size="11.5" fill="#3b82f6" font-weight="700">平均载荷 (${muLoad})</text>
+        <text x="${sx(Math.min(340, muStr))}" y="244" text-anchor="middle" font-size="11.5" fill="#10b981" font-weight="700">平均强度 (${Math.round(muStr)})</text>
+      `;
+
+      count++;
+      if (count > 2) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>降低失效概率有两条路——要么<strong>加大安全系数</strong>（把绿山往右推，但更贵更重），要么<strong>收紧工艺离散度 σ</strong>（把两座山变瘦，既省料又安全）！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

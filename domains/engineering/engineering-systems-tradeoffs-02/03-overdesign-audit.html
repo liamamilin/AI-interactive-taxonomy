@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：总工程师安全审计台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .case-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tab-btn { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; cursor: pointer; font-weight: 700; }
+    .tab-btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .opt-list { display: grid; gap: 10px; margin-top: 14px; }
+    .opt-btn { text-align: left; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; cursor: pointer; font-size: 14px; }
+    .opt-btn.ok { border-color: #10b981; background: rgba(16,185,129,0.1); }
+    .opt-btn.bad { border-color: #ef4444; background: rgba(239,68,68,0.1); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔍 总工程师安全审计台：不同系统该给多大安全系数？</h1>
+        <p>误区：所有产品都该按最高安全标准设计。真相：安全系数必须与“失效后果、重量惩罚、可检测性”严格匹配。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="case-tabs" id="tabs"></div>
+      <div id="caseBody"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>完成全部 3 项工程审计，理解为什么“火箭 1.25”和“电梯 10.0”都是各自场景下的理性最优！
+    </div>
+  </div>
+
+  <script>
+    const cases = [
+      {
+        title: "审计 1：运载火箭燃料贮箱",
+        desc: "每多 1 公斤结构死重，就要多消耗数十公斤推进剂，甚至导致载荷无法入轨。该如何定安全系数？",
+        opts: [
+          { text: "A. 为了万无一失，按建筑标准取 SF = 5.0", ok: false, msg: "❌ 过设计灾难！火箭自重直接超标，根本飞不出大气层。" },
+          { text: "B. 取极紧凑的 SF ≈ 1.25 ~ 1.4，同时用极其严苛的 X 光探伤和全箭静力试验压缩材料离散度", ok: true, msg: "✅ 航天工程铁律！用极致的品控与测试代替笨重的材料冗余。" },
+          { text: "C. 取 SF = 1.0 极限压榨重量，不做测试", ok: false, msg: "❌ 零余量下任何微小阵风或制造偏差都会导致空中解体。" }
+        ]
+      },
+      {
+        title: "审计 2：高层写字楼载人电梯钢缆",
+        desc: "钢缆每天承受数千次启停冲击与磨损，且直接关系几十名乘客生命，但钢缆自身多粗点对建筑总成本影响微乎其微。",
+        opts: [
+          { text: "A. 取 SF = 1.5 节省钢材成本", ok: false, msg: "❌ 极度危险！电梯钢缆存在长期疲劳磨损和突发急停冲击，1.5 倍余量远远不够。" },
+          { text: "B. 取超高 SF = 8 ~ 12（并配合多根独立钢缆冗余）", ok: true, msg: "✅ 完全正确！在生命攸关且重量不敏感的场景，高安全系数是最廉价可靠的保险。" },
+          { text: "C. 取 SF = 50，把钢缆做得比电梯轿厢还重", ok: false, msg: "❌ 荒谬过设计：钢缆自重反而会成为驱动电机的巨大负担。" }
+        ]
+      },
+      {
+        title: "审计 3：消费级蓝牙耳机塑料充电盒卡扣",
+        desc: "失效后果只是盖子松动（无生命危险），且用户对价格与体积极其敏感。",
+        opts: [
+          { text: "A. 用钛合金 CNC 加工，取 SF = 10", ok: false, msg: "❌ 严重过设计：成本翻 10 倍，产品在市场上毫无竞争力。" },
+          { text: "B. 取适中 SF ≈ 1.5 ~ 2.0，允许极小比例在极端跌落时损坏，通过质保换新兜底", ok: true, msg: "✅ 商业与工程平衡！当失效可逆且代价有限时，适度余量 + 售后兜底远比全民高价买单更优。" }
+        ]
+      }
+    ];
+    let cur = 0; const solved = new Set();
+    function render() {
+      document.getElementById("tabs").innerHTML = cases.map((c,i)=>`<button class="tab-btn ${i===cur?'active':''}" onclick="cur=${i};render()">${solved.has(i)?'✅ ':''}${c.title}</button>`).join("");
+      const c = cases[cur];
+      document.getElementById("caseBody").innerHTML = `<h3 style="margin:0 0 8px;">${c.title}</h3><p style="color:var(--tax-muted);margin:0;">${c.desc}</p><div class="opt-list">${c.opts.map((o,idx)=>`<button class="opt-btn" onclick="pick(${idx},this)">${o.text}</button>`).join("")}</div><div id="fb" style="margin-top:12px;font-weight:700;font-size:14px;"></div>`;
+    }
+    function pick(idx, btn) {
+      const o = cases[cur].opts[idx];
+      document.querySelectorAll(".opt-btn").forEach(b=>b.classList.remove("ok","bad"));
+      btn.classList.add(o.ok?"ok":"bad");
+      document.getElementById("fb").textContent = o.msg;
+      if (o.ok) {
+        solved.add(cur);
+        if (solved.size === cases.length) {
+          document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>全部审计通过！真正的高手不是无脑堆安全系数，而是根据<strong>失效后果、重量代价与品控成本</strong>精准定价每一分余量。`;
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+        document.getElementById("tabs").innerHTML = cases.map((c,i)=>`<button class="tab-btn ${i===cur?'active':''}" onclick="cur=${i};render()">${solved.has(i)?'✅ ':''}${c.title}</button>`).join("");
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

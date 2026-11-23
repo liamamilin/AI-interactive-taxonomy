@@ -5,10 +5,10 @@
   "stats": {
     "totalDomains": 10,
     "litDomains": 3,
-    "totalTopics": 87,
-    "totalPlannedTopics": 188,
+    "totalTopics": 91,
+    "totalPlannedTopics": 184,
     "totalBlueprintTopics": 275,
-    "totalToys": 261
+    "totalToys": 273
   },
   "tracks": [
     {
@@ -2449,30 +2449,13 @@
         {
           "id": "systems-tradeoffs",
           "title": "6. 系统工程与权衡艺术（Systems Trade-offs）",
-          "plannedTopics": [
-            {
-              "slug": "engineering-systems-tradeoffs-01",
-              "title": "帕累托前沿（快 / 好 / 省不可能三角）"
-            },
-            {
-              "slug": "engineering-systems-tradeoffs-02",
-              "title": "安全系数与过设计成本"
-            },
-            {
-              "slug": "engineering-systems-tradeoffs-03",
-              "title": "模块化标准接口（集装箱革命）"
-            },
-            {
-              "slug": "engineering-systems-tradeoffs-04",
-              "title": "平方-立方定律（巨型蚂蚁为何被压垮）"
-            }
-          ]
+          "plannedTopics": []
         }
       ],
-      "liveTopicCount": 20,
-      "plannedTopicCount": 4,
+      "liveTopicCount": 24,
+      "plannedTopicCount": 0,
       "blueprintTopicCount": 24,
-      "liveToyCount": 60,
+      "liveToyCount": 72,
       "topics": [
         {
           "id": "engineering/engineering-control-feedback-01",
@@ -2716,6 +2699,55 @@
               "archetype": "scenario",
               "concept": "无指责复盘 Blameless Postmortem · 防呆设计 Poka-Yoke · 系统性根因",
               "summary": "面对 3 起真实工程与医疗事故，对比“处罚操作员”和“物理防呆改造”哪个才能彻底堵死奶酪洞！"
+            }
+          ]
+        },
+        {
+          "id": "engineering/engineering-systems-tradeoffs-01",
+          "slug": "engineering-systems-tradeoffs-01",
+          "domain": "engineering",
+          "branch": "systems-tradeoffs",
+          "order": 1,
+          "title": "帕累托前沿（快 / 好 / 省不可能三角）",
+          "icon": "📐",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "为什么“既要上线快、又要质量高、还要预算省”在工程上几乎是不可能的？什么是真正的帕累托最优解？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-systems-tradeoffs-02",
+            "engineering/engineering-flow-queues-04"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-systems-tradeoffs-01/01-pareto-frontier-svg.html",
+              "file": "01-pareto-frontier-svg.html",
+              "path": "./domains/engineering/engineering-systems-tradeoffs-01/01-pareto-frontier-svg.html",
+              "title": "帕累托前沿透视镜：一眼看穿“伪需求”与支配劣解（SVG）",
+              "icon": "📊",
+              "archetype": "spatial",
+              "concept": "帕累托最优 · 支配解 Dominated · 权衡边界 Frontier",
+              "summary": "在“交付耗时 vs 研发成本”二维平面上点击投放候选方案，实时计算哪些方案被支配、哪些站上了帕累托前沿！"
+            },
+            {
+              "id": "engineering/engineering-systems-tradeoffs-01/02-iron-triangle-sim.html",
+              "file": "02-iron-triangle-sim.html",
+              "path": "./domains/engineering/engineering-systems-tradeoffs-01/02-iron-triangle-sim.html",
+              "title": "快 / 好 / 省不可能三角拉扯器：预算锁死时能同时提速提质吗？",
+              "icon": "🔺",
+              "archetype": "simulation",
+              "concept": "工程铁三角 · 约束耦合 · 隐性技术债",
+              "summary": "拉动速度、质量、省钱三大目标滑块，在总工程能力恒定的约束下，看强行三全其美会如何引爆技术债！"
+            },
+            {
+              "id": "engineering/engineering-systems-tradeoffs-01/03-tradeoff-decision-lab.html",
+              "file": "03-tradeoff-decision-lab.html",
+              "path": "./domains/engineering/engineering-systems-tradeoffs-01/03-tradeoff-decision-lab.html",
+              "title": "架构师需求谈判台：面对老板“全都要”，怎么给出帕累托方案？",
+              "icon": "🎯",
+              "archetype": "scenario",
+              "concept": "目标优先级 · 约束显性化 · 分阶段演进",
+              "summary": "面对紧急促销、医疗级高可用、极低预算砍半三大真实场景，选出不违背帕累托边界的唯一可行工程路线！"
             }
           ]
         },
@@ -2965,6 +2997,55 @@
           ]
         },
         {
+          "id": "engineering/engineering-systems-tradeoffs-02",
+          "slug": "engineering-systems-tradeoffs-02",
+          "domain": "engineering",
+          "branch": "systems-tradeoffs",
+          "order": 2,
+          "title": "安全系数与过设计成本",
+          "icon": "🛡️",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "为什么火箭的安全系数只有 1.25，而载人电梯钢缆却高达 8 到 12？安全余量越高真的越好吗？",
+          "difficulty": "进阶",
+          "related": [
+            "engineering/engineering-systems-tradeoffs-01",
+            "engineering/engineering-reliability-safety-02"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-systems-tradeoffs-02/01-safety-factor-curve.html",
+              "file": "01-safety-factor-curve.html",
+              "path": "./domains/engineering/engineering-systems-tradeoffs-02/01-safety-factor-curve.html",
+              "title": "安全系数经济学：失效代价 vs 过设计重量曲线",
+              "icon": "⚖️",
+              "archetype": "simulation",
+              "concept": "安全系数 SF · 过设计 Over-engineering · 边际安全收益",
+              "summary": "调节安全系数 SF 与场景重量惩罚，实时观察制造成本与失效风险如何在 U 型总代价曲线上博弈！"
+            },
+            {
+              "id": "engineering/engineering-systems-tradeoffs-02/02-stress-strength-overlap.html",
+              "file": "02-stress-strength-overlap.html",
+              "path": "./domains/engineering/engineering-systems-tradeoffs-02/02-stress-strength-overlap.html",
+              "title": "应力-强度干涉透视镜：平均够用为什么还会断？",
+              "icon": "📉",
+              "archetype": "spatial",
+              "concept": "载荷分布 · 材料强度离散度 · 尾部重叠风险",
+              "summary": "拖动载荷峰值与材料工艺离散度，亲眼看见两条正态曲线的重叠阴影区如何决定真实断裂概率！"
+            },
+            {
+              "id": "engineering/engineering-systems-tradeoffs-02/03-overdesign-audit.html",
+              "file": "03-overdesign-audit.html",
+              "path": "./domains/engineering/engineering-systems-tradeoffs-02/03-overdesign-audit.html",
+              "title": "总工程师安全审计台：火箭、大桥、手机卡扣该给多大余量？",
+              "icon": "🔍",
+              "archetype": "scenario",
+              "concept": "场景化安全标准 · 轻量化约束 · 失效后果分级",
+              "summary": "为三大截然不同的工程系统匹配合理的安全系数，既不能草菅人命，也不能重到飞不起来！"
+            }
+          ]
+        },
+        {
           "id": "engineering/engineering-control-feedback-03",
           "slug": "engineering-control-feedback-03",
           "domain": "engineering",
@@ -3210,6 +3291,55 @@
           ]
         },
         {
+          "id": "engineering/engineering-systems-tradeoffs-03",
+          "slug": "engineering-systems-tradeoffs-03",
+          "domain": "engineering",
+          "branch": "systems-tradeoffs",
+          "order": 3,
+          "title": "模块化标准接口（集装箱革命）",
+          "icon": "📦",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "为什么一个长宽固定的铁盒子，比发明更快的轮船更能降低全球贸易成本？标准接口如何把复杂度从 M×N 降到 M+N？",
+          "difficulty": "入门",
+          "related": [
+            "software/software-swe-web-02",
+            "engineering/engineering-systems-tradeoffs-01"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-systems-tradeoffs-03/01-container-port-race.html",
+              "file": "01-container-port-race.html",
+              "path": "./domains/engineering/engineering-systems-tradeoffs-03/01-container-port-race.html",
+              "title": "港口装卸竞速：散杂货人工码垛 vs 标准集装箱吊装",
+              "icon": "🚢",
+              "archetype": "race",
+              "concept": "标准化接口 · 多式联运 · 港口周转率",
+              "summary": "点击发车，让传统散杂货码头与现代标准集装箱码头同场竞速，亲眼见证装卸效率与运费的几十倍差距！"
+            },
+            {
+              "id": "engineering/engineering-systems-tradeoffs-03/02-mxn-interface-bus.html",
+              "file": "02-mxn-interface-bus.html",
+              "path": "./domains/engineering/engineering-systems-tradeoffs-03/02-mxn-interface-bus.html",
+              "title": "M×N 接口爆炸消除器：点对点直连 vs 统一标准总线（SVG）",
+              "icon": "🔌",
+              "archetype": "spatial",
+              "concept": "M×N 复杂度 · M+N 标准协议 · USB-C / API 网关",
+              "summary": "增减外设与主机数量，一键切换点对点专有接口与统一标准接口，直观感受连线数从二次方坍缩为线性！"
+            },
+            {
+              "id": "engineering/engineering-systems-tradeoffs-03/03-modular-boundary-builder.html",
+              "file": "03-modular-boundary-builder.html",
+              "path": "./domains/engineering/engineering-systems-tradeoffs-03/03-modular-boundary-builder.html",
+              "title": "系统模块化切分装配台：模块拆得越细越好吗？",
+              "icon": "🧱",
+              "archetype": "builder",
+              "concept": "高内聚低耦合 · 拆分粒度权衡 · 接口通信税",
+              "summary": "调节系统的模块拆分粒度，观察“内部维护难度”下降的同时，“跨模块接口税”如何反过来拖垮性能！"
+            }
+          ]
+        },
+        {
           "id": "engineering/engineering-control-feedback-04",
           "slug": "engineering-control-feedback-04",
           "domain": "engineering",
@@ -3451,6 +3581,55 @@
               "archetype": "scenario",
               "concept": "事后维修 RTF · 预防性维护 PM · 状态预测维护 PdM/CBM",
               "summary": "为办公室灯泡、航空涡轮叶片和带振动传感器的工厂电机匹配最省钱又安全的维护策略！"
+            }
+          ]
+        },
+        {
+          "id": "engineering/engineering-systems-tradeoffs-04",
+          "slug": "engineering-systems-tradeoffs-04",
+          "domain": "engineering",
+          "branch": "systems-tradeoffs",
+          "order": 4,
+          "title": "平方-立方定律（巨型蚂蚁为何被压垮）",
+          "icon": "🐜",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "把一只蚂蚁等比例放大 20 倍，它会变成称霸地球的怪兽吗？为什么自然界和工程界都不允许简单等比例放大？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-mechanics-structures-04",
+            "engineering/engineering-systems-tradeoffs-02"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-systems-tradeoffs-04/01-ant-scale-collapse.html",
+              "file": "01-ant-scale-collapse.html",
+              "path": "./domains/engineering/engineering-systems-tradeoffs-04/01-ant-scale-collapse.html",
+              "title": "巨型蚂蚁崩溃模拟器：体重 k³ vs 腿部承重 k²（SVG）",
+              "icon": "💥",
+              "archetype": "simulation",
+              "concept": "平方-立方定律 · 截面积 k² · 体积重量 k³",
+              "summary": "拖动放大倍数滑块 k，实时对比蚂蚁腿部承重能力与体重的剪刀差，亲眼看它在第几倍时被自身体重压断腿！"
+            },
+            {
+              "id": "engineering/engineering-systems-tradeoffs-04/02-surface-volume-cooling.html",
+              "file": "02-surface-volume-cooling.html",
+              "path": "./domains/engineering/engineering-systems-tradeoffs-04/02-surface-volume-cooling.html",
+              "title": "表面积/体积比透视镜：为什么老鼠怕冷而大象需要大耳朵？",
+              "icon": "🐘",
+              "archetype": "spatial",
+              "concept": "比表面积 6/L · 散热瓶颈 · 芯片与数据中心热密度",
+              "summary": "切换不同尺寸的生物与工程机柜，直观对比体积产热（L³）与表面散热（L²）的剧烈失衡！"
+            },
+            {
+              "id": "engineering/engineering-systems-tradeoffs-04/03-scaling-trap-lab.html",
+              "file": "03-scaling-trap-lab.html",
+              "path": "./domains/engineering/engineering-systems-tradeoffs-04/03-scaling-trap-lab.html",
+              "title": "工程等比缩放陷阱台：模型放大 10 倍直接造真机为何会炸？",
+              "icon": "🧪",
+              "archetype": "scenario",
+              "concept": "尺度效应 · 非线性补偿 · 结构拓扑重构",
+              "summary": "面对风洞航模、化工反应釜、木屋放大三大经典缩放陷阱，选出打破平方-立方魔咒的工程补偿方案！"
             }
           ]
         }
