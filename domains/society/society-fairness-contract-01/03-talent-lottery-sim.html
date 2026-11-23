@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎟️ 天赋彩票与起跑线重置实验</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎟️ 天赋彩票与起跑线重置实验</h1><p>误区：只要考试分数公平，富家子弟考上名校全靠个人努力，和运气无关。真相：连“高智商基因、专注力、健康体魄和好学区”本身都是一场未经选择的先天彩票！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>家庭背景对成才的继承权重</span><span id="vFam">65%</span></label><input type="range" id="sFam" min="10" max="95" value="65" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>公共免费教育均等化补偿</span><span id="vEdu">45%</span></label><input type="range" id="sEdu" min="0" max="100" value="45" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">寒门跃升顶层概率</div><div class="k-val" id="kMob" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">阶层固化指数</div><div class="k-val" id="kSt">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const fam=+document.getElementById('sFam').value, edu=+document.getElementById('sEdu').value;
+  document.getElementById('vFam').textContent=fam+'%'; document.getElementById('vEdu').textContent=edu+'%';
+  const mob=Math.max(3, Math.min(48, Math.round(25 - fam*0.22 + edu*0.24)));
+  const sticky=Math.max(15, Math.min(95, Math.round(fam*0.85 - edu*0.35 + 20)));
+  document.getElementById('kMob').textContent=mob+'%';
+  document.getElementById('kSt').textContent=sticky+' 分';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">寒门向上流动机会率: ${mob}% (完全随机理想为 20%)</text>
+    <rect x="20" y="44" width="${mob*10}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${sticky>60?'#ef4444':'#10b981'}">阶层固化粘性: ${sticky} 分</text>
+    <rect x="20" y="112" width="${sticky*5.2}" height="24" rx="6" fill="${sticky>60?'#ef4444':'#10b981'}"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">公共教育无法消除基因差异，但能极大对冲出生彩票的随机不公</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当家庭背景继承权重高达 ${fam}% 时，个人努力的杠杆会变小；把公共教育均等化拉高到 ${edu}% 后，寒门跃升率能立刻回升到 <strong>${mob}%</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

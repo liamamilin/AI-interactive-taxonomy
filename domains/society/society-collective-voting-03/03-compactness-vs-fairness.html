@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧭 紧致度 vs 比例代表性权衡仪</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧭 紧致度 vs 比例代表性权衡仪</h1><p>误区：只要把选区画成正方形或圆形，就一定能得到完全按人口比例分配的席位。真相：当某群体高度聚居在市中心时，死守几何方正反而会制造“天然杰利蝾螈”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>几何紧致度硬性要求</span><span id="vComp">75%</span></label><input type="range" id="sComp" min="10" max="100" value="75" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>少数派城市聚居集中度</span><span id="vClus">80%</span></label><input type="range" id="sClus" min="10" max="100" value="80" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">选区几何规整分</div><div class="k-val" id="kG">—</div></div>
+        <div class="kpi"><div class="k-lbl">席位比例公平分</div><div class="k-val" id="kF">—</div></div>
+        <div class="kpi"><div class="k-lbl">制度矛盾度</div><div class="k-val" id="kC">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const comp=+document.getElementById('sComp').value, clus=+document.getElementById('sClus').value;
+  document.getElementById('vComp').textContent=comp+'%'; document.getElementById('vClus').textContent=clus+'%';
+  const fair=Math.max(15, Math.min(98, Math.round(95 - (comp*clus)/130)));
+  const conflict=Math.round(comp*clus/100);
+  document.getElementById('kG').textContent=comp+' 分';
+  document.getElementById('kF').textContent=fair+' 分';
+  document.getElementById('kC').textContent=conflict>50?'高冲突':'低冲突';
+  const r1=20+(100-comp)*0.35;
+  document.getElementById('svg').innerHTML=`
+    <rect x="55" y="25" width="140" height="135" rx="${comp*0.4}" fill="#e0f2fe" stroke="#0284c7" stroke-width="3"/>
+    <circle cx="125" cy="92" r="${25+clus*0.28}" fill="#ef4444" opacity="0.45"/>
+    <text x="125" y="176" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-muted)">紧致度 ${comp}% vs 聚居度 ${clus}%</text>
+    <text x="240" y="55" font-size="13" font-weight="800" fill="#0284c7">几何紧致度: ${comp} 分</text>
+    <rect x="240" y="65" width="320" height="22" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="240" y="65" width="${comp*3.2}" height="22" rx="6" fill="#0284c7"/>
+    <text x="240" y="115" font-size="13" font-weight="800" fill="#10b981">席位比例公平度: ${fair} 分</text>
+    <rect x="240" y="125" width="320" height="22" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="240" y="125" width="${fair*3.2}" height="22" rx="6" fill="#10b981"/>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当城市选民高度聚居（${clus}%）时，无脑追求“几何规整”会把所有市中心选民天然打包成一个区，造成“无心插柳的席位失真”！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

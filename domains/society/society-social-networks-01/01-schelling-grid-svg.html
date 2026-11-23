@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧩 谢林隔离棋盘实时演化（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧩 谢林隔离棋盘实时演化（SVG）</h1><p>误区：城市出现严重阶层或族群聚居隔离，一定是因为人们极度排外。真相：哪怕每个人都喜欢混居、只要求邻居里有 35% 同类，几次搬家连锁反应后就会锁死成彻底隔离！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn primary" onclick="stepSim()">演化 1 步搬家</button>
+        <button class="btn" onclick="runAll()">一键跑到稳态</button>
+        <button class="btn" onclick="resetGrid()">重新随机打乱</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>最低同类邻居容忍度</span><span id="vTol">35%</span></label><input type="range" id="sTol" min="15" max="75" value="35" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>城市空房率</span><span id="vEmp">15%</span></label><input type="range" id="sEmp" min="5" max="30" value="15" oninput="resetGrid()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">不满意准备搬家人数</div><div class="k-val" id="kUnh">—</div></div>
+        <div class="kpi"><div class="k-lbl">宏观同质隔离度</div><div class="k-val" id="kSeg" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let grid=[], N=8;
+function resetGrid(){
+  const emp=+document.getElementById('sEmp').value/100;
+  document.getElementById('vEmp').textContent=(emp*100).toFixed(0)+'%';
+  grid=[];
+  for(let i=0;i<N*N;i++){
+    const r=Math.random();
+    grid.push(r<emp?0:(r<emp+(1-emp)/2?1:2));
+  }
+  upd();
+}
+function sameFrac(idx){
+  const me=grid[idx]; if(!me) return 1;
+  const r=Math.floor(idx/N), c=idx%N;
+  let tot=0, same=0;
+  for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+    if(!dr&&!dc) continue;
+    const nr=r+dr, nc=c+dc;
+    if(nr>=0&&nr<N&&nc>=0&&nc<N){
+      const v=grid[nr*N+nc];
+      if(v){ tot++; if(v===me) same++; }
+    }
+  }
+  return tot?same/tot:1;
+}
+function stepSim(){
+  const tol=+document.getElementById('sTol').value/100;
+  const empties=[], unhappies=[];
+  grid.forEach((v,i)=>{ if(!v) empties.push(i); else if(sameFrac(i)<tol) unhappies.push(i); });
+  unhappies.forEach(u=>{
+    if(empties.length){
+      const ei=Math.floor(Math.random()*empties.length);
+      const target=empties[ei];
+      grid[target]=grid[u]; grid[u]=0; empties[ei]=u;
+    }
+  });
+  upd();
+}
+function runAll(){ for(let k=0;k<18;k++) stepSim(); }
+function upd(){
+  const tol=+document.getElementById('sTol').value/100;
+  document.getElementById('vTol').textContent=(tol*100).toFixed(0)+'%';
+  let unh=0, sumSame=0, occ=0, svg='';
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+    const idx=r*N+c, v=grid[idx], x=25+c*23, y=14+r*23;
+    const col=v===1?'#0284c7':(v===2?'#f59e0b':'var(--tax-border)');
+    const unhappy=v && sameFrac(idx)<tol;
+    if(v){ occ++; sumSame+=sameFrac(idx); if(unhappy) unh++; }
+    svg+=`<rect x="${x}" y="${y}" width="20" height="20" rx="4" fill="${col}" opacity="${v?0.9:0.25}" stroke="${unhappy?'#ef4444':'none'}" stroke-width="2"/>`;
+  }
+  const seg=occ?Math.round(sumSame/occ*100):0;
+  document.getElementById('kUnh').textContent=unh+' 户';
+  document.getElementById('kSeg').textContent=seg+'%';
+  svg+=`<text x="240" y="65" font-size="14" font-weight="850" fill="var(--tax-text)">个体仅要求 ≥ ${(tol*100).toFixed(0)}% 同类邻居</text>
+  <text x="240" y="102" font-size="22" font-weight="900" fill="#0284c7">实际同质隔离度: ${seg}%</text>
+  <text x="240" y="138" font-size="12.5" fill="var(--tax-muted)">红框住户感到不适并搬走 → 打破旧邻平衡 → 引发多米诺搬迁</text>`;
+  document.getElementById('svg').innerHTML=svg;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>一个人搬走会让原街区的同类比例更低，迫使下一个温和派也搬走——只要容忍门槛超过 30%，微观上的温和偏好就会涌现出 <strong>${seg}% 的宏观高度隔离</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+resetGrid();
+  </script>
+</body>
+</html>

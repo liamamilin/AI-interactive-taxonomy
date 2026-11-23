@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>👑 多元无知与“皇帝的新衣”破局点</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>👑 多元无知与“皇帝的新衣”破局点</h1><p>误区：如果全场 90% 的人都鼓掌称赞，那说明至少大多数人心里真的喜欢它。真相：很可能 85% 的人心里都在吐槽，只是每个人以为只有自己觉得傻、害怕被孤立而假装鼓掌——这就是“多元无知”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>大家私下真实不认可比例</span><span id="vPriv">80%</span></label><input type="range" id="sPriv" min="20" max="95" value="80" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>公开站出来“做第一批反对者”比例</span><span id="vBrk">18%</span></label><input type="range" id="sBrk" min="0" max="45" value="18" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">公开表达真相比例</div><div class="k-val" id="kPub" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">全场状态</div><div class="k-val" id="kSt">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const priv=+document.getElementById('sPriv').value, brk=+document.getElementById('sBrk').value;
+  document.getElementById('vPriv').textContent=priv+'%'; document.getElementById('vBrk').textContent=brk+'%';
+  const collapse=brk>=15 && priv>=50;
+  const pub=collapse?priv:brk;
+  document.getElementById('kPub').textContent=pub+'%';
+  document.getElementById('kSt').textContent=collapse?'假象崩塌 (全员说真话)':'沉默螺旋锁死';
+  document.getElementById('kSt').style.color=collapse?'#10b981':'#ef4444';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#64748b">私下真实想法 (不认可): ${priv}%</text>
+    <rect x="20" y="44" width="${priv*5.4}" height="24" rx="6" fill="#64748b"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${collapse?'#10b981':'#ef4444'}">公开站出来说真话比例: ${pub}%</text>
+    <rect x="20" y="112" width="${pub*5.4}" height="24" rx="6" fill="${collapse?'#10b981':'#ef4444'}"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">${collapse?'🎉 第一批勇敢者打破了“只有我这么想”的幻觉，真相瞬间释放！':'🤫 公开反对声太弱，多数人继续偏好伪装'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“偏好伪装”让社会表面风平浪静、实则一触即溃——不需要说服所有人改变看法，只要 ${brk}% 的人敢公开说真话，就能瞬间引爆其余 ${priv}% 早已存在的不满！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌱 破茧实验：推荐系统里的“探索率 vs 留存率”</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌱 破茧实验：推荐系统里的“探索率 vs 留存率”</h1><p>误区：平台之所以不破除信息茧房，纯属程序员忘了加“随机推荐不同观点”的代码。真相：一旦强行推送用户反感的异质内容超过阈值，用户会立刻滑走甚至卸载 App——平台面临留存与极化的两难！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>跨圈层异质内容强插比例</span><span id="vDiv">25%</span></label><input type="range" id="sDiv" min="0" max="80" value="25" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>用户对异见的耐受度</span><span id="vTol">50%</span></label><input type="range" id="sTol" min="15" max="90" value="50" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">信息茧房破除度</div><div class="k-val" id="kBrk" style="color:#10b981;">—</div></div>
+        <div class="kpi"><div class="k-lbl">用户 7 日留存率</div><div class="k-val" id="kRet" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const div=+document.getElementById('sDiv').value, tol=+document.getElementById('sTol').value;
+  document.getElementById('vDiv').textContent=div+'%'; document.getElementById('vTol').textContent=tol+'%';
+  const brk=Math.min(96, Math.round(div*1.25));
+  const ret=Math.max(15, Math.min(92, Math.round(85 - Math.max(0, div - tol*0.6)*0.9)));
+  document.getElementById('kBrk').textContent=brk+'%';
+  document.getElementById('kRet').textContent=ret+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#10b981">信息破茧多元度: ${brk}%</text>
+    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="44" width="${brk*5.4}" height="24" rx="6" fill="#10b981"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">平台用户留存率: ${ret}%</text>
+    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${ret*5.4}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">${div>tol*0.6?'⚠️ 跨圈内容过猛，用户因不适开始流失':'✅ 温和探索区：既拓宽视野又保住留存'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>温和的“20% 惊喜探索”能在几乎不伤留存的情况下打破回音壁；一旦硬塞超过用户耐受阈值，商业平台就会在 KPI 压力下退回安全的信息茧房。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

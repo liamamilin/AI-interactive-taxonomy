@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏛️ 产权规则 vs 责任规则：卡拉布雷西大教堂</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏛️ 产权规则 vs 责任规则：卡拉布雷西大教堂</h1><p>误区：任何时候都应该绝对保护所有权，未经主人同意一分钱都不能动。真相：如果紧急救灾要借用邻居的一块地，双方谈不拢时，“先征收后由法院按市价赔偿”的责任规则效率最高！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>双方私下谈判阻塞度 (高=难谈拢)</span><span id="vB">70%</span></label><input type="range" id="sB" min="10" max="100" value="70" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>法院评估赔偿的误差率</span><span id="vE">20%</span></label><input type="range" id="sE" min="5" max="80" value="20" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">产权规则总损耗</div><div class="k-val" id="kP">—</div></div>
+        <div class="kpi"><div class="k-lbl">责任规则总损耗</div><div class="k-val" id="kL">—</div></div>
+        <div class="kpi"><div class="k-lbl">最优法律规则</div><div class="k-val" id="kW" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const b=+document.getElementById('sB').value, e=+document.getElementById('sE').value;
+  document.getElementById('vB').textContent=b+'%'; document.getElementById('vE').textContent=e+'%';
+  const lossP=Math.round(b*0.9), lossL=Math.round(e*0.85+10);
+  const win=lossP<=lossL?'产权规则 (必须同意才能买)':'责任规则 (先使用、法院定损赔)';
+  document.getElementById('kP').textContent=lossP+' 分';
+  document.getElementById('kL').textContent=lossL+' 分';
+  document.getElementById('kW').textContent=win;
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">产权规则损耗 (谈判僵局成本): ${lossP}</text>
+    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="44" width="${lossP*5.4}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#8b5cf6">责任规则损耗 (法院估价偏差): ${lossL}</text>
+    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${lossL*5.4}" height="24" rx="6" fill="#8b5cf6"/>
+    <text x="20" y="166" font-size="13" font-weight="800" fill="#10b981">推荐制度: ${win}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当谈判阻塞高（如紧急征地、排污侵权）且法院估价误差可控时，<strong>责任规则（损害赔偿）</strong>能绕过敲竹杠僵局；当双方容易面对面谈价时，<strong>产权规则</strong>最能保护真实估值！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

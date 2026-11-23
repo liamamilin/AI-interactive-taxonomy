@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📏 三级证明标准实验室（民事 vs 行政 vs 刑事）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📏 三级证明标准实验室（民事 vs 行政 vs 刑事）</h1><p>误区：只要证据有 60% 把握证明他干了，法院就应该判他坐牢。真相：51% 的“优势证据”只够赔钱（民事）；要剥夺人身自由，必须跨过 90%+ 的“排除合理怀疑”高墙！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setStd(51,'民事诉讼 · 优势证据',this)">民事 (51%)</button>
+        <button class="btn" onclick="setStd(75,'重大剥夺 · 清晰确信',this)">行政/监护 (75%)</button>
+        <button class="btn" onclick="setStd(92,'刑事重罪 · 排除合理怀疑',this)">刑事 (92%)</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>控方/原告证据链说服力</span><span id="vEv">68%</span></label><input type="range" id="sEv" min="10" max="99" value="68" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 170"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">当前法庭门槛</div><div class="k-val" id="kStd">—</div></div>
+        <div class="kpi"><div class="k-lbl">判决结果</div><div class="k-val" id="kRes">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let std=51, sName='民事诉讼 · 优势证据';
+function setStd(v,nm,btn){ std=v; sName=nm; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const ev=+document.getElementById('sEv').value; document.getElementById('vEv').textContent=ev+'%';
+  const pass=ev>=std;
+  document.getElementById('kStd').textContent=sName;
+  document.getElementById('kRes').textContent=pass?'胜诉 / 定罪成立':'证据不足 / 判无罪';
+  document.getElementById('kRes').style.color=pass?'#0284c7':'#10b981';
+  const col=pass?'#0284c7':'#94a3b8';
+  document.getElementById('svg').innerHTML=`
+    <rect x="30" y="60" width="540" height="36" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="30" y="60" width="${ev*5.4}" height="36" rx="8" fill="${col}"/>
+    <line x1="${30+std*5.4}" y1="30" x2="${30+std*5.4}" y2="120" stroke="#ef4444" stroke-width="3"/>
+    <text x="${30+std*5.4}" y="22" text-anchor="middle" font-size="12.5" font-weight="850" fill="#ef4444">门槛 ${std}%</text>
+    <text x="${35+ev*5.4}" y="83" font-size="13" font-weight="850" fill="#fff">${ev}%</text>
+    <text x="30" y="146" font-size="13" font-weight="800" fill="var(--tax-text)">结果：${pass?'跨过门槛，支持指控':'未达门槛，疑罪从无'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>著名辛普森案正是如此——同一份 ${ev}% 的证据，在刑事法庭跨不过 92% 的红线（判无罪），在民事赔偿法庭却轻松跨过 51%（判巨额赔偿）！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

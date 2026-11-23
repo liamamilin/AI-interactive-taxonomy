@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📊 算法喂养与双峰极化直方图（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📊 算法喂养与双峰极化直方图（SVG）</h1><p>误区：个性化推荐只是“把大家本来就关心的东西摆在前面”，不会改变社会共识。真相：算法和确认偏误互相正反馈，会直接把原本正态分布的温和人群撕成水火不容的两极！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>算法同温层推荐强度</span><span id="vAlg">70%</span></label><input type="range" id="sAlg" min="0" max="100" value="70" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>人类确认偏误 (排斥异见度)</span><span id="vBias">65%</span></label><input type="range" id="sBias" min="0" max="100" value="65" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">中间温和派比例</div><div class="k-val" id="kMid">—</div></div>
+        <div class="kpi"><div class="k-lbl">社会极化指数</div><div class="k-val" id="kPol" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const alg=+document.getElementById('sAlg').value/100, bias=+document.getElementById('sBias').value/100;
+  document.getElementById('vAlg').textContent=(alg*100).toFixed(0)+'%'; document.getElementById('vBias').textContent=(bias*100).toFixed(0)+'%';
+  const pol=Math.min(1, alg*0.55 + bias*0.45);
+  let bars='', midSum=0, totSum=0;
+  for(let i=0;i<15;i++){
+    const x=(i-7)/7;
+    const unimodal=Math.exp(-x*x*2.5);
+    const bimodal=Math.exp(-Math.pow(Math.abs(x)-0.78,2)*10);
+    const h=(1-pol)*unimodal + pol*bimodal;
+    totSum+=h; if(Math.abs(x)<0.35) midSum+=h;
+    const bh=h*120, bx=45+i*35;
+    const col=i<5?'#0284c7':(i>9?'#ef4444':'#10b981');
+    bars+=`<rect x="${bx}" y="${155-bh}" width="26" height="${bh}" rx="4" fill="${col}"/>`;
+  }
+  const midPct=Math.round(midSum/totSum*100), polScore=Math.round(pol*100);
+  document.getElementById('kMid').textContent=midPct+'%';
+  document.getElementById('kPol').textContent=polScore+' 分';
+  document.getElementById('svg').innerHTML=bars+`<line x1="35" y1="155" x2="570" y2="155" stroke="#94a3b8"/>
+  <text x="50" y="26" font-size="12" font-weight="800" fill="var(--tax-text)">观点光谱分布（左翼蓝 · 中间绿 · 右翼红）</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当算法同温层与人类偏误叠加到 ${polScore} 分时，原本占多数的中间温和派被掏空到只剩 <strong>${midPct}%</strong>，全网只剩下互相谩骂的两个极端尖峰！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌋 帕累托 80/20 法则与财富马太效应</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌋 帕累托 80/20 法则与财富马太效应</h1><p>误区：只要起点完全公平、规则一模一样，大家长期玩下去财富也会呈正态分布。真相：在“按比例乘以随机回报”的复利游戏里，哪怕起跑线完全一样，纯粹的运气迭代也会必然造出 20% 人拿走 80% 财富！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>财富复利乘数波动幅度</span><span id="vVol">55%</span></label><input type="range" id="sVol" min="10" max="90" value="55" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>经济迭代轮次</span><span id="vRound">15 轮</span></label><input type="range" id="sRound" min="3" max="30" value="15" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">前 20% 头部占比</div><div class="k-val" id="kTop" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">分布形态</div><div class="k-val" id="kShp">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const vol=+document.getElementById('sVol').value/100, rnd=+document.getElementById('sRound').value;
+  document.getElementById('vVol').textContent=(vol*100).toFixed(0)+'%'; document.getElementById('vRound').textContent=rnd+' 轮';
+  const alpha=Math.min(3.5, 0.5 + vol*rnd*0.18);
+  let vals=[];
+  for(let i=0;i<15;i++){ vals.push(Math.exp(-alpha*i/14)); }
+  const sum=vals.reduce((a,b)=>a+b,0);
+  const top20=Math.round((vals[0]+vals[1]+vals[2])/sum*100);
+  document.getElementById('kTop').textContent=top20+'%';
+  document.getElementById('kShp').textContent=top20>=70?'典型 80/20 幂律':'温和偏态';
+  let svg='';
+  vals.forEach((v,i)=>{
+    const h=(v/vals[0])*125, x=40+i*35;
+    svg+=`<rect x="${x}" y="${155-h}" width="25" height="${h}" rx="4" fill="${i<3?'#ef4444':'#0284c7'}"/>`;
+  });
+  document.getElementById('svg').innerHTML=svg+`<text x="45" y="28" font-size="12.5" font-weight="800" fill="var(--tax-text)">红柱为最富前 20% 群体，合计占有 ${top20}% 总财富</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“加法产生正态分布（比如身高），乘法产生幂律分布（比如财富）。”即使起点完全平等，乘法复利只要跑上 ${rnd} 轮，前 20% 人就会自然聚集 <strong>${top20}%</strong> 的财富！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

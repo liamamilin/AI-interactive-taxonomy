@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🕸️ 专利丛林与反公地悲剧（芯片/手机授权僵局）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🕸️ 专利丛林与反公地悲剧（芯片/手机授权僵局）</h1><p>误区：把一项技术拆成越多小专利分给不同公司，越能促进竞争。真相：如果造一台设备需要集齐 15 家互不妥协的专利持有人签字，每人收一笔过路费就能把产品价格推到没人买得起——这就是“反公地悲剧”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>产品涉及独立专利持有人数 N</span><span id="vN">12 家</span></label><input type="range" id="sN" min="1" max="25" value="12" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>单家专利漫天要价摩擦度</span><span id="vF">60%</span></label><input type="range" id="sF" min="10" max="100" value="60" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">累加授权成本占比</div><div class="k-val" id="kFee" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">产品成功上市概率</div><div class="k-val" id="kLaunch">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const n=+document.getElementById('sN').value, f=+document.getElementById('sF').value;
+  document.getElementById('vN').textContent=n+' 家'; document.getElementById('vF').textContent=f+'%';
+  const fee=Math.min(180, Math.round(n*(f/10)*0.85));
+  const launch=Math.max(2, Math.round(100*Math.pow(1-f/260, n)));
+  document.getElementById('kFee').textContent=fee+'% 售价';
+  document.getElementById('kLaunch').textContent=launch+'%';
+  document.getElementById('kLaunch').style.color=launch>50?'#10b981':'#ef4444';
+  let dots='';
+  for(let i=0;i<n;i++){
+    const x=40+i*21, h=20+f*0.8;
+    dots+=`<rect x="${x}" y="${145-h}" width="14" height="${h}" rx="3" fill="${fee>80?'#ef4444':'#0284c7'}"/>`;
+  }
+  document.getElementById('svg').innerHTML=dots+`
+    <text x="20" y="28" font-size="13" font-weight="800" fill="${launch>50?'#10b981':'#ef4444'}">${n} 道专利收费站叠加 → 产品落地概率仅 ${launch}%</text>
+    <text x="20" y="172" font-size="12" fill="var(--tax-muted)">公地悲剧是“谁都能用导致用光”，反公地悲剧是“谁都能否决导致谁也用不成”</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当 ${n} 家公司各自握有一小块不可或缺的专利却互不打包（专利池）时，叠加过路费会吃掉 ${fee}% 的售价，让新产品胎死腹中！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

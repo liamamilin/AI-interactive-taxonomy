@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚖️ 阿罗不可能定理四公理权衡仪</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 阿罗不可能定理四公理权衡仪</h1><p>误区：只要数学家再聪明一点，总能发明一种“绝对公平且无漏洞”的完美投票算法。真相：阿罗证明了不存在完美的投票规则——每套制度都必须牺牲至少一条公理！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>排序信息保真度 (牺牲 IIA)</span><span id="vA">65%</span></label><input type="range" id="sA" min="10" max="100" value="65" oninput="calc()"></div>
+        <div class="ctrl-box"><label><span>权力集中度 (接近独裁)</span><span id="vB">15%</span></label><input type="range" id="sB" min="0" max="100" value="15" oninput="calc()"></div>
+        <div class="ctrl-box"><label><span>选项限制严格度 (限制域)</span><span id="vC">25%</span></label><input type="range" id="sC" min="0" max="100" value="25" oninput="calc()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">无关选项独立性 (IIA)</div><div class="k-val" id="kI">—</div></div>
+        <div class="kpi"><div class="k-lbl">非独裁公平度</div><div class="k-val" id="kD">—</div></div>
+        <div class="kpi"><div class="k-lbl">制度原型</div><div class="k-val" id="kM">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function calc(){
+  const a=+document.getElementById('sA').value, b=+document.getElementById('sB').value, c=+document.getElementById('sC').value;
+  document.getElementById('vA').textContent=a+'%'; document.getElementById('vB').textContent=b+'%'; document.getElementById('vC').textContent=c+'%';
+  const iia=Math.max(5, Math.min(98, Math.round(100 - a*0.75 + b*0.35 + c*0.3)));
+  const nondict=Math.max(0, 100-b);
+  const pareto=Math.min(100, Math.round(60 + a*0.25 + b*0.15));
+  const domain=Math.max(5, 100-c);
+  document.getElementById('kI').textContent=iia+'%';
+  document.getElementById('kD').textContent=nondict+'%';
+  let mod='排序复选 / 波达计数';
+  if(b>60) mod='强主席/独裁拍板'; else if(c>60) mod='单峰偏好限定投票'; else if(iia>75) mod='简单多数决（易分票）';
+  document.getElementById('kM').textContent=mod;
+  const bars=[['帕累托一致',pareto,'#10b981'],['无限制域',domain,'#0284c7'],['非独裁性',nondict,'#8b5cf6'],['IIA 独立性',iia,'#f59e0b']];
+  let svg='';
+  bars.forEach(([nm,val,col],i)=>{
+    const y=22+i*40, w=val*3.6;
+    svg+=`<text x="15" y="${y+18}" font-size="13" font-weight="750" fill="var(--tax-text)">${nm}</text>
+    <rect x="135" y="${y}" width="360" height="24" rx="6" fill="var(--tax-border)" opacity="0.35"/>
+    <rect x="135" y="${y}" width="${w}" height="24" rx="6" fill="${col}"/>
+    <text x="${145+w}" y="${y+17}" font-size="12.5" font-weight="800" fill="${col}">${val}%</text>`;
+  });
+  document.getElementById('svg').innerHTML=svg;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>阿罗不可能定理就像制度设计的“能量守恒”：你想提高非独裁性与排序保真度，<strong>IIA 独立性（不被凑数候选人搅局）</strong>就必然下降！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+calc();
+  </script>
+</body>
+</html>

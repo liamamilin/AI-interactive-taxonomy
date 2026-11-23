@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎯 议程操纵者的隐形权力</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎯 议程操纵者的隐形权力</h1><p>误区：投票结果只取决于选民喜欢谁，和先表决哪项提案无关。真相：当群体偏好存在循环时，只要控制表决顺序，议程设定者可以指定任何一个人当选！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setOrder('AB',this)">方案一：先比 A vs B，胜者战 C</button>
+        <button class="btn" onclick="setOrder('BC',this)">方案二：先比 B vs C，胜者战 A</button>
+        <button class="btn" onclick="setOrder('CA',this)">方案三：先比 C vs A，胜者战 B</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>甲派 (A&gt;B&gt;C) 权重</span><span id="w1">35%</span></label><input type="range" id="s1" min="20" max="48" value="35" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>乙派 (B&gt;C&gt;A) 权重</span><span id="w2">33%</span></label><input type="range" id="s2" min="20" max="48" value="33" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">首轮胜出</div><div class="k-val" id="kR1">—</div></div>
+        <div class="kpi"><div class="k-lbl">最终赢家</div><div class="k-val" id="kWin" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">循环状态</div><div class="k-val" id="kCyc">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let ord='AB';
+function setOrder(o,btn){ ord=o; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const p1=+document.getElementById('s1').value, p2=+document.getElementById('s2').value, p3=100-p1-p2;
+  document.getElementById('w1').textContent=p1+'%'; document.getElementById('w2').textContent=p2+'%';
+  const beat=(x,y)=>{
+    const map={AB:p1+p3, BC:p1+p2, CA:p2+p3};
+    if(x+y in map) return map[x+y]>=50?x:y;
+    return map[y+x]>50?y:x;
+  };
+  let a,b,c;
+  if(ord==='AB'){a='A';b='B';c='C';}else if(ord==='BC'){a='B';b='C';c='A';}else{a='C';b='A';c='B';}
+  const r1=beat(a,b), win=beat(r1,c);
+  const cyc=(beat('A','B')==='A'&&beat('B','C')==='B'&&beat('C','A')==='C');
+  document.getElementById('kR1').textContent=r1+' (淘汰'+(r1===a?b:a)+')';
+  document.getElementById('kWin').textContent=win;
+  document.getElementById('kCyc').textContent=cyc?'完全循环':'已打破';
+  document.getElementById('svg').innerHTML=`
+    <rect x="30" y="30" width="140" height="50" rx="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+    <text x="100" y="60" text-anchor="middle" font-size="14" font-weight="800" fill="#0369a1">首轮: ${a} vs ${b}</text>
+    <line x1="170" y1="55" x2="230" y2="55" stroke="#0284c7" stroke-width="2.5"/>
+    <rect x="230" y="30" width="120" height="50" rx="10" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+    <text x="290" y="60" text-anchor="middle" font-size="14" font-weight="800" fill="#047857">胜者: ${r1}</text>
+    <line x1="290" y1="80" x2="290" y2="115" stroke="#0284c7" stroke-width="2.5"/>
+    <rect x="210" y="115" width="160" height="50" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+    <text x="290" y="145" text-anchor="middle" font-size="14" font-weight="800" fill="#b45309">决赛: ${r1} vs ${c}</text>
+    <line x1="370" y1="140" x2="430" y2="140" stroke="#0284c7" stroke-width="2.5"/>
+    <rect x="430" y="110" width="140" height="60" rx="12" fill="#0284c7"/>
+    <text x="500" y="146" text-anchor="middle" font-size="18" font-weight="850" fill="#fff">最终赢家: ${win}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>选民偏好一个字都没改，仅仅调换表决顺序，最终赢家就变成了 <strong>${win}</strong>！真正的权力往往不在投票箱里，而在排定议程的那支笔里。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

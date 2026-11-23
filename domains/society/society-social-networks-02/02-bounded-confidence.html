@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔀 有界信任模型：观点何时收敛、何时彻底分裂？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔀 有界信任模型：观点何时收敛、何时彻底分裂？</h1><p>误区：只要把所有不同观点的人拉到一个广场上自由交流，大家最终一定会越聊越近。真相：人们只愿意听和自己相差不太远的观点（有界信任 ε）；ε 太小时，讨论只会加速分裂成互不搭理的孤岛！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>倾听异见的容忍半径 ε</span><span id="vEps">0.22</span></label><input type="range" id="sEps" min="8" max="45" value="22" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>社交讨论轮次</span><span id="vStep">10 轮</span></label><input type="range" id="sStep" min="2" max="20" value="10" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">最终形成派系数量</div><div class="k-val" id="kClus">—</div></div>
+        <div class="kpi"><div class="k-lbl">群体结局</div><div class="k-val" id="kOut">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const eps=+document.getElementById('sEps').value/100, steps=+document.getElementById('sStep').value;
+  document.getElementById('vEps').textContent=eps.toFixed(2); document.getElementById('vStep').textContent=steps+' 轮';
+  let ops=Array.from({length:16},(_,i)=>i/15);
+  let paths=ops.map(v=>[v]);
+  for(let s=0;s<steps;s++){
+    ops=ops.map(x=>{
+      const nbrs=ops.filter(y=>Math.abs(x-y)<=eps);
+      return nbrs.reduce((a,b)=>a+b,0)/nbrs.length;
+    });
+    ops.forEach((v,i)=>paths[i].push(v));
+  }
+  const uniq=[];
+  ops.forEach(v=>{ if(!uniq.some(u=>Math.abs(u-v)<0.03)) uniq.push(v); });
+  document.getElementById('kClus').textContent=uniq.length+' 个派系';
+  document.getElementById('kOut').textContent=uniq.length===1?'达成全员共识':(uniq.length===2?'双极对立':'多派系碎裂');
+  let svg='';
+  paths.forEach((p,idx)=>{
+    let pts=p.map((v,t)=>`${35+t/steps*525},${160-v*135}`).join(' ');
+    svg+=`<polyline fill="none" stroke="hsl(${idx*20},75%,48%)" stroke-width="2" opacity="0.8" points="${pts}"/>`;
+  });
+  document.getElementById('svg').innerHTML=svg;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当容忍半径 ε ≥ 0.30 时，人群会神奇地合并成 <strong>1 条共识线</strong>；一旦容忍度缩水到 ${eps.toFixed(2)}，人群就会迅速聚拢并锁死成 <strong>${uniq.length} 个互不相通的派系</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

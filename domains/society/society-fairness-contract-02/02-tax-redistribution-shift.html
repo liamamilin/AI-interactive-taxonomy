@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔄 税前 vs 税后基尼系数回弹模拟</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔄 税前 vs 税后基尼系数回弹模拟</h1><p>误区：北欧等低基尼系数国家，是因为大家工资从一开始就几乎一样高。真相：很多高福利国家的“税前市场基尼系数”和美国差不多高（~0.48），全靠税后转移支付硬生生拉回到 0.28！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>市场初次分配极化度 (税前)</span><span id="vPre">0.48</span></label><input type="range" id="sPre" min="30" max="65" value="48" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>累进税+转移支付再分配力度</span><span id="vRed">42%</span></label><input type="range" id="sRed" min="0" max="70" value="42" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">税前市场基尼</div><div class="k-val" id="kPre" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">税后可支配基尼</div><div class="k-val" id="kPost" style="color:#10b981;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const pre=+document.getElementById('sPre').value/100, red=+document.getElementById('sRed').value/100;
+  document.getElementById('vPre').textContent=pre.toFixed(2); document.getElementById('vRed').textContent=(red*100).toFixed(0)+'%';
+  const post=pre*(1-red);
+  document.getElementById('kPre').textContent=pre.toFixed(3);
+  document.getElementById('kPost').textContent=post.toFixed(3);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">税前市场基尼系数: ${pre.toFixed(3)}</text>
+    <rect x="20" y="44" width="${pre*750}" height="24" rx="6" fill="#ef4444"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#10b981">税后转移支付基尼系数: ${post.toFixed(3)} (降幅 ${((pre-post)/pre*100).toFixed(0)}%)</text>
+    <rect x="20" y="112" width="${post*750}" height="24" rx="6" fill="#10b981"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">初次分配讲效率拉开差距，二次分配靠税收与公共服务托底</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只看税前工资，市场天然趋向集中（${pre.toFixed(2)}）；现代福利国家的秘密武器正是二次分配——通过 ${(red*100).toFixed(0)}% 的累进调节直接把可支配差距压回 <strong>${post.toFixed(3)}</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

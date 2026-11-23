@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎯 激励相容失灵：代理指标与真实目标背离</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎯 激励相容失灵：代理指标与真实目标背离</h1><p>误区：把员工或机构的奖金直接绑定在可量化的指标上，效率一定提高。真相：一旦指标成为唯一目标，大家就会专挑好刷数据的动作做，把真正重要但难量化的品质丢进垃圾桶！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>单一量化 KPI 奖金权重</span><span id="vW">80%</span></label><input type="range" id="sW" min="10" max="100" value="80" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>底层真实质量核查力度</span><span id="vA">25%</span></label><input type="range" id="sA" min="5" max="100" value="25" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">表面 KPI 达成率</div><div class="k-val" id="kKpi" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">真实业务健康度</div><div class="k-val" id="kReal">—</div></div>
+        <div class="kpi"><div class="k-lbl">激励状态</div><div class="k-val" id="kSt">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const w=+document.getElementById('sW').value, a=+document.getElementById('sA').value;
+  document.getElementById('vW').textContent=w+'%'; document.getElementById('vA').textContent=a+'%';
+  const kpi=Math.min(100, Math.round(55 + w*0.45));
+  const real=Math.max(10, Math.min(98, Math.round(65 + a*0.35 - Math.max(0, w-a)*0.65)));
+  document.getElementById('kKpi').textContent=kpi+'%';
+  document.getElementById('kReal').textContent=real+'%';
+  document.getElementById('kReal').style.color=real>65?'#10b981':'#ef4444';
+  document.getElementById('kSt').textContent=(kpi-real)>25?'严重刷数异化':'激励基本相容';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="36" font-size="13" font-weight="800" fill="#0284c7">表面报表 KPI: ${kpi}%</text>
+    <rect x="20" y="46" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="46" width="${kpi*5.4}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${real>65?'#10b981':'#ef4444'}">真实用户价值: ${real}%</text>
+    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${real*5.4}" height="24" rx="6" fill="${real>65?'#10b981':'#ef4444'}"/>
+    <text x="20" y="166" font-size="13" font-weight="800" fill="var(--tax-muted)">报表与真实裂口: ${Math.max(0,kpi-real)} 个百分点</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>激励相容的核心是“让个人最省力的赚钱方式刚好等于组织想要的真实目标”；否则重赏只会换来 <strong>${kpi}% 的漂亮假报表</strong> 和 <strong>${real}% 的真实崩坏</strong>。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

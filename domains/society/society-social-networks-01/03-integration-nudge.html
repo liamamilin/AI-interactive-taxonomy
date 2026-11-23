@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌈 破冰助推：如何低成本打破自我隔离？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌈 破冰助推：如何低成本打破自我隔离？</h1><p>误区：一旦城市形成了隔离区，除非强制行政拆迁，否则永远无法融合。真相：谢林发现只要一部分人稍微主动偏好“多元混居社区”，就能像催化剂一样把整座城市重新融在一起！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>愿意主动混居的“破冰者”比例</span><span id="vIce">20%</span></label><input type="range" id="sIce" min="0" max="60" value="20" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>公共混居配套吸引力</span><span id="vPub">50 分</span></label><input type="range" id="sPub" min="0" max="100" value="50" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">城市隔离度降幅</div><div class="k-val" id="kDrop" style="color:#10b981;">—</div></div>
+        <div class="kpi"><div class="k-lbl">最终混居健康度</div><div class="k-val" id="kMix">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const ice=+document.getElementById('sIce').value, pub=+document.getElementById('sPub').value;
+  document.getElementById('vIce').textContent=ice+'%'; document.getElementById('vPub').textContent=pub+' 分';
+  const drop=Math.min(45, Math.round(ice*0.55 + pub*0.18));
+  const mix=Math.min(95, 42+drop);
+  document.getElementById('kDrop').textContent='-'+drop+'%';
+  document.getElementById('kMix').textContent=mix+' 分';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">无干预稳态隔离度: 88%</text>
+    <rect x="20" y="44" width="${88*5.4}" height="24" rx="6" fill="#ef4444"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#10b981">破冰助推后隔离度: ${88-drop}% (混居健康度 ${mix})</text>
+    <rect x="20" y="112" width="${(88-drop)*5.4}" height="24" rx="6" fill="#10b981"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">不需要改变所有人，只需 ${ice}% 的人喜欢多元环境即可稳定邻里边界</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>既然微小排斥能滚雪球成大隔离，反过来只要 ${ice}% 的居民愿意充当混居粘合剂，就能把孤岛重新缝合，隔离度直降 <strong>${drop}%</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

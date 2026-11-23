@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🛡️ Apache 2.0 专利反制盾牌模拟</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🛡️ Apache 2.0 专利反制盾牌模拟</h1><p>误区：MIT 和 Apache 2.0 差不多，随便选一个就行。真相：MIT 没提专利——某巨头可能让你免费用它的代码，等你做大后再告你侵权；Apache 2.0 则自带“谁告我我就立刻收回你的免费使用权”的反制核武器！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>商业公司生态依赖深度</span><span id="vDep">85%</span></label><input type="range" id="sDep" min="10" max="100" value="85" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>提起专利侵权诉讼攻击度</span><span id="vAtk">70%</span></label><input type="range" id="sAtk" min="0" max="100" value="70" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">Apache 2.0 授权状态</div><div class="k-val" id="kSt">—</div></div>
+        <div class="kpi"><div class="k-lbl">攻击者自身业务瘫痪风险</div><div class="k-val" id="kPar" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const dep=+document.getElementById('sDep').value, atk=+document.getElementById('sAtk').value;
+  document.getElementById('vDep').textContent=dep+'%'; document.getElementById('vAtk').textContent=atk+'%';
+  const trig=atk>=50;
+  const par=trig?dep:0;
+  document.getElementById('kSt').textContent=trig?'授权自动终止!':'合法有效';
+  document.getElementById('kSt').style.color=trig?'#ef4444':'#10b981';
+  document.getElementById('kPar').textContent=par+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">企业对开源组件依赖度: ${dep}%</text>
+    <rect x="20" y="44" width="${dep*5.4}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${trig?'#ef4444':'#10b981'}">${trig?'触发专利反制条款 → 吊销全线软件授权，业务瘫痪 '+par+'%':'未发起专利诉讼 → 和平共享免费专利池'}</text>
+    <rect x="20" y="112" width="${Math.max(10,par*5.4)}" height="24" rx="6" fill="${trig?'#ef4444':'#10b981'}"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">互相保证摧毁式的条款，让大型科技公司彼此不敢轻易打开源专利战</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>Apache 2.0 就像开源界的“核威慑条约”：你依赖这个生态越深（${dep}%），就越不敢对外起诉，因为一旦开枪，你自己的免费授权也会在第一时间自动作废！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

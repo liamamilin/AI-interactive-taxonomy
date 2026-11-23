@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔔 布莱克斯通比率：定罪阈值分布透视镜（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔔 布莱克斯通比率：定罪阈值分布透视镜（SVG）</h1><p>误区：好法官一定能做到“既不错判一个好人，也不放过一个坏人”。真相：证据本身永远存在模糊重叠区，降低冤案率的唯一代价就是提高漏网率！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>定罪证据阈值线 T</span><span id="vT">75 分</span></label><input type="range" id="sT" min="20" max="95" value="75" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>案件先验有罪比例</span><span id="vG">30%</span></label><input type="range" id="sG" min="10" max="70" value="30" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">冤枉好人率</div><div class="k-val" id="kInn" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">放跑坏人率</div><div class="k-val" id="kGui" style="color:#f59e0b;">—</div></div>
+        <div class="kpi"><div class="k-lbl">放跑/冤枉比</div><div class="k-val" id="kRat">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function gauss(x,mu,s){ return Math.exp(-0.5*Math.pow((x-mu)/s,2)); }
+function upd(){
+  const T=+document.getElementById('sT').value, gPct=+document.getElementById('sG').value/100;
+  document.getElementById('vT').textContent=T+' 分'; document.getElementById('vG').textContent=(gPct*100).toFixed(0)+'%';
+  let fp=0, fn=0, totI=0, totG=0;
+  let ptsI='40,155 ', ptsG='40,155 ';
+  for(let x=0;x<=100;x+=2){
+    const gi=gauss(x,35,16)*(1-gPct), gg=gauss(x,68,16)*gPct;
+    totI+=gi; totG+=gg;
+    if(x>=T) fp+=gi; else fn+=gg;
+    const px=40+x*5.2;
+    ptsI+=`${px},${155-gi*130} `;
+    ptsG+=`${px},${155-gg*130} `;
+  }
+  ptsI+='560,155'; ptsG+='560,155';
+  const rFP=(fp/totI*100), rFN=(fn/totG*100);
+  const ratio=rFP>0.05?(fn/(fp)).toFixed(1)+' : 1':'∞ : 1';
+  document.getElementById('kInn').textContent=rFP.toFixed(1)+'%';
+  document.getElementById('kGui').textContent=rFN.toFixed(1)+'%';
+  document.getElementById('kRat').textContent=ratio;
+  const tx=40+T*5.2;
+  document.getElementById('svg').innerHTML=`
+    <polygon points="${ptsI}" fill="#10b981" opacity="0.28" stroke="#10b981" stroke-width="2"/>
+    <polygon points="${ptsG}" fill="#ef4444" opacity="0.25" stroke="#ef4444" stroke-width="2"/>
+    <line x1="${tx}" y1="15" x2="${tx}" y2="165" stroke="#0284c7" stroke-width="3"/>
+    <text x="${tx+6}" y="28" font-size="12" font-weight="850" fill="#0284c7">阈值 T=${T}</text>
+    <text x="50" y="30" font-size="11.5" font-weight="800" fill="#10b981">绿峰: 实际无辜人群</text>
+    <text x="545" y="30" text-anchor="end" font-size="11.5" font-weight="800" fill="#ef4444">红峰: 实际有罪人群</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>布莱克斯通名言“宁放十个坏人，不冤一个好人”不是口号，而是把阈值拉到右侧（当前 ${T} 分），宁可承担 ${rFN.toFixed(1)}% 的漏网率，也要把冤案率压到 ${rFP.toFixed(1)}%！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

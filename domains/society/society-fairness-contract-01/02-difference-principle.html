@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📈 差异原则：什么样的贫富差距是正义的？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📈 差异原则：什么样的贫富差距是正义的？</h1><p>误区：正义就等于结果完全平均，谁也不能比别人赚得多。真相：如果能干的人多创造 100 万并分出 30 万改善底层，那么哪怕拉大了贫富差距，底层的绝对生活水平反而提高了——这就是罗尔斯的差异原则！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>累进再分配税率 τ</span><span id="vT">35%</span></label><input type="range" id="sT" min="0" max="90" value="35" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>高税率对创造力的抑制弹性</span><span id="vE">60%</span></label><input type="range" id="sE" min="20" max="100" value="60" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">社会总蛋糕</div><div class="k-val" id="kPie">—</div></div>
+        <div class="kpi"><div class="k-lbl">底层绝对收入</div><div class="k-val" id="kBot" style="color:#10b981;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const t=+document.getElementById('sT').value/100, el=+document.getElementById('sE').value/100;
+  document.getElementById('vT').textContent=(t*100).toFixed(0)+'%'; document.getElementById('vE').textContent=(el*100).toFixed(0)+'%';
+  const botFn=x=>Math.round((10+140*x)*Math.max(0.15, 1-Math.pow(x,1.6)*el));
+  const pie=Math.round(200*Math.max(0.2, 1-Math.pow(t,1.6)*el));
+  const bot=botFn(t);
+  document.getElementById('kPie').textContent=pie+' 亿';
+  document.getElementById('kBot').textContent=bot+' 分';
+  let pts='';
+  for(let x=0;x<=0.9;x+=0.03){
+    pts+=`${40+x/0.9*520},${160-botFn(x)*1.8} `;
+  }
+  const cx=40+t/0.9*520, cy=160-bot*1.8;
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="160" x2="560" y2="160" stroke="#94a3b8"/>
+    <polyline fill="none" stroke="#10b981" stroke-width="3" points="${pts}"/>
+    <circle cx="${cx}" cy="${cy}" r="6" fill="#0284c7"/>
+    <text x="50" y="30" font-size="12" font-weight="800" fill="#10b981">底层绝对福祉倒 U 型曲线（税太低没保障，税太高蛋糕萎缩）</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>罗尔斯并非平均主义者！差异原则允许存在激励创新的贫富差距，唯一的合法性标尺是：<strong>这种不平等有没有让最底层的人比绝对平均时过得更好</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

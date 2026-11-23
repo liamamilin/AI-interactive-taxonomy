@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔁 排序复选 (IRV) 选票转移流向图</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔁 排序复选 (IRV) 选票转移流向图</h1><p>误区：排名垫底的候选人得票毫无意义。真相：在排序复选制 (IRV) 中，垫底者淘汰后，他的选票会按选民的第二顺位重新分配，彻底消除分票悲剧！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>C 选民把 A 排第二顺位的比例</span><span id="vT">82%</span></label><input type="range" id="sT" min="0" max="100" value="82" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>B 原始领先优势</span><span id="vB">44%</span></label><input type="range" id="sB" min="36" max="49" value="44" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">首轮领先</div><div class="k-val" id="kR1">—</div></div>
+        <div class="kpi"><div class="k-lbl">IRV 最终胜者</div><div class="k-val" id="kR2" style="color:#10b981;">—</div></div>
+        <div class="kpi"><div class="k-lbl">最终得票率</div><div class="k-val" id="kPct">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const tr=+document.getElementById('sT').value, b0=+document.getElementById('sB').value;
+  document.getElementById('vT').textContent=tr+'%'; document.getElementById('vB').textContent=b0+'%';
+  const rem=100-b0, a0=Math.round(rem*0.56), c0=rem-a0;
+  const toA=Math.round(c0*tr/100), toB=c0-toA;
+  const a1=a0+toA, b1=b0+toB;
+  const win=a1>=b1?'候选人 A':'候选人 B';
+  document.getElementById('kR1').textContent=`B (${b0}%)`;
+  document.getElementById('kR2').textContent=win;
+  document.getElementById('kPct').textContent=Math.max(a1,b1)+'%';
+  document.getElementById('svg').innerHTML=`
+    <rect x="24" y="22" width="160" height="40" rx="8" fill="#0284c7"/><text x="104" y="47" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">首轮 A: ${a0}%</text>
+    <rect x="24" y="74" width="160" height="40" rx="8" fill="#f59e0b"/><text x="104" y="99" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">首轮 B: ${b0}%</text>
+    <rect x="24" y="126" width="160" height="40" rx="8" fill="#94a3b8"/><text x="104" y="151" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">垫底 C: ${c0}% (淘汰)</text>
+    <path d="M184,146 C260,146 250,42 330,42" fill="none" stroke="#10b981" stroke-width="3"/>
+    <text x="258" y="84" text-anchor="middle" font-size="12" font-weight="800" fill="#10b981">+${toA}% 给 A</text>
+    <path d="M184,146 C250,146 260,94 330,94" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="262" y="132" text-anchor="middle" font-size="11.5" font-weight="750" fill="#b45309">+${toB}% 给 B</text>
+    <rect x="330" y="22" width="240" height="46" rx="10" fill="${a1>=b1?'#10b981':'#e2e8f0'}"/><text x="450" y="50" text-anchor="middle" font-size="15" font-weight="850" fill="${a1>=b1?'#fff':'#334155'}">次轮 A: ${a1}% ${a1>=b1?'🏆':''}</text>
+    <rect x="330" y="84" width="240" height="46" rx="10" fill="${b1>a1?'#f59e0b':'#e2e8f0'}"/><text x="450" y="112" text-anchor="middle" font-size="15" font-weight="850" fill="${b1>a1?'#fff':'#334155'}">次轮 B: ${b1}% ${b1>a1?'🏆':''}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>排序复选 (IRV) 让 C 的选民不必“含泪弃保”——投给 C 不会浪费选票，一旦 C 淘汰，${toA}% 的二选票会自动流向 A 完成逆转！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

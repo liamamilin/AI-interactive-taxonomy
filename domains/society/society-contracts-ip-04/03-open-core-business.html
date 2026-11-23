@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💎 Open Core 商业化边界权衡仪</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💎 Open Core 商业化边界权衡仪</h1><p>误区：开源项目想赚钱就必须把核心功能越阉割越好，逼大家买付费版。真相：开源部分太残废没人用，生态死掉就没有付费漏斗；开源部分太全又没人买单——全靠精准切分“个人用免费、大厂治理收费”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>开源核心免费功能占比</span><span id="vCore">70%</span></label><input type="range" id="sCore" min="15" max="98" value="70" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>企业级合规/权限刚需度</span><span id="vEnt">75%</span></label><input type="range" id="sEnt" min="10" max="100" value="75" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">开发者社区增速</div><div class="k-val" id="kCom" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">企业版付费转化</div><div class="k-val" id="kRev" style="color:#10b981;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const core=+document.getElementById('sCore').value, ent=+document.getElementById('sEnt').value;
+  document.getElementById('vCore').textContent=core+'%'; document.getElementById('vEnt').textContent=ent+'%';
+  const com=Math.round(core*0.95);
+  const conv=Math.max(5, Math.round((100-core)*0.6 + ent*0.45));
+  const total=Math.round(com*conv/45);
+  document.getElementById('kCom').textContent=com+' 分';
+  document.getElementById('kRev').textContent=total+' 万 MRR';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">社区传播热度 (开源占比 ${core}%): ${com} 分</text>
+    <rect x="20" y="44" width="${com*5.2}" height="22" rx="6" fill="#0284c7"/>
+    <text x="20" y="98" font-size="13" font-weight="800" fill="#10b981">商业化总营收 (流量 × 企业转化): ${total} 万 MRR</text>
+    <rect x="20" y="108" width="${Math.min(540,total*4.2)}" height="24" rx="6" fill="#10b981"/>
+    <text x="20" y="164" font-size="12.5" font-weight="750" fill="var(--tax-muted)">黄金法则：把个人开发者需要的功能全开源，把大公司才要的 SSO/审计锁进付费版</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>开源与赚钱并不矛盾！当开源核心达到 70%~80% 赢得海量开发者口碑，同时把大企业刚需的审计/高可用留在商业版时，总营收反而最高（${total} 万）！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💉 正外部性补贴：为什么疫苗和基础科研要补贴？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💉 正外部性补贴：为什么疫苗和基础科研要补贴？</h1><p>误区：所有好东西只要有用，市场自己就会买够，不需要政府补贴。真相：如果一件事的好处一半溢给了邻居（比如打疫苗防传染），个人只愿按自己的那一半收益付费，导致社会总投入严重不足！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>外部溢出社会价值</span><span id="vSp">35 元</span></label><input type="range" id="sSp" min="0" max="60" value="35" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>政府定向补贴力度</span><span id="vSub">20 元</span></label><input type="range" id="sSub" min="0" max="60" value="20" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">市场实际接种量</div><div class="k-val" id="kQ">—</div></div>
+        <div class="kpi"><div class="k-lbl">社会理想接种量</div><div class="k-val" id="kOpt" style="color:#10b981;">—</div></div>
+        <div class="kpi"><div class="k-lbl">错失的社会福利</div><div class="k-val" id="kLoss" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const sp=+document.getElementById('sSp').value, sub=+document.getElementById('sSub').value;
+  document.getElementById('vSp').textContent=sp+' 元'; document.getElementById('vSub').textContent=sub+' 元';
+  const qAct=Math.min(95, 30+sub), qOpt=Math.min(95, 30+sp);
+  const loss=Math.round(0.5*Math.abs(qOpt-qAct)*Math.abs(sp-sub));
+  document.getElementById('kQ').textContent=qAct+'%';
+  document.getElementById('kOpt').textContent=qOpt+'%';
+  document.getElementById('kLoss').textContent=loss+' 单位';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">当前实际覆盖率: ${qAct}%</text>
+    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="44" width="${qAct*5.4}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#10b981">社会理想覆盖率 (含外部性): ${qOpt}%</text>
+    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${qOpt*5.4}" height="24" rx="6" fill="#10b981"/>
+    <text x="20" y="168" font-size="13" font-weight="800" fill="${loss<30?'#10b981':'#ef4444'}">正外部性供给缺口: ${Math.abs(qOpt-qAct)}% (福利损失 ${loss})</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>补贴并非“偏袒”，而是把“帮别人挡住传染病”的外溢价值发还给行动者，让覆盖率从纯自利状态拉齐到社会最优的 <strong>${qOpt}%</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

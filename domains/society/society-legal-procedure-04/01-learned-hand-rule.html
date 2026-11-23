@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚖️ 汉德公式天平：B < P × L 过失判定器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 汉德公式天平：B < P × L 过失判定器</h1><p>误区：只要发生了意外造成巨大伤害，当事方就一定构成过失并承担赔偿。真相：如果预防这场万分之一小概率意外需要花掉几亿元成本（B > P×L），法律不认为你有义务这么做！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>安全预防成本 B</span><span id="vB">15 万元</span></label><input type="range" id="sB" min="1" max="80" value="15" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>事故发生概率 P</span><span id="vP">10%</span></label><input type="range" id="sP" min="1" max="50" value="10" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>潜在事故总损失 L</span><span id="vL">200 万元</span></label><input type="range" id="sL" min="20" max="500" step="10" value="200" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">预防成本 B</div><div class="k-val" id="kB">—</div></div>
+        <div class="kpi"><div class="k-lbl">预期事故损失 P × L</div><div class="k-val" id="kPL" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">法律判定</div><div class="k-val" id="kJ">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const B=+document.getElementById('sB').value, P=+document.getElementById('sP').value/100, L=+document.getElementById('sL').value;
+  document.getElementById('vB').textContent=B+' 万元'; document.getElementById('vP').textContent=(P*100).toFixed(0)+'%'; document.getElementById('vL').textContent=L+' 万元';
+  const pl=P*L, neg=B<pl;
+  document.getElementById('kB').textContent=B+' 万元';
+  document.getElementById('kPL').textContent=pl.toFixed(1)+' 万元';
+  document.getElementById('kJ').textContent=neg?'构成过失 (需赔)':'无过失 (免责)';
+  document.getElementById('kJ').style.color=neg?'#ef4444':'#10b981';
+  const maxV=Math.max(B,pl,30);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="36" font-size="13" font-weight="800" fill="#64748b">预防投入成本 B = ${B} 万元</text>
+    <rect x="20" y="46" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="46" width="${B/maxV*520}" height="24" rx="6" fill="#64748b"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${neg?'#ef4444':'#10b981'}">预期风险损失 P×L = ${pl.toFixed(1)} 万元</text>
+    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${pl/maxV*520}" height="24" rx="6" fill="${neg?'#ef4444':'#10b981'}"/>
+    <text x="20" y="168" font-size="13.5" font-weight="850" fill="${neg?'#ef4444':'#10b981'}">B (${B}) ${neg?'<':'≥'} P×L (${pl.toFixed(1)}) → ${neg?'花小钱就能防大灾却没花，构成过失！':'预防成本高于期望损失，不强求过度防御'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>法律经济学鼻祖汉德法官用 <code>B &lt; P × L</code> 一句话打通了正义与效率：只惩罚那些“明明花小钱（${B}万）就能挡住更大期望灾难（${pl.toFixed(1)}万）却偷懒不作为”的人！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

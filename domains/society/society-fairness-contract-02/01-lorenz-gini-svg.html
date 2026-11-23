@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📊 洛伦兹曲线与基尼系数实时绘测（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📊 洛伦兹曲线与基尼系数实时绘测（SVG）</h1><p>误区：基尼系数只是一个拍脑袋打的“贫富差距评分”。真相：它有着极其优美的几何定义——就是“绝对平等对角线”与“真实累计收入洛伦兹曲线”之间夹出的那个弓形面积占比！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>最富 20% 人群拿走社会总收入</span><span id="vTop">48%</span></label><input type="range" id="sTop" min="20" max="80" value="48" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>最穷 40% 人群拿走社会总收入</span><span id="vBot">14%</span></label><input type="range" id="sBot" min="2" max="38" value="14" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">基尼系数 (Gini)</div><div class="k-val" id="kGini">—</div></div>
+        <div class="kpi"><div class="k-lbl">贫富警戒状态</div><div class="k-val" id="kSt">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const top=+document.getElementById('sTop').value;
+  let bot=+document.getElementById('sBot').value;
+  if(top+bot>95){ bot=95-top; document.getElementById('sBot').value=bot; }
+  document.getElementById('vTop').textContent=top+'%'; document.getElementById('vBot').textContent=bot+'%';
+  const mid=100-top-bot;
+  const pts=[[0,0],[0.2,bot*0.35],[0.4,bot],[0.6,bot+mid*0.45],[0.8,100-top],[1,100]];
+  let area=0;
+  for(let i=0;i<5;i++){ area+=(pts[i][1]+pts[i+1][1])/200*0.2; }
+  const gini=Math.max(0, Math.min(0.95, 1-2*area));
+  document.getElementById('kGini').textContent=gini.toFixed(3);
+  document.getElementById('kSt').textContent=gini<0.3?'高度平等':(gini<0.4?'相对合理':(gini<0.5?'偏高 (过0.4警戒线)':'悬殊'));
+  document.getElementById('kSt').style.color=gini>=0.4?'#ef4444':'#10b981';
+  const sx=x=>50+x*160, sy=y=>180-y*1.5;
+  const poly=pts.map(([x,y])=>`${sx(x)},${sy(y)}`).join(' ');
+  document.getElementById('svg').innerHTML=`
+    <line x1="50" y1="180" x2="210" y2="180" stroke="#94a3b8"/>
+    <line x1="50" y1="30" x2="50" y2="180" stroke="#94a3b8"/>
+    <polygon points="50,180 210,30 ${poly.split(' ').reverse().join(' ')}" fill="#0284c7" opacity="0.25"/>
+    <line x1="50" y1="180" x2="210" y2="30" stroke="#10b981" stroke-width="2" stroke-dasharray="4 3"/>
+    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${poly}"/>
+    <text x="245" y="70" font-size="14" font-weight="850" fill="var(--tax-text)">基尼系数 G = 弓形面积 A / 三角总面积</text>
+    <text x="245" y="106" font-size="24" font-weight="900" fill="${gini>=0.4?'#ef4444':'#0284c7'}">G = ${gini.toFixed(3)}</text>
+    <text x="245" y="140" font-size="12.5" fill="var(--tax-muted)">0 = 绝对均等（重合绿线）；1 = 一个人拿走全部收入</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>洛伦兹曲线向下弯得越厉害，蓝色弓形面积越大，基尼系数就越高（当前 <strong>${gini.toFixed(3)}</strong>）。国际公认 0.40 是贫富差距警戒线！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

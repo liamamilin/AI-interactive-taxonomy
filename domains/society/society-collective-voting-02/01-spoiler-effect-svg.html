@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍌 剧透效应与分票陷阱（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🍌 剧透效应与分票陷阱（SVG）</h1><p>误区：多一个理念相近的候选人参选，只是给大家多一个选择，不会伤害自己阵营。真相：在简单多数决中，两个相似候选人互相分票，反而会让对立面渔翁得利！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>改革派总基本盘</span><span id="vBase">58%</span></label><input type="range" id="sBase" min="40" max="75" value="58" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>新锐候补 C 从改革派分流比例</span><span id="vSp">45%</span></label><input type="range" id="sSp" min="0" max="60" value="45" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">改革派 A 得票</div><div class="k-val" id="kA">—</div></div>
+        <div class="kpi"><div class="k-lbl">新锐派 C 得票</div><div class="k-val" id="kC">—</div></div>
+        <div class="kpi"><div class="k-lbl">保守派 B 得票</div><div class="k-val" id="kB">—</div></div>
+        <div class="kpi"><div class="k-lbl">多数决当选</div><div class="k-val" id="kW">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const base=+document.getElementById('sBase').value, sp=+document.getElementById('sSp').value;
+  document.getElementById('vBase').textContent=base+'%'; document.getElementById('vSp').textContent=sp+'%';
+  const c=Math.round(base*sp/100), a=base-c, b=100-base;
+  const maxV=Math.max(a,b,c);
+  const win=a===maxV?'改革派 A':(b===maxV?'保守派 B':'新锐派 C');
+  document.getElementById('kA').textContent=a+'%';
+  document.getElementById('kC').textContent=c+'%';
+  document.getElementById('kB').textContent=b+'%';
+  document.getElementById('kW').textContent=win;
+  document.getElementById('kW').style.color=win==='保守派 B'?'#ef4444':'#0284c7';
+  const rows=[['改革派 A',a,'#0284c7'],['新锐派 C (分票者)',c,'#38bdf8'],['保守派 B (对立阵营)',b,'#f59e0b']];
+  let svg='';
+  rows.forEach(([nm,val,col],i)=>{
+    const y=26+i*48, w=val*5.2;
+    svg+=`<text x="16" y="${y+16}" font-size="13" font-weight="750" fill="var(--tax-text)">${nm}</text>
+    <rect x="16" y="${y+22}" width="520" height="18" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="16" y="${y+22}" width="${w}" height="18" rx="6" fill="${col}"/>
+    <text x="${24+w}" y="${y+35}" font-size="12.5" font-weight="850" fill="${col}">${val}%</text>`;
+  });
+  document.getElementById('svg').innerHTML=svg;
+  document.getElementById('ahaBox').innerHTML=win==='保守派 B'
+    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>明明 <strong>${base}%</strong> 的选民都偏向改革派，却因为 C 分走了 ${c}% 的选票，让仅获 ${b}% 支持的保守派 B 渔翁得利——这就是“剧透效应”！`
+    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>当分流足够小时，A 仍能守住第一；试试向右拉高 C 的分流比例，看多数决如何瞬间反转结局！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

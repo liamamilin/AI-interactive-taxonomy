@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐍 眼镜蛇赏金实验（SVG 12期演化）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🐍 眼镜蛇赏金实验（SVG 12期演化）</h1><p>误区：只要赏金给得够高，任何社会问题都能用重赏解决。真相：一旦“制造问题再领赏”比“真正解决问题”更赚钱，重赏就会催生出一条专门制造问题的产业链！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>单条死蛇政府赏金</span><span id="vB">35 元</span></label><input type="range" id="sB" min="5" max="60" value="35" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>人工养大一条蛇成本</span><span id="vC">18 元</span></label><input type="range" id="sC" min="10" max="50" value="18" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">养蛇套利利润</div><div class="k-val" id="kProf">—</div></div>
+        <div class="kpi"><div class="k-lbl">取消赏金后放生数量</div><div class="k-val" id="kRel" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">最终野生蛇倍数</div><div class="k-val" id="kMul">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const b=+document.getElementById('sB').value, c=+document.getElementById('sC').value;
+  document.getElementById('vB').textContent=b+' 元'; document.getElementById('vC').textContent=c+' 元';
+  const prof=b-c;
+  let wild=100, farm=0, ptsW='', ptsF='';
+  for(let t=0;t<=12;t++){
+    const x=40+t*43;
+    ptsW+=`${x},${160-Math.min(140,wild*0.42)} `;
+    ptsF+=`${x},${160-Math.min(140,farm*0.42)} `;
+    if(t<8){
+      wild=Math.max(25, wild-b*0.25);
+      if(prof>0) farm=Math.min(280, farm + prof*1.6);
+    }else if(t===8){
+      wild=wild+farm; farm=0;
+    }else{
+      wild=Math.max(30, wild*0.97);
+    }
+  }
+  const endMul=(wild/100).toFixed(1)+'x';
+  document.getElementById('kProf').textContent=(prof>0?'+':'')+prof+' 元/条';
+  document.getElementById('kRel').textContent=prof>0?Math.round(prof*1.6*8)+' 条':'0 条';
+  document.getElementById('kMul').textContent=endMul;
+  document.getElementById('kMul').style.color=wild>110?'#ef4444':'#10b981';
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="160" x2="560" y2="160" stroke="#94a3b8"/>
+    <line x1="384" y1="20" x2="384" y2="160" stroke="#f59e0b" stroke-dasharray="4 3"/>
+    <text x="388" y="34" font-size="11" font-weight="750" fill="#f59e0b">第8期: 政府发现被骗取消赏金!</text>
+    <polyline fill="none" stroke="#ef4444" stroke-width="3" points="${ptsW}"/>
+    <polyline fill="none" stroke="#8b5cf6" stroke-width="2.5" stroke-dasharray="5 3" points="${ptsF}"/>
+    <text x="48" y="34" font-size="11.5" font-weight="800" fill="#ef4444">红线: 野生蛇数量</text>
+    <text x="48" y="52" font-size="11.5" font-weight="800" fill="#8b5cf6">紫虚线: 地下养殖蛇</text>`;
+  document.getElementById('ahaBox').innerHTML=prof>0
+    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>赏金高于养蛇成本时，市民开始地下养蛇套利；第 8 期政府发现真相取消赏金，养蛇户直接把无用的蛇全部放生，野生蛇暴涨到 <strong>${endMul}</strong>！`
+    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>当赏金低于养蛇成本（${b} ≤ ${c}），养蛇无利可图，悬赏才能真正压低野生毒蛇数量。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

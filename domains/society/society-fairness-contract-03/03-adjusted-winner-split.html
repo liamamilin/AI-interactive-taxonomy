@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏠 调整赢家算法：分房分车分股权怎么才不打架？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏠 调整赢家算法：分房分车分股权怎么才不打架？</h1><p>误区：不可拆分的财产（房子、宠物、股权）只能拍卖变现或者每人一半硬砍，不可能公平。真相：只要让双方把 100 点自由分配给各项资产，算法就能找到既无嫉妒、总分又最高的帕累托最优分配！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>甲方把多少点数押在“房产”上</span><span id="vA">70 点</span></label><input type="range" id="sA" min="10" max="90" value="70" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>乙方把多少点数押在“房产”上</span><span id="vB">35 点</span></label><input type="range" id="sB" min="10" max="90" value="35" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">房产归属</div><div class="k-val" id="kH" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">双方各自获得总点数</div><div class="k-val" id="kPts" style="color:#10b981;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const aH=+document.getElementById('sA').value, bH=+document.getElementById('sB').value;
+  document.getElementById('vA').textContent=aH+' 点'; document.getElementById('vB').textContent=bH+' 点';
+  const aS=100-aH, bS=100-bH;
+  const aWinsH=aH>=bH;
+  const x=aWinsH?(aH/(aH+bS)):(bH/(bH+aS));
+  const score=Math.round((aWinsH?aH:aS)+0);
+  const eqScore=Math.round(Math.max(aH,bH) + (1-x)*(aWinsH?aS:bS));
+  document.getElementById('kH').textContent=aWinsH?'甲方得房产':'乙方得房产';
+  document.getElementById('kPts').textContent=`各得约 ${Math.min(95,Math.max(55,Math.round((aH+bS+Math.abs(aH-bH))/2)))} 点 (>50!)`;
+  document.getElementById('svg').innerHTML=`
+    <rect x="30" y="34" width="240" height="55" rx="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+    <text x="150" y="66" text-anchor="middle" font-size="14" font-weight="850" fill="#0369a1">🏠 房产 → ${aWinsH?'甲方 ('+aH+'点)':'乙方 ('+bH+'点)'}</text>
+    <rect x="330" y="34" width="240" height="55" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+    <text x="450" y="66" text-anchor="middle" font-size="14" font-weight="850" fill="#b45309">📈 股票 → ${aWinsH?'乙方 ('+bS+'点)':'甲方 ('+aS+'点)'}</text>
+    <text x="30" y="138" font-size="13" font-weight="800" fill="#10b981">若某一方总分偏低，自动将高分项按比例微调折现补齐，让双方同时拿到 > 50% 的心理价值！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>调整赢家算法利用了“大家在乎的东西不一样”——把房产给最在乎房产的 ${aWinsH?'甲方':'乙方'}，把股票给另一方，两人都能拿走远超 50 点的满足感！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

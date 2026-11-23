@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✅ 批准投票 vs 波达计分策略战</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>✅ 批准投票 vs 波达计分策略战</h1><p>误区：让选民给所有候选人打分排序的“波达计数”一定比简单打勾更客观。真相：打分制极易诱发“把主要对手故意排到最后一名”的策略性埋葬行为！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>策略性埋葬对手比例</span><span id="vBur">60%</span></label><input type="range" id="sBur" min="0" max="100" value="60" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>中庸候选人 M 真实受认可度</span><span id="vM">72%</span></label><input type="range" id="sM" min="30" max="90" value="72" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">波达计数胜者</div><div class="k-val" id="kBor">—</div></div>
+        <div class="kpi"><div class="k-lbl">批准投票胜者</div><div class="k-val" id="kApp">—</div></div>
+        <div class="kpi"><div class="k-lbl">策略失真风险</div><div class="k-val" id="kRsk">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const bur=+document.getElementById('sBur').value, m0=+document.getElementById('sM').value;
+  document.getElementById('vBur').textContent=bur+'%'; document.getElementById('vM').textContent=m0+'%';
+  const bA=Math.round(70 - bur*0.28), bB=Math.round(68 - bur*0.25), bM=Math.round(52 + m0*0.35 + bur*0.12);
+  const appA=54, appB=52, appM=m0;
+  const wBor=bM>=Math.max(bA,bB)?'中庸 M':(bA>=bB?'强硬 A':'强硬 B');
+  const wApp=appM>=Math.max(appA,appB)?'中庸 M':'强硬 A';
+  document.getElementById('kBor').textContent=`${wBor} (${Math.max(bA,bB,bM)}分)`;
+  document.getElementById('kApp').textContent=`${wApp} (${Math.max(appA,appB,appM)}%)`;
+  document.getElementById('kRsk').textContent=bur>50?'高 (互相拉踩失真)':'可控';
+  document.getElementById('kRsk').style.color=bur>50?'#ef4444':'#10b981';
+  const rows=[['波达 · A',bA,'#0284c7'],['波达 · M',bM,'#8b5cf6'],['批准 · A',appA,'#38bdf8'],['批准 · M',appM,'#10b981']];
+  let svg='';
+  rows.forEach(([nm,val,col],i)=>{
+    const y=22+i*40, w=val*3.8;
+    svg+=`<text x="16" y="${y+17}" font-size="13" font-weight="750" fill="var(--tax-text)">${nm}</text>
+    <rect x="115" y="${y}" width="380" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="115" y="${y}" width="${w}" height="24" rx="6" fill="${col}"/>
+    <text x="${125+w}" y="${y+17}" font-size="12.5" font-weight="800" fill="${col}">${val}</text>`;
+  });
+  document.getElementById('svg').innerHTML=svg;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当两派互相把对方垫底（埋葬策略 ${bur}%）时，波达计分剧烈波动；而批准投票允许你同时勾选多个可接受选项，天然选出最大公约数 <strong>${wApp}</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

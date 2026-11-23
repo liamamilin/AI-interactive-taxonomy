@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌫️ 差分隐私预算 ε：加多少噪声才安全？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌫️ 差分隐私预算 ε：加多少噪声才安全？</h1><p>误区：只要在数据里加一点随机噪声，就既能保护隐私又不影响数据分析。真相：噪声加得太少，黑客对比两次查询依然能反推出个人秘密；噪声加得太多，统计结果直接变成乱码！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>隐私预算 ε (越小越隐私)</span><span id="vEps">1.0</span></label><input type="range" id="sEps" min="2" max="50" value="10" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>统计样本人数 N</span><span id="vN">1000 人</span></label><input type="range" id="sN" min="100" max="5000" step="100" value="1000" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">个人隐私安全度</div><div class="k-val" id="kPriv" style="color:#10b981;">—</div></div>
+        <div class="kpi"><div class="k-lbl">宏观统计误差率</div><div class="k-val" id="kErr" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const eps=+document.getElementById('sEps').value/10, n=+document.getElementById('sN').value;
+  document.getElementById('vEps').textContent=eps.toFixed(1); document.getElementById('vN').textContent=n+' 人';
+  const priv=Math.max(5, Math.min(99, Math.round(100*Math.exp(-eps/2.5))));
+  const err=Math.min(45, (100/(eps*Math.sqrt(n))*3.2)).toFixed(2);
+  document.getElementById('kPriv').textContent=priv+'%';
+  document.getElementById('kErr').textContent='±'+err+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#10b981">个人隐私安全保障度 (ε=${eps.toFixed(1)}): ${priv}%</text>
+    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="44" width="${priv*5.4}" height="24" rx="6" fill="#10b981"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">宏观数据统计可用性: ${(100-parseFloat(err)).toFixed(1)}% (误差 ±${err}%)</text>
+    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${Math.max(10,(100-parseFloat(err)*2)*5.4)}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">样本量越大 (${n}人)，噪声在总均值里越容易相互抵消，既护隐私又保精度</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>苹果和人口普查局都在用的<strong>差分隐私</strong>核心直觉是：往每个人的汇报里掺一点数学噪声，大样本统计误差仅 <strong>±${err}%</strong>，但黑客永远无法确认你在不在库里！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

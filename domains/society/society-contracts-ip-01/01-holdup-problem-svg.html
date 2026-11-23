@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔧 专用性投资与“敲竹杠”困境（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔧 专用性投资与“敲竹杠”困境（SVG）</h1><p>误区：只要双方事先口头谈好了长期合作价格，供应商就会放心花大钱为你建专属产线。真相：一旦产线除了卖给你之外一文不值，你在事后随时能逼他降价，导致他事前根本不敢投！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>设备专用性锁定程度</span><span id="vSpec">80%</span></label><input type="range" id="sSpec" min="10" max="100" value="80" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>违约惩罚与声誉约束力度</span><span id="vRep">30%</span></label><input type="range" id="sRep" min="0" max="100" value="30" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">事后被敲竹杠风险</div><div class="k-val" id="kHold" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">供应商实际投资意愿</div><div class="k-val" id="kInv" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const spec=+document.getElementById('sSpec').value, rep=+document.getElementById('sRep').value;
+  document.getElementById('vSpec').textContent=spec+'%'; document.getElementById('vRep').textContent=rep+'%';
+  const hold=Math.max(0, Math.round(spec*(1-rep/110)));
+  const inv=Math.max(10, Math.round(100 - hold*0.85));
+  document.getElementById('kHold').textContent=hold+'%';
+  document.getElementById('kInv').textContent=inv+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">被事后压价敲竹杠风险: ${hold}%</text>
+    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="44" width="${hold*5.4}" height="24" rx="6" fill="#ef4444"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">供应商事前专属投资意愿: ${inv}%</text>
+    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${inv*5.4}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">${hold>50?'⚠️ 锁定越深越容易被逼降价，双方陷入投资不足死局':'✅ 制度约束或低专用性保护了双方合作'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>契约永远写不完未来所有细节！当资产专用性高到 ${spec}% 而违约约束只有 ${rep}% 时，下游合并上游（纵向一体化）往往成了唯一的解局之道。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

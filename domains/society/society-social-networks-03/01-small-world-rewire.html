@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌐 小世界网络重连器：几根跨圈弦线缩短全世界（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌐 小世界网络重连器：几根跨圈弦线缩短全世界（SVG）</h1><p>误区：要想让世界上任意两个人只需 6 步就能认识，每个人都必须加满几千个跨国好友。真相：你只需要保持本地朋友圈，再随机连出几条跨圈“弱连接捷径”，全网平均路径瞬间坍缩！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>跨圈随机弱连接重连率 p</span><span id="vP">10%</span></label><input type="range" id="sP" min="0" max="50" value="10" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>本地圈子节点数 N</span><span id="vN">18 人</span></label><input type="range" id="sN" min="12" max="24" step="2" value="18" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">跨圈弱连接数</div><div class="k-val" id="kSh">—</div></div>
+        <div class="kpi"><div class="k-lbl">平均触达步数</div><div class="k-val" id="kLen" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const p=+document.getElementById('sP').value, n=+document.getElementById('sN').value;
+  document.getElementById('vP').textContent=p+'%'; document.getElementById('vN').textContent=n+' 人';
+  const shortcuts=Math.round(n*p/100*1.5);
+  const avgLen=(1 + (n/4)/(1+shortcuts*1.8)).toFixed(1);
+  document.getElementById('kSh').textContent=shortcuts+' 条捷径';
+  document.getElementById('kLen').textContent=avgLen+' 跳';
+  const cx=160, cy=100, R=76;
+  let svg='';
+  for(let i=0;i<n;i++){
+    const a1=i/n*Math.PI*2, a2=((i+1)%n)/n*Math.PI*2;
+    svg+=`<line x1="${cx+R*Math.cos(a1)}" y1="${cy+R*Math.sin(a1)}" x2="${cx+R*Math.cos(a2)}" y2="${cy+R*Math.sin(a2)}" stroke="#94a3b8" stroke-width="1.5"/>`;
+  }
+  for(let k=0;k<shortcuts;k++){
+    const i=(k*5)%n, j=(i+Math.floor(n/2)+k)%n;
+    const a1=i/n*Math.PI*2, a2=j/n*Math.PI*2;
+    svg+=`<line x1="${cx+R*Math.cos(a1)}" y1="${cy+R*Math.sin(a1)}" x2="${cx+R*Math.cos(a2)}" y2="${cy+R*Math.sin(a2)}" stroke="#0284c7" stroke-width="2.5"/>`;
+  }
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2;
+    svg+=`<circle cx="${cx+R*Math.cos(a)}" cy="${cy+R*Math.sin(a)}" r="5" fill="#0284c7"/>`;
+  }
+  svg+=`<text x="295" y="72" font-size="14" font-weight="850" fill="var(--tax-text)">仅增加 ${shortcuts} 条弱连接捷径</text>
+  <text x="295" y="106" font-size="22" font-weight="900" fill="#0284c7">平均距离骤降至 ${avgLen} 跳</text>
+  <text x="295" y="138" font-size="12" fill="var(--tax-muted)">高度聚簇的熟人圈 + 少量跨圈弱连接 = 小世界网络</text>`;
+  document.getElementById('svg').innerHTML=svg;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只需要 ${p}% 的跨圈捷径（${shortcuts} 条蓝线），信息穿透整个社交网络的平均步数就暴跌到了 <strong>${avgLen} 跳</strong>——这就是“六度分隔”的几何秘密！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐄 牛群与麦田：科斯谈判效率沙盘（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🐄 牛群与麦田：科斯谈判效率沙盘（SVG）</h1><p>误区：法律把产权判给工厂还是居民，会直接决定最后污染有多严重。真相：只要产权清晰且谈判零摩擦，不管法律偏袒谁，双方都会私下用钱买下更高效的那种做法！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setRight('farm',this)">产权归麦田主（禁止牛踩麦）</button>
+        <button class="btn" onclick="setRight('ranch',this)">产权归牧场主（牛有自由吃草权）</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>养牛额外收益</span><span id="vCow">80 元</span></label><input type="range" id="sCow" min="30" max="150" value="80" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>麦田受践踏损失</span><span id="vW">110 元</span></label><input type="range" id="sW" min="30" max="150" value="110" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>修围栏一次性成本</span><span id="vF">45 元</span></label><input type="range" id="sF" min="15" max="100" value="45" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">谈判最终方案</div><div class="k-val" id="kPlan" style="color:#10b981;">—</div></div>
+        <div class="kpi"><div class="k-lbl">全社会总净价值</div><div class="k-val" id="kTot">—</div></div>
+        <div class="kpi"><div class="k-lbl">谁掏钱买单</div><div class="k-val" id="kPay">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let right='farm';
+function setRight(r,btn){ right=r; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const cow=+document.getElementById('sCow').value, w=+document.getElementById('sW').value, f=+document.getElementById('sF').value;
+  document.getElementById('vCow').textContent=cow+' 元'; document.getElementById('vW').textContent=w+' 元'; document.getElementById('vF').textContent=f+' 元';
+  const opts=[['不养牛 (0)',0],['养牛且不修围栏',cow-w],['养牛+修围栏',cow-f]];
+  opts.sort((a,b)=>b[1]-a[1]);
+  const [bestName,bestVal]=opts[0];
+  document.getElementById('kPlan').textContent=bestName;
+  document.getElementById('kTot').textContent=bestVal+' 元';
+  document.getElementById('kPay').textContent=right==='farm'?'牧场主掏钱协调':'麦田主掏钱协调';
+  document.getElementById('svg').innerHTML=`
+    <rect x="24" y="24" width="250" height="125" rx="12" fill="#f0f9ff" stroke="#0284c7" stroke-width="2"/>
+    <text x="149" y="52" text-anchor="middle" font-size="14" font-weight="850" fill="#0369a1">制度初始分配</text>
+    <text x="149" y="84" text-anchor="middle" font-size="13" font-weight="750" fill="#334155">${right==='farm'?'麦田主握有禁止权':'牧场主握有放牧权'}</text>
+    <text x="149" y="114" text-anchor="middle" font-size="12" fill="#64748b">仅影响谁给谁转钱</text>
+    <line x1="274" y1="86" x2="326" y2="86" stroke="#10b981" stroke-width="3"/>
+    <rect x="326" y="24" width="250" height="125" rx="12" fill="#f0fdf4" stroke="#10b981" stroke-width="2.5"/>
+    <text x="451" y="52" text-anchor="middle" font-size="14" font-weight="850" fill="#047857">科斯谈判收敛结果</text>
+    <text x="451" y="84" text-anchor="middle" font-size="15" font-weight="850" fill="#047857">${bestName}</text>
+    <text x="451" y="116" text-anchor="middle" font-size="13" font-weight="750" fill="#065f46">社会净收益最大化 = ${bestVal} 元</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>无论你把初始产权判给麦田还是牧场，只要双方能顺畅谈钱，最终落地执行的永远是同一个效率最优方案：<strong>${bestName}（净值 ${bestVal} 元）</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

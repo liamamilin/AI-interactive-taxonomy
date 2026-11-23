@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧱 交易成本高墙：为什么科斯定理在现实会失灵？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧱 交易成本高墙：为什么科斯定理在现实会失灵？</h1><p>误区：现实中只要把空气产权分给市民，市民自然会和工厂谈判解决问题。真相：10 万个市民找工厂谈判的组织成本高达数千万元，交易成本高墙直接堵死了合作！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>需协调的利益相关方人数 N</span><span id="vN">15 人</span></label><input type="range" id="sN" min="2" max="50" value="15" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>单人谈判沟通摩擦成本</span><span id="vF">12 元</span></label><input type="range" id="sF" min="2" max="25" value="12" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">潜在合作总收益</div><div class="k-val">300 元</div></div>
+        <div class="kpi"><div class="k-lbl">总交易成本</div><div class="k-val" id="kTC" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">能否达成协议</div><div class="k-val" id="kDeal">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const n=+document.getElementById('sN').value, f=+document.getElementById('sF').value;
+  document.getElementById('vN').textContent=n+' 人'; document.getElementById('vF').textContent=f+' 元';
+  const tc=Math.round(n*f*1.4), deal=tc<300;
+  document.getElementById('kTC').textContent=tc+' 元';
+  document.getElementById('kDeal').textContent=deal?'可以谈成':'谈判流产';
+  document.getElementById('kDeal').style.color=deal?'#10b981':'#ef4444';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#10b981">合作改善总蛋糕: 300 元</text>
+    <rect x="20" y="44" width="300" height="26" rx="6" fill="#10b981"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#ef4444">交易与协调成本 (${n}方): ${tc} 元</text>
+    <rect x="20" y="112" width="${Math.min(540,tc)}" height="26" rx="6" fill="#ef4444"/>
+    <text x="20" y="168" font-size="13" font-weight="800" fill="${deal?'#10b981':'#ef4444'}">${deal?'净剩余 +'+(300-tc)+' 元，科斯谈判生效':'交易成本吞噬了全部蛋糕，法律必须直接判给高效方！'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>科斯定理真正的下半句是：<strong>现实中交易成本永远不为零</strong>！一旦参与人数多到交易成本 (${tc} 元) 超过合作收益 (300 元)，法律把初始产权判给谁就决定了一切！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

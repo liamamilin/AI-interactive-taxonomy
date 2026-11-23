@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚠️ 违约金过高 vs 过低的双重失衡</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚠️ 违约金过高 vs 过低的双重失衡</h1><p>误区：为了确保合同执行，违约金写得越高越好（比如十倍赔偿）。真相：天价违约金不仅常被法院调减，还会把资源死锁在低效交易里，吓跑本想签约的理性商业伙伴！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>约定违约金占损失比例</span><span id="vMul">100%</span></label><input type="range" id="sMul" min="10" max="300" step="10" value="100" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>外部市场价格波动率</span><span id="vVol">50%</span></label><input type="range" id="sVol" min="10" max="100" value="50" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">投机性毁约率</div><div class="k-val" id="kCh" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">签约吓阻/僵化损耗</div><div class="k-val" id="kFr" style="color:#f59e0b;">—</div></div>
+        <div class="kpi"><div class="k-lbl">合同综合效率</div><div class="k-val" id="kEff" style="color:#10b981;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const mul=+document.getElementById('sMul').value, vol=+document.getElementById('sVol').value;
+  document.getElementById('vMul').textContent=mul+'%'; document.getElementById('vVol').textContent=vol+'%';
+  const cheat=Math.max(0, Math.round((100-mul)*vol/100));
+  const freeze=Math.max(0, Math.round((mul-100)*vol/250));
+  const eff=Math.max(10, 100-cheat-freeze);
+  document.getElementById('kCh').textContent=cheat+'%';
+  document.getElementById('kFr').textContent=freeze+'%';
+  document.getElementById('kEff').textContent=eff+' 分';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">违约金过低导致的投机毁约: ${cheat}%</text>
+    <rect x="20" y="44" width="${cheat*5}" height="22" rx="6" fill="#ef4444"/>
+    <text x="20" y="96" font-size="13" font-weight="800" fill="#f59e0b">惩罚过高导致的锁死与拒签: ${freeze}%</text>
+    <rect x="20" y="106" width="${freeze*5}" height="22" rx="6" fill="#f59e0b"/>
+    <text x="20" y="156" font-size="13" font-weight="800" fill="#10b981">综合契约效率: ${eff} 分 (100% 补偿实际损失处最优)</text>
+    <rect x="20" y="164" width="${eff*5.2}" height="14" rx="4" fill="#10b981"/>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>违约金恰好等于实际损失（100%）时效率最高！过低助长白嫖违约（${cheat}%），过高吓死合理改约（${freeze}%）！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

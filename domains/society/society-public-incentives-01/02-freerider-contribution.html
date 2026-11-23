@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚌 公共品众筹与搭便车困境</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚌 公共品众筹与搭便车困境</h1><p>误区：只要大家集资建路能让每个人翻倍赚钱，人人都一定愿意主动掏钱。真相：如果不掏钱也能照样走这条路，每个人算完账后的最优解都是“一毛不拔”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>公共项目乘数 m</span><span id="vM">2.0x</span></label><input type="range" id="sM" min="12" max="35" value="20" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>实际出资人数 (共10人)</span><span id="vN">4 人</span></label><input type="range" id="sN" min="0" max="10" value="4" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">出资者净收益</div><div class="k-val" id="kC">—</div></div>
+        <div class="kpi"><div class="k-lbl">搭便车者净收益</div><div class="k-val" id="kF" style="color:#f59e0b;">—</div></div>
+        <div class="kpi"><div class="k-lbl">社会总财富</div><div class="k-val" id="kT">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const m=+document.getElementById('sM').value/10, n=+document.getElementById('sN').value;
+  document.getElementById('vM').textContent=m.toFixed(1)+'x'; document.getElementById('vN').textContent=n+' 人';
+  const pool=n*100*m, share=pool/10;
+  const netC=Math.round(100-100+share), netF=Math.round(100+share), tot=Math.round(netC*n+netF*(10-n));
+  document.getElementById('kC').textContent=netC+' 元';
+  document.getElementById('kF').textContent=netF+' 元';
+  document.getElementById('kT').textContent=tot+' 元';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">出资者 (${n}人) 人均最终资产: ${netC} 元</text>
+    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="44" width="${Math.min(540,netC*1.2)}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#f59e0b">搭便车者 (${10-n}人) 人均最终资产: ${netF} 元</text>
+    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${Math.min(540,netF*1.2)}" height="24" rx="6" fill="#f59e0b"/>
+    <text x="20" y="168" font-size="12.5" font-weight="750" fill="var(--tax-muted)">全员出资总财富上限: ${Math.round(1000*m)} 元 vs 当前: ${tot} 元</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>无论多少人出钱，搭便车者永远比出资者多净赚 <strong>100 元</strong>！如果没有强制税收或排他机制，公共品众筹必然陷入集体沉默。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

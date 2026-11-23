@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎒 举证责任倒置：当“自证清白”成本高到离谱</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎒 举证责任倒置：当“自证清白”成本高到离谱</h1><p>误区：身正不怕影子斜，谁有理谁就能拿出证据，举证责任给谁都一样。真相：证明“一件事情从未发生过”成本极高，把举证责任倒置给弱者往往等于直接判他败诉！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>弱势方搜证/自证成本</span><span id="vCost">75 分</span></label><input type="range" id="sCost" min="10" max="100" value="75" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>强势方内部信息掌握度</span><span id="vInfo">85%</span></label><input type="range" id="sInfo" min="20" max="100" value="85" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">常规举证误判率</div><div class="k-val" id="kNorm">—</div></div>
+        <div class="kpi"><div class="k-lbl">合理倒置后误判率</div><div class="k-val" id="kInv" style="color:#10b981;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const c=+document.getElementById('sCost').value, info=+document.getElementById('sInfo').value;
+  document.getElementById('vCost').textContent=c+' 分'; document.getElementById('vInfo').textContent=info+'%';
+  const errNorm=Math.round(c*0.55 + (info-50)*0.3);
+  const errInv=Math.max(8, Math.round((100-info)*0.45 + 10));
+  document.getElementById('kNorm').textContent=errNorm+'%';
+  document.getElementById('kInv').textContent=errInv+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">强迫弱者自证 (传统规则) 败诉冤屈率: ${errNorm}%</text>
+    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="44" width="${Math.min(540,errNorm*5.4)}" height="24" rx="6" fill="#ef4444"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#10b981">举证责任倒置 (高掌握度方自证) 误判率: ${errInv}%</text>
+    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${Math.min(540,errInv*5.4)}" height="24" rx="6" fill="#10b981"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">核心原则：谁最容易低成本拿到证据，举证责任就该落在谁头上</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>刑事案件保护个人，所以由掌握公权力的检方举证；而医疗事故或环境污染中，病历和排污数据全在机构手里，法律便会反转使用<strong>举证责任倒置</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

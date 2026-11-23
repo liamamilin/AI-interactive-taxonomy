@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎭 检察官谬误 vs 辩护人谬误话术解码</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎭 检察官谬误 vs 辩护人谬误话术解码</h1><p>误区：只有检察官会用概率误导陪审团，辩护律师说的比例都是客观的。真相：辩方最爱说“全城有 1000 人同血型，所以他只有千分之一有罪”——这是故意无视他本来就在现场的先验线索！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>全城匹配该特征人数</span><span id="vM">200 人</span></label><input type="range" id="sM" min="10" max="500" step="10" value="200" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>此人被列为嫌疑人的先验概率</span><span id="vPr">20%</span></label><input type="range" id="sPr" min="1" max="80" value="20" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">辩方误导话术</div><div class="k-val" id="kDef" style="color:#10b981;">—</div></div>
+        <div class="kpi"><div class="k-lbl">贝叶斯真实有罪率</div><div class="k-val" id="kReal" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">检方误导话术</div><div class="k-val" id="kPros" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const m=+document.getElementById('sM').value, pr=+document.getElementById('sPr').value/100;
+  document.getElementById('vM').textContent=m+' 人'; document.getElementById('vPr').textContent=(pr*100).toFixed(0)+'%';
+  const defRate=(1/m*100), lr=1000000/m;
+  const real=((pr*1)/(pr*1 + (1-pr)*(m/100000)))*100;
+  const prosRate=(100 - m/100000*100);
+  document.getElementById('kDef').textContent=defRate.toFixed(2)+'%';
+  document.getElementById('kReal').textContent=real.toFixed(1)+'%';
+  document.getElementById('kPros').textContent=prosRate.toFixed(2)+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#10b981">辩护人谬误 (假装全城人等概率): ${defRate.toFixed(2)}%</text>
+    <rect x="20" y="44" width="${Math.max(4,defRate*5.4)}" height="22" rx="5" fill="#10b981"/>
+    <text x="20" y="96" font-size="13" font-weight="800" fill="#0284c7">真实贝叶斯后验概率: ${real.toFixed(1)}%</text>
+    <rect x="20" y="106" width="${real*5.4}" height="22" rx="5" fill="#0284c7"/>
+    <text x="20" y="156" font-size="13" font-weight="800" fill="#ef4444">检察官谬误 (偷换匹配率): ${prosRate.toFixed(2)}%</text>
+    <rect x="20" y="166" width="${prosRate*5.4}" height="14" rx="4" fill="#ef4444"/>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>辩方故意抹掉“他就在案发现场”的先验概率，检方故意抹掉“全城还有 ${m-1} 个同样匹配的人”——真相永远在结合先验的<strong>贝叶斯后验 (${real.toFixed(1)}%)</strong>里！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

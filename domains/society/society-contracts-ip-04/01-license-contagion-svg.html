@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧬 开源协议“传染性”依赖树检测器（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧬 开源协议“传染性”依赖树检测器（SVG）</h1><p>误区：GitHub 上公开的代码都一样，拉下来改改就能闭源卖钱。真相：MIT 几乎无限制，Apache 2.0 送专利授权，而 GPL 具有强“传染性”——只要静态耦合分发，整个项目都必须跟着开源！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setLic('MIT',this)">MIT (极度宽松)</button>
+        <button class="btn" onclick="setLic('Apache',this)">Apache 2.0 (含专利授权)</button>
+        <button class="btn" onclick="setLic('LGPL',this)">LGPL (弱传染 · 动态链接安全)</button>
+        <button class="btn" onclick="setLic('GPL',this)">GPL v3 (强传染 Copyleft)</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>你的商业代码与该开源库链接紧密度</span><span id="vLink">静态打包进同一二进制</span></label><input type="range" id="sLink" min="0" max="100" value="80" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">商业闭源合规性</div><div class="k-val" id="kOk">—</div></div>
+        <div class="kpi"><div class="k-lbl">必须履行义务</div><div class="k-val" id="kOb">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let lic='MIT';
+function setLic(l,btn){ lic=l; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const lnk=+document.getElementById('sLink').value;
+  document.getElementById('vLink').textContent=lnk>=50?'静态打包 / 修改源码':'动态链接 / 独立进程';
+  let infect=false, ob='保留原作者版权声明即可';
+  if(lic==='Apache') ob='保留版权 + 注明修改 + 专利反制条款';
+  if(lic==='LGPL'){ infect=lnk>=50; ob=infect?'静态修改须开源':'动态链接可闭源'; }
+  if(lic==='GPL'){ infect=true; ob='衍生分发整套代码必须同样 GPL 开源！'; }
+  document.getElementById('kOk').textContent=infect?'高风险 (强制开源)':'允许闭源商用';
+  document.getElementById('kOk').style.color=infect?'#ef4444':'#10b981';
+  document.getElementById('kOb').textContent=ob;
+  const cUp=lic==='GPL'?'#ef4444':(lic==='LGPL'?'#f59e0b':'#10b981');
+  const cApp=infect?'#ef4444':'#0284c7';
+  document.getElementById('svg').innerHTML=`
+    <rect x="40" y="55" width="160" height="70" rx="12" fill="${cUp}" opacity="0.2" stroke="${cUp}" stroke-width="2.5"/>
+    <text x="120" y="86" text-anchor="middle" font-size="15" font-weight="850" fill="${cUp}">上游库: ${lic}</text>
+    <text x="120" y="108" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">${infect?'携带传染锁':'宽松许可'}</text>
+    <line x1="200" y1="90" x2="340" y2="90" stroke="${cApp}" stroke-width="3" stroke-dasharray="${lnk>=50?'0':'6 4'}"/>
+    <text x="270" y="78" text-anchor="middle" font-size="11.5" font-weight="800" fill="${cApp}">${lnk>=50?'紧耦合':'松耦合'}</text>
+    <rect x="340" y="55" width="220" height="70" rx="12" fill="${cApp}" opacity="0.18" stroke="${cApp}" stroke-width="2.5"/>
+    <text x="450" y="86" text-anchor="middle" font-size="15" font-weight="850" fill="${cApp}">你的商业软件</text>
+    <text x="450" y="108" text-anchor="middle" font-size="12" font-weight="800" fill="${cApp}">${infect?'⚠️ 被传染：必须开源！':'✅ 可安全闭源出售'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>开源协议不是“免费午餐”，而是精密的社会契约：<strong>MIT/Apache</strong> 让商业公司放心造轮子，而 <strong>GPL</strong> 用“传染性互惠”强迫使用者把改进回馈给全人类！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

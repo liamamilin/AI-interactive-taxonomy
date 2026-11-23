@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⛓️ 独立证据链叠加 vs 同一证据重复计分</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⛓️ 独立证据链叠加 vs 同一证据重复计分</h1><p>误区：只要有 5 个证人或 5 份线索指向同一人，定罪概率就一定接近 100%。真相：如果这 5 个证人其实都在案后一起看过同一篇新闻报道（高度相关），他们加起来只相当于 1 份证据！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>间接证据/证人数量</span><span id="vN">5 个</span></label><input type="range" id="sN" min="1" max="8" value="5" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>证据之间相互串通/同源相关性</span><span id="vC">75%</span></label><input type="range" id="sC" min="0" max="95" value="75" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">假设独立误算概率</div><div class="k-val" id="kId" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">扣除同源后的真实概率</div><div class="k-val" id="kRe" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const n=+document.getElementById('sN').value, corr=+document.getElementById('sC').value/100;
+  document.getElementById('vN').textContent=n+' 个'; document.getElementById('vC').textContent=(corr*100).toFixed(0)+'%';
+  const post=k=>{ const o=0.05*Math.pow(3.2,k); return o/(1+o)*100; };
+  const eff=1+(n-1)*(1-corr);
+  const pId=post(n), pRe=post(eff);
+  document.getElementById('kId').textContent=pId.toFixed(1)+'%';
+  document.getElementById('kRe').textContent=pRe.toFixed(1)+'%';
+  let ptsI='40,155 ', ptsR='40,155 ';
+  for(let k=1;k<=n;k++){
+    const x=40+k/8*500;
+    ptsI+=`${x},${155-post(k)*1.25} `;
+    ptsR+=`${x},${155-post(1+(k-1)*(1-corr))*1.25} `;
+  }
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="155" x2="550" y2="155" stroke="#94a3b8"/>
+    <polyline fill="none" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="5 3" points="${ptsI}"/>
+    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${ptsR}"/>
+    <text x="50" y="34" font-size="12" font-weight="800" fill="#ef4444">虚线 (误当独立): ${pId.toFixed(1)}%</text>
+    <text x="50" y="54" font-size="12" font-weight="800" fill="#0284c7">实线 (扣除同源): ${pRe.toFixed(1)}%</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>如果证据之间有 ${(corr*100).toFixed(0)}% 的同源相关性，${n} 个看似独立的线索其实只等价于 <strong>${eff.toFixed(1)} 个</strong> 有效证据，真实确信度只有 ${pRe.toFixed(1)}%！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

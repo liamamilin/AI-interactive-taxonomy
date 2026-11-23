@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💼 强连接 vs 弱连接：谁带来真正的新机会？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💼 强连接 vs 弱连接：谁带来真正的新机会？</h1><p>误区：找工作、找资源当然要靠铁哥们和闺蜜（强连接），普通点头之交根本指望不上。真相：你的铁哥们天天和你混在同一个圈子，你知道的信息他全知道（冗余度 85%）；反而是半生不熟的弱连接才能跨圈带来全新信息！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>强连接圈信息重叠冗余率</span><span id="vRed">80%</span></label><input type="range" id="sRed" min="20" max="95" value="80" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>保持联系的跨圈弱连接人数</span><span id="vWeak">24 人</span></label><input type="range" id="sWeak" min="5" max="60" value="24" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">10 个强连接新增有效线索</div><div class="k-val" id="kStr">—</div></div>
+        <div class="kpi"><div class="k-lbl">弱连接新增有效线索</div><div class="k-val" id="kWk" style="color:#0284c7;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const red=+document.getElementById('sRed').value/100, wk=+document.getElementById('sWeak').value;
+  document.getElementById('vRed').textContent=(red*100).toFixed(0)+'%'; document.getElementById('vWeak').textContent=wk+' 人';
+  const effStr=Math.max(1, Math.round(10*(1-red)*3));
+  const effWk=Math.round(wk*0.85*1.5);
+  document.getElementById('kStr').textContent=effStr+' 条新线索';
+  document.getElementById('kWk').textContent=effWk+' 条新线索';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#f59e0b">10 个死党 (强连接 · 重叠率 ${(red*100).toFixed(0)}%): 仅 ${effStr} 条不重样线索</text>
+    <rect x="20" y="44" width="${Math.min(540,effStr*6)}" height="24" rx="6" fill="#f59e0b"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">${wk} 个点头之交 (弱连接 · 跨圈异质): 带来 ${effWk} 条全新线索</text>
+    <rect x="20" y="112" width="${Math.min(540,effWk*6)}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">强连接给你情绪支持，弱连接给你跨圈信息差</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>社会学家格兰诺维特发现，超过一半的高薪工作来自“一年聊不到两次的弱连接”——因为死党圈信息高度重复（${(red*100).toFixed(0)}%），只有弱连接能把你桥接到全新行业！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

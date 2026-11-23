@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📈 专利保护年限倒 U 型福利曲线（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📈 专利保护年限倒 U 型福利曲线（SVG）</h1><p>误区：保护知识产权就是保护得越久越好，最好永久专利。真相：专利本质上是“用临时垄断换取公开技术”——保护太短没人研发，保护太久高价垄断会饿死消费者并卡死后续改良！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>专利垄断保护年限 T</span><span id="vT">20 年</span></label><input type="range" id="sT" min="0" max="35" value="20" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>行业研发沉没成本</span><span id="vCost">55 分</span></label><input type="range" id="sCost" min="20" max="90" value="55" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">新发明诞生概率</div><div class="k-val" id="kInn" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">垄断高价社会损耗</div><div class="k-val" id="kDwl" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">社会净福利</div><div class="k-val" id="kWel" style="color:#10b981;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const T=+document.getElementById('sT').value, cost=+document.getElementById('sCost').value;
+  document.getElementById('vT').textContent=T+' 年'; document.getElementById('vCost').textContent=cost+' 分';
+  const wel=t=>{ const inn=100*(1-Math.exp(-t/(cost*0.22))); const dwl=t*1.9; return Math.round(inn - dwl); };
+  const inn=Math.round(100*(1-Math.exp(-T/(cost*0.22)))), dwl=Math.round(T*1.9), w=wel(T);
+  document.getElementById('kInn').textContent=inn+'%';
+  document.getElementById('kDwl').textContent=dwl+' 分';
+  document.getElementById('kWel').textContent=w+' 分';
+  let pts='';
+  for(let t=0;t<=35;t++){
+    pts+=`${40+t*14.8},${155-Math.max(-10,wel(t))*1.5} `;
+  }
+  const cx=40+T*14.8, cy=155-Math.max(-10,w)*1.5;
+  document.getElementById('svg').innerHTML=`
+    <line x1="40" y1="155" x2="560" y2="155" stroke="#94a3b8"/>
+    <polyline fill="none" stroke="#10b981" stroke-width="3" points="${pts}"/>
+    <circle cx="${cx}" cy="${cy}" r="6" fill="#0284c7"/>
+    <text x="${Math.min(480,cx+8)}" y="${Math.max(24,cy-8)}" font-size="12" font-weight="800" fill="#0284c7">T=${T}年 (净福利 ${w})</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>国际公约把发明专利定在 <strong>20 年</strong>，正是卡在“研发激励边际递增放缓，而垄断无谓损失持续线性上升”的倒 U 型顶点附近！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

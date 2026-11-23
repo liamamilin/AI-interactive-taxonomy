@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔪 你切我选：无嫉妒切分实验室（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔪 你切我选：无嫉妒切分实验室（SVG）</h1><p>误区：公平切蛋糕就是拿尺子量出几何面积完全相同的两半。真相：如果 A 爱吃草莓、B 爱吃巧克力，只要按各自主观价值切分，两个人甚至可以同时觉得自己拿到了 70% 以上的价值！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>切刀位置 (0%=最左草莓, 100%=最右)</span><span id="vCut">50%</span></label><input type="range" id="sCut" min="10" max="90" value="50" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>选蛋糕者 B 对右侧巧克力的偏爱度</span><span id="vPref">75%</span></label><input type="range" id="sPref" min="20" max="90" value="75" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">B 挑走的那块 主观价值</div><div class="k-val" id="kB" style="color:#10b981;">—</div></div>
+        <div class="kpi"><div class="k-lbl">切刀者 A 剩下的主观价值</div><div class="k-val" id="kA" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">A 是否后悔没切好</div><div class="k-val" id="kEnv">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const cut=+document.getElementById('sCut').value, prefB=+document.getElementById('sPref').value;
+  document.getElementById('vCut').textContent=cut+'%'; document.getElementById('vPref').textContent=prefB+'%';
+  const valB_L=(Math.min(50,cut)/50)*(100-prefB) + (Math.max(0,cut-50)/50)*prefB;
+  const valB_R=100-valB_L;
+  const pickR=valB_R>=valB_L;
+  const bGet=Math.round(Math.max(valB_L,valB_R));
+  const aGet=Math.round(pickR?cut:(100-cut));
+  const envy=aGet<50;
+  document.getElementById('kB').textContent=bGet+'%';
+  document.getElementById('kA').textContent=aGet+'%';
+  document.getElementById('kEnv').textContent=envy?'亏了 (嫉妒B)':'无嫉妒 (≥50%)';
+  document.getElementById('kEnv').style.color=envy?'#ef4444':'#10b981';
+  const cx=40+cut*5.2;
+  document.getElementById('svg').innerHTML=`
+    <rect x="40" y="50" width="260" height="75" rx="8" fill="#fda4af" opacity="0.75"/>
+    <rect x="300" y="50" width="260" height="75" rx="8" fill="#92400e" opacity="0.75"/>
+    <text x="170" y="92" text-anchor="middle" font-size="14" font-weight="850" fill="#881337">🍓 草莓半边</text>
+    <text x="430" y="92" text-anchor="middle" font-size="14" font-weight="850" fill="#fef3c7">🍫 巧克力半边</text>
+    <line x1="${cx}" y1="30" x2="${cx}" y2="145" stroke="#0284c7" stroke-width="4"/>
+    <text x="${cx}" y="22" text-anchor="middle" font-size="12" font-weight="850" fill="#0284c7">刀位 ${cut}%</text>
+    <text x="40" y="166" font-size="13" font-weight="800" fill="var(--tax-text)">B 选走${pickR?'右半块':'左半块'} (B觉得值 ${bGet}%)，A 拿走另一块 (A觉得值 ${aGet}%)</text>`;
+  document.getElementById('ahaBox').innerHTML=envy
+    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>刀切歪了！B 毫不客气挑走了更肥的那块，留给切刀者 A 的只值 ${aGet}%——这就是为什么“你切我选”能逼切蛋糕的人老老实实切出自己心里精确的 50%！`
+    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>因为 B 更偏爱巧克力而 A 均匀看重两半，刀切在 50% 时，B 觉得自己拿了 <strong>${bGet}%</strong>，A 也觉得自己拿了 <strong>${aGet}%</strong>——双方同时实现“无嫉妒”双赢！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

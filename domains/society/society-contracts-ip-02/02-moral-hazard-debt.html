@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎲 有限责任的阴暗面：高杠杆“赌一把”道德风险</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎲 有限责任的阴暗面：高杠杆“赌一把”道德风险</h1><p>误区：股东永远最希望公司稳健赚钱，绝不会选期望收益为负的烂项目。真相：当公司快破产或极高负债时，反正亏光也只亏 0，股东会疯狂赌一个大波动烂项目来博一线生机！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>公司外部借债杠杆率</span><span id="vLev">80%</span></label><input type="range" id="sLev" min="10" max="95" value="80" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>激进赌博项目的波动幅度</span><span id="vVol">75 分</span></label><input type="range" id="sVol" min="10" max="100" value="75" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">稳健方案股东期望</div><div class="k-val" id="kSafe">—</div></div>
+        <div class="kpi"><div class="k-lbl">激进豪赌股东期望</div><div class="k-val" id="kGam" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">债权人预期亏损</div><div class="k-val" id="kCred">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const lev=+document.getElementById('sLev').value, vol=+document.getElementById('sVol').value;
+  document.getElementById('vLev').textContent=lev+'%'; document.getElementById('vVol').textContent=vol+' 分';
+  const safeSh=Math.max(5, 110-lev), gamSh=Math.round(0.5*Math.max(0, 100+vol-lev));
+  const credLoss=Math.round(0.5*Math.max(0, lev - (100-vol)));
+  document.getElementById('kSafe').textContent=safeSh+' 万';
+  document.getElementById('kGam').textContent=gamSh+' 万';
+  document.getElementById('kCred').textContent='-'+credLoss+' 万';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">稳健经营 · 股东期望: ${safeSh} 万</text>
+    <rect x="20" y="44" width="${safeSh*4.5}" height="24" rx="6" fill="#0284c7"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#ef4444">豪赌波动 · 股东期望: ${gamSh} 万 ${gamSh>safeSh?'⚠️ 诱发豪赌!':''}</text>
+    <rect x="20" y="112" width="${gamSh*4.5}" height="24" rx="6" fill="#ef4444"/>
+    <text x="20" y="166" font-size="13" font-weight="800" fill="#f59e0b">债权人替赌局兜底亏损: -${credLoss} 万</text>`;
+  document.getElementById('ahaBox').innerHTML=gamSh>safeSh
+    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>当负债率飙到 ${lev}% 时，股东的收益变成单向看涨期权——赌赢了拿 ${gamSh*2} 万，赌输了拍拍屁股破产，把 <strong>${credLoss} 万</strong> 窟窿甩给债主！`
+    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>自有资金比例够高时，赌输了先亏自己的本钱，股东就会自动回归稳健经营。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

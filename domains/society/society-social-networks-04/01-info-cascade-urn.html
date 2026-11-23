@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌊 信息级联：盲从锁死模拟器（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌊 信息级联：盲从锁死模拟器（SVG）</h1><p>误区：只要每个后续参与者都理性思考，群体就不可能全员犯错。真相：理性的后来者发现“前面已经连着两个人选 A 了”，就会觉得“他们加起来比我一个人准”，于是理性地抛弃自己的真信号跟风选 A！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>每个人手里的私人信息准确率</span><span id="vSig">65%</span></label><input type="range" id="sSig" min="52" max="88" value="65" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>前 2 位带节奏的人误选错边的概率</span><span id="vLead">85%</span></label><input type="range" id="sLead" min="10" max="100" value="85" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">前 2 人错选引发级联风险</div><div class="k-val" id="kCas" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">后续独立信息被浪费率</div><div class="k-val" id="kWst">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const sig=+document.getElementById('sSig').value/100, lead=+document.getElementById('sLead').value/100;
+  document.getElementById('vSig').textContent=(sig*100).toFixed(0)+'%'; document.getElementById('vLead').textContent=(lead*100).toFixed(0)+'%';
+  const casRisk=Math.round(lead*92);
+  const waste=Math.round(lead*80);
+  document.getElementById('kCas').textContent=casRisk+'%';
+  document.getElementById('kWst').textContent=waste+'%';
+  let nodes='';
+  for(let i=0;i<10;i++){
+    const x=42+i*54, wrong=(i<2)?(lead>0.5):(lead>0.5);
+    const col=wrong?'#ef4444':'#10b981';
+    nodes+=`<circle cx="${x}" cy="88" r="18" fill="${col}" opacity="${i<2?0.95:0.75}"/>
+    <text x="${x}" y="93" text-anchor="middle" font-size="11.5" font-weight="850" fill="#fff">${i<2?'带头':'跟'+(i+1)}</text>`;
+    if(i<9) nodes+=`<line x1="${x+18}" y1="88" x2="${x+36}" y2="88" stroke="${col}" stroke-width="2.5"/>`;
+  }
+  document.getElementById('svg').innerHTML=nodes+`
+    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">第 1、2 人公开行动定调 → 第 3~10 人停止披露私人信号，集体跟风</text>
+    <text x="30" y="148" font-size="12.5" font-weight="750" fill="var(--tax-muted)">即使第 3~10 人手里握有 ${(sig*100).toFixed(0)}% 正确的反面证据，也会被前两人的公开选择淹没</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>排队买奶茶、网红店打卡、股市追高都是“信息级联”：一旦前两人定调，后面的人不再提供新信息，整条队列都在盲从最前面两个偶然的样本！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

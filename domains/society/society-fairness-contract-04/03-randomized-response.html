@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🪙 随机回答法：如何让受访者放心承认尴尬秘密？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🪙 随机回答法：如何让受访者放心承认尴尬秘密？</h1><p>误区：问卷调查问“你有没有偷逃过税或考试作弊”，除了匿名信箱之外没有办法让人敢说真话。真相：让受访者先偷偷抛硬币，正面才答真话、反面随机乱填——调查员永远不知道你是不是真的，却能精准反推出全校真实作弊率！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>硬币正面 (必须答真话) 概率</span><span id="vP">50%</span></label><input type="range" id="sP" min="20" max="80" value="50" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>群体真实作弊比例 (上帝视角)</span><span id="vTrue">24%</span></label><input type="range" id="sTrue" min="5" max="60" value="24" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">问卷表面“是”的比例</div><div class="k-val" id="kObs">—</div></div>
+        <div class="kpi"><div class="k-lbl">公式反推真实比例</div><div class="k-val" id="kEst" style="color:#10b981;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const p=+document.getElementById('sP').value/100, tr=+document.getElementById('sTrue').value/100;
+  document.getElementById('vP').textContent=(p*100).toFixed(0)+'%'; document.getElementById('vTrue').textContent=(tr*100).toFixed(0)+'%';
+  const obs=p*tr + (1-p)*0.5;
+  const est=(obs-(1-p)*0.5)/p;
+  document.getElementById('kObs').textContent=(obs*100).toFixed(1)+'%';
+  document.getElementById('kEst').textContent=(est*100).toFixed(1)+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#64748b">上帝视角真实比例: ${(tr*100).toFixed(1)}%</text>
+    <rect x="20" y="44" width="${tr*540}" height="22" rx="6" fill="#64748b"/>
+    <text x="20" y="96" font-size="13" font-weight="800" fill="#f59e0b">掺入硬币噪音后表面答“是”: ${(obs*100).toFixed(1)}%</text>
+    <rect x="20" y="106" width="${obs*540}" height="22" rx="6" fill="#f59e0b"/>
+    <text x="20" y="156" font-size="13" font-weight="800" fill="#10b981">脱噪反推 (Obs - 0.5×(1-p)) / p = ${(est*100).toFixed(1)}% (完美还原!)</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕你在问卷上勾了“是”，也可以理直气壮说“我是抛硬币反面随机选的”——<strong>个体拥有绝对的合理推诿权</strong>，而统计学家依然能精准算出群体真相 <strong>${(est*100).toFixed(1)}%</strong>！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

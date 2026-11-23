@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧮 有效违约算盘：什么时候“宁愿赔钱也要毁约”？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧮 有效违约算盘：什么时候“宁愿赔钱也要毁约”？</h1><p>误区：道德和法律应当在任何情况下都强迫违约方按原合同把货交出来。真相：如果新买家出价高出原买家利润，赔足原买家全部期待利益再把货卖给新买家，全社会总财富反而净增！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>新买家 B 愿出的高价</span><span id="vB">180 元</span></label><input type="range" id="sB" min="110" max="240" value="180" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>原买家 A 对货物的心理估值</span><span id="vA">130 元</span></label><input type="range" id="sA" min="110" max="200" value="130" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">原合同价 / 卖方成本</div><div class="k-val">100 / 80 元</div></div>
+        <div class="kpi"><div class="k-lbl">需赔 A 的期待利润</div><div class="k-val" id="kDam">—</div></div>
+        <div class="kpi"><div class="k-lbl">违约后卖方净赚</div><div class="k-val" id="kNet" style="color:#10b981;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const b=+document.getElementById('sB').value, a=+document.getElementById('sA').value;
+  document.getElementById('vB').textContent=b+' 元'; document.getElementById('vA').textContent=a+' 元';
+  const dam=a-100, keepNet=100-80, breachNet=(b-80)-dam, eff=b>a;
+  document.getElementById('kDam').textContent=dam+' 元';
+  document.getElementById('kNet').textContent=breachNet+' 元';
+  document.getElementById('kNet').style.color=eff?'#10b981':'#ef4444';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#64748b">老实履约卖给 A 净赚: ${keepNet} 元 (A 也净赚 ${dam} 元)</text>
+    <rect x="20" y="44" width="${keepNet*3}" height="24" rx="6" fill="#64748b"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="${eff?'#10b981':'#ef4444'}">违约改卖 B 并赔足 A (${dam}元) 后卖方净赚: ${breachNet} 元</text>
+    <rect x="20" y="112" width="${Math.max(8,breachNet*3)}" height="24" rx="6" fill="${eff?'#10b981':'#ef4444'}"/>
+    <text x="20" y="166" font-size="13" font-weight="800" fill="${eff?'#10b981':'#ef4444'}">${eff?'✅ 有效违约：A 没亏，你多赚 '+(breachNet-keepNet)+' 元，货到了更需要它的 B 手里！':'❌ 无效违约：新价不如 A 的估值高，赔完反而亏了'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>期待利益赔偿（只赔 A 原本能赚的 ${dam} 元，而不判天价惩罚金）是精妙的筛选器：只有当货对 B 的价值真的高于 A 时，违约才会发生！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

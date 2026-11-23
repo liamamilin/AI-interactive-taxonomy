@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔍 K-匿名重识别攻击透视镜（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔍 K-匿名重识别攻击透视镜（SVG）</h1><p>误区：只要把姓名、手机号、身份证删掉，公开医院或出行数据就绝对安全了。真相：87% 的美国人仅凭【出生日期 + 性别 + 5位邮编】这三个“准标识符”就能在全美唯一锁定身份！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>年龄公开精细度</span><span id="vAge">精确到岁</span></label><input type="range" id="sAge" min="1" max="3" value="3" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>地区/邮编公开精细度</span><span id="vZip">精确到街道</span></label><input type="range" id="sZip" min="1" max="3" value="3" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">满足的匿名度 K</div><div class="k-val" id="kK">—</div></div>
+        <div class="kpi"><div class="k-lbl">身份被唯一锁定风险</div><div class="k-val" id="kRsk" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const age=+document.getElementById('sAge').value, zip=+document.getElementById('sZip').value;
+  document.getElementById('vAge').textContent=['20岁一档','5岁一档','精确到岁'][age-1];
+  document.getElementById('vZip').textContent=['仅保留省','精确到区','精确到街道'][zip-1];
+  const score=age*zip;
+  const K=score>=6?1:(score>=4?3:(score>=2?8:18));
+  const risk=K===1?89:(K<=3?42:(K<=8?14:3));
+  document.getElementById('kK').textContent='K = '+K+(K===1?' (孤立暴露!)':'');
+  document.getElementById('kRsk').textContent=risk+'%';
+  document.getElementById('kRsk').style.color=risk>40?'#ef4444':'#10b981';
+  let dots='';
+  for(let i=0;i<18;i++){
+    const col=(i<K)?(K===1?'#ef4444':'#0284c7'):'#cbd5e1';
+    const x=42+(i%9)*58, y=48+Math.floor(i/9)*48;
+    dots+=`<circle cx="${x}" cy="${y}" r="14" fill="${col}"/>`;
+  }
+  document.getElementById('svg').innerHTML=dots+`
+    <text x="30" y="155" font-size="13" font-weight="800" fill="${K===1?'#ef4444':'#10b981'}">${K===1?'❌ 红点就是你：该特征组合全表只有你 1 个人，删掉名字也能秒认出！':'✅ 共有 '+K+' 个人与你完全同组（'+K+'-匿名），无法区分谁是谁'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>匿名化不是“删掉名字”这么简单！必须把年龄段和邮编泛化到足够粗，保证任何一条记录至少有 <strong>K 个一模一样的替身</strong>，才能挡住重识别攻击！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

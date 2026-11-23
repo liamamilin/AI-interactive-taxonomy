@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎟️ 碳排放权交易：总量控制 vs 一刀切</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎟️ 碳排放权交易：总量控制 vs 一刀切</h1><p>误区：环保减排最公平的办法是要求每家工厂减排同样的比例。真相：让减排便宜的工厂多减、再把富余配额卖给减排昂贵的工厂，总环保目标不变，总成本却能暴跌！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>老钢厂减排 1 吨成本</span><span id="vA">90 元</span></label><input type="range" id="sA" min="40" max="150" value="90" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>新电厂减排 1 吨成本</span><span id="vB">25 元</span></label><input type="range" id="sB" min="10" max="60" value="25" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">各减一半总成本</div><div class="k-val" id="kEq" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">碳交易后总成本</div><div class="k-val" id="kTr" style="color:#10b981;">—</div></div>
+        <div class="kpi"><div class="k-lbl">净省治理成本</div><div class="k-val" id="kSav">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const cA=+document.getElementById('sA').value, cB=+document.getElementById('sB').value;
+  document.getElementById('vA').textContent=cA+' 元'; document.getElementById('vB').textContent=cB+' 元';
+  const eqCost=50*cA+50*cB, trCost=100*Math.min(cA,cB), sav=eqCost-trCost;
+  document.getElementById('kEq').textContent=eqCost+' 元';
+  document.getElementById('kTr').textContent=trCost+' 元';
+  document.getElementById('kSav').textContent=sav+' 元';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">一刀切各减 50 吨总花费: ${eqCost} 元</text>
+    <rect x="20" y="44" width="540" height="26" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="44" width="${Math.min(540,eqCost/11000*540)}" height="26" rx="6" fill="#ef4444"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#10b981">碳交易后 (低成本方减 100 吨): ${trCost} 元</text>
+    <rect x="20" y="112" width="540" height="26" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${Math.min(540,trCost/11000*540)}" height="26" rx="6" fill="#10b981"/>
+    <text x="20" y="168" font-size="13" font-weight="800" fill="#0284c7">成交价区间: ${Math.min(cA,cB)} ~ ${Math.max(cA,cB)} 元/吨，双赢省下 ${sav} 元</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>碳排放总量同样减少 100 吨，允许配额交易却凭空省下了 <strong>${sav} 元</strong> 社会资源——市场定价天然把减排任务分配给了成本最低的人！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

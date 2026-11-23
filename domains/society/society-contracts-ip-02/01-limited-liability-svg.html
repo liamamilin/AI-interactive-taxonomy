@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚀 无限责任 vs 有限责任创业意愿对比（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚀 无限责任 vs 有限责任创业意愿对比（SVG）</h1><p>误区：有限责任制度只是为了保护资本家赖账，对社会发展有害无益。真相：如果投 10 万块买股票失败了还要连累你赔光全部身家，就再也没有人敢投资修铁路、造火箭和做芯片了！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>项目成功概率</span><span id="vP">25%</span></label><input type="range" id="sP" min="5" max="60" value="25" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>失败时超出出资的连带债务</span><span id="vDebt">300 万元</span></label><input type="range" id="sDebt" min="50" max="600" step="50" value="300" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">个人投 100 万无限责任期望</div><div class="k-val" id="kUnl">—</div></div>
+        <div class="kpi"><div class="k-lbl">有限责任期望 (上限亏100万)</div><div class="k-val" id="kLim" style="color:#10b981;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const p=+document.getElementById('sP').value/100, debt=+document.getElementById('sDebt').value;
+  document.getElementById('vP').textContent=(p*100).toFixed(0)+'%'; document.getElementById('vDebt').textContent=debt+' 万元';
+  const winPay=450;
+  const eUnl=Math.round(p*winPay - (1-p)*(100+debt));
+  const eLim=Math.round(p*winPay - (1-p)*100);
+  document.getElementById('kUnl').textContent=(eUnl>0?'+':'')+eUnl+' 万';
+  document.getElementById('kUnl').style.color=eUnl>0?'#0284c7':'#ef4444';
+  document.getElementById('kLim').textContent=(eLim>0?'+':'')+eLim+' 万';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="36" font-size="13" font-weight="800" fill="${eUnl>0?'#0284c7':'#ef4444'}">无限连带责任期望收益: ${eUnl} 万元 ${eUnl<=0?'(不敢投!)':''}</text>
+    <rect x="20" y="46" width="${Math.max(10,Math.min(540,eUnl+250))}" height="24" rx="6" fill="${eUnl>0?'#0284c7':'#ef4444'}"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#10b981">有限责任公司期望收益: +${eLim} 万元 (最高只亏本金 100 万)</text>
+    <rect x="20" y="112" width="${Math.max(10,Math.min(540,eLim+250))}" height="24" rx="6" fill="#10b981"/>
+    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">风险隔离让“失败成本封顶、成功收益不封顶”，资本市场才得以诞生</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>同样一个好项目，在无限责任下期望值暴跌到 <strong>${eUnl} 万</strong> 没人敢碰；加上“有限责任”防火墙后，投资者立刻敢于支持高风险创新！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

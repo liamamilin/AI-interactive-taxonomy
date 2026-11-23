@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🗡️ 刺破公司面纱风险雷达（连带责任测试）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🗡️ 刺破公司面纱风险雷达（连带责任测试）</h1><p>误区：只要注册了一家“有限责任公司”，老板把公司钱转进自己微信当零花钱，破产后也绝对不用自己还债。真相：只要财产混同或空壳欺诈，法院会“刺破公司面纱”，直接追索老板个人财产！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>公私账目混同度</span><span id="vMix">65%</span></label><input type="range" id="sMix" min="0" max="100" value="65" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>资本严重不足/空壳度</span><span id="vCap">50%</span></label><input type="range" id="sCap" min="0" max="100" value="50" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">面纱被刺破概率</div><div class="k-val" id="kPr">—</div></div>
+        <div class="kpi"><div class="k-lbl">风险等级</div><div class="k-val" id="kLv">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const mix=+document.getElementById('sMix').value, cap=+document.getElementById('sCap').value;
+  document.getElementById('vMix').textContent=mix+'%'; document.getElementById('vCap').textContent=cap+'%';
+  const pr=Math.min(99, Math.round(mix*0.65 + cap*0.35));
+  const danger=pr>=60;
+  document.getElementById('kPr').textContent=pr+'%';
+  document.getElementById('kPr').style.color=danger?'#ef4444':'#10b981';
+  document.getElementById('kLv').textContent=danger?'极高 (个人房产危险)':'安全 (隔离有效)';
+  document.getElementById('svg').innerHTML=`
+    <rect x="40" y="34" width="180" height="110" rx="12" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+    <text x="130" y="92" text-anchor="middle" font-size="15" font-weight="850" fill="#0369a1">公司独立外壳</text>
+    <line x1="220" y1="89" x2="360" y2="89" stroke="${danger?'#ef4444':'#10b981'}" stroke-width="${danger?5:2}" stroke-dasharray="${danger?'0':'6 4'}"/>
+    <text x="290" y="75" text-anchor="middle" font-size="12.5" font-weight="850" fill="${danger?'#ef4444':'#10b981'}">${danger?'面纱刺破!':'防火墙稳固'}</text>
+    <rect x="360" y="34" width="190" height="110" rx="12" fill="${danger?'#fee2e2':'#f0fdf4'}" stroke="${danger?'#ef4444':'#10b981'}" stroke-width="2.5"/>
+    <text x="455" y="82" text-anchor="middle" font-size="14" font-weight="850" fill="${danger?'#b91c1c':'#047857'}">股东个人资产</text>
+    <text x="455" y="108" text-anchor="middle" font-size="13" font-weight="800" fill="${danger?'#ef4444':'#10b981'}">穿透风险: ${pr}%</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>有限责任的前提是“把公司当成独立的人”！一旦账目混同度达到 ${mix}%、变成你的私人钱袋，法院就会直接穿透追责（穿透概率 ${pr}%）！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐑 独立性崩塌：当陪审员开始互相抄作业</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🐑 独立性崩塌：当陪审员开始互相抄作业</h1><p>误区：只要把 100 个人拉进同一个微信群讨论再投票，准确率一定会比 1 个人高。真相：一旦大家互相看脸色抄作业，100 个高度相关的投票者等价于只有 2 个人！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>个体正确率 p</span><span id="vP">65%</span></label><input type="range" id="sP" min="52" max="80" value="65" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>意见跟风相关性 ρ</span><span id="vR">55%</span></label><input type="range" id="sR" min="0" max="95" value="55" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">名义人数</div><div class="k-val">31 人</div></div>
+        <div class="kpi"><div class="k-lbl">等效独立人数</div><div class="k-val" id="kEff" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">实际准确率</div><div class="k-val" id="kAcc">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function majProb(n,p){
+  let sum=0, comb=1, kMin=Math.floor(n/2)+1;
+  for(let k=0;k<=n;k++){ if(k>0) comb=comb*(n-k+1)/k; if(k>=kMin) sum+=comb*Math.pow(p,k)*Math.pow(1-p,n-k); }
+  return sum;
+}
+function upd(){
+  const p=+document.getElementById('sP').value/100, rho=+document.getElementById('sR').value/100;
+  document.getElementById('vP').textContent=(p*100).toFixed(0)+'%'; document.getElementById('vR').textContent=(rho*100).toFixed(0)+'%';
+  const N=31;
+  const eff=Math.max(1, Math.round(N/(1+(N-1)*rho)));
+  const effOdd=eff%2===0?eff+1:eff;
+  const accIdeal=majProb(N,p), accReal=majProb(effOdd,p);
+  document.getElementById('kEff').textContent=effOdd+' 人';
+  document.getElementById('kAcc').textContent=(accReal*100).toFixed(1)+'%';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#10b981">完全独立 (31人): ${(accIdeal*100).toFixed(1)}%</text>
+    <rect x="20" y="44" width="540" height="26" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="44" width="${accIdeal*540}" height="26" rx="6" fill="#10b981"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">含跟风 ρ=${(rho*100).toFixed(0)}% (等效 ${effOdd} 人): ${(accReal*100).toFixed(1)}%</text>
+    <rect x="20" y="112" width="540" height="26" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${accReal*540}" height="26" rx="6" fill="#0284c7"/>
+    <text x="20" y="168" font-size="12.5" font-weight="750" fill="var(--tax-muted)">有效独立样本缩水比例: ${(100-effOdd/N*100).toFixed(0)}%</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>孔多塞定理的隐含前提是<strong>独立判断</strong>！当跟风度达到 ${(rho*100).toFixed(0)}% 时，31 个人瞬间缩水成 <strong>${effOdd} 个独立大脑</strong>，群体智慧彻底失效！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎯 比例原则审查仪：不能用大炮打蚊子</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎯 比例原则审查仪：不能用大炮打蚊子</h1><p>误区：只要执法目的是为了公共利益，采取再严厉、再一刀切的手段都是合法的。真相：即使目标正当，如果存在更温和的替代手段，或者造成的权利伤害远超收益，依然违背比例原则！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>行政处罚/限制手段严厉度</span><span id="vS">75 分</span></label><input type="range" id="sS" min="10" max="100" value="75" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>实际新增公共利益</span><span id="vG">45 分</span></label><input type="range" id="sG" min="10" max="100" value="45" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">公民权利受损</div><div class="k-val" id="kH" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">净社会平衡值</div><div class="k-val" id="kNet">—</div></div>
+        <div class="kpi"><div class="k-lbl">审查结论</div><div class="k-val" id="kRes">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const sev=+document.getElementById('sS').value, gain=+document.getElementById('sG').value;
+  document.getElementById('vS').textContent=sev+' 分'; document.getElementById('vG').textContent=gain+' 分';
+  const harm=Math.round(sev*0.9), net=gain-harm;
+  const ok=net>=0 && sev<=gain+15;
+  document.getElementById('kH').textContent=harm+' 分';
+  document.getElementById('kNet').textContent=(net>0?'+':'')+net+' 分';
+  document.getElementById('kRes').textContent=ok?'符合比例原则':'大炮打蚊子 (越界)';
+  document.getElementById('kRes').style.color=ok?'#10b981':'#ef4444';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="#10b981">公共利益增量: +${gain} 分</text>
+    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="44" width="${gain*5.4}" height="24" rx="6" fill="#10b981"/>
+    <text x="20" y="102" font-size="13" font-weight="800" fill="#ef4444">手段造成的权利损害: -${harm} 分</text>
+    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="112" width="${harm*5.4}" height="24" rx="6" fill="#ef4444"/>
+    <text x="20" y="166" font-size="13" font-weight="800" fill="${ok?'#10b981':'#ef4444'}">${ok?'✅ 手段与目的相称':'❌ 损害大于收益，违反狭义比例性'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>比例原则是公权力的紧箍咒：手段必须有效（适当性）、必须是损害最小的（必要性），且绝不能为了赚 ${gain} 分公益去毁掉 ${harm} 分公民基本权利！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>

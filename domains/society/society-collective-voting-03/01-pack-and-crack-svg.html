@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✂️ 集中与打散 (Pack & Crack) 网格实验室</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>✂️ 集中与打散 (Pack & Crack) 网格实验室</h1><p>误区：只要每个选区人口一样多，投票结果就能公平反映全城选民的比例。真相：通过把对手选民“集中在一个区（Pack）”再把其余分散稀释（Crack），同样人口能画出截然相反的席位！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setMode('fair',this)">规则一：方正横排划分</button>
+        <button class="btn" onclick="setMode('blue',this)">规则二：蓝党操刀（打散红党）</button>
+        <button class="btn" onclick="setMode('red',this)">规则三：红党操刀（反杀蓝党）</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>全局摇摆选民倒向蓝党比例</span><span id="vSw">60%</span></label><input type="range" id="sSw" min="0" max="100" value="60" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 220"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">全城选民比 (蓝:红)</div><div class="k-val" id="kPop">—</div></div>
+        <div class="kpi"><div class="k-lbl">蓝党赢得选区</div><div class="k-val" id="kBS" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">红党赢得选区</div><div class="k-val" id="kRS" style="color:#ef4444;">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let mode='fair';
+const BASE=[1,1,0,0,0, 1,1,1,0,0, 1,1,0,0,0, 1,0,0,2,2, 1,1,2,2,2];
+const MAPS={
+  fair:[0,0,0,0,0, 1,1,1,1,1, 2,2,2,2,2, 3,3,3,3,3, 4,4,4,4,4],
+  blue:[0,0,1,1,2, 0,0,1,1,2, 0,3,3,2,2, 4,3,3,3,2, 4,4,4,4,1],
+  red:[0,0,0,1,1, 0,2,2,1,1, 0,2,2,3,1, 4,2,3,3,3, 4,4,4,4,3]
+};
+const DCOL=['#bae6fd','#fde68a','#bbf7d0','#ddd6fe','#fbcfe8'];
+function setMode(m,btn){ mode=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const sw=+document.getElementById('sSw').value; document.getElementById('vSw').textContent=sw+'%';
+  const grid=BASE.map((v,i)=>v===2?(i%5<(sw>=50?4:2)?1:0):v);
+  const bPop=grid.filter(x=>x===1).length, rPop=25-bPop;
+  const dist=MAPS[mode];
+  const counts=[[0,0],[0,0],[0,0],[0,0],[0,0]];
+  grid.forEach((v,i)=>{ counts[dist[i]][v]++; });
+  let bSeats=0, rSeats=0;
+  counts.forEach(([r,b])=>{ if(b>r) bSeats++; else rSeats++; });
+  document.getElementById('kPop').textContent=`${bPop} : ${rPop}`;
+  document.getElementById('kBS').textContent=`${bSeats} / 5 席`;
+  document.getElementById('kRS').textContent=`${rSeats} / 5 席`;
+  let svg='';
+  for(let r=0;r<5;r++) for(let c=0;c<5;c++){
+    const idx=r*5+c, x=30+c*38, y=15+r*38, d=dist[idx], isB=grid[idx]===1;
+    svg+=`<rect x="${x}" y="${y}" width="35" height="35" rx="6" fill="${DCOL[d]}" stroke="#64748b" stroke-width="1"/>
+    <circle cx="${x+17.5}" cy="${y+17.5}" r="9" fill="${isB?'#0284c7':'#ef4444'}"/>`;
+  }
+  for(let d=0;d<5;d++){
+    const [r,b]=counts[d], y=22+d*38, winB=b>r;
+    svg+=`<rect x="255" y="${y}" width="315" height="30" rx="8" fill="${DCOL[d]}" stroke="${winB?'#0284c7':'#ef4444'}" stroke-width="2"/>
+    <text x="270" y="${y+20}" font-size="13" font-weight="800" fill="#0f172a">第 ${d+1} 选区：蓝 ${b} vs 红 ${r} → ${winB?'蓝胜':'红胜'}</text>`;
+  }
+  document.getElementById('svg').innerHTML=svg;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>蓝红选民总比 <strong>${bPop}:${rPop}</strong> 纹丝未动，仅仅重画 5 个选区边界，席位就变成了 <strong>蓝 ${bSeats} 席 vs 红 ${rSeats} 席</strong>！这就是政治学家最警惕的“杰利蝾螈”！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚖️ 无知之幕社会契约投票器（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 无知之幕社会契约投票器（SVG）</h1><p>误区：公平的制度全靠富人发善心施舍，否则谁也不会支持高保障社会。真相：只要在制定规则时蒙上“无知之幕”（不知道自己会投胎成谁），纯粹自利的理性人也会拼命把底线兜牢！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>社会保障与再分配力度</span><span id="vTax">40%</span></label><input type="range" id="sTax" min="0" max="80" value="40" oninput="upd()"></div>
+        <div class="ctrl-box"><label><span>你对“万一投胎成最穷者”的恐惧度</span><span id="vRisk">75%</span></label><input type="range" id="sRisk" min="10" max="100" value="75" oninput="upd()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">顶层 20% 收入</div><div class="k-val" id="kTop">—</div></div>
+        <div class="kpi"><div class="k-lbl">底层 20% 保底收入</div><div class="k-val" id="kBot" style="color:#10b981;">—</div></div>
+        <div class="kpi"><div class="k-lbl">你是否愿投胎进此社会</div><div class="k-val" id="kVote">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function upd(){
+  const t=+document.getElementById('sTax').value/100, risk=+document.getElementById('sRisk').value/100;
+  document.getElementById('vTax').textContent=(t*100).toFixed(0)+'%'; document.getElementById('vRisk').textContent=(risk*100).toFixed(0)+'%';
+  const eff=1-t*t*0.55;
+  const top=Math.round(300*(1-t*0.65)*eff);
+  const mid=Math.round(90*eff + 35*t);
+  const bot=Math.round((15 + 115*t)*eff);
+  const ok=bot >= 40*risk;
+  document.getElementById('kTop').textContent=top+' 万';
+  document.getElementById('kBot').textContent=bot+' 万';
+  document.getElementById('kVote').textContent=ok?'愿意签署契约':'拒签 (底层太惨)';
+  document.getElementById('kVote').style.color=ok?'#10b981':'#ef4444';
+  const bars=[['顶层 (20%概率)',top,'#0284c7'],['中产 (60%概率)',mid,'#8b5cf6'],['底层 (20%概率)',bot,'#10b981']];
+  let svg='';
+  bars.forEach(([nm,val,col],i)=>{
+    const y=26+i*50;
+    svg+=`<text x="20" y="${y+16}" font-size="13" font-weight="800" fill="var(--tax-text)">${nm}</text>
+    <rect x="155" y="${y}" width="380" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="155" y="${y}" width="${Math.min(380,val*1.2)}" height="24" rx="6" fill="${col}"/>
+    <text x="${165+Math.min(380,val*1.2)}" y="${y+17}" font-size="12.5" font-weight="850" fill="${col}">${val} 万</text>`;
+  });
+  document.getElementById('svg').innerHTML=svg;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>罗尔斯的“无知之幕”把道德问题变成了理性风险决策：不知道自己会抽中哪张人生彩票时，你最关心的不再是顶层能赚 ${top} 万，而是底层能不能有 <strong>${bot} 万</strong> 尊严兜底！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+upd();
+  </script>
+</body>
+</html>
