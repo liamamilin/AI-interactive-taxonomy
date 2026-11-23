@@ -1714,7 +1714,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-interactive-toys/01-text-slot-machine.html",
               "title": "文字老虎机",
               "icon": "🎰",
-              "archetype": "interactive",
+              "archetype": "simulation",
               "concept": "Token 预测 · Temperature 温度",
               "summary": "拧动温度滑块、转动概率大转盘，亲眼看 AI 如何一个词一个词“摇”出整段话。"
             },
@@ -1724,7 +1724,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-interactive-toys/02-word-spotlight.html",
               "title": "词语聚光灯",
               "icon": "🔦",
-              "archetype": "interactive",
+              "archetype": "spatial",
               "concept": "Self-Attention · 记忆窗口",
               "summary": "切换一个关键词看注意力光线瞬间改道，再不断发闲聊看 AI 如何把“花生过敏”挤出记忆。"
             },
@@ -1734,7 +1734,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-interactive-toys/03-hallucination-lab.html",
               "title": "幻觉实验室",
               "icon": "🧪",
-              "archetype": "interactive",
+              "archetype": "scenario",
               "concept": "幻觉成因 · Prompt 护栏 · RAG 小抄",
               "summary": "扮演蒙眼答题员亲手拼出假百科，再拖入事实小抄看虚假概率条瞬间坍缩。"
             }
@@ -1960,7 +1960,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-training-toys/01-pretraining-dial.html",
               "title": "猜字调参机",
               "icon": "🎛️",
-              "archetype": "interactive",
+              "archetype": "simulation",
               "concept": "预训练 · Loss 误差 · 梯度下降",
               "summary": "点击反向传播看参数旋钮自动微调、误差曲线俯冲，再拉爆学习率体验梯度爆炸。"
             },
@@ -1970,7 +1970,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-training-toys/02-sft-rlhf-trainer.html",
               "title": "驯兽师打分器",
               "icon": "🦁",
-              "archetype": "interactive",
+              "archetype": "scenario",
               "concept": "Base 基座 → SFT → RLHF 对齐",
               "summary": "先看野生基座模型如何乱续写网页，再投喂示范卡并当人类打分员驯出贴心助手。"
             },
@@ -1980,7 +1980,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-training-toys/03-scaling-overfit-lab.html",
               "title": "炼丹炉控制室",
               "icon": "⚗️",
-              "archetype": "interactive",
+              "archetype": "simulation",
               "concept": "Scaling Law · 过拟合 · 涌现",
               "summary": "拉动参数、数据、轮数三拉杆，对比刷题与考场新题剪刀差，调出解锁涌现的黄金配比。"
             }
@@ -2207,7 +2207,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-finetuning-toys/01-lora-sticker-shop.html",
               "title": "技能贴纸店",
               "icon": "🏷️",
-              "archetype": "interactive",
+              "archetype": "builder",
               "concept": "全量微调 vs LoRA 低秩外挂",
               "summary": "对比重刷 64 块主权重与贴 48MB 透明贴纸，给同一个冻结大脑秒换医生/猫娘皮肤。"
             },
@@ -2217,7 +2217,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-finetuning-toys/02-data-curation-forgetting.html",
               "title": "数据挑拣台",
               "icon": "☕",
-              "archetype": "interactive",
+              "archetype": "simulation",
               "concept": "数据质量 > 数量 · 灾难性遗忘",
               "summary": "体验塞 6000 条脏数据如何把模型带偏，以及不掺通用老题狂训如何让它忘掉李白。"
             },
@@ -2227,7 +2227,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-finetuning-toys/03-prompt-rag-finetune.html",
               "title": "三选一诊疗室",
               "icon": "🩺",
-              "archetype": "interactive",
+              "archetype": "scenario",
               "concept": "Prompt vs RAG vs 微调选型",
               "summary": "当一回 AI 架构医生给 4 个真实业务需求开处方，2 分钟背熟技术选型口诀。"
             }
@@ -2280,55 +2280,6 @@ window.TAXONOMY_DATA = {
               "archetype": "race",
               "concept": "串行瓶颈 · GPU 并行计算 · 全局直连路径",
               "summary": "同屏派发 16 词长句，直观看清为什么必须排队的 RNN 最终被全员并行的 Transformer 取代。"
-            }
-          ]
-        },
-        {
-          "id": "ai/ai-infra-safety-01",
-          "slug": "ai-infra-safety-01",
-          "domain": "ai",
-          "branch": "infra-safety",
-          "order": 4,
-          "title": "GPU 与 AI 芯片并行原理",
-          "icon": "🧮",
-          "color": "#2563eb",
-          "soft": "#eff6ff",
-          "subtitle": "为什么 CPU 算大模型慢如蜗牛，而 GPU、TPU 和 NPU 能靠“人海战术”和脉动阵列把矩阵乘法拉满？",
-          "difficulty": "进阶",
-          "related": [
-            "ai/llm-infra-toys",
-            "ai/ai-dl-foundations-05"
-          ],
-          "toys": [
-            {
-              "id": "ai/ai-infra-safety-01/01-cpu-vs-gpu-race.html",
-              "file": "01-cpu-vs-gpu-race.html",
-              "path": "./domains/ai/ai-infra-safety-01/01-cpu-vs-gpu-race.html",
-              "title": "CPU 法拉利 vs GPU 大巴车竞速",
-              "icon": "🚌",
-              "archetype": "race",
-              "concept": "低延迟串行 vs 高吞吐并行 · SIMD / SIMT · 矩阵乘法",
-              "summary": "在“复杂逻辑分支”与“1000 次矩阵乘加”两个任务上，让 4 核 CPU 和 64 核 GPU 同步起跑对比。"
-            },
-            {
-              "id": "ai/ai-infra-safety-01/02-memory-wall-roofline.html",
-              "file": "02-memory-wall-roofline.html",
-              "path": "./domains/ai/ai-infra-safety-01/02-memory-wall-roofline.html",
-              "title": "显存墙与 Roofline 屋顶线沙盘",
-              "icon": "🧱",
-              "archetype": "simulation",
-              "concept": "算术强度 · Memory-Bound vs Compute-Bound · HBM 带宽",
-              "summary": "调节批大小 Batch Size，亲眼看推理如何撞上 HBM 显存带宽天花板，以及批处理如何把算力榨干。"
-            },
-            {
-              "id": "ai/ai-infra-safety-01/03-systolic-array-spatial.html",
-              "file": "03-systolic-array-spatial.html",
-              "path": "./domains/ai/ai-infra-safety-01/03-systolic-array-spatial.html",
-              "title": "TPU 脉动阵列数据流图谱",
-              "icon": "💎",
-              "archetype": "spatial",
-              "concept": "Tensor Core · 脉动阵列 Systolic Array · 数据复用",
-              "summary": "单步推进 3×3 脉动阵列时钟脉冲，直观观察权重驻留芯片内、激活值如心跳般波浪传递的零搬运魔法。"
             }
           ]
         },
@@ -2553,7 +2504,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-infra-toys/01-vram-kv-cache.html",
               "title": "显存搬家大作战",
               "icon": "🚛",
-              "archetype": "interactive",
+              "archetype": "simulation",
               "concept": "Quantization 量化 · KV Cache",
               "summary": "用 INT4 把 70B 大模型瘦身塞进单卡，再开关 KV Cache 看计算量从 55 次暴降到 10 次。"
             },
@@ -2563,7 +2514,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-infra-toys/02-continuous-batching.html",
               "title": "GPU 食堂打饭机",
               "icon": "🍱",
-              "archetype": "interactive",
+              "archetype": "race",
               "concept": "静态批处理 vs 连续批处理（vLLM）",
               "summary": "双甘特图同步竞速，直观体验“谁写完谁先走、空位立刻补新人”如何消灭空转气泡。"
             },
@@ -2573,7 +2524,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-infra-toys/03-prefill-decode-pipeline.html",
               "title": "双阶段流水线",
               "icon": "⏱️",
-              "archetype": "interactive",
+              "archetype": "simulation",
               "concept": "Prefill 读题 · Decode 吐字 · PD 分离",
               "summary": "透视 GPU 算力条与显存带宽条的“跷跷板”切换，体验 PD 分离如何根治打字卡顿。"
             }
@@ -2603,7 +2554,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/agent-interactive-toys/01-tool-calling-bench.html",
               "title": "手脚装配台",
               "icon": "🦾",
-              "archetype": "interactive",
+              "archetype": "builder",
               "concept": "Tool Calling（工具调用）",
               "summary": "先看纯大脑面对查天气、算账、发邮件如何瞎猜，再插上工具插件看它精准调度外援。"
             },
@@ -2613,7 +2564,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/agent-interactive-toys/02-react-maze-loop.html",
               "title": "ReAct 迷宫特工",
               "icon": "🧭",
-              "archetype": "interactive",
+              "archetype": "spatial",
               "concept": "ReAct 自主循环 · 动态纠错",
               "summary": "随时在迷宫放路障捣乱，看 Agent 如何撞门后自己找钥匙、绕路并触发 Max Steps 保护。"
             },
@@ -2623,7 +2574,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/agent-interactive-toys/03-autonomy-guardrails.html",
               "title": "权限闸门",
               "icon": "🚧",
-              "archetype": "interactive",
+              "archetype": "scenario",
               "concept": "任务拆解 · Human-in-the-Loop",
               "summary": "对比手把手副驾驶、高危刹车与 YOLO 全自动 3 秒删老板合同的职场社死现场。"
             }
@@ -2680,52 +2631,51 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
-          "id": "ai/ai-infra-safety-02",
-          "slug": "ai-infra-safety-02",
+          "id": "ai/ai-infra-safety-01",
+          "slug": "ai-infra-safety-01",
           "domain": "ai",
           "branch": "infra-safety",
           "order": 5,
-          "title": "分布式训练并行（DP / TP / PP）",
-          "icon": "🕸️",
+          "title": "GPU 与 AI 芯片并行原理",
+          "icon": "🧮",
           "color": "#2563eb",
           "soft": "#eff6ff",
-          "subtitle": "一张显卡装不下千亿参数大模型，怎么把几千张 GPU 编织成一台巨型超级计算机？",
+          "subtitle": "为什么 CPU 算大模型慢如蜗牛，而 GPU、TPU 和 NPU 能靠“人海战术”和脉动阵列把矩阵乘法拉满？",
           "difficulty": "进阶",
           "related": [
             "ai/llm-infra-toys",
-            "ai/llm-training-toys",
-            "ai/ai-infra-safety-01"
+            "ai/ai-dl-foundations-05"
           ],
           "toys": [
             {
-              "id": "ai/ai-infra-safety-02/01-3d-parallelism-builder.html",
-              "file": "01-3d-parallelism-builder.html",
-              "path": "./domains/ai/ai-infra-safety-02/01-3d-parallelism-builder.html",
-              "title": "3D 并行切分装配台（DP / TP / PP）",
-              "icon": "🧩",
-              "archetype": "builder",
-              "concept": "数据并行 DP · 张量并行 TP · 流水线并行 PP",
-              "summary": "切换三种切分策略把 70B 模型塞进 4 张 GPU，直观对比每张卡的显存占用与卡间通信压力。"
-            },
-            {
-              "id": "ai/ai-infra-safety-02/02-pipeline-bubble-simulation.html",
-              "file": "02-pipeline-bubble-simulation.html",
-              "path": "./domains/ai/ai-infra-safety-02/02-pipeline-bubble-simulation.html",
-              "title": "流水线气泡（Bubble）消除沙盘",
-              "icon": "🫧",
-              "archetype": "simulation",
-              "concept": "流水线并行 PP · Micro-batch 微批次 · 气泡率公式",
-              "summary": "调高微批次切分数 M，亲眼看见 4 张 GPU 之间大片白白发呆的“空闲气泡”如何被迅速挤掉。"
-            },
-            {
-              "id": "ai/ai-infra-safety-02/03-nvlink-vs-ethernet-race.html",
-              "file": "03-nvlink-vs-ethernet-race.html",
-              "path": "./domains/ai/ai-infra-safety-02/03-nvlink-vs-ethernet-race.html",
-              "title": "NVLink vs 以太网梯度同步竞速",
-              "icon": "⚡",
+              "id": "ai/ai-infra-safety-01/01-cpu-vs-gpu-race.html",
+              "file": "01-cpu-vs-gpu-race.html",
+              "path": "./domains/ai/ai-infra-safety-01/01-cpu-vs-gpu-race.html",
+              "title": "CPU 法拉利 vs GPU 大巴车竞速",
+              "icon": "🚌",
               "archetype": "race",
-              "concept": "All-Reduce 梯度同步 · NVLink 900GB/s · 通信掩盖",
-              "summary": "对比张量并行跑在机内 NVLink 与跨机普通千兆/百兆网上的真实步时，理解为什么集群贵在互联。"
+              "concept": "低延迟串行 vs 高吞吐并行 · SIMD / SIMT · 矩阵乘法",
+              "summary": "在“复杂逻辑分支”与“1000 次矩阵乘加”两个任务上，让 4 核 CPU 和 64 核 GPU 同步起跑对比。"
+            },
+            {
+              "id": "ai/ai-infra-safety-01/02-memory-wall-roofline.html",
+              "file": "02-memory-wall-roofline.html",
+              "path": "./domains/ai/ai-infra-safety-01/02-memory-wall-roofline.html",
+              "title": "显存墙与 Roofline 屋顶线沙盘",
+              "icon": "🧱",
+              "archetype": "simulation",
+              "concept": "算术强度 · Memory-Bound vs Compute-Bound · HBM 带宽",
+              "summary": "调节批大小 Batch Size，亲眼看推理如何撞上 HBM 显存带宽天花板，以及批处理如何把算力榨干。"
+            },
+            {
+              "id": "ai/ai-infra-safety-01/03-systolic-array-spatial.html",
+              "file": "03-systolic-array-spatial.html",
+              "path": "./domains/ai/ai-infra-safety-01/03-systolic-array-spatial.html",
+              "title": "TPU 脉动阵列数据流图谱",
+              "icon": "💎",
+              "archetype": "spatial",
+              "concept": "Tensor Core · 脉动阵列 Systolic Array · 数据复用",
+              "summary": "单步推进 3×3 脉动阵列时钟脉冲，直观观察权重驻留芯片内、激活值如心跳般波浪传递的零搬运魔法。"
             }
           ]
         },
@@ -3000,7 +2950,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/agent-harness-toys/01-harness-pit-stop.html",
               "title": "同芯赛车场",
               "icon": "🏎️",
-              "archetype": "interactive",
+              "archetype": "race",
               "concept": "模型是引擎 · Harness 定成败",
               "summary": "同款 LLM 引擎同场竞速，自由拔插 4 件 Harness 装备看它如何吊打裸奔模型。"
             },
@@ -3010,7 +2960,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/agent-harness-toys/02-context-compactor.html",
               "title": "上下文急救室",
               "icon": "🧰",
-              "archetype": "interactive",
+              "archetype": "simulation",
               "concept": "Context Engineering 内存管家",
               "summary": "把海量日志灌爆水箱，再用工具裁剪、对话压缩与外部 task.md 把水位与账单打下来。"
             },
@@ -3020,9 +2970,59 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/agent-harness-toys/03-verifier-circuit-breaker.html",
               "title": "闭环验收台",
               "icon": "🚀",
-              "archetype": "interactive",
+              "archetype": "builder",
               "concept": "客观验收官 · 死循环检测 · 熔断器",
               "summary": "绝不轻信 AI 的“我修好了”，组合三大验收与熔断机关护送火箭安全升空。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-infra-safety-02",
+          "slug": "ai-infra-safety-02",
+          "domain": "ai",
+          "branch": "infra-safety",
+          "order": 6,
+          "title": "分布式训练并行（DP / TP / PP）",
+          "icon": "🕸️",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "一张显卡装不下千亿参数大模型，怎么把几千张 GPU 编织成一台巨型超级计算机？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/llm-infra-toys",
+            "ai/llm-training-toys",
+            "ai/ai-infra-safety-01"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-infra-safety-02/01-3d-parallelism-builder.html",
+              "file": "01-3d-parallelism-builder.html",
+              "path": "./domains/ai/ai-infra-safety-02/01-3d-parallelism-builder.html",
+              "title": "3D 并行切分装配台（DP / TP / PP）",
+              "icon": "🧩",
+              "archetype": "builder",
+              "concept": "数据并行 DP · 张量并行 TP · 流水线并行 PP",
+              "summary": "切换三种切分策略把 70B 模型塞进 4 张 GPU，直观对比每张卡的显存占用与卡间通信压力。"
+            },
+            {
+              "id": "ai/ai-infra-safety-02/02-pipeline-bubble-simulation.html",
+              "file": "02-pipeline-bubble-simulation.html",
+              "path": "./domains/ai/ai-infra-safety-02/02-pipeline-bubble-simulation.html",
+              "title": "流水线气泡（Bubble）消除沙盘",
+              "icon": "🫧",
+              "archetype": "simulation",
+              "concept": "流水线并行 PP · Micro-batch 微批次 · 气泡率公式",
+              "summary": "调高微批次切分数 M，亲眼看见 4 张 GPU 之间大片白白发呆的“空闲气泡”如何被迅速挤掉。"
+            },
+            {
+              "id": "ai/ai-infra-safety-02/03-nvlink-vs-ethernet-race.html",
+              "file": "03-nvlink-vs-ethernet-race.html",
+              "path": "./domains/ai/ai-infra-safety-02/03-nvlink-vs-ethernet-race.html",
+              "title": "NVLink vs 以太网梯度同步竞速",
+              "icon": "⚡",
+              "archetype": "race",
+              "concept": "All-Reduce 梯度同步 · NVLink 900GB/s · 通信掩盖",
+              "summary": "对比张量并行跑在机内 NVLink 与跨机普通千兆/百兆网上的真实步时，理解为什么集群贵在互联。"
             }
           ]
         },
@@ -3031,7 +3031,7 @@ window.TAXONOMY_DATA = {
           "slug": "ai-applied-agents-01",
           "domain": "ai",
           "branch": "applied-agents",
-          "order": 6,
+          "order": 7,
           "title": "Workflow 编排 vs 自主 Agent 边界",
           "icon": "🧭",
           "color": "#2563eb",
@@ -3081,7 +3081,7 @@ window.TAXONOMY_DATA = {
           "slug": "ai-infra-safety-03",
           "domain": "ai",
           "branch": "infra-safety",
-          "order": 6,
+          "order": 7,
           "title": "机制可解释性（打开黑盒）",
           "icon": "🔬",
           "color": "#2563eb",
@@ -3127,11 +3127,61 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "ai/token-embedding-toys",
+          "slug": "token-embedding-toys",
+          "domain": "ai",
+          "branch": "llm-foundations",
+          "order": 7,
+          "title": "Token 与向量空间",
+          "icon": "🔬",
+          "color": "#0ea5e9",
+          "soft": "#f0f9ff",
+          "subtitle": "揭秘 AI 怎么“看”文字：切词显微镜、语义星座图与词义变色龙",
+          "difficulty": "入门",
+          "related": [
+            "ai/llm-interactive-toys",
+            "ai/rag-deep-dive-toys",
+            "ai/multimodal-ai-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/token-embedding-toys/01-tokenizer-microscope.html",
+              "file": "01-tokenizer-microscope.html",
+              "path": "./domains/ai/token-embedding-toys/01-tokenizer-microscope.html",
+              "title": "切词显微镜",
+              "icon": "🔬",
+              "archetype": "builder",
+              "concept": "Tokenization 分词 · BPE 子词切分",
+              "summary": "输入任意中英文看它被切成哪些 Token 编号，切到 AI 视角瞬间懂为什么它数不清 strawberry 有几个 r。"
+            },
+            {
+              "id": "ai/token-embedding-toys/02-embedding-galaxy.html",
+              "file": "02-embedding-galaxy.html",
+              "path": "./domains/ai/token-embedding-toys/02-embedding-galaxy.html",
+              "title": "语义星座图",
+              "icon": "🌌",
+              "archetype": "spatial",
+              "concept": "Embedding 词向量 · 余弦相似度 · 向量算术",
+              "summary": "在 2D 语义星空中点击任意词看近义词连线，亲手演示“国王 - 男人 + 女人 = 王后”的几何魔法。"
+            },
+            {
+              "id": "ai/token-embedding-toys/03-polysemy-embedding.html",
+              "file": "03-polysemy-embedding.html",
+              "path": "./domains/ai/token-embedding-toys/03-polysemy-embedding.html",
+              "title": "词义变色龙",
+              "icon": "🦎",
+              "archetype": "spatial",
+              "concept": "静态词向量 vs 动态语境向量",
+              "summary": "切换包含“苹果”和“杜鹃”的不同句子，亲眼看着同一个词的坐标点在水果、科技、金融星云之间实时滑行。"
+            }
+          ]
+        },
+        {
           "id": "ai/ai-infra-safety-04",
           "slug": "ai-infra-safety-04",
           "domain": "ai",
           "branch": "infra-safety",
-          "order": 7,
+          "order": 8,
           "title": "AI 伦理、水印与隐私治理",
           "icon": "🛡️",
           "color": "#2563eb",
@@ -3176,56 +3226,6 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
-          "id": "ai/token-embedding-toys",
-          "slug": "token-embedding-toys",
-          "domain": "ai",
-          "branch": "llm-foundations",
-          "order": 7,
-          "title": "Token 与向量空间",
-          "icon": "🔬",
-          "color": "#0ea5e9",
-          "soft": "#f0f9ff",
-          "subtitle": "揭秘 AI 怎么“看”文字：切词显微镜、语义星座图与词义变色龙",
-          "difficulty": "入门",
-          "related": [
-            "ai/llm-interactive-toys",
-            "ai/rag-deep-dive-toys",
-            "ai/multimodal-ai-toys"
-          ],
-          "toys": [
-            {
-              "id": "ai/token-embedding-toys/01-tokenizer-microscope.html",
-              "file": "01-tokenizer-microscope.html",
-              "path": "./domains/ai/token-embedding-toys/01-tokenizer-microscope.html",
-              "title": "切词显微镜",
-              "icon": "🔬",
-              "archetype": "interactive",
-              "concept": "Tokenization 分词 · BPE 子词切分",
-              "summary": "输入任意中英文看它被切成哪些 Token 编号，切到 AI 视角瞬间懂为什么它数不清 strawberry 有几个 r。"
-            },
-            {
-              "id": "ai/token-embedding-toys/02-embedding-galaxy.html",
-              "file": "02-embedding-galaxy.html",
-              "path": "./domains/ai/token-embedding-toys/02-embedding-galaxy.html",
-              "title": "语义星座图",
-              "icon": "🌌",
-              "archetype": "interactive",
-              "concept": "Embedding 词向量 · 余弦相似度 · 向量算术",
-              "summary": "在 2D 语义星空中点击任意词看近义词连线，亲手演示“国王 - 男人 + 女人 = 王后”的几何魔法。"
-            },
-            {
-              "id": "ai/token-embedding-toys/03-polysemy-embedding.html",
-              "file": "03-polysemy-embedding.html",
-              "path": "./domains/ai/token-embedding-toys/03-polysemy-embedding.html",
-              "title": "词义变色龙",
-              "icon": "🦎",
-              "archetype": "interactive",
-              "concept": "静态词向量 vs 动态语境向量",
-              "summary": "切换包含“苹果”和“杜鹃”的不同句子，亲眼看着同一个词的坐标点在水果、科技、金融星云之间实时滑行。"
-            }
-          ]
-        },
-        {
           "id": "ai/reasoning-model-toys",
           "slug": "reasoning-model-toys",
           "domain": "ai",
@@ -3249,7 +3249,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/reasoning-model-toys/01-fast-vs-slow-thinking.html",
               "title": "快思考 vs 慢思考",
               "icon": "⚡",
-              "archetype": "interactive",
+              "archetype": "race",
               "concept": "System 1 直觉 vs System 2 思考链（CoT）",
               "summary": "在 3 道经典反直觉逻辑陷阱题上，对比快思考 0.2 秒脱口答错与慢思考打草稿验算的神奇反转。"
             },
@@ -3259,7 +3259,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/reasoning-model-toys/02-test-time-scaling.html",
               "title": "思考预算滑块",
               "icon": "⏳",
-              "archetype": "interactive",
+              "archetype": "simulation",
               "concept": "Test-Time Compute · 过度思考陷阱",
               "summary": "拖动思考 Token 预算观察难题准确率曲线飙升，再切到“1+1=?”体验过度思考如何浪费账单。"
             },
@@ -3269,7 +3269,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/reasoning-model-toys/03-rlvr-aha-moment.html",
               "title": "顿悟时刻模拟器",
               "icon": "💡",
-              "archetype": "interactive",
+              "archetype": "scenario",
               "concept": "RLVR 强化学习 · 自我反思涌现",
               "summary": "只靠客观结果验证器打 +1/0 分，亲眼见证推理模型在第 3 轮自发涌现“等等，我重算一遍”的 Aha Moment。"
             }
@@ -3299,7 +3299,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/rag-deep-dive-toys/01-chunking-slicer.html",
               "title": "切块手术台",
               "icon": "✂️",
-              "archetype": "interactive",
+              "archetype": "builder",
               "concept": "Chunking 切块大小 · Overlap 重叠保护",
               "summary": "拖动切块与重叠滑块，亲眼看硬切一刀如何把金额与前提条件斩断导致 AI 答错，加 20% 重叠立刻救回！"
             },
@@ -3309,7 +3309,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/rag-deep-dive-toys/02-keyword-vs-vector.html",
               "title": "搜词 vs 搜意",
               "icon": "🔍",
-              "archetype": "interactive",
+              "archetype": "race",
               "concept": "BM25 关键词 · 向量语义 · 混合检索",
               "summary": "同一句口语提问和冷门编号提问，同屏对比关键词检索、向量语义检索与混合检索（Hybrid Search）的命中差异。"
             },
@@ -3319,7 +3319,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/rag-deep-dive-toys/03-rerank-funnel.html",
               "title": "重排提纯漏斗",
               "icon": "⏳",
-              "archetype": "interactive",
+              "archetype": "simulation",
               "concept": "粗排 Top-K vs 精排 Reranker",
               "summary": "粗排先捞出 6 条鱼龙混杂的片段，点击启动交叉编码器 Rerank，看藏在第 5 名的唯一正确答案飙升第 1 名！"
             }
@@ -3349,7 +3349,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/ai-security-toys/01-prompt-injection-heist.html",
               "title": "白字藏毒：提示词注入",
               "icon": "🕵️",
-              "archetype": "interactive",
+              "archetype": "scenario",
               "concept": "Indirect Prompt Injection · 指令与数据混排",
               "summary": "扮演红队黑客在普通简历里悄悄埋入隐藏指令，看没有隔离防护的 AI 招聘官如何瞬间叛变给满分！"
             },
@@ -3359,7 +3359,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/ai-security-toys/02-jailbreak-defense-lab.html",
               "title": "越狱攻防演练场",
               "icon": "🧱",
-              "archetype": "interactive",
+              "archetype": "builder",
               "concept": "Jailbreak 越狱套路 · 多层安全护栏",
               "summary": "用“角色扮演 / Base64 暗号 / 渐进诱导”三种经典越狱攻防，开关三层安全护栏体验纵深防御。"
             },
@@ -3369,7 +3369,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/ai-security-toys/03-privilege-isolation.html",
               "title": "最小权限防线",
               "icon": "🔐",
-              "archetype": "interactive",
+              "archetype": "scenario",
               "concept": "Agent 数据泄露防御 · 最小权限原则",
               "summary": "当邮件摘要 Agent 读到藏着恶意指令的钓鱼邮件时，对比大权限裸奔泄密与最小权限隔离如何免疫。"
             }
@@ -3399,7 +3399,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/moe-architecture-toys/01-moe-hospital-triage.html",
               "title": "大医院分诊台",
               "icon": "🏥",
-              "archetype": "interactive",
+              "archetype": "spatial",
               "concept": "Sparse Activation 稀疏激活 · Router 路由",
               "summary": "输入不同类型的词，看分诊台每次只唤醒 8 位专家里的 2 位专科医生，其余专家休眠省电 75%！"
             },
@@ -3409,7 +3409,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/moe-architecture-toys/02-load-balancing-crisis.html",
               "title": "专家累死危机",
               "icon": "⚖️",
-              "archetype": "interactive",
+              "archetype": "simulation",
               "concept": "Router Collapse · 负载均衡惩罚",
               "summary": "关掉负载均衡看所有词挤爆 1 号王牌专家、其余 7 人摸鱼；开启平衡惩罚瞬间均匀分流提速！"
             },
@@ -3419,7 +3419,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/moe-architecture-toys/03-dense-vs-moe-tradeoff.html",
               "title": "稠密 vs MoE 选购台",
               "icon": "🎚️",
-              "archetype": "interactive",
+              "archetype": "race",
               "concept": "显存占满 vs 算力省钱的真实权衡",
               "summary": "拖动总参数与激活比例，直观对比 Dense 稠密模型与 MoE 在显存容量、推理速度与单次电费上的取舍。"
             }
@@ -3449,7 +3449,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/mcp-protocol-toys/01-mn-cable-nightmare.html",
               "title": "M×N 插头灾难",
               "icon": "🔌",
-              "archetype": "interactive",
+              "archetype": "spatial",
               "concept": "M×N 胶水代码 vs M+N 统一协议",
               "summary": "自由增加 AI 应用数 M 与外部工具数 N，亲眼看传统蜘蛛网连线爆炸，一键开启 MCP 瞬间变清爽！"
             },
@@ -3459,7 +3459,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/mcp-protocol-toys/02-mcp-handshake-inspector.html",
               "title": "MCP 握手透视仪",
               "icon": "🤝",
-              "archetype": "interactive",
+              "archetype": "scenario",
               "concept": "Client / Server · tools/list 自动发现",
               "summary": "逐步点击体验 MCP 三步标准握手，看 AI 如何像插 U 盘一样即插即用发现新工具菜单，无需改一行代码。"
             },
@@ -3469,7 +3469,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/mcp-protocol-toys/03-mcp-three-primitives.html",
               "title": "MCP 三原语装配间",
               "icon": "🧩",
-              "archetype": "interactive",
+              "archetype": "builder",
               "concept": "Tools 工具 · Resources 资源 · Prompts 模板",
               "summary": "把 6 个真实需求分拣到 Tools / Resources / Prompts 三个插槽，2 分钟彻底分清 MCP 的三大核心概念。"
             }
@@ -3499,7 +3499,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/multi-agent-toys/01-team-topologies.html",
               "title": "三种队形实战对比",
               "icon": "📐",
-              "archetype": "interactive",
+              "archetype": "race",
               "concept": "流水线 · 主管派活 · 辩论评审",
               "summary": "同一项深度调研任务，切换流水线、主管并行派活、正反辩论三种队形，直观对比耗时与质量！"
             },
@@ -3509,7 +3509,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/multi-agent-toys/02-telephone-game-drift.html",
               "title": "传话筒失真实验",
               "icon": "📢",
-              "archetype": "interactive",
+              "archetype": "scenario",
               "concept": "Context Drift 上下文漂移 · 共享黑板",
               "summary": "看原始需求经过 4 个 Agent 口头接力后如何面目全非，切换「共享黑板」立刻恢复 100% 保真！"
             },
@@ -3519,7 +3519,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/multi-agent-toys/03-token-multiplier-trap.html",
               "title": "多 Agent 账单刺客",
               "icon": "💸",
-              "archetype": "interactive",
+              "archetype": "simulation",
               "concept": "Token 消耗平方级膨胀 · 何时该用单 Agent",
               "summary": "调大 Agent 数量与互聊轮数，亲眼看“AI 互相客套开会”如何把 Token 账单飙升 10 倍！"
             }
@@ -3549,7 +3549,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/multimodal-ai-toys/01-image-patch-slicer.html",
               "title": "图片切块机",
               "icon": "🧩",
-              "archetype": "interactive",
+              "archetype": "spatial",
               "concept": "ViT Image Patches · 图片变 Token",
               "summary": "一键把像素图切成 16 块拼图并排成一列，亲眼看“一张照片”如何伪装成文字 Token 塞进 Transformer！"
             },
@@ -3559,7 +3559,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/multimodal-ai-toys/02-clip-alignment-match.html",
               "title": "图文连连看（CLIP）",
               "icon": "🎯",
-              "archetype": "interactive",
+              "archetype": "blind-lab",
               "concept": "跨模态对齐 · 共享向量空间",
               "summary": "点击不同图片与文字配对，看 CLIP 相似度矩阵的对角线如何亮起，把图像和文字拉进同一个语义空间！"
             },
@@ -3569,7 +3569,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/multimodal-ai-toys/03-native-vs-pipeline-audio.html",
               "title": "原生语音 vs 三段拼接",
               "icon": "🎙️",
-              "archetype": "interactive",
+              "archetype": "race",
               "concept": "ASR+LLM+TTS 拼接 vs 原生多模态",
               "summary": "对比老式三段拼接（延迟 4 秒、听不出阴阳怪气）与原生多模态语音（0.3 秒秒回、听懂笑声与语气）！"
             }
@@ -3599,7 +3599,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/long-context-memory-toys/01-lost-in-the-middle.html",
               "title": "大海捞针：U 型陷阱",
               "icon": "🪡",
-              "archetype": "interactive",
+              "archetype": "blind-lab",
               "concept": "Lost in the Middle · 首尾效应",
               "summary": "把密码藏在 10 万字长文的开头、正中间或结尾，亲手画出大名鼎鼎的 U 型注意力召回曲线！"
             },
@@ -3609,7 +3609,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/long-context-memory-toys/02-working-vs-episodic-memory.html",
               "title": "短期记忆 vs 长期笔记本",
               "icon": "📓",
-              "archetype": "interactive",
+              "archetype": "scenario",
               "concept": "工作记忆（Context）vs 持久化长期记忆",
               "summary": "点击“重启新对话”看短期记忆瞬间清零，而写入长期记忆笔记本的个人偏好如何跨会话永久留存！"
             },
@@ -3619,7 +3619,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/long-context-memory-toys/03-rope-extrapolation.html",
               "title": "位置编码时钟（RoPE）",
               "icon": "🕰️",
-              "archetype": "interactive",
+              "archetype": "simulation",
               "concept": "绝对位置编码崩溃 vs RoPE 旋转外推",
               "summary": "把输入长度拉超训练上限 4K，看老式绝对位置编码直接乱码，而 RoPE 缩放如何平滑外推到 128K！"
             }
@@ -3649,7 +3649,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-evals-toys/01-benchmark-contamination.html",
               "title": "榜单水分透视仪",
               "icon": "💧",
-              "archetype": "interactive",
+              "archetype": "scenario",
               "concept": "Data Contamination 数据污染 · 刷榜陷阱",
               "summary": "对比“提前背过考题的刷榜模型”与“老实泛化模型”：把考题改一个数字，刷榜冠军当场原形毕露！"
             },
@@ -3659,7 +3659,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-evals-toys/02-llm-as-judge-bias.html",
               "title": "AI 判卷官的 3 大偏见",
               "icon": "⚖️",
-              "archetype": "interactive",
+              "archetype": "blind-lab",
               "concept": "LLM-as-a-Judge · 话痨/位置/自恋偏见",
               "summary": "揭秘用 AI 考 AI 时的三大暗坑（谁写得长谁赢、排前面谁赢），并一键开启“交换位置盲测”消除偏见！"
             },
@@ -3669,7 +3669,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-evals-toys/03-arena-elo-matcher.html",
               "title": "盲测竞技场（Elo）",
               "icon": "⚔️",
-              "archetype": "interactive",
+              "archetype": "blind-lab",
               "concept": "Chatbot Arena 匿名盲测 · Elo 积分",
               "summary": "亲自当 3 轮匿名盲测评委（只看回答不看模型名），投票揭晓幕后真身并实时计算 Elo 天梯分涨跌！"
             }
