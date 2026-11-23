@@ -526,27 +526,63 @@ window.TAXONOMY_DATA = {
       "desc": "宇宙运行的底层语法：概率直觉、统计分布、物理与演化",
       "branches": [
         {
-          "id": "probability",
-          "title": "概率与统计直觉",
+          "id": "probability-stats",
+          "title": "1. 概率直觉与统计分布（Probability & Statistics）",
           "plannedTopics": [
-            "蒙提霍尔三门问题",
-            "高尔顿钉板与中心极限定理"
+            "蒙提霍尔三门问题（换门胜率翻倍）",
+            "高尔顿钉板与中心极限定理",
+            "生日悖论（23 人撞生日）",
+            "幂律分布 vs 正态分布"
           ]
         },
         {
-          "id": "physics",
-          "title": "物理与热力学",
+          "id": "math-info",
+          "title": "2. 数学直觉与信息论（Calculus, Linear Algebra & Info）",
           "plannedTopics": [
-            "热力学熵增与时间之箭",
-            "波的干涉与共振"
+            "导数斜率与积分面积",
+            "矩阵空间变换与特征向量",
+            "傅里叶变换（圆周画万物）",
+            "香农信息熵与压缩极限"
           ]
         },
         {
-          "id": "evolution",
-          "title": "演化与复杂性",
+          "id": "mechanics-waves",
+          "title": "3. 力学、波动与光学（Mechanics, Waves & Optics）",
           "plannedTopics": [
-            "自然选择与基因漂变",
-            "混沌系统与蝴蝶效应"
+            "引力弹弓与卫星轨道",
+            "波的干涉与降噪耳机原理",
+            "光纤全反射通信",
+            "多普勒效应（救护车变调）"
+          ]
+        },
+        {
+          "id": "thermo-entropy",
+          "title": "4. 热力学、能量与熵增（Thermodynamics & Entropy）",
+          "plannedTopics": [
+            "分子热运动与温度本质",
+            "热力学第二定律与熵增",
+            "麦克斯韦妖与信息代价",
+            "卡诺热机效率上限"
+          ]
+        },
+        {
+          "id": "chaos-emergence",
+          "title": "5. 复杂系统、混沌与涌现（Complexity & Emergence）",
+          "plannedTopics": [
+            "双摆与蝴蝶效应",
+            "康威生命游戏（规则涌现）",
+            "鸟群 Boids 群体智能",
+            "相变与森林火灾临界点"
+          ]
+        },
+        {
+          "id": "evolution-ecology",
+          "title": "6. 演化、生态与传染病（Evolution & Ecology）",
+          "plannedTopics": [
+            "自然选择与保护色演化",
+            "捕食者-猎物震荡周期",
+            "传染病 SIR 模型与 R0 阈值",
+            "生物尺度律（体型与寿命）"
           ]
         }
       ],
