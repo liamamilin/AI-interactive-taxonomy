@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：猜数字竞速 · 线性查找 vs 二分查找</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 14px; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 740px) { .duel { grid-template-columns: 1fr; } }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin: 10px 0; }
+    .c { height: 24px; border-radius: 5px; font-size: 10px; font-family: monospace; display: flex; align-items: center; justify-content: center; background: var(--tax-surface); border: 1px solid var(--tax-border); }
+    .c.elim { opacity: 0.25; }
+    .c.chk { background: rgba(245,158,11,0.28); border-color: var(--tax-amber); }
+    .c.hit { background: var(--tax-green); color: #fff; border-color: var(--tax-green); font-weight: 900; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔍 线性查找 vs 二分查找：在 64 个有序格子里找「57」，谁先抓到？</h1>
+        <p>点击发车！左边一个一个老实翻（<code>O(n)</code>），右边每次只看正中间、一口气排除一半（<code>O(log n)</code>）！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="btn" onclick="start()">▶ 开始查找目标「57」</button>
+      <div class="duel">
+        <div class="lane">
+          <div style="font-weight:850;font-size:14px;">🐢 线性查找 O(n)</div>
+          <div class="grid" id="linGrid"></div>
+          <div id="linStat" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+        </div>
+        <div class="lane">
+          <div style="font-weight:850;font-size:14px;">⚡ 二分查找 O(log n)</div>
+          <div class="grid" id="binGrid"></div>
+          <div id="binStat" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>点击开始查找，亲眼看二分查找如何用 <strong>6 步</strong> 吊打线性查找的 <strong>58 步</strong>！
+    </div>
+  </div>
+
+  <script>
+    const TARGET = 57;
+    let timer = null;
+
+    function build() {
+      document.getElementById("linGrid").innerHTML = Array.from({ length: 64 }, (_, i) => `<div class="c" id="l${i}">${i}</div>`).join("");
+      document.getElementById("binGrid").innerHTML = Array.from({ length: 64 }, (_, i) => `<div class="c" id="b${i}">${i}</div>`).join("");
+    }
+
+    function start() {
+      if (timer) clearInterval(timer);
+      build();
+      let li = 0, lo = 0, hi = 63, bSteps = 0, bDone = false, lDone = false;
+      timer = setInterval(() => {
+        if (!lDone) {
+          const el = document.getElementById("l" + li);
+          if (li === TARGET) {
+            el.classList.add("hit");
+            lDone = true;
+            document.getElementById("linStat").textContent = `😵 终于找到了！共翻了 ${li + 1} 次`;
+          } else {
+            el.classList.add("chk");
+            document.getElementById("linStat").textContent = `逐格翻找中：第 ${li + 1} 步 (值=${li})`;
+            li++;
+          }
+        }
+        if (!bDone) {
+          bSteps++;
+          const mid = Math.floor((lo + hi) / 2);
+          const el = document.getElementById("b" + mid);
+          if (mid === TARGET) {
+            el.classList.add("hit");
+            bDone = true;
+            document.getElementById("binStat").textContent = `✅ 命中目标！仅用 ${bSteps} 步！`;
+          } else {
+            el.classList.add("chk");
+            if (mid < TARGET) {
+              for (let k = lo; k <= mid; k++) document.getElementById("b" + k).classList.add("elim");
+              lo = mid + 1;
+            } else {
+              for (let k = mid; k <= hi; k++) document.getElementById("b" + k).classList.add("elim");
+              hi = mid - 1;
+            }
+            document.getElementById("binStat").textContent = `第 ${bSteps} 步猜 ${mid} → 直接砍掉一半！`;
+          }
+        }
+        if (bDone && lDone) {
+          clearInterval(timer);
+          document.getElementById("ahaBox").innerHTML = `💡 <strong>对数爆炸的魔力：</strong>在 64 个数里，二分只用了 <strong>${bSteps} 步</strong>；哪怕扩到 <strong>40 亿</strong> 个数（全人类手机号），二分也只需要最多 <strong>32 步</strong>！唯一前提是：<strong>数据必须有序</strong>。`;
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }, 95);
+    }
+    build();
+  </script>
+</body>
+</html>

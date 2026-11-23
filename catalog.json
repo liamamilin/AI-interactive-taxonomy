@@ -5,10 +5,10 @@
   "stats": {
     "totalDomains": 10,
     "litDomains": 2,
-    "totalTopics": 47,
-    "totalPlannedTopics": 228,
+    "totalTopics": 51,
+    "totalPlannedTopics": 224,
     "totalBlueprintTopics": 275,
-    "totalToys": 141
+    "totalToys": 153
   },
   "tracks": [
     {
@@ -1204,24 +1204,7 @@
         {
           "id": "dsa",
           "title": "2. 数据结构与算法直觉（Data Structures & Algorithms）",
-          "plannedTopics": [
-            {
-              "slug": "software-dsa-01",
-              "title": "时间复杂度赛跑（O(log n) vs O(n²)）"
-            },
-            {
-              "slug": "software-dsa-02",
-              "title": "哈希表与布隆过滤器"
-            },
-            {
-              "slug": "software-dsa-03",
-              "title": "排序与 A* 寻路迷宫"
-            },
-            {
-              "slug": "software-dsa-04",
-              "title": "平衡树与拓扑排序"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "network-crypto",
@@ -1312,11 +1295,60 @@
           ]
         }
       ],
-      "liveTopicCount": 4,
-      "plannedTopicCount": 20,
+      "liveTopicCount": 8,
+      "plannedTopicCount": 16,
       "blueprintTopicCount": 24,
-      "liveToyCount": 12,
+      "liveToyCount": 24,
       "topics": [
+        {
+          "id": "software/software-dsa-01",
+          "slug": "software-dsa-01",
+          "domain": "software",
+          "branch": "dsa",
+          "order": 1,
+          "title": "时间复杂度赛跑（O(log n) vs O(n²)）",
+          "icon": "⏱️",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "数据量翻 10 倍，为什么好算法只多花 3 步，而烂算法直接从 1 秒卡死成 100 秒甚至算到宇宙毁灭？",
+          "difficulty": "入门",
+          "related": [
+            "software/software-systems-os-02",
+            "software/software-database-cache-01"
+          ],
+          "toys": [
+            {
+              "id": "software/software-dsa-01/01-bigo-growth-curve.html",
+              "file": "01-bigo-growth-curve.html",
+              "path": "./domains/software/software-dsa-01/01-bigo-growth-curve.html",
+              "title": "大 O 增长爆炸曲线沙盘",
+              "icon": "📈",
+              "archetype": "simulation",
+              "concept": "Big-O 渐近复杂度 · O(1) / O(log n) / O(n log n) / O(n²) / O(2ⁿ)",
+              "summary": "拖动数据规模 N 从 10 到 100,000，实时看 O(log n) 稳如老狗，而 O(n²) 与 O(2ⁿ) 如何瞬间垂直起飞。"
+            },
+            {
+              "id": "software/software-dsa-01/02-binary-vs-linear-race.html",
+              "file": "02-binary-vs-linear-race.html",
+              "path": "./domains/software/software-dsa-01/02-binary-vs-linear-race.html",
+              "title": "猜数字竞速：线性查找 vs 二分查找",
+              "icon": "🔍",
+              "archetype": "race",
+              "concept": "线性查找 O(n) · 二分查找 O(log n) · 每次砍掉一半",
+              "summary": "在 64 个有序格子里找隐藏目标，同屏对比逐格排查与每次对半砍的惊人步数差。"
+            },
+            {
+              "id": "software/software-dsa-01/03-space-time-tradeoff.html",
+              "file": "03-space-time-tradeoff.html",
+              "path": "./domains/software/software-dsa-01/03-space-time-tradeoff.html",
+              "title": "空间换时间诊所：两数之和优化",
+              "icon": "⚖️",
+              "archetype": "builder",
+              "concept": "暴力双循环 O(n²) · 哈希缓存 O(n) · 空间换时间",
+              "summary": "在经典的“两数之和（Two Sum）”考题里一键切换暴力嵌套循环与哈希表备忘录，体验 1000 倍提速。"
+            }
+          ]
+        },
         {
           "id": "software/software-systems-os-01",
           "slug": "software-systems-os-01",
@@ -1363,6 +1395,55 @@
               "archetype": "simulation",
               "concept": "二进制补码 Two's Complement · 模运算 · 化减为加",
               "summary": "拨动 4 位补码表盘，看清为什么芯片根本不需要造“减法器”，靠绕圈加法就能优雅算出负数！"
+            }
+          ]
+        },
+        {
+          "id": "software/software-dsa-02",
+          "slug": "software-dsa-02",
+          "domain": "software",
+          "branch": "dsa",
+          "order": 2,
+          "title": "哈希表与布隆过滤器",
+          "icon": "🧮",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "为什么字典查 1 亿条数据只需 1 步（O(1)）？布隆过滤器又怎么用极小内存瞬间拦下 99% 的恶意空查？",
+          "difficulty": "入门",
+          "related": [
+            "software/software-database-cache-03",
+            "software/software-distributed-03"
+          ],
+          "toys": [
+            {
+              "id": "software/software-dsa-02/01-hash-collision-buckets.html",
+              "file": "01-hash-collision-buckets.html",
+              "path": "./domains/software/software-dsa-02/01-hash-collision-buckets.html",
+              "title": "哈希桶与碰撞拉链装配台",
+              "icon": "🪣",
+              "archetype": "builder",
+              "concept": "哈希函数 Hash · 哈希碰撞 Collision · 拉链法与扩容 Rehash",
+              "summary": "往 8 个桶里不断塞入 Key，亲眼看两个不同名字撞进同一个桶时如何挂成链表，以及负载因子过高为何要扩容。"
+            },
+            {
+              "id": "software/software-dsa-02/02-bloom-filter-bitarray.html",
+              "file": "02-bloom-filter-bitarray.html",
+              "path": "./domains/software/software-dsa-02/02-bloom-filter-bitarray.html",
+              "title": "布隆过滤器（Bloom Filter）位数组实验",
+              "icon": "🛡️",
+              "archetype": "blind-lab",
+              "concept": "位数组 Bit Array · 多重哈希 · 绝不漏报但允许极低误报",
+              "summary": "往 16 位数组里插入几个单词再测试查询，秒懂为什么布隆过滤器说“不在就 100% 不在”，说“在则可能撞脸误判”。"
+            },
+            {
+              "id": "software/software-dsa-02/03-hash-dos-rehash-scenario.html",
+              "file": "03-hash-dos-rehash-scenario.html",
+              "path": "./domains/software/software-dsa-02/03-hash-dos-rehash-scenario.html",
+              "title": "哈希退化攻击（HashDoS）排障室",
+              "icon": "🚨",
+              "archetype": "scenario",
+              "concept": "哈希碰撞攻击 · O(1) 退化成 O(n) · 树化与随机盐",
+              "summary": "黑客故意构造全撞进 0 号桶的恶意请求把服务器拖垮！开启红黑树转化与随机哈希种子瞬间化解危机。"
             }
           ]
         },
@@ -1416,6 +1497,55 @@
           ]
         },
         {
+          "id": "software/software-dsa-03",
+          "slug": "software-dsa-03",
+          "domain": "software",
+          "branch": "dsa",
+          "order": 3,
+          "title": "排序与 A* 寻路迷宫",
+          "icon": "🧭",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "同样把一堆乱序柱子排整齐，快排怎么比冒泡快出一个次元？游戏小兵又是怎么靠 A* 算法绕开墙抄近路的？",
+          "difficulty": "入门",
+          "related": [
+            "ai/ai-symbolic-ml-01",
+            "software/software-dsa-01"
+          ],
+          "toys": [
+            {
+              "id": "software/software-dsa-03/01-sorting-bar-race.html",
+              "file": "01-sorting-bar-race.html",
+              "path": "./domains/software/software-dsa-03/01-sorting-bar-race.html",
+              "title": "柱状图排序竞速：冒泡排序 vs 快速排序",
+              "icon": "📊",
+              "archetype": "race",
+              "concept": "冒泡排序 O(n²) · 快速排序 O(n log n) · 分治思想",
+              "summary": "同一组乱序柱状图同步起跑，亲眼看冒泡一步步挪窝，而快排靠“选基准一分为二”瞬间排完。"
+            },
+            {
+              "id": "software/software-dsa-03/02-astar-maze-spatial.html",
+              "file": "02-astar-maze-spatial.html",
+              "path": "./domains/software/software-dsa-03/02-astar-maze-spatial.html",
+              "title": "A* 寻路迷宫 vs BFS 盲目水波扩散",
+              "icon": "🗺️",
+              "archetype": "spatial",
+              "concept": "BFS 广度优先 · A* 启发式函数 f=g+h · 曼哈顿距离",
+              "summary": "点击格子自由摆放墙壁，同屏对比 BFS 四面八方瞎扩散与 A* 盯着终点直奔而去的探索格子数差距。"
+            },
+            {
+              "id": "software/software-dsa-03/03-sort-stability-lab.html",
+              "file": "03-sort-stability-lab.html",
+              "path": "./domains/software/software-dsa-03/03-sort-stability-lab.html",
+              "title": "排序稳定性（Stability）电商榜单实验室",
+              "icon": "🏷️",
+              "archetype": "scenario",
+              "concept": "稳定排序 MergeSort · 不稳定排序 QuickSort · 多键排序",
+              "summary": "先按销量排好、再按价格重排商品，亲眼看“不稳定排序”如何把同价商品原本的销量顺序彻底打乱！"
+            }
+          ]
+        },
+        {
           "id": "software/software-systems-os-03",
           "slug": "software-systems-os-03",
           "domain": "software",
@@ -1461,6 +1591,55 @@
               "archetype": "simulation",
               "concept": "异步非阻塞 I/O · Event Loop · 为什么主线程不能写死循环",
               "summary": "往事件循环里投递网络请求、定时器与耗时重计算，亲眼看一个阻塞函数如何把整个页面卡成 PPT。"
+            }
+          ]
+        },
+        {
+          "id": "software/software-dsa-04",
+          "slug": "software-dsa-04",
+          "domain": "software",
+          "branch": "dsa",
+          "order": 4,
+          "title": "平衡树与拓扑排序",
+          "icon": "🌳",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "为什么有序插入 1,2,3,4,5 会把普通二叉搜索树变成一根歪脖子链表？构建系统又是怎么按依赖顺序排课编译的？",
+          "difficulty": "进阶",
+          "related": [
+            "software/software-database-cache-01",
+            "software/software-dsa-01"
+          ],
+          "toys": [
+            {
+              "id": "software/software-dsa-04/01-bst-vs-avl-rotation.html",
+              "file": "01-bst-vs-avl-rotation.html",
+              "path": "./domains/software/software-dsa-04/01-bst-vs-avl-rotation.html",
+              "title": "歪脖子树急救：BST 退化 vs AVL 左旋平衡",
+              "icon": "🌲",
+              "archetype": "spatial",
+              "concept": "二叉搜索树退化 · AVL / 红黑树旋转 · 树高 O(log n)",
+              "summary": "按顺序插入 1→5，亲眼看普通 BST 歪成一根链表，一键开启平衡旋转瞬间把它掰回优雅对称树！"
+            },
+            {
+              "id": "software/software-dsa-04/02-topological-sort-courses.html",
+              "file": "02-topological-sort-courses.html",
+              "path": "./domains/software/software-dsa-04/02-topological-sort-courses.html",
+              "title": "大学排课与编译依赖拓扑排序台（DAG）",
+              "icon": "📚",
+              "archetype": "builder",
+              "concept": "有向无环图 DAG · 入度清零 Kahn 算法 · 循环依赖检测",
+              "summary": "每次只选“先修课已修完（入度=0）”的课程，亲手跑通拓扑排序，并体验循环依赖为何直接死锁报错。"
+            },
+            {
+              "id": "software/software-dsa-04/03-heap-priority-queue.html",
+              "file": "03-heap-priority-queue.html",
+              "path": "./domains/software/software-dsa-04/03-heap-priority-queue.html",
+              "title": "医院急诊优先队列（最小堆 Heap）",
+              "icon": "🚑",
+              "archetype": "simulation",
+              "concept": "二叉堆 Binary Heap · O(log n) 上浮下沉 · Top-K 问题",
+              "summary": "往急诊分诊堆里插入不同危重等级的病人，实时观察最小堆如何用极少交换永远把最危重病人顶在堆顶。"
             }
           ]
         },

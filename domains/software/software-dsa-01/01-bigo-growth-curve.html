@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：大 O 增长爆炸曲线沙盘 · Big-O</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .rows { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+    .row { display: grid; grid-template-columns: 120px 1fr 125px; gap: 10px; align-items: center; font-size: 13.5px; font-weight: 800; }
+    .track { height: 14px; background: var(--tax-surface-alt); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); }
+    .fill { height: 100%; border-radius: 999px; transition: width 0.2s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📈 大 O 增长爆炸沙盘：为什么写代码“在小测试集跑得快”最骗人？</h1>
+        <p>当 <code>N = 10</code> 时，所有算法都不到 1 毫秒；向右拖动数据量 <code>N</code>，看看各复杂度操作次数的恐怖分化！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">📦 输入数据规模 N：<span id="nVal" style="color:var(--tax-primary)">16</span> 条记录</label>
+      <input id="nSlider" type="range" min="4" max="1000" step="4" value="16" style="width:100%;margin-top:8px;" />
+      <div class="rows" id="barRows"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const n = parseInt(document.getElementById("nSlider").value, 10);
+      document.getElementById("nVal").textContent = n.toLocaleString();
+
+      const items = [
+        { name: "O(1) 常数", ops: 1, col: "var(--tax-green)" },
+        { name: "O(log n) 对数", ops: Math.ceil(Math.log2(n)), col: "#10b981" },
+        { name: "O(n) 线性", ops: n, col: "var(--tax-primary)" },
+        { name: "O(n log n) 排序", ops: Math.round(n * Math.log2(n)), col: "var(--tax-amber)" },
+        { name: "O(n²) 嵌套循环", ops: n * n, col: "var(--tax-red)" }
+      ];
+      const maxLog = Math.log10(1000 * 1000);
+      document.getElementById("barRows").innerHTML = items.map(it => {
+        const pct = Math.max(2, (Math.log10(Math.max(1, it.ops)) / maxLog) * 100);
+        return `
+          <div class="row">
+            <span>${it.name}</span>
+            <div class="track"><div class="fill" style="width:${pct.toFixed(1)}%;background:${it.col}"></div></div>
+            <span style="font-family:monospace;text-align:right;color:${it.col};">${it.ops.toLocaleString()} 步</span>
+          </div>
+        `;
+      }).join("");
+
+      document.getElementById("ahaBox").innerHTML = n >= 500
+        ? `💡 <strong>数量级鸿沟已拉开（N = ${n}）：</strong>二分查找 <code>O(log n)</code> 只需要 <strong>${Math.ceil(Math.log2(n))} 步</strong>，而双层循环 <code>O(n²)</code> 已经飙到 <strong>${(n*n).toLocaleString()} 步</strong>（慢了上万倍）！哪怕把服务器 CPU 升级 10 倍，也救不回一个 O(n²) 算法！`
+        : "💡 <strong>顿悟时刻：</strong>把数据量 N 拉到 <strong>500 以上</strong>（甚至 1000），感受 O(log n) 几乎纹丝不动、O(n²) 瞬间爆表的视觉冲击！";
+    }
+    document.getElementById("nSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

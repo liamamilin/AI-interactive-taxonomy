@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>平衡树与拓扑排序 · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🌳 平衡树与拓扑排序</h1>
+        <p>为什么有序插入 1,2,3,4,5 会把普通二叉搜索树变成一根歪脖子链表？构建系统又是怎么按依赖顺序排课编译的？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-bst-vs-avl-rotation.html">
+        <div class="hub-icon">🌲</div>
+        <div class="hub-tag">玩具 01 · 树形旋转（Spatial）</div>
+        <div class="hub-title">歪脖子树急救：BST 退化 vs AVL 左旋平衡</div>
+        <div class="hub-desc">对比有序插入导致的链表退化与 AVL 旋转自平衡，一秒看懂树高为何决定了查找性能。</div>
+      </a>
+      <a class="hub-card" href="./02-topological-sort-courses.html">
+        <div class="hub-icon">📚</div>
+        <div class="hub-tag">玩具 02 · 依赖排课（Builder）</div>
+        <div class="hub-title">大学排课与编译依赖拓扑排序台（DAG）</div>
+        <div class="hub-desc">亲手用入度清零法（Kahn 算法）安排课程与代码构建顺序，秒懂 npm/Make 依赖解析原理。</div>
+      </a>
+      <a class="hub-card" href="./03-heap-priority-queue.html">
+        <div class="hub-icon">🚑</div>
+        <div class="hub-tag">玩具 03 · 堆调度沙盘（Simulation）</div>
+        <div class="hub-title">医院急诊优先队列（最小堆 Heap）</div>
+        <div class="hub-desc">动态入队出队，直观体验二叉堆如何不用全排序就能 O(1) 锁定最紧急任务。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

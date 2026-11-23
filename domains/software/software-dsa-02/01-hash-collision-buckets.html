@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：哈希桶与碰撞拉链装配台 · Hash Table</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 8px 14px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .buckets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    @media (max-width: 680px) { .buckets { grid-template-columns: repeat(2, 1fr); } }
+    .bkt { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 12px; padding: 10px; min-height: 82px; }
+    .bkt.hit { border-color: var(--tax-amber); }
+    .tag { display: inline-block; padding: 3px 8px; border-radius: 6px; background: var(--tax-primary); color: #fff; font-size: 11.5px; font-weight: 800; margin: 4px 4px 0 0; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🪣 哈希桶与碰撞拉链：字典怎么做到 1 步直达，撞桶了又怎么办？</h1>
+        <p>点击插入下方单词（哈希规则：<code>字符码之和 % 8</code>）。看看两个不同单词撞进同一个桶时怎么用“拉链”解决！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" onclick="ins('cat')">+ 插入 "cat"</button>
+        <button class="btn" onclick="ins('dog')">+ 插入 "dog"</button>
+        <button class="btn" onclick="ins('act')">+ 插入 "act"（与 cat 碰撞！）</button>
+        <button class="btn" onclick="ins('tea')">+ 插入 "tea"</button>
+        <button class="btn" onclick="ins('eat')">+ 插入 "eat"（与 tea 碰撞！）</button>
+        <button class="btn sec" onclick="resetB()">↺ 清空</button>
+      </div>
+      <div class="buckets" id="bktGrid"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let buckets = Array.from({ length: 8 }, () => []);
+    let ops = 0;
+
+    function hash8(s) {
+      let sum = 0;
+      for (let i = 0; i < s.length; i++) sum += s.charCodeAt(i);
+      return sum % 8;
+    }
+
+    function ins(w) {
+      const idx = hash8(w);
+      if (!buckets[idx].includes(w)) buckets[idx].push(w);
+      ops++;
+      render(idx);
+      if (ops >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function resetB() {
+      buckets = Array.from({ length: 8 }, () => []);
+      render(-1);
+    }
+
+    function render(lastIdx) {
+      let collisions = 0;
+      document.getElementById("bktGrid").innerHTML = buckets.map((arr, i) => {
+        if (arr.length > 1) collisions++;
+        return `
+          <div class="bkt ${i === lastIdx ? "hit" : ""}">
+            <div style="font-size:12px;font-weight:850;color:var(--tax-muted);">桶 #${i} ${arr.length > 1 ? "💥碰撞拉链" : ""}</div>
+            <div>${arr.map(x => `<span class="tag">${x}</span>`).join("") || "<span style='font-size:11.5px;color:var(--tax-muted);'>空</span>"}</div>
+          </div>
+        `;
+      }).join("");
+
+      document.getElementById("ahaBox").innerHTML = collisions > 0
+        ? "💡 <strong>触发哈希碰撞（Collision）！</strong><code>cat</code> 和 <code>act</code> 算出的桶号完全一样，于是它们在同一个桶里挂成小链表（拉链法）。只要桶数量充足（负载因子 < 0.75 就自动翻倍扩容 Rehash），平均查找永远稳稳保持 <strong>O(1)</strong>！"
+        : "💡 <strong>顿悟时刻：</strong>先插入 <code>cat</code> 再插入 <code>act</code>（或 <code>tea</code> 与 <code>eat</code>），亲眼看碰撞拉链如何产生！";
+    }
+    render(-1);
+  </script>
+</body>
+</html>

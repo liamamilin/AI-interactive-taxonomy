@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：大学排课与编译依赖拓扑排序台 · DAG</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .courses { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 14px 0; }
+    .c { padding: 14px; border-radius: 14px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); text-align: center; cursor: pointer; transition: all 0.15s ease; }
+    .c.ready { border-color: var(--tax-green); background: rgba(16,185,129,0.12); }
+    .c.done { opacity: 0.45; border-style: dashed; }
+    .c.locked { opacity: 0.65; cursor: not-allowed; }
+    .plan { padding: 12px 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); font-weight: 800; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📚 拓扑排序排课台（Topological Sort）：先修哪门课才不会卡壳？</h1>
+        <p>规则很简单（<strong>Kahn 算法</strong>）：只有<strong>先修课全部修完（入度 = 0，亮绿框）</strong>的课程才能点击选修！把 5 门课全部修完通关！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="courses" id="courseGrid"></div>
+      <div class="plan">🗓️ 你的拓扑学习序列：<span id="seqOut" style="color:var(--tax-primary);">（请点击绿框课程开始）</span></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const COURSES = [
+      { id: "py", name: "🐍 Python 基础", deps: [] },
+      { id: "math", name: "📐 线性代数", deps: [] },
+      { id: "dsa", name: "🧮 数据结构", deps: ["py"] },
+      { id: "ml", name: "🤖 机器学习", deps: ["py", "math"] },
+      { id: "llm", name: "🧠 大模型工程", deps: ["dsa", "ml"] }
+    ];
+    let done = [];
+
+    function take(id) {
+      if (done.includes(id)) return;
+      const c = COURSES.find(x => x.id === id);
+      if (!c.deps.every(d => done.includes(d))) return;
+      done.push(id);
+      render();
+      if (done.length === COURSES.length && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      document.getElementById("courseGrid").innerHTML = COURSES.map(c => {
+        const isDone = done.includes(c.id);
+        const leftDeps = c.deps.filter(d => !done.includes(d));
+        const ready = !isDone && leftDeps.length === 0;
+        const cls = isDone ? "done" : ready ? "ready" : "locked";
+        return `
+          <div class="c ${cls}" onclick="take('${c.id}')">
+            <div style="font-weight:850;font-size:14px;">${c.name}</div>
+            <div style="font-size:11.5px;color:var(--tax-muted);margin-top:6px;">
+              ${isDone ? "✅ 已修完" : ready ? "🟢 入度=0 · 可立即选修" : `🔒 还缺 ${leftDeps.length} 门先修课`}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      document.getElementById("seqOut").textContent = done.length
+        ? done.map(id => COURSES.find(x => x.id === id).name).join(" → ")
+        : "（请点击绿框课程开始）";
+
+      document.getElementById("ahaBox").innerHTML = done.length === COURSES.length
+        ? "💡 <strong>拓扑排序圆满完成！</strong>每次摘掉入度为 0 的节点并解锁后续依赖，这就是 <strong>npm/pip 装包、Makefile 编译、Airflow 任务调度</strong> 的核心算法！如果某天剩下节点入度全不为 0，就说明出现了致命的“循环依赖环”！"
+        : "💡 <strong>顿悟时刻：</strong>依次点击亮绿框的课程（入度为 0），观察每修完一门基础课如何解锁后面的进阶课程！";
+    }
+    render();
+  </script>
+</body>
+</html>

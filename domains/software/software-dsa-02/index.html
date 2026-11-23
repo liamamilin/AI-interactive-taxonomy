@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>哈希表与布隆过滤器 · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧮 哈希表与布隆过滤器</h1>
+        <p>为什么字典查 1 亿条数据只需 1 步（O(1)）？布隆过滤器又怎么用极小内存瞬间拦下 99% 的恶意空查？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-hash-collision-buckets.html">
+        <div class="hub-icon">🪣</div>
+        <div class="hub-tag">玩具 01 · 哈希桶装配（Builder）</div>
+        <div class="hub-title">哈希桶与碰撞拉链装配台</div>
+        <div class="hub-desc">亲手插入不同字符串观察取模落桶与碰撞拉链，秒懂字典 O(1) 查找与负载因子扩容机制。</div>
+      </a>
+      <a class="hub-card" href="./02-bloom-filter-bitarray.html">
+        <div class="hub-icon">🛡️</div>
+        <div class="hub-tag">玩具 02 · 盲测验真（Blind-Lab）</div>
+        <div class="hub-title">布隆过滤器（Bloom Filter）位数组实验</div>
+        <div class="hub-desc">点亮 16 位比特数组并测试未插入词汇，亲眼见证“绝无漏报，但可能假阳性撞脸”的概率奇迹。</div>
+      </a>
+      <a class="hub-card" href="./03-hash-dos-rehash-scenario.html">
+        <div class="hub-icon">🚨</div>
+        <div class="hub-tag">玩具 03 · 攻防排障（Scenario）</div>
+        <div class="hub-title">哈希退化攻击（HashDoS）排障室</div>
+        <div class="hub-desc">揭秘黑客如何用 1 万个碰撞 Key 把 O(1) 哈希表打成 O(n) 慢链表，以及现代语言的防御机制。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：哈希退化攻击（HashDoS）排障室</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    @media (max-width: 700px) { .checks { grid-template-columns: 1fr; } }
+    .chk { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-weight: 800; font-size: 13.5px; cursor: pointer; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .num { font-size: 24px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚨 哈希退化攻击（HashDoS）：黑客怎么用 1 个 POST 请求把服务器 CPU 打满？</h1>
+        <p>黑客逆向了固定的哈希算法，一口气发来 <strong>50,000 个全撞进 0 号桶的恶意表单参数</strong>！勾选下方防御手段恢复正常！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="checks">
+        <label class="chk"><input type="checkbox" id="cSeed" onchange="render()" /> 🧂 开启随机哈希盐（SipHash，黑客猜不到桶号）</label>
+        <label class="chk"><input type="checkbox" id="cTree" onchange="render()" /> 🌳 链表超长自动转红黑树（Java 8 HashMap 防护）</label>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);">单次请求解析耗时</div>
+          <div class="num" id="msOut" style="color:var(--tax-red);">14,200 ms 💥</div>
+        </div>
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);">最坏查找复杂度</div>
+          <div class="num" id="bigOut" style="color:var(--tax-red);">O(n²) 瘫痪</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    function render() {
+      const s = document.getElementById("cSeed").checked;
+      const t = document.getElementById("cTree").checked;
+      let ms, big, col, aha;
+      if (s) {
+        ms = "6 ms ✅"; big = "O(n) 均匀打散"; col = "var(--tax-green)";
+        aha = "💡 <strong>随机盐（SipHash）从源头破功：</strong>每次进程启动随机生成密钥盐，黑客提前算好的碰撞字典瞬间失效！这是 Python / Rust / Go 等现代语言内置的标配防御。";
+      } else if (t) {
+        ms = "45 ms ✅"; big = "O(n log n) 兜底"; col = "var(--tax-primary)";
+        aha = "💡 <strong>链表转红黑树（Java 8 经典方案）：</strong>即便不幸撞进同一个桶超过 8 个元素，桶内结构自动升级成红黑树，把灾难性的 O(n) 链条查找兜底成 O(log n)！";
+      } else {
+        ms = "14,200 ms 💥"; big = "O(n²) 瘫痪"; col = "var(--tax-red)";
+        aha = "💡 <strong>HashDoS 原理：</strong>5 万个 Key 全挤在 0 号桶排成一根 5 万节的超长链表，插入总耗时瞬间退化成 O(n²)，几 KB 流量就能让服务器宕机！勾选上方任意防线试试。";
+      }
+      document.getElementById("msOut").textContent = ms;
+      document.getElementById("msOut").style.color = col;
+      document.getElementById("bigOut").textContent = big;
+      document.getElementById("bigOut").style.color = col;
+      document.getElementById("ahaBox").innerHTML = aha;
+      if ((s || t) && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+  </script>
+</body>
+</html>

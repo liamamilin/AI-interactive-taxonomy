@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：柱状图排序竞速 · 冒泡 vs 快排</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 14px; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .duel { grid-template-columns: 1fr; } }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .bars { display: flex; align-items: flex-end; gap: 4px; height: 130px; margin: 10px 0; }
+    .bar { flex: 1; border-radius: 4px 4px 0 0; background: var(--tax-primary); transition: height 0.08s linear; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📊 冒泡排序 vs 快速排序：同样排 18 根柱子，谁先把乱序变阶梯？</h1>
+        <p>点击发车！左边冒泡排序只跟旁边邻居两两交换（<code>O(n²)</code>），右边快速排序每次找基准一分为二（<code>O(n log n)</code>）！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="btn" onclick="start()">▶ 打乱并同时起跑</button>
+      <div class="duel">
+        <div class="lane">
+          <div style="font-weight:850;font-size:14px;">🐢 冒泡排序（Bubble Sort）</div>
+          <div class="bars" id="bBars"></div>
+          <div id="bStat" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+        </div>
+        <div class="lane">
+          <div style="font-weight:850;font-size:14px;">⚡ 快速排序（Quick Sort）</div>
+          <div class="bars" id="qBars"></div>
+          <div id="qStat" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>点击起跑，数一数两种算法各自花了多少次比较和交换才把柱子排成完美阶梯！
+    </div>
+  </div>
+
+  <script>
+    const BASE = [72, 18, 95, 34, 60, 12, 88, 45, 29, 81, 53, 15, 90, 38, 66, 22, 77, 49];
+    let timer = null;
+
+    function draw(id, arr, col) {
+      document.getElementById(id).innerHTML = arr.map(v => `<div class="bar" style="height:${v}%;background:${col};"></div>`).join("");
+    }
+
+    function genBubbleSteps(src) {
+      const a = [...src], steps = [];
+      for (let i = 0; i < a.length; i++) {
+        for (let j = 0; j < a.length - 1 - i; j++) {
+          if (a[j] > a[j + 1]) {
+            [a[j], a[j + 1]] = [a[j + 1], a[j]];
+            steps.push([...a]);
+          }
+        }
+      }
+      return steps;
+    }
+
+    function genQuickSteps(src) {
+      const a = [...src], steps = [];
+      function qs(l, r) {
+        if (l >= r) return;
+        const pivot = a[r];
+        let i = l;
+        for (let j = l; j < r; j++) {
+          if (a[j] < pivot) {
+            [a[i], a[j]] = [a[j], a[i]];
+            steps.push([...a]);
+            i++;
+          }
+        }
+        [a[i], a[r]] = [a[r], a[i]];
+        steps.push([...a]);
+        qs(l, i - 1);
+        qs(i + 1, r);
+      }
+      qs(0, a.length - 1);
+      return steps;
+    }
+
+    function start() {
+      if (timer) clearInterval(timer);
+      const bs = genBubbleSteps(BASE);
+      const qs = genQuickSteps(BASE);
+      let bi = 0, qi = 0;
+      timer = setInterval(() => {
+        if (bi < bs.length) {
+          draw("bBars", bs[bi], "var(--tax-amber)");
+          bi++;
+          document.getElementById("bStat").textContent = bi >= bs.length ? `✅ 完成！共交换 ${bs.length} 步` : `冒泡挪动中：第 ${bi} 步`;
+        }
+        if (qi < qs.length) {
+          draw("qBars", qs[qi], "var(--tax-green)");
+          qi++;
+          document.getElementById("qStat").textContent = qi >= qs.length ? `✅ 闪电完赛！仅 ${qs.length} 步！` : `分治交换中：第 ${qi} 步`;
+        }
+        if (bi >= bs.length && qi >= qs.length) {
+          clearInterval(timer);
+          document.getElementById("ahaBox").innerHTML = `💡 <strong>分治法（Divide & Conquer）的降维打击：</strong>冒泡只能一格一格把大数挪到末尾（花了 <strong>${bs.length} 步</strong>），而快排挑一个基准数，一步就把整个数组拆成“全小的左半边”和“全大的右半边”（仅 <strong>${qs.length} 步</strong>），数据越大差距越悬殊！`;
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }, 65);
+    }
+
+    draw("bBars", BASE, "var(--tax-amber)");
+    draw("qBars", BASE, "var(--tax-green)");
+  </script>
+</body>
+</html>

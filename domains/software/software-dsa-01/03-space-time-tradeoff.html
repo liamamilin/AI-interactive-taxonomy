@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：空间换时间诊所 · 两数之和优化</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .num { font-size: 24px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚖️ 空间换时间：如何把面试第一题 Two Sum 提速 10,000 倍？</h1>
+        <p>题目：在 <strong>10,000 个数字</strong>里找出哪两个加起来等于目标值。切换下方两种实现，看多花一点内存（哈希表）如何彻底消灭嵌套循环！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="bBrute" onclick="pick('brute')">🐢 方案 A：两层 for 循环暴力两两配对</button>
+        <button class="btn" id="bHash" onclick="pick('hash')">⚡ 方案 B：边走边记“哈希表备忘录”</button>
+      </div>
+      <div class="cards" id="cardBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["brute"]);
+    function pick(m) {
+      seen.add(m);
+      document.getElementById("bBrute").classList.toggle("active", m === "brute");
+      document.getElementById("bHash").classList.toggle("active", m === "hash");
+      const hash = m === "hash";
+      document.getElementById("cardBox").innerHTML = hash
+        ? `
+          <div class="card" style="border-color:var(--tax-green);"><div style="font-size:13px;color:var(--tax-muted);">⏱️ 时间复杂度（1 万条数据）</div><div class="num" style="color:var(--tax-green);">O(n) · 最多 1 万次</div></div>
+          <div class="card"><div style="font-size:13px;color:var(--tax-muted);">💾 额外内存占用</div><div class="num" style="color:var(--tax-amber);">O(n) · ~320 KB</div></div>
+        `
+        : `
+          <div class="card" style="border-color:var(--tax-red);"><div style="font-size:13px;color:var(--tax-muted);">⏱️ 时间复杂度（1 万条数据）</div><div class="num" style="color:var(--tax-red);">O(n²) · 5,000 万次！</div></div>
+          <div class="card"><div style="font-size:13px;color:var(--tax-muted);">💾 额外内存占用</div><div class="num" style="color:var(--tax-green);">O(1) · 0 KB</div></div>
+        `;
+      document.getElementById("ahaBox").innerHTML = hash
+        ? "💡 <strong>空间换时间（Space-Time Tradeoff）典范：</strong>每扫到一个数字 x，只需在哈希表里 O(1) 查一眼“之前见过 <code>target - x</code> 吗？”。只多花了几百 KB 内存，就把 5000 万次比较压成 1 万次——内存很便宜，用户的时间最贵！"
+        : "💡 <strong>暴力穷举的浪费：</strong>因为不肯花一点内存记住“我刚才见过哪些数”，每个数字都要傻傻回头把后面所有数再扫描一遍！点击切换到 <strong>方案 B（哈希表备忘录）</strong> 试试。";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("brute");
+  </script>
+</body>
+</html>

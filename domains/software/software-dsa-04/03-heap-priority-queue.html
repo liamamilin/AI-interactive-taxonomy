@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：医院急诊优先队列 · 最小堆 Heap</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .heap { display: flex; gap: 10px; flex-wrap: wrap; padding: 14px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); min-height: 74px; align-items: center; }
+    .nd { padding: 10px 14px; border-radius: 12px; background: var(--tax-surface); border: 1.5px solid var(--tax-border); font-weight: 850; font-size: 13.5px; }
+    .nd.top { border-color: var(--tax-red); background: rgba(239,68,68,0.14); color: var(--tax-red); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚑 医院急诊最小堆（Min-Heap）：不用全局排序，怎么永远 1 步揪出最危重病人？</h1>
+        <p>数字越小病情越危急（1 级最危重）。点击给急诊室添加病人或叫号接诊，看<strong>优先队列（最小堆）</strong>如何永远把最高优先级稳稳顶在第一位！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" onclick="pushP(5, '感冒')">+ 挂号：5级 感冒</button>
+        <button class="btn" onclick="pushP(3, '高烧')">+ 挂号：3级 高烧</button>
+        <button class="btn" style="background:var(--tax-red);border-color:var(--tax-red);" onclick="pushP(1, '心梗急救')">+ 挂号：1级 心梗急救！</button>
+        <button class="btn sec" onclick="popP()">🩺 医生叫号（弹出堆顶）</button>
+      </div>
+
+      <div style="font-size:13px;font-weight:800;color:var(--tax-muted);margin-bottom:6px;">堆顶（永远是当前最危急病人）→ 其余候诊节点（无需完全排好序！）：</div>
+      <div class="heap" id="heapBox"></div>
+      <div id="logOut" style="margin-top:10px;font-size:13.5px;font-weight:750;color:var(--tax-primary);"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let heap = [{ p: 4, name: "扭伤" }, { p: 6, name: "擦伤" }];
+    let ops = 0;
+
+    function pushP(p, name) {
+      heap.push({ p, name });
+      // siftUp
+      let i = heap.length - 1;
+      while (i > 0) {
+        const par = Math.floor((i - 1) / 2);
+        if (heap[par].p <= heap[i].p) break;
+        [heap[par], heap[i]] = [heap[i], heap[par]];
+        i = par;
+      }
+      ops++;
+      document.getElementById("logOut").textContent = `📥 新病人「${p}级 ${name}」入堆并完成 O(log n) 上浮！`;
+      render();
+      if (ops >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function popP() {
+      if (!heap.length) return;
+      const top = heap[0];
+      const last = heap.pop();
+      if (heap.length) {
+        heap[0] = last;
+        let i = 0;
+        while (true) {
+          let s = i, l = 2 * i + 1, r = 2 * i + 2;
+          if (l < heap.length && heap[l].p < heap[s].p) s = l;
+          if (r < heap.length && heap[r].p < heap[s].p) s = r;
+          if (s === i) break;
+          [heap[i], heap[s]] = [heap[s], heap[i]];
+          i = s;
+        }
+      }
+      ops++;
+      document.getElementById("logOut").textContent = `🩺 医生已优先接诊堆顶：「${top.p}级 ${top.name}」！`;
+      render();
+      if (ops >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      document.getElementById("heapBox").innerHTML = heap.length
+        ? heap.map((x, i) => `<div class="nd ${i === 0 ? "top" : ""}">${i === 0 ? "🚨 堆顶 · " : ""}${x.p}级 ${x.name}</div>`).join("")
+        : "<span style='color:var(--tax-muted);'>候诊室已清空 ✅</span>";
+      document.getElementById("ahaBox").innerHTML = "💡 <strong>最小堆（Heap）的偷懒智慧：</strong>如果只关心“下一个最紧急的是谁”，根本没必要把 1000 个人全部排好序！堆只保证“每个爹都比儿子急”，所以找最急的只要 <strong>O(1)</strong>，插入/弹出只花 <strong>O(log n)</strong>——这正是操作系统任务调度、定时器与海量数据 Top-K 的幕后功臣！";
+    }
+    render();
+  </script>
+</body>
+</html>

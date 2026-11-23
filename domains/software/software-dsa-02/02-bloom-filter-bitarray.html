@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：布隆过滤器（Bloom Filter）位数组实验</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 8px 14px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .bits { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 14px 0; }
+    .bit { padding: 10px 4px; border-radius: 8px; text-align: center; font-family: monospace; font-weight: 850; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); }
+    .bit.on { background: rgba(99,102,241,0.22); border-color: var(--tax-primary); color: var(--tax-primary); }
+    .res { padding: 12px 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); font-size: 14px; font-weight: 800; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🛡️ 布隆过滤器（Bloom Filter）：仅占 16 比特，怎么瞬间拦下 99% 的不存在查询？</h1>
+        <p>布隆过滤器不存真实数据，只用 2 个哈希函数把对应比特位翻成 <code>1</code>。先插入 <strong>apple / banana</strong>，再分别查询 <strong>cherry</strong> 和 <strong>grape</strong> 看看神奇现象！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" onclick="addWord('apple')">+ 插入 apple [位 2, 7]</button>
+        <button class="btn" onclick="addWord('banana')">+ 插入 banana [位 5, 11]</button>
+        <button class="btn sec" onclick="queryWord('cherry')">🔍 查询 cherry [位 2, 14]</button>
+        <button class="btn sec" onclick="queryWord('grape')">🔍 查询 grape [位 7, 11]（撞脸！）</button>
+      </div>
+      <div class="bits" id="bitGrid"></div>
+      <div class="res" id="resBox">请先点击插入 apple 和 banana，再点击右侧两个查询按钮！</div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const MAP = { apple: [2, 7], banana: [5, 11], cherry: [2, 14], grape: [7, 11] };
+    const bits = Array(16).fill(0);
+    const added = new Set();
+    let queries = 0;
+
+    function addWord(w) {
+      added.add(w);
+      MAP[w].forEach(i => bits[i] = 1);
+      document.getElementById("resBox").textContent = `✅ 已写入 "${w}"：把第 ${MAP[w].join("、")} 号比特位翻成 1！`;
+      render();
+    }
+
+    function queryWord(w) {
+      queries++;
+      const pos = MAP[w];
+      const allOne = pos.every(i => bits[i] === 1);
+      if (!allOne) {
+        document.getElementById("resBox").innerHTML = `🟢 查询 "${w}" [位 ${pos.join(", ")}]：发现有比特位为 0 → <strong>100% 绝对不存在！（直接拦截，不用查数据库！）</strong>`;
+      } else {
+        document.getElementById("resBox").innerHTML = added.has(w)
+          ? `✅ 查询 "${w}"：全为 1，真实存在！`
+          : `⚠️ 查询 "${w}" [位 ${pos.join(", ")}]：竟然全是 1（被 apple 的 7 和 banana 的 11 凑齐了！）→ <strong>触发假阳性误判！</strong>`;
+      }
+      render();
+      if (queries >= 2 && added.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      document.getElementById("bitGrid").innerHTML = bits.map((v, i) => `
+        <div class="bit ${v ? "on" : ""}">
+          <div style="font-size:10px;color:var(--tax-muted);">#${i}</div>
+          <div style="font-size:16px;">${v}</div>
+        </div>
+      `).join("");
+      document.getElementById("ahaBox").innerHTML = "💡 <strong>布隆过滤器的铁律：</strong>只要有一个对应位是 0，它就<strong>100% 绝对不在集合里</strong>（绝不漏报）；但如果全为 1，有极小概率是其他元素拼出来的“撞脸误判”。拿它挡在数据库前面，能用几 MB 内存瞬间拦下 99% 的恶意空查（防缓存穿透）！";
+    }
+    render();
+  </script>
+</body>
+</html>

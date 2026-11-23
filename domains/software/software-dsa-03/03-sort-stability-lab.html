@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：排序稳定性（Stability）电商榜单实验室</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .list { display: flex; flex-direction: column; gap: 8px; }
+    .item { display: flex; justify-content: space-between; padding: 12px 16px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-weight: 800; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏷️ 排序稳定性（Stability）：为什么“同价商品”的顺序莫名其妙乱了？</h1>
+        <p>商品列表已经先按<strong>销量从高到低</strong>排好。现在用户点击“按价格从低到高排序”，切换 <strong>稳定排序</strong> 与 <strong>不稳定排序</strong> 看看两款同为 ¥99 的商品顺序！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="bInit" onclick="show('init')">① 初始状态（已按销量降序）</button>
+        <button class="btn" id="bStable" onclick="show('stable')">② 稳定排序（归并/Timsort）按价格排</button>
+        <button class="btn" id="bUnstable" onclick="show('unstable')">③ 不稳定排序（原生快排）按价格排</button>
+      </div>
+      <div class="list" id="listBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const DATA = {
+      init: {
+        rows: ["🔥 爆款耳机 A（¥99 · 销量 9,800）", "🎧 旗舰耳机 B（¥199 · 销量 4,200）", "📦 普通耳机 C（¥99 · 销量 120）"],
+        aha: "💡 <strong>初始列表：</strong>同为 ¥99 的两款耳机，爆款 A（销量 9800）排在冷门 C（销量 120）前面。现在分别点击 <strong>稳定排序</strong> 和 <strong>不稳定排序</strong> 按价格重排！"
+      },
+      stable: {
+        rows: ["🔥 爆款耳机 A（¥99 · 销量 9,800）✅ 保留原有顺序", "📦 普通耳机 C（¥99 · 销量 120）✅", "🎧 旗舰耳机 B（¥199 · 销量 4,200）"],
+        aha: "💡 <strong>稳定排序（Stable Sort）的承诺：</strong>如果两个元素键值相等（都是 ¥99），它们在排序前后的<strong>相对先后顺序绝不翻转</strong>！这就是为什么 Python / Java / JS 的内置 <code>sort()</code>（Timsort）全部强制要求稳定排序！"
+      },
+      unstable: {
+        rows: ["📦 普通耳机 C（¥99 · 销量 120）⚠️ 竟然跑到了爆款前面！", "🔥 爆款耳机 A（¥99 · 销量 9,800）", "🎧 旗舰耳机 B（¥199 · 销量 4,200）"],
+        aha: "💡 <strong>不稳定排序的暗坑：</strong>原生快排在跨区交换元素时，可能把两个同样 ¥99 的商品左右互换，直接破坏了上一步按销量排好的用户体验！"
+      }
+    };
+    const seen = new Set(["init"]);
+    function show(k) {
+      seen.add(k);
+      ["init", "stable", "unstable"].forEach(x => document.getElementById("b" + x.charAt(0).toUpperCase() + x.slice(1)).classList.toggle("active", x === k));
+      document.getElementById("listBox").innerHTML = DATA[k].rows.map((r, i) => `<div class="item"><span>#${i+1} ${r}</span></div>`).join("");
+      document.getElementById("ahaBox").innerHTML = DATA[k].aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    show("init");
+  </script>
+</body>
+</html>

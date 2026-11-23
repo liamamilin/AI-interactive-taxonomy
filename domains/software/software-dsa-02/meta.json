@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "dsa",
+  "order": 2,
+  "title": "哈希表与布隆过滤器",
+  "icon": "🧮",
+  "subtitle": "为什么字典查 1 亿条数据只需 1 步（O(1)）？布隆过滤器又怎么用极小内存瞬间拦下 99% 的恶意空查？",
+  "difficulty": "入门",
+  "related": ["software/software-database-cache-03", "software/software-distributed-03"],
+  "toys": {
+    "01-hash-collision-buckets.html": {
+      "title": "哈希桶与碰撞拉链装配台",
+      "icon": "🪣",
+      "archetype": "builder",
+      "concept": "哈希函数 Hash · 哈希碰撞 Collision · 拉链法与扩容 Rehash",
+      "summary": "往 8 个桶里不断塞入 Key，亲眼看两个不同名字撞进同一个桶时如何挂成链表，以及负载因子过高为何要扩容。"
+    },
+    "02-bloom-filter-bitarray.html": {
+      "title": "布隆过滤器（Bloom Filter）位数组实验",
+      "icon": "🛡️",
+      "archetype": "blind-lab",
+      "concept": "位数组 Bit Array · 多重哈希 · 绝不漏报但允许极低误报",
+      "summary": "往 16 位数组里插入几个单词再测试查询，秒懂为什么布隆过滤器说“不在就 100% 不在”，说“在则可能撞脸误判”。"
+    },
+    "03-hash-dos-rehash-scenario.html": {
+      "title": "哈希退化攻击（HashDoS）排障室",
+      "icon": "🚨",
+      "archetype": "scenario",
+      "concept": "哈希碰撞攻击 · O(1) 退化成 O(n) · 树化与随机盐",
+      "summary": "黑客故意构造全撞进 0 号桶的恶意请求把服务器拖垮！开启红黑树转化与随机哈希种子瞬间化解危机。"
+    }
+  }
+}
