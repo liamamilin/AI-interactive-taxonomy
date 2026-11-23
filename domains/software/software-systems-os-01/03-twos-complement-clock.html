@@ -3,21 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>玩具 03：补码时钟 · 电脑如何用加法做减法</title>
+  <title>玩具 03：补码时钟表盘 · 化减为加的几何魔法</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
     .ctrls { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
     @media (max-width: 700px) { .ctrls { grid-template-columns: 1fr; } }
-    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; font-family: ui-monospace, monospace; font-size: 14px; line-height: 1.8; }
+    .stage { display: grid; grid-template-columns: 260px 1fr; gap: 16px; align-items: center; }
+    @media (max-width: 720px) { .stage { grid-template-columns: 1fr; } }
+    .dial-wrap { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 10px; }
+    svg { width: 100%; height: 240px; display: block; }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; font-family: ui-monospace, monospace; font-size: 13.5px; line-height: 1.85; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
       <div>
-        <h1>🕰️ 补码时钟（Two's Complement）：为什么 CPU 芯片里根本不造“减法器”？</h1>
-        <p>想象一个 16 格表盘（4 位二进制，范围 -8 ~ +7）：想算 <code>A - B</code>，不需要倒拨指针，只要顺时针多走 <code>16 - B</code> 格就刚好落在同一个刻度上！</p>
+        <h1>🕰️ 补码时钟表盘：为什么 CPU 芯片里根本不需要造“减法器”？</h1>
+        <p>在这个 16 格表盘（4 位补码，-8 ~ +7）上，<strong>逆时针退 B 格（减法）</strong>与<strong>顺时针走 16-B 格（加补码）</strong>永远落在完全同一个刻度！</p>
       </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
@@ -34,7 +38,10 @@
         </div>
       </div>
 
-      <div class="box" id="calcBox"></div>
+      <div class="stage">
+        <div class="dial-wrap"><svg viewBox="0 0 240 240" id="clkSvg"></svg></div>
+        <div class="box" id="calcBox"></div>
+      </div>
     </div>
 
     <div class="tax-aha" id="ahaBox"></div>
@@ -43,6 +50,10 @@
   <script>
     let drags = 0;
     function toBin4(n) { return ((n & 15) >>> 0).toString(2).padStart(4, "0"); }
+    function pos(idx, r) {
+      const ang = ((idx / 16) * 360 - 90) * Math.PI / 180;
+      return [120 + Math.cos(ang) * r, 120 + Math.sin(ang) * r];
+    }
 
     function render() {
       const a = parseInt(document.getElementById("aSlider").value, 10);
@@ -50,17 +61,39 @@
       document.getElementById("aVal").textContent = a;
       document.getElementById("bVal").textContent = b;
 
+      const aIdx = ((a % 16) + 16) % 16;
+      const resMod = ((a - b) % 16 + 16) % 16;
+      const signed = resMod >= 8 ? resMod - 16 : resMod;
+
+      let s = `<circle cx="120" cy="120" r="96" fill="none" stroke="#334155" stroke-width="3"/>`;
+      // Draw 16 ticks
+      for (let i = 0; i < 16; i++) {
+        const val = i >= 8 ? i - 16 : i;
+        const [x, y] = pos(i, 96);
+        const [lx, ly] = pos(i, 76);
+        const isStart = i === aIdx;
+        const isEnd = i === resMod;
+        s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${isEnd ? 7 : isStart ? 6 : 3}" fill="${isEnd ? "#10b981" : isStart ? "#6366f1" : "#64748b"}"/>`;
+        s += `<text x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="middle" fill="${isEnd ? "#34d399" : isStart ? "#a5b4fc" : "#94a3b8"}" font-size="10.5" font-weight="${isEnd || isStart ? 900 : 600}">${val}</text>`;
+      }
+
+      const [sx, sy] = pos(aIdx, 52);
+      const [ex, ey] = pos(resMod, 52);
+      s += `<line x1="120" y1="120" x2="${sx.toFixed(1)}" y2="${sy.toFixed(1)}" stroke="#6366f1" stroke-width="3" stroke-dasharray="4,3"/>`;
+      s += `<line x1="120" y1="120" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>`;
+      s += `<circle cx="120" cy="120" r="5" fill="#fff"/>`;
+      document.getElementById("clkSvg").innerHTML = s;
+
       const negB = -b;
       const rawSum = (a & 15) + (negB & 15);
-      const mod4 = rawSum & 15;
-      const signed = mod4 >= 8 ? mod4 - 16 : mod4;
-
       document.getElementById("calcBox").innerHTML = `
-        人类视角：<strong>${a} - ${b} = ${a - b}</strong><br>
-        芯片视角：把 -${b} 按位取反 +1 变成补码 <strong>${toBin4(negB)}</strong>（无符号等价于 +${16 - b}）<br>
-        直接做纯加法：${toBin4(a)} + ${toBin4(negB)} = ${rawSum.toString(2).padStart(5, "0")} → 截断低 4 位 = <strong style="color:var(--tax-green)">${toBin4(mod4)} (即 ${signed})</strong>
+        <div>🔵 起点指针：<strong>A = ${a}</strong>（二进制 <code>${toBin4(a)}</code>）</div>
+        <div>🟡 逆时针退 ${b} 格 ＝ 顺时针走 <strong>${16 - b} 格</strong>（补码 <code>${toBin4(negB)}</code>）</div>
+        <div>⚙️ 芯片只做纯加法：<code>${toBin4(a)} + ${toBin4(negB)} = ${rawSum.toString(2).padStart(5, "0")}</code></div>
+        <div style="margin-top:6px;">🟢 丢掉最高进位，落点指针：<strong style="color:var(--tax-green);font-size:16px;">${toBin4(resMod)} (十进制 ${signed})</strong></div>
       `;
-      document.getElementById("ahaBox").innerHTML = "💡 <strong>补码的天才设计：</strong>就像在 12 小时钟面上，<strong>退回 3 小时（-3）</strong>和<strong>往前拨 9 小时（+9）</strong>指向完全相同的时刻！靠补码机制，CPU 只需要一套加法器电路就能通吃所有正负加减法，连 +0 和 -0 也不再打架！";
+
+      document.getElementById("ahaBox").innerHTML = "💡 <strong>补码的几何直觉：</strong>在这个 16 格表盘上，<strong>往回退 " + b + " 格</strong>和<strong>往前绕 " + (16 - b) + " 格</strong>指向完全同一个绿色刻度！靠这套模运算魔法，CPU 只需一套加法器就能通吃全天下所有正负加减法！";
     }
 
     ["aSlider", "bSlider"].forEach(id => document.getElementById(id).addEventListener("input", () => {

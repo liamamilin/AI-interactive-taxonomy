@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>玩具 02：固定窗口临界突刺陷阱 · 滑动窗口解法</title>
+  <title>玩具 02：固定窗口临界突刺陷阱 · SVG 时间轴演示</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
-    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
     .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
-    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; line-height: 1.75; font-size: 14px; }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-bottom: 12px; }
+    svg { width: 100%; height: 190px; display: block; }
   </style>
 </head>
 <body class="tax-toy">
@@ -18,38 +19,91 @@
     <div class="tax-topbar">
       <div>
         <h1>🪟 固定窗口临界突刺陷阱：明明限了 100 QPS，怎么 0.2 秒内冲进了 200 个请求？</h1>
-        <p>系统规定 <strong>每 1 秒最多 100 次请求</strong>。黑客卡在 <code>0.9s</code> 发 100 次，又在 <code>1.1s</code> 发 100 次！切换两种窗口算法看看结果！</p>
+        <p>规则：<strong>每 1 秒最多 100 次</strong>。黑客卡在 <code>0.9s</code> 和 <code>1.1s</code> 各打满 100 次！切换算法并拖动 <strong>检查时间点</strong> 观察窗口覆盖范围！</p>
       </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
 
     <div class="tax-panel">
       <div class="tabs">
-        <button class="btn active" id="mFix" onclick="pick('fix')">💥 固定窗口计数器（整秒清零）</button>
-        <button class="btn" id="mSlide" onclick="pick('slide')">✅ 滑动窗口（Redis ZSET / 分片平滑）</button>
+        <button class="btn active" id="mFix" onclick="pick('fix')">💥 固定窗口（整秒归零 · 2 倍突刺穿透！）</button>
+        <button class="btn" id="mSlide" onclick="pick('slide')">✅ 滑动窗口（动态回看过去 1.0 秒 · 瞬间拦下！）</button>
       </div>
-      <div class="box" id="outBox"></div>
+
+      <label style="font-size:13.5px;font-weight:800;">⏱️ 拖动滑动窗口观测时刻 t = <span id="tVal" style="color:var(--tax-primary)">1.20</span> 秒（红色脉冲分别在 0.9s 和 1.1s）</label>
+      <input id="tSlider" type="range" min="100" max="190" value="120" style="width:100%;margin:6px 0 12px;" />
+
+      <div class="stage"><svg viewBox="0 0 540 185" id="winSvg"></svg></div>
     </div>
 
     <div class="tax-aha" id="ahaBox"></div>
   </div>
 
   <script>
+    let mode = "fix";
     const seen = new Set(["fix"]);
+
     function pick(m) {
+      mode = m;
       seen.add(m);
       document.getElementById("mFix").classList.toggle("active", m === "fix");
       document.getElementById("mSlide").classList.toggle("active", m === "slide");
-      const slide = m === "slide";
-      document.getElementById("outBox").innerHTML = slide
-        ? "✅ <strong>滑动窗口成功拦截！</strong><br>在 <code>1.1s</code> 时刻，算法动态回看过去整整 1 秒区间 <code>[0.1s, 1.1s]</code>，发现里面已经装满了 <code>0.9s</code> 时的 100 个请求 → 立刻把 <code>1.1s</code> 涌来的 100 个请求全部拦截返回 429！"
-        : "💥 <strong>临界双倍突刺打穿防线！</strong><br>• 窗口 1 <code>[0.0s, 1.0s)</code>：在 0.9s 放行 100 次（没超！）<br>• 1.0s 整点计数器直接归零！<br>• 窗口 2 <code>[1.0s, 2.0s)</code>：在 1.1s 又放行 100 次（没超！）<br>→ 结果在短短 <strong>0.2 秒内实际放行了 200 次（2 倍上限）</strong>，把数据库干翻！";
-      document.getElementById("ahaBox").innerHTML = slide
-        ? "💡 <strong>滑动窗口消除边界死角：</strong>无论攻击者怎么卡整秒边界，任意连续 1 秒窗口内的请求总数绝不会超过阈值！"
-        : "💡 <strong>固定窗口最经典的面试坑：</strong>跨窗口边界处永远存在 <strong>2 倍突刺漏洞</strong>！点击上方切换到 <strong>✅ 滑动窗口</strong> 看如何根治。";
+      render();
       if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
     }
-    pick("fix");
+
+    function render() {
+      const t = parseInt(document.getElementById("tSlider").value, 10) / 100;
+      document.getElementById("tVal").textContent = t.toFixed(2);
+      const isSlide = mode === "slide";
+
+      // Map time [0.0s .. 2.0s] -> x [40 .. 500] (230 px per second)
+      const tx = sec => 40 + sec * 230;
+      let s = "";
+
+      // Base timeline
+      s += `<line x1="40" y1="145" x2="500" y2="145" stroke="#475569" stroke-width="2.5"/>`;
+      [0, 0.5, 1.0, 1.5, 2.0].forEach(sec => {
+        const x = tx(sec);
+        s += `<line x1="${x}" y1="140" x2="${x}" y2="152" stroke="#94a3b8" stroke-width="2"/>`;
+        s += `<text x="${x}" y="168" text-anchor="middle" fill="#94a3b8" font-size="11">${sec.toFixed(1)}s</text>`;
+      });
+
+      // Two 100-req bursts at 0.9s and 1.1s
+      const b1x = tx(0.9), b2x = tx(1.1);
+      s += `<rect x="${b1x - 14}" y="55" width="28" height="90" rx="5" fill="rgba(239,68,68,0.75)" stroke="#fca5a5" stroke-width="1.5"/>`;
+      s += `<text x="${b1x}" y="48" text-anchor="middle" fill="#fca5a5" font-size="10.5" font-weight="800">100次</text>`;
+
+      const b2Blocked = isSlide && t >= 1.1 && (t - 1.0) <= 0.9;
+      s += `<rect x="${b2x - 14}" y="55" width="28" height="90" rx="5" fill="${b2Blocked ? "rgba(16,185,129,0.25)" : "rgba(239,68,68,0.75)"}" stroke="${b2Blocked ? "#34d399" : "#fca5a5"}" stroke-width="1.5" stroke-dasharray="${b2Blocked ? "4,3" : "none"}"/>`;
+      s += `<text x="${b2x}" y="48" text-anchor="middle" fill="${b2Blocked ? "#34d399" : "#fca5a5"}" font-size="10.5" font-weight="800">${b2Blocked ? "🛡️已拦截!" : "100次"}</text>`;
+
+      if (!isSlide) {
+        // Fixed windows [0,1) and [1,2)
+        s += `<rect x="${tx(0)}" y="22" width="230" height="123" fill="rgba(99,102,241,0.10)" stroke="#6366f1" stroke-dasharray="6,4" stroke-width="2"/>`;
+        s += `<rect x="${tx(1)}" y="22" width="230" height="123" fill="rgba(245,158,11,0.10)" stroke="#f59e0b" stroke-dasharray="6,4" stroke-width="2"/>`;
+        s += `<text x="${tx(0.5)}" y="36" text-anchor="middle" fill="#a5b4fc" font-size="11" font-weight="800">固定窗口 1：计 100/100 ✅放行</text>`;
+        s += `<text x="${tx(1.5)}" y="36" text-anchor="middle" fill="#fcd34d" font-size="11" font-weight="800">固定窗口 2：1.0s清零 → 计 100/100 💥也放行!</text>`;
+      } else {
+        // Sliding window [t-1.0, t]
+        const wx1 = tx(t - 1.0), wx2 = tx(t);
+        const cnt = ((t - 1.0 <= 0.9 && t >= 0.9) ? 100 : 0) + ((t - 1.0 <= 1.1 && t >= 1.1) ? 100 : 0);
+        const over = cnt > 100;
+        s += `<rect x="${wx1.toFixed(1)}" y="20" width="230" height="125" rx="6" fill="${over ? "rgba(16,185,129,0.16)" : "rgba(56,189,248,0.12)"}" stroke="${over ? "#10b981" : "#38bdf8"}" stroke-width="2.5"/>`;
+        s += `<text x="${((wx1 + wx2) / 2).toFixed(1)}" y="35" text-anchor="middle" fill="#6ee7b7" font-size="11" font-weight="800">滑动窗口 [${(t-1).toFixed(2)}s, ${t.toFixed(2)}s]：发现 ${cnt} 次 → ${over ? "🚨 超限拦截！" : "正常"}</text>`;
+      }
+
+      document.getElementById("winSvg").innerHTML = s;
+      document.getElementById("ahaBox").innerHTML = isSlide
+        ? "💡 <strong>滑动窗口彻底堵死边界漏洞！</strong>拖动时间滑块可以看到：只要窗口横跨 <code>0.9s</code> 和 <code>1.1s</code>，系统立刻察觉过去 1 秒内已累计 200 次请求，果断把第二波突刺全部拒之门外！"
+        : "💡 <strong>固定窗口的 2 倍突刺漏洞：</strong>因为 1.0s 整点直接把计数器清零，0.9s 和 1.1s 这两波相隔仅 0.2 秒的洪峰竟然各自“合法”通过，瞬间把下游打成 200 QPS！切到 <strong>✅ 滑动窗口</strong> 看看效果。";
+    }
+
+    document.getElementById("tSlider").addEventListener("input", () => {
+      render();
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
   </script>
 </body>
 </html>

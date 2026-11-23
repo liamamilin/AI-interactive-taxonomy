@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>玩具 01：60fps 动画竞速 · 改 left vs 改 transform</title>
+  <title>玩具 01：60fps 动画实战对比 · 改 left vs 改 transform</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
     .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
-    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
     .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .track-wrap { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 14px; margin-bottom: 14px; }
+    .lane { position: relative; height: 42px; background: #1e293b; border-radius: 10px; margin: 10px 0; overflow: hidden; display: flex; align-items: center; }
+    .box-mv { position: absolute; left: 8px; width: 42px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: #fff; }
     .pipe { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
     @media (max-width: 720px) { .pipe { grid-template-columns: 1fr 1fr; } }
-    .st { padding: 14px; border-radius: 14px; text-align: center; background: var(--tax-surface-alt); border: 2px solid var(--tax-border); }
+    .st { padding: 12px; border-radius: 12px; text-align: center; background: var(--tax-surface-alt); border: 2px solid var(--tax-border); }
     .st.hit { border-color: var(--tax-red); background: rgba(239,68,68,0.14); }
     .st.skip { opacity: 0.35; border-style: dashed; }
     .st.gpu { border-color: var(--tax-green); background: rgba(16,185,129,0.16); }
@@ -22,17 +25,24 @@
   <div class="tax-wrap">
     <div class="tax-topbar">
       <div>
-        <h1>🏎️ 改 <code>left</code> vs 改 <code>transform</code>：前端动画丝滑 60fps 的终极秘密！</h1>
-        <p>切换下面 3 种 CSS 属性动画，亲眼看每一帧到底惊动了渲染流水线的哪几个昂贵阶段！</p>
+        <h1>🏎️ 改 <code>left</code> vs 改 <code>transform</code>：肉眼实测 15fps 掉帧 vs 60fps 丝滑！</h1>
+        <p>观察下方两条实时跑道（上：模拟主线程因重排卡顿的 <code>left</code> 动画；下：直通 GPU 合成层的 <code>transform</code> 动画），并切换查看流水线！</p>
       </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
 
     <div class="tax-panel">
+      <div class="track-wrap">
+        <div style="font-size:12px;color:#fca5a5;font-weight:800;">🐢 改 left（每帧触发主线程 Layout + Paint → 卡顿掉帧 ~12 FPS）</div>
+        <div class="lane"><div class="box-mv" id="boxSlow" style="background:#ef4444;">left</div></div>
+        <div style="font-size:12px;color:#6ee7b7;font-weight:800;margin-top:8px;">🚀 改 transform: translateX（跳过布局与重绘 → GPU 合成 60 FPS 丝滑！）</div>
+        <div class="lane"><div class="box-mv" id="boxFast" style="background:#10b981;">GPU</div></div>
+      </div>
+
       <div class="tabs">
-        <button class="btn active" id="pLeft" onclick="pick('left')">🐢 改 width / left（触发全套回流！）</button>
-        <button class="btn" id="pColor" onclick="pick('color')">🟡 改 background-color（跳过布局，触发重绘）</button>
-        <button class="btn" id="pTrans" onclick="pick('trans')">🚀 改 transform / opacity（直通 GPU 合成！）</button>
+        <button class="btn active" id="pLeft" onclick="pick('left')">🐢 查看 left 触发阶段</button>
+        <button class="btn" id="pColor" onclick="pick('color')">🟡 查看 color 触发阶段</button>
+        <button class="btn" id="pTrans" onclick="pick('trans')">🚀 查看 transform 触发阶段</button>
       </div>
       <div class="pipe" id="pipeRow"></div>
     </div>
@@ -44,18 +54,18 @@
     const DATA = {
       left: {
         s: ["hit", "hit", "hit", "hit"],
-        aha: "💡 <strong>最昂贵的回流（Reflow / Layout）：</strong>改 <code>left / width</code> 会牵一发而动全身，浏览器必须重新算一遍整页所有元素的几何坐标，再重画像素、再合成，极易掉帧卡顿！"
+        aha: "💡 <strong>最昂贵的回流（Reflow / Layout）：</strong>改 <code>left / width</code> 牵一发而动全身，浏览器每帧重算整页布局并重画像素，主线程一旦超时立刻掉成上面的 12fps PPT！"
       },
       color: {
         s: ["hit", "skip", "hit", "hit"],
-        aha: "💡 <strong>重绘（Repaint）：</strong>改背景色不影响别的元素位置，所以跳过了最耗时的 Layout，但 CPU 仍需重新光栅化像素（Paint）。"
+        aha: "💡 <strong>重绘（Repaint）：</strong>改背景色不影响元素几何位置，跳过了最耗时的 Layout，但 CPU 仍需重新光栅化像素。"
       },
       trans: {
         s: ["skip", "skip", "skip", "gpu"],
-        aha: "💡 <strong>GPU 合成层（Composite）降维打击：</strong><code>transform</code> 和 <code>opacity</code> 彻底跳过 Layout 和 Paint，直接把已经画好的图层纹理交给显卡 GPU 平移缩放，主线程就算忙着算 JS，动画依然稳稳 60–120 fps！"
+        aha: "💡 <strong>GPU 合成层（Composite）降维打击：</strong><code>transform</code> 和 <code>opacity</code> 彻底绕开 Layout 和 Paint，直接由 GPU 独立线程平移纹理，所以能跑出下方肉眼可见的丝滑 60fps！"
       }
     };
-    const NAMES = ["1. Style 样式计算", "2. Layout 重排布局", "3. Paint 重绘像素", "4. Composite GPU合成"];
+    const NAMES = ["1. Style 样式", "2. Layout 重排", "3. Paint 重绘", "4. Composite 合成"];
     const seen = new Set(["left"]);
 
     function pick(k) {
@@ -63,13 +73,30 @@
       ["left", "color", "trans"].forEach(x => document.getElementById("p" + x.charAt(0).toUpperCase() + x.slice(1)).classList.toggle("active", x === k));
       document.getElementById("pipeRow").innerHTML = NAMES.map((n, i) => {
         const cls = DATA[k].s[i];
-        const tag = cls === "skip" ? "⏭️ 完美跳过！" : cls === "gpu" ? "⚡ GPU 零耗时直出" : "🔥 每帧重新执行";
-        return `<div class="st ${cls}"><div style="font-weight:850;font-size:13.5px;">${n}</div><div style="font-size:12px;margin-top:6px;">${tag}</div></div>`;
+        const tag = cls === "skip" ? "⏭️ 完美跳过！" : cls === "gpu" ? "⚡ GPU 直出" : "🔥 每帧重算";
+        return `<div class="st ${cls}"><div style="font-weight:850;font-size:13px;">${n}</div><div style="font-size:11.5px;margin-top:5px;">${tag}</div></div>`;
       }).join("");
       document.getElementById("ahaBox").innerHTML = DATA[k].aha;
       if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
     }
+
+    // Live animation comparing janky 12fps vs smooth 60fps
+    let startTs = performance.now();
+    let lastSlow = 0;
+    function loop(now) {
+      const t = ((now - startTs) / 1400) % 2;
+      const prog = t <= 1 ? t : 2 - t;
+      const maxX = Math.max(120, document.getElementById("boxFast").parentElement.clientWidth - 58);
+      document.getElementById("boxFast").style.transform = `translateX(${(prog * maxX).toFixed(1)}px)`;
+      if (now - lastSlow > 95) {
+        lastSlow = now;
+        document.getElementById("boxSlow").style.left = `${(8 + prog * maxX).toFixed(0)}px`;
+      }
+      requestAnimationFrame(loop);
+    }
+
     pick("left");
+    requestAnimationFrame(loop);
   </script>
 </body>
 </html>
