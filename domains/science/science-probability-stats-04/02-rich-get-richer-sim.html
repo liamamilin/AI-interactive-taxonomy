@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：马太效应沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🕸️ 马太效应沙盘：随机世界 vs 强者愈强（优先连接）</h1>
+        <p>误区：爆款和大V纯靠质量比别人好一万倍。真相：哪怕起点完全相同，只要存在“越火越容易被推荐”的优先连接，结果必然长出幂律赢家通吃！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div style="margin-bottom:14px;">
+        <button id="bRand" class="btn active" onclick="sim('rand')">🎲 完全随机分配（均匀世界）</button>
+        <button id="bRich" class="btn" onclick="sim('rich')">👑 优先连接（强者愈强 · 幂律世界）</button>
+      </div>
+      <svg id="barSvg" viewBox="0 0 560 220" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+      <div style="margin-top:10px;font-weight:800;font-size:14px;" id="topShare">Top 3 创作者占据总流量：--</div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>点击切换到「优先连接」，看同样 1000 次流量分配是如何造出少数超级巨星的！
+    </div>
+  </div>
+
+  <script>
+    const seen = new Set();
+    function sim(mode) {
+      seen.add(mode);
+      document.getElementById("bRand").classList.toggle("active", mode === "rand");
+      document.getElementById("bRich").classList.toggle("active", mode === "rich");
+
+      const n = 20;
+      const scores = new Array(n).fill(1);
+      for (let step = 0; step < 1000; step++) {
+        if (mode === "rand") {
+          scores[Math.floor(Math.random() * n)]++;
+        } else {
+          const sum = scores.reduce((a, b) => a + b, 0);
+          let r = Math.random() * sum, acc = 0;
+          for (let i = 0; i < n; i++) {
+            acc += scores[i];
+            if (r <= acc) { scores[i]++; break; }
+          }
+        }
+      }
+      scores.sort((a, b) => b - a);
+      const maxS = scores[0];
+      const total = scores.reduce((a, b) => a + b, 0);
+      const top3 = Math.round(((scores[0] + scores[1] + scores[2]) / total) * 100);
+      document.getElementById("topShare").textContent = `Top 3 节点占据总流量：${top3}%`;
+
+      const bw = 500 / n;
+      let html = `<line x1="30" y1="195" x2="530" y2="195" stroke="var(--tax-border)"/>`;
+      scores.forEach((v, i) => {
+        const h = (v / maxS) * 160;
+        html += `<rect x="${30 + i * bw + 2}" y="${195 - h}" width="${bw - 4}" height="${h}" rx="3" fill="${i < 3 && mode === 'rich' ? '#ef4444' : 'var(--tax-primary)'}"/>`;
+      });
+      document.getElementById("barSvg").innerHTML = html;
+
+      if (seen.size >= 2) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>起点完全一样，仅仅因为“已有流量越多越容易被选中”，Top 3 节点就吞下了 <strong>${top3}%</strong> 的总流量——这就是社交粉丝数、论文引用数、城市人口呈现幂律长尾的底层引擎！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    sim("rand");
+  </script>
+</body>
+</html>

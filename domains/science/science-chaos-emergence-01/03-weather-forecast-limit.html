@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：天气预报极限实验室</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌦️ 天气预报极限：为什么算力再强也难报准下个月今天？</h1><p>误区：报不准 30 天后的天气只是因为气象卫星还不够密。真相：哪怕把传感器铺满地球每立方米，量子级误差在混沌大气里 15 天也会放大到全盘皆输！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">📡 初始观测误差：10^<span id="eOut">-4</span>
+        <input id="eS" type="range" min="-8" max="-1" value="-4" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 540 190" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕你把观测精度一口气提高一万倍（-4 变 -8），可预报天数也只多出几天！</div>
+    
+  </div>
+  <script>
+    let m=0;
+    function render(){
+      const exp=+document.getElementById("eS").value;
+      document.getElementById("eOut").textContent=exp;
+      const err0=Math.pow(10,exp);
+      let pts=[], limitDay=20;
+      for(let d=0;d<=20;d++){
+        const e=Math.min(1, err0*Math.pow(2, d/1.4));
+        if(e>=0.8 && limitDay===20) limitDay=d;
+        pts.push(`${d===0?'M':'L'}${(40+d*23).toFixed(1)},${(165-e*130).toFixed(1)}`);
+      }
+      document.getElementById("svg").innerHTML=`
+        <line x1="40" y1="165" x2="500" y2="165" stroke="var(--tax-border)"/>
+        <line x1="40" y1="60" x2="500" y2="60" stroke="#ef4444" stroke-dasharray="4,4"/>
+        <path d="${pts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="3"/>
+        <text x="270" y="30" text-anchor="middle" font-size="14" font-weight="850" fill="var(--tax-primary)">有效预报窗口：约 ${limitDay} 天</text>
+      `;
+      m++; if(exp<=-6 && m>1){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>由于误差按指数翻倍，精度提升 10000 倍（10⁻⁴ → 10⁻⁸）仅仅把有效预报窗口从 ~9 天延长到 ~${limitDay} 天！这就是洛伦兹发现的 2 周气象预测天花板。`;
+        if(window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+    </script>
+</body>
+</html>

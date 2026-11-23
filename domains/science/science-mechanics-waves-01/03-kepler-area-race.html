@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：开普勒第二定律竞速</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏃 开普勒第二定律：近地点狂飙，远地点慢跑</h1><p>误区：行星绕太阳永远是匀速转圈。真相：轨道越扁，靠近太阳时引力拉得越狠、速度越快，等时间扫过的扇形面积永远相等！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🥚 轨道偏心率 e：<span id="eOut">0.60</span>
+        <input id="eS" type="range" min="0" max="0.75" step="0.05" value="0.6" style="width:100%;margin-top:8px;" oninput="upd()" />
+      </label>
+      <svg id="svg" viewBox="0 0 460 220" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>把偏心率拉到 0.7，看行星每次冲过太阳左侧近地点时如何瞬间加速！</div>
+    
+  </div>
+  <script>
+    let e=0.6, th=0, ticks=0;
+    function upd(){ e=parseFloat(document.getElementById("eS").value); document.getElementById("eOut").textContent=e.toFixed(2); }
+    function loop(){
+      const a=145, b=a*Math.sqrt(1-e*e), c=a*e;
+      const r=a*(1-e*e)/(1+e*Math.cos(th));
+      const dth=0.025*(a/r)*(a/r);
+      th=(th+dth)%(Math.PI*2);
+      const px=230-c+r*Math.cos(th), py=110-r*Math.sin(th);
+      document.getElementById("svg").innerHTML=`
+        <ellipse cx="230" cy="110" rx="${a}" ry="${b}" fill="none" stroke="var(--tax-border)" stroke-width="2"/>
+        <circle cx="${230-c}" cy="110" r="14" fill="#f59e0b"/>
+        <line x1="${230-c}" y1="110" x2="${px.toFixed(1)}" y2="${py.toFixed(1)}" stroke="var(--tax-primary)" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="8" fill="var(--tax-primary)"/>
+      `;
+      ticks++; if(ticks===90 && window.ToySDK){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>距离越近（r 越小），角速度越大（∝ 1/r²），保证同样时间内扫过的面积严格守恒！`;
+        window.ToySDK.markCompleted();
+      }
+      requestAnimationFrame(loop);
+    }
+    upd(); requestAnimationFrame(loop);
+    </script>
+</body>
+</html>

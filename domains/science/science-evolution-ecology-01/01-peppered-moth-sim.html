@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：桦尺蛾工业黑化沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🪲 桦尺蛾工业黑化沙盘：环境变黑，白蛾为何瞬间消失？</h1><p>误区：蛾子为了躲避小鸟“主动”把自己晒黑。真相：本来就有极少数随机突变的黑蛾，只是树干变黑后，白蛾显眼被吃光了！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+        <button class="btn active" id="e0" onclick="setEnv(0)">🌳 原始白桦林</button>
+        <button class="btn" id="e1" onclick="setEnv(1)">🏭 煤烟黑森林</button>
+        <button class="btn primary" onclick="nextGen()">⏭️ 繁衍并经历 1 代天敌捕食</button>
+      </div>
+      <svg id="svg" viewBox="0 0 540 180" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>先切换到「煤烟黑森林」，再连点几下繁衍，看黑蛾占比如何从 10% 飙升到 90%！</div>
+    
+  </div>
+  <script>
+    let dark=0, whiteCnt=18, blackCnt=2, gens=0;
+    function setEnv(d){ dark=d; document.getElementById("e0").classList.toggle("active",d===0); document.getElementById("e1").classList.toggle("active",d===1); draw(); }
+    function nextGen(){
+      gens++;
+      if(dark===1){ whiteCnt=Math.max(1,Math.round(whiteCnt*0.55)); blackCnt=Math.min(19,Math.round(blackCnt*1.65+1)); }
+      else { blackCnt=Math.max(1,Math.round(blackCnt*0.55)); whiteCnt=Math.min(19,Math.round(whiteCnt*1.45+1)); }
+      const tot=whiteCnt+blackCnt;
+      whiteCnt=Math.round((whiteCnt/tot)*20); blackCnt=20-whiteCnt;
+      draw();
+      if(gens>=3 && window.ToySDK){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>环境一变，捕食者的眼睛立刻成了最冷酷的筛子！基因没有方向，但环境筛选出了唯一能活下来的颜色。`;
+        window.ToySDK.markCompleted();
+      }
+    }
+    function draw(){
+      const bg=dark?"#1e293b":"#f1f5f9";
+      let dots="";
+      for(let i=0;i<20;i++){
+        const isB=i>=whiteCnt;
+        dots+=`<circle cx="${45+(i%10)*48}" cy="${55+Math.floor(i/10)*65}" r="11" fill="${isB?'#0f172a':'#ffffff'}" stroke="#94a3b8" stroke-width="2"/>`;
+      }
+      document.getElementById("svg").innerHTML=`<rect width="540" height="180" fill="${bg}"/>${dots}<text x="270" y="166" text-anchor="middle" font-size="13" font-weight="800" fill="${dark?'#fff':'#0f172a'}">第 ${gens} 代：白蛾 ${whiteCnt*5}% vs 黑蛾 ${blackCnt*5}%</text>`;
+    }
+    draw();
+    </script>
+</body>
+</html>

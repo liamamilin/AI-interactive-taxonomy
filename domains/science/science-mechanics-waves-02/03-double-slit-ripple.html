@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：双缝水波干涉纹</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌊 双缝水波干涉纹：亮的地方更亮，暗的地方几乎没波</h1><p>误区：开两条缝，屏幕应该均匀变亮两倍。真相：波程差为半波长奇数倍的地方互相抵消成死水，能量全集中到了亮纹处！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">📏 双缝间距 d：<span id="dOut">4</span> · 波长 λ 固定
+        <input id="dS" type="range" min="2" max="10" value="4" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 560 180" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>调大双缝间距 d，观察右侧屏幕上干涉条纹变得越来越密集！</div>
+    
+  </div>
+  <script>
+    let m=0;
+    function render(){
+      const d=+document.getElementById("dS").value;
+      document.getElementById("dOut").textContent=d;
+      let bars="";
+      for(let y=10;y<170;y+=4){
+        const ang=(y-90)/80;
+        const intensity=Math.pow(Math.cos(d*ang*1.8),2);
+        bars+=`<rect x="460" y="${y}" width="60" height="4" fill="var(--tax-primary)" opacity="${intensity.toFixed(2)}"/>`;
+      }
+      document.getElementById("svg").innerHTML=`
+        <line x1="120" y1="10" x2="120" y2="${85-d*3}" stroke="currentColor" stroke-width="4"/>
+        <line x1="120" y1="${90-d*2}" x2="120" y2="${90+d*2}" stroke="currentColor" stroke-width="4"/>
+        <line x1="120" y1="${95+d*3}" x2="120" y2="170" stroke="currentColor" stroke-width="4"/>
+        ${bars}
+        <text x="490" y="175" text-anchor="middle" font-size="10" fill="var(--tax-muted)">干涉条纹</text>
+      `;
+      m++; if(m>=3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+    </script>
+</body>
+</html>

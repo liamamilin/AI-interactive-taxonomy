@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：三门博弈实战台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .doors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 16px 0; }
+    .door { padding: 22px 12px; border-radius: 16px; border: 2px solid var(--tax-border); background: var(--tax-surface-alt); text-align: center; cursor: pointer; transition: transform 0.15s, border-color 0.15s; }
+    .door:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .door.picked { border-color: var(--tax-primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    .door.open { opacity: 0.78; cursor: default; }
+    .door .emoji { font-size: 42px; display: block; margin-bottom: 8px; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .scard { padding: 12px; border: 1px solid var(--tax-border); border-radius: 12px; text-align: center; }
+    .btn { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.alt { background: var(--tax-surface-alt); color: inherit; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🐐 三门博弈实战台：主持人开了山羊门，你换不换？</h1>
+        <p>误区：最后剩 2 扇门，中奖率肯定是 50% 对 50%。真相：你一开始选中的概率只有 1/3，剩下 2/3 全部浓缩在了另一扇门里！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div id="prompt" style="font-weight:800;font-size:15px;">第一步：点击选择一扇门（背后藏着 1 辆跑车 🏎️ 和 2 只山羊 🐐）</div>
+      <div class="doors" id="doors"></div>
+      <div id="actions" style="min-height:42px;"></div>
+      <div class="stats">
+        <div class="scard"><div style="font-size:12px;color:var(--tax-muted);">🛡️ 坚持不换胜率</div><div id="stayStat" style="font-size:20px;font-weight:900;">0 / 0 (0%)</div></div>
+        <div class="scard"><div style="font-size:12px;color:var(--tax-muted);">🔄 果断换门胜率</div><div id="switchStat" style="font-size:20px;font-weight:900;color:var(--tax-primary);">0 / 0 (0%)</div></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>试着分别用“坚持”和“换门”各玩几局，观察真实胜率统计！
+    </div>
+  </div>
+
+  <script>
+    let car = 0, pick = -1, goatOpen = -1, stage = 0;
+    let stayW = 0, stayN = 0, swW = 0, swN = 0;
+
+    function initRound() {
+      car = Math.floor(Math.random() * 3);
+      pick = -1; goatOpen = -1; stage = 0;
+      document.getElementById("prompt").textContent = "第一步：点击选择一扇门（1 辆跑车 🏎️，2 只山羊 🐐）";
+      document.getElementById("actions").innerHTML = "";
+      renderDoors();
+    }
+
+    function renderDoors() {
+      const box = document.getElementById("doors");
+      box.innerHTML = [0,1,2].map(i => {
+        let emoji = "🚪", label = `门 #${i+1}`, cls = "door";
+        if (i === pick) cls += " picked";
+        if (stage >= 1 && i === goatOpen) { emoji = "🐐"; label = "主持人打开：山羊"; cls += " open"; }
+        if (stage === 2 && i !== goatOpen) { emoji = i === car ? "🏎️" : "🐐"; label = i === car ? "大奖跑车！" : "山羊"; cls += " open"; }
+        return `<div class="${cls}" onclick="choose(${i})"><span class="emoji">${emoji}</span><strong>${label}</strong></div>`;
+      }).join("");
+    }
+
+    function choose(i) {
+      if (stage !== 0) return;
+      pick = i;
+      const cands = [0,1,2].filter(x => x !== pick && x !== car);
+      goatOpen = cands[Math.floor(Math.random() * cands.length)];
+      stage = 1;
+      document.getElementById("prompt").textContent = `主持人打开了 #${goatOpen+1} 号门（山羊）。现在你决定：`;
+      document.getElementById("actions").innerHTML = `
+        <button class="btn alt" onclick="finish(false)">🛡️ 坚持 #${pick+1} 号门</button>
+        <button class="btn" onclick="finish(true)">🔄 换到另一扇门</button>
+      `;
+      renderDoors();
+    }
+
+    function finish(doSwitch) {
+      if (stage !== 1) return;
+      if (doSwitch) {
+        pick = [0,1,2].find(x => x !== pick && x !== goatOpen);
+      }
+      stage = 2;
+      const win = pick === car;
+      if (doSwitch) { swN++; if (win) swW++; } else { stayN++; if (win) stayW++; }
+
+      document.getElementById("stayStat").textContent = `${stayW} / ${stayN} (${stayN?Math.round(stayW/stayN*100):0}%)`;
+      document.getElementById("switchStat").textContent = `${swW} / ${swN} (${swN?Math.round(swW/swN*100):0}%)`;
+      document.getElementById("prompt").textContent = win ? "🎉 恭喜开走跑车！" : "🐐 很遗憾，选中了山羊。";
+      document.getElementById("actions").innerHTML = `<button class="btn" onclick="initRound()">再来一局 →</button>`;
+      renderDoors();
+
+      if (stayN + swN >= 3) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>主持人<strong>知道门后是什么</strong>，他永远只开山羊门！这等于帮你把“另外两扇门一共 2/3 的中奖概率”全部打包集中到了你没选的那一扇门上，所以换门胜率直接翻倍到 <strong>66.7%</strong>！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    initRound();
+  </script>
+</body>
+</html>

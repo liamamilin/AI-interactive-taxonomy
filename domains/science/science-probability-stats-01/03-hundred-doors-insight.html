@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：100 扇门直觉放大镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔭 100 扇门直觉放大镜：把 N 拉大，悖论瞬间变常识！</h1>
+        <p>误区：3 扇门太少让人晕头转向。真相：把门数从 3 扇拉到 100 扇，你绝不会再犹豫要不要换！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🚪 总门数 N：<span id="nOut">3</span> 扇（主持人会帮你打开 N-2 扇山羊门）
+        <input id="nS" type="range" min="3" max="100" value="3" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="gridSvg" viewBox="0 0 560 220" style="width:100%;height:auto;margin-top:14px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+      <div style="display:flex;justify-content:space-between;margin-top:12px;font-weight:800;font-size:15px;">
+        <span>🟦 你初选的门（坚持胜率）：<span id="pStay">33.3%</span></span>
+        <span>🟩 主持人独留的那扇门（换门胜率）：<span id="pSw" style="color:#10b981;">66.7%</span></span>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>把总门数拉到 100 扇：你一开始盲选 1 扇门（中奖率 1%），主持人排除掉 98 扇山羊门后独留的那扇门，几乎一定藏着跑车（99%）！
+    </div>
+  </div>
+
+  <script>
+    let moves = 0;
+    function render() {
+      const N = +document.getElementById("nS").value;
+      document.getElementById("nOut").textContent = N;
+      document.getElementById("pStay").textContent = (100 / N).toFixed(1) + "%";
+      document.getElementById("pSw").textContent = (((N - 1) / N) * 100).toFixed(1) + "%";
+
+      const cols = Math.min(20, Math.max(3, Math.ceil(Math.sqrt(N * 2.2))));
+      const rows = Math.ceil(N / cols);
+      const cellW = 520 / cols, cellH = Math.min(48, 190 / rows);
+      let html = "";
+      for (let i = 0; i < N; i++) {
+        const c = i % cols, r = Math.floor(i / cols);
+        const x = 20 + c * cellW + 2, y = 15 + r * cellH + 2;
+        const w = cellW - 4, h = cellH - 4;
+        let fill = "var(--tax-border)", op = 0.35;
+        if (i === 0) { fill = "#3b82f6"; op = 1; }
+        else if (i === N - 1) { fill = "#10b981"; op = 1; }
+        html += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${fill}" opacity="${op}"/>`;
+      }
+      document.getElementById("gridSvg").innerHTML = html;
+
+      moves++;
+      if (N >= 50 && moves > 1) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>共有 ${N} 扇门时，你初选中的蓝门只有 <strong>${(100/N).toFixed(1)}%</strong> 胜率；其余 ${N-1} 扇门中主持人排除了 ${N-2} 个错误答案，把 <strong>${(((N-1)/N)*100).toFixed(1)}%</strong> 的概率全浓缩进了最后那扇绿门！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

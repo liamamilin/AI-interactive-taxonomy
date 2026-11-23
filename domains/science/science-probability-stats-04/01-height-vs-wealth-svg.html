@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：瘦尾正态 vs 肥尾幂律</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 16px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📊 瘦尾正态 vs 肥尾幂律：当首富走进 50 人教室</h1>
+        <p>误区：任何群体的“平均值”都能代表大多数人。真相：在肥尾幂律世界里，1 个极端值就能把平均值拉到没人认识！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div style="margin-bottom:14px;">
+        <button class="btn primary" onclick="toggleExtreme()">🚪 放入“极端个体”（2.3m 巨人 / 1000亿首富）</button>
+        <span id="tagOut" style="font-weight:750;font-size:13.5px;color:var(--tax-muted);">当前：仅 50 名普通人</span>
+      </div>
+      <svg id="cmpSvg" viewBox="0 0 560 220" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>点击按钮把极端个体请进教室，对比左边（正态身高）与右边（幂律财富）的平均值变化！
+    </div>
+  </div>
+
+  <script>
+    let hasExt = false;
+    function toggleExtreme() {
+      hasExt = !hasExt;
+      document.getElementById("tagOut").textContent = hasExt ? "当前：50 名普通人 + 1 名极端个体！" : "当前：仅 50 名普通人";
+      render();
+      if (hasExt && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    function render() {
+      const hAvg = hasExt ? ((50 * 1.72 + 2.30) / 51).toFixed(3) : "1.720";
+      const wAvg = hasExt ? ((50 * 20 + 10000000) / 51).toFixed(0) : "20";
+      const wBar = hasExt ? 155 : 16;
+
+      document.getElementById("cmpSvg").innerHTML = `
+        <text x="140" y="28" text-anchor="middle" font-size="14" font-weight="800" fill="currentColor">📏 身高（正态瘦尾）</text>
+        <rect x="115" y="135" width="50" height="45" rx="6" fill="#10b981"/>
+        <text x="140" y="126" text-anchor="middle" font-size="15" font-weight="900" fill="#10b981">均值 ${hAvg} m</text>
+        <text x="140" y="202" text-anchor="middle" font-size="12" fill="var(--tax-muted)">变化：${hasExt ? "+0.6%（稳如泰山）" : "基准"}</text>
+
+        <line x1="280" y1="20" x2="280" y2="205" stroke="var(--tax-border)" stroke-dasharray="4,4"/>
+
+        <text x="420" y="28" text-anchor="middle" font-size="14" font-weight="800" fill="currentColor">💰 财富（幂律肥尾）</text>
+        <rect x="395" y="${180 - wBar}" width="50" height="${wBar}" rx="6" fill="${hasExt?'#ef4444':'var(--tax-primary)'}"/>
+        <text x="420" y="${172 - wBar}" text-anchor="middle" font-size="15" font-weight="900" fill="${hasExt?'#ef4444':'var(--tax-primary)'}">均值 ${Number(wAvg).toLocaleString()} 万</text>
+        <text x="420" y="202" text-anchor="middle" font-size="12" fill="var(--tax-muted)">变化：${hasExt ? "暴涨 9800 倍（严重失真）" : "基准（20万）"}</text>
+      `;
+
+      if (hasExt) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>巨人走进教室只让平均身高多了 1 厘米；但千亿首富走进来，教室人均身家瞬间飙到 <strong>19.6 亿元</strong>！遇到幂律分布数据时，看<strong>中位数</strong>或<strong>二八比例</strong>远比看“平均值”靠谱！`;
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

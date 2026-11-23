@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：演化真相检验台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧬 演化真相检验台：为什么抗生素越用越不灵？</h1><p>误区：细菌吃了抗生素后“学会”了抵抗。真相：细菌里早就有耐药突变株，抗生素杀死了所有普通细菌，把地盘全让给了耐药菌！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="q0" onclick="pick(0)">💊 用药中途觉得好了就停药</button>
+        <button class="btn" id="q1" onclick="pick(1)">✅ 遵医嘱吃满完整疗程</button>
+      </div>
+      <div id="box" style="padding:16px;border:1px solid var(--tax-border);border-radius:12px;line-height:1.7;"></div>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>演化从不“未卜先知”，一切适应都是先有随机多样性、再被环境残酷筛选的结果。</div>
+    
+  </div>
+  <script>
+    const seen=new Set([0]);
+    function pick(i){
+      seen.add(i); [0,1].forEach(k=>document.getElementById("q"+k).classList.toggle("active",k===i));
+      document.getElementById("box").innerHTML=i===0
+        ? "❌ 半途停药等于亲自做了一次“人工筛选”：最弱的普通菌死了，最耐药的那批幸存下来并独占全部营养卷土重来！"
+        : "✅ 持续高浓度药效连同中低耐药突变体一并清零，不给它们留下繁殖空窗，这就是完整疗程的演化意义。";
+      if(seen.size>=2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0);
+    </script>
+</body>
+</html>

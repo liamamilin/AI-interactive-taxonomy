@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：防疫策略博弈台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏥 防疫策略博弈台：为什么 80% 的传播来自 20% 的节点？</h1><p>误区：每个人传染别人的机会均等。真相：由于社交网络也服从幂律分布，精准关闭密闭高密聚集场所往往能事半功倍把 Rt 压到 1 以下！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="p0" onclick="pick(0)">🚶 仅随机在马路上抽查路人</button>
+        <button class="btn" id="p1" onclick="pick(1)">🏢 重点通风/限流密闭高密聚集场所</button>
+      </div>
+      <div id="box" style="padding:16px;border:1px solid var(--tax-border);border-radius:12px;line-height:1.7;"></div>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>流行病传播和网络谣言一样，抓住“高连接枢纽”就能花 20% 成本砍掉 80% 传染链！</div>
+    
+  </div>
+  <script>
+    const seen=new Set([0]);
+    function pick(i){
+      seen.add(i); [0,1].forEach(k=>document.getElementById("p"+k).classList.toggle("active",k===i));
+      document.getElementById("box").innerHTML=i===0
+        ? "❌ 效率极低！多数路人处于社交网络末梢，真正发生 1 传 50 的密闭聚会场所依然在疯狂造毒。"
+        : "✅ 精准切断幂律网络中的超级枢纽（Super-spreader events），有效传染数 Rt 瞬间腰斩跌破 1.0！";
+      if(seen.size>=2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0);
+    </script>
+</body>
+</html>

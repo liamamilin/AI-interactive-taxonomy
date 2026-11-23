@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：引力弹弓借力图解</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🪐 引力弹弓借力图解：为什么绕木星转一圈能凭空加速？</h1><p>误区：绕静止星球一圈，进来多快出去就多快。真相：木星正以 13 km/s 绕太阳狂奔！从它屁股后面绕过去，就像网球拍迎面抽球一样偷走动能！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="b0" onclick="pick(0)">🚀 从行星后方切入（顺向加速）</button>
+        <button class="btn" id="b1" onclick="pick(1)">🛑 从行星前方切入（迎面减速）</button>
+      </div>
+      <svg id="svg" viewBox="0 0 540 210" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>切换前方与后方切入，看探测器速度矢量是如何借用行星公转速度的！</div>
+    
+  </div>
+  <script>
+    const seen=new Set([0]);
+    function pick(m){
+      seen.add(m);
+      [0,1].forEach(i=>document.getElementById("b"+i).classList.toggle("active",i===m));
+      const path=m===0?"M 80,170 Q 320,170 290,85 Q 270,40 460,40":"M 80,40 Q 320,40 290,125 Q 270,170 460,170";
+      const res=m===0?"10 km/s → 28 km/s（白嫖 +18 km/s！）":"28 km/s → 12 km/s（免费刹车！）";
+      document.getElementById("svg").innerHTML=`
+        <circle cx="270" cy="105" r="28" fill="#f59e0b" fill-opacity="0.3" stroke="#f59e0b" stroke-width="2.5"/>
+        <text x="270" y="109" text-anchor="middle" font-size="13" font-weight="800" fill="#f59e0b">🪐 木星 →</text>
+        <path d="${path}" fill="none" stroke="${m===0?'#10b981':'#ef4444'}" stroke-width="3" stroke-dasharray="6,3"/>
+        <text x="270" y="195" text-anchor="middle" font-size="14" font-weight="850" fill="${m===0?'#10b981':'#ef4444'}">${res}</text>
+      `;
+      if(seen.size>=2){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>从木星后方绕过相当于被移动的球拍“抽了一板”实现免费加速（旅行者号飞出太阳系）；从前方绕过则免费减速（探测水星时用来刹车）！`;
+        if(window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    pick(0);
+    </script>
+</body>
+</html>

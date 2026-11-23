@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：墨水扩散与时间箭头</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💧 墨水扩散与时间箭头：拔掉隔板后还能自动缩回去吗？</h1><p>误区：分子之间有什么神秘力量在互相推开。真相：没有任何斥力，只是散开的状态比挤在一起的组合多出无数倍！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <button class="btn primary" id="gBtn" onclick="openGate()">🚪 拔掉中间隔板（开始扩散）</button>
+      <button class="btn" onclick="resetBox()">🔄 重置到左侧</button>
+      <svg id="svg" viewBox="0 0 500 180" style="width:100%;height:auto;margin-top:12px;border:2px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>拔掉隔板，观察左右两侧粒子数如何不可逆地趋向 50% 对 50%！</div>
+    
+  </div>
+  <script>
+    let opened=false, pts=[];
+    function resetBox(){ opened=false; pts=Array.from({length:24},()=>({x:20+Math.random()*210,y:20+Math.random()*140,vx:(Math.random()-0.5)*4,vy:(Math.random()-0.5)*4})); }
+    function openGate(){ opened=true; if(window.ToySDK) window.ToySDK.markCompleted(); document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>隔板一抽，粒子迅速充满全箱！理论上 24 个粒子也有极微小的概率某天同时撞回左边，但 1/2²⁴ ≈ 1600万分之一；换成真实的一滴墨水（10²² 个分子），宇宙毁灭前都不可能自发缩回去！`; }
+    function tick(){
+      const maxX=opened?486:244;
+      let html=opened?"":`<line x1="250" y1="0" x2="250" y2="180" stroke="#ef4444" stroke-width="4"/>`;
+      pts.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy;
+        if(p.x<12||p.x>maxX) p.vx*=-1;
+        if(p.y<12||p.y>168) p.vy*=-1;
+        p.x=Math.max(12,Math.min(maxX,p.x)); p.y=Math.max(12,Math.min(168,p.y));
+        html+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5" fill="var(--tax-primary)"/>`;
+      });
+      document.getElementById("svg").innerHTML=html;
+      requestAnimationFrame(tick);
+    }
+    resetBox(); requestAnimationFrame(tick);
+    </script>
+</body>
+</html>

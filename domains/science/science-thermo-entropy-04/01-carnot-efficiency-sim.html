@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：卡诺热机效率沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔥 卡诺热机效率沙盘：不排废热，热机根本转不动！</h1><p>误区：发动机浪费热量只是因为润滑和工艺不够好。真相：卡诺定理证明，只要冷源不是绝对零度，任何热机效率都不可能达到 100%！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🔥 高温热源 Th：<span id="thOut">900</span> K · 低温环境 Tc = 300 K
+        <input id="thS" type="range" min="350" max="2000" step="50" value="900" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 540 180" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>拉高燃烧温度 Th，看看即便没有一点摩擦，理论最高效率卡诺极限也只有多少！</div>
+    
+  </div>
+  <script>
+    let m=0;
+    function render(){
+      const th=+document.getElementById("thS").value, tc=300;
+      document.getElementById("thOut").textContent=th;
+      const eff=((1-tc/th)*100).toFixed(1);
+      const w=eff*4.2;
+      document.getElementById("svg").innerHTML=`
+        <rect x="60" y="55" width="420" height="36" rx="8" fill="#ef4444" fill-opacity="0.25"/>
+        <rect x="60" y="55" width="${w}" height="36" rx="8" fill="#10b981"/>
+        <text x="68" y="78" font-size="13" font-weight="800" fill="#fff">有用功 ${eff}%</text>
+        <text x="472" y="78" text-anchor="end" font-size="13" font-weight="800" fill="#ef4444">必排废热 ${(100-eff).toFixed(1)}%</text>
+        <text x="270" y="135" text-anchor="middle" font-size="14" font-weight="850" fill="var(--tax-primary)">卡诺最高理论效率 η = 1 - Tc/Th = ${eff}%</text>
+      `;
+      m++; if(m>=3 && window.ToySDK){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>想让热机更省油，要么拼命提高燃烧室温度 Th（直到材料熔化），要么降低环境冷源 Tc——这就是为什么火电厂冬天效率比夏天高！`;
+        window.ToySDK.markCompleted();
+      }
+    }
+    render();
+    </script>
+</body>
+</html>

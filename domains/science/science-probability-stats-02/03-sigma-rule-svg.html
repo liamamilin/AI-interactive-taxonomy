@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：三西格玛法则透视镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📐 三西格玛（68-95-99.7）法则透视镜</h1>
+        <p>误区：99% 合格率已经很高了。真相：在精密制造与高并发系统里，2σ（95%）和 6σ（99.99966%）之间隔着天壤之别！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">📏 覆盖标准差范围 ±zσ：<span id="zOut">1.0σ</span>
+        <input id="zS" type="range" min="0.5" max="4.0" step="0.1" value="1.0" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="bellSvg" viewBox="0 0 560 230" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+      <div style="margin-top:10px;display:flex;justify-content:space-between;font-weight:800;font-size:15px;">
+        <span>区间覆盖率：<span id="covOut" style="color:var(--tax-primary);">68.3%</span></span>
+        <span>区间外异常率：<span id="outOut" style="color:#ef4444;">31.7%</span></span>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>拖动游标分别经过 1σ、2σ、3σ，观察正态曲线尾部面积是如何以指数级速度消失的！
+    </div>
+  </div>
+
+  <script>
+    let moves = 0;
+    function erf(x) {
+      const a1=0.254829592, a2=-0.284496736, a3=1.421413741, a4=-1.453152027, a5=1.061405429, p=0.3275911;
+      const sign = x < 0 ? -1 : 1;
+      x = Math.abs(x);
+      const t = 1 / (1 + p * x);
+      const y = 1 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t * Math.exp(-x*x);
+      return sign * y;
+    }
+    function render() {
+      const z = parseFloat(document.getElementById("zS").value);
+      document.getElementById("zOut").textContent = z.toFixed(1) + "σ";
+      const cov = erf(z / Math.SQRT2);
+      document.getElementById("covOut").textContent = (cov * 100).toFixed(2) + "%";
+      document.getElementById("outOut").textContent = ((1 - cov) * 100).toFixed(2) + "%";
+
+      const sx = x => 280 + (x / 4.2) * 240;
+      const sy = y => 195 - y * 410;
+      let line = [], area = [];
+      for (let x = -4.0; x <= 4.01; x += 0.1) {
+        const y = Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+        line.push(`${x===-4?'M':'L'}${sx(x).toFixed(1)},${sy(y).toFixed(1)}`);
+        if (Math.abs(x) <= z) area.push([sx(x), sy(y)]);
+      }
+      const areaPath = area.length ? `M${area[0][0].toFixed(1)},195 ` + area.map(p=>`L${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ") + ` L${area[area.length-1][0].toFixed(1)},195 Z` : "";
+
+      document.getElementById("bellSvg").innerHTML = `
+        <line x1="30" y1="195" x2="530" y2="195" stroke="var(--tax-border)"/>
+        <path d="${areaPath}" fill="var(--tax-primary)" fill-opacity="0.28"/>
+        <path d="${line.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="2.5"/>
+        <text x="${sx(-z)}" y="214" text-anchor="middle" font-size="11" fill="var(--tax-primary)">-${z.toFixed(1)}σ</text>
+        <text x="${sx(z)}" y="214" text-anchor="middle" font-size="11" fill="var(--tax-primary)">+${z.toFixed(1)}σ</text>
+      `;
+
+      moves++;
+      if (z >= 2.8 && moves > 1) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>±3σ 覆盖了 <strong>99.73%</strong> 的样本！但在日均 1 亿次请求的系统里，剩下的 0.27% 依然意味着每天 27 万次异常——所以工业界才要追求 6σ（百万分之 3.4）！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

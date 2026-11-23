@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：切线斜率显微镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+    .card { padding: 14px; border: 1px solid var(--tax-border); border-radius: 12px; background: var(--tax-surface-alt); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔎 切线斜率显微镜：弯曲的线放大看也是直的</h1><p>误区：导数是抽象的符号演算。真相：导数就是把曲线在某一点无限放大后那条直线的倾斜度！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">📍 观测点位置 x：<span id="xOut">1.0</span> · 瞬时斜率 f'(x) = <span id="sOut" style="color:var(--tax-primary);">2.0</span>
+        <input id="xS" type="range" min="-2.5" max="2.5" step="0.1" value="1.0" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 560 240" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>拖动观测点跨过最低点 x=0，看切线斜率如何从负转零再变正！</div>
+    
+  </div>
+  <script>
+    
+    let m=0;
+    function render(){
+      const x0=+document.getElementById("xS").value;
+      const y0=0.4*x0*x0, slope=0.8*x0;
+      document.getElementById("xOut").textContent=x0.toFixed(1);
+      document.getElementById("sOut").textContent=slope.toFixed(2);
+      const sx=x=>280+x*85, sy=y=>200-y*65;
+      let pts=[];
+      for(let x=-2.8;x<=2.81;x+=0.1) pts.push(`${x===-2.8?'M':'L'}${sx(x).toFixed(1)},${sy(0.4*x*x).toFixed(1)}`);
+      const tx1=x0-1.1, ty1=y0-slope*1.1, tx2=x0+1.1, ty2=y0+slope*1.1;
+      document.getElementById("svg").innerHTML=`
+        <line x1="30" y1="200" x2="530" y2="200" stroke="var(--tax-border)"/>
+        <line x1="280" y1="20" x2="280" y2="220" stroke="var(--tax-border)"/>
+        <path d="${pts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="3"/>
+        <line x1="${sx(tx1)}" y1="${sy(ty1)}" x2="${sx(tx2)}" y2="${sy(ty2)}" stroke="#ef4444" stroke-width="2.5"/>
+        <circle cx="${sx(x0)}" cy="${sy(y0)}" r="6" fill="#ef4444" stroke="#fff" stroke-width="2"/>
+      `;
+      m++; if(m>2){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>在 x=${x0.toFixed(1)} 处切线斜率为 <strong>${slope.toFixed(2)}</strong>——当斜率为 0 时（x=0），曲线恰好处于极值谷底！这就是机器学习梯度下降找最低点的全部秘密。`;
+        if(window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+    
+  </script>
+</body>
+</html>

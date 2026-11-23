@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：光纤折弯极限台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>➰ 光纤折弯极限台：为什么家里宽带光纤不能死折？</h1><p>误区：只要玻璃丝没断就能通网。真相：弯道太急会直接破坏全反射角度，信号还没到头就全漏光了！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">➰ 光纤弯曲半径：<span id="rOut">40</span> mm
+        <input id="rS" type="range" min="5" max="60" value="40" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 540 180" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>把弯曲半径缩到 15mm 以下，看信号到达率是如何断崖式暴跌的！</div>
+    
+  </div>
+  <script>
+    let m=0;
+    function render(){
+      const r=+document.getElementById("rS").value;
+      document.getElementById("rOut").textContent=r;
+      const loss=r<20?Math.round((20-r)*5.5):2;
+      const keep=Math.max(5,100-loss);
+      document.getElementById("svg").innerHTML=`
+        <path d="M 60,130 C ${160-r*1.5},40 ${380+r*1.5},40 480,130" fill="none" stroke="var(--tax-primary)" stroke-width="10" opacity="0.25"/>
+        <text x="270" y="155" text-anchor="middle" font-size="14" font-weight="800" fill="${keep>80?'#10b981':'#ef4444'}">光信号到达率：${keep}%</text>
+      `;
+      m++; if(r<=15 && m>1){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>弯道太急时，光束撞击外侧管壁的入射角急剧变小，直接打破全反射条件漏光！所以装宽带时师傅绝不敢把光纤折成直角。`;
+        if(window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+    </script>
+</body>
+</html>

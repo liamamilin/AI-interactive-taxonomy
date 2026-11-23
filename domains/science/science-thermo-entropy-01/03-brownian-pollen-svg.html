@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：布朗运动显微镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔬 布朗运动显微镜：花粉颗粒为何永不停歇地乱撞？</h1><p>误区：水里花粉在自己游泳。真相：花粉只是被亿万个看不见的水分子从四面八方随机撞击而被动摇晃！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <button class="btn primary" onclick="resetWalk()">🔄 重置花粉轨迹</button>
+      <svg id="svg" viewBox="0 0 500 200" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>看着花粉走出毫无规律的随机游走轨迹——爱因斯坦正是靠这步数学推导出原子的真实尺寸！</div>
+    
+  </div>
+  <script>
+    let pts=[[250,100]], steps=0;
+    function resetWalk(){ pts=[[250,100]]; steps=0; }
+    function step(){
+      const last=pts[pts.length-1];
+      const nx=Math.max(20,Math.min(480,last[0]+(Math.random()-0.5)*18));
+      const ny=Math.max(20,Math.min(180,last[1]+(Math.random()-0.5)*18));
+      pts.push([nx,ny]); if(pts.length>90) pts.shift();
+      const d=pts.map((p,i)=>`${i===0?'M':'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+      document.getElementById("svg").innerHTML=`<path d="${d}" fill="none" stroke="var(--tax-primary)" stroke-width="2" opacity="0.65"/><circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="9" fill="#f59e0b" stroke="#fff" stroke-width="2"/>`;
+      steps++; if(steps===45 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    setInterval(step, 90);
+    </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：生物 vs 城市尺度律对照台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏙️ 生物 vs 城市尺度律：为什么大城市越发展节奏越快？</h1><p>误区：城市和生物体一样，越大越笨重缓慢。真相：城市的基础设施（电缆、道路）像血管一样省钱（0.85 次幂），但人的社交与专利却呈 1.15 次幂超线性爆发！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="c0" onclick="pick(0)">🐘 生物体放大 2 倍</button>
+        <button class="btn" id="c1" onclick="pick(1)">🏙️ 城市人口放大 2 倍</button>
+      </div>
+      <div id="box" style="padding:16px;border:1px solid var(--tax-border);border-radius:12px;line-height:1.7;"></div>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>生物受限于 0.75 次幂越长越慢，而人类城市凭借 1.15 次幂的社交乘数效应越大越快——但犯罪率与拥堵也会一起按 1.15 次幂放大！</div>
+    
+  </div>
+  <script>
+    const seen=new Set([0]);
+    function pick(i){
+      seen.add(i); [0,1].forEach(k=>document.getElementById("c"+k).classList.toggle("active",k===i));
+      document.getElementById("box").innerHTML=i===0
+        ? "<strong>🐘 亚线性 0.75 次幂：</strong>体重翻倍，只需多吃 1.68 倍食物，心跳变慢、寿命变长。"
+        : "<strong>🏙️ 硬件省钱 + 软件爆发：</strong>城市人口翻倍，加油站和电缆长度只需 1.80 倍（省 20% 基建）；但工资、专利、GDP 甚至步行速度全都会涨到 <strong>2.22 倍</strong>！";
+      if(seen.size>=2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0);
+    </script>
+</body>
+</html>

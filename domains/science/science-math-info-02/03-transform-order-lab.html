@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：变换顺序陷阱台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+    .card { padding: 14px; border: 1px solid var(--tax-border); border-radius: 12px; background: var(--tax-surface-alt); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔀 变换顺序陷阱台：先旋转再压扁 ≠ 先压扁再旋转</h1><p>误区：3×5 等于 5×3，所以矩阵先后顺序也无所谓。真相：空间操作一旦换了顺序，结果天差地别！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div class="grid2">
+        <div class="card"><strong>A：先逆时针转 45° → 再水平拉长 2 倍</strong><svg id="sA" viewBox="0 0 220 160" style="width:100%;margin-top:8px;"></svg></div>
+        <div class="card"><strong>B：先水平拉长 2 倍 → 再逆时针转 45°</strong><svg id="sB" viewBox="0 0 220 160" style="width:100%;margin-top:8px;"></svg></div>
+      </div>
+      <div style="margin-top:12px;"><button class="btn primary" onclick="play()">▶️ 同步对比两种操作顺序</button></div>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>点击运行对比，看一模一样的两个操作仅调换先后顺序，如何得到完全不同的菱形朝向！</div>
+    
+  </div>
+  <script>
+    
+    function drawPoly(id, fn, col){
+      const pts=[[0,0],[1,0],[1,1],[0,1]].map(p=>fn(p[0],p[1])).map(p=>`${110+p[0]*35},${110-p[1]*35}`).join(" ");
+      document.getElementById(id).innerHTML=`<line x1="15" y1="110" x2="205" y2="110" stroke="var(--tax-border)"/><line x1="110" y1="15" x2="110" y2="145" stroke="var(--tax-border)"/><polygon points="${pts}" fill="${col}" fill-opacity="0.3" stroke="${col}" stroke-width="2.5"/>`;
+    }
+    function play(){
+      const c=Math.SQRT1_2;
+      drawPoly("sA",(x,y)=>{const rx=c*x-c*y, ry=c*x+c*y; return [2*rx, ry];}, "#3b82f6");
+      drawPoly("sB",(x,y)=>{const sx=2*x, sy=y; return [c*sx-c*sy, c*sx+c*sy];}, "#ef4444");
+      document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>左边沿着 X 轴被压成了扁菱形，右边则是整体斜着拉长了！在 3D 游戏引擎里“先穿袜子再穿鞋”和“先穿鞋再穿袜子”一样不可交换。`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    drawPoly("sA",(x,y)=>[x,y],"#3b82f6"); drawPoly("sB",(x,y)=>[x,y],"#ef4444");
+    
+  </script>
+</body>
+</html>

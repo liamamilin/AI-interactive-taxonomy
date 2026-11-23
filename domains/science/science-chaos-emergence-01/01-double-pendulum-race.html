@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：双生双摆蝴蝶效应</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🦋 双生双摆蝴蝶效应：相差 0.001°，几秒后天壤之别</h1><p>误区：方程确定就能永远准确预测未来。真相：非线性混沌系统会把小数点后几位的微小测量误差以指数级放大！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <button class="btn primary" onclick="resetPend()">🔄 同步释放两根相差 0.001° 的双摆</button>
+      <svg id="svg" viewBox="0 0 460 230" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>盯紧蓝红两根双摆——前 2 秒完全重合，第 5 秒开始彻底各奔东西！</div>
+    
+  </div>
+  <script>
+    let p1, p2, ticks=0;
+    function mk(da){ return {a1:Math.PI*0.75+da, a2:Math.PI*0.8, w1:0, w2:0}; }
+    function step(p){
+      const g=0.45, l1=52, l2=52;
+      const num1=-g*3*Math.sin(p.a1)-g*Math.sin(p.a1-2*p.a2)-2*Math.sin(p.a1-p.a2)*(p.w2*p.w2*l2+p.w1*p.w1*l1*Math.cos(p.a1-p.a2));
+      const den=l1*(3-Math.cos(2*p.a1-2*p.a2));
+      const acc1=num1/den;
+      const acc2=(2*Math.sin(p.a1-p.a2)*(p.w1*p.w1*l1*2+g*2*Math.cos(p.a1)+p.w2*p.w2*l2*Math.cos(p.a1-p.a2)))/(l2*(3-Math.cos(2*p.a1-2*p.a2)));
+      p.w1+=acc1*0.25; p.w2+=acc2*0.25; p.a1+=p.w1*0.25; p.a2+=p.w2*0.25;
+    }
+    function resetPend(){ p1=mk(0); p2=mk(0.002); ticks=0; }
+    function drawP(p, col){
+      const cx=230, cy=105, l=52;
+      const x1=cx+l*Math.sin(p.a1), y1=cy+l*Math.cos(p.a1);
+      const x2=x1+l*Math.sin(p.a2), y2=y1+l*Math.cos(p.a2);
+      return `<line x1="${cx}" y1="${cy}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" stroke="${col}" stroke-width="3"/><line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${col}" stroke-width="3"/><circle cx="${x2.toFixed(1)}" cy="${y2.toFixed(1)}" r="6" fill="${col}"/>`;
+    }
+    function loop(){
+      step(p1); step(p2); ticks++;
+      document.getElementById("svg").innerHTML=drawP(p1,"#3b82f6")+drawP(p2,"#ef4444");
+      if(ticks===180 && window.ToySDK){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>两根双摆遵循完全相同的牛顿方程，没有一点随机噪声，但仅 0.001° 的初值差就让它们在几秒后彻底失去相关性——这就是“混沌”与“蝴蝶效应”！`;
+        window.ToySDK.markCompleted();
+      }
+      requestAnimationFrame(loop);
+    }
+    resetPend(); requestAnimationFrame(loop);
+    </script>
+</body>
+</html>

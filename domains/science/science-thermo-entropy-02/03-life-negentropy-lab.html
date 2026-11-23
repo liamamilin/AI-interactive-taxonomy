@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：冰箱与生命的逆熵真相</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>❄️ 冰箱与生命的逆熵真相：局部变整齐没违反物理定律</h1><p>误区：生命越长越复杂、冰箱越来越冷，说明热力学第二定律错了。真相：它们都是开放系统，局部减熵的同时正往房间和宇宙狂排更多的废热！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="c0" onclick="pick(0)">❄️ 厨房里的冰箱</button>
+        <button class="btn" id="c1" onclick="pick(1)">🌱 地球上的生命</button>
+      </div>
+      <div id="box" style="padding:16px;border:1px solid var(--tax-border);border-radius:12px;line-height:1.7;"></div>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>在封闭厨房里把冰箱门打开当空调吹，厨房总温度反而会越来越高！</div>
+    
+  </div>
+  <script>
+    const seen=new Set([0]);
+    function pick(i){
+      seen.add(i);
+      [0,1].forEach(k=>document.getElementById("c"+k).classList.toggle("active",k===i));
+      document.getElementById("box").innerHTML=i===0
+        ? "<strong>❄️ 冰箱账本：</strong>冰箱内部吸走 100 焦耳热量（局部减熵），但压缩机耗电并向厨房背面散热网排出 <strong>140 焦耳</strong>废热——厨房总熵反而在加速增加！"
+        : "<strong>🌱 生命账本：</strong>薛定谔说“生命以负熵为食”：我们吃进低熵的高能食物、晒着低熵太阳光，维持身体精密有序，代价是不断向外界排出高熵的二氧化碳、汗水与体热！";
+      if(seen.size>=2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0);
+    </script>
+</body>
+</html>

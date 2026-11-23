@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：中心极限定理魔法机</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 16px; border-radius: 10px; border: none; background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎲 中心极限定理魔法机：均匀骰子取平均后为何变成正态钟形？</h1>
+        <p>误区：只有原本就是正态的数据，均值才是正态。真相：哪怕单次掷骰子完全平直（1~6 等概率），只要把多颗骰子求平均，分布就会飞速变成钟形！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+        <label style="font-weight:800;font-size:14px;">每次同时掷骰子颗数 N：<span id="nOut">1</span> 颗
+          <input id="nS" type="range" min="1" max="12" value="1" oninput="run()" />
+        </label>
+        <button class="btn" onclick="run()">🔄 重新抽样 1000 次</button>
+      </div>
+      <svg id="hist" viewBox="0 0 560 230" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>把骰子颗数 N 从 1 拉到 8，观察原本平平无奇的均匀分布如何神奇地聚拢成钟形尖峰！
+    </div>
+  </div>
+
+  <script>
+    let moves = 0;
+    function run() {
+      const N = +document.getElementById("nS").value;
+      document.getElementById("nOut").textContent = N;
+      const bins = new Array(24).fill(0);
+      for (let s = 0; s < 1000; s++) {
+        let sum = 0;
+        for (let i = 0; i < N; i++) sum += 1 + Math.floor(Math.random() * 6);
+        const avg = sum / N; // 1..6
+        const idx = Math.min(23, Math.max(0, Math.floor(((avg - 1) / 5.001) * 24)));
+        bins[idx]++;
+      }
+      const maxB = Math.max(1, ...bins);
+      const bw = 480 / 24;
+      let html = `<line x1="40" y1="195" x2="520" y2="195" stroke="var(--tax-border)"/>`;
+      bins.forEach((v, i) => {
+        const h = (v / maxB) * 160;
+        html += `<rect x="${40 + i * bw + 1}" y="${195 - h}" width="${bw - 2}" height="${h}" rx="3" fill="${N===1?'#f59e0b':'var(--tax-primary)'}"/>`;
+      });
+      html += `<text x="40" y="214" font-size="11" fill="var(--tax-muted)">均值 1.0</text>`;
+      html += `<text x="280" y="214" text-anchor="middle" font-size="11" fill="var(--tax-muted)">期望均值 3.5</text>`;
+      html += `<text x="520" y="214" text-anchor="end" font-size="11" fill="var(--tax-muted)">均值 6.0</text>`;
+      document.getElementById("hist").innerHTML = html;
+
+      moves++;
+      if (N >= 5 && moves > 1) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>同时掷 ${N} 颗骰子求平均时，极端大或极端小同时出现的概率急剧下降，分布迅速收窄为围绕 3.5 的正态分布（标准误按 1/√N 缩小）——这就是民意调查只需抽样几千人的数学底气！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    run();
+  </script>
+</body>
+</html>

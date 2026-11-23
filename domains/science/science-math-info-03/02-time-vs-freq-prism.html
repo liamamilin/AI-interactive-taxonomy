@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：声音三棱镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+    .card { padding: 14px; border: 1px solid var(--tax-border); border-radius: 12px; background: var(--tax-surface-alt); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎵 声音三棱镜：在混杂噪声里一键分离出隐藏频率</h1><p>误区：波形混在一起就再也分不开了。真相：傅里叶变换就像音乐三棱镜，能把一团乱麻的时域波形拆成干净的频谱柱！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="f1" onclick="tog(1)">1Hz 低音</button>
+        <button class="btn" id="f3" onclick="tog(3)">3Hz 中音</button>
+        <button class="btn" id="f7" onclick="tog(7)">7Hz 高音</button>
+      </div>
+      <div class="grid2">
+        <div class="card"><strong>〰️ 时域混合波形</strong><svg id="tSvg" viewBox="0 0 260 150" style="width:100%;margin-top:8px;"></svg></div>
+        <div class="card"><strong>📊 频域频谱图（FFT）</strong><svg id="fSvg" viewBox="0 0 260 150" style="width:100%;margin-top:8px;"></svg></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>同时打开低、中、高三个音符，看左边波形乱成一团时，右边频谱依然根根分明！</div>
+    
+  </div>
+  <script>
+    
+    const on=new Set([1]);
+    function tog(f){
+      if(on.has(f) && on.size>1) on.delete(f); else on.add(f);
+      [1,3,7].forEach(k=>document.getElementById("f"+k).classList.toggle("active",on.has(k)));
+      let pts=[];
+      for(let i=0;i<=120;i++){
+        const x=(i/120)*Math.PI*2; let y=0;
+        on.forEach(k=>y+=Math.sin(k*x));
+        pts.push(`${i===0?'M':'L'}${(10+i*2).toFixed(1)},${(75-y*20).toFixed(1)}`);
+      }
+      document.getElementById("tSvg").innerHTML=`<path d="${pts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="2"/>`;
+      let bars="";
+      for(let k=1;k<=8;k++){
+        const h=on.has(k)?95:6;
+        bars+=`<rect x="${15+k*26}" y="${130-h}" width="18" height="${h}" rx="3" fill="${on.has(k)?'#10b981':'var(--tax-border)'}"/><text x="${24+k*26}" y="145" text-anchor="middle" font-size="10" fill="var(--tax-muted)">${k}Hz</text>`;
+      }
+      document.getElementById("fSvg").innerHTML=bars;
+      if(on.size>=2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    tog(1);
+    
+  </script>
+</body>
+</html>

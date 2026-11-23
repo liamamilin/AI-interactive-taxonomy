@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：SIR 传染病曲线沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📉 SIR 传染病曲线沙盘：“压平曲线”到底在救谁？</h1><p>误区：只要最终都会感染一遍，早点晚点没区别。真相：同时生病的人数如果冲破医院床位红线，本来能救活的病人也会因为挤兑而死亡！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">😷 接触传播强度（R0）：<span id="rOut">2.5</span>
+        <input id="rS" type="range" min="0.8" max="4.5" step="0.1" value="2.5" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 540 200" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>把 R0 从 3.5 压低到 1.4，看着红色感染高峰稳稳降到医疗红线以下！</div>
+    
+  </div>
+  <script>
+    let m=0;
+    function render(){
+      const r0=parseFloat(document.getElementById("rS").value);
+      document.getElementById("rOut").textContent=r0.toFixed(1);
+      const gamma=0.14, beta=r0*gamma;
+      let S=0.99, I=0.01, R=0, pI=[], pR=[];
+      for(let t=0;t<=100;t++){
+        pI.push(`${t===0?'M':'L'}${(30+t*4.8).toFixed(1)},${(175-I*380).toFixed(1)}`);
+        pR.push(`${t===0?'M':'L'}${(30+t*4.8).toFixed(1)},${(175-R*140).toFixed(1)}`);
+        const dI=(beta*S*I - gamma*I)*0.5, dR=(gamma*I)*0.5;
+        S=Math.max(0,S-beta*S*I*0.5); I=Math.max(0,I+dI); R=Math.min(1,R+dR);
+      }
+      document.getElementById("svg").innerHTML=`
+        <line x1="30" y1="175" x2="510" y2="175" stroke="var(--tax-border)"/>
+        <line x1="30" y1="100" x2="510" y2="100" stroke="#ef4444" stroke-dasharray="5,4"/>
+        <text x="40" y="94" font-size="11" font-weight="800" fill="#ef4444">🏥 医院床位承载红线</text>
+        <path d="${pR.join(' ')}" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="4,3"/>
+        <path d="${pI.join(' ')}" fill="none" stroke="#ef4444" stroke-width="3"/>
+      `;
+      m++; if(m>=3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+    </script>
+</body>
+</html>

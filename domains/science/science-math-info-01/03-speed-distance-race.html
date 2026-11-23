@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：速度-路程双向转换器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+    .card { padding: 14px; border: 1px solid var(--tax-border); border-radius: 12px; background: var(--tax-surface-alt); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏎️ 速度与路程：导数和积分其实是同一枚硬币的两面</h1><p>误区：微分和积分是两门毫不相干的数学。真相：路程曲线求斜率（导数）就是速度，速度曲线求面积（积分）就是路程！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="b1" onclick="pick(0)">📈 匀加速冲刺</button>
+        <button class="btn" id="b2" onclick="pick(1)">➡️ 恒定巡航</button>
+        <button class="btn" id="b3" onclick="pick(2)">🛑 先快后刹</button>
+      </div>
+      <div class="grid2">
+        <div class="card"><strong>⚡ 速度曲线 v(t)（面积 = 路程）</strong><svg id="vSvg" viewBox="0 0 260 150" style="width:100%;margin-top:8px;"></svg></div>
+        <div class="card"><strong>🛣️ 路程曲线 s(t)（斜率 = 速度）</strong><svg id="sSvg" viewBox="0 0 260 150" style="width:100%;margin-top:8px;"></svg></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>切换三种驾驶模式，对比左右两张图：速度越高（面积涨得越快），路程曲线就越陡峭（斜率越大）！</div>
+    
+  </div>
+  <script>
+    
+    const seen=new Set([0]);
+    function pick(m){
+      seen.add(m);
+      [0,1,2].forEach(i=>document.getElementById("b"+(i+1)).classList.toggle("active",i===m));
+      const vFn=t=>m===0?t:m===1?0.6:Math.max(0.05,1-t);
+      let vp=[], sp=[], s=0;
+      for(let t=0;t<=1.01;t+=0.05){
+        const v=vFn(t); s+=v*0.05;
+        vp.push([20+t*220, 130-v*100]);
+        sp.push([20+t*220, 130-s*180]);
+      }
+      const p=a=>a.map((x,i)=>`${i===0?'M':'L'}${x[0].toFixed(1)},${x[1].toFixed(1)}`).join(" ");
+      document.getElementById("vSvg").innerHTML=`<line x1="20" y1="130" x2="240" y2="130" stroke="var(--tax-border)"/><path d="${p(vp)} L240,130 L20,130 Z" fill="var(--tax-primary)" fill-opacity="0.2"/><path d="${p(vp)}" fill="none" stroke="var(--tax-primary)" stroke-width="2.5"/>`;
+      document.getElementById("sSvg").innerHTML=`<line x1="20" y1="130" x2="240" y2="130" stroke="var(--tax-border)"/><path d="${p(sp)}" fill="none" stroke="#10b981" stroke-width="2.5"/>`;
+      if(seen.size>=2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0);
+    
+  </script>
+</body>
+</html>

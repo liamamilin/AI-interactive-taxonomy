@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：防火隔离带策略台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🪓 防火隔离带策略台：怎么用砍 5% 的树保住整片森林？</h1><p>误区：防火全靠着火后再派飞机洒水。真相：只要提前清出一条窄窄的防火带，把超级连通块切回孤岛，大火就永远烧不过去！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="s0" onclick="pick(0)">随机零星砍伐 5% 树木</button>
+        <button class="btn" id="s1" onclick="pick(1)">🪓 沿垂直中线开辟 1 列窄隔离带</button>
+      </div>
+      <div id="box" style="padding:16px;border:1px solid var(--tax-border);border-radius:12px;line-height:1.7;"></div>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>同样砍掉 5% 的树，随机分散砍几乎没用，连成一条线切断拓扑连通性才彻底锁死火灾！</div>
+    
+  </div>
+  <script>
+    const seen=new Set([0]);
+    function pick(i){
+      seen.add(i); [0,1].forEach(k=>document.getElementById("s"+k).classList.toggle("active",k===i));
+      document.getElementById("box").innerHTML=i===0
+        ? "❌ 如果森林原本密度 80%，随机砍 5% 后仍有 75%，依然远超 59.3% 渗流阈值，大火照样绕着圈烧穿全林！"
+        : "✅ 垂直隔离带直接把全图物理切成左右两半！哪怕左边烧成焦土，右边 50% 的森林也毫发无伤——这就是流行病封控与网络分段隔离的拓扑本质！";
+      if(seen.size>=2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0);
+    </script>
+</body>
+</html>

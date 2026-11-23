@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：死亡与繁盛边界</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 混沌边缘：为什么生命游戏规则卡得这么苛刻？</h1><p>误区：只要规则允许繁殖，生命就会越来越丰富。真相：繁殖太严瞬间灭绝，繁殖太松全屏挤死，复杂结构只能诞生在窄窄的“混沌边缘”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn" id="r0" onclick="pick(0)">💀 严苛规则（需 4 邻居才出生）</button>
+        <button class="btn active" id="r1" onclick="pick(1)">🦋 混沌边缘（经典 B3/S23）</button>
+        <button class="btn" id="r2" onclick="pick(2)">💥 泛滥规则（2 邻居就出生）</button>
+      </div>
+      <div id="box" style="padding:16px;border:1px solid var(--tax-border);border-radius:12px;line-height:1.7;"></div>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>切换三种规则，理解为什么物理宇宙的常数也像 B3/S23 一样卡在能演化生命的“混沌边缘”！</div>
+    
+  </div>
+  <script>
+    const seen=new Set([1]);
+    const txt=[
+      "<strong>💀 结果：3 代之内全军覆没。</strong>诞生门槛太高，结构刚出现就因孤单死去，宇宙一片死寂。",
+      "<strong>🦋 结果：诞生出既能稳定存在又能移动计算的复杂模式！</strong>恰好处在秩序（死寂）与混沌（爆炸）之间的黄金相变线。",
+      "<strong>💥 结果：瞬间挤满全屏白噪点！</strong>只要 2 个邻居就疯狂繁殖，所有精细结构都被无序噪点吞没。"
+    ];
+    function pick(i){
+      seen.add(i); [0,1,2].forEach(k=>document.getElementById("r"+k).classList.toggle("active",k===i));
+      document.getElementById("box").innerHTML=txt[i];
+      if(seen.size>=3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(1);
+    </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：矩阵空间变形机</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+    .card { padding: 14px; border: 1px solid var(--tax-border); border-radius: 12px; background: var(--tax-surface-alt); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🕸️ 矩阵空间变形机：矩阵的每一列就是新坐标轴！</h1><p>误区：矩阵只是解方程的工具。真相：2×2 矩阵的两列数字，直接告诉你原来的 (1,0) 和 (0,1) 被搬到了哪里！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="p0" onclick="setM(1,0,0,1,0)">原位网格</button>
+        <button class="btn" id="p1" onclick="setM(1.5,0.6,0,1,1)">✂️ 水平剪切</button>
+        <button class="btn" id="p2" onclick="setM(0.7,-0.7,0.7,0.7,2)">🔄 旋转 45°</button>
+        <button class="btn" id="p3" onclick="setM(1.8,0,0,0.6,3)">↔️ 挤压拉伸</button>
+      </div>
+      <svg id="svg" viewBox="0 0 440 240" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+      <div style="margin-top:10px;font-weight:800;" id="detOut">行列式（面积缩放倍数）：1.00×</div>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>点击不同变换按钮，观察单位正方形的面积缩放比例——那就是线性代数里神秘的“行列式”！</div>
+    
+  </div>
+  <script>
+    
+    const seen=new Set([0]);
+    function setM(a,b,c,d,idx){
+      seen.add(idx);
+      [0,1,2,3].forEach(i=>document.getElementById("p"+i).classList.toggle("active",i===idx));
+      const det=a*d-b*c;
+      document.getElementById("detOut").textContent=`行列式（面积缩放倍数）：${det.toFixed(2)}×`;
+      const tr=(x,y)=>[220+(a*x+b*y)*32, 120-(c*x+d*y)*32];
+      let html="";
+      for(let i=-4;i<=4;i++){
+        const p1=tr(i,-4), p2=tr(i,4), p3=tr(-4,i), p4=tr(4,i);
+        html+=`<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="var(--tax-border)" stroke-width="1"/>`;
+        html+=`<line x1="${p3[0]}" y1="${p3[1]}" x2="${p4[0]}" y2="${p4[1]}" stroke="var(--tax-border)" stroke-width="1"/>`;
+      }
+      const s0=tr(0,0),s1=tr(1,0),s2=tr(1,1),s3=tr(0,1);
+      html+=`<polygon points="${s0} ${s1} ${s2} ${s3}" fill="var(--tax-primary)" fill-opacity="0.3" stroke="var(--tax-primary)" stroke-width="2.5"/>`;
+      document.getElementById("svg").innerHTML=html;
+      if(seen.size>=3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    setM(1,0,0,1,0);
+    
+  </script>
+</body>
+</html>

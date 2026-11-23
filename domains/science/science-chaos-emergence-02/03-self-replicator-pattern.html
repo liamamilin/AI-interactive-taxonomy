@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：生命模式图鉴</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧬 生命模式图鉴：静物、闪烁灯与移动飞船</h1><p>误区：元胞自动机里所有图案都在乱变。真相：其中自发形成了类似生物器官的三大稳态物种：静物、振荡器、飞船！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="m0" onclick="pick(0)">🧱 静物：2×2 方块</button>
+        <button class="btn" id="m1" onclick="pick(1)">🚨 振荡器：3格闪烁灯</button>
+        <button class="btn" id="m2" onclick="pick(2)">🚀 飞船：滑翔机</button>
+      </div>
+      <svg id="svg" viewBox="0 0 300 140" style="width:100%;max-width:340px;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);display:block;"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>把这三种基本元件组合起来，科学家甚至在生命游戏里造出了能跑 2048 的图灵机 CPU！</div>
+    
+  </div>
+  <script>
+    const seen=new Set([0]);
+    function pick(i){
+      seen.add(i); [0,1,2].forEach(k=>document.getElementById("m"+k).classList.toggle("active",k===i));
+      const pts=i===0?[[4,2],[4,3],[5,2],[5,3]]:i===1?[[4,2],[4,3],[4,4]]:[[2,3],[3,4],[4,2],[4,3],[4,4]];
+      document.getElementById("svg").innerHTML=pts.map(([r,c])=>`<rect x="${c*30+40}" y="${r*18+10}" width="26" height="16" rx="3" fill="var(--tax-primary)"/>`).join("");
+      if(seen.size>=3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0);
+    </script>
+</body>
+</html>

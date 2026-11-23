@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：群体智能应用台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🤖 群体智能应用台：大自然怎么教工程师做调度？</h1><p>误区：无人机表演和快递路由全靠一台超级电脑算好每一步。真相：面对动态环境，局部协同往往比全局规划更快更稳！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="a0" onclick="pick(0)">🐜 蚁群信息素找最短路</button>
+        <button class="btn" id="a1" onclick="pick(1)">🚁 灾区无人机蜂群搜救</button>
+      </div>
+      <div id="box" style="padding:16px;border:1px solid var(--tax-border);border-radius:12px;line-height:1.7;"></div>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>没有上帝视角也能找到全局最优解，这就是自组织系统的迷人之处！</div>
+    
+  </div>
+  <script>
+    const seen=new Set([0]);
+    function pick(i){
+      seen.add(i); [0,1].forEach(k=>document.getElementById("a"+k).classList.toggle("active",k===i));
+      document.getElementById("box").innerHTML=i===0
+        ? "<strong>🐜 蚁群算法（ACO）：</strong>每只蚂蚁走过都会留气味，短路径来回最快、气味越浓，吸引更多同伴走短路径——互联网数据包路由就借用了这一招！"
+        : "<strong>🚁 蜂群自组织：</strong>灾区断网无 GPS 时，上百架小无人机仅靠彼此蓝牙测距与“排斥太近、吸引太远”，就能自动铺成覆盖全区的信号网！";
+      if(seen.size>=2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0);
+    </script>
+</body>
+</html>

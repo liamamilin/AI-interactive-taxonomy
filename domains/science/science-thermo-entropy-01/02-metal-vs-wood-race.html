@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：导热体感竞速</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧊 导热体感竞速：同为 20℃，铁块为什么摸起来更凉？</h1><p>误区：铁块温度比木头低。真相：它们温度一模一样，但铁块导热极快，瞬间把你手心的热量抽走，皮肤神经测的其实是“热流速度”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <button class="btn primary" onclick="touch()">✋ 双手同时按上 20℃ 铁块与木块</button>
+      <svg id="svg" viewBox="0 0 540 160" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>点击触碰，观察手心热量流向铁块与木头的速度差距！</div>
+    
+  </div>
+  <script>
+    let tmr=null;
+    function touch(){
+      if(tmr) clearInterval(tmr);
+      let m=0, w=0;
+      tmr=setInterval(()=>{
+        m=Math.min(100,m+7); w=Math.min(18,w+1.2);
+        document.getElementById("svg").innerHTML=`
+          <text x="30" y="48" font-size="14" font-weight="800" fill="currentColor">🔩 20℃ 铁块抽热速度</text>
+          <rect x="210" y="30" width="${m*2.8}" height="24" rx="5" fill="#3b82f6"/>
+          <text x="${220+m*2.8}" y="47" font-size="12" font-weight="800" fill="#3b82f6">${Math.round(m)}%</text>
+          <text x="30" y="112" font-size="14" font-weight="800" fill="currentColor">🪵 20℃ 木块抽热速度</text>
+          <rect x="210" y="94" width="${w*2.8}" height="24" rx="5" fill="#f59e0b"/>
+          <text x="${220+w*2.8}" y="111" font-size="12" font-weight="800" fill="#f59e0b">${Math.round(w)}%</text>
+        `;
+        if(m>=100){
+          clearInterval(tmr);
+          document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>人体皮肤根本不是温度计，而是“热流速率计”！导热率高的金属疯狂吸走掌心热量，才欺骗大脑以为它更冷。`;
+          if(window.ToySDK) window.ToySDK.markCompleted();
+        }
+      },60);
+    }
+    </script>
+</body>
+</html>

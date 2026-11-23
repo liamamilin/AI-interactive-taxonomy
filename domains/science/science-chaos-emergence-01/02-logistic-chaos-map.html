@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：逻辑斯蒂混沌分岔图</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌿 逻辑斯蒂混沌分岔图：xₙ₊₁ = r·xₙ(1-xₙ) 如何发疯？</h1><p>误区：只有包含成百上千变量的系统才会混沌。真相：哪怕只有一行最简单的二次乘法迭代，只要参数 r 跨过 3.57，秩序就会瞬间瓦解！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🐇 繁殖率参数 r：<span id="rOut">2.80</span>
+        <input id="rS" type="range" min="2.4" max="3.98" step="0.02" value="2.8" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 540 200" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>拖动 r 分别经过 3.1（二周期震荡）、3.5（四周期）和 3.85（彻底混沌）！</div>
+    
+  </div>
+  <script>
+    let m=0;
+    function render(){
+      const r=parseFloat(document.getElementById("rS").value);
+      document.getElementById("rOut").textContent=r.toFixed(2);
+      let x=0.35, pts=[];
+      for(let i=0;i<=45;i++){
+        pts.push(`${i===0?'M':'L'}${(30+i*10.5).toFixed(1)},${(180-x*150).toFixed(1)}`);
+        x=r*x*(1-x);
+      }
+      document.getElementById("svg").innerHTML=`<line x1="30" y1="180" x2="510" y2="180" stroke="var(--tax-border)"/><path d="${pts.join(' ')}" fill="none" stroke="${r>3.57?'#ef4444':'var(--tax-primary)'}" stroke-width="2.5"/>`;
+      m++; if(r>3.6 && m>1){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>r=${r.toFixed(2)} 时种群数量陷入永不重复的混沌狂舞！越过 3.57 的“倍周期分岔”临界点后，简单确定规则也能涌现出无限复杂性。`;
+        if(window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+    </script>
+</body>
+</html>

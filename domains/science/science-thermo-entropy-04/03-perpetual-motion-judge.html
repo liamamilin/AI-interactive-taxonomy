@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：永动机专利审判庭</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 永动机专利审判庭：哪条物理定律枪毙了它？</h1><p>误区：只要不凭空造能量，从大海里吸点热发电应该不犯法吧？真相：没有低温冷源做温差，单热源热机（第二类永动机）同样绝对不可能！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="j0" onclick="pick(0)">🌀 方案1：重力重锤轮（不烧油永远转）</button>
+        <button class="btn" id="j1" onclick="pick(1)">🌊 方案2：抽海水降温 1℃ 发电的巨轮</button>
+      </div>
+      <div id="box" style="padding:16px;border:1px solid var(--tax-border);border-radius:12px;line-height:1.7;"></div>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>审理两份“永动机”申请，分清第一类（能量守恒）与第二类（熵增不可逆）的死穴！</div>
+    
+  </div>
+  <script>
+    const seen=new Set([0]);
+    function pick(i){
+      seen.add(i);
+      [0,1].forEach(k=>document.getElementById("j"+k).classList.toggle("active",k===i));
+      document.getElementById("box").innerHTML=i===0
+        ? "<strong>⚖️ 判决：违反【热力学第一定律（能量守恒）】！</strong><br>属于第一类永动机。重锤转一圈回原位净重力功严格为 0，摩擦耗能停转是必然。"
+        : "<strong>⚖️ 判决：不违背能量守恒，但违反【热力学第二定律】！</strong><br>属于第二类永动机。没有更冷的地方接收废热，海水里的无序分子热运动无法自发聚成单一方向的宏观电流！";
+      if(seen.size>=2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0);
+    </script>
+</body>
+</html>

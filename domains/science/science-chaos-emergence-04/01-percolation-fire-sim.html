@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：森林大火渗流临界点</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌲 森林大火渗流临界点：为什么 59% 密度是个生死线？</h1><p>误区：树木多 10%，过火面积也只多 10%。真相：在二维网格渗流模型里，跨过 59.3% 临界密度会触发连通巨簇，火势瞬间烧穿全林！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+        <label style="font-weight:800;font-size:14px;">🌲 森林密度 p：<span id="pOut">55%</span>
+          <input id="pS" type="range" min="20" max="90" value="55" oninput="initForest()" />
+        </label>
+        <button class="btn primary" onclick="ignite()">🔥 从最左侧点火！</button>
+        <span style="font-weight:800;font-size:13.5px;">过火比例：<span id="burnOut">0%</span></span>
+      </div>
+      <svg id="svg" viewBox="0 0 360 220" style="width:100%;max-width:460px;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);display:block;"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>分别在 45%、60%、75% 密度下点火，亲眼见证 60% 附近“是否烧穿对岸”的剧烈相变！</div>
+    
+  </div>
+  <script>
+    const W=24, H=14; let grid=[];
+    function initForest(){
+      const p=+document.getElementById("pS").value/100;
+      document.getElementById("pOut").textContent=Math.round(p*100)+"%";
+      grid=Array.from({length:H},()=>Array.from({length:W},()=>Math.random()<p?1:0));
+      draw();
+    }
+    function draw(){
+      let html="", burned=0, trees=0;
+      for(let r=0;r<H;r++)for(let c=0;c<W;c++){
+        const v=grid[r][c];
+        if(v>0) trees++;
+        if(v===2) burned++;
+        if(v===0) continue;
+        html+=`<rect x="${c*15+1}" y="${r*15+4}" width="13" height="13" rx="2" fill="${v===2?'#ef4444':'#10b981'}"/>`;
+      }
+      document.getElementById("svg").innerHTML=html;
+      document.getElementById("burnOut").textContent=trees?Math.round(burned/trees*100)+"%":"0%";
+    }
+    function ignite(){
+      const q=[];
+      for(let r=0;r<H;r++) if(grid[r][0]===1){ grid[r][0]=2; q.push([r,0]); }
+      while(q.length){
+        const [r,c]=q.shift();
+        [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>{
+          const nr=r+dr, nc=c+dc;
+          if(nr>=0&&nr<H&&nc>=0&&nc<W&&grid[nr][nc]===1){ grid[nr][nc]=2; q.push([nr,nc]); }
+        });
+      }
+      draw();
+      if(window.ToySDK){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>低于 59% 时森林是一座座孤岛，火烧几棵就自己熄灭；一旦跨过 59.3% 相变阈值，树冠连成贯通全图的超级大陆，一把火直接烧穿到底！`;
+        window.ToySDK.markCompleted();
+      }
+    }
+    initForest();
+    </script>
+</body>
+</html>

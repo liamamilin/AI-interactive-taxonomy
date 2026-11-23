@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：群体免疫阈值计算器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💉 群体免疫阈值计算器：1 - 1/R0 决定疫苗接种率</h1><p>误区：任何传染病都要 100% 打满疫苗才有效。真相：只要让足够多人免疫，使得病毒平均传给下一个人不足 1 个（Rt<1），疫情就会自己断链！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🦠 病毒基本传染数 R0：<span id="rOut">3.0</span>
+        <input id="rS" type="range" min="1.2" max="15" step="0.2" value="3.0" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 540 160" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>拉高 R0 到 12（麻疹级别），看群体免疫接种率门槛如何飙升到 91.7%！</div>
+    
+  </div>
+  <script>
+    let m=0;
+    function render(){
+      const r0=parseFloat(document.getElementById("rS").value);
+      document.getElementById("rOut").textContent=r0.toFixed(1);
+      const hit=(1-1/r0)*100;
+      document.getElementById("svg").innerHTML=`
+        <rect x="60" y="55" width="420" height="34" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+        <rect x="60" y="55" width="${hit*4.2}" height="34" rx="8" fill="#10b981"/>
+        <text x="270" y="128" text-anchor="middle" font-size="15" font-weight="850" fill="var(--tax-primary)">需免疫人口比例 ≥ ${hit.toFixed(1)}% 即可阻断流行</text>
+      `;
+      m++; if(m>=3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+    </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：Boids 鸟群模拟器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🕊️ Boids 鸟群模拟器：3 条规则造出无首领的完美编队</h1><p>误区：鸟群整齐飞行全靠前面有只“领头鸟”发号施令。真相：每只鸟只看身边几只邻居——别撞车（分离）、朝向一致（对齐）、别掉队（凝聚）！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:10px;">
+        <button class="btn active" id="bAlign" onclick="tog('align')">🧭 对齐规则（跟邻居同向）</button>
+        <button class="btn active" id="bCoh" onclick="tog('coh')">🧲 凝聚规则（向群体中心靠拢）</button>
+      </div>
+      <svg id="svg" viewBox="0 0 500 210" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>试着关掉再打开“对齐”和“凝聚”，看鸟群如何在一秒内散架又重新编队！</div>
+    
+  </div>
+  <script>
+    const cfg={align:true, coh:true}; let clicks=0;
+    function tog(k){ cfg[k]=!cfg[k]; document.getElementById(k==='align'?'bAlign':'bCoh').classList.toggle("active",cfg[k]); clicks++; if(clicks>=2 && window.ToySDK) window.ToySDK.markCompleted(); }
+    const boids=Array.from({length:22},()=>({x:Math.random()*500,y:Math.random()*210,vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3}));
+    function tick(){
+      boids.forEach(b=>{
+        let ax=0,ay=0,cx=0,cy=0,cnt=0;
+        boids.forEach(o=>{
+          if(o===b)return;
+          const dx=o.x-b.x, dy=o.y-b.y, d=Math.hypot(dx,dy);
+          if(d<80){ ax+=o.vx; ay+=o.vy; cx+=o.x; cy+=o.y; cnt++; if(d<22){ b.vx-=dx*0.04; b.vy-=dy*0.04; } }
+        });
+        if(cnt>0){
+          if(cfg.align){ b.vx+=(ax/cnt-b.vx)*0.05; b.vy+=(ay/cnt-b.vy)*0.05; }
+          if(cfg.coh){ b.vx+=((cx/cnt-b.x)*0.004); b.vy+=((cy/cnt-b.y)*0.004); }
+        }
+        const sp=Math.hypot(b.vx,b.vy)||1;
+        b.vx=(b.vx/sp)*2.6; b.vy=(b.vy/sp)*2.6;
+        b.x=(b.x+b.vx+500)%500; b.y=(b.y+b.vy+210)%210;
+      });
+      document.getElementById("svg").innerHTML=boids.map(b=>{
+        const ang=Math.atan2(b.vy,b.vx)*180/Math.PI;
+        return `<polygon points="8,0 -5,-4 -5,4" fill="var(--tax-primary)" transform="translate(${b.x.toFixed(1)},${b.y.toFixed(1)}) rotate(${ang.toFixed(1)})"/>`;
+      }).join("");
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    </script>
+</body>
+</html>

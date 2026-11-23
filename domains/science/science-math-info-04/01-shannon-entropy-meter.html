@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：香农信息熵测量仪</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+    .card { padding: 14px; border: 1px solid var(--tax-border); border-radius: 12px; background: var(--tax-surface-alt); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📏 香农信息熵测量仪：越确定的事，信息量越接近 0</h1><p>误区：字数越多信息量越大。真相：如果明天的太阳肯定从东边升起（概率 100%），这句话的信息量严格为 0 比特！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🪙 硬币正面概率 p：<span id="pOut">50%</span> · 信息熵 H = <span id="hOut" style="color:var(--tax-primary);">1.000</span> bits
+        <input id="pS" type="range" min="0" max="100" value="50" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 560 210" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>把概率拖到 0% 或 100%，再拖回 50%，感受“不确定性”与“信息熵”的等价关系！</div>
+    
+  </div>
+  <script>
+    
+    let m=0;
+    function ent(p){ if(p<=0||p>=1)return 0; return -p*Math.log2(p)-(1-p)*Math.log2(1-p); }
+    function render(){
+      const p=+document.getElementById("pS").value/100;
+      const h=ent(p);
+      document.getElementById("pOut").textContent=Math.round(p*100)+"%";
+      document.getElementById("hOut").textContent=h.toFixed(3);
+      let pts=[];
+      for(let i=0;i<=100;i++){
+        const x=i/100, y=ent(x);
+        pts.push(`${i===0?'M':'L'}${(40+x*480).toFixed(1)},${(180-y*150).toFixed(1)}`);
+      }
+      document.getElementById("svg").innerHTML=`
+        <line x1="40" y1="180" x2="520" y2="180" stroke="var(--tax-border)"/>
+        <path d="${pts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="3"/>
+        <circle cx="${40+p*480}" cy="${180-h*150}" r="6" fill="#ef4444" stroke="#fff" stroke-width="2"/>
+        <text x="280" y="200" text-anchor="middle" font-size="11" fill="var(--tax-muted)">事件发生概率 p (0% → 100%)</text>
+      `;
+      m++; if((p<0.1||p>0.9) && m>1){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当概率高达 ${Math.round(p*100)}% 时，结果几乎毫无悬念，信息熵跌到 <strong>${h.toFixed(3)} bits</strong>！只有最难预测的 50/50 局面才需要整整 1 bit 来传递。`;
+        if(window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+    
+  </script>
+</body>
+</html>

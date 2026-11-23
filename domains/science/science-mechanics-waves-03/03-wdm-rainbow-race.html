@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：波分复用光速竞速</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌈 波分复用（WDM）光速竞速：一根丝同时跑 N 种颜色</h1><p>误区：一根光纤只能传一路数据。真相：不同颜色（波长）的光互相穿透互不干扰，一根光纤就是一条拥有上百条彩色车道的高速公路！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🌈 复用激光波长通道数：<span id="cOut">1</span> 路 · 总带宽：<span id="bOut" style="color:var(--tax-primary);">10 Gbps</span>
+        <input id="cS" type="range" min="1" max="8" value="1" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 540 160" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>把颜色通道拉满 8 路，看总带宽翻 8 倍却不用多挖一条海底光缆！</div>
+    
+  </div>
+  <script>
+    const cols=["#ef4444","#f97316","#f59e0b","#10b981","#06b6d4","#3b82f6","#6366f1","#a855f7"];
+    let m=0;
+    function render(){
+      const n=+document.getElementById("cS").value;
+      document.getElementById("cOut").textContent=n;
+      document.getElementById("bOut").textContent=(n*10)+" Gbps";
+      let lines="";
+      for(let i=0;i<n;i++){
+        const y=42+i*10;
+        lines+=`<line x1="40" y1="${y}" x2="500" y2="${y}" stroke="${cols[i]}" stroke-width="3"/>`;
+      }
+      document.getElementById("svg").innerHTML=`<rect x="40" y="34" width="460" height="92" rx="10" fill="var(--tax-border)" opacity="0.2"/>${lines}`;
+      m++; if(n>=5 && m>1){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>不用重铺昂贵的海底光缆，只要在两端换上彩色激光合波器（WDM），同一根玻璃纤维的传输容量瞬间暴涨 <strong>${n} 倍</strong>！`;
+        if(window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+    </script>
+</body>
+</html>

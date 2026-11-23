@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：牛顿大炮轨道沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>☄️ 牛顿大炮轨道沙盘：卫星其实一直在“往下掉”！</h1><p>误区：太空没有重力所以卫星飘在天上。真相：空间站受地球重力高达地面 90%，它只是横向飞得太快，刚好一直错过地球表面！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🚀 炮弹初速度 v：<span id="vOut">7.9</span> km/s
+        <input id="vS" type="range" min="3.0" max="12.0" step="0.1" value="7.9" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 460 240" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>试着把速度调到 5.0（坠毁）、7.9（圆轨）和 11.2（逃逸），观察轨迹的质变！</div>
+    
+  </div>
+  <script>
+    let m=0;
+    function render(){
+      const v=+document.getElementById("vS").value;
+      document.getElementById("vOut").textContent=v.toFixed(1);
+      const cx=230, cy=125, R=52;
+      let path="", label="", col="var(--tax-primary)";
+      if(v<7.7){
+        const reach=20+(v/7.7)*140;
+        path=`<path d="M ${cx},${cy-R-12} Q ${cx+reach*0.7},${cy-R-8} ${cx+Math.sin(reach/90)*R},${cy-Math.cos(reach/90)*R}" fill="none" stroke="#ef4444" stroke-width="3"/>`;
+        label="💥 速度不足，落回地面！"; col="#ef4444";
+      } else if(v<11.2){
+        const rx=64+(v-7.7)*22, ry=64+(v-7.7)*10;
+        path=`<ellipse cx="${cx+(rx-64)*0.6}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="6,3"/>`;
+        label=v<8.2?"🛰️ 刚好绕地球圆周飞行（第一宇宙速度 7.9 km/s）！":"🛰️ 椭圆轨道稳定绕飞！"; col="#10b981";
+      } else {
+        path=`<path d="M ${cx},${cy-R-12} Q ${cx+90},${cy-R-20} 440,20" fill="none" stroke="#f59e0b" stroke-width="3"/>`;
+        label="🌌 突破第二宇宙速度（11.2 km/s），挣脱地球引力！"; col="#f59e0b";
+      }
+      document.getElementById("svg").innerHTML=`
+        <circle cx="${cx}" cy="${cy}" r="${R}" fill="#3b82f6" fill-opacity="0.25" stroke="#3b82f6" stroke-width="2"/>
+        <text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="13" font-weight="800" fill="#3b82f6">🌍 地球</text>
+        ${path}
+        <text x="${cx}" y="224" text-anchor="middle" font-size="13" font-weight="800" fill="${col}">${label}</text>
+      `;
+      m++; if(m>=3 && window.ToySDK){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只要横向速度达到 <strong>7.9 km/s</strong>，炮弹每向前飞 8 公里、向下坠落 5 米，而地球表面刚好也向下弯曲 5 米——于是它就成了永不落地的卫星！`;
+        window.ToySDK.markCompleted();
+      }
+    }
+    render();
+    </script>
+</body>
+</html>

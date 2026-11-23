@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：声波相消调相器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>〰️ 声波相消调相器：1 + (-1) = 0 的声学魔法</h1><p>误区：声音只能越叠加越吵。真相：只要发射一段振幅相同、相位刚好差 180°（波峰对波谷）的反相声波，就能实现“以声消声”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🎛️ 反相声波相位差 φ：<span id="phOut">0°</span> · 合成音量：<span id="volOut" style="color:var(--tax-primary);">200%</span>
+        <input id="phS" type="range" min="0" max="360" value="0" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 560 220" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>把相位差拖到 <strong>180°</strong>，亲眼看见绿色合成波彻底拉平归零！</div>
+    
+  </div>
+  <script>
+    function render(){
+      const deg=+document.getElementById("phS").value;
+      const rad=deg*Math.PI/180;
+      document.getElementById("phOut").textContent=deg+"°";
+      const amp=Math.abs(Math.cos(rad/2))*2;
+      document.getElementById("volOut").textContent=Math.round(amp*100)+"%";
+      let p1=[], p2=[], pSum=[];
+      for(let i=0;i<=160;i++){
+        const x=(i/160)*Math.PI*4;
+        const y1=Math.sin(x), y2=Math.sin(x+rad), ys=y1+y2;
+        const px=30+i*3.1;
+        p1.push(`${i===0?'M':'L'}${px.toFixed(1)},${(110-y1*38).toFixed(1)}`);
+        p2.push(`${i===0?'M':'L'}${px.toFixed(1)},${(110-y2*38).toFixed(1)}`);
+        pSum.push(`${i===0?'M':'L'}${px.toFixed(1)},${(110-ys*38).toFixed(1)}`);
+      }
+      document.getElementById("svg").innerHTML=`
+        <path d="${p1.join(' ')}" fill="none" stroke="#f59e0b" stroke-width="1.5" opacity="0.6"/>
+        <path d="${p2.join(' ')}" fill="none" stroke="#3b82f6" stroke-width="1.5" opacity="0.6"/>
+        <path d="${pSum.join(' ')}" fill="none" stroke="${amp<0.2?'#10b981':'#ef4444'}" stroke-width="3.5"/>
+      `;
+      if(Math.abs(deg-180)<=10){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>相位差 <strong>180°</strong> 时，噪声波峰刚好撞上降噪波谷，合成振幅归零（完全相消干涉）——这就是主动降噪耳机的全部核心！`;
+        if(window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+    </script>
+</body>
+</html>

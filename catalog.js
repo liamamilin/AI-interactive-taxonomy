@@ -5,11 +5,11 @@ window.TAXONOMY_DATA = {
   "subtitle": "围绕“人”的 10 大认知领域 · 每个复杂概念 2 分钟玩懂",
   "stats": {
     "totalDomains": 10,
-    "litDomains": 3,
-    "totalTopics": 91,
-    "totalPlannedTopics": 184,
+    "litDomains": 4,
+    "totalTopics": 115,
+    "totalPlannedTopics": 160,
     "totalBlueprintTopics": 275,
-    "totalToys": 273
+    "totalToys": 345
   },
   "tracks": [
     {
@@ -1050,141 +1050,1216 @@ window.TAXONOMY_DATA = {
         {
           "id": "probability-stats",
           "title": "1. 概率直觉与统计分布（Probability & Statistics）",
-          "plannedTopics": [
-            {
-              "slug": "science-probability-stats-01",
-              "title": "蒙提霍尔三门问题（换门胜率翻倍）"
-            },
-            {
-              "slug": "science-probability-stats-02",
-              "title": "高尔顿钉板与中心极限定理"
-            },
-            {
-              "slug": "science-probability-stats-03",
-              "title": "生日悖论（23 人撞生日）"
-            },
-            {
-              "slug": "science-probability-stats-04",
-              "title": "幂律分布 vs 正态分布"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "math-info",
           "title": "2. 数学直觉与信息论（Calculus, Linear Algebra & Info）",
-          "plannedTopics": [
-            {
-              "slug": "science-math-info-01",
-              "title": "导数斜率与积分面积"
-            },
-            {
-              "slug": "science-math-info-02",
-              "title": "矩阵空间变换与特征向量"
-            },
-            {
-              "slug": "science-math-info-03",
-              "title": "傅里叶变换（圆周画万物）"
-            },
-            {
-              "slug": "science-math-info-04",
-              "title": "香农信息熵与压缩极限"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "mechanics-waves",
           "title": "3. 力学、波动与光学（Mechanics, Waves & Optics）",
-          "plannedTopics": [
-            {
-              "slug": "science-mechanics-waves-01",
-              "title": "引力弹弓与卫星轨道"
-            },
-            {
-              "slug": "science-mechanics-waves-02",
-              "title": "波的干涉与降噪耳机原理"
-            },
-            {
-              "slug": "science-mechanics-waves-03",
-              "title": "光纤全反射通信"
-            },
-            {
-              "slug": "science-mechanics-waves-04",
-              "title": "多普勒效应（救护车变调）"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "thermo-entropy",
           "title": "4. 热力学、能量与熵增（Thermodynamics & Entropy）",
-          "plannedTopics": [
-            {
-              "slug": "science-thermo-entropy-01",
-              "title": "分子热运动与温度本质"
-            },
-            {
-              "slug": "science-thermo-entropy-02",
-              "title": "热力学第二定律与熵增"
-            },
-            {
-              "slug": "science-thermo-entropy-03",
-              "title": "麦克斯韦妖与信息代价"
-            },
-            {
-              "slug": "science-thermo-entropy-04",
-              "title": "卡诺热机效率上限"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "chaos-emergence",
           "title": "5. 复杂系统、混沌与涌现（Complexity & Emergence）",
-          "plannedTopics": [
-            {
-              "slug": "science-chaos-emergence-01",
-              "title": "双摆与蝴蝶效应"
-            },
-            {
-              "slug": "science-chaos-emergence-02",
-              "title": "康威生命游戏（规则涌现）"
-            },
-            {
-              "slug": "science-chaos-emergence-03",
-              "title": "鸟群 Boids 群体智能"
-            },
-            {
-              "slug": "science-chaos-emergence-04",
-              "title": "相变与森林火灾临界点"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "evolution-ecology",
           "title": "6. 演化、生态与传染病（Evolution & Ecology）",
-          "plannedTopics": [
+          "plannedTopics": []
+        }
+      ],
+      "liveTopicCount": 24,
+      "plannedTopicCount": 0,
+      "blueprintTopicCount": 24,
+      "liveToyCount": 72,
+      "topics": [
+        {
+          "id": "science/science-chaos-emergence-01",
+          "slug": "science-chaos-emergence-01",
+          "domain": "science",
+          "branch": "chaos-emergence",
+          "order": 1,
+          "title": "双摆与蝴蝶效应",
+          "icon": "🦋",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "物理方程明明 100% 确定、没有一丝随机性，为什么我们却连下个月的天气都算不准？",
+          "difficulty": "进阶",
+          "related": [
+            "science/science-chaos-emergence-02",
+            "science/science-mechanics-waves-01"
+          ],
+          "toys": [
             {
-              "slug": "science-evolution-ecology-01",
-              "title": "自然选择与保护色演化"
+              "id": "science/science-chaos-emergence-01/01-double-pendulum-race.html",
+              "file": "01-double-pendulum-race.html",
+              "path": "./domains/science/science-chaos-emergence-01/01-double-pendulum-race.html",
+              "title": "双生双摆蝴蝶效应：起点差 0.001 度后彻底分道扬镳（SVG）",
+              "icon": "🦋",
+              "archetype": "race",
+              "concept": "初值敏感性 · 确定性混沌 · 李雅普诺夫指数",
+              "summary": "同时释放两根起点几乎完全重合的双摆，亲眼看见几秒后它们的轨迹变得风马牛不相及！"
             },
             {
-              "slug": "science-evolution-ecology-02",
-              "title": "捕食者-猎物震荡周期"
+              "id": "science/science-chaos-emergence-01/02-logistic-chaos-map.html",
+              "file": "02-logistic-chaos-map.html",
+              "path": "./domains/science/science-chaos-emergence-01/02-logistic-chaos-map.html",
+              "title": "逻辑斯蒂混沌分岔图：一个简单方程如何突然发疯？（SVG）",
+              "icon": "🌿",
+              "archetype": "simulation",
+              "concept": "倍周期分岔 · 混沌边缘 · 费根鲍姆常数",
+              "summary": "调节繁殖率参数 r，观察种群数量如何从稳定一点、二周期震荡一路裂变成彻底混沌！"
             },
             {
-              "slug": "science-evolution-ecology-03",
-              "title": "传染病 SIR 模型与 R0 阈值"
+              "id": "science/science-chaos-emergence-01/03-weather-forecast-limit.html",
+              "file": "03-weather-forecast-limit.html",
+              "path": "./domains/science/science-chaos-emergence-01/03-weather-forecast-limit.html",
+              "title": "天气预报极限实验室：为什么 15 天是物理预测上限？",
+              "icon": "🌦️",
+              "archetype": "spatial",
+              "concept": "误差指数放大 · 集合预报 · 可预测时间窗口",
+              "summary": "调节初始观测误差，观察误差在混沌大气中指数翻倍并最终吞噬全部预测信号的时刻！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-evolution-ecology-01",
+          "slug": "science-evolution-ecology-01",
+          "domain": "science",
+          "branch": "evolution-ecology",
+          "order": 1,
+          "title": "自然选择与保护色演化",
+          "icon": "🦋",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "长颈鹿不是因为努力伸脖子才变长，桦尺蛾也不是“主动”变黑——演化只是环境筛子在默默淘汰不匹配的个体。",
+          "difficulty": "入门",
+          "related": [
+            "science/science-evolution-ecology-02",
+            "science/science-evolution-ecology-03"
+          ],
+          "toys": [
+            {
+              "id": "science/science-evolution-ecology-01/01-peppered-moth-sim.html",
+              "file": "01-peppered-moth-sim.html",
+              "path": "./domains/science/science-evolution-ecology-01/01-peppered-moth-sim.html",
+              "title": "桦尺蛾工业黑化沙盘：环境变色如何重塑种群基因？（SVG）",
+              "icon": "🪲",
+              "archetype": "simulation",
+              "concept": "自然选择 · 环境筛选 · 基因频率漂移",
+              "summary": "拖动环境背景从白桦林变成煤烟黑墙，运行几代繁殖，看种群白蛾如何迅速被黑蛾取代！"
             },
             {
-              "slug": "science-evolution-ecology-04",
-              "title": "生物尺度律（体型与寿命）"
+              "id": "science/science-evolution-ecology-01/02-mutation-vs-selection.html",
+              "file": "02-mutation-vs-selection.html",
+              "path": "./domains/science/science-evolution-ecology-01/02-mutation-vs-selection.html",
+              "title": "演化真相检验台：随机突变 + 定向选择 ≠ 定向突变",
+              "icon": "🧬",
+              "archetype": "scenario",
+              "concept": "随机突变 · 抗生素耐药性 · 达尔文逻辑",
+              "summary": "辨析耐药细菌与长颈鹿脖子的常见误区，掌握“盲目试错 + 残酷筛选”的底层算法！"
+            },
+            {
+              "id": "science/science-evolution-ecology-01/03-fitness-landscape-svg.html",
+              "file": "03-fitness-landscape-svg.html",
+              "path": "./domains/science/science-evolution-ecology-01/03-fitness-landscape-svg.html",
+              "title": "适应度地形图：为什么演化有时会卡在局部小山坡？（SVG）",
+              "icon": "⛰️",
+              "archetype": "spatial",
+              "concept": "适应度景观 · 局部最优 · 基因突变跨沟",
+              "summary": "调节突变步长，看生物种群如何爬上适应度高峰，以及为什么小步突变很难跨过低谷！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-math-info-01",
+          "slug": "science-math-info-01",
+          "domain": "science",
+          "branch": "math-info",
+          "order": 1,
+          "title": "导数斜率与积分面积",
+          "icon": "∫",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "微积分不是背公式！导数就是“此刻的瞬时速度”，积分就是“把无数薄片面积攒起来”。",
+          "difficulty": "入门",
+          "related": [
+            "science/science-math-info-02",
+            "science/science-math-info-03"
+          ],
+          "toys": [
+            {
+              "id": "science/science-math-info-01/01-tangent-slope-svg.html",
+              "file": "01-tangent-slope-svg.html",
+              "path": "./domains/science/science-math-info-01/01-tangent-slope-svg.html",
+              "title": "切线斜率显微镜：放大曲线直到它变成一条直线（SVG）",
+              "icon": "🔎",
+              "archetype": "spatial",
+              "concept": "导数 · 瞬时变化率 · 局部线性化",
+              "summary": "拖动 x 轴游标与放大镜倍率，亲眼看见弯曲的抛物线在局部是如何拉直成切线的！"
+            },
+            {
+              "id": "science/science-math-info-01/02-riemann-slices-sim.html",
+              "file": "02-riemann-slices-sim.html",
+              "path": "./domains/science/science-math-info-01/02-riemann-slices-sim.html",
+              "title": "积分切片压缩机：矩形切得越细，面积越逼近真值（SVG）",
+              "icon": "🍰",
+              "archetype": "simulation",
+              "concept": "定积分 · 黎曼和 · 无限细分",
+              "summary": "调节切片数量 N（从 4 片到 60 片），看阶梯锯齿如何一步步严丝合缝地填满曲线下面积！"
+            },
+            {
+              "id": "science/science-math-info-01/03-speed-distance-race.html",
+              "file": "03-speed-distance-race.html",
+              "path": "./domains/science/science-math-info-01/03-speed-distance-race.html",
+              "title": "速度-路程双向转换器：微积分基本定理直觉版",
+              "icon": "🏎️",
+              "archetype": "race",
+              "concept": "微分与积分互逆 · 速度曲线面积即路程",
+              "summary": "切换加速、匀速、急刹三种驾驶模式，同步观察路程曲线斜率（导数）与速度曲线面积（积分）！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-mechanics-waves-01",
+          "slug": "science-mechanics-waves-01",
+          "domain": "science",
+          "branch": "mechanics-waves",
+          "order": 1,
+          "title": "引力弹弓与卫星轨道",
+          "icon": "🛰️",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "卫星为什么掉不到地球上？旅行者号不烧一滴燃料，怎么靠木星偷走速度飞出太阳系？",
+          "difficulty": "入门",
+          "related": [
+            "science/science-mechanics-waves-04",
+            "science/science-chaos-emergence-01"
+          ],
+          "toys": [
+            {
+              "id": "science/science-mechanics-waves-01/01-newton-cannon-orbit.html",
+              "file": "01-newton-cannon-orbit.html",
+              "path": "./domains/science/science-mechanics-waves-01/01-newton-cannon-orbit.html",
+              "title": "牛顿大炮轨道沙盘：速度决定坠落、绕飞还是逃逸（SVG）",
+              "icon": "☄️",
+              "archetype": "simulation",
+              "concept": "第一宇宙速度 · 自由落体绕飞 · 逃逸速度",
+              "summary": "调节山顶大炮的发射初速度，看炮弹如何从落地、绕地圆周运动一路变成飞向深空的双曲线！"
+            },
+            {
+              "id": "science/science-mechanics-waves-01/02-gravity-assist-slingshot.html",
+              "file": "02-gravity-assist-slingshot.html",
+              "path": "./domains/science/science-mechanics-waves-01/02-gravity-assist-slingshot.html",
+              "title": "引力弹弓借力图解：跟移动的行星“打乒乓”（SVG）",
+              "icon": "🪐",
+              "archetype": "spatial",
+              "concept": "引力弹弓 · 动量交换 · 相对速度叠加",
+              "summary": "切换从行星前方迎面切入 vs 从行星后方顺向借力，亲眼看见探测器速度暴增或剧减！"
+            },
+            {
+              "id": "science/science-mechanics-waves-01/03-kepler-area-race.html",
+              "file": "03-kepler-area-race.html",
+              "path": "./domains/science/science-mechanics-waves-01/03-kepler-area-race.html",
+              "title": "开普勒第二定律竞速：近地点狂飙 vs 远地点慢跑",
+              "icon": "🏃",
+              "archetype": "race",
+              "concept": "角动量守恒 · 等面积扫过 · 椭圆轨道",
+              "summary": "对比近圆轨道与大偏心率椭圆轨道，观察卫星如何在靠近恒星时自动加速冲刺！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-probability-stats-01",
+          "slug": "science-probability-stats-01",
+          "domain": "science",
+          "branch": "probability-stats",
+          "order": 1,
+          "title": "蒙提霍尔三门问题（换门胜率翻倍）",
+          "icon": "🚪",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "三扇门后只有一辆跑车，你选了一扇后，主持人打开另一扇山羊门。此时剩两扇门，换门胜率还是 50% 吗？",
+          "difficulty": "入门",
+          "related": [
+            "science/science-probability-stats-02",
+            "science/science-probability-stats-03"
+          ],
+          "toys": [
+            {
+              "id": "science/science-probability-stats-01/01-three-doors-lab.html",
+              "file": "01-three-doors-lab.html",
+              "path": "./domains/science/science-probability-stats-01/01-three-doors-lab.html",
+              "title": "三门博弈实战台：亲手选门并验证换门胜率",
+              "icon": "🐐",
+              "archetype": "scenario",
+              "concept": "条件概率 · 信息更新 · 蒙提霍尔悖论",
+              "summary": "亲自选门、看主持人排除错误选项，再决定坚持还是换门，用累计战绩打破 50/50 错觉！"
+            },
+            {
+              "id": "science/science-probability-stats-01/02-stay-vs-switch-race.html",
+              "file": "02-stay-vs-switch-race.html",
+              "path": "./domains/science/science-probability-stats-01/02-stay-vs-switch-race.html",
+              "title": "千局蒙特卡洛竞速：坚持派 vs 换门派（SVG）",
+              "icon": "📈",
+              "archetype": "race",
+              "concept": "大数定律 · 33.3% vs 66.7% · 胜率收敛曲线",
+              "summary": "一键同时跑 500 局“死守派”与“换门派”对决，在实时 SVG 折线图上见证两条胜率线稳稳分道扬镳！"
+            },
+            {
+              "id": "science/science-probability-stats-01/03-hundred-doors-insight.html",
+              "file": "03-hundred-doors-insight.html",
+              "path": "./domains/science/science-probability-stats-01/03-hundred-doors-insight.html",
+              "title": "100 扇门直觉放大镜：为什么换门胜率是 99%？（SVG）",
+              "icon": "🔭",
+              "archetype": "spatial",
+              "concept": "极端尺度直觉 · 概率浓缩 · 样本空间",
+              "summary": "把 3 扇门扩展到 100 扇门：主持人帮你排除了 98 扇山羊门，瞬间看懂全部概率是如何浓缩到最后那扇门的！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-thermo-entropy-01",
+          "slug": "science-thermo-entropy-01",
+          "domain": "science",
+          "branch": "thermo-entropy",
+          "order": 1,
+          "title": "分子热运动与温度本质",
+          "icon": "🔥",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "温度到底是什么？为什么金属摸起来比木头凉，哪怕它们明明处于同一个房间温度？",
+          "difficulty": "入门",
+          "related": [
+            "science/science-thermo-entropy-02",
+            "science/science-thermo-entropy-04"
+          ],
+          "toys": [
+            {
+              "id": "science/science-thermo-entropy-01/01-gas-molecule-box.html",
+              "file": "01-gas-molecule-box.html",
+              "path": "./domains/science/science-thermo-entropy-01/01-gas-molecule-box.html",
+              "title": "分子碰撞箱：温度其实就是分子平均动能（SVG）",
+              "icon": "⚛️",
+              "archetype": "simulation",
+              "concept": "温度本质 · 分子平均动能 · 气体压强",
+              "summary": "拖动温度滑块，亲眼看见盒子里的小分子狂飙加速、撞击器壁次数暴增推高气压！"
+            },
+            {
+              "id": "science/science-thermo-entropy-01/02-metal-vs-wood-race.html",
+              "file": "02-metal-vs-wood-race.html",
+              "path": "./domains/science/science-thermo-entropy-01/02-metal-vs-wood-race.html",
+              "title": "导热体感竞速：同温 20℃ 的铁块为何比木头冰手？",
+              "icon": "🧊",
+              "archetype": "race",
+              "concept": "热传导率 · 热流速度 · 体感温度错觉",
+              "summary": "把手同时按在同为 20℃ 的铁块与木头上，实时对比热量从手心被抽走的速度！"
+            },
+            {
+              "id": "science/science-thermo-entropy-01/03-brownian-pollen-svg.html",
+              "file": "03-brownian-pollen-svg.html",
+              "path": "./domains/science/science-thermo-entropy-01/03-brownian-pollen-svg.html",
+              "title": "布朗运动显微镜：花粉为什么自己跳个不停？（SVG）",
+              "icon": "🔬",
+              "archetype": "spatial",
+              "concept": "布朗运动 · 微观热碰撞 · 原子存在证据",
+              "summary": "观察隐形水分子四面八方的随机撞击如何推动大花粉颗粒走出曲折迷踪步！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-chaos-emergence-02",
+          "slug": "science-chaos-emergence-02",
+          "domain": "science",
+          "branch": "chaos-emergence",
+          "order": 2,
+          "title": "康威生命游戏（规则涌现）",
+          "icon": "👾",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "仅仅 4 条极其简单的邻格生死规则，竟然能自发演化出自己会爬行的“滑翔机”甚至图灵机！",
+          "difficulty": "入门",
+          "related": [
+            "science/science-chaos-emergence-01",
+            "science/science-chaos-emergence-03"
+          ],
+          "toys": [
+            {
+              "id": "science/science-chaos-emergence-02/01-life-glider-sandbox.html",
+              "file": "01-life-glider-sandbox.html",
+              "path": "./domains/science/science-chaos-emergence-02/01-life-glider-sandbox.html",
+              "title": "生命游戏演化沙盘：亲手点燃“滑翔机”飞越棋盘（SVG）",
+              "icon": "🛸",
+              "archetype": "simulation",
+              "concept": "元胞自动机 · 局部规则 · 宏观涌现滑翔机",
+              "summary": "点击注入滑翔机或随机汤，看着没有大脑的小方格仅靠邻居数规则自行列队向前飞行！"
+            },
+            {
+              "id": "science/science-chaos-emergence-02/02-rule-boundary-lab.html",
+              "file": "02-rule-boundary-lab.html",
+              "path": "./domains/science/science-chaos-emergence-02/02-rule-boundary-lab.html",
+              "title": "死亡与繁盛边界：把规则改宽 1 个数字会发生什么？",
+              "icon": "⚖️",
+              "archetype": "scenario",
+              "concept": "混沌边缘 Edge of Chaos · 寂灭 vs 爆炸",
+              "summary": "对比 B3/S23（生命游戏）与过度繁殖规则，理解复杂生命为何只能诞生在“死寂与乱炸”的窄缝里！"
+            },
+            {
+              "id": "science/science-chaos-emergence-02/03-self-replicator-pattern.html",
+              "file": "03-self-replicator-pattern.html",
+              "path": "./domains/science/science-chaos-emergence-02/03-self-replicator-pattern.html",
+              "title": "生命模式图鉴：静物、振荡器与移动飞船（SVG）",
+              "icon": "🧬",
+              "archetype": "spatial",
+              "concept": "稳态静物 · 周期闪烁体 · 自主移动结构",
+              "summary": "一键切换方块、闪烁灯、蟾蜍与滑翔机，观察局部规则支撑起的三大经典“人工物种”！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-evolution-ecology-02",
+          "slug": "science-evolution-ecology-02",
+          "domain": "science",
+          "branch": "evolution-ecology",
+          "order": 2,
+          "title": "捕食者-猎物震荡周期",
+          "icon": "🦊",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "为什么兔子多了狐狸就多，狐狸一多兔子又被吃光、狐狸跟着饿死？生态为什么总是循环震荡？",
+          "difficulty": "进阶",
+          "related": [
+            "science/science-evolution-ecology-01",
+            "engineering/engineering-control-feedback-03"
+          ],
+          "toys": [
+            {
+              "id": "science/science-evolution-ecology-02/01-lotka-volterra-svg.html",
+              "file": "01-lotka-volterra-svg.html",
+              "path": "./domains/science/science-evolution-ecology-02/01-lotka-volterra-svg.html",
+              "title": "狐狸与兔子生态波浪（Lotka-Volterra 模型）（SVG）",
+              "icon": "🐇",
+              "archetype": "simulation",
+              "concept": "捕食者-猎物方程 · 相位滞后震荡 · 动态平衡",
+              "summary": "调节兔子繁殖率或狐狸捕食率，在 SVG 时序图上亲眼看见两条生态曲线交错起伏的永恒华尔兹！"
+            },
+            {
+              "id": "science/science-evolution-ecology-02/02-phase-portrait-loop.html",
+              "file": "02-phase-portrait-loop.html",
+              "path": "./domains/science/science-evolution-ecology-02/02-phase-portrait-loop.html",
+              "title": "生态相空间闭环图：为什么两条线画成了一个大圈？（SVG）",
+              "icon": "⭕",
+              "archetype": "spatial",
+              "concept": "相图极限环 · 周期循环 · 生态稳态",
+              "summary": "把时间隐藏掉，直接以“兔子数 vs 狐狸数”画图，看生态如何绕着中心点一圈圈打转！"
+            },
+            {
+              "id": "science/science-evolution-ecology-02/03-wolf-cull-backfire.html",
+              "file": "03-wolf-cull-backfire.html",
+              "path": "./domains/science/science-evolution-ecology-02/03-wolf-cull-backfire.html",
+              "title": "生态干预警示台：为了保护鹿群把狼全杀光会怎样？",
+              "icon": "🐺",
+              "archetype": "scenario",
+              "concept": "营养级联 · 过度放牧崩溃 · 敬畏生态反馈",
+              "summary": "推演“消灭全部狼群”与“放回适量狼群”两种政策后的 10 年生态结局！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-math-info-02",
+          "slug": "science-math-info-02",
+          "domain": "science",
+          "branch": "math-info",
+          "order": 2,
+          "title": "矩阵空间变换与特征向量",
+          "icon": "🧮",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "矩阵不是枯燥的数字表格！它是一台“把整个二维网格拉伸、旋转、剪切”的空间变形机。",
+          "difficulty": "进阶",
+          "related": [
+            "science/science-math-info-01",
+            "science/science-math-info-03"
+          ],
+          "toys": [
+            {
+              "id": "science/science-math-info-02/01-matrix-grid-warp.html",
+              "file": "01-matrix-grid-warp.html",
+              "path": "./domains/science/science-math-info-02/01-matrix-grid-warp.html",
+              "title": "矩阵空间变形机：亲手扭曲整个坐标系（SVG）",
+              "icon": "🕸️",
+              "archetype": "spatial",
+              "concept": "线性变换 · 基向量落点 · 行列式面积缩放",
+              "summary": "调节矩阵参数或一键切换旋转/剪切/缩放，亲眼看见网格与正方形如何随之变形！"
+            },
+            {
+              "id": "science/science-math-info-02/02-eigenvector-finder.html",
+              "file": "02-eigenvector-finder.html",
+              "path": "./domains/science/science-math-info-02/02-eigenvector-finder.html",
+              "title": "特征向量探测器：变换后唯一不转弯的神奇方向（SVG）",
+              "icon": "🧭",
+              "archetype": "simulation",
+              "concept": "特征向量 Eigenvector · 特征值 Eigenvalue · 主轴",
+              "summary": "旋转绿色测试向量，在空间剧烈变形时找出那根方向纹丝不动、只发生伸缩的特征向量！"
+            },
+            {
+              "id": "science/science-math-info-02/03-transform-order-lab.html",
+              "file": "03-transform-order-lab.html",
+              "path": "./domains/science/science-math-info-02/03-transform-order-lab.html",
+              "title": "变换顺序陷阱台：先旋转再拉伸 vs 先拉伸再旋转",
+              "icon": "🔀",
+              "archetype": "scenario",
+              "concept": "矩阵乘法不可交换 A×B ≠ B×A · 图形学管道",
+              "summary": "对比两种操作顺序的最终落点，直观理解为什么矩阵乘法 AB 不等于 BA！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-mechanics-waves-02",
+          "slug": "science-mechanics-waves-02",
+          "domain": "science",
+          "branch": "mechanics-waves",
+          "order": 2,
+          "title": "波的干涉与降噪耳机原理",
+          "icon": "🎧",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "声音加声音怎么会变成“绝对安静”？主动降噪耳机是如何在飞机轰鸣中凭空造出反相声波的？",
+          "difficulty": "入门",
+          "related": [
+            "science/science-mechanics-waves-04",
+            "science/science-math-info-03"
+          ],
+          "toys": [
+            {
+              "id": "science/science-mechanics-waves-02/01-wave-interference-svg.html",
+              "file": "01-wave-interference-svg.html",
+              "path": "./domains/science/science-mechanics-waves-02/01-wave-interference-svg.html",
+              "title": "声波相消调相器：拖动半个波长实现完全静音（SVG）",
+              "icon": "〰️",
+              "archetype": "simulation",
+              "concept": "相干叠加 · 波峰遇波谷 · 相消干涉",
+              "summary": "拖动降噪耳机发射波的相位差，亲眼看见两条声波在 180° 反相时彻底抵消成一条直线！"
+            },
+            {
+              "id": "science/science-mechanics-waves-02/02-anc-headphone-lab.html",
+              "file": "02-anc-headphone-lab.html",
+              "path": "./domains/science/science-mechanics-waves-02/02-anc-headphone-lab.html",
+              "title": "主动降噪（ANC）实战台：为什么它怕突然的尖叫？",
+              "icon": "✈️",
+              "archetype": "scenario",
+              "concept": "前馈麦克风 · 稳态低频噪声 · 物理隔音互补",
+              "summary": "对比飞机引擎低频轰鸣与突发清脆拍手声，理解为什么降噪耳机对低频稳态噪声最神效！"
+            },
+            {
+              "id": "science/science-mechanics-waves-02/03-double-slit-ripple.html",
+              "file": "03-double-slit-ripple.html",
+              "path": "./domains/science/science-mechanics-waves-02/03-double-slit-ripple.html",
+              "title": "双缝水波干涉纹：明暗相间的能量重分配（SVG）",
+              "icon": "🌊",
+              "archetype": "spatial",
+              "concept": "双缝干涉 · 路程差 · 能量守恒",
+              "summary": "调节双缝间距与波长，观察屏幕上的干涉亮暗条纹如何随波长实时疏密变化！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-probability-stats-02",
+          "slug": "science-probability-stats-02",
+          "domain": "science",
+          "branch": "probability-stats",
+          "order": 2,
+          "title": "高尔顿钉板与中心极限定理",
+          "icon": "🔔",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "为什么身高、测量误差、考试成绩总是不约而同地长成“中间高两头低”的钟形曲线？",
+          "difficulty": "入门",
+          "related": [
+            "science/science-probability-stats-01",
+            "science/science-probability-stats-04"
+          ],
+          "toys": [
+            {
+              "id": "science/science-probability-stats-02/01-galton-board-sim.html",
+              "file": "01-galton-board-sim.html",
+              "path": "./domains/science/science-probability-stats-02/01-galton-board-sim.html",
+              "title": "交互式高尔顿钉板：无数次 50/50 碰撞如何堆出正态钟形曲线？（SVG）",
+              "icon": "📌",
+              "archetype": "simulation",
+              "concept": "二项分布趋近正态 · 独立随机叠加 · 高尔顿钉板",
+              "summary": "调节钉板层数与偏移倾向，观察几百颗弹珠随机左右弹跳后如何在底部自然堆出完美的钟形曲线！"
+            },
+            {
+              "id": "science/science-probability-stats-02/02-dice-clt-race.html",
+              "file": "02-dice-clt-race.html",
+              "path": "./domains/science/science-probability-stats-02/02-dice-clt-race.html",
+              "title": "中心极限定理魔法机：平庸的骰子均值如何变成正态分布？（SVG）",
+              "icon": "🎲",
+              "archetype": "race",
+              "concept": "中心极限定理 CLT · 样本均值分布 · 标准误缩小",
+              "summary": "对比“每次掷 1 颗骰子”与“每次掷 6 颗骰子取平均”，亲眼看见均匀方波如何瞬间蜕变为尖锐正态峰！"
+            },
+            {
+              "id": "science/science-probability-stats-02/03-sigma-rule-svg.html",
+              "file": "03-sigma-rule-svg.html",
+              "path": "./domains/science/science-probability-stats-02/03-sigma-rule-svg.html",
+              "title": "三西格玛（68-95-99.7）法则透视镜（SVG）",
+              "icon": "📐",
+              "archetype": "spatial",
+              "concept": "标准差 σ · 68-95-99.7 法则 · 六西格玛品控",
+              "summary": "拖动 z-score 游标横扫正态曲线，实时计算区间覆盖概率与百万分之一缺陷率！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-thermo-entropy-02",
+          "slug": "science-thermo-entropy-02",
+          "domain": "science",
+          "branch": "thermo-entropy",
+          "order": 2,
+          "title": "热力学第二定律与熵增",
+          "icon": "⏳",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "为什么打碎的杯子不会自己粘回去？时间为什么只朝一个方向流逝？",
+          "difficulty": "入门",
+          "related": [
+            "science/science-thermo-entropy-01",
+            "science/science-thermo-entropy-03"
+          ],
+          "toys": [
+            {
+              "id": "science/science-thermo-entropy-02/01-entropy-box-diffusion.html",
+              "file": "01-entropy-box-diffusion.html",
+              "path": "./domains/science/science-thermo-entropy-02/01-entropy-box-diffusion.html",
+              "title": "墨水扩散与时间箭头：为什么粒子只散开不聚拢？（SVG）",
+              "icon": "💧",
+              "archetype": "simulation",
+              "concept": "微观状态数 Ω · 熵增本质 · 统计不可逆",
+              "summary": "拔掉中间隔板，看集中在一侧的气体粒子如何迅速铺满全箱，并统计“全部自动回到左半边”的概率！"
+            },
+            {
+              "id": "science/science-thermo-entropy-02/02-microstate-combinations.html",
+              "file": "02-microstate-combinations.html",
+              "path": "./domains/science/science-thermo-entropy-02/02-microstate-combinations.html",
+              "title": "微观状态数透视镜：整齐只有 1 种，混乱有亿万种（SVG）",
+              "icon": "🎲",
+              "archetype": "spatial",
+              "concept": "玻尔兹曼公式 S=k·lnΩ · 概率压倒一切",
+              "summary": "调节房间里的粒子数 N，计算“全部缩在左半边”的组合概率，理解熵增其实只是概率碾压！"
+            },
+            {
+              "id": "science/science-thermo-entropy-02/03-life-negentropy-lab.html",
+              "file": "03-life-negentropy-lab.html",
+              "path": "./domains/science/science-thermo-entropy-02/03-life-negentropy-lab.html",
+              "title": "生命与冰箱的“逆熵”真相：局部变整齐要付出什么代价？",
+              "icon": "❄️",
+              "archetype": "scenario",
+              "concept": "开放系统 · 负熵流 · 局部减熵全球增熵",
+              "summary": "解析冰箱制冷、生命成长与房间收拾，明白局部秩序的建立必须向外界排出更多热量与废熵！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-chaos-emergence-03",
+          "slug": "science-chaos-emergence-03",
+          "domain": "science",
+          "branch": "chaos-emergence",
+          "order": 3,
+          "title": "鸟群 Boids 群体智能",
+          "icon": "🐦",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "成千上万只椋鸟在空中如丝绸般同步盘旋，却没有一只“领头鸟”。仅靠 3 条局部规则怎么做到？",
+          "difficulty": "入门",
+          "related": [
+            "science/science-chaos-emergence-02",
+            "science/science-chaos-emergence-04"
+          ],
+          "toys": [
+            {
+              "id": "science/science-chaos-emergence-03/01-boids-flocking-sim.html",
+              "file": "01-boids-flocking-sim.html",
+              "path": "./domains/science/science-chaos-emergence-03/01-boids-flocking-sim.html",
+              "title": "Boids 鸟群模拟器：分离、对齐、凝聚三大法则（SVG）",
+              "icon": "🕊️",
+              "archetype": "simulation",
+              "concept": "分离 Separation · 对齐 Alignment · 凝聚 Cohesion",
+              "summary": "实时开关分离、对齐、凝聚三大局部规则，亲眼看 25 只小鸟从一盘散沙瞬间列队同步盘旋！"
+            },
+            {
+              "id": "science/science-chaos-emergence-03/02-no-leader-swarm-race.html",
+              "file": "02-no-leader-swarm-race.html",
+              "path": "./domains/science/science-chaos-emergence-03/02-no-leader-swarm-race.html",
+              "title": "去中心化抗打击测试：干掉“领头鸟”鸟群会散吗？",
+              "icon": "🎯",
+              "archetype": "race",
+              "concept": "去中心化鲁棒性 · 局部感知 · 无单点故障",
+              "summary": "对比中心化领航编队与去中心化 Boids 群，测试首领消失后的恢复速度！"
+            },
+            {
+              "id": "science/science-chaos-emergence-03/03-swarm-robotics-lab.html",
+              "file": "03-swarm-robotics-lab.html",
+              "path": "./domains/science/science-chaos-emergence-03/03-swarm-robotics-lab.html",
+              "title": "群体智能应用台：无人机编队、蚁群算法与交通防撞",
+              "icon": "🤖",
+              "archetype": "scenario",
+              "concept": "蚁群信息素 · 无人机群集 · 自组织协同",
+              "summary": "为无人搜救蜂群、物流路由与自动驾驶车队匹配正确的局部协同规则！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-evolution-ecology-03",
+          "slug": "science-evolution-ecology-03",
+          "domain": "science",
+          "branch": "evolution-ecology",
+          "order": 3,
+          "title": "传染病 SIR 模型与 R0 阈值",
+          "icon": "🦠",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "为什么 R0=0.9 时疫情会悄无声息地熄灭，而 R0=1.2 时却会指数爆发席卷全城？",
+          "difficulty": "入门",
+          "related": [
+            "science/science-chaos-emergence-04",
+            "science/science-evolution-ecology-02"
+          ],
+          "toys": [
+            {
+              "id": "science/science-evolution-ecology-03/01-sir-epidemic-curves.html",
+              "file": "01-sir-epidemic-curves.html",
+              "path": "./domains/science/science-evolution-ecology-03/01-sir-epidemic-curves.html",
+              "title": "SIR 传染病曲线沙盘：压平曲线到底在压什么？（SVG）",
+              "icon": "📉",
+              "archetype": "simulation",
+              "concept": "易感者 S · 感染者 I · 康复者 R · 压平峰值",
+              "summary": "调节传染率 β，亲眼看见红线（同时感染峰值）如何撞穿医院床位线，以及戴口罩如何压平它！"
+            },
+            {
+              "id": "science/science-evolution-ecology-03/02-r0-herd-immunity.html",
+              "file": "02-r0-herd-immunity.html",
+              "path": "./domains/science/science-evolution-ecology-03/02-r0-herd-immunity.html",
+              "title": "群体免疫阈值计算器：R0 越大，需要打多少疫苗？（SVG）",
+              "icon": "💉",
+              "archetype": "spatial",
+              "concept": "基本传染数 R0 · 群体免疫阈值 1-1/R0",
+              "summary": "拖动不同病毒的 R0（流感 1.5 到麻疹 15），实时算出能彻底阻断传播的最低疫苗接种率！"
+            },
+            {
+              "id": "science/science-evolution-ecology-03/03-superspreader-scenario.html",
+              "file": "03-superspreader-scenario.html",
+              "path": "./domains/science/science-evolution-ecology-03/03-superspreader-scenario.html",
+              "title": "防疫策略博弈台：封控随机路人 vs 精准阻断超级传播场所",
+              "icon": "🏥",
+              "archetype": "scenario",
+              "concept": "有效传染数 Rt · 社交网络枢纽 · 精准防控",
+              "summary": "对比不同防控手段对有效传染数 Rt 的压制效率，理解为什么 1-1/R0 决定疫情生死！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-math-info-03",
+          "slug": "science-math-info-03",
+          "domain": "science",
+          "branch": "math-info",
+          "order": 3,
+          "title": "傅里叶变换（圆周画万物）",
+          "icon": "🌀",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "任何复杂的方波、声音甚至卡通轮廓，都能拆解成一堆匀速旋转的圆圈叠加！",
+          "difficulty": "进阶",
+          "related": [
+            "science/science-math-info-01",
+            "engineering/engineering-power-signals-03"
+          ],
+          "toys": [
+            {
+              "id": "science/science-math-info-03/01-epicycle-square-wave.html",
+              "file": "01-epicycle-square-wave.html",
+              "path": "./domains/science/science-math-info-03/01-epicycle-square-wave.html",
+              "title": "圆周画方波魔法：几个圆圈就能拼出直角方波？（SVG）",
+              "icon": "⭕",
+              "archetype": "simulation",
+              "concept": "傅里叶级数 · 奇次谐波叠加 · 吉布斯现象",
+              "summary": "调节叠加的谐波圆圈数量 N，亲眼看见几条柔和的正弦波如何叠加出锋利的方形脉冲！"
+            },
+            {
+              "id": "science/science-math-info-03/02-time-vs-freq-prism.html",
+              "file": "02-time-vs-freq-prism.html",
+              "path": "./domains/science/science-math-info-03/02-time-vs-freq-prism.html",
+              "title": "声音三棱镜：从混乱波形里一键提取隐藏音符（SVG）",
+              "icon": "🎵",
+              "archetype": "spatial",
+              "concept": "时域 vs 频域 · 频谱分析 · 音频降噪",
+              "summary": "点击混合多个频率的正弦波，看右侧频域柱状图如何精准揪出每一根隐藏的基频！"
+            },
+            {
+              "id": "science/science-math-info-03/03-jpeg-compression-lab.html",
+              "file": "03-jpeg-compression-lab.html",
+              "path": "./domains/science/science-math-info-03/03-jpeg-compression-lab.html",
+              "title": "高频舍弃压缩实验室：为什么丢掉 70% 频率人眼还看不出？",
+              "icon": "🖼️",
+              "archetype": "builder",
+              "concept": "高频细节 vs 低频轮廓 · 有损压缩 · JPEG/MP3 原理",
+              "summary": "拖动保留的频率分量比例，观察信号轮廓如何仅靠前 20% 的低频成分就已八九不离十！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-mechanics-waves-03",
+          "slug": "science-mechanics-waves-03",
+          "domain": "science",
+          "branch": "mechanics-waves",
+          "order": 3,
+          "title": "光纤全反射通信",
+          "icon": "💡",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "一根头发丝细的玻璃丝，怎么让激光绕着地球拐弯跑几千公里还不漏光？",
+          "difficulty": "入门",
+          "related": [
+            "science/science-mechanics-waves-02",
+            "engineering/engineering-power-signals-03"
+          ],
+          "toys": [
+            {
+              "id": "science/science-mechanics-waves-03/01-total-internal-reflection.html",
+              "file": "01-total-internal-reflection.html",
+              "path": "./domains/science/science-mechanics-waves-03/01-total-internal-reflection.html",
+              "title": "激光全反射临界角沙盘：折射率与入射角（SVG）",
+              "icon": "🔦",
+              "archetype": "simulation",
+              "concept": "全反射 · 临界角 · 纤芯/包层折射率差",
+              "summary": "调节激光射入光纤的角度，看光线何时突破临界角漏出玻璃，何时像水银一样在管内无限弹射前进！"
+            },
+            {
+              "id": "science/science-mechanics-waves-03/02-fiber-bend-loss-lab.html",
+              "file": "02-fiber-bend-loss-lab.html",
+              "path": "./domains/science/science-mechanics-waves-03/02-fiber-bend-loss-lab.html",
+              "title": "光纤折弯极限台：为什么网线能打死结，光纤一折就断网？",
+              "icon": "➰",
+              "archetype": "spatial",
+              "concept": "弯曲半径 · 破坏全反射条件 · 信号衰减",
+              "summary": "拖动光纤弯曲半径滑块，观察太急的弯道如何让激光角度小于临界角而漏光！"
+            },
+            {
+              "id": "science/science-mechanics-waves-03/03-wdm-rainbow-race.html",
+              "file": "03-wdm-rainbow-race.html",
+              "path": "./domains/science/science-mechanics-waves-03/03-wdm-rainbow-race.html",
+              "title": "波分复用（WDM）光速竞速：一根光纤同时跑 100 种颜色！",
+              "icon": "🌈",
+              "archetype": "race",
+              "concept": "波分复用 WDM · 互不干扰 · 超高带宽",
+              "summary": "对比单色光与多波长彩色激光在同根光纤里的并行传输，理解一根细丝为何能撑起全城宽带！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-probability-stats-03",
+          "slug": "science-probability-stats-03",
+          "domain": "science",
+          "branch": "probability-stats",
+          "order": 3,
+          "title": "生日悖论（23 人撞生日）",
+          "icon": "🎂",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "一年有 365 天，为什么只要一个 23 人的班级，就有超过 50% 的概率出现两人同一天生日？",
+          "difficulty": "入门",
+          "related": [
+            "science/science-probability-stats-01",
+            "software/software-network-crypto-04"
+          ],
+          "toys": [
+            {
+              "id": "science/science-probability-stats-03/01-birthday-pair-graph.html",
+              "file": "01-birthday-pair-graph.html",
+              "path": "./domains/science/science-probability-stats-03/01-birthday-pair-graph.html",
+              "title": "配对组合爆炸图：23 个人之间其实有 253 条比较线！（SVG）",
+              "icon": "🕸️",
+              "archetype": "spatial",
+              "concept": "组合配对 N(N-1)/2 · 补集计算 · 平方级增长",
+              "summary": "拖动人数滑块 N，亲眼看见人与人之间的两两配对连线如何呈平方级暴增，瞬间揭开生日悖论谜底！"
+            },
+            {
+              "id": "science/science-probability-stats-03/02-classroom-collision-sim.html",
+              "file": "02-classroom-collision-sim.html",
+              "path": "./domains/science/science-probability-stats-03/02-classroom-collision-sim.html",
+              "title": "随机班级生日墙：一键抽样验证 23 人撞车率（SVG）",
+              "icon": "📅",
+              "archetype": "simulation",
+              "concept": "抽样模拟 · 365 格日历碰撞 · 直观验证",
+              "summary": "在 365 天日历格子上随机投放 N 个同学的生日，高亮撞车日期并连续抽样 100 个班级统计真实碰撞率！"
+            },
+            {
+              "id": "science/science-probability-stats-03/03-hash-collision-lab.html",
+              "file": "03-hash-collision-lab.html",
+              "path": "./domains/science/science-probability-stats-03/03-hash-collision-lab.html",
+              "title": "密码学“生日攻击”对照台：为什么 64 位哈希不够安全？",
+              "icon": "🔐",
+              "archetype": "blind-lab",
+              "concept": "生日攻击 Birthday Attack · √N 碰撞阈值 · 哈希安全位数",
+              "summary": "对比“撞指定生日（1/365）”与“任意两人撞车（√365≈19）”，理解为什么密码学哈希长度必须翻倍！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-thermo-entropy-03",
+          "slug": "science-thermo-entropy-03",
+          "domain": "science",
+          "branch": "thermo-entropy",
+          "order": 3,
+          "title": "麦克斯韦妖与信息代价",
+          "icon": "😈",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "如果派一个小妖怪守在门边，只放快分子去右边、慢分子去左边，岂不是能凭空造出永动机？",
+          "difficulty": "进阶",
+          "related": [
+            "science/science-thermo-entropy-02",
+            "science/science-math-info-04"
+          ],
+          "toys": [
+            {
+              "id": "science/science-thermo-entropy-03/01-maxwell-demon-game.html",
+              "file": "01-maxwell-demon-game.html",
+              "path": "./domains/science/science-thermo-entropy-03/01-maxwell-demon-game.html",
+              "title": "亲自扮演麦克斯韦妖：开关小门分拣红蓝分子（SVG）",
+              "icon": "🚪",
+              "archetype": "scenario",
+              "concept": "麦克斯韦妖 · 信息获取 · 温度差生成",
+              "summary": "点击开关中间小门，只放红色快分子进右边、蓝色慢分子进左边，看看你如何记住它们的信息！"
+            },
+            {
+              "id": "science/science-thermo-entropy-03/02-landauer-erasure-cost.html",
+              "file": "02-landauer-erasure-cost.html",
+              "path": "./domains/science/science-thermo-entropy-03/02-landauer-erasure-cost.html",
+              "title": "兰道尔擦除代价计算器：删掉 1 比特记忆必须发热！（SVG）",
+              "icon": "🔥",
+              "archetype": "simulation",
+              "concept": "兰道尔原理 kT·ln2 · 信息即物理 · 内存擦除发热",
+              "summary": "调节小妖大脑的擦除比特数与环境温度，直观看到“抹除记忆”所释放的最小热量刚好挽救热力学第二定律！"
+            },
+            {
+              "id": "science/science-thermo-entropy-03/03-bit-heat-bridge.html",
+              "file": "03-bit-heat-bridge.html",
+              "path": "./domains/science/science-thermo-entropy-03/03-bit-heat-bridge.html",
+              "title": "信息熵与热力学熵桥梁：为什么电脑算得越快越烫？",
+              "icon": "💻",
+              "archetype": "spatial",
+              "concept": "不可逆逻辑门 · 信息擦除极限 · 芯片散热墙",
+              "summary": "对比 AND/OR 不可逆门（丢弃 1 比特信息必然发热）与理论可逆计算门的热功耗差异！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-chaos-emergence-04",
+          "slug": "science-chaos-emergence-04",
+          "domain": "science",
+          "branch": "chaos-emergence",
+          "order": 4,
+          "title": "相变与森林火灾临界点",
+          "icon": "🔥",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "为什么森林树木密度从 55% 涨到 62%，一场小火苗突然从“原地熄灭”变成“烧穿全岛”？",
+          "difficulty": "进阶",
+          "related": [
+            "science/science-chaos-emergence-03",
+            "science/science-evolution-ecology-03"
+          ],
+          "toys": [
+            {
+              "id": "science/science-chaos-emergence-04/01-percolation-fire-sim.html",
+              "file": "01-percolation-fire-sim.html",
+              "path": "./domains/science/science-chaos-emergence-04/01-percolation-fire-sim.html",
+              "title": "森林大火渗流临界点：59.3% 神奇阈值（SVG）",
+              "icon": "🌲",
+              "archetype": "simulation",
+              "concept": "渗流相变 Percolation · 临界密度 59.3% · 突变",
+              "summary": "调节森林树木密度并点火，亲眼看见跨过 59% 临界线后火势突然从“零星小火”相变为“烧穿全图”！"
+            },
+            {
+              "id": "science/science-chaos-emergence-04/02-phase-transition-curve.html",
+              "file": "02-phase-transition-curve.html",
+              "path": "./domains/science/science-chaos-emergence-04/02-phase-transition-curve.html",
+              "title": "相变 S 型突变曲线：水烧到 100℃ 为什么突然沸腾？（SVG）",
+              "icon": "🫧",
+              "archetype": "spatial",
+              "concept": "相变 · 临界阈值 · 量变引发质变",
+              "summary": "对比线性渐进与渗流相变 S 曲线，看系统在临界点附近如何对微小变化极度敏感！"
+            },
+            {
+              "id": "science/science-chaos-emergence-04/03-firebreak-strategy-lab.html",
+              "file": "03-firebreak-strategy-lab.html",
+              "path": "./domains/science/science-chaos-emergence-04/03-firebreak-strategy-lab.html",
+              "title": "防火隔离带策略台：怎么用砍 5% 的树保住 90% 的森林？",
+              "icon": "🪓",
+              "archetype": "scenario",
+              "concept": "阻断连通分量 · 人工降低局部密度 · 流行病隔离",
+              "summary": "在紧邻临界点的森林中选出最省树又能彻底切断火路连通性的防火带方案！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-evolution-ecology-04",
+          "slug": "science-evolution-ecology-04",
+          "domain": "science",
+          "branch": "evolution-ecology",
+          "order": 4,
+          "title": "生物尺度律（体型与寿命）",
+          "icon": "🐋",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "老鼠一分钟心跳 600 次只活 2 年，蓝鲸心跳 6 次活 90 年——为什么所有哺乳动物一生的总心跳次数都惊人地接近 10 亿次？",
+          "difficulty": "进阶",
+          "related": [
+            "science/science-evolution-ecology-02",
+            "engineering/engineering-systems-tradeoffs-04"
+          ],
+          "toys": [
+            {
+              "id": "science/science-evolution-ecology-04/01-kleiber-metabolic-law.html",
+              "file": "01-kleiber-metabolic-law.html",
+              "path": "./domains/science/science-evolution-ecology-04/01-kleiber-metabolic-law.html",
+              "title": "克莱伯 3/4 次幂定律：大象为什么不用吃 1 万只老鼠的饭？（SVG）",
+              "icon": "🐘",
+              "archetype": "simulation",
+              "concept": "克莱伯定律 M^0.75 · 分形血管网络 · 规模经济",
+              "summary": "拖动动物体重滑块，对比“线性预期油耗”与“真实 3/4 次幂代谢率”，发现大体型生物惊人的节能秘密！"
+            },
+            {
+              "id": "science/science-evolution-ecology-04/02-heartbeat-lifespan-svg.html",
+              "file": "02-heartbeat-lifespan-svg.html",
+              "path": "./domains/science/science-evolution-ecology-04/02-heartbeat-lifespan-svg.html",
+              "title": "10 亿次心跳时钟：小鼠、猫、人与蓝鲸的对数直线（SVG）",
+              "icon": "💓",
+              "archetype": "spatial",
+              "concept": "生物尺度律 · 心率 M^-0.25 · 寿命 M^0.25",
+              "summary": "点击切换 4 种代表性哺乳动物，计算它们的终身总心跳，亲眼见证 10 亿次生物钟的神秘守恒！"
+            },
+            {
+              "id": "science/science-evolution-ecology-04/03-city-scaling-comparison.html",
+              "file": "03-city-scaling-comparison.html",
+              "path": "./domains/science/science-evolution-ecology-04/03-city-scaling-comparison.html",
+              "title": "生物 vs 城市尺度律对照台：城市越大会变慢还是变快？",
+              "icon": "🏙️",
+              "archetype": "blind-lab",
+              "concept": "亚线性基础设施 (0.85) · 超线性创新交互 (1.15)",
+              "summary": "对比生物体“越大代谢越慢”与人类城市“越大节奏越快（1.15 次幂创新）”的惊人反转！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-math-info-04",
+          "slug": "science-math-info-04",
+          "domain": "science",
+          "branch": "math-info",
+          "order": 4,
+          "title": "香农信息熵与压缩极限",
+          "icon": "🗜️",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "信息到底怎么度量？为什么重复废话可以无限压缩，而真正的随机噪声连 1 比特也压不动？",
+          "difficulty": "进阶",
+          "related": [
+            "science/science-math-info-03",
+            "science/science-thermo-entropy-03"
+          ],
+          "toys": [
+            {
+              "id": "science/science-math-info-04/01-shannon-entropy-meter.html",
+              "file": "01-shannon-entropy-meter.html",
+              "path": "./domains/science/science-math-info-04/01-shannon-entropy-meter.html",
+              "title": "香农信息熵测量仪：越“意外”的消息信息量越大（SVG）",
+              "icon": "📏",
+              "archetype": "simulation",
+              "concept": "信息熵 H=-Σp·log₂p · 不确定性 · 硬币偏置",
+              "summary": "调节硬币正反面概率，实时计算香农熵，亲眼看见“绝对确定（p=1）”时信息量为 0！"
+            },
+            {
+              "id": "science/science-math-info-04/02-huffman-coding-builder.html",
+              "file": "02-huffman-coding-builder.html",
+              "path": "./domains/science/science-math-info-04/02-huffman-coding-builder.html",
+              "title": "霍夫曼压缩编码台：给高频字分配超短暗号（SVG）",
+              "icon": "🔠",
+              "archetype": "builder",
+              "concept": "可变长前缀编码 · 无损压缩极限 · 霍夫曼树",
+              "summary": "切换均匀文本与偏斜文本，对比固定等长编码与霍夫曼变长编码的总比特数差距！"
+            },
+            {
+              "id": "science/science-math-info-04/03-random-incompressible-race.html",
+              "file": "03-random-incompressible-race.html",
+              "path": "./domains/science/science-math-info-04/03-random-incompressible-race.html",
+              "title": "压缩算法碰壁赛：重复文本 vs 真随机噪声",
+              "icon": "🧱",
+              "archetype": "race",
+              "concept": "香农压缩极限 · 鸽巢原理 · 不可压缩随机串",
+              "summary": "同时压缩纯重复字符串与真随机噪声，见证 ZIP 算法为何在随机噪声面前彻底失效！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-mechanics-waves-04",
+          "slug": "science-mechanics-waves-04",
+          "domain": "science",
+          "branch": "mechanics-waves",
+          "order": 4,
+          "title": "多普勒效应（救护车变调）",
+          "icon": "🚑",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "为什么救护车向你冲过来时鸣笛声特别尖锐，擦肩而过的一瞬间突然变低沉？",
+          "difficulty": "入门",
+          "related": [
+            "science/science-mechanics-waves-02",
+            "science/science-mechanics-waves-01"
+          ],
+          "toys": [
+            {
+              "id": "science/science-mechanics-waves-04/01-doppler-wavefront-svg.html",
+              "file": "01-doppler-wavefront-svg.html",
+              "path": "./domains/science/science-mechanics-waves-04/01-doppler-wavefront-svg.html",
+              "title": "多普勒波前压缩动画：声源跑起来怎么挤扁声波？（SVG）",
+              "icon": "🔊",
+              "archetype": "simulation",
+              "concept": "波前压缩 · 波长变短音调变高 · 马赫锥",
+              "summary": "拖动救护车行驶速度（0 到 1.2 倍音速），亲眼看见车头前方波前被挤密、超越音速时形成音爆锥！"
+            },
+            {
+              "id": "science/science-mechanics-waves-04/02-redshift-cosmology-lab.html",
+              "file": "02-redshift-cosmology-lab.html",
+              "path": "./domains/science/science-mechanics-waves-04/02-redshift-cosmology-lab.html",
+              "title": "宇宙红移观测站：天文学家怎么知道星系正在远离我们？（SVG）",
+              "icon": "🌌",
+              "archetype": "spatial",
+              "concept": "光的多普勒效应 · 宇宙红移 · 哈勃膨胀",
+              "summary": "拖动星系退行速度，观察氢原子吸收光谱线如何整体向红端移动，揭开宇宙大爆炸证据！"
+            },
+            {
+              "id": "science/science-mechanics-waves-04/03-doppler-radar-scenario.html",
+              "file": "03-doppler-radar-scenario.html",
+              "path": "./domains/science/science-mechanics-waves-04/03-doppler-radar-scenario.html",
+              "title": "交警测速雷达与气象台抉择台：多普勒频移能干嘛？",
+              "icon": "📡",
+              "archetype": "scenario",
+              "concept": "多普勒雷达 · 回波频移测速 · 龙卷风预警",
+              "summary": "解决超速测速、台风风向判断与血液流速超声三大场景，理解多普勒效应的工程神通！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-probability-stats-04",
+          "slug": "science-probability-stats-04",
+          "domain": "science",
+          "branch": "probability-stats",
+          "order": 4,
+          "title": "幂律分布 vs 正态分布",
+          "icon": "🦢",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "为什么“平均身高”很有参考价值，但“平均财富”和“平均地震震级”却常常严重误导人？",
+          "difficulty": "进阶",
+          "related": [
+            "science/science-probability-stats-02",
+            "science/science-chaos-emergence-04"
+          ],
+          "toys": [
+            {
+              "id": "science/science-probability-stats-04/01-height-vs-wealth-svg.html",
+              "file": "01-height-vs-wealth-svg.html",
+              "path": "./domains/science/science-probability-stats-04/01-height-vs-wealth-svg.html",
+              "title": "瘦尾正态 vs 肥尾幂律：当首富走进教室会发生什么？（SVG）",
+              "icon": "📊",
+              "archetype": "spatial",
+              "concept": "正态分布（平均有意义） · 幂律肥尾（极端值主导） · 均值失真",
+              "summary": "向 50 人的样本里放入一个极端值（如巨人 vs 千亿富豪），实时观察正态均值与幂律均值的剧烈差异！"
+            },
+            {
+              "id": "science/science-probability-stats-04/02-rich-get-richer-sim.html",
+              "file": "02-rich-get-richer-sim.html",
+              "path": "./domains/science/science-probability-stats-04/02-rich-get-richer-sim.html",
+              "title": "马太效应沙盘：随机连线 vs 优先连接如何长出幂律？（SVG）",
+              "icon": "🕸️",
+              "archetype": "simulation",
+              "concept": "优先连接 Preferential Attachment · 幂律生成机制 · 赢家通吃",
+              "summary": "切换“完全随机分配”与“强者愈强（按现有关注度加权）”，在 SVG 柱状图上见证超级大V的诞生！"
+            },
+            {
+              "id": "science/science-probability-stats-04/03-tail-risk-scenario.html",
+              "file": "03-tail-risk-scenario.html",
+              "path": "./domains/science/science-probability-stats-04/03-tail-risk-scenario.html",
+              "title": "黑天鹅风险决策台：千万别用正态直觉管理肥尾世界！",
+              "icon": "🦢",
+              "archetype": "scenario",
+              "concept": "肥尾风险 Tail Risk · 均值陷阱 · 反脆弱策略",
+              "summary": "面对互联网 P99 延迟、VC 风险投资与极端洪灾防汛，选出适配幂律分布的正确决策！"
+            }
+          ]
+        },
+        {
+          "id": "science/science-thermo-entropy-04",
+          "slug": "science-thermo-entropy-04",
+          "domain": "science",
+          "branch": "thermo-entropy",
+          "order": 4,
+          "title": "卡诺热机效率上限",
+          "icon": "🚂",
+          "color": "#0891b2",
+          "soft": "#ecfeff",
+          "subtitle": "为什么汽车发动机烧掉的油，永远有一大半变成尾气废热浪费掉，连神仙都做不出 100% 效率的热机？",
+          "difficulty": "进阶",
+          "related": [
+            "science/science-thermo-entropy-01",
+            "science/science-thermo-entropy-02"
+          ],
+          "toys": [
+            {
+              "id": "science/science-thermo-entropy-04/01-carnot-efficiency-sim.html",
+              "file": "01-carnot-efficiency-sim.html",
+              "path": "./domains/science/science-thermo-entropy-04/01-carnot-efficiency-sim.html",
+              "title": "卡诺热机效率沙盘：效率只取决于高低温差！（SVG）",
+              "icon": "🔥",
+              "archetype": "simulation",
+              "concept": "卡诺效率 1-Tc/Th · 冷源不可或缺 · 废热排泄",
+              "summary": "调节高温热源与低温冷源的温度，亲眼看见为什么必须往外排废热才能把热能转成机械功！"
+            },
+            {
+              "id": "science/science-thermo-entropy-04/02-sankey-energy-flow.html",
+              "file": "02-sankey-energy-flow.html",
+              "path": "./domains/science/science-thermo-entropy-04/02-sankey-energy-flow.html",
+              "title": "汽车发动机能量流向图：100 份汽油到底去了哪？（SVG）",
+              "icon": "🚗",
+              "archetype": "spatial",
+              "concept": "热机做功占比 · 排气管与水箱散热 · 电动车对比",
+              "summary": "对比传统内燃机与纯电动机的能量去向，瞬间看懂为什么电动车能效远超烧油！"
+            },
+            {
+              "id": "science/science-thermo-entropy-04/03-perpetual-motion-judge.html",
+              "file": "03-perpetual-motion-judge.html",
+              "path": "./domains/science/science-thermo-entropy-04/03-perpetual-motion-judge.html",
+              "title": "永动机专利审判庭：一眼识破第一类与第二类骗局",
+              "icon": "⚖️",
+              "archetype": "scenario",
+              "concept": "能量守恒 · 单一热源取热做功不可能 · 永动机破产",
+              "summary": "审理“海水降温发电船”与“重锤重力轮”两大经典永动机方案，找出它们违反的物理铁律！"
             }
           ]
         }
-      ],
-      "liveTopicCount": 0,
-      "plannedTopicCount": 24,
-      "blueprintTopicCount": 24,
-      "liveToyCount": 0,
-      "topics": []
+      ]
     },
     {
       "id": "software",

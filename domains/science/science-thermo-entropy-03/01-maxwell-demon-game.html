@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：亲自扮演麦克斯韦妖</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚪 亲自扮演麦克斯韦妖：点击开门分拣红快/蓝慢分子</h1><p>误区：小妖怪开门不费劲，能免费制造温差发电。真相：小妖大脑必须记录每个分子的快慢信息，迟早塞满内存！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <button class="btn primary" onclick="sortStep()">⚡ 让小妖分拣 1 次分子（记录 1 bit 信息）</button>
+      <span style="font-weight:800;margin-left:8px;">大脑已占用内存：<span id="memOut" style="color:#ef4444;">0</span> bits</span>
+      <svg id="svg" viewBox="0 0 500 170" style="width:100%;height:auto;margin-top:12px;border:2px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>点击分拣几次，看看你把右边变热的同时，大脑内存被塞进了多少比特记录！</div>
+    
+  </div>
+  <script>
+    let mem=0;
+    function sortStep(){
+      mem++;
+      document.getElementById("memOut").textContent=mem;
+      const hot=Math.min(12, 3+mem), cold=Math.min(12, 3+mem);
+      let html=`<line x1="250" y1="0" x2="250" y2="170" stroke="var(--tax-border)" stroke-width="4"/><text x="250" y="90" text-anchor="middle" font-size="22">😈</text>`;
+      for(let i=0;i<cold;i++) html+=`<circle cx="${35+(i%4)*48}" cy="${35+Math.floor(i/4)*45}" r="7" fill="#3b82f6"/>`;
+      for(let i=0;i<hot;i++) html+=`<circle cx="${290+(i%4)*48}" cy="${35+Math.floor(i/4)*45}" r="7" fill="#ef4444"/>`;
+      document.getElementById("svg").innerHTML=html;
+      if(mem>=4){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>你成功把冷热分子分开了，但代价是小妖大脑塞满了 <strong>${mem} bits</strong> 的记录！当内存满到必须清空重启时，擦除信息释放的热量刚好抵消你的全部收益！`;
+        if(window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    sortStep();
+    </script>
+</body>
+</html>

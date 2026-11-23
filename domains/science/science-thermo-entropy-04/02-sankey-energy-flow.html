@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：发动机能量流向图</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚗 发动机能量流向图：烧油 vs 用电的能量账本</h1><p>误区：电车只是把污染转移到发电厂，总效率差不多。真相：电厂大型联合循环热效率高达 60%，而汽车小内燃机大量热量直接从排气管白白喷掉！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="v0" onclick="pick(0)">⛽ 传统燃油车（热机受卡诺限制）</button>
+        <button class="btn" id="v1" onclick="pick(1)">⚡ 纯电动车（电磁直接做功）</button>
+      </div>
+      <svg id="svg" viewBox="0 0 540 160" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>切换燃油车与电动车，看 100 份输入能量最后分别有多少真正推动了车轮！</div>
+    
+  </div>
+  <script>
+    const seen=new Set([0]);
+    function pick(m){
+      seen.add(m);
+      [0,1].forEach(i=>document.getElementById("v"+i).classList.toggle("active",i===m));
+      document.getElementById("svg").innerHTML=m===0
+        ? `<rect x="40" y="40" width="120" height="32" rx="6" fill="#10b981"/><text x="100" y="61" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">推动车轮 28%</text><rect x="170" y="40" width="320" height="32" rx="6" fill="#ef4444"/><text x="330" y="61" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">尾气与水箱废热浪费 72%</text>`
+        : `<rect x="40" y="40" width="390" height="32" rx="6" fill="#10b981"/><text x="235" y="61" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">推动车轮 85%（电磁转换不受卡诺限制！）</text><rect x="440" y="40" width="60" height="32" rx="6" fill="#f59e0b"/><text x="470" y="61" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">15%</text>`;
+      if(seen.size>=2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0);
+    </script>
+</body>
+</html>

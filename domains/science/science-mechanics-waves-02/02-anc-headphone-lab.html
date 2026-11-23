@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：主动降噪实战台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>✈️ 主动降噪（ANC）实战台：为什么它怕突然的尖叫？</h1><p>误区：主动降噪耳机能把所有声音都消掉。真相：反相声波的生成与传播有时间延迟，对规律低频最稳，对突发高频全靠耳罩海绵物理隔音！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="n0" onclick="pick(0)">✈️ 飞机引擎轰鸣 (100Hz 稳态低频)</button>
+        <button class="btn" id="n1" onclick="pick(1)">👏 突然清脆拍手 (3000Hz 瞬态高频)</button>
+      </div>
+      <svg id="svg" viewBox="0 0 540 160" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>切换两种噪声，看为什么物理海绵耳罩和主动芯片必须协同作战！</div>
+    
+  </div>
+  <script>
+    const seen=new Set([0]);
+    function pick(m){
+      seen.add(m);
+      [0,1].forEach(i=>document.getElementById("n"+i).classList.toggle("active",i===m));
+      document.getElementById("svg").innerHTML=m===0
+        ? `<rect x="40" y="55" width="460" height="40" rx="8" fill="#10b981" fill-opacity="0.2" stroke="#10b981"/><text x="270" y="80" text-anchor="middle" font-size="14" font-weight="800" fill="#10b981">✅ 波长长达 3.4 米，规律可预测 → ANC 反相抵消 -30dB！</text>`
+        : `<rect x="40" y="55" width="460" height="40" rx="8" fill="#ef4444" fill-opacity="0.2" stroke="#ef4444"/><text x="270" y="80" text-anchor="middle" font-size="14" font-weight="800" fill="#ef4444">⚠️ 波长仅 11 厘米且突如其来 → 芯片来不及算，全靠耳罩海绵挡！</text>`;
+      if(seen.size>=2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0);
+    </script>
+</body>
+</html>

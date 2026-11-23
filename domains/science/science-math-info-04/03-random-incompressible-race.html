@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：压缩算法碰壁赛</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+    .card { padding: 14px; border: 1px solid var(--tax-border); border-radius: 12px; background: var(--tax-surface-alt); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧱 压缩算法碰壁赛：为什么随机噪声连 1 个字节也压不动？</h1><p>误区：只要压缩算法够强，任何文件都能越压越小。真相：如果所有文件都能无损变小，根据鸽巢原理必然有不同文件撞成同一份压缩包！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <button class="btn primary" onclick="run()">🗜️ 同步压缩 1000 字节样本</button>
+      <svg id="svg" viewBox="0 0 560 170" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>点击运行压缩对比，看高度重复的日志与纯随机加密串的体积变化！</div>
+    
+  </div>
+  <script>
+    
+    function run(){
+      document.getElementById("svg").innerHTML=`
+        <text x="30" y="48" font-size="14" font-weight="800" fill="currentColor">重复规律文本 (AAAA...)</text>
+        <rect x="230" y="30" width="260" height="24" rx="5" fill="var(--tax-border)" opacity="0.4"/>
+        <rect x="230" y="30" width="22" height="24" rx="5" fill="#10b981"/>
+        <text x="260" y="47" font-size="13" font-weight="800" fill="#10b981">1000B → 42B (省 95.8%)</text>
+
+        <text x="30" y="118" font-size="14" font-weight="800" fill="currentColor">真随机 / 已加密噪声</text>
+        <rect x="230" y="100" width="268" height="24" rx="5" fill="#ef4444"/>
+        <text x="236" y="117" font-size="13" font-weight="800" fill="#fff">1000B → 1018B (反而变大！)</text>
+      `;
+      document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>真随机串的香农熵已达最大值，没有任何冗余规律可挖；加上压缩头元数据后，体积反而会略微膨胀！`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    run();
+    
+  </script>
+</body>
+</html>

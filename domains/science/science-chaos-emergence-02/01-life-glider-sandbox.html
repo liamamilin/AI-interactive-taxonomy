@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：生命游戏演化沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🛸 生命游戏演化沙盘：4 条规则如何“涌现”出会飞的生命？</h1><p>误区：复杂的集体行为一定需要中央指挥官。真相：每个格子只数自己周围 8 个邻居的死活，却能涌现出跨屏飞行的“滑翔机”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn primary" onclick="spawnGlider()">🛸 注入滑翔机（Glider）</button>
+        <button class="btn" onclick="randGrid()">🎲 随机汤（Random）</button>
+        <span style="font-weight:800;margin-left:8px;">代数：<span id="genOut">0</span></span>
+      </div>
+      <svg id="svg" viewBox="0 0 360 220" style="width:100%;max-width:460px;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);display:block;"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>盯住那只自己斜着往前爬的“滑翔机”——没有任何代码教它往右下飞，飞行只是 B3/S23 局部规则的副产品！</div>
+    
+  </div>
+  <script>
+    const W=24, H=14;
+    let g=Array.from({length:H},()=>Array(W).fill(0)), gen=0;
+    function spawnGlider(){
+      g=Array.from({length:H},()=>Array(W).fill(0)); gen=0;
+      [[1,2],[2,3],[3,1],[3,2],[3,3]].forEach(([r,c])=>g[r][c]=1);
+    }
+    function randGrid(){
+      g=Array.from({length:H},()=>Array.from({length:W},()=>Math.random()<0.3?1:0)); gen=0;
+    }
+    function step(){
+      const ng=Array.from({length:H},()=>Array(W).fill(0));
+      for(let r=0;r<H;r++)for(let c=0;c<W;c++){
+        let nb=0;
+        for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+          if(dr===0&&dc===0)continue;
+          nb+=g[(r+dr+H)%H][(c+dc+W)%W];
+        }
+        ng[r][c]=g[r][c]?(nb===2||nb===3?1:0):(nb===3?1:0);
+      }
+      g=ng; gen++;
+      document.getElementById("genOut").textContent=gen;
+      let html="";
+      for(let r=0;r<H;r++)for(let c=0;c<W;c++){
+        if(g[r][c]) html+=`<rect x="${c*15+1}" y="${r*15+4}" width="13" height="13" rx="3" fill="var(--tax-primary)"/>`;
+      }
+      document.getElementById("svg").innerHTML=html;
+      if(gen===20 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    spawnGlider();
+    setInterval(step, 180);
+    </script>
+</body>
+</html>

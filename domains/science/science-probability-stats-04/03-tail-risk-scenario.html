@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：黑天鹅风险决策台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .tbtn { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; cursor: pointer; font-weight: 700; }
+    .tbtn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .opts { display: grid; gap: 10px; margin-top: 14px; }
+    .obtn { text-align: left; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; cursor: pointer; font-size: 14px; }
+    .obtn.ok { border-color: #10b981; background: rgba(16,185,129,0.1); }
+    .obtn.bad { border-color: #ef4444; background: rgba(239,68,68,0.1); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🦢 黑天鹅风险决策台：千万别用正态直觉管理肥尾世界！</h1>
+        <p>误区：只要把平均值算准、控制住 95% 的日常情况就高枕无忧。真相：在幂律世界里，决定生死的全是那 1% 的极端长尾！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs" id="tabs"></div>
+      <div id="body"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>通关全部 3 个肥尾场景，学会在“极端值主导的世界”里做正确决策！
+    </div>
+  </div>
+
+  <script>
+    const cases = [
+      {
+        title: "场景 1：服务端接口延迟监控",
+        desc: "接口平均响应时间只有 25ms，但用户却天天投诉卡顿甚至超时。问题出在哪？",
+        opts: [
+          { text: "A. 平均 25ms 已经很快了，用户肯定是心理作用", ok: false, msg: "❌ 均值陷阱！网络请求延迟呈典型长尾分布，95% 很快，但那 1% 的 P99 慢请求可能卡死 5 秒，直接拖垮页面！" },
+          { text: "B. 改用 P95 / P99 分位数监控长尾请求，排查慢 SQL 与 GC 停顿", ok: true, msg: "✅ SRE 黄金准则！在长尾分布里，分位数（P99）比平均值诚实一百倍。" }
+        ]
+      },
+      {
+        title: "场景 2：早期科技风险投资（VC）",
+        desc: "10 个早期项目里有 8 个可能亏光，但只要命中 1 个百倍独角兽就能赚回整个基金。",
+        opts: [
+          { text: "A. 重仓押注 1 家看起来“最稳”的普通公司，追求平均稳健收益", ok: false, msg: "❌ 错把幂律当正态！早期创新回报服从极度幂律，错失头部赢家就等于平庸亏损。" },
+          { text: "B. 广泛小额试错分散覆盖，一旦跑出头部赢家立即加注追投（拥抱肥尾上行）", ok: true, msg: "✅ 幂律投资铁律！当收益没有上限而亏损最多 1 倍时，核心是不断买便宜的“正黑天鹅期权”。" }
+        ]
+      },
+      {
+        title: "场景 3：百年一遇洪水防汛堤坝",
+        desc: "过去 30 年平均每年最高水位只有 4 米，是否可以按 4.5 米修筑堤坝？",
+        opts: [
+          { text: "A. 可以，4.5 米已经高出 30 年均值，足够安全", ok: false, msg: "❌ 致命错误！自然灾害强度服从肥尾分布，一次“百年一遇”的极端洪峰可能直接冲到 8 米，摧毁整座城市。" },
+          { text: "B. 放弃“平均水位”思维，必须按极值分布（GEV）与历史最大洪峰加上冗余高度筑堤", ok: true, msg: "✅ 工程防灾底线！面对下行肥尾风险，必须敬畏极端值而非平均值。" }
+        ]
+      }
+    ];
+    let cur = 0; const solved = new Set();
+    function render() {
+      document.getElementById("tabs").innerHTML = cases.map((c,i)=>`<button class="tbtn ${i===cur?'active':''}" onclick="cur=${i};render()">${solved.has(i)?'✅ ':''}${c.title}</button>`).join("");
+      const c = cases[cur];
+      document.getElementById("body").innerHTML = `<h3 style="margin:0 0 8px;">${c.title}</h3><p style="color:var(--tax-muted);margin:0;">${c.desc}</p><div class="opts">${c.opts.map((o,idx)=>`<button class="obtn" onclick="pick(${idx},this)">${o.text}</button>`).join("")}</div><div id="fb" style="margin-top:12px;font-weight:700;font-size:14px;"></div>`;
+    }
+    function pick(idx, btn) {
+      const o = cases[cur].opts[idx];
+      document.querySelectorAll(".obtn").forEach(b=>b.classList.remove("ok","bad"));
+      btn.classList.add(o.ok?"ok":"bad");
+      document.getElementById("fb").textContent = o.msg;
+      if (o.ok) {
+        solved.add(cur);
+        if (solved.size === cases.length) {
+          document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>全部通关！先分清自己身处<strong>正态世界</strong>（身高、体温）还是<strong>幂律世界</strong>（财富、延迟、灾害），再用对应的工具做决策，才不会被“平均值”欺骗。`;
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+        document.getElementById("tabs").innerHTML = cases.map((c,i)=>`<button class="tbtn ${i===cur?'active':''}" onclick="cur=${i};render()">${solved.has(i)?'✅ ':''}${c.title}</button>`).join("");
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

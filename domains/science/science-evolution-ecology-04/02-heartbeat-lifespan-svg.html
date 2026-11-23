@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：10 亿次心跳时钟</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💓 10 亿次心跳时钟：为什么小鼠匆匆 2 年，大象从容 70 年？</h1><p>误区：动物寿命毫无规律可循。真相：心率按体重 -1/4 次幂变慢，寿命按 +1/4 次幂变长，两者一乘，绝大多数哺乳动物一生总心跳都在 10 亿次上下！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="a0" onclick="pick(0)">🐭 小鼠 (600次/分 · 2年)</button>
+        <button class="btn" id="a1" onclick="pick(1)">🐱 家猫 (150次/分 · 15年)</button>
+        <button class="btn" id="a2" onclick="pick(2)">🐘 大象 (30次/分 · 70年)</button>
+        <button class="btn" id="a3" onclick="pick(3)">🐋 蓝鲸 (8次/分 · 90年)</button>
+      </div>
+      <svg id="svg" viewBox="0 0 540 140" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>点遍这 4 种体型相差百万倍的动物，看它们的终身总心跳是不是全都落在同一个数量级！</div>
+    
+  </div>
+  <script>
+    const seen=new Set([0]);
+    const list=[
+      {name:"小鼠",bpm:600,yrs:2},{name:"家猫",bpm:150,yrs:15},{name:"大象",bpm:30,yrs:70},{name:"蓝鲸",bpm:8,yrs:90}
+    ];
+    function pick(i){
+      seen.add(i); [0,1,2,3].forEach(k=>document.getElementById("a"+k).classList.toggle("active",k===i));
+      const a=list[i];
+      const tot=(a.bpm*60*24*365*a.yrs/1e8).toFixed(1);
+      document.getElementById("svg").innerHTML=`
+        <text x="270" y="55" text-anchor="middle" font-size="18" font-weight="900" fill="var(--tax-primary)">${a.name}一生总心跳 ≈ ${tot} 亿次</text>
+        <text x="270" y="95" text-anchor="middle" font-size="13" fill="var(--tax-muted)">每分钟 ${a.bpm} 次 × 寿命 ${a.yrs} 年（均落在 ~4 到 12 亿次同一数量级！）</text>
+      `;
+      if(seen.size>=3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0);
+    </script>
+</body>
+</html>

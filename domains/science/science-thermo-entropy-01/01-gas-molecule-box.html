@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：分子碰撞箱</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚛️ 分子碰撞箱：温度的本质就是分子的疯狂程度</h1><p>误区：温度是某种看不见的“热质”液体。真相：温度只是微观粒子平均平动动能的宏观读数，绝对零度就是粒子彻底停摆！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🌡️ 设定温度：<span id="tOut">300</span> K · 器壁压强：<span id="pOut" style="color:var(--tax-primary);">1.0×</span>
+        <input id="tS" type="range" min="50" max="900" value="300" style="width:100%;margin-top:8px;" oninput="upd()" />
+      </label>
+      <svg id="svg" viewBox="0 0 500 200" style="width:100%;height:auto;margin-top:12px;border:2px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>把温度拉高到 800K 或降到 50K，看分子撞墙频率如何直接决定气压！</div>
+    
+  </div>
+  <script>
+    let T=300, moves=0;
+    const balls=Array.from({length:18},()=>({x:40+Math.random()*420,y:30+Math.random()*140,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2}));
+    function upd(){
+      T=+document.getElementById("tS").value;
+      document.getElementById("tOut").textContent=T;
+      document.getElementById("pOut").textContent=(T/300).toFixed(2)+"×";
+      moves++; if(moves>=3 && window.ToySDK){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>升温到 ${T}K 后，分子平均动能成正比放大，撞击容器内壁更猛更频繁——这就是高压锅加热后气压飙升的微观真相！`;
+        window.ToySDK.markCompleted();
+      }
+    }
+    function tick(){
+      const sp=Math.sqrt(T/150)*1.8;
+      let html="";
+      balls.forEach(b=>{
+        b.x+=b.vx*sp; b.y+=b.vy*sp;
+        if(b.x<12||b.x>488) b.vx*=-1;
+        if(b.y<12||b.y>188) b.vy*=-1;
+        b.x=Math.max(12,Math.min(488,b.x)); b.y=Math.max(12,Math.min(188,b.y));
+        html+=`<circle cx="${b.x.toFixed(1)}" cy="${b.y.toFixed(1)}" r="6" fill="${T>500?'#ef4444':T<150?'#38bdf8':'var(--tax-primary)'}"/>`;
+      });
+      document.getElementById("svg").innerHTML=html;
+      requestAnimationFrame(tick);
+    }
+    upd(); requestAnimationFrame(tick);
+    </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：随机班级生日墙</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 16px; border-radius: 10px; border: none; background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-right: 8px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📅 随机班级生日墙：抽样 100 个 23 人班看看撞车几回！</h1>
+        <p>把 365 天铺成日历格子，随机撒入 23 个同学。红格代表至少有 2 个同学同一天生日！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn" onclick="sampleOne()">🎂 随机生成 1 个 23 人班级</button>
+        <button class="btn" style="background:#10b981;" onclick="sample100()">⚡ 连续抽样 100 个班级</button>
+        <span style="font-weight:800;font-size:14px;margin-left:8px;">撞车班级：<span id="statOut">0 / 0</span></span>
+      </div>
+      <svg id="calSvg" viewBox="0 0 560 220" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>点击抽样，看看 23 个人撒进 365 个格子里到底有多容易撞车！
+    </div>
+  </div>
+
+  <script>
+    let hits = 0, total = 0;
+    function genClass() {
+      const counts = new Array(365).fill(0);
+      for (let i = 0; i < 23; i++) counts[Math.floor(Math.random() * 365)]++;
+      return counts;
+    }
+    function drawCal(counts) {
+      const cols = 25, rows = 15, cw = 520 / cols, ch = 195 / rows;
+      let html = "";
+      for (let d = 0; d < 365; d++) {
+        const c = d % cols, r = Math.floor(d / cols);
+        const cnt = counts[d];
+        const fill = cnt >= 2 ? "#ef4444" : cnt === 1 ? "var(--tax-primary)" : "var(--tax-border)";
+        const op = cnt === 0 ? 0.28 : 1;
+        html += `<rect x="${20+c*cw+1}" y="${12+r*ch+1}" width="${cw-2}" height="${ch-2}" rx="2" fill="${fill}" opacity="${op}"/>`;
+      }
+      document.getElementById("calSvg").innerHTML = html;
+    }
+    function sampleOne() {
+      const c = genClass();
+      const hit = c.some(x => x >= 2);
+      total++; if (hit) hits++;
+      document.getElementById("statOut").textContent = `${hits} / ${total} (${Math.round(hits/total*100)}%)`;
+      drawCal(c);
+    }
+    function sample100() {
+      let last = null;
+      for (let k = 0; k < 100; k++) {
+        last = genClass();
+        total++; if (last.some(x => x >= 2)) hits++;
+      }
+      document.getElementById("statOut").textContent = `${hits} / ${total} (${(hits/total*100).toFixed(1)}%)`;
+      drawCal(last);
+      document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>累计抽样 ${total} 个 23 人班级，实际出现生日撞车的比例为 <strong>${(hits/total*100).toFixed(1)}%</strong>（理论值 50.7%）——红格子几乎每隔一次抽样就会闪现！`;
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    }
+    sampleOne();
+  </script>
+</body>
+</html>

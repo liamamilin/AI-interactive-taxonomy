@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：克莱伯代谢定律沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🐘 克莱伯 3/4 次幂定律：大体型生物的“规模节能红利”</h1><p>误区：体重翻 100 倍，每天需要的食物热量也翻 100 倍。真相：生物体靠分形血管送营养，代谢功耗只按体重的 0.75 次幂增长！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">⚖️ 动物体重倍数（相对小鼠）：<span id="mOut">100</span> 倍
+        <input id="mS" type="range" min="1" max="10000" step="50" value="100" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 540 160" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>拖动体重到 10000 倍，对比“按体重线性翻倍”与“真实 3/4 次幂耗能”的巨大节能红利！</div>
+    
+  </div>
+  <script>
+    let m=0;
+    function render(){
+      const M=+document.getElementById("mS").value;
+      document.getElementById("mOut").textContent=M;
+      const real=Math.round(Math.pow(M,0.75));
+      const wReal=Math.min(280, (real/M)*280);
+      document.getElementById("svg").innerHTML=`
+        <text x="30" y="48" font-size="13" font-weight="800" fill="currentColor">线性预期耗能 (${M}×)</text>
+        <rect x="210" y="30" width="280" height="24" rx="5" fill="#ef4444" opacity="0.35"/>
+        <text x="30" y="108" font-size="13" font-weight="800" fill="currentColor">真实克莱伯耗能 (${real}×)</text>
+        <rect x="210" y="90" width="${Math.max(12,wReal).toFixed(1)}" height="24" rx="5" fill="#10b981"/>
+        <text x="270" y="145" text-anchor="middle" font-size="13" font-weight="800" fill="#10b981">单位体重节能比例：节省 ${Math.round((1-real/M)*100)}%！</text>
+      `;
+      m++; if(m>=3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+    </script>
+</body>
+</html>

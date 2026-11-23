@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：密码学“生日攻击”对照台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ab { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    @media (max-width: 720px) { .ab { grid-template-columns: 1fr; } }
+    .card { padding: 16px; border: 1.5px solid var(--tax-border); border-radius: 14px; background: var(--tax-surface-alt); }
+    .num { font-size: 24px; font-weight: 900; font-family: monospace; margin: 8px 0; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔐 密码学“生日攻击”对照台：为何哈希位数必须翻倍？</h1>
+        <p>误区：64 位哈希有 2⁶⁴ 种可能，黑客要试 2⁶⁴ 次才能制造碰撞。真相：只要找到“任意两个撞车”，尝试次数只需开平方（2³² 次）！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🔑 哈希摘要长度（Bits）：<span id="bOut">32</span> 位
+        <input id="bS" type="range" min="16" max="128" step="16" value="32" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <div class="ab">
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:700;">🎯 A：攻破指定目标（原像攻击）</div>
+          <div class="num" id="aOut" style="color:#10b981;">2³² 次</div>
+          <div style="font-size:13px;color:var(--tax-muted);">相当于找一个“和指定某人同一天生日”的人，需要遍历全空间。</div>
+        </div>
+        <div class="card" style="border-color:#ef4444;">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:700;">💥 B：制造任意碰撞（生日攻击）</div>
+          <div class="num" id="bVal" style="color:#ef4444;">2¹⁶ 次</div>
+          <div style="font-size:13px;color:var(--tax-muted);">相当于找“任意两个撞生日的人”，安全强度直接砍半（√N）！</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>拖动位数滑块到 64 位和 128 位，理解为什么 SHA-256 要用长达 256 位来抵御 128 位级别的生日碰撞攻击！
+    </div>
+  </div>
+
+  <script>
+    let moves = 0;
+    function render() {
+      const b = +document.getElementById("bS").value;
+      document.getElementById("bOut").textContent = b;
+      document.getElementById("aOut").textContent = `2^${b} 次`;
+      document.getElementById("bVal").textContent = `2^${b/2} 次`;
+      moves++;
+      if (b >= 64 && moves > 1) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>${b} 位哈希面对生日攻击时，有效抗碰撞强度只有 <strong>${b/2} 位（2^${b/2} 次）</strong>！在现代算力下，2³² 只需几秒就能算完——这就是为什么 64 位校验和绝对不能用于防篡改签名。`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

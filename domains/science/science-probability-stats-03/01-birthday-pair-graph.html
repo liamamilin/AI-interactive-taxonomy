@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：配对组合爆炸图</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; align-items: center; }
+    @media (max-width: 740px) { .grid { grid-template-columns: 1fr; } }
+    .scard { padding: 12px; border: 1px solid var(--tax-border); border-radius: 12px; margin-bottom: 10px; }
+    .snum { font-size: 24px; font-weight: 900; font-family: monospace; color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🕸️ 配对组合爆炸图：为什么 23 人就有 50.7% 撞生日？</h1>
+        <p>误区：以为是在问“谁和<strong>我</strong>同一天生日”（那确实只需要 253 人）。真相：题目问的是“<strong>任意两人</strong>同一天生日”，比较次数是 N×(N-1)÷2！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">👥 班级人数 N：<span id="nOut">23</span> 人
+        <input id="nS" type="range" min="2" max="50" value="23" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <div class="grid" style="margin-top:14px;">
+        <svg id="netSvg" viewBox="0 0 320 260" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+        <div>
+          <div class="scard"><div style="font-size:12px;color:var(--tax-muted);">两两配对比较总数 N(N-1)/2</div><div class="snum" id="pairOut">253 对</div></div>
+          <div class="scard"><div style="font-size:12px;color:var(--tax-muted);">至少两人撞生日概率</div><div class="snum" id="probOut" style="color:#10b981;">50.7%</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>拖动人数到 23、30、50，看连线数是如何呈平方级爆炸的！
+    </div>
+  </div>
+
+  <script>
+    let moves = 0;
+    function render() {
+      const N = +document.getElementById("nS").value;
+      document.getElementById("nOut").textContent = N;
+      const pairs = (N * (N - 1)) / 2;
+      let pNo = 1;
+      for (let i = 0; i < N; i++) pNo *= (365 - i) / 365;
+      const pHit = (1 - pNo) * 100;
+
+      document.getElementById("pairOut").textContent = pairs + " 对";
+      document.getElementById("probOut").textContent = pHit.toFixed(1) + "%";
+
+      const cx = 160, cy = 130, R = 100;
+      const pts = Array.from({length: N}, (_, i) => {
+        const a = (i / N) * Math.PI * 2 - Math.PI / 2;
+        return [cx + R * Math.cos(a), cy + R * Math.sin(a)];
+      });
+      let html = "";
+      for (let i = 0; i < N; i++) {
+        for (let j = i + 1; j < N; j++) {
+          html += `<line x1="${pts[i][0].toFixed(1)}" y1="${pts[i][1].toFixed(1)}" x2="${pts[j][0].toFixed(1)}" y2="${pts[j][1].toFixed(1)}" stroke="var(--tax-primary)" stroke-width="0.7" opacity="0.22"/>`;
+        }
+      }
+      pts.forEach(p => html += `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="var(--tax-primary)"/>`);
+      document.getElementById("netSvg").innerHTML = html;
+
+      moves++;
+      if (moves > 1) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>${N} 个人之间有足足 <strong>${pairs} 对</strong>潜在碰撞组合！每多 1 个人不是多 1 次机会，而是多了与前面所有人的 N-1 次配对机会。`;
+        if (moves >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

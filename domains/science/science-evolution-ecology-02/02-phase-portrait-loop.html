@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：生态相空间闭环图</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⭕ 生态相空间闭环图：把时间藏起来，看生态在画圈</h1><p>误区：周期震荡很难一眼看出规律。真相：把横轴设为兔子数、纵轴设为狐狸数，整个生态系统的命运就是绕着平衡点不停画圈！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🔄 初始偏离幅度：<span id="rOut">40%</span>
+        <input id="rS" type="range" min="15" max="80" value="40" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 420 200" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>偏离平衡点越大，这个生态循环圈就画得越夸张（大起大落）！</div>
+    
+  </div>
+  <script>
+    let m=0;
+    function render(){
+      const r=+document.getElementById("rS").value;
+      document.getElementById("rOut").textContent=r+"%";
+      document.getElementById("svg").innerHTML=`
+        <circle cx="210" cy="100" r="5" fill="var(--tax-primary)"/>
+        <ellipse cx="210" cy="100" rx="${r*1.8}" ry="${r*0.95}" fill="none" stroke="var(--tax-primary)" stroke-width="3" stroke-dasharray="6,3"/>
+        <text x="210" y="190" text-anchor="middle" font-size="12" fill="var(--tax-muted)">横轴：兔子数量 → · 纵轴：狐狸数量 ↑</text>
+      `;
+      m++; if(m>=3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+    </script>
+</body>
+</html>

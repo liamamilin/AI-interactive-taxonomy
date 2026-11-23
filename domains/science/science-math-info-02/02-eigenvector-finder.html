@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：特征向量探测器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+    .card { padding: 14px; border: 1px solid var(--tax-border); border-radius: 12px; background: var(--tax-surface-alt); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧭 特征向量探测器：寻找变换后唯一“不歪”的箭头</h1><p>误区：矩阵会把所有向量都旋转歪掉。真相：总有那么几个特殊方向，变换后依然指向同一条直线，只变长短！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🔄 旋转输入向量角度 θ：<span id="angOut">20°</span>（提示：试试 45°！）
+        <input id="ang" type="range" min="0" max="180" value="20" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 420 230" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>转动角度滑块，让蓝色原向量与红色变换后向量完全重合在一条直线上！</div>
+    
+  </div>
+  <script>
+    
+    function render(){
+      const deg=+document.getElementById("ang").value;
+      document.getElementById("angOut").textContent=deg+"°";
+      const rad=deg*Math.PI/180;
+      const x=Math.cos(rad), y=Math.sin(rad);
+      // Matrix [[2, 1], [1, 2]] -> eigenvectors at 45 deg (lambda=3) and 135 deg (lambda=1)
+      const tx=2*x+y, ty=x+2*y;
+      const cross=Math.abs(x*ty-y*tx);
+      const hit=cross<0.06;
+      const cx=210, cy=145, sc=42;
+      document.getElementById("svg").innerHTML=`
+        <line x1="20" y1="${cy}" x2="400" y2="${cy}" stroke="var(--tax-border)"/>
+        <line x1="${cx}" y1="15" x2="${cx}" y2="215" stroke="var(--tax-border)"/>
+        <line x1="${cx}" y1="${cy}" x2="${cx+tx*sc}" y2="${cy-ty*sc}" stroke="${hit?'#10b981':'#ef4444'}" stroke-width="4" stroke-linecap="round"/>
+        <line x1="${cx}" y1="${cy}" x2="${cx+x*sc}" y2="${cy-y*sc}" stroke="#3b82f6" stroke-width="4" stroke-linecap="round"/>
+        <text x="210" y="30" text-anchor="middle" font-size="13" font-weight="800" fill="${hit?'#10b981':'var(--tax-muted)'}">${hit?'🎯 命中特征向量！方向完全共线！':'🟦 原向量 vs 🟥 变换后向量'}</text>
+      `;
+      if(hit){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>在 <strong>${deg}°</strong> 方向上，变换后的箭头没有发生任何偏转，只是原地伸缩了！这就是 PCA 降维与谷歌 PageRank 寻找“主轴”的核心数学武器。`;
+        if(window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+    
+  </script>
+</body>
+</html>

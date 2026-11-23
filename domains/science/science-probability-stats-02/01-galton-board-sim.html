@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：交互式高尔顿钉板</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    .btn { padding: 9px 16px; border-radius: 10px; border: none; background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📌 交互式高尔顿钉板：无数次随机碰撞为何堆出必然的钟形？</h1>
+        <p>误区：每颗弹珠去向完全随机，底部应该平平铺满。真相：走极端（全往左或全往右）只有 1 条路径，走中间却有成千上万条路径！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" onclick="dropBalls(250)">💧 释放 250 颗弹珠</button>
+        <label style="font-weight:750;font-size:14px;">向右偏置概率：<span id="pOut">50%</span>
+          <input id="pS" type="range" min="25" max="75" value="50" oninput="document.getElementById('pOut').textContent=this.value+'%'" />
+        </label>
+        <span style="font-size:13px;color:var(--tax-muted);font-weight:700;">累计弹珠：<span id="totOut">0</span></span>
+      </div>
+      <svg id="board" viewBox="0 0 560 280" style="width:100%;height:auto;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>点击释放弹珠，看微观的无序碰撞如何在宏观上涌现出优雅的钟形曲线！
+    </div>
+  </div>
+
+  <script>
+    const rows = 10;
+    let bins = new Array(rows + 1).fill(0);
+    let total = 0;
+
+    function render() {
+      const maxB = Math.max(10, ...bins);
+      let html = "";
+      // Draw pegs
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c <= r; c++) {
+          const x = 280 + (c - r / 2) * 32;
+          const y = 24 + r * 12;
+          html += `<circle cx="${x}" cy="${y}" r="2.5" fill="var(--tax-muted)" opacity="0.7"/>`;
+        }
+      }
+      // Draw histogram bins
+      const bw = 30;
+      bins.forEach((cnt, i) => {
+        const x = 280 + (i - rows / 2) * 32 - bw / 2;
+        const h = (cnt / maxB) * 105;
+        html += `<rect x="${x}" y="${258 - h}" width="${bw - 4}" height="${h}" rx="4" fill="var(--tax-primary)" opacity="0.85"/>`;
+        if (cnt > 0) html += `<text x="${x + (bw-4)/2}" y="${252 - h}" text-anchor="middle" font-size="10" fill="var(--tax-muted)">${cnt}</text>`;
+      });
+      document.getElementById("board").innerHTML = html;
+      document.getElementById("totOut").textContent = total;
+    }
+
+    function dropBalls(n) {
+      const pRight = +document.getElementById("pS").value / 100;
+      for (let k = 0; k < n; k++) {
+        let right = 0;
+        for (let r = 0; r < rows; r++) if (Math.random() < pRight) right++;
+        bins[right]++;
+        total++;
+      }
+      render();
+      if (total >= 250) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（Aha! Moment）：</strong>已落入 ${total} 颗弹珠！中间槽位拥有最多的组合路径（C(10,5)=252 种），而最左/最右各只有 1 种可能——这就是自然界万物服从正态分布的组合数学根源！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

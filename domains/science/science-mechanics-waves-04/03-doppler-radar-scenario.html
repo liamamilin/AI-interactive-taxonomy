@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：多普勒雷达实战台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📡 多普勒雷达实战台：怎么用回波频率抓超速和台风？</h1><p>误区：测速雷达必须拍两张照片算路程除以时间。真相：只需一束微波撞上车头弹回来，看频率变高了多少就能瞬间算出车速！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <div style="margin-bottom:12px;">
+        <button class="btn active" id="c0" onclick="pick(0)">🚗 高速测速雷达</button>
+        <button class="btn" id="c1" onclick="pick(1)">🌪️ 气象多普勒雷达</button>
+        <button class="btn" id="c2" onclick="pick(2)">🩺 医院彩超测血流</button>
+      </div>
+      <div id="box" style="padding:16px;border:1px solid var(--tax-border);border-radius:12px;line-height:1.7;"></div>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>依次体验 3 个多普勒工业应用，看同一个物理规律如何横跨交通、气象与医疗！</div>
+    
+  </div>
+  <script>
+    const seen=new Set([0]);
+    const data=[
+      "<strong>🚗 原理：</strong>雷达发射 24GHz 微波，迎面驶来的汽车把波前压密，反射回波频率升高 Δf，车速 v ∝ Δf，0.01 秒就能抓拍超速！",
+      "<strong>🌪️ 原理：</strong>向云层发射电磁波，朝雷达吹来的雨滴回波频移为正（绿色），吹离的为负（红色）——红绿紧挨在一起旋转，就是龙卷风钩状回波预警！",
+      "<strong>🩺 原理：</strong>超声探头向血管发射声波，移动的红细胞把声波反射回来产生频移，彩色多普勒把迎面血流标红、背离标蓝，一眼看穿血管是否堵塞！"
+    ];
+    function pick(i){
+      seen.add(i);
+      [0,1,2].forEach(k=>document.getElementById("c"+k).classList.toggle("active",k===i));
+      document.getElementById("box").innerHTML=data[i];
+      if(seen.size>=3 && window.ToySDK){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只要目标在运动，反射回来的波频率就一定发生变化——这就是人类“隔空测速”的通用超能力！`;
+        window.ToySDK.markCompleted();
+      }
+    }
+    pick(0);
+    </script>
+</body>
+</html>

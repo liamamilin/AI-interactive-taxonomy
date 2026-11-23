@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：兰道尔擦除代价计算器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔥 兰道尔擦除代价：删掉 1 比特记忆必须向宇宙排出热量！</h1><p>误区：删除电脑文件只是软件操作，不涉及物理能量。真相：把 0/1 两种可能强行重置为全 0，压缩了信息相空间，物理上至少放热 kT·ln2！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🗑️ 每秒擦除比特数：<span id="bOut">10</span> × 10²⁰ bits/s
+        <input id="bS" type="range" min="1" max="50" value="10" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 540 160" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>拉动擦除速率，看“信息擦除”如何跨界变成实实在在的物理焦耳热量！</div>
+    
+  </div>
+  <script>
+    let m=0;
+    function render(){
+      const b=+document.getElementById("bS").value;
+      document.getElementById("bOut").textContent=b;
+      // 300K: kT ln2 ~ 2.87e-21 J/bit => 1e20 bits = 0.287 W
+      const watts=(b*0.287).toFixed(2);
+      document.getElementById("svg").innerHTML=`
+        <rect x="60" y="55" width="${b*8}" height="32" rx="6" fill="#ef4444"/>
+        <text x="270" y="125" text-anchor="middle" font-size="16" font-weight="850" fill="#ef4444">300K 室温下最低物理发热功率：${watts} 瓦</text>
+      `;
+      m++; if(m>=3 && window.ToySDK){
+        document.getElementById("ahaBox").innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>每秒擦除 ${b}×10²⁰ 比特，哪怕用世界上最完美的超导材料，物理定律也规定至少产生 <strong>${watts} W</strong> 热量——信息与热力学在此彻底合流！`;
+        window.ToySDK.markCompleted();
+      }
+    }
+    render();
+    </script>
+</body>
+</html>

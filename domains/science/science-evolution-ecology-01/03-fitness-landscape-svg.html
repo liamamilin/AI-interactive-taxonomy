@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：适应度地形图</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 9px 15px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: inherit; font-weight: 800; cursor: pointer; margin-right: 8px; }
+    .btn.primary, .btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⛰️ 适应度地形图：为什么演化有时也绕不出“设计缺陷”？</h1><p>误区：自然界所有生物器官都是完美无缺的最优解。真相：演化只能一步步爬坡，遇到中间隔着死谷的更高山峰，往往只能卡在局部山头！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    
+    <div class="tax-panel">
+      <label style="font-weight:800;font-size:14px;">🧬 演化尝试步数：<span id="sOut">0</span>
+        <input id="sS" type="range" min="0" max="100" value="0" style="width:100%;margin-top:8px;" oninput="render()" />
+      </label>
+      <svg id="svg" viewBox="0 0 540 190" style="width:100%;height:auto;margin-top:12px;border:1px solid var(--tax-border);border-radius:12px;background:var(--tax-surface);"></svg>
+    </div>
+    <div class="tax-aha" id="ahaBox">💡 <strong>顿悟时刻（Aha! Moment）：</strong>人眼视神经反着长导致盲点、喉返神经绕远路，全都是演化卡在“局部山坡”来不及推倒重来的历史遗迹！</div>
+    
+  </div>
+  <script>
+    let m=0;
+    function h(x){ return 80*Math.exp(-Math.pow((x-35)/15,2)) + 135*Math.exp(-Math.pow((x-80)/12,2)); }
+    function render(){
+      const s=+document.getElementById("sS").value;
+      document.getElementById("sOut").textContent=s;
+      const x=Math.min(35, 10 + s*0.35);
+      let pts=[];
+      for(let i=0;i<=100;i+=2) pts.push(`${i===0?'M':'L'}${(30+i*4.8).toFixed(1)},${(170-h(i)).toFixed(1)}`);
+      document.getElementById("svg").innerHTML=`<path d="${pts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="3"/><circle cx="${30+x*4.8}" cy="${170-h(x)}" r="7" fill="#ef4444"/><text x="${30+80*4.8}" y="26" text-anchor="middle" font-size="12" font-weight="800" fill="#10b981">全局最高峰（隔着低谷爬不过去）</text>`;
+      m++; if(s>=60 && m>1 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+    </script>
+</body>
+</html>
