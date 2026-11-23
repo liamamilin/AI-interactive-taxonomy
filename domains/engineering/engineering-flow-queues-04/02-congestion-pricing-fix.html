@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：拥堵收费破局 · 用过路费拯救全城交通</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .num { font-size: 26px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>💰 拥堵收费破局：为什么给免费捷径收过路费，反而让全城人省时又省心？</h1>
+        <p>在布雷斯路网的中间捷径上设置一道电子拥堵收费站（每 1 元等价于 1 分钟时间成本）。向右调高过路费，看看全城平均通勤时间怎么变！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:850;font-size:14.5px;">🚧 中间捷径拥堵费：<span id="fVal" style="color:var(--tax-primary)">0</span> 元（0 元=免费抢挤，≥25 元=无人抄捷径）</label>
+      <input id="fSl" type="range" min="0" max="30" value="0" style="width:100%;margin-top:8px;" />
+
+      <div class="cards">
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);">🚗 走捷径的车辆占比</div>
+          <div class="num" id="pOut" style="color:var(--tax-amber);">100%</div>
+        </div>
+        <div class="card" style="border-color:var(--tax-primary);">
+          <div style="font-size:13px;color:var(--tax-muted);">⏱️ 全城司机平均通勤耗时</div>
+          <div class="num" id="tOut" style="color:var(--tax-red);">80 分钟 💥</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const fee = parseInt(document.getElementById("fSl").value, 10);
+      document.getElementById("fVal").textContent = fee;
+      const ratio = Math.max(0, Math.min(1, (25 - fee) / 25));
+      const time = Math.round(65 + ratio * 15);
+      document.getElementById("pOut").textContent = Math.round(ratio * 100) + "%";
+      const tEl = document.getElementById("tOut");
+      tEl.textContent = time + (time <= 66 ? " 分钟（回归最优 ✅）" : " 分钟（拥堵！）");
+      tEl.style.color = time <= 66 ? "var(--tax-green)" : "var(--tax-red)";
+
+      document.getElementById("ahaBox").innerHTML = fee >= 25
+        ? "💡 <strong>庇古税（Pigouvian Tax）神来之笔！</strong>当过路费抵消了抄捷径的私利诱惑，车流自动重新均匀分流到上下两条干道，全城耗时瞬间从 80 分钟降回 <strong>65 分钟</strong>——而且其实没人真的花钱走收费站，全城免费白赚 15 分钟！"
+        : "💡 <strong>顿悟时刻：</strong>把捷径过路费一路向右拉到 <strong>25 元</strong>，亲眼看“收费”如何把陷入死胡同的自私博弈重新拉回社会最优！";
+    }
+    document.getElementById("fSl").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

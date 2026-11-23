@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：真实世界逆向奇迹 · 拆桥治堵与电网悖论</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; line-height: 1.7; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🌉 拆掉主干道，城市反而更畅通了？3 个震惊工程界的真实布雷斯案例！</h1>
+        <p>布雷斯悖论绝不是纸上谈兵的数学游戏，它在城市交通、电网和互联网路由里反复真实上演。依次点开这 3 个真实案例！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="c1" onclick="pick(1)">🇰🇷 首尔清溪川（2003 拆 6 车道高架）</button>
+        <button class="btn" id="c2" onclick="pick(2)">🇺🇸 纽约 42 街（地球日意外封路）</button>
+        <button class="btn" id="c3" onclick="pick(3)">⚡ 电网与弹簧（加一根导线反而停电）</button>
+      </div>
+      <div class="box" id="outBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const DATA = {
+      1: {
+        txt: "🌊 <strong>首尔清溪川奇迹：</strong>2003 年首尔市长力排众议拆掉了市中心日均 16 万车次的 6 车道清溪高架桥，改回步行河道公园。所有人预测全城必将大瘫痪——结果实测周边主干道平均车速反而<strong>不降反升</strong>，市民出行更加顺畅！",
+        aha: "💡 <strong>诱导需求（Induced Demand）+ 布雷斯逆效应：</strong>修路会诱导更多人开车涌入瓶颈，而审慎拆除低效捷径则会重新平衡整个路网与公共交通选择！"
+      },
+      2: {
+        txt: "🗽 <strong>纽约第 42 街封路奇观：</strong>1990 年地球日，纽约市政临时封闭了曼哈顿最繁忙的第 42 街。交通局原本做好了末日大堵车的准备，结果当天周边车流竟然比平时更加顺畅，促使纽约后来永久把时代广场改成了步行区！",
+        aha: "💡 <strong>复杂网络不是线性叠加：</strong>在存在自私个体动态博弈的系统里，增加局部容量有时反而破坏全局均衡！"
+      },
+      3: {
+        txt: "⚡ <strong>物理世界同样成立（弹簧与电网）：</strong>在并联弹簧吊重物系统中，剪断中间一根绷紧的承重绳，重物竟然会<strong>向上弹升</strong>！在交流电网中盲目增加一条新输电线，也可能引发相位失衡导致区域大停电！",
+        aha: "💡 <strong>系统工程师的最高敬畏：</strong>面对高度耦合的复杂网络（交通、电网、微服务路由），<strong>永远不能靠“头痛医头、堵哪扩哪”的直觉拍脑袋</strong>，必须做全局仿真建模！"
+      }
+    };
+    const seen = new Set([1]);
+    function pick(n) {
+      seen.add(n);
+      [1, 2, 3].forEach(i => document.getElementById("c" + i).classList.toggle("active", i === n));
+      document.getElementById("outBox").innerHTML = DATA[n].txt;
+      document.getElementById("ahaBox").innerHTML = DATA[n].aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(1);
+  </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：产线瓶颈（TOC）预算装配台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .pipe { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0; }
+    @media (max-width: 720px) { .pipe { grid-template-columns: 1fr; } }
+    .st { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; text-align: center; }
+    .st.bot { border-color: var(--tax-red); background: rgba(239,68,68,0.1); }
+    .btn { padding: 8px 14px; border-radius: 10px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-top: 8px; }
+    .btn.sec { background: var(--tax-surface); color: var(--tax-text); border-color: var(--tax-border); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏭 约束理论（TOC）：给非瓶颈环节疯狂提速，为什么总产出纹丝不动？</h1>
+        <p>手握 <strong>3 份升级预算</strong>（每份给该工序产能 +30 件/天）。点击分配给三道串联工序，目标把整条线的总产出推到最高！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-weight:850;font-size:15px;">
+        <span>💰 剩余升级预算：<span id="budOut" style="color:var(--tax-primary)">3</span> / 3</span>
+        <span>📦 整条产线真实总产出：<strong id="totOut" style="color:var(--tax-green);font-family:monospace;">40 件/天</strong></span>
+        <button class="btn sec" style="margin:0;padding:6px 12px;font-size:12.5px;" onclick="resetCap()">↺ 重置预算</button>
+      </div>
+      <div class="pipe" id="pipeBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let cap = [100, 40, 90];
+    let bud = 3;
+
+    function up(i) {
+      if (bud <= 0) return;
+      cap[i] += 30;
+      bud--;
+      render();
+      if (bud === 0 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function resetCap() { cap = [100, 40, 90]; bud = 3; render(); }
+
+    function render() {
+      const minV = Math.min(...cap);
+      document.getElementById("budOut").textContent = bud;
+      document.getElementById("totOut").textContent = minV + " 件/天";
+      const names = ["🎨 1. 产品设计", "💻 2. 核心研发", "🧪 3. 测试发布"];
+      document.getElementById("pipeBox").innerHTML = cap.map((v, i) => `
+        <div class="st ${v === minV ? "bot" : ""}">
+          <div style="font-weight:850;font-size:14.5px;">${names[i]}</div>
+          <div style="font-size:24px;font-weight:900;font-family:monospace;margin:6px 0;color:${v === minV ? "var(--tax-red)" : "var(--tax-primary)"};">${v} 件/天</div>
+          <div style="font-size:11.5px;color:var(--tax-muted);">${v === minV ? "🚨 当前系统最窄瓶颈！" : "产能富余"}</div>
+          <button class="btn" onclick="up(${i})" ${bud <= 0 ? "disabled" : ""}>+30 扩容</button>
+        </div>
+      `).join("");
+
+      document.getElementById("ahaBox").innerHTML = minV >= 100
+        ? "💡 <strong>满分厂长（总产出飙到 100 件/天）！</strong>你精准把预算全砸在了红框瓶颈上！高德拉特《目标》中的约束理论（TOC）铁律：<strong>在非瓶颈处节省的一小时，对整个系统而言纯粹是海市蜃楼！</strong>"
+        : "💡 <strong>顿悟时刻：</strong>试着把预算花在最宽的“产品设计”上看看总产出变不变——然后再把预算集中砸向红框瓶颈！";
+    }
+    render();
+  </script>
+</body>
+</html>

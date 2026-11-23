@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：看板限流竞速 · 同时做 4 件事 vs 一次做 1 件</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 14px; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .duel { grid-template-columns: 1fr; } }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .trow { display: grid; grid-template-columns: 60px 1fr 54px; gap: 8px; align-items: center; margin: 8px 0; font-size: 12.5px; font-weight: 800; }
+    .tr { height: 12px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; }
+    .fl { height: 100%; width: 0%; transition: width 0.12s linear; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📋 看板限流（WIP Limit）竞速：4 个需求同时开工 vs 做完一个再开下一个！</h1>
+        <p>4 个项目各需 4 天工期。点击开始！左边采用“雨露均沾、每天轮流切换”，右边严格“限流 WIP=1 各个击破”！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="btn" onclick="go()">▶ 启动 4 个项目交付竞速</button>
+      <div class="duel">
+        <div class="lane">
+          <div style="font-weight:850;font-size:14px;">😵 无限制并发（每天在 4 个项目间疯狂切换）</div>
+          <div id="multiBox"></div>
+          <div id="mStat" style="font-size:12px;color:var(--tax-red);font-family:monospace;margin-top:6px;">待命…</div>
+        </div>
+        <div class="lane" style="border-color:var(--tax-green);">
+          <div style="font-weight:850;font-size:14px;">⚡ 看板限流 WIP=1（干完 A 再开 B）</div>
+          <div id="singleBox"></div>
+          <div id="sStat" style="font-size:12px;color:var(--tax-green);font-family:monospace;margin-top:6px;">待命…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let timer = null;
+    function drawBars(id, vals, col) {
+      document.getElementById(id).innerHTML = ["项目 A", "项目 B", "项目 C", "项目 D"].map((n, i) => `
+        <div class="trow"><span>${n}</span><div class="tr"><div class="fl" style="width:${vals[i]}%;background:${col}"></div></div><span style="font-family:monospace;">${vals[i]}%</span></div>
+      `).join("");
+    }
+
+    function go() {
+      if (timer) clearInterval(timer);
+      const m = [0, 0, 0, 0], s = [0, 0, 0, 0];
+      let day = 0;
+      timer = setInterval(() => {
+        day++;
+        // Multi-tasking: 4 projects progress slowly + 25% switching penalty
+        for (let i = 0; i < 4; i++) m[i] = Math.min(100, m[i] + 5);
+        // Single-piece flow: finish one by one cleanly
+        const cur = s.findIndex(v => v < 100);
+        if (cur >= 0) s[cur] = Math.min(100, s[cur] + 25);
+
+        drawBars("multiBox", m, "var(--tax-amber)");
+        drawBars("singleBox", s, "var(--tax-green)");
+        const mDone = m.filter(v => v >= 100).length;
+        const sDone = s.filter(v => v >= 100).length;
+        document.getElementById("mStat").textContent = `第 ${day} 天：已上线 ${mDone}/4 个项目`;
+        document.getElementById("sStat").textContent = `第 ${day} 天：已上线 ${sDone}/4 个项目（平均交付早一半！）`;
+
+        if (mDone === 4 && sDone === 4) {
+          clearInterval(timer);
+          document.getElementById("ahaBox").innerHTML = "💡 <strong>单件流（WIP=1）完胜！</strong>并发切换不仅因上下文损耗拖慢总工期（20天 vs 16天），更致命的是——<strong>第 16 天前老板一个上线成品都看不到</strong>！而限流 WIP=1 在第 4 天就交付了项目 A 开始赚钱回血！";
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }, 150);
+    }
+
+    drawBars("multiBox", [0, 0, 0, 0], "var(--tax-amber)");
+    drawBars("singleBox", [0, 0, 0, 0], "var(--tax-green)");
+    document.getElementById("ahaBox").innerHTML = "💡 <strong>顿悟时刻：</strong>点击启动竞速，看看“同时开 4 个坑”和“专注做完 1 个再开下 1 个”在第 8 天时的天壤之别！";
+  </script>
+</body>
+</html>

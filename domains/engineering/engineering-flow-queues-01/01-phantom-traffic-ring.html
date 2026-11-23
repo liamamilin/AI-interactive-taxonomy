@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：环形公路幽灵堵车波 Canvas 模拟</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.warn { background: var(--tax-red); border-color: var(--tax-red); }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    canvas { width: 100%; max-width: 440px; height: 240px; border-radius: 16px; border: 1.5px solid var(--tax-border); background: #0f172a; display: block; margin: 0 auto; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⭕ 环形公路幽灵堵车波：没人出车祸，堵车怎么凭空生出来？</h1>
+        <p>18 辆车正在完美匀速绕圈行驶。点击 <strong>🛑 让 1 号车轻点 0.5 秒刹车</strong>，亲眼看一团红色刹车波如何<strong>逆时针向后无限传播</strong>！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn warn" onclick="tapBrake()">🛑 让 1 号车轻点一下刹车！</button>
+        <button class="btn sec" onclick="resetCars()">↺ 恢复完美匀速车流</button>
+        <span style="margin-left:auto;font-family:monospace;font-weight:850;">平均车速：<span id="spdOut" style="color:var(--tax-green)">100%</span></span>
+      </div>
+      <canvas id="cv" width="440" height="240"></canvas>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const cv = document.getElementById("cv");
+    const ctx = cv.getContext("2d");
+    const N = 18;
+    const TWO_PI = Math.PI * 2;
+    let cars = [];
+    let braked = false;
+
+    function resetCars() {
+      cars = Array.from({ length: N }, (_, i) => ({
+        ang: (i / N) * TWO_PI,
+        v: 0.022
+      }));
+      braked = false;
+      document.getElementById("ahaBox").innerHTML = "💡 <strong>顿悟时刻：</strong>现在整条环路顺畅无阻！点击红色按钮 <strong>🛑 让 1 号车轻点一下刹车</strong>，见证著名的日本 Sugiyama 环形公路真实实验！";
+    }
+
+    function tapBrake() {
+      cars[0].v = 0.002;
+      braked = true;
+      document.getElementById("ahaBox").innerHTML = "💡 <strong>幽灵堵车波诞生！</strong>1 号车早就重新加速跑远了，但因为每辆后车都要等 0.5 秒反应再比前车踩得更重一点，这团<strong>红色拥堵波（Shockwave）</strong>竟然逆着车流方向一圈圈向后传递！等你终于开到堵车源头时，早就空无一物了！";
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function loop() {
+      // Update cars with simple reaction/following model
+      const nextV = [];
+      for (let i = 0; i < N; i++) {
+        const ahead = cars[(i + 1) % N];
+        let gap = ahead.ang - cars[i].ang;
+        if (gap < 0) gap += TWO_PI;
+        let v = cars[i].v;
+        if (gap < 0.24) v = Math.max(0.002, v - 0.0032);
+        else if (gap > 0.34) v = Math.min(0.024, v + 0.00055);
+        else v += (0.022 - v) * 0.04;
+        nextV.push(v);
+      }
+      let sumV = 0;
+      for (let i = 0; i < N; i++) {
+        cars[i].v = nextV[i];
+        cars[i].ang = (cars[i].ang + cars[i].v) % TWO_PI;
+        sumV += cars[i].v;
+      }
+      const pct = Math.round((sumV / (N * 0.022)) * 100);
+      const spEl = document.getElementById("spdOut");
+      spEl.textContent = pct + "%";
+      spEl.style.color = pct < 75 ? "var(--tax-red)" : "var(--tax-green)";
+
+      // Render ring road
+      ctx.fillStyle = "#0f172a";
+      ctx.fillRect(0, 0, 440, 240);
+      ctx.strokeStyle = "#334155";
+      ctx.lineWidth = 22;
+      ctx.beginPath();
+      ctx.arc(220, 120, 88, 0, TWO_PI);
+      ctx.stroke();
+
+      cars.forEach(c => {
+        const x = 220 + Math.cos(c.ang) * 88;
+        const y = 120 + Math.sin(c.ang) * 88;
+        const slow = c.v < 0.014;
+        ctx.fillStyle = slow ? "#ef4444" : "#34d399";
+        ctx.beginPath();
+        ctx.arc(x, y, slow ? 7 : 5.5, 0, TWO_PI);
+        ctx.fill();
+      });
+
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "bold 11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(braked ? "红点 = 逆向传播的幽灵堵车波" : "绿点 = 匀速顺畅车流", 220, 124);
+
+      requestAnimationFrame(loop);
+    }
+
+    resetCars();
+    loop();
+  </script>
+</body>
+</html>

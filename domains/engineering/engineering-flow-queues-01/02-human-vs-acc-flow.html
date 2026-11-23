@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：人类急刹跟车 vs 自适应巡航（ACC）吞吐竞速</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .num { font-size: 26px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🤖 吞吐竞速：为什么车流里只要混进 5%“佛系留白车”，整条高速就不堵了？</h1>
+        <p>切换两种驾驶风格，对比整条高速公路每小时通行量与油耗差距！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="mHum" onclick="pick('hum')">😤 全员紧贴急刹（人类路怒跟车）</button>
+        <button class="btn" id="mAcc" onclick="pick('acc')">🧘 混入 5% 缓冲巡航车（提前留白吃掉刹车波）</button>
+      </div>
+      <div class="cards" id="cardBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["hum"]);
+    function pick(m) {
+      seen.add(m);
+      document.getElementById("mHum").classList.toggle("active", m === "hum");
+      document.getElementById("mAcc").classList.toggle("active", m === "acc");
+      const acc = m === "acc";
+      document.getElementById("cardBox").innerHTML = acc
+        ? `
+          <div class="card" style="border-color:var(--tax-green);"><div style="font-size:13px;color:var(--tax-muted);">🚗 单车道每小时通行量</div><div class="num" style="color:var(--tax-green);">2,150 辆/小时 ✅</div></div>
+          <div class="card"><div style="font-size:13px;color:var(--tax-muted);">⛽ 全路段综合油耗</div><div class="num" style="color:var(--tax-green);">-35% 极省油</div></div>
+        `
+        : `
+          <div class="card" style="border-color:var(--tax-red);"><div style="font-size:13px;color:var(--tax-muted);">🚗 单车道每小时通行量</div><div class="num" style="color:var(--tax-red);">1,240 辆/小时 🐢</div></div>
+          <div class="card"><div style="font-size:13px;color:var(--tax-muted);">⛽ 全路段综合油耗</div><div class="num" style="color:var(--tax-red);">+40% 频繁急刹重起</div></div>
+        `;
+      document.getElementById("ahaBox").innerHTML = acc
+        ? "💡 <strong>“减震海绵车”奇迹（MIT / 亚利桑那大学实测）：</strong>车流里只要有 5% 的车辆主动留出稍大车距、看到前车亮刹车灯时松油门滑行而不急刹，就能把后传的刹车冲击波像海绵一样彻底吸收，让整条高速的通行力暴涨 40%+！"
+        : "💡 <strong>紧贴前车的错觉：</strong>每个人都怕被插队而死贴前车，结果前车一抖就得一脚刹死，反而把大家一起拖进走走停停的泥潭！切到 <strong>🧘 缓冲巡航</strong> 看看变化。";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("hum");
+  </script>
+</body>
+</html>

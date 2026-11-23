@@ -6,10 +6,10 @@ window.TAXONOMY_DATA = {
   "stats": {
     "totalDomains": 10,
     "litDomains": 3,
-    "totalTopics": 71,
-    "totalPlannedTopics": 204,
+    "totalTopics": 75,
+    "totalPlannedTopics": 200,
     "totalBlueprintTopics": 275,
-    "totalToys": 213
+    "totalToys": 225
   },
   "tracks": [
     {
@@ -2430,24 +2430,7 @@ window.TAXONOMY_DATA = {
         {
           "id": "flow-queues",
           "title": "2. 流动、队列与交通动力学（Flow, Queues & Traffic）",
-          "plannedTopics": [
-            {
-              "slug": "engineering-flow-queues-01",
-              "title": "高速公路幽灵堵车波"
-            },
-            {
-              "slug": "engineering-flow-queues-02",
-              "title": "排队论（单排大队 vs 多排小队）"
-            },
-            {
-              "slug": "engineering-flow-queues-03",
-              "title": "利特尔法则（吞吐与积压）"
-            },
-            {
-              "slug": "engineering-flow-queues-04",
-              "title": "布雷斯悖论（多修一条路反而更堵）"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "mechanics-structures",
@@ -2538,10 +2521,10 @@ window.TAXONOMY_DATA = {
           ]
         }
       ],
-      "liveTopicCount": 4,
-      "plannedTopicCount": 20,
+      "liveTopicCount": 8,
+      "plannedTopicCount": 16,
       "blueprintTopicCount": 24,
-      "liveToyCount": 12,
+      "liveToyCount": 24,
       "topics": [
         {
           "id": "engineering/engineering-control-feedback-01",
@@ -2589,6 +2572,55 @@ window.TAXONOMY_DATA = {
               "archetype": "scenario",
               "concept": "稳态误差 · 剧烈超调震荡 · 响应迟缓排障",
               "summary": "面对“永远差 5 厘米到不了目标”“来回剧烈画波浪”等 3 种经典病症曲线，开出正确的调参处方！"
+            }
+          ]
+        },
+        {
+          "id": "engineering/engineering-flow-queues-01",
+          "slug": "engineering-flow-queues-01",
+          "domain": "engineering",
+          "branch": "flow-queues",
+          "order": 1,
+          "title": "高速公路幽灵堵车波",
+          "icon": "🚗",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "前方既没有车祸也没有修路，为什么高速上走着走着就突然堵死，等开过去却啥也没有？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-control-feedback-03",
+            "engineering/engineering-flow-queues-04"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-flow-queues-01/01-phantom-traffic-ring.html",
+              "file": "01-phantom-traffic-ring.html",
+              "path": "./domains/engineering/engineering-flow-queues-01/01-phantom-traffic-ring.html",
+              "title": "环形公路幽灵堵车波 Canvas 模拟",
+              "icon": "⭕",
+              "archetype": "simulation",
+              "concept": "反应延迟 · 冲击波向后传播 · 交通相变",
+              "summary": "在流畅行驶的环形车流里让 1 号车轻点 0.5 秒刹车，亲眼看一团红色堵车波逆着车流方向生生不息向后传！"
+            },
+            {
+              "id": "engineering/engineering-flow-queues-01/02-human-vs-acc-flow.html",
+              "file": "02-human-vs-acc-flow.html",
+              "path": "./domains/engineering/engineering-flow-queues-01/02-human-vs-acc-flow.html",
+              "title": "吞吐竞速：人类跟车反应 vs 协同巡航（ACC）",
+              "icon": "🤖",
+              "archetype": "race",
+              "concept": "安全车距缓冲 · 消除急刹过冲 · 道路通行力提升",
+              "summary": "对比人类“紧贴前车 + 急刹猛踩”与自适应巡航提前留白均匀滑行，看一条高速路的通行效率如何瞬间翻倍！"
+            },
+            {
+              "id": "engineering/engineering-flow-queues-01/03-zipper-merge-scenario.html",
+              "file": "03-zipper-merge-scenario.html",
+              "path": "./domains/engineering/engineering-flow-queues-01/03-zipper-merge-scenario.html",
+              "title": "拉链式交替汇流 vs 提前 1 公里强行并道",
+              "icon": "🤐",
+              "archetype": "scenario",
+              "concept": "拉链汇流 Zipper Merge · 道路空间利用率 · 消除插队恐慌",
+              "summary": "当双车道收窄成单车道时，对比“所有车提前挤进左道”与“开到汇合点一左一右拉链交替”的排队长龙差距！"
             }
           ]
         },
@@ -2642,6 +2674,55 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "engineering/engineering-flow-queues-02",
+          "slug": "engineering-flow-queues-02",
+          "domain": "engineering",
+          "branch": "flow-queues",
+          "order": 2,
+          "title": "排队论（单排大队 vs 多排小队）",
+          "icon": "🧍",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "为什么机场安检和银行都改成了“所有人排一条蛇形大长队，叫号去任意空窗口”，而超市老是让你选的那一排最慢？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-flow-queues-03",
+            "software/software-distributed-04"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-flow-queues-02/01-single-vs-multi-queue.html",
+              "file": "01-single-vs-multi-queue.html",
+              "path": "./domains/engineering/engineering-flow-queues-02/01-single-vs-multi-queue.html",
+              "title": "队列竞速：1 条蛇形总队 vs 3 条独立小队",
+              "icon": "🏁",
+              "archetype": "race",
+              "concept": "M/M/c 共享队列 vs 多个 M/M/1 · 消除窗口空转 · 公平性",
+              "summary": "当 2 号收银台突然遇到一位要刷 5 张优惠券的“慢顾客”时，亲眼看两条架构下后排顾客的等待时间差距！"
+            },
+            {
+              "id": "engineering/engineering-flow-queues-02/02-utilization-hockey-stick.html",
+              "file": "02-utilization-hockey-stick.html",
+              "path": "./domains/engineering/engineering-flow-queues-02/02-utilization-hockey-stick.html",
+              "title": "利用率冰球杆爆炸曲线（为何不能把 CPU 跑满 95%）",
+              "icon": "📈",
+              "archetype": "simulation",
+              "concept": "排队论利用率 ρ · 1/(1-ρ) 非线性爆炸 · 留出缓冲余量",
+              "summary": "拖动系统繁忙度 ρ 从 50% 拉到 98%，看等待时间如何从 1 分钟突然垂直飙升成 49 分钟！"
+            },
+            {
+              "id": "engineering/engineering-flow-queues-02/03-queue-psychology-lab.html",
+              "file": "03-queue-psychology-lab.html",
+              "path": "./domains/engineering/engineering-flow-queues-02/03-queue-psychology-lab.html",
+              "title": "排队心理学：为什么电梯装镜子后投诉少了一半？",
+              "icon": "🪞",
+              "archetype": "scenario",
+              "concept": "感知等待时间 vs 实际时间 · 确定性进度条 · 公平感",
+              "summary": "不花钱扩建窗口，组合“预计等待倒计时”“消除盲等”“统一蛇形队”三招，把顾客烦躁度直降 70%！"
+            }
+          ]
+        },
+        {
           "id": "engineering/engineering-control-feedback-03",
           "slug": "engineering-control-feedback-03",
           "domain": "engineering",
@@ -2691,6 +2772,55 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "engineering/engineering-flow-queues-03",
+          "slug": "engineering-flow-queues-03",
+          "domain": "engineering",
+          "branch": "flow-queues",
+          "order": 3,
+          "title": "利特尔法则（吞吐与积压）",
+          "icon": "⚖️",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "为什么往研发团队里同时塞进 20 个需求，不仅产出一点没变快，反而每个需求的交付周期直接拉长 4 倍？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-flow-queues-02",
+            "business/business-org-operations-03"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-flow-queues-03/01-littles-law-calculator.html",
+              "file": "01-littles-law-calculator.html",
+              "path": "./domains/engineering/engineering-flow-queues-03/01-littles-law-calculator.html",
+              "title": "利特尔法则（L = λ × W）咖啡店积压沙盘",
+              "icon": "☕",
+              "archetype": "simulation",
+              "concept": "利特尔法则 L = λW · 在制品 WIP · 吞吐率与交付周期",
+              "summary": "调节咖啡店进客速率 λ 与店里积压人数 L，亲眼验证三者之间像牛顿定律一样牢不可破的守恒关系！"
+            },
+            {
+              "id": "engineering/engineering-flow-queues-03/02-wip-limit-kanban-race.html",
+              "file": "02-wip-limit-kanban-race.html",
+              "path": "./domains/engineering/engineering-flow-queues-03/02-wip-limit-kanban-race.html",
+              "title": "看板限流（WIP Limit）交付竞速：同时做 10 件事 vs 一次只做 2 件",
+              "icon": "📋",
+              "archetype": "race",
+              "concept": "限制在制品 WIP Limit · 多任务上下文切换 · 交付前置时间",
+              "summary": "对比“所有需求一起开工”与“严格限流 WIP=2 逐个做完”，直观看到为什么少开新坑反而更快上线！"
+            },
+            {
+              "id": "engineering/engineering-flow-queues-03/03-bottleneck-drum-buffer.html",
+              "file": "03-bottleneck-drum-buffer.html",
+              "path": "./domains/engineering/engineering-flow-queues-03/03-bottleneck-drum-buffer.html",
+              "title": "产线瓶颈（TOC）：非瓶颈提速 10 倍全是徒劳！",
+              "icon": "🏭",
+              "archetype": "builder",
+              "concept": "约束理论 TOC · 系统吞吐由最窄瓶颈决定 · 中间积压爆仓",
+              "summary": "把 3 份升级预算分配给“设计 / 开发 / 测试”三道工序，亲手验证只有扩宽最窄瓶颈才能真正提升整条线产出！"
+            }
+          ]
+        },
+        {
           "id": "engineering/engineering-control-feedback-04",
           "slug": "engineering-control-feedback-04",
           "domain": "engineering",
@@ -2736,6 +2866,55 @@ window.TAXONOMY_DATA = {
               "archetype": "spatial",
               "concept": "去噪追踪 · 滞后 vs 平滑权衡 · 实时状态估计",
               "summary": "拖动滤波信任度 K，实时对比满屏乱跳的红色 GPS 原始点与贴着真实轨迹走的绿色卡尔曼估计曲线！"
+            }
+          ]
+        },
+        {
+          "id": "engineering/engineering-flow-queues-04",
+          "slug": "engineering-flow-queues-04",
+          "domain": "engineering",
+          "branch": "flow-queues",
+          "order": 4,
+          "title": "布雷斯悖论（多修一条路反而更堵）",
+          "icon": "🛣️",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "市政府花巨资在两座城之间新修了一条零耗时免费高速捷径，为什么全体司机的通勤时间反而从 65 分钟暴涨到了 80 分钟？",
+          "difficulty": "进阶",
+          "related": [
+            "engineering/engineering-flow-queues-01",
+            "business/business-game-theory-02"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-flow-queues-04/01-braess-paradox-network.html",
+              "file": "01-braess-paradox-network.html",
+              "path": "./domains/engineering/engineering-flow-queues-04/01-braess-paradox-network.html",
+              "title": "布雷斯悖论 SVG 路网博弈图",
+              "icon": "🗺️",
+              "archetype": "spatial",
+              "concept": "布雷斯悖论 Braess's Paradox · 纳什均衡 ≠ 社会最优 · 自私路由",
+              "summary": "一键修通中间那条“0 分钟传送捷径”，亲眼看 4000 辆车如何为了个人贪快集体涌入同一瓶颈，把全城时间拖慢 15 分钟！"
+            },
+            {
+              "id": "engineering/engineering-flow-queues-04/02-congestion-pricing-fix.html",
+              "file": "02-congestion-pricing-fix.html",
+              "path": "./domains/engineering/engineering-flow-queues-04/02-congestion-pricing-fix.html",
+              "title": "拥堵收费破局：用 10 元过路费拯救全城交通",
+              "icon": "💰",
+              "archetype": "simulation",
+              "concept": "庇古税 · 外部性定价 · 新加坡/伦敦拥堵费",
+              "summary": "给新修的捷径设一道拥堵收费站，观察个人最优如何重新对齐社会最优，全员通勤时间奇迹般降回 65 分钟！"
+            },
+            {
+              "id": "engineering/engineering-flow-queues-04/03-real-world-road-removal.html",
+              "file": "03-real-world-road-removal.html",
+              "path": "./domains/engineering/engineering-flow-queues-04/03-real-world-road-removal.html",
+              "title": "真实世界逆向奇迹：拆掉高架桥后，首尔清溪川反而更畅通了！",
+              "icon": "🌉",
+              "archetype": "scenario",
+              "concept": "诱导需求 Induced Demand · 拆路治堵真实案例 · 电网与网络路由",
+              "summary": "探索首尔清溪川、纽约百老汇与互联网 BGP 路由中的真实布雷斯悖论案例，打破“堵车就扩路”的线性思维！"
             }
           ]
         }

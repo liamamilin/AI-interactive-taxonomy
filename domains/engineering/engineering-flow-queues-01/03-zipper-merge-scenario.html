@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：拉链式交替汇流 vs 提前强行并道</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; line-height: 1.75; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🤐 拉链式交替汇流：开到车道尽头再并线，到底是“没素质插队”还是最优解？</h1>
+        <p>前方 1 公里处双车道收窄为单车道。切换对比“大家提前 1 公里全挤进左道”与“两条道跑满再一左一右拉链交替”！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="mEarly" onclick="pick('early')">🐍 提前 1 公里全挤进左道（右侧空着 1 公里）</button>
+        <button class="btn" id="mZip" onclick="pick('zip')">🤐 拉链式交替汇流（两条道用满，尽头 1:1 交替）</button>
+      </div>
+      <div class="box" id="outBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["early"]);
+    function pick(m) {
+      seen.add(m);
+      document.getElementById("mEarly").classList.toggle("active", m === "early");
+      document.getElementById("mZip").classList.toggle("active", m === "zip");
+      const zip = m === "zip";
+      document.getElementById("outBox").innerHTML = zip
+        ? "✅ <strong>拉链式汇流（Zipper Merge · 欧美与国内交警力推）：</strong><br>• 两条车道 100% 铺满利用，排队总长度直接<strong>缩短 40%</strong>（不再向后倒灌堵死上一个十字路口）！<br>• 左右车速一致、到达合流点严格 <code>左1 → 右1 → 左1 → 右1</code>，彻底消除高速差刮擦与路怒！"
+        : "💥 <strong>提前并道的反直觉陷阱：</strong><br>• 右侧整整 1 公里柏油路白白空着，左道排起 2 公里长龙直接把后方立交桥出口全部堵死！<br>• 偶尔有车从空荡荡的右道高速冲到前面加塞，引发左道连环急刹和剧烈路怒！";
+      document.getElementById("ahaBox").innerHTML = zip
+        ? "💡 <strong>系统最优 vs 直觉误区：</strong>在严重拥堵的合流口，<strong>充分利用所有可用车道到尽头再 1:1 拉链交替</strong>，才是让所有人整体最快、最安全通过的交通工程最优解！"
+        : "💡 <strong>提前并道反而拖慢全队：</strong>浪费一半路面容量并制造巨大车速差！点击切换到 <strong>🤐 拉链式交替汇流</strong> 看正解。";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("early");
+  </script>
+</body>
+</html>

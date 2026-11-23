@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：排队心理学 · 降低感知等待时间</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    @media (max-width: 720px) { .checks { grid-template-columns: 1fr; } }
+    .chk { display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-weight: 800; font-size: 13px; cursor: pointer; }
+    .res { padding: 16px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); text-align: center; }
+    .big { font-size: 26px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🪞 排队心理学：没换更快的电梯，为什么在电梯厅装面镜子投诉就少了一半？</h1>
+        <p>实际物理等待时间固定为 <strong>10 分钟</strong>（一秒没少！）。勾选下方 3 项零硬件成本的体验工程设计，看顾客的<strong>心理感知时长</strong>如何暴降！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="checks">
+        <label class="chk"><input type="checkbox" id="q1" onchange="render()" /> ⏳ 显示精准剩余时间进度条（消除未知焦虑）</label>
+        <label class="chk"><input type="checkbox" id="q2" onchange="render()" /> 🪞 提供镜子/骨架屏/预点单（占据空闲注意力）</label>
+        <label class="chk"><input type="checkbox" id="q3" onchange="render()" /> 🐍 统一先来先得单队列（消除被隔壁队超车的不公感）</label>
+      </div>
+      <div class="res">
+        <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">物理耗时仍是 10 分钟，但顾客心理感觉等了：</div>
+        <div class="big" id="feelOut" style="color:var(--tax-red);">18 分钟（暴躁投诉 💥）</div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    function render() {
+      const n = ["q1", "q2", "q3"].filter(id => document.getElementById(id).checked).length;
+      const texts = ["18 分钟（盲等太煎熬，暴躁投诉 💥）", "12 分钟（焦躁缓解 🟡）", "7.5 分钟（体验不错 🔵）", "4.5 分钟（丝滑无痛 ✅）"];
+      const cols = ["var(--tax-red)", "var(--tax-amber)", "var(--tax-primary)", "var(--tax-green)"];
+      const el = document.getElementById("feelOut");
+      el.textContent = texts[n];
+      el.style.color = cols[n];
+      document.getElementById("ahaBox").innerHTML = n === 3
+        ? "💡 <strong>体验工程的精髓（Maister 排队心理学）：</strong>人们讨厌的往往不是等待本身，而是<strong>无事可干的空白等待、不知道还要等多久的焦虑、以及不公平感</strong>！App 里的骨架屏、打车地图实时小车、迪士尼排队区互动全是这套神技！"
+        : "💡 <strong>顿悟时刻：</strong>逐个勾选上方 3 项体验工程手段，感受“物理时间一秒没减，体感时间却直接砍半”的神奇魔力！";
+      if (n === 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+  </script>
+</body>
+</html>

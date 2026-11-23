@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：利用率冰球杆爆炸曲线 · 1/(1-ρ)</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 210px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📈 利用率冰球杆曲线：为什么老板把团队/服务器排满 95%，交付反而慢了 10 倍？</h1>
+        <p>排队论公式 <code>等待倍数 ≈ ρ / (1 - ρ)</code>。向右拖动资源利用率 <code>ρ</code> 从 50% 到 98%，亲眼看曲线在 80% 后垂直冲天！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:850;font-size:14.5px;">🔥 系统/人员繁忙利用率 ρ：<span id="rVal" style="color:var(--tax-primary)">60%</span>（当前排队等待倍数：<strong id="wVal" style="color:var(--tax-green)">1.5×</strong>）</label>
+      <input id="rSl" type="range" min="10" max="98" value="60" style="width:100%;margin-top:8px;" />
+      <div class="stage"><svg viewBox="0 0 540 200" id="qSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const pct = parseInt(document.getElementById("rSl").value, 10);
+      const rho = pct / 100;
+      const wait = rho / (1 - rho);
+      document.getElementById("rVal").textContent = pct + "%";
+      const wEl = document.getElementById("wVal");
+      wEl.textContent = wait.toFixed(1) + "×";
+      wEl.style.color = pct >= 85 ? "var(--tax-red)" : pct >= 70 ? "var(--tax-amber)" : "var(--tax-green)";
+
+      const pts = [];
+      for (let p = 10; p <= 96; p += 2) {
+        const r = p / 100;
+        const w = Math.min(25, r / (1 - r));
+        const x = 35 + ((p - 10) / 88) * 475;
+        const y = 175 - (w / 25) * 150;
+        pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+      }
+      const cx = 35 + ((pct - 10) / 88) * 475;
+      const cy = 175 - (Math.min(25, wait) / 25) * 150;
+
+      let s = `<line x1="35" y1="175" x2="515" y2="175" stroke="#334155" stroke-width="2"/>`;
+      const x80 = 35 + ((80 - 10) / 88) * 475;
+      s += `<line x1="${x80.toFixed(1)}" y1="20" x2="${x80.toFixed(1)}" y2="175" stroke="#ef4444" stroke-dasharray="5,4" stroke-width="1.5"/>`;
+      s += `<text x="${(x80 - 6).toFixed(1)}" y="34" text-anchor="end" fill="#fca5a5" font-size="11" font-weight="800">80% 警戒红线 →</text>`;
+      s += `<polyline points="${pts.join(" ")}" fill="none" stroke="#38bdf8" stroke-width="3.5"/>`;
+      s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="7" fill="${pct >= 85 ? "#ef4444" : "#10b981"}" stroke="#fff" stroke-width="2"/>`;
+      document.getElementById("qSvg").innerHTML = s;
+
+      document.getElementById("ahaBox").innerHTML = pct >= 85
+        ? `💡 <strong>冰球杆爆炸区（ρ = ${pct}%）：</strong>看起来只是比 75% 多塞了 ${pct - 75}% 的活，但排队等待时间瞬间暴涨到了 <strong>${wait.toFixed(1)} 倍</strong>！无论服务器 CPU、高速公路还是研发团队，<strong>必须刻意留出 20% 弹性余量（Slack）</strong>，追求 100% 满载就是在制造灾难！`
+        : "💡 <strong>顿悟时刻：</strong>把利用率 ρ 往右拖过 <strong>85% → 95%</strong>，亲眼看原本平缓的等待曲线如何一飞冲天！";
+    }
+    document.getElementById("rSl").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

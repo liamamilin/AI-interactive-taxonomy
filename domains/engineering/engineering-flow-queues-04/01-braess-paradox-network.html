@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：布雷斯悖论 SVG 路网博弈图</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.warn { background: var(--tax-red); border-color: var(--tax-red); }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; }
+    svg { width: 100%; height: 220px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🗺️ 布雷斯悖论（Braess's Paradox）：修通一条 0 分钟捷径，全城人反而多堵 15 分钟！</h1>
+        <p><strong>4,000 辆车</strong>要从起点 S 开往终点 T。窄路耗时 <code>车数 / 100</code> 分钟，宽路恒定 <code>45</code> 分钟。点击修通中间 <strong>A → B（0 分钟传送门）</strong> 看看发生什么！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" id="bToggle" onclick="toggleBridge()">🚧 修通中间 0 分钟捷径（A → B）</button>
+        <span style="margin-left:auto;font-family:monospace;font-weight:900;font-size:15px;">每位司机实际通勤：<span id="tOut" style="color:var(--tax-green)">65 分钟</span></span>
+      </div>
+      <div class="stage"><svg viewBox="0 0 540 210" id="netSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let built = false;
+    function toggleBridge() {
+      built = !built;
+      const btn = document.getElementById("bToggle");
+      btn.classList.toggle("warn", built);
+      btn.textContent = built ? "🧨 拆掉中间捷径（恢复原路网）" : "🚧 修通中间 0 分钟捷径（A → B）";
+      render();
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      const tEl = document.getElementById("tOut");
+      tEl.textContent = built ? "80 分钟（反而慢了 15 分钟 💥）" : "65 分钟（均衡畅通 ✅）";
+      tEl.style.color = built ? "var(--tax-red)" : "var(--tax-green)";
+
+      let s = "";
+      // Edges S(70,105) -> A(270,35) -> T(470,105) and S -> B(270,175) -> T
+      const saCol = built ? "#ef4444" : "#38bdf8";
+      const btCol = built ? "#ef4444" : "#38bdf8";
+      const atCol = built ? "#334155" : "#10b981";
+      const sbCol = built ? "#334155" : "#10b981";
+
+      s += `<line x1="70" y1="105" x2="270" y2="38" stroke="${saCol}" stroke-width="${built ? 6 : 4}"/>`;
+      s += `<line x1="270" y1="38" x2="470" y2="105" stroke="${atCol}" stroke-width="3.5"/>`;
+      s += `<line x1="70" y1="105" x2="270" y2="172" stroke="${sbCol}" stroke-width="3.5"/>`;
+      s += `<line x1="270" y1="172" x2="470" y2="105" stroke="${btCol}" stroke-width="${built ? 6 : 4}"/>`;
+
+      if (built) {
+        s += `<line x1="270" y1="38" x2="270" y2="172" stroke="#fbbf24" stroke-width="5" stroke-dasharray="6,4"/>`;
+        s += `<text x="282" y="108" fill="#fcd34d" font-size="11.5" font-weight="800">⚡新捷径 0分钟 (4000车!)</text>`;
+      }
+
+      // Labels
+      s += `<text x="155" y="55" text-anchor="middle" fill="${saCol}" font-size="11" font-weight="800">${built ? "4000车 → 40分钟!" : "2000车 → 20分钟"}</text>`;
+      s += `<text x="385" y="55" text-anchor="middle" fill="${atCol}" font-size="11">宽路 45分钟 (${built ? "0车" : "2000车"})</text>`;
+      s += `<text x="155" y="162" text-anchor="middle" fill="${sbCol}" font-size="11">宽路 45分钟 (${built ? "0车" : "2000车"})</text>`;
+      s += `<text x="385" y="162" text-anchor="middle" fill="${btCol}" font-size="11" font-weight="800">${built ? "4000车 → 40分钟!" : "2000车 → 20分钟"}</text>`;
+
+      // Nodes
+      [[70,105,"起点 S","#6366f1"],[270,38,"路口 A","#0ea5e9"],[270,172,"路口 B","#0ea5e9"],[470,105,"终点 T","#10b981"]].forEach(([x,y,lb,c]) => {
+        s += `<circle cx="${x}" cy="${y}" r="20" fill="${c}" stroke="#fff" stroke-width="2"/><text x="${x}" y="${y+4}" text-anchor="middle" fill="#fff" font-size="10.5" font-weight="800">${lb}</text>`;
+      });
+
+      document.getElementById("netSvg").innerHTML = s;
+      document.getElementById("ahaBox").innerHTML = built
+        ? "💡 <strong>布雷斯悖论生效（个人理性 → 集体灾难）！</strong>捷径一通，每个聪明司机都想抄 <code>S → A → B → T</code> 省掉 45 分钟宽路！结果 4,000 辆车全部挤进两条窄路（40 + 0 + 40 = <strong>80 分钟</strong>），而且现在谁也不敢独自改回宽路（40 + 45 = 85 更慢）——全城被锁死在更烂的纳什均衡里！"
+        : "💡 <strong>修路前的和平均衡：</strong>上下两条路平分 2,000 辆车，每人耗时 <code>20 + 45 = 65 分钟</code>。现在点击 <strong>🚧 修通中间 0 分钟捷径</strong> 见证反直觉奇迹！";
+    }
+    render();
+  </script>
+</body>
+</html>

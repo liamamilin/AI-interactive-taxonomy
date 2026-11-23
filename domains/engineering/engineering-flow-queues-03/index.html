@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>利特尔法则（吞吐与积压）· 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚖️ 利特尔法则（吞吐与积压）</h1>
+        <p>为什么往研发团队里同时塞进 20 个需求，不仅产出一点没变快，反而每个需求的交付周期直接拉长 4 倍？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-littles-law-calculator.html">
+        <div class="hub-icon">☕</div>
+        <div class="hub-tag">玩具 01 · 守恒沙盘（Simulation）</div>
+        <div class="hub-title">利特尔法则（L = λ × W）咖啡店沙盘</div>
+        <div class="hub-desc">拉动在制品数量与吞吐率，秒懂为什么“停止乱开新坑”是缩短交付周期的唯一捷径。</div>
+      </a>
+      <a class="hub-card" href="./02-wip-limit-kanban-race.html">
+        <div class="hub-icon">📋</div>
+        <div class="hub-tag">玩具 02 · 看板竞速（Race）</div>
+        <div class="hub-title">看板限流竞速：同时做 6 件事 vs 一次只做 2 件</div>
+        <div class="hub-desc">直击“多线并发切换”如何把每个任务都拖到最后一天，而严格 WIP 限流如何提前数倍交付价值。</div>
+      </a>
+      <a class="hub-card" href="./03-bottleneck-drum-buffer.html">
+        <div class="hub-icon">🏭</div>
+        <div class="hub-tag">玩具 03 · 预算装配（Builder）</div>
+        <div class="hub-title">产线瓶颈（TOC）：非瓶颈提速全是徒劳</div>
+        <div class="hub-desc">亲手给三道工序分配升级名额，用数据验证系统总产出永远由最窄的那一环锁死。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
