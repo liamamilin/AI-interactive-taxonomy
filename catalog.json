@@ -401,36 +401,78 @@
       "desc": "现代人的新外脑：从大语言模型底层原理到智能体与工程基建",
       "branches": [
         {
-          "id": "llm-core",
-          "title": "LLM 原理与表示",
-          "plannedTopics": []
-        },
-        {
-          "id": "llm-train",
-          "title": "训练、微调与推理基建",
-          "plannedTopics": []
-        },
-        {
-          "id": "llm-advanced",
-          "title": "推理增强、多模态与架构",
-          "plannedTopics": []
-        },
-        {
-          "id": "agents",
-          "title": "Agent 智能体与工程缰绳",
-          "plannedTopics": []
-        },
-        {
-          "id": "safety-evals",
-          "title": "安全攻防与评测",
-          "plannedTopics": []
-        },
-        {
-          "id": "classic-gen",
-          "title": "经典 ML、扩散画图与具身",
+          "id": "symbolic-ml",
+          "title": "1. 经典与符号智能（Symbolic AI & Classic ML）",
           "plannedTopics": [
-            "扩散模型去噪画图",
-            "强化学习与 AlphaGo 树搜索"
+            "搜索与博弈树（A* / Minimax）",
+            "规则引擎与知识图谱",
+            "监督学习（回归 / 决策树 / SVM）",
+            "无监督学习（聚类 / PCA 降维）",
+            "贝叶斯推断与概率图模型"
+          ]
+        },
+        {
+          "id": "dl-foundations",
+          "title": "2. 神经网络与深度学习基石（Deep Learning）",
+          "plannedTopics": [
+            "感知机与激活函数",
+            "反向传播与残差连接（ResNet）",
+            "CNN 卷积看图原理",
+            "RNN / LSTM 序列演进",
+            "Transformer 完整解剖"
+          ]
+        },
+        {
+          "id": "llm-foundations",
+          "title": "3. 大语言模型核心与表示（LLM Foundations）",
+          "plannedTopics": [
+            "非 Transformer 序列架构（Mamba / SSM）"
+          ]
+        },
+        {
+          "id": "training-alignment",
+          "title": "4. 训练、微调与对齐（Training & Alignment）",
+          "plannedTopics": [
+            "合成数据与模型蒸馏（Distillation）",
+            "偏好对齐进阶（DPO / GRPO / 宪法 AI）"
+          ]
+        },
+        {
+          "id": "multimodal-gen",
+          "title": "5. 多模态与生成式媒体（Multimodal & GenMedia）",
+          "plannedTopics": [
+            "扩散模型去噪画图（Diffusion & CFG）",
+            "视频生成与世界模型（DiT）",
+            "语音合成与克隆（TTS / ASR）",
+            "3D 生成与空间智能（NeRF / 3DGS）"
+          ]
+        },
+        {
+          "id": "rl-embodied",
+          "title": "6. 强化学习与具身智能（RL & Embodied AI）",
+          "plannedTopics": [
+            "探索 vs 利用（多臂老虎机 / MDP）",
+            "值函数与策略梯度（Q-Learning / PPO）",
+            "蒙特卡洛树搜索（AlphaGo）",
+            "具身机器人（VLA / Sim2Real）",
+            "自动驾驶感知与规控（BEV）"
+          ]
+        },
+        {
+          "id": "applied-agents",
+          "title": "7. 应用架构、RAG 与 Agent 系统",
+          "plannedTopics": [
+            "Workflow 编排 vs 自主 Agent 边界"
+          ]
+        },
+        {
+          "id": "infra-safety",
+          "title": "8. 基础设施、可解释与安全治理",
+          "plannedTopics": [
+            "GPU 与 AI 芯片并行原理",
+            "分布式训练并行（DP / TP / PP）",
+            "机制可解释性（打开黑盒）",
+            "AI 伦理、水印与隐私治理"
           ]
         }
       ],
@@ -441,7 +483,7 @@
           "id": "ai/llm-interactive-toys",
           "slug": "llm-interactive-toys",
           "domain": "ai",
-          "branch": "llm-core",
+          "branch": "llm-foundations",
           "order": 1,
           "title": "LLM 核心原理",
           "icon": "🎰",
@@ -484,7 +526,7 @@
           "id": "ai/llm-training-toys",
           "slug": "llm-training-toys",
           "domain": "ai",
-          "branch": "llm-train",
+          "branch": "training-alignment",
           "order": 2,
           "title": "LLM 训练全流程",
           "icon": "🎛️",
@@ -527,7 +569,7 @@
           "id": "ai/llm-finetuning-toys",
           "slug": "llm-finetuning-toys",
           "domain": "ai",
-          "branch": "llm-train",
+          "branch": "training-alignment",
           "order": 3,
           "title": "LLM 微调实战",
           "icon": "🏷️",
@@ -570,7 +612,7 @@
           "id": "ai/llm-infra-toys",
           "slug": "llm-infra-toys",
           "domain": "ai",
-          "branch": "llm-train",
+          "branch": "infra-safety",
           "order": 4,
           "title": "LLM Infra 推理基建",
           "icon": "⚡",
@@ -613,7 +655,7 @@
           "id": "ai/agent-interactive-toys",
           "slug": "agent-interactive-toys",
           "domain": "ai",
-          "branch": "agents",
+          "branch": "applied-agents",
           "order": 5,
           "title": "AI Agent 智能体",
           "icon": "🤖",
@@ -656,7 +698,7 @@
           "id": "ai/agent-harness-toys",
           "slug": "agent-harness-toys",
           "domain": "ai",
-          "branch": "agents",
+          "branch": "applied-agents",
           "order": 6,
           "title": "Agent Harness 工程缰绳",
           "icon": "⚙️",
@@ -699,7 +741,7 @@
           "id": "ai/token-embedding-toys",
           "slug": "token-embedding-toys",
           "domain": "ai",
-          "branch": "llm-core",
+          "branch": "llm-foundations",
           "order": 7,
           "title": "Token 与向量空间",
           "icon": "🔬",
@@ -742,7 +784,7 @@
           "id": "ai/reasoning-model-toys",
           "slug": "reasoning-model-toys",
           "domain": "ai",
-          "branch": "llm-advanced",
+          "branch": "training-alignment",
           "order": 8,
           "title": "慢思考推理模型",
           "icon": "🧠",
@@ -785,7 +827,7 @@
           "id": "ai/rag-deep-dive-toys",
           "slug": "rag-deep-dive-toys",
           "domain": "ai",
-          "branch": "llm-advanced",
+          "branch": "applied-agents",
           "order": 9,
           "title": "RAG 深度原理",
           "icon": "📚",
@@ -828,7 +870,7 @@
           "id": "ai/ai-security-toys",
           "slug": "ai-security-toys",
           "domain": "ai",
-          "branch": "safety-evals",
+          "branch": "infra-safety",
           "order": 10,
           "title": "AI 安全与提示词注入",
           "icon": "🛡️",
@@ -871,7 +913,7 @@
           "id": "ai/moe-architecture-toys",
           "slug": "moe-architecture-toys",
           "domain": "ai",
-          "branch": "llm-advanced",
+          "branch": "llm-foundations",
           "order": 11,
           "title": "MoE 混合专家架构",
           "icon": "🏥",
@@ -914,7 +956,7 @@
           "id": "ai/mcp-protocol-toys",
           "slug": "mcp-protocol-toys",
           "domain": "ai",
-          "branch": "agents",
+          "branch": "applied-agents",
           "order": 12,
           "title": "MCP 模型上下文协议",
           "icon": "🔌",
@@ -957,7 +999,7 @@
           "id": "ai/multi-agent-toys",
           "slug": "multi-agent-toys",
           "domain": "ai",
-          "branch": "agents",
+          "branch": "applied-agents",
           "order": 13,
           "title": "Multi-Agent 多智能体协作",
           "icon": "🤝",
@@ -1000,7 +1042,7 @@
           "id": "ai/multimodal-ai-toys",
           "slug": "multimodal-ai-toys",
           "domain": "ai",
-          "branch": "llm-advanced",
+          "branch": "multimodal-gen",
           "order": 14,
           "title": "多模态原理（看图与听声）",
           "icon": "👁️",
@@ -1043,7 +1085,7 @@
           "id": "ai/long-context-memory-toys",
           "slug": "long-context-memory-toys",
           "domain": "ai",
-          "branch": "llm-core",
+          "branch": "llm-foundations",
           "order": 15,
           "title": "长上下文与记忆系统",
           "icon": "🧭",
@@ -1086,7 +1128,7 @@
           "id": "ai/llm-evals-toys",
           "slug": "llm-evals-toys",
           "domain": "ai",
-          "branch": "safety-evals",
+          "branch": "infra-safety",
           "order": 16,
           "title": "LLM 评测与竞技场",
           "icon": "🏆",
