@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：分代假说 · 年轻代 vs 老年代 STW 沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .num { font-size: 28px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⏱️ 分代 GC（Generational GC）：为什么把内存按“年龄”分区，卡顿能骤降 100 倍？</h1>
+        <p>软件界有一条铁律叫<strong>弱分代假说</strong>：98% 的临时对象活不过一次函数调用！拖动“临时对象短命比例”，对比“全堆扫描”与“分代 Minor GC”的停顿时间！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:850;font-size:14.5px;">🫧 短命临时对象占比：<span id="pVal" style="color:var(--tax-primary)">95%</span>（堆总大小 16 GB，年轻代 1 GB）</label>
+      <input id="pSlider" type="range" min="30" max="99" value="95" style="width:100%;margin-top:8px;" />
+
+      <div class="cards">
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">🐢 不分代：每次全堆扫描 STW 停顿</div>
+          <div class="num" id="fullOut" style="color:var(--tax-red);">480 ms</div>
+        </div>
+        <div class="card" style="border-color:var(--tax-primary);">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">⚡ 分代回收：仅复制年轻代存活者</div>
+          <div class="num" id="minOut" style="color:var(--tax-green);">3 ms</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const p = parseInt(document.getElementById("pSlider").value, 10);
+      document.getElementById("pVal").textContent = p + "%";
+      const survive = 100 - p;
+      const minorMs = Math.max(2, Math.round(survive * 1.8));
+      document.getElementById("minOut").textContent = minorMs + " ms";
+      document.getElementById("minOut").style.color = minorMs <= 15 ? "var(--tax-green)" : "var(--tax-amber)";
+      document.getElementById("ahaBox").innerHTML = p >= 90
+        ? `💡 <strong>分代假说的威力：</strong>因为 ${p}% 的新对象转瞬即逝，Minor GC 只需要把极少数存活下来的 ${survive}% 对象抄到幸存区，剩下的 1GB 垃圾整片清零——停顿仅 <strong>${minorMs} ms</strong>，用户完全无感！`
+        : "💡 <strong>当对象普遍长寿时：</strong>如果大量对象都活很久，不断晋升到老年代就会频繁触发 480ms 级别的 Full GC 卡顿！把滑块拉回 <strong>95%+</strong> 体会真实业务里的黄金分布。";
+    }
+    document.getElementById("pSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

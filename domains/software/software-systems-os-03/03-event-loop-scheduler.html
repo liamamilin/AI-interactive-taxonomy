@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：单线程事件循环（Event Loop）调度沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btns { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.warn { background: var(--tax-red); border-color: var(--tax-red); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; min-height: 120px; }
+    .log { font-family: ui-monospace, monospace; font-size: 12.5px; line-height: 1.65; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎡 单线程 Event Loop：为什么只有一个厨师（线程），却能同时接 1000 桌客人的单？</h1>
+        <p>点击往事件循环里派发 <strong>异步网络请求</strong> 或 <strong>同步重计算</strong>，看看什么叫“非阻塞 I/O”和“主线程卡死”！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="btns">
+        <button class="btn" onclick="addTask('io')">🌐 派发异步 I/O（查数据库，不阻塞）</button>
+        <button class="btn warn" onclick="addTask('cpu')">🔥 派发同步重计算（卡死主线程 3 秒！）</button>
+      </div>
+
+      <div class="grid">
+        <div class="box">
+          <div style="font-weight:850;font-size:14px;margin-bottom:8px;">⚙️ 主线程状态：<span id="stOut" style="color:var(--tax-green);">🟢 60fps 丝滑空闲</span></div>
+          <div style="font-size:13px;color:var(--tax-muted);">心跳计数器（卡死时会停止跳动）：<strong id="beatOut" style="font-family:monospace;color:var(--tax-primary);">0</strong></div>
+        </div>
+        <div class="box">
+          <div style="font-weight:850;font-size:14px;margin-bottom:6px;">📜 调度日志</div>
+          <div class="log" id="logOut">点击上方按钮投递任务…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>分别点击两种任务！看看异步 I/O 怎么把等待丢给操作系统后台，而同步重计算怎么把主线程心跳彻底冻结！
+    </div>
+  </div>
+
+  <script>
+    let beat = 0, blockedUntil = 0;
+    const tried = new Set();
+    const logs = [];
+
+    setInterval(() => {
+      if (Date.now() < blockedUntil) {
+        document.getElementById("stOut").textContent = "🔴 主线程被同步计算彻底卡死！";
+        document.getElementById("stOut").style.color = "var(--tax-red)";
+        return;
+      }
+      beat++;
+      document.getElementById("beatOut").textContent = beat;
+      document.getElementById("stOut").textContent = "🟢 60fps 丝滑响应中";
+      document.getElementById("stOut").style.color = "var(--tax-green)";
+    }, 150);
+
+    function log(msg) {
+      logs.unshift(msg);
+      document.getElementById("logOut").innerHTML = logs.slice(0, 5).join("<br>");
+    }
+
+    function addTask(type) {
+      tried.add(type);
+      if (type === "io") {
+        log("🌐 发出异步查库请求 → 立刻归还主线程（心跳不停！）");
+        setTimeout(() => log("✅ 操作系统后台查完回传回调 → 丝滑入队执行"), 900);
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>非阻塞 I/O 的精髓：</strong>厨师（主线程）把菜放进烤箱（内核 epoll/kqueue）后立刻转身接下一桌单，绝不傻站着干等，所以单线程也能撑起高并发！";
+      } else {
+        blockedUntil = Date.now() + 2000;
+        log("🔥 同步死算占满 Call Stack → 画面、点击、所有回调全部卡死 2 秒！");
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>单线程的死穴（CPU 密集型阻塞）：</strong>一旦有人在主线程写大循环算素数或同步读大文件，整个 Event Loop 就像厨师自己切了 2 小时土豆，所有客人都被卡死——这类重活必须丢给 Worker 线程池！";
+      }
+      if (tried.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+  </script>
+</body>
+</html>

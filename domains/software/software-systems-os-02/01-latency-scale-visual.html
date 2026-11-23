@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：存储金字塔 · 人类时间尺度对照</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tiers { display: flex; flex-direction: column; gap: 10px; }
+    .tier { display: grid; grid-template-columns: 160px 1fr 140px; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); cursor: pointer; transition: border-color 0.15s ease; }
+    @media (max-width: 680px) { .tier { grid-template-columns: 1fr; } }
+    .tier.active { border-color: var(--tax-primary); background: rgba(99,102,241,0.1); }
+    .bar { height: 12px; border-radius: 999px; background: var(--tax-surface); overflow: hidden; }
+    .fill { height: 100%; border-radius: 999px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏛️ 存储金字塔：如果读一次 L1 缓存算 1 秒，那读一次硬盘要等多久？</h1>
+        <p>人类对“1 纳秒”和“100 纳秒”毫无概念。点击下方存储层级，把 1 纳秒放大成 <strong>1 秒钟</strong> 来感受 CPU 的真实煎熬！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tiers" id="tierList"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const ITEMS = [
+      { name: "⚡ L1 缓存", real: "1 ns", human: "1 秒（眨一下眼）", pct: 4, col: "var(--tax-green)", note: "紧贴运算核心，容量极小（几十 KB），但速度登峰造极。" },
+      { name: "🔋 L3 共享缓存", real: "15 ns", human: "15 秒（倒杯水）", pct: 18, col: "var(--tax-primary)", note: "多核共享的最后一道芯片内高速仓库（几十 MB）。" },
+      { name: "📦 RAM 主内存", real: "100 ns", human: "1 分 40 秒（泡碗面）", pct: 45, col: "var(--tax-amber)", note: "比 L1 慢了整整 100 倍！如果数据不在缓存里，CPU 就得干坐着等 100 个周期。" },
+      { name: "💾 NVMe 固态硬盘", real: "100,000 ns", human: "1.2 天（睡一觉再起来）", pct: 78, col: "#f97316", note: "虽然 SSD 已经比机械硬盘快很多，但在 CPU 眼里依然漫长如隔日！" },
+      { name: "🌐 跨洲网络请求", real: "150,000,000 ns", human: "4.7 年（大学都毕业了！）", pct: 100, col: "var(--tax-red)", note: "光速跨太平洋往返一次，够 CPU 自己原地执行几亿条指令了！" }
+    ];
+    const seen = new Set([0]);
+    let cur = 0;
+
+    function pick(i) {
+      cur = i;
+      seen.add(i);
+      render();
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      document.getElementById("tierList").innerHTML = ITEMS.map((it, i) => `
+        <div class="tier ${i === cur ? "active" : ""}" onclick="pick(${i})">
+          <div style="font-weight:850;font-size:14px;">${it.name} <span style="font-size:12px;color:var(--tax-muted);font-family:monospace;">(${it.real})</span></div>
+          <div class="bar"><div class="fill" style="width:${it.pct}%;background:${it.col}"></div></div>
+          <div style="font-weight:850;font-size:13px;text-align:right;color:${it.col};">${it.human}</div>
+        </div>
+      `).join("");
+      const it = ITEMS[cur];
+      document.getElementById("ahaBox").innerHTML = `💡 <strong>${it.name}（人类尺度 ≈ ${it.human}）：</strong>${it.note} 这就是为什么高性能软件的核心秘诀只有一句话：<strong>尽量把热数据留在离 CPU 最近的那几层！</strong>`;
+    }
+    render();
+  </script>
+</body>
+</html>

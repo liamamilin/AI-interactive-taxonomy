@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "systems-os",
+  "order": 4,
+  "title": "内存管理与垃圾回收（GC）",
+  "icon": "♻️",
+  "subtitle": "为什么 C++ 程序员要手动释放内存，Java/Go 有自动保洁阿姨（GC）却偶尔会卡顿（STW），Rust 又是怎么做到既安全又零 GC 的？",
+  "difficulty": "进阶",
+  "related": ["software/software-systems-os-02", "software/software-systems-os-03"],
+  "toys": {
+    "01-mark-sweep-gc-spatial.html": {
+      "title": "标记-清除（Mark & Sweep）内存清扫图",
+      "icon": "🧹",
+      "archetype": "spatial",
+      "concept": "GC Roots 可达性分析 · 标记-清除 · 内存碎片与循环引用",
+      "summary": "单步点击“标记可达对象 → 清除孤岛垃圾”，亲眼看清为什么标记-清除能完美干掉引用计数搞不定的循环引用！"
+    },
+    "02-generational-gc-sim.html": {
+      "title": "分代假说：年轻代 vs 老年代 STW 停顿沙盘",
+      "icon": "⏱️",
+      "archetype": "simulation",
+      "concept": "弱分代假说 · Minor GC vs Full GC · Stop-The-World 卡顿",
+      "summary": "调节对象存活率，直观感受为什么 98% 的临时对象“朝生夕死”，以及分代回收如何把卡顿从 500ms 压到 2ms。"
+    },
+    "03-manual-gc-rust-race.html": {
+      "title": "三派内存哲学擂台：C++ vs Java(GC) vs Rust(所有权)",
+      "icon": "⚖️",
+      "archetype": "race",
+      "concept": "手动管理 · 追踪式 GC · Rust 编译期所有权 Ownership",
+      "summary": "在“开发心智负担”“运行零卡顿”“内存防崩溃”三个维度同屏对决三大流派，秒懂 Rust 为何惊艳系统编程界。"
+    }
+  }
+}

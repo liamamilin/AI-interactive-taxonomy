@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：哲学家死锁餐桌 · 打破循环等待</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .duel { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; line-height: 1.65; font-size: 13.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🥢 死锁餐桌（Deadlock）：为什么两个好端端的线程会永远原地罚站？</h1>
+        <p>线程 A 需要锁 #1 和锁 #2 才能干活，线程 B 也需要这两把锁。切换下方两种加锁顺序，体验死锁爆发与瞬间破局！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="mDead" onclick="setMode('dead')">💀 反序加锁（A 拿 #1 等 #2，B 拿 #2 等 #1）</button>
+        <button class="btn" id="mFix" onclick="setMode('fix')">✅ 全局按序加锁（所有人必须先拿 #1 再拿 #2）</button>
+      </div>
+      <div class="duel" id="duelBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["dead"]);
+    function setMode(m) {
+      seen.add(m);
+      document.getElementById("mDead").classList.toggle("active", m === "dead");
+      document.getElementById("mFix").classList.toggle("active", m === "fix");
+      const fix = m === "fix";
+      document.getElementById("duelBox").innerHTML = fix
+        ? `
+          <div class="card" style="border-color:var(--tax-green);"><strong>🧵 线程 A：</strong><br>1. 抢到锁 #1 ✅<br>2. 顺利拿到锁 #2 ✅<br>3. 干完活，释放 #2 和 #1 🎉</div>
+          <div class="card" style="border-color:var(--tax-green);"><strong>🧵 线程 B：</strong><br>1. 尝试拿锁 #1（乖乖排队等 A）<br>2. A 释放后瞬间拿到 #1 和 #2 ✅<br>3. 顺利完成！全程零死锁 🎉</div>
+        `
+        : `
+          <div class="card" style="border-color:var(--tax-red);"><strong>🧵 线程 A：</strong><br>1. 抢到锁 #1 ✊<br>2. 死死等着 B 交出锁 #2… ⏳<br>3. 永久卡死（CPU 0%）💀</div>
+          <div class="card" style="border-color:var(--tax-red);"><strong>🧵 线程 B：</strong><br>1. 抢到锁 #2 ✊<br>2. 死死等着 A 交出锁 #1… ⏳<br>3. 永久卡死（CPU 0%）💀</div>
+        `;
+      document.getElementById("ahaBox").innerHTML = fix
+        ? "💡 <strong>一招破死锁（打破循环等待）：</strong>死锁必须同时满足 4 个条件（互斥、占有且等待、不可抢占、循环等待）。只要规定<strong>全系统按固定编号顺序申请锁（比如先小后大）</strong>，永远不可能形成闭环，死锁就被数学上彻底消灭了！"
+        : "💡 <strong>典型死锁现场（互不相让）：</strong>A 抱着 #1 等 #2，B 抱着 #2 等 #1，构成经典<strong>循环等待（Circular Wait）</strong>！点击上方 <strong>✅ 全局按序加锁</strong> 瞬间解锁。";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    setMode("dead");
+  </script>
+</body>
+</html>

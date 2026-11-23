@@ -5,11 +5,11 @@ window.TAXONOMY_DATA = {
   "subtitle": "围绕“人”的 10 大认知领域 · 每个复杂概念 2 分钟玩懂",
   "stats": {
     "totalDomains": 10,
-    "litDomains": 1,
-    "totalTopics": 43,
-    "totalPlannedTopics": 232,
+    "litDomains": 2,
+    "totalTopics": 47,
+    "totalPlannedTopics": 228,
     "totalBlueprintTopics": 275,
-    "totalToys": 129
+    "totalToys": 141
   },
   "tracks": [
     {
@@ -1200,24 +1200,7 @@ window.TAXONOMY_DATA = {
         {
           "id": "systems-os",
           "title": "1. 计算机底层与操作系统（Systems & OS）",
-          "plannedTopics": [
-            {
-              "slug": "software-systems-os-01",
-              "title": "二进制与逻辑门加法器"
-            },
-            {
-              "slug": "software-systems-os-02",
-              "title": "CPU 缓存局部性（L1 / RAM 百倍速差）"
-            },
-            {
-              "slug": "software-systems-os-03",
-              "title": "进程、线程、协程与死锁"
-            },
-            {
-              "slug": "software-systems-os-04",
-              "title": "内存管理与垃圾回收（GC）"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "dsa",
@@ -1330,11 +1313,208 @@ window.TAXONOMY_DATA = {
           ]
         }
       ],
-      "liveTopicCount": 0,
-      "plannedTopicCount": 24,
+      "liveTopicCount": 4,
+      "plannedTopicCount": 20,
       "blueprintTopicCount": 24,
-      "liveToyCount": 0,
-      "topics": []
+      "liveToyCount": 12,
+      "topics": [
+        {
+          "id": "software/software-systems-os-01",
+          "slug": "software-systems-os-01",
+          "domain": "software",
+          "branch": "systems-os",
+          "order": 1,
+          "title": "二进制与逻辑门加法器",
+          "icon": "🔌",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "电脑芯片里只有一堆“开”和“关”的微米级开关，它到底是怎么靠 0 和 1 算出 1+1=2 的？",
+          "difficulty": "入门",
+          "related": [
+            "ai/ai-infra-safety-01",
+            "software/software-systems-os-02"
+          ],
+          "toys": [
+            {
+              "id": "software/software-systems-os-01/01-binary-lightbulbs.html",
+              "file": "01-binary-lightbulbs.html",
+              "path": "./domains/software/software-systems-os-01/01-binary-lightbulbs.html",
+              "title": "8 位二进制灯泡计数器",
+              "icon": "💡",
+              "archetype": "builder",
+              "concept": "二进制 Binary · 位权 2ⁿ · 溢出归零",
+              "summary": "亲手点亮 8 盏代表 128→1 的开关灯泡，秒懂电脑怎么用 0/1 表示任意数字，以及 255+1 为什么会溢出归零。"
+            },
+            {
+              "id": "software/software-systems-os-01/02-half-adder-circuit.html",
+              "file": "02-half-adder-circuit.html",
+              "path": "./domains/software/software-systems-os-01/02-half-adder-circuit.html",
+              "title": "逻辑门半加器电路板（XOR + AND）",
+              "icon": "⚡",
+              "archetype": "spatial",
+              "concept": "异或门 XOR · 与门 AND · 二进制加法电路",
+              "summary": "拨动输入开关 A 和 B，实时看电流流过 XOR 和 AND 两扇逻辑门，亲眼见证硅片怎样用开关算出“本位和进位”。"
+            },
+            {
+              "id": "software/software-systems-os-01/03-twos-complement-clock.html",
+              "file": "03-twos-complement-clock.html",
+              "path": "./domains/software/software-systems-os-01/03-twos-complement-clock.html",
+              "title": "补码时钟：电脑怎么用加法做减法？",
+              "icon": "🕰️",
+              "archetype": "simulation",
+              "concept": "二进制补码 Two's Complement · 模运算 · 化减为加",
+              "summary": "拨动 4 位补码表盘，看清为什么芯片根本不需要造“减法器”，靠绕圈加法就能优雅算出负数！"
+            }
+          ]
+        },
+        {
+          "id": "software/software-systems-os-02",
+          "slug": "software-systems-os-02",
+          "domain": "software",
+          "branch": "systems-os",
+          "order": 2,
+          "title": "CPU 缓存局部性（L1 / RAM 百倍速差）",
+          "icon": "⚡",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "为什么写完全一样的两层循环，只是把行和列交换一下遍历顺序，程序就能瞬间快出 10 倍？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/ai-infra-safety-01",
+            "software/software-database-cache-03"
+          ],
+          "toys": [
+            {
+              "id": "software/software-systems-os-02/01-latency-scale-visual.html",
+              "file": "01-latency-scale-visual.html",
+              "path": "./domains/software/software-systems-os-02/01-latency-scale-visual.html",
+              "title": "存储金字塔：把纳秒放大成人类的“秒与年”",
+              "icon": "🏛️",
+              "archetype": "simulation",
+              "concept": "L1/L2/L3 缓存 · RAM 内存 · SSD / 网络延迟数量级",
+              "summary": "把 CPU 读一次 L1 缓存比作 1 秒，亲眼看看读内存、读硬盘和跨洋请求在 CPU 眼里要等多久。"
+            },
+            {
+              "id": "software/software-systems-os-02/02-row-vs-col-cache-race.html",
+              "file": "02-row-vs-col-cache-race.html",
+              "path": "./domains/software/software-systems-os-02/02-row-vs-col-cache-race.html",
+              "title": "矩阵遍历竞速：按行读（Cache Hit）vs 按列跳（Cache Miss）",
+              "icon": "🏎️",
+              "archetype": "race",
+              "concept": "空间局部性 Spatial Locality · 缓存行 Cache Line (64B) · 预取",
+              "summary": "同屏对比按行连续遍历与按列大跨步跳跃遍历，亲眼看 64 字节缓存行如何把耗时拉开 10 倍差距。"
+            },
+            {
+              "id": "software/software-systems-os-02/03-false-sharing-lab.html",
+              "file": "03-false-sharing-lab.html",
+              "path": "./domains/software/software-systems-os-02/03-false-sharing-lab.html",
+              "title": "多核伪共享（False Sharing）乒乓灾难",
+              "icon": "🏓",
+              "archetype": "scenario",
+              "concept": "MESI 缓存一致性 · 伪共享 False Sharing · 缓存行填充 Padding",
+              "summary": "两个 CPU 核心明明改的是两个毫不相干的变量，为什么越加核心越慢？一键插入 Padding 瞬间破除缓存行打架！"
+            }
+          ]
+        },
+        {
+          "id": "software/software-systems-os-03",
+          "slug": "software-systems-os-03",
+          "domain": "software",
+          "branch": "systems-os",
+          "order": 3,
+          "title": "进程、线程、协程与死锁",
+          "icon": "🧵",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "为什么开 1 万个线程会把服务器干崩，而 Go 语言开 100 万个协程却稳如泰山？两个线程又是怎么互相卡成死锁的？",
+          "difficulty": "进阶",
+          "related": [
+            "software/software-systems-os-04",
+            "software/software-distributed-04"
+          ],
+          "toys": [
+            {
+              "id": "software/software-systems-os-03/01-process-thread-coroutine.html",
+              "file": "01-process-thread-coroutine.html",
+              "path": "./domains/software/software-systems-os-03/01-process-thread-coroutine.html",
+              "title": "进程 / 线程 / 协程内存与切换竞速",
+              "icon": "🏎️",
+              "archetype": "race",
+              "concept": "进程隔离 · 线程共享内存 · 用户态协程 Goroutine",
+              "summary": "调高并发任务数到 10 万，实时对比进程、操作系统线程与协程的内存账单与上下文切换开销。"
+            },
+            {
+              "id": "software/software-systems-os-03/02-deadlock-dining-room.html",
+              "file": "02-deadlock-dining-room.html",
+              "path": "./domains/software/software-systems-os-03/02-deadlock-dining-room.html",
+              "title": "哲学家死锁餐桌：打破循环等待",
+              "icon": "🥢",
+              "archetype": "scenario",
+              "concept": "死锁四大条件 · 互斥与循环等待 · 按序加锁解锁",
+              "summary": "亲手触发经典的“左右手各拿一根筷子”全场死锁，再一键启用“全局编号按序加锁”瞬间破局！"
+            },
+            {
+              "id": "software/software-systems-os-03/03-event-loop-scheduler.html",
+              "file": "03-event-loop-scheduler.html",
+              "path": "./domains/software/software-systems-os-03/03-event-loop-scheduler.html",
+              "title": "单线程事件循环（Event Loop）调度沙盘",
+              "icon": "🎡",
+              "archetype": "simulation",
+              "concept": "异步非阻塞 I/O · Event Loop · 为什么主线程不能写死循环",
+              "summary": "往事件循环里投递网络请求、定时器与耗时重计算，亲眼看一个阻塞函数如何把整个页面卡成 PPT。"
+            }
+          ]
+        },
+        {
+          "id": "software/software-systems-os-04",
+          "slug": "software-systems-os-04",
+          "domain": "software",
+          "branch": "systems-os",
+          "order": 4,
+          "title": "内存管理与垃圾回收（GC）",
+          "icon": "♻️",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "为什么 C++ 程序员要手动释放内存，Java/Go 有自动保洁阿姨（GC）却偶尔会卡顿（STW），Rust 又是怎么做到既安全又零 GC 的？",
+          "difficulty": "进阶",
+          "related": [
+            "software/software-systems-os-02",
+            "software/software-systems-os-03"
+          ],
+          "toys": [
+            {
+              "id": "software/software-systems-os-04/01-mark-sweep-gc-spatial.html",
+              "file": "01-mark-sweep-gc-spatial.html",
+              "path": "./domains/software/software-systems-os-04/01-mark-sweep-gc-spatial.html",
+              "title": "标记-清除（Mark & Sweep）内存清扫图",
+              "icon": "🧹",
+              "archetype": "spatial",
+              "concept": "GC Roots 可达性分析 · 标记-清除 · 内存碎片与循环引用",
+              "summary": "单步点击“标记可达对象 → 清除孤岛垃圾”，亲眼看清为什么标记-清除能完美干掉引用计数搞不定的循环引用！"
+            },
+            {
+              "id": "software/software-systems-os-04/02-generational-gc-sim.html",
+              "file": "02-generational-gc-sim.html",
+              "path": "./domains/software/software-systems-os-04/02-generational-gc-sim.html",
+              "title": "分代假说：年轻代 vs 老年代 STW 停顿沙盘",
+              "icon": "⏱️",
+              "archetype": "simulation",
+              "concept": "弱分代假说 · Minor GC vs Full GC · Stop-The-World 卡顿",
+              "summary": "调节对象存活率，直观感受为什么 98% 的临时对象“朝生夕死”，以及分代回收如何把卡顿从 500ms 压到 2ms。"
+            },
+            {
+              "id": "software/software-systems-os-04/03-manual-gc-rust-race.html",
+              "file": "03-manual-gc-rust-race.html",
+              "path": "./domains/software/software-systems-os-04/03-manual-gc-rust-race.html",
+              "title": "三派内存哲学擂台：C++ vs Java(GC) vs Rust(所有权)",
+              "icon": "⚖️",
+              "archetype": "race",
+              "concept": "手动管理 · 追踪式 GC · Rust 编译期所有权 Ownership",
+              "summary": "在“开发心智负担”“运行零卡顿”“内存防崩溃”三个维度同屏对决三大流派，秒懂 Rust 为何惊艳系统编程界。"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "engineering",

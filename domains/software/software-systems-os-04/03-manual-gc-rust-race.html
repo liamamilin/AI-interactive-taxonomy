@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：三派内存哲学擂台 · C++ vs Java vs Rust</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .bar-row { display: grid; grid-template-columns: 110px 1fr 56px; gap: 10px; align-items: center; margin: 12px 0; font-size: 13.5px; font-weight: 800; }
+    .track { height: 14px; background: var(--tax-surface-alt); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); }
+    .fill { height: 100%; border-radius: 999px; transition: width 0.25s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚖️ 三派内存管理擂台：C++、Java/Go、Rust 怎么破解“安全 + 零卡顿”难题？</h1>
+        <p>依次点击切换三大流派，对比它们在<strong>运行时性能</strong>、<strong>内存防崩溃安全</strong>与<strong>上手轻松度</strong>上的不同取舍！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="bCpp" onclick="pick('cpp')">⚙️ C / C++（手动管理）</button>
+        <button class="btn" id="bJava" onclick="pick('java')">☕ Java / Go（运行时 GC）</button>
+        <button class="btn" id="bRust" onclick="pick('rust')">🦀 Rust（编译期所有权）</button>
+      </div>
+      <div id="bars"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const DATA = {
+      cpp: {
+        m: [
+          { l: "极速零卡顿", v: 98, c: "var(--tax-green)" },
+          { l: "内存防崩溃", v: 35, c: "var(--tax-red)" },
+          { l: "写代码轻松", v: 45, c: "var(--tax-amber)" }
+        ],
+        aha: "💡 <strong>C/C++ 哲学（信任程序员）：</strong>把所有控制权交给人类，零 GC 开销、性能登顶；但一旦忘记 free 或野指针越界，就会引发严重安全漏洞或程序当场段错误崩溃！"
+      },
+      java: {
+        m: [
+          { l: "极速零卡顿", v: 76, c: "var(--tax-amber)" },
+          { l: "内存防崩溃", v: 95, c: "var(--tax-green)" },
+          { l: "写代码轻松", v: 95, c: "var(--tax-green)" }
+        ],
+        aha: "💡 <strong>Java / Go 哲学（雇个保洁阿姨 GC）：</strong>极大解放开发生产力且几乎杜绝野指针；代价是运行时需要多占一些内存并承担偶尔的 GC 暂停开销。"
+      },
+      rust: {
+        m: [
+          { l: "极速零卡顿", v: 98, c: "var(--tax-green)" },
+          { l: "内存防崩溃", v: 98, c: "var(--tax-green)" },
+          { l: "写代码轻松", v: 40, c: "var(--tax-amber)" }
+        ],
+        aha: "💡 <strong>Rust 的破局神技（把保洁阿姨请进编译器）：</strong>通过严格的“所有权与借用检查”，在<strong>代码还没运行前的编译阶段</strong>就把释放时机全部算死并插入 free——既无 GC 卡顿，又保证内存安全，唯一代价就是学习曲线陡峭（和编译器斗智斗勇）！"
+      }
+    };
+    const seen = new Set(["cpp"]);
+    function pick(k) {
+      seen.add(k);
+      ["cpp", "java", "rust"].forEach(x => document.getElementById("b" + x.charAt(0).toUpperCase() + x.slice(1)).classList.toggle("active", x === k));
+      const d = DATA[k];
+      document.getElementById("bars").innerHTML = d.m.map(it => `
+        <div class="bar-row">
+          <span>${it.l}</span>
+          <div class="track"><div class="fill" style="width:${it.v}%;background:${it.c}"></div></div>
+          <span style="font-family:monospace;text-align:right;">${it.v}%</span>
+        </div>
+      `).join("");
+      document.getElementById("ahaBox").innerHTML = d.aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("cpp");
+  </script>
+</body>
+</html>

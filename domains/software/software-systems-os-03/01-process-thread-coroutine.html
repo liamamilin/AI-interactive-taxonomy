@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：进程 / 线程 / 协程内存与切换竞速</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+    @media (max-width: 740px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .card.boom { border-color: var(--tax-red); background: rgba(239,68,68,0.08); }
+    .num { font-size: 24px; font-weight: 900; font-family: ui-monospace, monospace; margin: 8px 0; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏎️ 进程 vs 线程 vs 协程：同样开 10,000 个并发，谁先爆内存？</h1>
+        <p>假设服务器配有 <strong>16 GB 内存</strong>。拖动并发任务数滑块，对比三代并发抽象的真实内存账单与切换成本！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">🚀 并发任务数：<span id="nVal" style="color:var(--tax-primary)">1,000</span> 个（单机内存上限：16 GB）</label>
+      <input id="nSlider" type="range" min="100" max="100000" step="100" value="1000" style="width:100%;margin-top:8px;" />
+
+      <div class="cards" id="cardRow"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function fmtMem(mb) {
+      return mb >= 1024 ? (mb / 1024).toFixed(1) + " GB" : Math.round(mb) + " MB";
+    }
+    function render() {
+      const n = parseInt(document.getElementById("nSlider").value, 10);
+      document.getElementById("nVal").textContent = n.toLocaleString();
+
+      const items = [
+        { name: "🏢 OS 进程（Process）", perMb: 12, sw: "~5 μs（切页表+内核态）", desc: "独立地址空间，安全隔离但极笨重" },
+        { name: "🧵 OS 线程（Thread）", perMb: 2, sw: "~1.5 μs（陷内核态）", desc: "共享进程内存，但每线程固定栈 ~2MB" },
+        { name: "🪶 协程（Goroutine / Async）", perMb: 0.002, sw: "~0.05 μs（纯用户态）", desc: "初始栈仅 2KB，由运行时调度器复用少量线程" }
+      ];
+
+      document.getElementById("cardRow").innerHTML = items.map(it => {
+        const tot = n * it.perMb;
+        const oom = tot > 16384;
+        return `
+          <div class="card ${oom ? "boom" : ""}">
+            <div style="font-weight:850;font-size:14.5px;">${it.name}</div>
+            <div class="num" style="color:${oom ? "var(--tax-red)" : "var(--tax-green)"}">${fmtMem(tot)} ${oom ? "💥OOM" : "✅"}</div>
+            <div style="font-size:12px;color:var(--tax-muted);">切换开销：${it.sw}</div>
+            <div style="font-size:12px;color:var(--tax-muted);margin-top:4px;">${it.desc}</div>
+          </div>
+        `;
+      }).join("");
+
+      document.getElementById("ahaBox").innerHTML = n >= 10000
+        ? `💡 <strong>高并发分水岭（${n.toLocaleString()} 并发）：</strong>进程和操作系统线程早就把 16GB 内存撑爆了，而 <strong>协程只占 ${fmtMem(n * 0.002)}</strong> 且切换无需陷入操作系统内核——这就是 Go / Rust Tokio / Java 虚拟线程统治现代后端高并发的底层秘密！`
+        : "💡 <strong>顿悟时刻：</strong>把并发数往右拉过 <strong>10,000</strong> 甚至 <strong>100,000</strong>，亲眼看进程和线程接连 OOM 爆掉，而协程依然风轻云淡！";
+    }
+    document.getElementById("nSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

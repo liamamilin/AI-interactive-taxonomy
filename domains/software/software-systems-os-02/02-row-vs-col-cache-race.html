@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：矩阵遍历竞速 · 按行读 vs 按列跳</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 14px; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 720px) { .duel { grid-template-columns: 1fr; } }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .mat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 10px 0; }
+    .c { height: 28px; border-radius: 6px; background: var(--tax-surface); border: 1px solid var(--tax-border); font-size: 11px; display: flex; align-items: center; justify-content: center; font-family: monospace; }
+    .c.hit { background: rgba(16,185,129,0.25); border-color: var(--tax-green); }
+    .c.miss { background: rgba(239,68,68,0.22); border-color: var(--tax-red); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏎️ 按行读 vs 按列跳：完全一样的 16 个数字，为什么速度差 10 倍？</h1>
+        <p>内存是一条连续排队的长纸带，CPU 每次搬运一整条 <strong>Cache Line（一次搬一整行 4 格）</strong>。点击开始遍历，亲眼看缓存命中率差距！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="btn" onclick="run()">▶ 同步遍历 4×4 矩阵</button>
+      <div class="duel">
+        <div class="lane">
+          <div style="font-weight:850;font-size:14px;">🚀 按行遍历 <code>a[i][j]</code>（连续读取）</div>
+          <div class="mat" id="rowMat"></div>
+          <div id="rowStat" style="font-size:12.5px;font-family:monospace;color:var(--tax-green);">待命…</div>
+        </div>
+        <div class="lane">
+          <div style="font-weight:850;font-size:14px;">🐢 按列遍历 <code>a[j][i]</code>（跨步跳跃）</div>
+          <div class="mat" id="colMat"></div>
+          <div id="colStat" style="font-size:12.5px;font-family:monospace;color:var(--tax-red);">待命…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>点击起跑，看清为什么“写代码顺着内存排布读”比换更贵的 CPU 还要立竿见影！
+    </div>
+  </div>
+
+  <script>
+    let timer = null;
+    function initGrids() {
+      document.getElementById("rowMat").innerHTML = Array.from({ length: 16 }, (_, i) => `<div class="c" id="rm${i}">${i}</div>`).join("");
+      document.getElementById("colMat").innerHTML = Array.from({ length: 16 }, (_, i) => `<div class="c" id="cm${i}">${i}</div>`).join("");
+    }
+    function run() {
+      if (timer) clearInterval(timer);
+      initGrids();
+      let step = 0, rMiss = 0, cMiss = 0;
+      timer = setInterval(() => {
+        if (step >= 16) {
+          clearInterval(timer);
+          document.getElementById("ahaBox").innerHTML = `💡 <strong>空间局部性（Spatial Locality）完胜！</strong>按行读每 4 格只触发 1 次主存搬运（仅 <strong>${rMiss} 次 Miss</strong>，后面 3 格全在 L1 白嫖命中）；按列跳步步踩空（<strong>${cMiss} 次 Miss</strong>，每次白搬一整行只用 1 格），耗时直接慢出一个数量级！`;
+          if (window.ToySDK) window.ToySDK.markCompleted();
+          return;
+        }
+        // Row-major index = step
+        const rIsMiss = step % 4 === 0;
+        if (rIsMiss) rMiss++;
+        document.getElementById("rm" + step).classList.add(rIsMiss ? "miss" : "hit");
+        document.getElementById("rowStat").textContent = `已读 ${step + 1}/16 · Cache Miss: ${rMiss} 次（75% 命中！）`;
+
+        // Col-major index = (step % 4) * 4 + Math.floor(step / 4)
+        const cIdx = (step % 4) * 4 + Math.floor(step / 4);
+        cMiss++;
+        document.getElementById("cm" + cIdx).classList.add("miss");
+        document.getElementById("colStat").textContent = `已读 ${step + 1}/16 · Cache Miss: ${cMiss} 次（0% 命中！）`;
+        step++;
+      }, 150);
+    }
+    initGrids();
+  </script>
+</body>
+</html>

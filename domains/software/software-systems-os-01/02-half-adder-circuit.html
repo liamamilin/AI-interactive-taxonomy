@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：逻辑门半加器电路板 · XOR + AND</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .sw { padding: 10px 18px; border-radius: 12px; border: 2px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 850; font-size: 14.5px; cursor: pointer; }
+    .sw.on { border-color: var(--tax-amber); background: rgba(245,158,11,0.18); color: var(--tax-amber); }
+    .board { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; }
+    svg { width: 100%; height: 220px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚡ 半加器电路板（Half Adder）：仅仅 2 扇逻辑门，硅片就学会了算数！</h1>
+        <p>点击拨动输入开关 <strong>A</strong> 和 <strong>B</strong>，看电流如何同时流经 <strong>XOR（异或门 → 算本位）</strong> 与 <strong>AND（与门 → 算进位）</strong>！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="sw" id="swA" onclick="toggle('A')">开关 A = 0</button>
+        <button class="sw" id="swB" onclick="toggle('B')">开关 B = 0</button>
+        <span style="font-family:monospace;font-size:15px;font-weight:850;margin-left:auto;" id="eqOut">0 + 0 = 00₂ (0)</span>
+      </div>
+
+      <div class="board">
+        <svg viewBox="0 0 540 210" id="cktSvg"></svg>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let A = 0, B = 0;
+    const combos = new Set(["00"]);
+
+    function toggle(k) {
+      if (k === "A") A ^= 1; else B ^= 1;
+      combos.add(`${A}${B}`);
+      render();
+      if (combos.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function wire(d, on) {
+      return `<path d="${d}" fill="none" stroke="${on ? "#fbbf24" : "#334155"}" stroke-width="${on ? 4.5 : 3}" stroke-linecap="round" />`;
+    }
+
+    function render() {
+      const sum = A ^ B;
+      const carry = A & B;
+      const dec = carry * 2 + sum;
+
+      const elA = document.getElementById("swA");
+      const elB = document.getElementById("swB");
+      elA.textContent = `开关 A = ${A}`; elA.classList.toggle("on", A === 1);
+      elB.textContent = `开关 B = ${B}`; elB.classList.toggle("on", B === 1);
+      document.getElementById("eqOut").textContent = `${A} + ${B} = ${carry}${sum}₂ (十进制 ${dec})`;
+
+      let s = "";
+      // Wires from A & B to XOR and AND
+      s += wire("M 70,55 L 220,55", A);
+      s += wire("M 135,55 L 135,142 L 220,142", A);
+      s += wire("M 70,158 L 165,158 L 165,78 L 220,78", B);
+      s += wire("M 70,158 L 220,158", B);
+      // Outputs
+      s += wire("M 310,66 L 445,66", sum);
+      s += wire("M 310,150 L 445,150", carry);
+
+      // Input nodes
+      s += `<circle cx="70" cy="55" r="18" fill="${A ? "#f59e0b" : "#1e293b"}" stroke="#94a3b8" stroke-width="2"/><text x="70" y="60" text-anchor="middle" fill="#fff" font-weight="800" font-size="13">A=${A}</text>`;
+      s += `<circle cx="70" cy="158" r="18" fill="${B ? "#f59e0b" : "#1e293b"}" stroke="#94a3b8" stroke-width="2"/><text x="70" y="163" text-anchor="middle" fill="#fff" font-weight="800" font-size="13">B=${B}</text>`;
+
+      // XOR Gate
+      s += `<rect x="220" y="40" width="90" height="52" rx="12" fill="#1e293b" stroke="#6366f1" stroke-width="2.5"/>`;
+      s += `<text x="265" y="63" text-anchor="middle" fill="#c7d2fe" font-weight="800" font-size="13">XOR 异或</text>`;
+      s += `<text x="265" y="80" text-anchor="middle" fill="#94a3b8" font-size="10.5">不同为 1</text>`;
+
+      // AND Gate
+      s += `<rect x="220" y="124" width="90" height="52" rx="12" fill="#1e293b" stroke="#10b981" stroke-width="2.5"/>`;
+      s += `<text x="265" y="147" text-anchor="middle" fill="#a7f3d0" font-weight="800" font-size="13">AND 与门</text>`;
+      s += `<text x="265" y="164" text-anchor="middle" fill="#94a3b8" font-size="10.5">全 1 才进位</text>`;
+
+      // Output bulbs
+      s += `<rect x="445" y="44" width="82" height="44" rx="12" fill="${sum ? "#f59e0b" : "#1e293b"}" stroke="#fff" stroke-width="1.5"/><text x="486" y="71" text-anchor="middle" fill="#fff" font-weight="800" font-size="12.5">本位 S=${sum}</text>`;
+      s += `<rect x="445" y="128" width="82" height="44" rx="12" fill="${carry ? "#10b981" : "#1e293b"}" stroke="#fff" stroke-width="1.5"/><text x="486" y="155" text-anchor="middle" fill="#fff" font-weight="800" font-size="12.5">进位 C=${carry}</text>`;
+
+      document.getElementById("cktSvg").innerHTML = s;
+      document.getElementById("ahaBox").innerHTML = (A === 1 && B === 1)
+        ? "💡 <strong>1 + 1 = 10₂（满二进一）！</strong>当 A 和 B 同时闭合，XOR 熄灭（本位变 0）、AND 点亮（进位变 1）！把 64 个这样的加法器串起来，就是现代 CPU 的核心算术逻辑单元（ALU）！"
+        : "💡 <strong>顿悟时刻：</strong>试着把开关 A 和 B <strong>全部打开（1 + 1）</strong>，亲眼看电流如何触发“本位归 0、进位亮 1”！";
+    }
+    render();
+  </script>
+</body>
+</html>

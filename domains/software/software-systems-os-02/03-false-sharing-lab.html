@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：多核伪共享（False Sharing）乒乓灾难</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .line { display: flex; gap: 8px; flex-wrap: wrap; padding: 14px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); justify-content: center; }
+    .slot { padding: 12px 16px; border-radius: 10px; font-family: monospace; font-weight: 800; font-size: 13px; border: 1.5px solid var(--tax-border); background: var(--tax-surface); }
+    .slot.a { border-color: var(--tax-primary); color: var(--tax-primary); }
+    .slot.b { border-color: var(--tax-green); color: var(--tax-green); }
+    .slot.pad { border-style: dashed; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏓 伪共享（False Sharing）：两个 CPU 核心各改各的变量，怎么反而越并发越慢？</h1>
+        <p>CPU 缓存一致性协议（MESI）是以 <strong>64 字节缓存行（Cache Line）</strong> 为最小同步单位的！切换下方布局，看看“紧挨着放”与“加 Padding 隔开”的天壤之别！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="mBad" onclick="setM('bad')">💥 紧挨着存放（挤在同一条 64B 缓存行）</button>
+        <button class="btn" id="mPad" onclick="setM('pad')">✅ 插入 64B Padding（分住两条独立缓存行）</button>
+      </div>
+
+      <div class="line" id="memView"></div>
+      <div id="perfOut" style="margin-top:14px;font-weight:850;font-size:15px;text-align:center;"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["bad"]);
+    function setM(m) {
+      seen.add(m);
+      document.getElementById("mBad").classList.toggle("active", m === "bad");
+      document.getElementById("mPad").classList.toggle("active", m === "pad");
+      const pad = m === "pad";
+      document.getElementById("memView").innerHTML = pad
+        ? `<div class="slot a">Cache Line #1：Core 1 专用计数器 X</div><div class="slot pad">🧱 56B Padding 隔离墙</div><div class="slot b">Cache Line #2：Core 2 专用计数器 Y</div>`
+        : `<div class="slot a">Core 1 改 X</div><div class="slot b">Core 2 改 Y</div><div style="width:100%;text-align:center;font-size:12px;color:var(--tax-red);margin-top:4px;">⚠️ 挤在同一个 64B 缓存行里！一方刚写，另一方的整行缓存立刻作废（Cache Ping-Pong）！</div>`;
+      document.getElementById("perfOut").innerHTML = pad
+        ? `双核 1 亿次计数耗时：<span style="color:var(--tax-green)">0.08 秒（满血线性加速 2× ✅）</span>`
+        : `双核 1 亿次计数耗时：<span style="color:var(--tax-red)">0.72 秒（比单核还慢 9 倍 💥）</span>`;
+      document.getElementById("ahaBox").innerHTML = pad
+        ? "💡 <strong>Padding 隔离神技（如 Java @Contended / C++ alignas(64)）：</strong>故意浪费几十字节内存把两个热变量隔开到不同的 64B 缓存行，两个核心从此井水不犯河水，性能瞬间暴涨 9 倍！"
+        : "💡 <strong>什么是“伪共享”？</strong>代码里 X 和 Y 毫无关系，但物理内存上它们是“合租同一条 64B 缓存行的室友”，导致两颗 CPU 核心疯狂互相作废对方缓存！点击上方切换到 <strong>插入 Padding</strong> 看看效果。";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    setM("bad");
+  </script>
+</body>
+</html>

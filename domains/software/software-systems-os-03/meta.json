@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "systems-os",
+  "order": 3,
+  "title": "进程、线程、协程与死锁",
+  "icon": "🧵",
+  "subtitle": "为什么开 1 万个线程会把服务器干崩，而 Go 语言开 100 万个协程却稳如泰山？两个线程又是怎么互相卡成死锁的？",
+  "difficulty": "进阶",
+  "related": ["software/software-systems-os-04", "software/software-distributed-04"],
+  "toys": {
+    "01-process-thread-coroutine.html": {
+      "title": "进程 / 线程 / 协程内存与切换竞速",
+      "icon": "🏎️",
+      "archetype": "race",
+      "concept": "进程隔离 · 线程共享内存 · 用户态协程 Goroutine",
+      "summary": "调高并发任务数到 10 万，实时对比进程、操作系统线程与协程的内存账单与上下文切换开销。"
+    },
+    "02-deadlock-dining-room.html": {
+      "title": "哲学家死锁餐桌：打破循环等待",
+      "icon": "🥢",
+      "archetype": "scenario",
+      "concept": "死锁四大条件 · 互斥与循环等待 · 按序加锁解锁",
+      "summary": "亲手触发经典的“左右手各拿一根筷子”全场死锁，再一键启用“全局编号按序加锁”瞬间破局！"
+    },
+    "03-event-loop-scheduler.html": {
+      "title": "单线程事件循环（Event Loop）调度沙盘",
+      "icon": "🎡",
+      "archetype": "simulation",
+      "concept": "异步非阻塞 I/O · Event Loop · 为什么主线程不能写死循环",
+      "summary": "往事件循环里投递网络请求、定时器与耗时重计算，亲眼看一个阻塞函数如何把整个页面卡成 PPT。"
+    }
+  }
+}

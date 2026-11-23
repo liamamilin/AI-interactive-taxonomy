@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>进程、线程、协程与死锁 · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧵 进程、线程、协程与死锁</h1>
+        <p>为什么开 1 万个线程会把服务器干崩，而 Go 语言开 100 万个协程却稳如泰山？两个线程又是怎么互相卡成死锁的？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-process-thread-coroutine.html">
+        <div class="hub-icon">🏎️</div>
+        <div class="hub-tag">玩具 01 · 开销竞速（Race）</div>
+        <div class="hub-title">进程 / 线程 / 协程内存与切换竞速</div>
+        <div class="hub-desc">拉高并发连接数，一眼看穿三代并发模型在内存占用和内核态切换成本上的数量级差距。</div>
+      </a>
+      <a class="hub-card" href="./02-deadlock-dining-room.html">
+        <div class="hub-icon">🥢</div>
+        <div class="hub-tag">玩具 02 · 死锁破局（Scenario）</div>
+        <div class="hub-title">哲学家死锁餐桌：打破循环等待</div>
+        <div class="hub-desc">复刻经典死锁现场，体验按全局锁顺序加锁如何彻底根除“你等我、我等你”的永久卡死。</div>
+      </a>
+      <a class="hub-card" href="./03-event-loop-scheduler.html">
+        <div class="hub-icon">🎡</div>
+        <div class="hub-tag">玩具 03 · 调度沙盘（Simulation）</div>
+        <div class="hub-title">单线程事件循环（Event Loop）调度沙盘</div>
+        <div class="hub-desc">同时投递异步 I/O 与同步重计算，直观理解 Node.js 与浏览器单线程为什么怕阻塞但擅长高并发。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

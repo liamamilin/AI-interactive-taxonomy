@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "systems-os",
+  "order": 2,
+  "title": "CPU 缓存局部性（L1 / RAM 百倍速差）",
+  "icon": "⚡",
+  "subtitle": "为什么写完全一样的两层循环，只是把行和列交换一下遍历顺序，程序就能瞬间快出 10 倍？",
+  "difficulty": "进阶",
+  "related": ["ai/ai-infra-safety-01", "software/software-database-cache-03"],
+  "toys": {
+    "01-latency-scale-visual.html": {
+      "title": "存储金字塔：把纳秒放大成人类的“秒与年”",
+      "icon": "🏛️",
+      "archetype": "simulation",
+      "concept": "L1/L2/L3 缓存 · RAM 内存 · SSD / 网络延迟数量级",
+      "summary": "把 CPU 读一次 L1 缓存比作 1 秒，亲眼看看读内存、读硬盘和跨洋请求在 CPU 眼里要等多久。"
+    },
+    "02-row-vs-col-cache-race.html": {
+      "title": "矩阵遍历竞速：按行读（Cache Hit）vs 按列跳（Cache Miss）",
+      "icon": "🏎️",
+      "archetype": "race",
+      "concept": "空间局部性 Spatial Locality · 缓存行 Cache Line (64B) · 预取",
+      "summary": "同屏对比按行连续遍历与按列大跨步跳跃遍历，亲眼看 64 字节缓存行如何把耗时拉开 10 倍差距。"
+    },
+    "03-false-sharing-lab.html": {
+      "title": "多核伪共享（False Sharing）乒乓灾难",
+      "icon": "🏓",
+      "archetype": "scenario",
+      "concept": "MESI 缓存一致性 · 伪共享 False Sharing · 缓存行填充 Padding",
+      "summary": "两个 CPU 核心明明改的是两个毫不相干的变量，为什么越加核心越慢？一键插入 Padding 瞬间破除缓存行打架！"
+    }
+  }
+}
