@@ -450,27 +450,63 @@ window.TAXONOMY_DATA = {
       "desc": "资源的时间价值与风险定价：复利、杠杆、组合与宏观货币",
       "branches": [
         {
-          "id": "wealth",
-          "title": "复利与个人财务",
+          "id": "time-value",
+          "title": "1. 时间价值与个人财务（Time Value & Personal Finance）",
           "plannedTopics": [
-            "复利曲线 vs 通胀侵蚀",
-            "房贷等额本息与本金真相"
+            "复利曲线 vs 通胀侵蚀（72 法则）",
+            "房贷等额本息 vs 等额本金真相",
+            "名义利率 vs 实际利率",
+            "个人现金流与资产负债表"
           ]
         },
         {
-          "id": "risk",
-          "title": "风险、杠杆与组合",
+          "id": "risk-leverage",
+          "title": "2. 风险、杠杆与波动数学（Risk, Leverage & Volatility）",
           "plannedTopics": [
-            "杠杆爆仓与波动损耗",
-            "分散投资与夏普比率"
+            "跌 50% 要涨 100%（波动损耗）",
+            "杠杆倍数与强平爆仓线",
+            "凯利公式（梭哈必死 vs 最优仓位）",
+            "尾部风险与黑天鹅"
           ]
         },
         {
-          "id": "macro",
-          "title": "宏观与货币",
+          "id": "portfolio",
+          "title": "3. 资产配置与投资组合（Portfolio & Allocation）",
           "plannedTopics": [
-            "货币乘数与央行降息传导",
-            "汇率与购买力平价"
+            "有效前沿与低相关性降波",
+            "股债定期再平衡",
+            "指数被动投资与费率复利侵蚀",
+            "定投微笑曲线的边界条件"
+          ]
+        },
+        {
+          "id": "valuation",
+          "title": "4. 资产估值与公司金融（Valuation & Corporate Finance）",
+          "plannedTopics": [
+            "现金流折现（DCF 未来钱折今天）",
+            "市盈率（PE）与成长预期陷阱",
+            "创业股权稀释与融资蛋糕",
+            "债券价格与利率跷跷板"
+          ]
+        },
+        {
+          "id": "insurance-derivatives",
+          "title": "5. 保险、期权与风险对冲（Insurance & Derivatives）",
+          "plannedTopics": [
+            "保险精算与大数定律",
+            "期权盈亏曲线（Call / Put）",
+            "期货套期保值（锁定价格）",
+            "逆向选择与免赔额机制"
+          ]
+        },
+        {
+          "id": "macro-monetary",
+          "title": "6. 宏观经济与货币周期（Macroeconomics & Monetary）",
+          "plannedTopics": [
+            "货币乘数与部分准备金",
+            "央行加息 / 降息传导链",
+            "汇率与蒙代尔不可能三角",
+            "债务周期与泡沫破裂（明斯基时刻）"
           ]
         }
       ],
