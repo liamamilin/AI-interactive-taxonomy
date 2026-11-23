@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAP 定理三选二（脑裂抉择）· 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚡ CAP 定理三选二（脑裂抉择）</h1>
+        <p>海底光缆被挖断的那一秒，你的分布式系统是宁可报错拒服保账本一致（CP），还是允许短暂数据不同步继续接单（AP）？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-cap-partition-scenario.html">
+        <div class="hub-icon">✂️</div>
+        <div class="hub-tag">玩具 01 · 脑裂抉择（Scenario）</div>
+        <div class="hub-title">机房断网脑裂抉择：CP 银行 vs AP 购物车</div>
+        <div class="hub-desc">亲手剪断机房间网线，直击网络分区不可避免时 C（强一致）与 A（高可用）的残酷二选一。</div>
+      </a>
+      <a class="hub-card" href="./02-quorum-rw-sandbox.html">
+        <div class="hub-icon">⚖️</div>
+        <div class="hub-tag">玩具 02 · 法定人数（Simulation）</div>
+        <div class="hub-title">法定人数公式（W + R &gt; N）读写调音台</div>
+        <div class="hub-desc">拖动 W 和 R 副本数量，直观用鸽巢原理看懂分布式存储怎样在延迟与一致性间精准微调。</div>
+      </a>
+      <a class="hub-card" href="./03-eventual-consistency-sim.html">
+        <div class="hub-icon">🔄</div>
+        <div class="hub-tag">玩具 03 · 延迟对照（Blind-Lab）</div>
+        <div class="hub-title">最终一致性收敛剧场：朋友圈点赞延迟</div>
+        <div class="hub-desc">对比同步强一致与异步最终一致性的响应速度与收敛过程，看懂不同业务为何选不同模型。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

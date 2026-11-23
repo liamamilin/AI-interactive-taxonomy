@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：旧老大复活防脑裂 · 任期 Term 碾压</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; line-height: 1.7; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🛡️ 旧老大复活防脑裂：断网的旧 Leader 突然满血归来，会引发“双主大战”吗？</h1>
+        <p>前任老大（<code>Term = 1</code>）因网线松动失联了 10 秒，期间大部队已经选出了 <code>Term = 2</code> 的新老大。依次点击看网线插回后的瞬间！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="s1" onclick="go(1)">① 分区期间：旧主 (Term 1) 试图自己写数据</button>
+        <button class="btn" id="s2" onclick="go(2)">② 网线恢复：旧主撞上新主 (Term 2) 心跳</button>
+      </div>
+      <div class="box" id="outBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set([1]);
+    function go(n) {
+      seen.add(n);
+      document.getElementById("s1").classList.toggle("active", n === 1);
+      document.getElementById("s2").classList.toggle("active", n === 2);
+      document.getElementById("outBox").innerHTML = n === 1
+        ? "🔒 <strong>分区孤岛里的旧主（Term 1）：</strong><br>即使有客户端连上了孤立的旧主并要求写数据，旧主广播日志时连不到另外 4 台机器，凑不够 <strong>过半数（≥3）确认</strong>，因此这条脏写入<strong>永远无法 Commit</strong>，彻底保护了数据安全！"
+        : "👑 <strong>官大一级压死人（Term 2 &gt; Term 1）：</strong><br>网线一插回，旧主立刻收到新主发来的 <code>Term = 2</code> 心跳！Raft 铁律规定：<strong>任何节点只要见到比自己更大的任期号，必须当场交出王冠退位成 Follower</strong>，并把刚才孤岛里未提交的脏草稿全部截断回滚，乖乖同步新主日志！";
+      document.getElementById("ahaBox").innerHTML = n === 1
+        ? "💡 <strong>第一道防线（过半数）：</strong>少数派孤岛里的旧老大永远凑不齐过半同意，所以写不进任何假账！点击 <strong>② 网线恢复</strong> 看第二道防线。"
+        : "💡 <strong>第二道防线（单调递增 Term 任期号）：</strong>Raft 用“过半数 + 任期号”两把大锁，彻底终结了分布式系统最可怕的“双主脑裂”噩梦！";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    go(1);
+  </script>
+</body>
+</html>

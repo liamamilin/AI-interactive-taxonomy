@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：Raft 民主选举模拟 · 随机超时防僵局</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.warn { background: var(--tax-red); border-color: var(--tax-red); }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .cluster { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    @media (max-width: 720px) { .cluster { grid-template-columns: repeat(2, 1fr); } }
+    .nd { padding: 14px 8px; border-radius: 14px; text-align: center; background: var(--tax-surface-alt); border: 2px solid var(--tax-border); }
+    .nd.leader { border-color: var(--tax-amber); background: rgba(245,158,11,0.16); }
+    .nd.dead { opacity: 0.4; border-style: dashed; border-color: var(--tax-red); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>👑 Raft 民主选举：老大突然宕机，剩下 4 台机器怎么不打架就选出新老大？</h1>
+        <p>每台 Follower 都有一个 <strong>150–300ms 的随机心跳倒计时</strong>。点击 <strong>💥 干掉当前 Leader</strong>，看谁最先超时起义并拿到 ≥3 票登基！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn warn" onclick="killLeader()">💥 干掉当前 Leader（触发选举！）</button>
+        <button class="btn sec" onclick="resetCluster()">↺ 重启全部 5 节点</button>
+        <span style="margin-left:auto;font-family:monospace;font-weight:850;">当前任期 Term = <span id="termOut" style="color:var(--tax-primary)">1</span></span>
+      </div>
+      <div class="cluster" id="clusterBox"></div>
+      <div id="logOut" style="margin-top:12px;font-size:13.5px;font-weight:800;text-align:center;color:var(--tax-primary);"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let term = 1;
+    let nodes = [];
+    let kills = 0;
+
+    function resetCluster() {
+      term = 1;
+      nodes = [
+        { id: 1, role: "Leader", alive: true, timeout: 210 },
+        { id: 2, role: "Follower", alive: true, timeout: 165 },
+        { id: 3, role: "Follower", alive: true, timeout: 240 },
+        { id: 4, role: "Follower", alive: true, timeout: 190 },
+        { id: 5, role: "Follower", alive: true, timeout: 275 }
+      ];
+      document.getElementById("logOut").textContent = "👑 节点 #1 正在正常发送心跳，集群风平浪静。";
+      render();
+    }
+
+    function killLeader() {
+      const cur = nodes.find(n => n.role === "Leader" && n.alive);
+      if (cur) { cur.alive = false; cur.role = "Dead"; }
+      const alive = nodes.filter(n => n.alive);
+      if (alive.length < 3) {
+        document.getElementById("logOut").textContent = "🚨 存活节点不足 3 个（未达过半数 Quorum），集群安全暂停写入！";
+        render();
+        return;
+      }
+      term++;
+      // 随机超时最小的节点最先超时发起拉票
+      alive.forEach(n => { n.timeout = 150 + Math.floor(Math.random() * 140); n.role = "Follower"; });
+      alive.sort((a, b) => a.timeout - b.timeout);
+      const winner = alive[0];
+      winner.role = "Leader";
+      kills++;
+      document.getElementById("logOut").textContent = `🗳️ 节点 #${winner.id} 最先超时（${winner.timeout}ms）→ 自荐 Candidate → 获 ${alive.length}/5 票（≥3 过半）→ 登基为 Term ${term} 新 Leader！`;
+      render();
+      if (kills >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      document.getElementById("termOut").textContent = term;
+      document.getElementById("clusterBox").innerHTML = nodes.map(n => `
+        <div class="nd ${n.role === "Leader" ? "leader" : !n.alive ? "dead" : ""}">
+          <div style="font-size:22px;">${n.role === "Leader" ? "👑" : n.alive ? "🖥️" : "💀"}</div>
+          <div style="font-weight:850;font-size:14px;margin-top:4px;">节点 #${n.id}</div>
+          <div style="font-size:12px;color:var(--tax-muted);margin-top:3px;">${n.alive ? n.role : "已宕机"}</div>
+          <div style="font-size:11px;font-family:monospace;color:var(--tax-primary);margin-top:4px;">${n.alive ? "超时 " + n.timeout + "ms" : "--"}</div>
+        </div>
+      `).join("");
+
+      document.getElementById("ahaBox").innerHTML = kills >= 1
+        ? "💡 <strong>随机超时（Randomized Timeout）的巧思：</strong>如果所有节点都设成固定 200ms 超时，老大一死大家就会同时起义瓜分选票陷入死循环！把超时打散在 150–300ms 之间，几乎总有 1 位“急性子”率先拉票凑齐过半选票，一举打破僵局！"
+        : "💡 <strong>顿悟时刻：</strong>点击 <strong>💥 干掉当前 Leader</strong> 两次，看看剩下节点如何靠随机超时在几百毫秒内无痛选出新老大，以及挂掉 3 台后为何拒绝选主！";
+    }
+    resetCluster();
+  </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "distributed",
+  "order": 2,
+  "title": "Raft 分布式共识选举",
+  "icon": "🗳️",
+  "subtitle": "5 台服务器里老大突然死机了，剩下 4 台怎么在没有人类裁判的情况下，几百毫秒内民主选出新老大且绝不撞车？",
+  "difficulty": "进阶",
+  "related": ["software/software-distributed-01", "software/software-distributed-03"],
+  "toys": {
+    "01-raft-leader-election.html": {
+      "title": "Raft 民主选举模拟：随机超时防僵局",
+      "icon": "👑",
+      "archetype": "simulation",
+      "concept": "Leader / Follower / Candidate · 任期 Term · 随机选举超时",
+      "summary": "一键干掉当前 Leader，亲眼看随机超时机制如何让某位节点率先拉票拿到过半数（3/5）选票登基！"
+    },
+    "02-raft-log-replication.html": {
+      "title": "日志两阶段复制（AppendEntries 过半提交）",
+      "icon": "📜",
+      "archetype": "spatial",
+      "concept": "日志复制 Log Replication · 过半数确认 Committed · 强一致状态机",
+      "summary": "向 Leader 发送写入指令，逐步追踪“追加未提交 → 过半节点落盘 → 正式 Commit”全流程。"
+    },
+    "03-raft-split-brain-defense.html": {
+      "title": "旧老大复活防脑裂：任期 Term 碾压",
+      "icon": "🛡️",
+      "archetype": "scenario",
+      "concept": "网络分区恢复 · 更高 Term 自动退位 · 杜绝双主写入",
+      "summary": "让断网失联的老 Leader 突然恢复并试图继续发号施令，亲眼看它遇到更高 Term 时如何乖乖退位变 Follower！"
+    }
+  }
+}

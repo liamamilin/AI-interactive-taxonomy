@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：令牌桶 vs 漏桶突发洪峰实测</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .duel { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .big { font-size: 24px; font-weight: 900; font-family: ui-monospace, monospace; margin: 8px 0; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🌊 令牌桶 vs 漏桶：同样限速 2 次/秒，遇到 8 个瞬间突发请求谁更友好？</h1>
+        <p>两只桶容量都是 6，匀速速率都是 2 个/秒。点击发射一波 <strong>8 个瞬间并发请求</strong>，对比两者的放行与排队行为！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" onclick="burst()">⚡ 瞬间发射 8 个突发请求！</button>
+        <button class="btn sec" onclick="refill()">🪙 攒满令牌 / 清空水桶</button>
+      </div>
+
+      <div class="duel">
+        <div class="card" style="border-color:var(--tax-primary);">
+          <div style="font-weight:850;font-size:14.5px;">🪙 令牌桶（Token Bucket · 允许合理突发）</div>
+          <div class="big" id="tbStat" style="color:var(--tax-primary);">桶内余票：6 / 6</div>
+          <div id="tbLog" style="font-size:13px;color:var(--tax-muted);line-height:1.55;">平时没人访问时，每秒往桶里存 2 张通行令牌，最多攒 6 张！</div>
+        </div>
+        <div class="card">
+          <div style="font-weight:850;font-size:14.5px;">💧 漏桶（Leaky Bucket · 强制绝对平滑）</div>
+          <div class="big" id="lbStat" style="color:var(--tax-amber);">桶内积水：0 / 6</div>
+          <div id="lbLog" style="font-size:13px;color:var(--tax-muted);line-height:1.55;">不管外面洪峰多大，桶底小孔永远严格每 0.5 秒只滴出 1 个请求！</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let tokens = 6, water = 0, ops = 0;
+
+    function refill() {
+      tokens = 6; water = 0;
+      document.getElementById("tbStat").textContent = "桶内余票：6 / 6";
+      document.getElementById("lbStat").textContent = "桶内积水：0 / 6";
+      document.getElementById("tbLog").textContent = "已重新攒满 6 张令牌，随时可接突发！";
+      document.getElementById("lbLog").textContent = "漏桶已排空！";
+    }
+
+    function burst() {
+      ops++;
+      const req = 8;
+      const tbPass = Math.min(req, tokens);
+      const tbDrop = req - tbPass;
+      tokens -= tbPass;
+
+      const lbQueue = Math.min(req, 6 - water);
+      const lbDrop = req - lbQueue;
+      water += lbQueue;
+
+      document.getElementById("tbStat").textContent = `秒放 ${tbPass} 个 · 429拒 ${tbDrop} 个`;
+      document.getElementById("tbLog").innerHTML = `✅ 靠之前攒下的 6 张令牌，<strong>立刻瞬间放行 ${tbPass} 个请求（0 排队延迟！）</strong>，超出的 ${tbDrop} 个直接返回 429 限流。`;
+      document.getElementById("lbStat").textContent = `排队 ${lbQueue} 个 · 溢出 ${lbDrop} 个`;
+      document.getElementById("lbLog").innerHTML = `⏳ 即使桶是空的，也绝不瞬间放行！${lbQueue} 个请求必须排成单队花 <strong>${(lbQueue * 0.5).toFixed(1)} 秒</strong> 慢慢滴出，保护脆弱下游！`;
+
+      document.getElementById("ahaBox").innerHTML = "💡 <strong>选型口诀：</strong>面对面向 C 端用户的 API 网关（需要容忍合理的瞬间点击突发、追求低延迟），选 <strong>令牌桶（如 Guava RateLimiter / Nginx burst）</strong>；面对脆弱的第三方支付接口或必须绝对平滑削峰填谷的队列，选 <strong>漏桶</strong>！";
+      if (ops >= 1 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    document.getElementById("ahaBox").innerHTML = "💡 <strong>顿悟时刻：</strong>点击上方 <strong>⚡ 瞬间发射 8 个突发请求</strong>，一秒看清令牌桶和漏桶的核心性格差异！";
+  </script>
+</body>
+</html>

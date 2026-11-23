@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Raft 分布式共识选举 · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🗳️ Raft 分布式共识选举</h1>
+        <p>5 台服务器里老大突然死机了，剩下 4 台怎么在没有人类裁判的情况下，几百毫秒内民主选出新老大且绝不撞车？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-raft-leader-election.html">
+        <div class="hub-icon">👑</div>
+        <div class="hub-tag">玩具 01 · 选举沙盘（Simulation）</div>
+        <div class="hub-title">Raft 民主选举模拟：随机超时防僵局</div>
+        <div class="hub-desc">亲手拔掉主节点网线，观察 5 节点集群如何在随机倒计时下迅速选出新任 Leader。</div>
+      </a>
+      <a class="hub-card" href="./02-raft-log-replication.html">
+        <div class="hub-icon">📜</div>
+        <div class="hub-tag">玩具 02 · 复制拓扑（Spatial）</div>
+        <div class="hub-title">日志两阶段复制（过半提交）</div>
+        <div class="hub-desc">逐步追踪一条写命令如何经由 Leader 广播给 Follower 并在超过半数确认后正式生效。</div>
+      </a>
+      <a class="hub-card" href="./03-raft-split-brain-defense.html">
+        <div class="hub-icon">🛡️</div>
+        <div class="hub-tag">玩具 03 · 脑裂防御（Scenario）</div>
+        <div class="hub-title">旧老大复活防脑裂：任期 Term 碾压</div>
+        <div class="hub-desc">模拟断网旧主突然归来，看懂单调递增的 Term 任期号如何一招防止“双主互相覆盖数据”。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

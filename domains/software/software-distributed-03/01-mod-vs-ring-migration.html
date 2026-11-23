@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：扩容大迁徙竞速 · 取模哈希 vs 一致性哈希环</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 14px; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .duel { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .num { font-size: 30px; font-weight: 900; font-family: ui-monospace, monospace; margin: 8px 0; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚚 扩容大迁徙：3 台缓存加到 4 台，为什么普通取模会让 75% 缓存瞬间作废？</h1>
+        <p>集群里存着 <strong>1,200 个热点 Key</strong>。点击把机器数从 3 台一路扩容到 6 台，对比两种路由策略的数据迁移（缓存失效）比例！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="btn" onclick="addNode()">➕ 扩容 +1 台服务器（当前：<span id="nOut">3</span> 台）</button>
+
+      <div class="duel">
+        <div class="card">
+          <div style="font-weight:850;font-size:14px;">💥 普通取模路由 <code>hash(k) % N</code></div>
+          <div class="num" id="modPct" style="color:var(--tax-red);">0%</div>
+          <div style="font-size:12.5px;color:var(--tax-muted);" id="modTxt">尚未扩容</div>
+        </div>
+        <div class="card" style="border-color:var(--tax-green);">
+          <div style="font-weight:850;font-size:14px;">⭕ 一致性哈希环（Consistent Hashing）</div>
+          <div class="num" id="ringPct" style="color:var(--tax-green);">0%</div>
+          <div style="font-size:12.5px;color:var(--tax-muted);" id="ringTxt">尚未扩容</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let N = 3;
+    let ops = 0;
+
+    function addNode() {
+      const prev = N;
+      N = N >= 8 ? 3 : N + 1;
+      ops++;
+      document.getElementById("nOut").textContent = N;
+
+      let modMoved = 0;
+      for (let k = 0; k < 1200; k++) {
+        if ((k % prev) !== (k % N)) modMoved++;
+      }
+      const mp = Math.round((modMoved / 1200) * 100);
+      const rp = Math.round((1 / N) * 100);
+
+      document.getElementById("modPct").textContent = mp + "% 失效 💥";
+      document.getElementById("modTxt").textContent = `从 ${prev} 台变成 ${N} 台，1200 个 Key 里有 ${modMoved} 个换了归属！`;
+      document.getElementById("ringPct").textContent = `~${rp}% 迁移 ✅`;
+      document.getElementById("ringTxt").textContent = `只从相邻节点切出约 1/${N} 的圆弧给新机器，其余 ${100 - rp}% 纹丝不动！`;
+
+      document.getElementById("ahaBox").innerHTML = `💡 <strong>为什么大厂禁止用 %N 做分布式缓存路由？</strong>从 ${prev} 台加到 ${N} 台时，<code>%N</code> 让 <strong>${mp}%</strong> 的缓存集体失效、流量瞬间打爆后端数据库！而一致性哈希环把迁移量死死压在理论最优值 <strong>1/N（约 ${rp}%）</strong>！`;
+      if (ops >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    document.getElementById("ahaBox").innerHTML = "💡 <strong>顿悟时刻：</strong>点击上方 <strong>➕ 扩容 +1 台服务器</strong> 按钮，看看两种哈希算法在加机器瞬间的惊人迁移率差距！";
+  </script>
+</body>
+</html>

@@ -6,10 +6,10 @@ window.TAXONOMY_DATA = {
   "stats": {
     "totalDomains": 10,
     "litDomains": 2,
-    "totalTopics": 59,
-    "totalPlannedTopics": 216,
+    "totalTopics": 63,
+    "totalPlannedTopics": 212,
     "totalBlueprintTopics": 275,
-    "totalToys": 177
+    "totalToys": 189
   },
   "tracks": [
     {
@@ -1220,24 +1220,7 @@ window.TAXONOMY_DATA = {
         {
           "id": "distributed",
           "title": "5. 分布式系统与高并发（Distributed Systems）",
-          "plannedTopics": [
-            {
-              "slug": "software-distributed-01",
-              "title": "CAP 定理三选二（脑裂抉择）"
-            },
-            {
-              "slug": "software-distributed-02",
-              "title": "Raft 分布式共识选举"
-            },
-            {
-              "slug": "software-distributed-03",
-              "title": "一致性哈希环（扩缩容不崩）"
-            },
-            {
-              "slug": "software-distributed-04",
-              "title": "限流算法（令牌桶 vs 漏桶）"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "swe-web",
@@ -1262,10 +1245,10 @@ window.TAXONOMY_DATA = {
           ]
         }
       ],
-      "liveTopicCount": 16,
-      "plannedTopicCount": 8,
+      "liveTopicCount": 20,
+      "plannedTopicCount": 4,
       "blueprintTopicCount": 24,
-      "liveToyCount": 48,
+      "liveToyCount": 60,
       "topics": [
         {
           "id": "software/software-database-cache-01",
@@ -1313,6 +1296,55 @@ window.TAXONOMY_DATA = {
               "archetype": "scenario",
               "concept": "联合索引 (a, b, c) · 最左前缀原则 · 索引失效排障",
               "summary": "针对联合索引 `(city, age, score)` 诊断 4 条真实 SQL 语句，一秒看清哪条命中索引、哪条直接失效！"
+            }
+          ]
+        },
+        {
+          "id": "software/software-distributed-01",
+          "slug": "software-distributed-01",
+          "domain": "software",
+          "branch": "distributed",
+          "order": 1,
+          "title": "CAP 定理三选二（脑裂抉择）",
+          "icon": "⚡",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "海底光缆被挖断的那一秒，你的分布式系统是宁可报错拒服保账本一致（CP），还是允许短暂数据不同步继续接单（AP）？",
+          "difficulty": "进阶",
+          "related": [
+            "software/software-distributed-02",
+            "software/software-database-cache-02"
+          ],
+          "toys": [
+            {
+              "id": "software/software-distributed-01/01-cap-partition-scenario.html",
+              "file": "01-cap-partition-scenario.html",
+              "path": "./domains/software/software-distributed-01/01-cap-partition-scenario.html",
+              "title": "机房断网脑裂抉择：CP 银行 vs AP 购物车",
+              "icon": "✂️",
+              "archetype": "scenario",
+              "concept": "CAP 定理 · 网络分区 Partition · CP 强一致 vs AP 高可用",
+              "summary": "一剪刀剪断北京与上海机房的光纤！分别在 CP 和 AP 模式下处理用户读写请求，亲眼看“三选二”其实只是断网时 C 与 A 二选一。"
+            },
+            {
+              "id": "software/software-distributed-01/02-quorum-rw-sandbox.html",
+              "file": "02-quorum-rw-sandbox.html",
+              "path": "./domains/software/software-distributed-01/02-quorum-rw-sandbox.html",
+              "title": "法定人数公式（W + R > N）读写调音台",
+              "icon": "⚖️",
+              "archetype": "simulation",
+              "concept": "Quorum 读写法定人数 · W+R>N 强一致 · 最终一致性",
+              "summary": "在 5 节点集群里自由调节写副本数 W 和读副本数 R，直观验证为什么只要 W + R > N 就必定读到最新值！"
+            },
+            {
+              "id": "software/software-distributed-01/03-eventual-consistency-sim.html",
+              "file": "03-eventual-consistency-sim.html",
+              "path": "./domains/software/software-distributed-01/03-eventual-consistency-sim.html",
+              "title": "最终一致性收敛剧场：朋友圈点赞延迟",
+              "icon": "🔄",
+              "archetype": "blind-lab",
+              "concept": "最终一致性 Eventual Consistency · 异步复制延迟 · 冲突合并",
+              "summary": "对比强同步复制与异步最终一致性在不同地区用户的可见时间差，秒懂为什么社交平台选 AP 而银行死守 CP。"
             }
           ]
         },
@@ -1513,6 +1545,55 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "software/software-distributed-02",
+          "slug": "software-distributed-02",
+          "domain": "software",
+          "branch": "distributed",
+          "order": 2,
+          "title": "Raft 分布式共识选举",
+          "icon": "🗳️",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "5 台服务器里老大突然死机了，剩下 4 台怎么在没有人类裁判的情况下，几百毫秒内民主选出新老大且绝不撞车？",
+          "difficulty": "进阶",
+          "related": [
+            "software/software-distributed-01",
+            "software/software-distributed-03"
+          ],
+          "toys": [
+            {
+              "id": "software/software-distributed-02/01-raft-leader-election.html",
+              "file": "01-raft-leader-election.html",
+              "path": "./domains/software/software-distributed-02/01-raft-leader-election.html",
+              "title": "Raft 民主选举模拟：随机超时防僵局",
+              "icon": "👑",
+              "archetype": "simulation",
+              "concept": "Leader / Follower / Candidate · 任期 Term · 随机选举超时",
+              "summary": "一键干掉当前 Leader，亲眼看随机超时机制如何让某位节点率先拉票拿到过半数（3/5）选票登基！"
+            },
+            {
+              "id": "software/software-distributed-02/02-raft-log-replication.html",
+              "file": "02-raft-log-replication.html",
+              "path": "./domains/software/software-distributed-02/02-raft-log-replication.html",
+              "title": "日志两阶段复制（AppendEntries 过半提交）",
+              "icon": "📜",
+              "archetype": "spatial",
+              "concept": "日志复制 Log Replication · 过半数确认 Committed · 强一致状态机",
+              "summary": "向 Leader 发送写入指令，逐步追踪“追加未提交 → 过半节点落盘 → 正式 Commit”全流程。"
+            },
+            {
+              "id": "software/software-distributed-02/03-raft-split-brain-defense.html",
+              "file": "03-raft-split-brain-defense.html",
+              "path": "./domains/software/software-distributed-02/03-raft-split-brain-defense.html",
+              "title": "旧老大复活防脑裂：任期 Term 碾压",
+              "icon": "🛡️",
+              "archetype": "scenario",
+              "concept": "网络分区恢复 · 更高 Term 自动退位 · 杜绝双主写入",
+              "summary": "让断网失联的老 Leader 突然恢复并试图继续发号施令，亲眼看它遇到更高 Term 时如何乖乖退位变 Follower！"
+            }
+          ]
+        },
+        {
           "id": "software/software-dsa-02",
           "slug": "software-dsa-02",
           "domain": "software",
@@ -1709,6 +1790,55 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "software/software-distributed-03",
+          "slug": "software-distributed-03",
+          "domain": "software",
+          "branch": "distributed",
+          "order": 3,
+          "title": "一致性哈希环（扩缩容不崩）",
+          "icon": "⭕",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "缓存集群从 3 台扩容到 4 台，用普通 hash(key)%N 会让 75% 缓存瞬间雪崩失效！把服务器摆成一个圆环怎么就破局了？",
+          "difficulty": "进阶",
+          "related": [
+            "software/software-dsa-02",
+            "software/software-database-cache-03"
+          ],
+          "toys": [
+            {
+              "id": "software/software-distributed-03/01-mod-vs-ring-migration.html",
+              "file": "01-mod-vs-ring-migration.html",
+              "path": "./domains/software/software-distributed-03/01-mod-vs-ring-migration.html",
+              "title": "扩容大迁徙竞速：取模哈希 vs 一致性哈希环",
+              "icon": "🚚",
+              "archetype": "race",
+              "concept": "hash(key)%N 全量重排 · 一致性哈希环 · 最小数据迁移",
+              "summary": "一键把集群从 3 台扩容到 4 台，实时对比普通取模（75% 缓存报废）与一致性哈希环（仅迁移 ~25% 局部数据）的震撼差距！"
+            },
+            {
+              "id": "software/software-distributed-03/02-consistent-hash-ring-svg.html",
+              "file": "02-consistent-hash-ring-svg.html",
+              "path": "./domains/software/software-distributed-03/02-consistent-hash-ring-svg.html",
+              "title": "一致性哈希圆环顺时针寻址图",
+              "icon": "⭕",
+              "archetype": "spatial",
+              "concept": "0 ~ 2³²-1 哈希环 · 顺时针找最近节点 · 宕机自动顺延",
+              "summary": "点击干掉圆环上的一台服务器，亲眼看它的流量如何顺时针平滑滑落到下一台邻居节点，其余机器纹丝不动！"
+            },
+            {
+              "id": "software/software-distributed-03/03-virtual-nodes-balance.html",
+              "file": "03-virtual-nodes-balance.html",
+              "path": "./domains/software/software-distributed-03/03-virtual-nodes-balance.html",
+              "title": "虚拟节点（Virtual Nodes）消除数据倾斜沙盘",
+              "icon": "⚖️",
+              "archetype": "simulation",
+              "concept": "数据倾斜 Skew · 虚拟分身节点 · 负载均衡",
+              "summary": "把每台物理机的虚拟分身从 1 个拉到 100 个，亲眼看三台机器的负载分布从严重偏科变成完美 33.3% 均分！"
+            }
+          ]
+        },
+        {
           "id": "software/software-dsa-03",
           "slug": "software-dsa-03",
           "domain": "software",
@@ -1901,6 +2031,55 @@ window.TAXONOMY_DATA = {
               "archetype": "simulation",
               "concept": "RUM 猜想 · 读放大 vs 写放大 · B+ 树与 LSM-Tree 选型",
               "summary": "在“读多写少电商”与“写多读少监控日志”之间切换，直观理解 B+ 树和 LSM-Tree 各自的统治区。"
+            }
+          ]
+        },
+        {
+          "id": "software/software-distributed-04",
+          "slug": "software-distributed-04",
+          "domain": "software",
+          "branch": "distributed",
+          "order": 4,
+          "title": "限流算法（令牌桶 vs 漏桶）",
+          "icon": "🪣",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "双十一零点每秒涌进 10 万次抢购请求，网关怎么既允许合理的瞬间突发流量，又死死护住后端不被洪峰冲垮？",
+          "difficulty": "入门",
+          "related": [
+            "software/software-network-crypto-02",
+            "software/software-systems-os-03"
+          ],
+          "toys": [
+            {
+              "id": "software/software-distributed-04/01-token-vs-leaky-bucket.html",
+              "file": "01-token-vs-leaky-bucket.html",
+              "path": "./domains/software/software-distributed-04/01-token-vs-leaky-bucket.html",
+              "title": "令牌桶 vs 漏桶突发洪峰实测",
+              "icon": "🌊",
+              "archetype": "race",
+              "concept": "令牌桶 Token Bucket · 漏桶 Leaky Bucket · 突发流量 Burst",
+              "summary": "一键发射 10 个瞬间突发请求！亲眼看令牌桶如何用攒下的令牌秒放行突发，而漏桶如何像沙漏一样绝对匀速滴出。"
+            },
+            {
+              "id": "software/software-distributed-04/02-fixed-vs-sliding-window.html",
+              "file": "02-fixed-vs-sliding-window.html",
+              "path": "./domains/software/software-distributed-04/02-fixed-vs-sliding-window.html",
+              "title": "固定窗口临界突刺陷阱（1 秒 2 倍流量穿透）",
+              "icon": "🪟",
+              "archetype": "scenario",
+              "concept": "固定窗口限流 · 边界双倍突刺 · 滑动窗口算法",
+              "summary": "在 0.99 秒和 1.01 秒各打满 100 次请求，亲眼看固定窗口如何被 200 次瞬间流量打穿，再开启滑动窗口一秒封堵！"
+            },
+            {
+              "id": "software/software-distributed-04/03-circuit-breaker-fsm.html",
+              "file": "03-circuit-breaker-fsm.html",
+              "path": "./domains/software/software-distributed-04/03-circuit-breaker-fsm.html",
+              "title": "熔断器三态机（Closed → Open → Half-Open）",
+              "icon": "🔌",
+              "archetype": "simulation",
+              "concept": "服务雪崩 · 熔断器 Circuit Breaker · 半开探活恢复",
+              "summary": "不断注入下游超时故障触发熔断跳闸，体验快速失败保护与半开状态放行 1 个侦察兵试探恢复的精妙设计！"
             }
           ]
         },

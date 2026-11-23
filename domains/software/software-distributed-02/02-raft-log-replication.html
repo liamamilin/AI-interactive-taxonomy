@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：Raft 日志两阶段复制 · 过半提交</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .steps { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 720px) { .row { grid-template-columns: 1fr; } }
+    .nd { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; text-align: center; }
+    .log-entry { margin-top: 8px; padding: 8px; border-radius: 8px; font-family: monospace; font-size: 12.5px; font-weight: 800; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📜 Raft 日志两阶段复制：为什么必须“过半数抄完小本本”才敢告诉用户写入成功？</h1>
+        <p>客户端发来写命令 <code>SET x = 42</code>。依次点击下面 3 个步骤，走完 Raft 最核心的两阶段日志提交！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="steps">
+        <button class="btn active" id="s1" onclick="go(1)">① Leader 先写本地未提交日志</button>
+        <button class="btn" id="s2" onclick="go(2)">② 广播 AppendEntries 并等过半确认</button>
+        <button class="btn" id="s3" onclick="go(3)">③ 正式 Commit 并回复客户端成功！</button>
+      </div>
+      <div class="row" id="nodeBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set([1]);
+    function go(n) {
+      seen.add(n);
+      [1, 2, 3].forEach(i => document.getElementById("s" + i).classList.toggle("active", i === n));
+      const nodes = [
+        { name: "👑 Leader #1", st: n === 3 ? "✅ Committed: x=42" : "🟡 Uncommitted: x=42", col: n === 3 ? "rgba(16,185,129,0.2)" : "rgba(245,158,11,0.2)" },
+        { name: "🖥️ Follower #2", st: n >= 2 ? (n === 3 ? "✅ Committed: x=42" : "🟡 已落盘，回复 OK") : "⬜ 空", col: n === 3 ? "rgba(16,185,129,0.2)" : n === 2 ? "rgba(99,102,241,0.18)" : "var(--tax-surface)" },
+        { name: "🖥️ Follower #3（网络慢）", st: "⏳ 掉队中（不影响过半！）", col: "var(--tax-surface)" }
+      ];
+      document.getElementById("nodeBox").innerHTML = nodes.map(x => `
+        <div class="nd">
+          <div style="font-weight:850;font-size:14px;">${x.name}</div>
+          <div class="log-entry" style="background:${x.col};">${x.st}</div>
+        </div>
+      `).join("");
+
+      const ahas = {
+        1: "💡 <strong>阶段 1：</strong>Leader 收到写请求后先记在自己草稿本上（Uncommitted），此时绝不敢直接回复用户成功，万一自己立刻断电数据就丢了！",
+        2: "💡 <strong>阶段 2（过半确认）：</strong>Leader 把日志并发发给所有 Follower。只要包括自己在内有 <strong>2/3（过半数）</strong> 落盘成功，哪怕 #3 号机宕机也完全不卡壳！",
+        3: "💡 <strong>阶段 3（Commit 永久生效）：</strong>一旦凑齐过半确认，Leader 立刻把日志标为 Committed 并回复客户端成功！将来无论选谁当新老大，过半数原则保证了新老大必定拥有这条已提交日志（etcd / TiKV / CockroachDB 全靠它保命）！"
+      };
+      document.getElementById("ahaBox").innerHTML = ahas[n];
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    go(1);
+  </script>
+</body>
+</html>

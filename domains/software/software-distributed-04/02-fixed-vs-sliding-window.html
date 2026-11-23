@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：固定窗口临界突刺陷阱 · 滑动窗口解法</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; line-height: 1.75; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🪟 固定窗口临界突刺陷阱：明明限了 100 QPS，怎么 0.2 秒内冲进了 200 个请求？</h1>
+        <p>系统规定 <strong>每 1 秒最多 100 次请求</strong>。黑客卡在 <code>0.9s</code> 发 100 次，又在 <code>1.1s</code> 发 100 次！切换两种窗口算法看看结果！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="mFix" onclick="pick('fix')">💥 固定窗口计数器（整秒清零）</button>
+        <button class="btn" id="mSlide" onclick="pick('slide')">✅ 滑动窗口（Redis ZSET / 分片平滑）</button>
+      </div>
+      <div class="box" id="outBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["fix"]);
+    function pick(m) {
+      seen.add(m);
+      document.getElementById("mFix").classList.toggle("active", m === "fix");
+      document.getElementById("mSlide").classList.toggle("active", m === "slide");
+      const slide = m === "slide";
+      document.getElementById("outBox").innerHTML = slide
+        ? "✅ <strong>滑动窗口成功拦截！</strong><br>在 <code>1.1s</code> 时刻，算法动态回看过去整整 1 秒区间 <code>[0.1s, 1.1s]</code>，发现里面已经装满了 <code>0.9s</code> 时的 100 个请求 → 立刻把 <code>1.1s</code> 涌来的 100 个请求全部拦截返回 429！"
+        : "💥 <strong>临界双倍突刺打穿防线！</strong><br>• 窗口 1 <code>[0.0s, 1.0s)</code>：在 0.9s 放行 100 次（没超！）<br>• 1.0s 整点计数器直接归零！<br>• 窗口 2 <code>[1.0s, 2.0s)</code>：在 1.1s 又放行 100 次（没超！）<br>→ 结果在短短 <strong>0.2 秒内实际放行了 200 次（2 倍上限）</strong>，把数据库干翻！";
+      document.getElementById("ahaBox").innerHTML = slide
+        ? "💡 <strong>滑动窗口消除边界死角：</strong>无论攻击者怎么卡整秒边界，任意连续 1 秒窗口内的请求总数绝不会超过阈值！"
+        : "💡 <strong>固定窗口最经典的面试坑：</strong>跨窗口边界处永远存在 <strong>2 倍突刺漏洞</strong>！点击上方切换到 <strong>✅ 滑动窗口</strong> 看如何根治。";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("fix");
+  </script>
+</body>
+</html>

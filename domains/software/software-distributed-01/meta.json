@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "distributed",
+  "order": 1,
+  "title": "CAP 定理三选二（脑裂抉择）",
+  "icon": "⚡",
+  "subtitle": "海底光缆被挖断的那一秒，你的分布式系统是宁可报错拒服保账本一致（CP），还是允许短暂数据不同步继续接单（AP）？",
+  "difficulty": "进阶",
+  "related": ["software/software-distributed-02", "software/software-database-cache-02"],
+  "toys": {
+    "01-cap-partition-scenario.html": {
+      "title": "机房断网脑裂抉择：CP 银行 vs AP 购物车",
+      "icon": "✂️",
+      "archetype": "scenario",
+      "concept": "CAP 定理 · 网络分区 Partition · CP 强一致 vs AP 高可用",
+      "summary": "一剪刀剪断北京与上海机房的光纤！分别在 CP 和 AP 模式下处理用户读写请求，亲眼看“三选二”其实只是断网时 C 与 A 二选一。"
+    },
+    "02-quorum-rw-sandbox.html": {
+      "title": "法定人数公式（W + R > N）读写调音台",
+      "icon": "⚖️",
+      "archetype": "simulation",
+      "concept": "Quorum 读写法定人数 · W+R>N 强一致 · 最终一致性",
+      "summary": "在 5 节点集群里自由调节写副本数 W 和读副本数 R，直观验证为什么只要 W + R > N 就必定读到最新值！"
+    },
+    "03-eventual-consistency-sim.html": {
+      "title": "最终一致性收敛剧场：朋友圈点赞延迟",
+      "icon": "🔄",
+      "archetype": "blind-lab",
+      "concept": "最终一致性 Eventual Consistency · 异步复制延迟 · 冲突合并",
+      "summary": "对比强同步复制与异步最终一致性在不同地区用户的可见时间差，秒懂为什么社交平台选 AP 而银行死守 CP。"
+    }
+  }
+}

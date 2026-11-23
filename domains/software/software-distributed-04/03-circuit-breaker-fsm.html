@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：熔断器三态机 · Closed → Open → Half-Open</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.warn { background: var(--tax-red); border-color: var(--tax-red); }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .states { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 700px) { .states { grid-template-columns: 1fr; } }
+    .st { padding: 16px; border-radius: 14px; text-align: center; background: var(--tax-surface-alt); border: 2px solid var(--tax-border); opacity: 0.45; transition: all 0.2s ease; }
+    .st.on { opacity: 1; transform: translateY(-2px); }
+    .st.closed.on { border-color: var(--tax-green); background: rgba(16,185,129,0.14); }
+    .st.open.on { border-color: var(--tax-red); background: rgba(239,68,68,0.14); }
+    .st.half.on { border-color: var(--tax-amber); background: rgba(245,158,11,0.16); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔌 熔断器三态机（Circuit Breaker）：像家里空气开关一样防止微服务连环雪崩！</h1>
+        <p>依次点击下方操作，亲手体验 <strong>连续失败 3 次跳闸（Open）→ 冷却后放 1 个侦察兵探活（Half-Open）→ 探活成功恢复（Closed）</strong> 全周期！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn warn" onclick="fail()">💥 模拟一次下游超时失败（当前连败：<span id="fCnt">0</span>/3）</button>
+        <button class="btn sec" onclick="coolDown()">⏳ 等待冷却结束（进入半开探活）</button>
+        <button class="btn" onclick="probeOk()">✅ 侦察兵请求成功（恢复闭合）</button>
+      </div>
+
+      <div class="states">
+        <div class="st closed on" id="stClosed"><div style="font-size:24px;">🟢</div><div style="font-weight:850;margin-top:4px;">Closed 闭合</div><div style="font-size:12px;color:var(--tax-muted);margin-top:4px;">正常放行全部流量</div></div>
+        <div class="st open" id="stOpen"><div style="font-size:24px;">🔴</div><div style="font-weight:850;margin-top:4px;">Open 熔断跳闸</div><div style="font-size:12px;color:var(--tax-muted);margin-top:4px;">直接快速失败，绝不拖垮线程池！</div></div>
+        <div class="st half" id="stHalf"><div style="font-size:24px;">🟡</div><div style="font-weight:850;margin-top:4px;">Half-Open 半开</div><div style="font-size:12px;color:var(--tax-muted);margin-top:4px;">只放 1 个侦察兵探路</div></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let state = "closed", fails = 0;
+    const seen = new Set(["closed"]);
+
+    function fail() {
+      if (state === "open") return;
+      fails++;
+      if (fails >= 3 || state === "half") {
+        state = "open";
+        seen.add("open");
+      }
+      render();
+    }
+
+    function coolDown() {
+      if (state === "open") {
+        state = "half";
+        seen.add("half");
+        render();
+      }
+    }
+
+    function probeOk() {
+      if (state === "half") {
+        state = "closed";
+        fails = 0;
+        render();
+        if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+
+    function render() {
+      document.getElementById("fCnt").textContent = fails;
+      document.getElementById("stClosed").classList.toggle("on", state === "closed");
+      document.getElementById("stOpen").classList.toggle("on", state === "open");
+      document.getElementById("stHalf").classList.toggle("on", state === "half");
+
+      const ahas = {
+        closed: seen.size >= 3
+          ? "💡 <strong>完美自愈闭环通关！</strong>熔断器（Hystrix / Resilience4j / Sentinel）在下游挂掉时果断“拉闸断电”防止全站线程池被拖死，冷却后再派少量侦察兵试探恢复——这就是高可用微服务的保命保险丝！"
+          : "💡 <strong>状态：Closed 正常放行。</strong>连续点击 3 次 <strong>💥 模拟下游超时失败</strong> 触发熔断跳闸！",
+        open: "💡 <strong>状态：Open 跳闸熔断！</strong>下游已经卡死了，继续发请求只会把自己的线程全堵死！现在直接 1ms 返回降级兜底结果。点击 <strong>⏳ 等待冷却结束</strong> 进入半开状态。",
+        half: "💡 <strong>状态：Half-Open 半开探活！</strong>冷却期结束，放 1 个侦察兵试探：成功就恢复全量流量，失败就立刻重新跳闸！点击 <strong>✅ 侦察兵请求成功</strong> 完成自愈。"
+      };
+      document.getElementById("ahaBox").innerHTML = ahas[state];
+    }
+    render();
+  </script>
+</body>
+</html>

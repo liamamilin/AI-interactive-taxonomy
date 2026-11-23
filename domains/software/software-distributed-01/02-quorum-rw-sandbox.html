@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：法定人数公式（W + R > N）读写调音台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    @media (max-width: 700px) { .ctrls { grid-template-columns: 1fr; } }
+    .nodes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 14px 0; }
+    .nd { padding: 14px 6px; border-radius: 12px; text-align: center; font-weight: 850; font-size: 13px; background: var(--tax-surface-alt); border: 2px solid var(--tax-border); }
+    .nd.w { border-color: var(--tax-primary); }
+    .nd.r { background: rgba(245,158,11,0.16); }
+    .nd.both { border-color: var(--tax-green); background: rgba(16,185,129,0.22); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚖️ Quorum 法定人数（W + R &gt; N）：为什么不用写满全部 5 台机器，也能保证 100% 读到最新值？</h1>
+        <p>集群共有 <strong>N = 5</strong> 台副本节点。调节每次写入确认数 <code>W</code> 与读取抽查数 <code>R</code>，看什么时候读写集合必然相交！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <div>
+          <label style="font-weight:850;font-size:14px;">✏️ 写确认副本数 W：<span id="wVal" style="color:var(--tax-primary)">3</span> / 5</label>
+          <input id="wSlider" type="range" min="1" max="5" value="3" style="width:100%;margin-top:6px;" />
+        </div>
+        <div>
+          <label style="font-weight:850;font-size:14px;">🔍 读抽查副本数 R：<span id="rVal" style="color:var(--tax-amber)">3</span> / 5</label>
+          <input id="rSlider" type="range" min="1" max="5" value="3" style="width:100%;margin-top:6px;" />
+        </div>
+      </div>
+
+      <div class="nodes" id="nodeRow"></div>
+      <div id="statOut" style="text-align:center;font-weight:850;font-size:15px;"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const W = parseInt(document.getElementById("wSlider").value, 10);
+      const R = parseInt(document.getElementById("rSlider").value, 10);
+      document.getElementById("wVal").textContent = W;
+      document.getElementById("rVal").textContent = R;
+
+      // 最坏情况：W 从左往右写，R 从右往左读，看有没有交集
+      let overlap = 0;
+      let html = "";
+      for (let i = 0; i < 5; i++) {
+        const isW = i < W;
+        const isR = i >= 5 - R;
+        if (isW && isR) overlap++;
+        const cls = isW && isR ? "both" : isW ? "w" : isR ? "r" : "";
+        const tag = isW && isR ? "🎯 读写交集！" : isW ? "✏️ 最新值" : isR ? "🔍 仅旧值" : "⬜ 未参与";
+        html += `<div class="nd ${cls}">节点 #${i + 1}<div style="font-size:11px;margin-top:6px;">${tag}</div></div>`;
+      }
+      document.getElementById("nodeRow").innerHTML = html;
+
+      const strong = W + R > 5;
+      document.getElementById("statOut").innerHTML = `W (${W}) + R (${R}) = <strong>${W + R}</strong> ${strong ? "&gt; 5 → <span style='color:var(--tax-green)'>✅ 必然重叠，强一致读取！</span>" : "≤ 5 → <span style='color:var(--tax-red)'>⚠️ 可能完全错过，读到旧值！</span>"}`;
+      document.getElementById("ahaBox").innerHTML = strong
+        ? "💡 <strong>鸽巢原理的工程奇迹（W + R &gt; N）：</strong>5 台机器里，只要写完 3 台、读查 3 台，哪怕最倒霉也会至少撞上 <strong>1 台存着最新版本号的节点</strong>！而且集群就算挂掉 2 台机器，系统依然照常读写！"
+        : "💡 <strong>弱一致（最终一致）配置：</strong>当 W + R ≤ N 时（如 W=1, R=1），读写延迟最低，但可能读到还没同步过来的旧副本！把 W 或 R 拉高让 W + R &gt; 5 试试！";
+    }
+
+    ["wSlider", "rSlider"].forEach(id => document.getElementById(id).addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }));
+    render();
+  </script>
+</body>
+</html>

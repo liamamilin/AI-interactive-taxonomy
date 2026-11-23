@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：机房断网脑裂抉择 · CP vs AP</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .nodes { display: grid; grid-template-columns: 1fr 90px 1fr; gap: 10px; align-items: center; }
+    @media (max-width: 700px) { .nodes { grid-template-columns: 1fr; } }
+    .nd { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; text-align: center; }
+    .link { text-align: center; font-weight: 900; font-size: 13px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>✂️ 机房断网脑裂抉择：CAP“三选二”的真相其实是“断网时 C 与 A 二选一”！</h1>
+        <p>北京机房刚把余额改成了 <strong>¥500</strong>，就在同步前，挖掘机一铲子挖断了京沪光纤（P 分区爆发）！切换下方策略看上海机房怎么回答用户！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn active" id="mCp" onclick="pick('cp')">🏦 CP 模式（保强一致，如银行/ZooKeeper/etcd）</button>
+        <button class="btn" id="mAp" onclick="pick('ap')">🛒 AP 模式（保高可用，如电商购物车/DNS/Cassandra）</button>
+      </div>
+
+      <div class="nodes">
+        <div class="nd">
+          <div style="font-weight:850;font-size:15px;">🖥️ 北京节点 A</div>
+          <div style="font-size:22px;font-weight:900;color:var(--tax-primary);margin:6px 0;">余额 = ¥500</div>
+          <div style="font-size:12px;color:var(--tax-muted);">刚刚收到最新写入</div>
+        </div>
+        <div class="link" style="color:var(--tax-red);">✂️ 光纤已断<br>无法同步！</div>
+        <div class="nd" id="shNode"></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["cp"]);
+    function pick(m) {
+      seen.add(m);
+      document.getElementById("mCp").classList.toggle("active", m === "cp");
+      document.getElementById("mAp").classList.toggle("active", m === "ap");
+      const cp = m === "cp";
+      document.getElementById("shNode").innerHTML = cp
+        ? `<div style="font-weight:850;font-size:15px;">🖥️ 上海节点 B</div><div style="font-size:18px;font-weight:900;color:var(--tax-red);margin:8px 0;">🚫 503 拒绝服务！</div><div style="font-size:12px;color:var(--tax-muted);">“连不上北京，我宁可报错也不敢给你过时余额！”</div>`
+        : `<div style="font-weight:850;font-size:15px;">🖥️ 上海节点 B</div><div style="font-size:22px;font-weight:900;color:var(--tax-amber);margin:6px 0;">余额 = ¥1,000（旧值）</div><div style="font-size:12px;color:var(--tax-muted);">“照常营业！等网通了后台再合并对账！”</div>`;
+
+      document.getElementById("ahaBox").innerHTML = cp
+        ? "💡 <strong>CP 选择（牺牲可用性 A，死保一致性 C）：</strong>在分布式系统里，网线总有一天会断（P 必然发生）。银行转账绝不能让同一个用户两边各取一次钱，所以断网时必须果断拒服！"
+        : "💡 <strong>AP 选择（牺牲强一致 C，死保可用性 A）：</strong>朋友圈少显示 1 个赞、购物车短暂不同步根本无伤大雅，但如果网站直接 503 打不开就会流失海量用户——所以断网时优先保证“永不停机”！";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("cp");
+  </script>
+</body>
+</html>

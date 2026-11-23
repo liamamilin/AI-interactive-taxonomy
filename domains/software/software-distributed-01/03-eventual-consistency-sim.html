@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：最终一致性收敛剧场 · 朋友圈点赞</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 14px; }
+    .regions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 720px) { .regions { grid-template-columns: 1fr; } }
+    .reg { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; text-align: center; }
+    .num { font-size: 28px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔄 最终一致性收敛剧场：为什么你刚给朋友点了赞，他刷屏 1 秒后才看到？</h1>
+        <p>点击下方按钮给一条全球热帖点个赞，亲眼看主库秒回成功，而亚洲、欧洲、美洲三个边缘只读副本在几百毫秒内陆续收敛同步！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="btn" onclick="likePost()">👍 立刻点赞！（目前赞数 +1）</button>
+
+      <div class="regions">
+        <div class="reg"><div>🇨🇳 亚洲主库（本地写入）</div><div class="num" id="r1" style="color:var(--tax-green);">100</div><div id="t1" style="font-size:12px;color:var(--tax-muted);">就绪</div></div>
+        <div class="reg"><div>🇪🇺 欧洲只读副本（延迟 400ms）</div><div class="num" id="r2" style="color:var(--tax-primary);">100</div><div id="t2" style="font-size:12px;color:var(--tax-muted);">就绪</div></div>
+        <div class="reg"><div>🇺🇸 美洲只读副本（延迟 900ms）</div><div class="num" id="r3" style="color:var(--tax-amber);">100</div><div id="t3" style="font-size:12px;color:var(--tax-muted);">就绪</div></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let likes = 100, clicks = 0;
+    function likePost() {
+      likes++;
+      clicks++;
+      const cur = likes;
+      document.getElementById("r1").textContent = cur;
+      document.getElementById("t1").textContent = "⚡ 10ms 立即返回成功！";
+      document.getElementById("t2").textContent = "⏳ 异步同步中…";
+      document.getElementById("t3").textContent = "⏳ 跨洋复制中…";
+
+      setTimeout(() => {
+        document.getElementById("r2").textContent = cur;
+        document.getElementById("t2").textContent = "✅ 已收敛同步";
+      }, 450);
+
+      setTimeout(() => {
+        document.getElementById("r3").textContent = cur;
+        document.getElementById("t3").textContent = "✅ 全球全部一致！";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>最终一致性（Eventual Consistency）的魔力：</strong>如果点个赞非要等全球 3 大洲全部写完才亮红心，用户体验会卡成 PPT！允许短暂 0.5 秒不一致、换取 10ms 极速响应，只要不再有新写入，所有副本<strong>最终总会收敛一致</strong>！";
+        if (clicks >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+      }, 950);
+    }
+    document.getElementById("ahaBox").innerHTML = "💡 <strong>顿悟时刻：</strong>连续点击两次 <strong>👍 立刻点赞</strong>，观察三个大洲的赞数如何短暂错开、又在 1 秒内全部收敛成同一个数字！";
+  </script>
+</body>
+</html>

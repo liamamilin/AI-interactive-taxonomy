@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：一致性哈希圆环顺时针寻址图</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .btn { padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-red); border-color: var(--tax-red); color: #fff; }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 10px; }
+    svg { width: 100%; height: 240px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⭕ 一致性哈希圆环：顺时针走，遇到哪台服务器就住哪台！</h1>
+        <p>环上 3 台服务器（A/B/C）各自掌管逆时针方向的一段圆弧。点击 <strong>💥 让节点 B 宕机</strong>，看 Key-2 的流量如何顺时针平滑接管，而 Key-1 和 Key-3 毫发无损！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" id="bKill" onclick="toggleB()">💥 模拟节点 B 突然宕机</button>
+      </div>
+      <div class="stage"><svg viewBox="0 0 460 230" id="ringSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let bDead = false;
+
+    function pt(deg, r) {
+      const rad = ((deg - 90) * Math.PI) / 180;
+      return [230 + Math.cos(rad) * r, 115 + Math.sin(rad) * r];
+    }
+
+    function toggleB() {
+      bDead = !bDead;
+      const btn = document.getElementById("bKill");
+      btn.classList.toggle("active", bDead);
+      btn.textContent = bDead ? "🔌 恢复节点 B 上线" : "💥 模拟节点 B 突然宕机";
+      render();
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      let s = `<circle cx="230" cy="115" r="82" fill="none" stroke="#334155" stroke-width="5"/>`;
+      const servers = [
+        { name: "节点 A", deg: 0, alive: true, col: "#6366f1" },
+        { name: "节点 B", deg: 120, alive: !bDead, col: "#10b981" },
+        { name: "节点 C", deg: 240, alive: true, col: "#f59e0b" }
+      ];
+      const keys = [
+        { name: "K1", deg: 320, owner: "A" },
+        { name: "K2", deg: 75, owner: bDead ? "C (顺时针接管!)" : "B" },
+        { name: "K3", deg: 195, owner: "C" }
+      ];
+
+      keys.forEach(k => {
+        const [x, y] = pt(k.deg, 82);
+        const [lx, ly] = pt(k.deg, 108);
+        s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="7" fill="#38bdf8"/>`;
+        s += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" fill="#7dd3fc" font-size="11" font-weight="800">${k.name}→${k.owner}</text>`;
+      });
+
+      servers.forEach(sv => {
+        const [x, y] = pt(sv.deg, 82);
+        s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="18" fill="${sv.alive ? sv.col : "#475569"}" stroke="#fff" stroke-width="2" stroke-dasharray="${sv.alive ? "none" : "4,3"}"/>`;
+        s += `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">${sv.alive ? sv.name.slice(-1) : "💀"}</text>`;
+      });
+
+      document.getElementById("ringSvg").innerHTML = s;
+      document.getElementById("ahaBox").innerHTML = bDead
+        ? "💡 <strong>最小爆炸半径！</strong>节点 B 挂掉后，只有原本发给 B 的 <code>K2</code> 顺时针滑到了节点 C，而 <code>K1→A</code> 和 <code>K3→C</code> 完全没受影响——这就是 Redis Cluster、DynamoDB 和 CDN 路由抗故障的几何密码！"
+        : "💡 <strong>顿悟时刻：</strong>点击上方 <strong>💥 模拟节点 B 突然宕机</strong>，亲眼看圆环如何把故障影响严格锁死在局部圆弧内！";
+    }
+    render();
+  </script>
+</body>
+</html>

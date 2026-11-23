@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "distributed",
+  "order": 3,
+  "title": "一致性哈希环（扩缩容不崩）",
+  "icon": "⭕",
+  "subtitle": "缓存集群从 3 台扩容到 4 台，用普通 hash(key)%N 会让 75% 缓存瞬间雪崩失效！把服务器摆成一个圆环怎么就破局了？",
+  "difficulty": "进阶",
+  "related": ["software/software-dsa-02", "software/software-database-cache-03"],
+  "toys": {
+    "01-mod-vs-ring-migration.html": {
+      "title": "扩容大迁徙竞速：取模哈希 vs 一致性哈希环",
+      "icon": "🚚",
+      "archetype": "race",
+      "concept": "hash(key)%N 全量重排 · 一致性哈希环 · 最小数据迁移",
+      "summary": "一键把集群从 3 台扩容到 4 台，实时对比普通取模（75% 缓存报废）与一致性哈希环（仅迁移 ~25% 局部数据）的震撼差距！"
+    },
+    "02-consistent-hash-ring-svg.html": {
+      "title": "一致性哈希圆环顺时针寻址图",
+      "icon": "⭕",
+      "archetype": "spatial",
+      "concept": "0 ~ 2³²-1 哈希环 · 顺时针找最近节点 · 宕机自动顺延",
+      "summary": "点击干掉圆环上的一台服务器，亲眼看它的流量如何顺时针平滑滑落到下一台邻居节点，其余机器纹丝不动！"
+    },
+    "03-virtual-nodes-balance.html": {
+      "title": "虚拟节点（Virtual Nodes）消除数据倾斜沙盘",
+      "icon": "⚖️",
+      "archetype": "simulation",
+      "concept": "数据倾斜 Skew · 虚拟分身节点 · 负载均衡",
+      "summary": "把每台物理机的虚拟分身从 1 个拉到 100 个，亲眼看三台机器的负载分布从严重偏科变成完美 33.3% 均分！"
+    }
+  }
+}

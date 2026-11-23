@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "distributed",
+  "order": 4,
+  "title": "限流算法（令牌桶 vs 漏桶）",
+  "icon": "🪣",
+  "subtitle": "双十一零点每秒涌进 10 万次抢购请求，网关怎么既允许合理的瞬间突发流量，又死死护住后端不被洪峰冲垮？",
+  "difficulty": "入门",
+  "related": ["software/software-network-crypto-02", "software/software-systems-os-03"],
+  "toys": {
+    "01-token-vs-leaky-bucket.html": {
+      "title": "令牌桶 vs 漏桶突发洪峰实测",
+      "icon": "🌊",
+      "archetype": "race",
+      "concept": "令牌桶 Token Bucket · 漏桶 Leaky Bucket · 突发流量 Burst",
+      "summary": "一键发射 10 个瞬间突发请求！亲眼看令牌桶如何用攒下的令牌秒放行突发，而漏桶如何像沙漏一样绝对匀速滴出。"
+    },
+    "02-fixed-vs-sliding-window.html": {
+      "title": "固定窗口临界突刺陷阱（1 秒 2 倍流量穿透）",
+      "icon": "🪟",
+      "archetype": "scenario",
+      "concept": "固定窗口限流 · 边界双倍突刺 · 滑动窗口算法",
+      "summary": "在 0.99 秒和 1.01 秒各打满 100 次请求，亲眼看固定窗口如何被 200 次瞬间流量打穿，再开启滑动窗口一秒封堵！"
+    },
+    "03-circuit-breaker-fsm.html": {
+      "title": "熔断器三态机（Closed → Open → Half-Open）",
+      "icon": "🔌",
+      "archetype": "simulation",
+      "concept": "服务雪崩 · 熔断器 Circuit Breaker · 半开探活恢复",
+      "summary": "不断注入下游超时故障触发熔断跳闸，体验快速失败保护与半开状态放行 1 个侦察兵试探恢复的精妙设计！"
+    }
+  }
+}

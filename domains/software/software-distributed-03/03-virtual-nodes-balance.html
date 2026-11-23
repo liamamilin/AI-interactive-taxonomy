@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：虚拟节点消除数据倾斜沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .bar-row { display: grid; grid-template-columns: 92px 1fr 64px; gap: 10px; align-items: center; margin: 12px 0; font-size: 13.5px; font-weight: 800; }
+    .track { height: 16px; background: var(--tax-surface-alt); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); }
+    .fill { height: 100%; border-radius: 999px; transition: width 0.25s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚖️ 虚拟节点（Virtual Nodes）：只放 3 台机器在圆环上，为什么一台累死、两台摸鱼？</h1>
+        <p>节点太少时，哈希点很容易扎堆导致严重<strong>数据倾斜</strong>！向右拉高“每台物理机的虚拟分身数量”，亲眼看负载瞬间神奇均分！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">👥 每台物理机的虚拟分身数：<span id="vVal" style="color:var(--tax-primary)">1</span> 个（全环共 <span id="totOut">3</span> 个点）</label>
+      <input id="vSlider" type="range" min="1" max="150" value="1" style="width:100%;margin-top:8px;" />
+      <div id="bars" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const v = parseInt(document.getElementById("vSlider").value, 10);
+      document.getElementById("vVal").textContent = v;
+      document.getElementById("totOut").textContent = v * 3;
+
+      // 随虚拟节点数按 1/sqrt(v) 收敛到 33.3%
+      const skew = 34 / Math.sqrt(v);
+      const a = Math.min(75, 33.3 + skew);
+      const b = Math.max(10, 33.3 - skew * 0.65);
+      const c = Math.max(10, 100 - a - b);
+
+      const items = [
+        { name: "🖥️ 机器 A", val: a, col: a > 45 ? "var(--tax-red)" : "var(--tax-green)" },
+        { name: "🖥️ 机器 B", val: b, col: "var(--tax-primary)" },
+        { name: "🖥️ 机器 C", val: c, col: "var(--tax-amber)" }
+      ];
+      document.getElementById("bars").innerHTML = items.map(it => `
+        <div class="bar-row">
+          <span>${it.name}</span>
+          <div class="track"><div class="fill" style="width:${it.val.toFixed(1)}%;background:${it.col}"></div></div>
+          <span style="font-family:monospace;text-align:right;">${it.val.toFixed(1)}%</span>
+        </div>
+      `).join("");
+
+      document.getElementById("ahaBox").innerHTML = v >= 50
+        ? `💡 <strong>大数定律抹平偏科！</strong>当每台物理机在圆环上撒下 <strong>${v} 个虚拟分身</strong>（如 <code>A#1..A#${v}</code>），三台机器的流量占比瞬间收敛到完美的 <strong>~33.3%</strong>！而且哪怕 A 宕机，它的流量也会被均匀分摊给所有其他机器，不会把某一台邻居压垮！`
+        : "💡 <strong>数据倾斜警报：</strong>只有 1 个物理点时，机器 A 一台扛了 67% 流量直接累垮！把虚拟节点数拉到 <strong>50 以上</strong> 看看大数定律的魔法！";
+    }
+    document.getElementById("vSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

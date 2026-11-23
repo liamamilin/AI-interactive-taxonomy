@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>限流算法（令牌桶 vs 漏桶）· 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🪣 限流算法（令牌桶 vs 漏桶）</h1>
+        <p>双十一零点每秒涌进 10 万次抢购请求，网关怎么既允许合理的瞬间突发流量，又死死护住后端不被洪峰冲垮？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-token-vs-leaky-bucket.html">
+        <div class="hub-icon">🌊</div>
+        <div class="hub-tag">玩具 01 · 突发实测（Race）</div>
+        <div class="hub-title">令牌桶 vs 漏桶突发洪峰实测</div>
+        <div class="hub-desc">发射一波瞬间突发请求，亲眼看清两只“桶”在应对突发流量时的本质差异。</div>
+      </a>
+      <a class="hub-card" href="./02-fixed-vs-sliding-window.html">
+        <div class="hub-icon">🪟</div>
+        <div class="hub-tag">玩具 02 · 边界漏洞（Scenario）</div>
+        <div class="hub-title">固定窗口临界突刺陷阱</div>
+        <div class="hub-desc">揭秘为什么“每秒限 100 次”的固定计数器会在跨秒瞬间放进 200 次流量，以及滑动窗口解法。</div>
+      </a>
+      <a class="hub-card" href="./03-circuit-breaker-fsm.html">
+        <div class="hub-icon">🔌</div>
+        <div class="hub-tag">玩具 03 · 三态沙盘（Simulation）</div>
+        <div class="hub-title">熔断器三态机（Closed → Open → Half-Open）</div>
+        <div class="hub-desc">像家里空气开关一样保护微服务：亲手触发故障熔断、快速失败与半开试探自动自愈。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
