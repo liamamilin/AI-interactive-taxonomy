@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：莫拉维克悖论 · 下棋大师为何折衣服翻车？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .duel { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; line-height: 1.6; font-size: 13.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>👕 莫拉维克悖论：为什么 AI 能拿奥数金牌，却折不好一件软塌塌的 T 恤？</h1>
+        <p>切换两类任务，看看“人类觉得极难的事”与“人类 3 岁就觉得理所当然的事”在 AI 眼里的难度倒挂！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="m1" onclick="pick(1)">♟️ 高阶抽象：国际象棋 / 写代码 / 做奥数</button>
+        <button class="btn" id="m2" onclick="pick(2)">👕 底层具身：翻找口袋里的钥匙 / 叠柔软衣物</button>
+      </div>
+      <div class="duel" id="duelBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const DATA = {
+      1: {
+        h: "😰 <strong>人类难度：极高</strong><br>抽象逻辑与符号数学是人类最近几千年才进化出的新技能，需要极度专注和数年苦练。",
+        a: "😎 <strong>AI 难度：轻松拿捏</strong><br>规则清晰、状态离散、环境无物理噪声，非常适合计算机靠算力和海量文本暴力碾压！",
+        aha: "💡 <strong>抽象推理反而是“简单题”：</strong>对计算机而言，下棋和解微积分所需的计算量，其实远小于处理现实世界的无穷连续物理变化。"
+      },
+      2: {
+        h: "😎 <strong>人类难度：3 岁小孩闭眼都会</strong><br>因为生命花了<strong>数亿年进化</strong>，把视觉、触觉、本体感觉与小脑运动控制刻进了我们的基因本能里！",
+        a: "😰 <strong>AI 难度：地狱级挑战</strong><br>柔软布料有无穷多个形变自由度，手指力度差 0.5 牛顿就会捏碎鸡蛋或滑脱——这正是 1988 年提出的著名<strong>莫拉维克悖论（Moravec's Paradox）</strong>！",
+        aha: "💡 <strong>莫拉维克悖论的核心洞见：</strong>“让电脑在智力测验或下棋中达到成人水平相对容易，但让它具备一岁婴儿的感知与运动能力却极其困难！”——这就是具身智能之所以是 AI 终极圣杯的原因。"
+      }
+    };
+    const seen = new Set([1]);
+    function pick(n) {
+      seen.add(n);
+      document.getElementById("m1").classList.toggle("active", n === 1);
+      document.getElementById("m2").classList.toggle("active", n === 2);
+      const d = DATA[n];
+      document.getElementById("duelBox").innerHTML = `<div class="card">${d.h}</div><div class="card">${d.a}</div>`;
+      document.getElementById("ahaBox").innerHTML = d.aha;
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(1);
+  </script>
+</body>
+</html>

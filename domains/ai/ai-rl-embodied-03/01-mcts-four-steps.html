@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：MCTS 四步循环 · 选择→扩展→模拟→回传</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .steps { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .tree { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; }
+    .row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .nd { padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface); font-size: 13px; font-weight: 800; text-align: center; min-width: 110px; }
+    .nd.hi { border-color: var(--tax-primary); background: rgba(99,102,241,0.14); }
+    .nd.win { border-color: var(--tax-green); background: rgba(16,185,129,0.16); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🌳 MCTS 四步循环：如何在不穷举的情况下，把算力全砸在“妙手”上？</h1>
+        <p>依次点击下面 4 个阶段，走完一轮标准的 <strong>蒙特卡洛树搜索（MCTS）</strong> 迭代，看胜率是如何向上回传更新的！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="steps">
+        <button class="btn active" id="s1" onclick="go(1)">① Selection 选择</button>
+        <button class="btn" id="s2" onclick="go(2)">② Expansion 扩展</button>
+        <button class="btn" id="s3" onclick="go(3)">③ Simulation 模拟/评估</button>
+        <button class="btn" id="s4" onclick="go(4)">④ Backprop 反向回传</button>
+      </div>
+      <div class="tree" id="treeBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set([1]);
+    function go(n) {
+      seen.add(n);
+      [1, 2, 3, 4].forEach(i => document.getElementById("s" + i).classList.toggle("active", i === n));
+      const rootStat = n === 4 ? "12 / 21 (+1)" : "11 / 20";
+      const leftStat = n === 4 ? "8 / 11 (+1)" : "7 / 10";
+      const leafHtml = n >= 2 ? `<div class="row"><div class="nd ${n >= 3 ? "win" : "hi"}">新着法 A1<br>${n === 2 ? "0 / 0（刚长出）" : n === 3 ? "⚡ 价值网判胜 +1" : "1 / 1 ✅"}</div></div>` : "";
+
+      document.getElementById("treeBox").innerHTML = `
+        <div class="row"><div class="nd ${n === 1 || n === 4 ? "hi" : ""}">根节点（当前盘面）<br>${rootStat}</div></div>
+        <div class="row">
+          <div class="nd ${n === 1 || n === 4 ? "hi" : ""}">分支 A（高潜）<br>${leftStat}</div>
+          <div class="nd">分支 B（普通）<br>4 / 10</div>
+        </div>
+        ${leafHtml}
+      `;
+
+      const ahas = {
+        1: "💡 <strong>① 选择（Selection）：</strong>从根节点出发，按 <strong>UCB/PUCT 公式</strong> 挑选兼顾“高胜率 + 探索潜力”的分支（这里选中分支 A）。",
+        2: "💡 <strong>② 扩展（Expansion）：</strong>到达叶节点后，把一个还没走过的候选新着法（A1）挂到树上。",
+        3: "💡 <strong>③ 模拟/评估（Simulation）：</strong>传统 MCTS 会随机快下到底看输赢；AlphaGo 直接调用<strong>价值神经网络</strong>瞬间给出胜率评估！",
+        4: "💡 <strong>④ 反向回传（Backpropagation）：</strong>把新节点赢下的 +1 一路沿着来时的路径写回分支 A 和根节点！重复几千次后，<strong>最有希望的分支长得又深又粗，烂着法根本不浪费算力</strong>——这就是“慢思考”搜索的精髓！"
+      };
+      document.getElementById("ahaBox").innerHTML = ahas[n];
+      if (seen.size >= 4 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    go(1);
+  </script>
+</body>
+</html>

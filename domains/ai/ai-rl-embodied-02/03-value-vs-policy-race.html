@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：学派擂台 · Q-Learning vs PPO</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .duel { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; line-height: 1.6; font-size: 13.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🥊 强化学习双雄：什么时候用 Q-Learning（DQN），什么时候用 PPO？</h1>
+        <p>切换两大截然不同的控制任务，看看“给每个动作打分（值函数派）”和“直接输出动作概率（策略梯度派）”谁更胜一筹！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="t1" onclick="pick(1)">考题 A：红白机打砖块（仅左/右/停 3 个离散键）</button>
+        <button class="btn" id="t2" onclick="pick(2)">考题 B：机械臂倒咖啡（7 个关节连续角度与力矩）</button>
+      </div>
+      <div class="duel" id="duelBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const DATA = {
+      1: {
+        q: "🏆 <strong>DQN / Q-Learning 胜出！</strong><br>动作只有 3 个，给左、右、停分别算一个 Q 分数再挑最大的轻而易举，还能用经验回放池反复复习旧录像，样本效率超高！",
+        p: "⚡ <strong>PPO 也能打，但更费样本</strong><br>PPO 属于 On-Policy 算法，每更新完策略就要把旧录像扔掉重新玩，数据消耗比 DQN 更大。",
+        aha: "💡 <strong>离散少量动作（如 Atari 游戏）：</strong>值函数派（DQN）靠“逐个动作打分 + 经验回放”非常高效！"
+      },
+      2: {
+        q: "❌ <strong>Q-Learning 直接卡死！</strong><br>7 个关节每个都是连续实数，动作组合有无穷多个！根本不可能算完无穷个动作的 Q 值再取 argmax。",
+        p: "🏆 <strong>PPO（策略梯度）完胜！</strong><br>直接让神经网络输出每个关节力矩的连续高斯分布（均值与方差），丝滑控制多自由度机械臂和人形机器人！",
+        aha: "💡 <strong>连续高维控制与大模型对齐（PPO 称王）：</strong>只要动作空间巨大或连续（机械臂、无人机、甚至词表 10 万个词的 LLM），<strong>策略梯度（PPO / GRPO）</strong>就是当仁不让的主力架构！"
+      }
+    };
+    const seen = new Set([1]);
+    function pick(n) {
+      seen.add(n);
+      document.getElementById("t1").classList.toggle("active", n === 1);
+      document.getElementById("t2").classList.toggle("active", n === 2);
+      const d = DATA[n];
+      document.getElementById("duelBox").innerHTML = `<div class="card">${d.q}</div><div class="card">${d.p}</div>`;
+      document.getElementById("ahaBox").innerHTML = d.aha;
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(1);
+  </script>
+</body>
+</html>

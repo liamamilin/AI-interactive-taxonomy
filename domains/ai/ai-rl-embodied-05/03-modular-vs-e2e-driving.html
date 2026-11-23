@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：架构代差竞速 · 模块化规则 vs 端到端智驾</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 14px; }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+    .track { height: 14px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin: 8px 0; }
+    .fill { height: 100%; width: 0%; transition: width 0.16s linear; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧠 模块化规则 vs 端到端智驾（End-to-End）：为什么老智驾总像“新手顿挫”？</h1>
+        <p>前方遇到<strong>“无保护左转 + 快递三轮车加塞 + 临时锥桶”</strong>地狱路口！点击发车，看两代智驾架构如何博弈通行！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="btn" onclick="go()">▶ 进入地狱施工路口测试</button>
+
+      <div class="lane">
+        <div style="font-weight:850;font-size:14px;">🚀 新一代：一段式端到端（图像直接进神经网络 → 轨迹/方向盘直接出）</div>
+        <div class="track"><div class="fill" id="f1" style="background:var(--tax-green);"></div></div>
+        <div id="s1" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+      </div>
+
+      <div class="lane">
+        <div style="font-weight:850;font-size:14px;">🧱 旧一代：感知 → 预测 → 30 万行 C++ 规则规划（模块级联）</div>
+        <div class="track"><div class="fill" id="f2" style="background:var(--tax-amber);"></div></div>
+        <div id="s2" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>点击测试，看清为什么全行业都在抛弃手写 <code>if/else</code> 规控代码，全面转向 <strong>End-to-End 端到端数据驱动</strong>！
+    </div>
+  </div>
+
+  <script>
+    let timer = null;
+    function go() {
+      if (timer) clearInterval(timer);
+      let p1 = 0, p2 = 0;
+      timer = setInterval(() => {
+        p1 = Math.min(100, p1 + 20);
+        p2 = Math.min(60, p2 + 12);
+        document.getElementById("f1").style.width = p1 + "%";
+        document.getElementById("f2").style.width = p2 + "%";
+        document.getElementById("s1").textContent = p1 < 50 ? "轻点减速观察三轮车意图…" : p1 < 100 ? "抓住空隙丝滑绕行锥桶…" : "✅ 拟人化一把丝滑通过！";
+        document.getElementById("s2").textContent = p2 < 40 ? "感知把三轮车标成矩形框传给规划…" : "🛑 触发安全规则冲突：死锁在路口原地画龙，请求人类接管！";
+        if (p1 >= 100) {
+          clearInterval(timer);
+          document.getElementById("ahaBox").innerHTML = "💡 <strong>端到端智驾的代差革命：</strong>传统模块化把信息层层压缩（快递小哥探头看路、眼神犹豫等细微线索全在模块交界处丢光了），且程序员永远写不完长尾规则！<strong>端到端神经网络直接向千万小时人类老司机录像学习</strong>，零信息损毁，上限随数据和算力持续 Scaling！";
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }, 220);
+    }
+  </script>
+</body>
+</html>

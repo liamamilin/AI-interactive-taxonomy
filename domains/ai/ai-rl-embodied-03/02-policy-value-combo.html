@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：直觉 + 算力合体 · 策略网与价值网剪枝</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    @media (max-width: 720px) { .checks { grid-template-columns: 1fr; } }
+    .chk { display: flex; align-items: center; gap: 10px; padding: 14px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-weight: 800; cursor: pointer; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 720px) { .metrics { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .num { font-size: 22px; font-weight: 900; font-family: ui-monospace, monospace; color: var(--tax-primary); margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧠 策略网 + 价值网：AlphaGo 如何把“宇宙级搜索树”砍成秒算？</h1>
+        <p>围棋平均每步有 250 种落子（宽度）、一盘 150 步（深度），直接搜就是 <code>250¹⁵⁰</code>。勾选装上 AlphaGo 的两张王牌神经网络试试！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="checks">
+        <label class="chk"><input type="checkbox" id="cPol" onchange="render()" /> 🎯 装配策略网络（Policy Net：靠直觉只看前 5 个好点，猛砍宽度！）</label>
+        <label class="chk"><input type="checkbox" id="cVal" onchange="render()" /> 🔮 装配价值网络（Value Net：一眼看穿局势胜率，不用算到终局，猛砍深度！）</label>
+      </div>
+
+      <div class="metrics">
+        <div class="card">
+          <div style="font-size:12px;color:var(--tax-muted);font-weight:750;">每步有效分支宽度</div>
+          <div class="num" id="wOut">250</div>
+        </div>
+        <div class="card">
+          <div style="font-size:12px;color:var(--tax-muted);font-weight:750;">需要向下推演深度</div>
+          <div class="num" id="dOut">150 步</div>
+        </div>
+        <div class="card">
+          <div style="font-size:12px;color:var(--tax-muted);font-weight:750;">可计算性判定</div>
+          <div class="num" id="stOut" style="font-size:17px;">💥 宇宙热寂也算不完</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    function render() {
+      const p = document.getElementById("cPol").checked;
+      const v = document.getElementById("cVal").checked;
+      document.getElementById("wOut").textContent = p ? "3 ~ 5（极窄）" : "250（爆炸）";
+      document.getElementById("dOut").textContent = v ? "10 ~ 15 步（秒评）" : "150 步（下到底）";
+
+      let st, aha;
+      if (p && v) {
+        st = "✅ 1600 次模拟秒出神之一手！";
+        aha = "💡 <strong>神经符号合体的巅峰：</strong>人类顶尖棋手靠的也是“直觉挑 3 个点（策略网）+ 心算 10 步后判断优劣（价值网）+ 反复权衡（MCTS）”！这同样启发了如今的 <strong>o1 / R1 推理大模型</strong>！";
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      } else if (p || v) {
+        st = "⚠️ 依然太大，还差另一半！";
+        aha = "💡 <strong>只砍一边不够：</strong>宽度和深度是指数关系，必须<strong>同时装上策略网（砍宽度）和价值网（砍深度）</strong>才能把搜索树压进实时算力预算！";
+      } else {
+        st = "💥 10¹⁷⁰ 宇宙热寂也算不完";
+        aha = "💡 <strong>顿悟时刻：</strong>请把上方两张神经网络都勾选装上，亲眼看天文数字如何瞬间驯服！";
+      }
+      document.getElementById("stOut").textContent = st;
+      document.getElementById("ahaBox").innerHTML = aha;
+    }
+    render();
+  </script>
+</body>
+</html>

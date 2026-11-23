@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：PPO 裁剪护栏（Clip）防训崩沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .num { font-size: 26px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚧 PPO 裁剪护栏（Clip）：为什么强化学习“步子迈太大”会瞬间训崩？</h1>
+        <p>策略梯度一旦某步更新过猛，新策略就会采集到一堆垃圾样本，陷入不可逆的雪崩。开启/关闭 <strong>PPO Clip [0.8, 1.2]</strong> 并拉大更新比率试试！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:850;font-size:14px;">🦶 新旧策略概率比 r(θ)：<span id="rVal" style="color:var(--tax-primary)">1.10</span>（1.0=原地踏步，>1.5=猛踩油门）</label>
+      <input id="rSlider" type="range" min="50" max="220" value="110" style="width:100%;margin-top:8px;" />
+      <label style="display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-weight:800;font-size:14px;cursor:pointer;">
+        <input id="clipChk" type="checkbox" checked onchange="render()" /> 🛡️ 开启 PPO 裁剪护栏（强制限制有效比率在 0.8 ~ 1.2 之间）
+      </label>
+
+      <div class="grid">
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">实际生效更新倍率</div>
+          <div class="num" id="effOut" style="color:var(--tax-primary);">1.10×</div>
+        </div>
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">训练稳定性诊断</div>
+          <div class="num" id="stOut" style="font-size:18px;margin-top:10px;">✅ 稳步上涨</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let acts = 0;
+    function render() {
+      const r = parseInt(document.getElementById("rSlider").value, 10) / 100;
+      const clip = document.getElementById("clipChk").checked;
+      document.getElementById("rVal").textContent = r.toFixed(2);
+      const eff = clip ? Math.max(0.8, Math.min(1.2, r)) : r;
+      document.getElementById("effOut").textContent = eff.toFixed(2) + "×";
+
+      const wild = eff > 1.35 || eff < 0.7;
+      document.getElementById("stOut").textContent = wild ? "💥 策略崩盘（发散雪崩！）" : "✅ 安全在信任域内";
+      document.getElementById("stOut").style.color = wild ? "var(--tax-red)" : "var(--tax-green)";
+
+      document.getElementById("ahaBox").innerHTML = wild
+        ? "💡 <strong>没装护栏瞬间训崩！</strong>普通策略梯度允许 r(θ) 飙到 " + r.toFixed(2) + "，一次过猛的参数更新就把之前辛辛苦苦学到的好策略全毁了！重新勾上 <strong>PPO 裁剪护栏</strong> 试试。"
+        : "💡 <strong>PPO 封神的极简哲学：</strong>只需一行 <code>clip(r, 1-ε, 1+ε)</code>，一旦新策略比旧策略偏离超过 20%，梯度直接归零不让它继续狂飙——用最简单的代码实现了最稳健的强化学习！";
+    }
+    document.getElementById("rSlider").addEventListener("input", () => {
+      acts++;
+      render();
+      if (acts >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

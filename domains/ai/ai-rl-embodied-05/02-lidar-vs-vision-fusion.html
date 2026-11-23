@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：传感器对决 · 纯视觉 vs 激光雷达融合</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .duel { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; font-size: 13.5px; line-height: 1.6; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📡 纯视觉 vs 激光雷达（LiDAR）多传感器融合：谁才是终极路线？</h1>
+        <p>切换 3 种棘手天气与光线场景，对比“低成本纯视觉摄像头”与“激光雷达 + 毫米波 + 摄像头融合”的真实能力边界！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="w1" onclick="pick(1)">🌑 场景 1：无路灯深夜 + 穿黑衣静止路障</button>
+        <button class="btn" id="w2" onclick="pick(2)">🚦 场景 2：辨认红绿灯颜色与交警手势</button>
+        <button class="btn" id="w3" onclick="pick(3)">🌧️ 场景 3：倾盆暴雨 + 浓雾低能见度</button>
+      </div>
+      <div class="duel" id="duelBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const DATA = {
+      1: {
+        v: "⚠️ <strong>纯视觉受限：</strong>摄像头依赖环境反光，黑夜逆光或车灯照不到的远处极易漏检静止黑衣目标，需极强高动态传感器 + 大数据兜底。",
+        l: "✅ <strong>激光雷达完胜：</strong>自带主动红外激光脉冲，伸手不见五指也能毫米级测出障碍物的精确距离与轮廓！",
+        aha: "💡 <strong>主动测距 vs 被动成像：</strong>激光雷达像蝙蝠的回声定位，不靠阳光就能精准测距，是安全冗余极强的“兜底保险丝”。"
+      },
+      2: {
+        v: "✅ <strong>纯视觉完胜：</strong>语义信息极其丰富，轻松看懂红绿灯读秒、地上虚实线、路牌文字和交警手势！",
+        l: "⚠️ <strong>激光雷达无能为力：</strong>激光点云只有三维坐标和反射强度，没有颜色信息，根本分不清红灯还是绿灯！",
+        aha: "💡 <strong>视觉永远是核心主力：</strong>人类道路本就是为“眼睛”设计的，所以哪怕装了激光雷达的车，依然必须以摄像头视觉为主干！"
+      },
+      3: {
+        v: "⚠️ <strong>视觉模糊：</strong>镜头沾水起雾，能见度骤降。",
+        l: "⚠️ <strong>激光散射，靠 4D 毫米波雷达补位：</strong>大雨滴会反射激光产生噪点，此时波长更长的<strong>毫米波雷达</strong>穿透雨雾最强！",
+        aha: "💡 <strong>路线之争的本质是“成本 vs 冗余”：</strong>纯视觉路线押注 AI 大模型达到超人泛化且硬件极省钱；多传感器融合路线用物理异构互补买更高安全下限——随着激光雷达降到千元级，两者都在向端到端大模型收敛！"
+      }
+    };
+    const seen = new Set([1]);
+    function pick(n) {
+      seen.add(n);
+      [1, 2, 3].forEach(i => document.getElementById("w" + i).classList.toggle("active", i === n));
+      const d = DATA[n];
+      document.getElementById("duelBox").innerHTML = `
+        <div class="card"><div style="font-weight:850;margin-bottom:6px;">📷 纯视觉方案</div>${d.v}</div>
+        <div class="card"><div style="font-weight:850;margin-bottom:6px;">📡 激光雷达 + 毫米波融合</div>${d.l}</div>
+      `;
+      document.getElementById("ahaBox").innerHTML = d.aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(1);
+  </script>
+</body>
+</html>

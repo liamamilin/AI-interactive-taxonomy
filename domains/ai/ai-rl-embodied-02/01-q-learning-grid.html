@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：Q-Learning 价值传播迷宫</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 460px; margin: 0 auto; }
+    .cell { padding: 16px 8px; border-radius: 12px; text-align: center; border: 1.5px solid var(--tax-border); font-family: ui-monospace, monospace; font-weight: 850; font-size: 14px; transition: background 0.25s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🗺️ Q-Learning 价值传播：奖励是怎么从终点“倒流”回起点的？</h1>
+        <p>一开始所有格子都是 0，只有右下角终点藏着 <strong>+10 奖励</strong>。连续点击 <strong>“执行贝尔曼更新”</strong>，看高分价值如何一圈圈倒灌回左上角起点！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" onclick="step()">⚡ 执行 1 轮贝尔曼更新</button>
+        <button class="btn sec" onclick="resetGrid()">↺ 清零重置</button>
+        <span style="font-weight:850;font-size:14px;">已迭代轮数：<span id="epOut" style="color:var(--tax-primary)">0</span></span>
+      </div>
+      <div class="grid" id="gridBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>连续点击 <strong>5 次</strong>“执行贝尔曼更新”，亲眼看“终点香味”如何穿过整张迷宫传到起点！
+    </div>
+  </div>
+
+  <script>
+    const GAMMA = 0.85;
+    let ep = 0;
+    let V = Array(16).fill(0);
+    V[15] = 10;
+
+    function step() {
+      ep++;
+      const next = [...V];
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const idx = r * 4 + c;
+          if (idx === 15) continue;
+          const nbs = [];
+          if (r > 0) nbs.push(V[(r - 1) * 4 + c]);
+          if (r < 3) nbs.push(V[(r + 1) * 4 + c]);
+          if (c > 0) nbs.push(V[r * 4 + (c - 1)]);
+          if (c < 3) nbs.push(V[r * 4 + (c + 1)]);
+          next[idx] = Math.max(...nbs) * GAMMA;
+        }
+      }
+      V = next;
+      render();
+      if (ep >= 5) {
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>贝尔曼方程的本质（价值倒流）：</strong>每个格子不需要知道全图，只需要记住“我的最大邻居值 × γ”！反复更新几轮后，终点奖励就自然倒灌回起点——小人以后只要<strong>每步往数字更大的邻居走</strong>，就必定走最短路径！";
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+
+    function resetGrid() {
+      ep = 0;
+      V = Array(16).fill(0);
+      V[15] = 10;
+      render();
+    }
+
+    function render() {
+      document.getElementById("epOut").textContent = ep;
+      document.getElementById("gridBox").innerHTML = V.map((v, i) => {
+        const alpha = Math.min(0.85, v / 10);
+        const tag = i === 0 ? "🤖 起点" : i === 15 ? "🏆 +10" : "";
+        return `<div class="cell" style="background:rgba(16,185,129,${alpha.toFixed(2)});">${tag ? tag + "<br>" : ""}${v.toFixed(1)}</div>`;
+      }).join("");
+    }
+    render();
+  </script>
+</body>
+</html>

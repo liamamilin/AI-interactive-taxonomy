@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：BEV 上帝视角与占用网络（Occupancy）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .road { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; max-width: 480px; margin: 0 auto; padding: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; }
+    .vox { height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 800; background: var(--tax-surface); border: 1px solid var(--tax-border); }
+    .vox.occ { background: rgba(239,68,68,0.22); border-color: var(--tax-red); color: var(--tax-red); }
+    .vox.ego { background: rgba(99,102,241,0.24); border-color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🛰️ BEV + 占用网络（Occupancy）：遇到没见过的“侧翻卡车”，智驾怎么不直接撞上去？</h1>
+        <p>前方车道横着一辆<strong>白色侧翻货车 + 掉落的异形沙发</strong>（白名单里没有这个类别）。切换两种感知系统看看结果！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="bOld" onclick="setMode('old')">📦 传统 2D 白名单检测框（只认车/人/锥桶）</button>
+        <button class="btn" id="bOcc" onclick="setMode('occ')">🧱 BEV + 3D 占用网络（体素空间占位）</button>
+      </div>
+      <div class="road" id="roadGrid"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["old"]);
+    function setMode(m) {
+      seen.add(m);
+      document.getElementById("bOld").classList.toggle("active", m === "old");
+      document.getElementById("bOcc").classList.toggle("active", m === "occ");
+      const occ = m === "occ";
+      const cells = Array.from({ length: 18 }, (_, i) => {
+        if (i === 14) return `<div class="vox ego">🚗 自车</div>`;
+        if ([2, 3, 4, 8, 9].includes(i)) {
+          return occ
+            ? `<div class="vox occ">🧱 占用</div>`
+            : `<div class="vox" style="color:var(--tax-muted);">❓ 未知(忽略)</div>`;
+        }
+        return `<div class="vox">⬜ 通行</div>`;
+      });
+      document.getElementById("roadGrid").innerHTML = cells.join("");
+
+      document.getElementById("ahaBox").innerHTML = occ
+        ? "💡 <strong>占用网络（Occupancy Network）救命原理：</strong>它先把 8 路摄像头特征通过 BEV Transformer 投影到统一俯视 3D 网格，再把空间切成无数个“乐高体素块”。<strong>根本不管前方是侧翻卡车、落石还是外星飞船，只要体素被占用了就绝不撞上去！</strong>"
+        : "💡 <strong>传统白名单检测的致命盲区：</strong>如果训练清单里只有“正常行驶的汽车”，遇到侧翻的白色货车底盘或马路上的怪异掉落物，检测框置信度过低会直接漏检！切到 <strong>BEV + 占用网络</strong> 看看解法！";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    setMode("old");
+  </script>
+</body>
+</html>

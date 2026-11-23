@@ -6,10 +6,10 @@ window.TAXONOMY_DATA = {
   "stats": {
     "totalDomains": 10,
     "litDomains": 1,
-    "totalTopics": 38,
-    "totalPlannedTopics": 237,
+    "totalTopics": 43,
+    "totalPlannedTopics": 232,
     "totalBlueprintTopics": 275,
-    "totalToys": 114
+    "totalToys": 129
   },
   "tracks": [
     {
@@ -1525,28 +1525,7 @@ window.TAXONOMY_DATA = {
         {
           "id": "rl-embodied",
           "title": "6. 强化学习与具身智能（RL & Embodied AI）",
-          "plannedTopics": [
-            {
-              "slug": "ai-rl-embodied-01",
-              "title": "探索 vs 利用（多臂老虎机 / MDP）"
-            },
-            {
-              "slug": "ai-rl-embodied-02",
-              "title": "值函数与策略梯度（Q-Learning / PPO）"
-            },
-            {
-              "slug": "ai-rl-embodied-03",
-              "title": "蒙特卡洛树搜索（AlphaGo）"
-            },
-            {
-              "slug": "ai-rl-embodied-04",
-              "title": "具身机器人（VLA / Sim2Real）"
-            },
-            {
-              "slug": "ai-rl-embodied-05",
-              "title": "自动驾驶感知与规控（BEV）"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "applied-agents",
@@ -1559,10 +1538,10 @@ window.TAXONOMY_DATA = {
           "plannedTopics": []
         }
       ],
-      "liveTopicCount": 38,
-      "plannedTopicCount": 5,
+      "liveTopicCount": 43,
+      "plannedTopicCount": 0,
       "blueprintTopicCount": 43,
-      "liveToyCount": 114,
+      "liveToyCount": 129,
       "topics": [
         {
           "id": "ai/ai-dl-foundations-01",
@@ -1610,6 +1589,55 @@ window.TAXONOMY_DATA = {
               "archetype": "builder",
               "concept": "ReLU 折线叠加 · 万能近似定理 · 宽度表达力",
               "summary": "增加 ReLU 神经元数量，亲眼看着几根简单的直拐杖折线拼出一条光滑的正弦曲线。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-rl-embodied-01",
+          "slug": "ai-rl-embodied-01",
+          "domain": "ai",
+          "branch": "rl-embodied",
+          "order": 1,
+          "title": "探索 vs 利用（多臂老虎机 / MDP）",
+          "icon": "🎰",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "去吃熟悉的老店，还是冒险尝一家新开的网红餐厅？强化学习的起点就藏在这个经典两难里！",
+          "difficulty": "入门",
+          "related": [
+            "ai/ai-symbolic-ml-01",
+            "ai/reasoning-model-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-rl-embodied-01/01-multi-armed-bandit.html",
+              "file": "01-multi-armed-bandit.html",
+              "path": "./domains/ai/ai-rl-embodied-01/01-multi-armed-bandit.html",
+              "title": "三臂老虎机探索-利用赌局",
+              "icon": "🎰",
+              "archetype": "scenario",
+              "concept": "多臂老虎机 Bandit · Exploration vs Exploitation · 遗憾值 Regret",
+              "summary": "手握 15 枚金币面对 3 台隐藏胜率的老虎机，亲手体验“过早锁死次优解”与“过度乱试浪费金币”的拉扯。"
+            },
+            {
+              "id": "ai/ai-rl-embodied-01/02-epsilon-greedy-sim.html",
+              "file": "02-epsilon-greedy-sim.html",
+              "path": "./domains/ai/ai-rl-embodied-01/02-epsilon-greedy-sim.html",
+              "title": "ε-贪婪与 UCB 策略曲线沙盘",
+              "icon": "📈",
+              "archetype": "simulation",
+              "concept": "ε-Greedy · UCB 乐观置信上界 · 长期累计收益",
+              "summary": "调节探索概率 ε，实时观察 1000 轮后的总收益曲线，理解为什么“前期大胆试、后期稳准狠”才是王道。"
+            },
+            {
+              "id": "ai/ai-rl-embodied-01/03-mdp-discount-gamma.html",
+              "file": "03-mdp-discount-gamma.html",
+              "path": "./domains/ai/ai-rl-embodied-01/03-mdp-discount-gamma.html",
+              "title": "MDP 折扣因子 γ：短视鬼 vs 长期主义",
+              "icon": "⏳",
+              "archetype": "spatial",
+              "concept": "马尔可夫决策过程 MDP · 折扣因子 γ · 延迟满足",
+              "summary": "拨动折扣因子 γ，看迷宫小人如何在“眼前的 +2 小金币”和“远处的 +20 大宝箱”之间瞬间改变路线！"
             }
           ]
         },
@@ -1811,6 +1839,55 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "ai/ai-rl-embodied-02",
+          "slug": "ai-rl-embodied-02",
+          "domain": "ai",
+          "branch": "rl-embodied",
+          "order": 2,
+          "title": "值函数与策略梯度（Q-Learning / PPO）",
+          "icon": "🧭",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "没有老师教标准答案，AI 怎么靠自己不断摔跟头，从零学会走迷宫、打游戏甚至控制机械臂？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/ai-rl-embodied-01",
+            "ai/llm-training-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-rl-embodied-02/01-q-learning-grid.html",
+              "file": "01-q-learning-grid.html",
+              "path": "./domains/ai/ai-rl-embodied-02/01-q-learning-grid.html",
+              "title": "Q-Learning 价值传播迷宫",
+              "icon": "🗺️",
+              "archetype": "spatial",
+              "concept": "Q-Table · 贝尔曼更新 · 价值倒推传播",
+              "summary": "反复点击“训练 1 轮”，亲眼见证终点的 +10 奖励如何像水波纹一样一步步倒推点亮整张迷宫的 Q 值地图。"
+            },
+            {
+              "id": "ai/ai-rl-embodied-02/02-ppo-clip-guardrail.html",
+              "file": "02-ppo-clip-guardrail.html",
+              "path": "./domains/ai/ai-rl-embodied-02/02-ppo-clip-guardrail.html",
+              "title": "PPO 裁剪护栏（Clip）防训崩沙盘",
+              "icon": "🚧",
+              "archetype": "simulation",
+              "concept": "策略梯度 Policy Gradient · PPO Clip 区间 · 步子太大扯着蛋",
+              "summary": "调节策略更新步幅与 PPO Clip 护栏，直击为什么普通策略梯度容易一脚油门训崩，而 PPO 能稳如老狗。"
+            },
+            {
+              "id": "ai/ai-rl-embodied-02/03-value-vs-policy-race.html",
+              "file": "03-value-vs-policy-race.html",
+              "path": "./domains/ai/ai-rl-embodied-02/03-value-vs-policy-race.html",
+              "title": "学派擂台：Q-Learning（值函数）vs PPO（策略梯度）",
+              "icon": "🥊",
+              "archetype": "race",
+              "concept": "离散动作空间 · 连续控制机械臂 · Actor-Critic",
+              "summary": "在“离散走格子”与“连续机械臂力矩控制”两大考题上对比两派算法，秒懂它们各自的统治战场。"
+            }
+          ]
+        },
+        {
           "id": "ai/ai-symbolic-ml-02",
           "slug": "ai-symbolic-ml-02",
           "domain": "ai",
@@ -2004,6 +2081,55 @@ window.TAXONOMY_DATA = {
               "archetype": "simulation",
               "concept": "3D Full Attention 平方爆炸 · 时空压缩 VAE · 算力成本",
               "summary": "调节分辨率与视频时长，直观感受 3D 时空 Token 数量如何让注意力计算量瞬间暴涨几百倍。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-rl-embodied-03",
+          "slug": "ai-rl-embodied-03",
+          "domain": "ai",
+          "branch": "rl-embodied",
+          "order": 3,
+          "title": "蒙特卡洛树搜索（AlphaGo）",
+          "icon": "⚫",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "围棋变化数比宇宙原子还多，穷举绝对算不完！AlphaGo 怎么把“直觉神经网络”和“深谋远虑树搜索”合体？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/ai-symbolic-ml-01",
+            "ai/ai-rl-embodied-02"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-rl-embodied-03/01-mcts-four-steps.html",
+              "file": "01-mcts-four-steps.html",
+              "path": "./domains/ai/ai-rl-embodied-03/01-mcts-four-steps.html",
+              "title": "MCTS 四步循环：选择→扩展→模拟→回传",
+              "icon": "🌳",
+              "archetype": "spatial",
+              "concept": "MCTS 蒙特卡洛树搜索 · Selection / Expansion / Rollout / Backprop",
+              "summary": "单步推进一棵博弈搜索树的 4 个阶段，亲眼看胜率统计如何从叶节点一路反向回传并改写根节点决策。"
+            },
+            {
+              "id": "ai/ai-rl-embodied-03/02-policy-value-combo.html",
+              "file": "02-policy-value-combo.html",
+              "path": "./domains/ai/ai-rl-embodied-03/02-policy-value-combo.html",
+              "title": "直觉 + 算力合体：策略网与价值网剪枝",
+              "icon": "🧠",
+              "archetype": "builder",
+              "concept": "策略网络 Policy Net · 价值网络 Value Net · 深度与宽度双剪枝",
+              "summary": "分别打开策略网（剪宽度）和价值网（剪深度），看 AlphaGo 如何把天文数字的围棋搜索树压成可算规模。"
+            },
+            {
+              "id": "ai/ai-rl-embodied-03/03-self-play-elo-curve.html",
+              "file": "03-self-play-elo-curve.html",
+              "path": "./domains/ai/ai-rl-embodied-03/03-self-play-elo-curve.html",
+              "title": "AlphaZero 自我对弈（Self-Play）进化沙盘",
+              "icon": "🚀",
+              "archetype": "simulation",
+              "concept": "左右互搏 Self-Play · 不依赖人类棋谱 · 超越人类上限",
+              "summary": "拉动自我对弈训练天数（0 到 40 天），对比“模仿人类棋谱”与“纯从零左右互搏”的棋力 Elo 突破轨迹。"
             }
           ]
         },
@@ -2252,6 +2378,55 @@ window.TAXONOMY_DATA = {
               "archetype": "race",
               "concept": "ASR+LLM+TTS 级联延迟 · 原生语音大模型 · 随时打断 Barge-in",
               "summary": "对比传统三段式语音助手与原生端到端语音模型的响应毫秒数，秒懂为什么端到端能实现 300ms 真人对话感。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-rl-embodied-04",
+          "slug": "ai-rl-embodied-04",
+          "domain": "ai",
+          "branch": "rl-embodied",
+          "order": 4,
+          "title": "具身机器人（VLA / Sim2Real）",
+          "icon": "🦾",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "聊天大模型连物理世界都没摸过，怎么装进机器人身体里学会叠衣服、端咖啡，又怎么跨过“仿真到现实”的鸿沟？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/multimodal-ai-toys",
+            "ai/agent-interactive-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-rl-embodied-04/01-vla-action-tokens.html",
+              "file": "01-vla-action-tokens.html",
+              "path": "./domains/ai/ai-rl-embodied-04/01-vla-action-tokens.html",
+              "title": "VLA 视觉-语言-动作解码台",
+              "icon": "🤖",
+              "archetype": "builder",
+              "concept": "VLA (Vision-Language-Action) · 动作 Token 化 · 端到端具身",
+              "summary": "输入摄像头画面与一句话指令，看 VLA 模型如何像预测文字一样直接输出机械臂的 7 维关节控制 Token。"
+            },
+            {
+              "id": "ai/ai-rl-embodied-04/02-sim2real-domain-rand.html",
+              "file": "02-sim2real-domain-rand.html",
+              "path": "./domains/ai/ai-rl-embodied-04/02-sim2real-domain-rand.html",
+              "title": "Sim2Real 域随机化闯关沙盘",
+              "icon": "🌍",
+              "archetype": "simulation",
+              "concept": "Sim2Real 鸿沟 · Domain Randomization 域随机化 · 物理鲁棒性",
+              "summary": "在仿真器里开启光照、摩擦力与重量随机扰动，亲眼看机器人走出实验室来到真实地面时为何不再瞬间摔倒。"
+            },
+            {
+              "id": "ai/ai-rl-embodied-04/03-moravec-paradox-scenario.html",
+              "file": "03-moravec-paradox-scenario.html",
+              "path": "./domains/ai/ai-rl-embodied-04/03-moravec-paradox-scenario.html",
+              "title": "莫拉维克悖论：下棋大师为何折衣服翻车？",
+              "icon": "👕",
+              "archetype": "scenario",
+              "concept": "莫拉维克悖论 Moravec's Paradox · 柔性物体操控 · 触觉反馈",
+              "summary": "对比“奥数金牌”与“单手剥鸡蛋/叠柔软T恤”，一秒悟懂为什么人类 3 岁就会的动作反而是 AI 最难攻克的堡垒。"
             }
           ]
         },
@@ -2650,6 +2825,55 @@ window.TAXONOMY_DATA = {
               "archetype": "simulation",
               "concept": "空间智能 Spatial Intelligence · 单目深度 · 运动视差 Parallax",
               "summary": "左右移动虚拟观察者头部位置，观察前景、中景、远景按真实深度产生视差位移，理解 AI 如何从 2D 还原 3D 世界。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-rl-embodied-05",
+          "slug": "ai-rl-embodied-05",
+          "domain": "ai",
+          "branch": "rl-embodied",
+          "order": 5,
+          "title": "自动驾驶感知与规控（BEV）",
+          "icon": "🚗",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "自动驾驶汽车没有长在天上的上帝摄像头，怎么把车身周围 8 个鱼眼画面拼成精准 3D 上帝视角（BEV）并完成无图端到端驾驶？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/ai-dl-foundations-03",
+            "ai/ai-rl-embodied-04"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-rl-embodied-05/01-bev-occupancy-spatial.html",
+              "file": "01-bev-occupancy-spatial.html",
+              "path": "./domains/ai/ai-rl-embodied-05/01-bev-occupancy-spatial.html",
+              "title": "BEV 上帝视角与占用网络（Occupancy）",
+              "icon": "🛰️",
+              "archetype": "spatial",
+              "concept": "BEV 鸟瞰图 · 3D 占用网络 Occupancy · 异形障碍物",
+              "summary": "在“传统 2D 框识别”与“BEV + 3D 占用网络”之间切换，看清为什么遇到侧翻大货车或散落轮胎时占用网络能救命。"
+            },
+            {
+              "id": "ai/ai-rl-embodied-05/02-lidar-vs-vision-fusion.html",
+              "file": "02-lidar-vs-vision-fusion.html",
+              "path": "./domains/ai/ai-rl-embodied-05/02-lidar-vs-vision-fusion.html",
+              "title": "传感器对决：纯视觉 vs 激光雷达融合",
+              "icon": "📡",
+              "archetype": "scenario",
+              "concept": "纯视觉 Tesla 路线 · 激光雷达 LiDAR · 极端天气长尾",
+              "summary": "在大雾暴雨、夜晚眩光与强逆光 3 种极端路况下对比纯视觉与多传感器融合的表现，秒懂行业路线之争。"
+            },
+            {
+              "id": "ai/ai-rl-embodied-05/03-modular-vs-e2e-driving.html",
+              "file": "03-modular-vs-e2e-driving.html",
+              "path": "./domains/ai/ai-rl-embodied-05/03-modular-vs-e2e-driving.html",
+              "title": "架构代差竞速：模块化规则 vs 端到端智驾",
+              "icon": "🧠",
+              "archetype": "race",
+              "concept": "感知-预测-规划模块化 · End-to-End 端到端神经网络 · 信息损毁",
+              "summary": "面对“施工锥桶 + 交警手势 + 鬼探头”复杂路口，对比 30 万行 C++ 规则代码与端到端大模型的拟人通行能力。"
             }
           ]
         },

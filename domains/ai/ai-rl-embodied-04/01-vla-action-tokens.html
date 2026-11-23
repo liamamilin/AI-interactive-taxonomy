@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：VLA 视觉-语言-动作解码台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .pipe { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .pipe { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .toks { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .tok { padding: 6px 10px; border-radius: 8px; background: var(--tax-surface); border: 1.5px solid var(--tax-primary); font-family: ui-monospace, monospace; font-size: 12px; font-weight: 800; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🤖 VLA（Vision-Language-Action）：把机械臂动作变成大模型的“外语”！</h1>
+        <p>给具身大模型同时喂入 <strong>📷 摄像头画面</strong> 和 <strong>🗣️ 人类口令</strong>，选择不同任务，看它如何像吐文字一样输出一串 7 自由度机械臂 <strong>Action Tokens</strong>！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="c1" onclick="pick(1)">🍎 任务 1：“把红苹果放进碗里”</button>
+        <button class="btn" id="c2" onclick="pick(2)">🧽 任务 2：“把桌上的咖啡渍擦干净”</button>
+        <button class="btn" id="c3" onclick="pick(3)">🔌 任务 3：“拔掉充电器插头”</button>
+      </div>
+      <div class="pipe" id="pipeBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const TASKS = {
+      1: {
+        inTxt: "📷 画面：桌面左侧有红苹果、右侧有白瓷碗<br>🗣️ 指令：“把红苹果放进碗里”",
+        toks: ["Δx:+0.14", "Δy:-0.08", "Δz:-0.12", "Roll:0°", "Gripper:闭合(0.2)", "Δx:+0.30", "Gripper:松开(1.0)"],
+        aha: "💡 <strong>VLA 的核心统一（如 RT-2 / π0 / OpenVLA）：</strong>把机械臂的位姿偏移量离散成 256 个桶（或用 Diffusion Action Head 连续输出），让多模态大模型原生听懂人类常识（比如知道“红苹果”长什么样）并直接输出电机指令！"
+      },
+      2: {
+        inTxt: "📷 画面：桌面中央有深色水渍、角落有海绵<br>🗣️ 指令：“把桌上的咖啡渍擦干净”",
+        toks: ["抓海绵:闭合", "下压接触力:4N", "轨迹:画圆往复×3", "抬起:+0.10", "放回原位:松开"],
+        aha: "💡 <strong>双系统协同（System 2 + System 1）：</strong>慢思考 VLM 每秒看几次画面规划“先拿海绵再擦桌子”，底层的快反应动作头以 50Hz 高频控制力矩与手腕微调！"
+      },
+      3: {
+        inTxt: "📷 画面：墙面插座插着白色充电头<br>🗣️ 指令：“拔掉充电器插头”",
+        toks: ["对准插头侧面", "Gripper:强夹(0.05)", "沿法线回拉:-0.08", "力反馈突降→停手"],
+        aha: "💡 <strong>具身智能的最大瓶颈：</strong>文本互联网有几十万亿字，但真实机器人的手眼力觉遥操作数据极度稀缺——谁能低成本采集高质量动作数据，谁就能率先引爆机器人 GPT 时刻！"
+      }
+    };
+    const seen = new Set([1]);
+    function pick(n) {
+      seen.add(n);
+      [1, 2, 3].forEach(i => document.getElementById("c" + i).classList.toggle("active", i === n));
+      const d = TASKS[n];
+      document.getElementById("pipeBox").innerHTML = `
+        <div class="card"><div style="font-weight:850;margin-bottom:8px;">📥 多模态输入（V + L）</div><div style="font-size:13.5px;line-height:1.7;">${d.inTxt}</div></div>
+        <div class="card" style="border-color:var(--tax-primary);"><div style="font-weight:850;">📤 输出机械臂 Action Tokens（A）</div><div class="toks">${d.toks.map(t => `<span class="tok">${t}</span>`).join("")}</div></div>
+      `;
+      document.getElementById("ahaBox").innerHTML = d.aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(1);
+  </script>
+</body>
+</html>

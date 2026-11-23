@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：三臂老虎机探索-利用赌局 · Multi-Armed Bandit</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .arms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 14px 0; }
+    @media (max-width: 720px) { .arms { grid-template-columns: 1fr; } }
+    .arm { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; text-align: center; }
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-top: 10px; }
+    .btn.sec { background: var(--tax-surface); color: var(--tax-text); border-color: var(--tax-border); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎰 三臂老虎机：你敢放弃“还不错”的机器，去赌一台未知的机器吗？</h1>
+        <p>面前有 3 台胜率未知的机器（总计 12 次拉杆机会）。试着在有限预算里摸清哪台胜率最高，并赢下最多金币！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-weight:850;font-size:15px;">
+        <span>🪙 剩余机会：<span id="leftOut" style="color:var(--tax-primary)">12</span> / 12</span>
+        <span>🏆 累计金币：<span id="scoreOut" style="color:var(--tax-green)">0</span></span>
+        <button class="btn sec" style="margin:0;padding:6px 12px;font-size:12.5px;" onclick="resetGame()">↺ 重新开局</button>
+      </div>
+
+      <div class="arms" id="armRow"></div>
+      <div id="logOut" style="font-size:13.5px;color:var(--tax-muted);text-align:center;min-height:22px;">点击任意一台机器拉杆开始！</div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>拉完 12 次后揭晓三台机器的真实隐藏胜率——看看你是“过早满足于次优解”，还是精准平衡了<strong>探索（试新）</strong>与<strong>利用（薅羊毛）</strong>！
+    </div>
+  </div>
+
+  <script>
+    const TRUE_P = [0.25, 0.78, 0.45];
+    let left = 12, score = 0;
+    let stats = [{ n: 0, w: 0 }, { n: 0, w: 0 }, { n: 0, w: 0 }];
+
+    function pull(i) {
+      if (left <= 0) return;
+      left--;
+      const win = Math.random() < TRUE_P[i] ? 1 : 0;
+      stats[i].n++;
+      stats[i].w += win;
+      score += win;
+      document.getElementById("logOut").textContent = win ? `🎉 机器 #${i + 1} 中奖！+1 金币` : `💨 机器 #${i + 1} 空手而归`;
+      render();
+      if (left === 0) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>本局复盘（共赢 ${score} 枚金币）：</strong>三台机器真实胜率其实是 <strong>#1: 25%、#2: 78%、#3: 45%</strong>！强化学习里最核心的权衡就是：先花少量步数<strong>探索（Exploration）</strong>摸清环境，一旦锁定高胜率选项就立刻全力<strong>利用（Exploitation）</strong>！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+
+    function resetGame() {
+      left = 12; score = 0;
+      stats = [{ n: 0, w: 0 }, { n: 0, w: 0 }, { n: 0, w: 0 }];
+      document.getElementById("logOut").textContent = "已重置，点击任意机器开始！";
+      render();
+    }
+
+    function render() {
+      document.getElementById("leftOut").textContent = left;
+      document.getElementById("scoreOut").textContent = score;
+      document.getElementById("armRow").innerHTML = stats.map((s, i) => {
+        const est = s.n ? Math.round((s.w / s.n) * 100) + "%" : "未知";
+        const reveal = left === 0 ? `<div style="font-size:12px;color:var(--tax-primary);margin-top:4px;">真实胜率：${Math.round(TRUE_P[i]*100)}%</div>` : "";
+        return `
+          <div class="arm">
+            <div style="font-size:28px;">🎰</div>
+            <div style="font-weight:850;font-size:15px;margin-top:4px;">老虎机 #${i + 1}</div>
+            <div style="font-size:12.5px;color:var(--tax-muted);margin-top:4px;">已试 ${s.n} 次 · 估计胜率 ${est}</div>
+            ${reveal}
+            <button class="btn" onclick="pull(${i})" ${left <= 0 ? "disabled" : ""}>拉杆一次</button>
+          </div>
+        `;
+      }).join("");
+    }
+    render();
+  </script>
+</body>
+</html>

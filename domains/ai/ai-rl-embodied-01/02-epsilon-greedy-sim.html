@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：ε-贪婪与 UCB 策略曲线沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+    @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .num { font-size: 26px; font-weight: 900; font-family: ui-monospace, monospace; color: var(--tax-primary); margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📈 ε-贪婪策略沙盘：探索率设 0%、10% 还是 50%，1000 轮后谁赚得最多？</h1>
+        <p>规则很简单：有 <code>ε</code> 的概率随机瞎试（探索），有 <code>1 - ε</code> 的概率选当前已知最好的（利用）。拖动 <code>ε</code> 找到 1000 轮期望收益的最高峰！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">🎲 随机探索率 ε：<span id="eVal" style="color:var(--tax-primary)">10%</span>（对照基准：UCB 乐观上界算法约 745 分）</label>
+      <input id="eSlider" type="range" min="0" max="60" value="10" style="width:100%;margin-top:8px;" />
+
+      <div class="cards">
+        <div class="card">
+          <div style="font-size:12.5px;color:var(--tax-muted);font-weight:750;">发现最优机器概率</div>
+          <div class="num" id="findOut">95%</div>
+        </div>
+        <div class="card">
+          <div style="font-size:12.5px;color:var(--tax-muted);font-weight:750;">1000 轮期望总得分</div>
+          <div class="num" id="revOut" style="color:var(--tax-green);">710</div>
+        </div>
+        <div class="card">
+          <div style="font-size:12.5px;color:var(--tax-muted);font-weight:750;">策略评价</div>
+          <div class="num" id="tagOut" style="font-size:17px;margin-top:10px;">✅ 黄金平衡</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const e = parseInt(document.getElementById("eSlider").value, 10) / 100;
+      document.getElementById("eVal").textContent = Math.round(e * 100) + "%";
+
+      const findBest = e === 0 ? 0.34 : Math.min(0.99, 0.34 + 0.65 * (1 - Math.exp(-e * 28)));
+      const avgRandom = 0.49;
+      const bestP = 0.78;
+      const subP = 0.45;
+      const exploitP = findBest * bestP + (1 - findBest) * subP;
+      const expected = Math.round(1000 * ((1 - e) * exploitP + e * avgRandom));
+
+      document.getElementById("findOut").textContent = Math.round(findBest * 100) + "%";
+      document.getElementById("revOut").textContent = expected;
+
+      let tag, aha;
+      if (e < 0.03) {
+        tag = "😵 死守局部次优";
+        aha = "💡 <strong>纯贪婪陷阱（ε≈0）：</strong>完全不探索的话，66% 的概率会一头扎进胜率只有 45% 的普通机器里薅一辈子，错失真正的 78% 摇钱树！";
+      } else if (e <= 0.14) {
+        tag = "✅ 黄金平衡区";
+        aha = "💡 <strong>最优探索区（ε ≈ 5%~12%）：</strong>花一小部分预算就能 95%+ 锁定最强机器，再把 90% 的机会砸在最优解上！更聪明的 <strong>UCB 算法</strong> 还会给试得少的机器加“乐观加分”，连固定 ε 都不需要。";
+      } else {
+        tag = "💸 过度乱试浪费";
+        aha = "💡 <strong>探索过头（ε > 15%）：</strong>早就知道 #2 机器最好了，却还要把一大半金币扔去给差机器“做慈善”，导致长期总收益直线下滑！";
+      }
+      document.getElementById("tagOut").textContent = tag;
+      document.getElementById("ahaBox").innerHTML = aha;
+    }
+    document.getElementById("eSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

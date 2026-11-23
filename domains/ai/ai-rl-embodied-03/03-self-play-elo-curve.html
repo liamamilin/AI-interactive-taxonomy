@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：AlphaZero 自我对弈（Self-Play）进化沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .num { font-size: 28px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚀 AlphaZero 左右互搏：为什么“不向人类学”反而比人类强出 1000 分？</h1>
+        <p>拖动训练天数（第 0 天到第 40 天），对比“只模仿人类棋谱（监督学习）”与“纯从零自我对弈（AlphaGo Zero）”的棋力 Elo 演变！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:850;font-size:14.5px;">📅 自我对弈训练天数：<span id="dayVal" style="color:var(--tax-primary)">0</span> 天（人类世界冠军约 3600 Elo）</label>
+      <input id="daySlider" type="range" min="0" max="40" value="0" style="width:100%;margin-top:8px;" />
+
+      <div class="cards">
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">📚 模仿人类棋谱上限（SL）</div>
+          <div class="num" id="slOut" style="color:var(--tax-amber);">1200</div>
+        </div>
+        <div class="card" style="border-color:var(--tax-primary);">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">⚡ AlphaGo Zero 纯自我对弈</div>
+          <div class="num" id="azOut" style="color:var(--tax-green);">100</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const d = parseInt(document.getElementById("daySlider").value, 10);
+      document.getElementById("dayVal").textContent = d;
+      const sl = Math.round(1200 + 2100 * (1 - Math.exp(-d * 0.25)));
+      const az = Math.round(100 + 5100 * (1 - Math.exp(-d * 0.14)));
+      document.getElementById("slOut").textContent = sl + " Elo";
+      document.getElementById("azOut").textContent = az + " Elo";
+
+      let aha;
+      if (d < 3) {
+        aha = "💡 <strong>第 0~2 天：</strong>纯随机落子的 AlphaZero 连业余入门都下不过，而背了人类棋谱的模型起步飞快！继续把天数往右拉！";
+      } else if (d < 15) {
+        aha = "💡 <strong>第 3~14 天（反超人类！）：</strong>仅仅 3 天，AlphaZero 就靠自己发明出人类钻研了三千年的定式并反超击败李世石的初代 AlphaGo；而模仿人类的模型卡死在 3300 Elo 天花板！";
+      } else {
+        aha = "💡 <strong>第 15~40 天（5100+ Elo 降维打击）：</strong>以人为师，上限就是人类自己；而<strong>以规则和自我对弈为师</strong>，AI 就能不断自己充当“刚好比昨天强一点的陪练”，彻底冲破人类知识边界！";
+      }
+      document.getElementById("ahaBox").innerHTML = aha;
+    }
+    document.getElementById("daySlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

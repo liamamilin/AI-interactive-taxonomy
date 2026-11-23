@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：Sim2Real 域随机化闯关沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    @media (max-width: 720px) { .checks { grid-template-columns: 1fr; } }
+    .chk { display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-weight: 750; font-size: 13px; cursor: pointer; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .num { font-size: 26px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🌍 Sim2Real 域随机化：为什么在电脑里健步如飞的机器狗，一到真实草地就劈叉？</h1>
+        <p>真机训练太贵太容易摔坏，大家都在 GPU 仿真器（如 Isaac Gym）里并行训一万只机器狗。勾选下方<strong>域随机化（Domain Randomization）</strong>扰动项，看现实成功率如何飙升！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="checks">
+        <label class="chk"><input type="checkbox" id="r1" onchange="render()" /> 🧊 随机化地面摩擦力与坡度</label>
+        <label class="chk"><input type="checkbox" id="r2" onchange="render()" /> ⚖️ 随机化电机延迟与负载重量</label>
+        <label class="chk"><input type="checkbox" id="r3" onchange="render()" /> 💡 随机化摄像头光照与外力踹一脚</label>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">💻 虚拟仿真器行走成功率</div>
+          <div class="num" id="simOut" style="color:var(--tax-primary);">99%</div>
+        </div>
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">🏞️ 迁移到真实物理世界成功率</div>
+          <div class="num" id="realOut" style="color:var(--tax-red);">18%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    function render() {
+      const n = ["r1", "r2", "r3"].filter(id => document.getElementById(id).checked).length;
+      const real = [18, 46, 74, 95][n];
+      document.getElementById("realOut").textContent = real + "%";
+      document.getElementById("realOut").style.color = real >= 90 ? "var(--tax-green)" : "var(--tax-red)";
+      document.getElementById("ahaBox").innerHTML = n === 3
+        ? "💡 <strong>Sim2Real 零样本迁移通关！</strong>既然永远无法把仿真器做得和真实世界 100% 一模一样，那就反其道而行之：在仿真里故意把物理参数、光照和阻力疯狂随机化——<strong>让真实世界看起来只是仿真随机分布里的普通一员</strong>！"
+        : "💡 <strong>Sim2Real 鸿沟：</strong>在完美无瑕的温室仿真里训出来的机器人，只要真实地板滑了一点点就会当场摔倒！把上方 3 项域随机化全部勾上试试！";
+      if (n === 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：MDP 折扣因子 γ · 短视鬼 vs 长期主义</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .track-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 16px 0; }
+    .cell { padding: 14px 6px; border-radius: 12px; text-align: center; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-size: 13px; font-weight: 800; }
+    .cell.path { border-color: var(--tax-primary); background: rgba(99,102,241,0.14); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⏳ MDP 折扣因子 γ（Gamma）：一个数字决定 AI 是“及时行乐”还是“放长线钓大鱼”！</h1>
+        <p>机器人站在起点：走 <strong>1 步</strong> 就能拿 <strong>+4 小金币</strong>，走 <strong>5 步</strong> 才能拿到 <strong>+20 大宝箱</strong>。拖动未来折扣因子 <code>γ</code>，看它的最优决策如何瞬间反转！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">🎛️ 未来折扣因子 γ：<span id="gVal" style="color:var(--tax-primary)">0.50</span>（未来第 k 步奖励折现为 <code>R × γᵏ</code>）</label>
+      <input id="gSlider" type="range" min="10" max="99" value="50" style="width:100%;margin-top:8px;" />
+
+      <div class="track-row" id="gridRow"></div>
+      <div id="calcOut" style="font-size:14px;font-weight:800;text-align:center;"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const g = parseInt(document.getElementById("gSlider").value, 10) / 100;
+      document.getElementById("gVal").textContent = g.toFixed(2);
+      const nearVal = 4 * Math.pow(g, 1);
+      const farVal = 20 * Math.pow(g, 5);
+      const pickFar = farVal > nearVal;
+
+      const cells = [
+        { label: "🪙 +4\n(1步)", hit: !pickFar },
+        { label: "🤖 起点", hit: true },
+        { label: "→ 步2", hit: pickFar },
+        { label: "→ 步3", hit: pickFar },
+        { label: "→ 步4", hit: pickFar },
+        { label: "💎 +20\n(5步)", hit: pickFar }
+      ];
+      document.getElementById("gridRow").innerHTML = cells.map(c => `<div class="cell ${c.hit ? "path" : ""}">${c.label.replace("\n", "<br>")}</div>`).join("");
+      document.getElementById("calcOut").innerHTML = `折现价值对比：近处 +4 金币 = <span style="color:var(--tax-amber)">${nearVal.toFixed(2)}</span> vs 远处 +20 宝箱 = <span style="color:var(--tax-green)">${farVal.toFixed(2)}</span> → 决策：<strong>${pickFar ? "坚持走 5 步拿大宝箱！" : "立刻转身拿 +4 小金币！"}</strong>`;
+
+      document.getElementById("ahaBox").innerHTML = pickFar
+        ? "💡 <strong>长期主义觉醒（γ > 0.67）：</strong>未来折扣很小，机器人愿意忍受前 4 步零回报，坚定奔向远处的 +20 大宝箱！现实中下围棋、做长链条推理模型通常把 γ 设在 0.99 甚至 1.0。"
+        : "💡 <strong>极度短视（γ ≤ 0.67）：</strong>5 步之后的 +20 经过 γ⁵ 疯狂打折后还不如眼前的 +4！把 γ 往右拉过 <strong>0.70</strong>，看机器人如何学会延迟满足！";
+    }
+    document.getElementById("gSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>
