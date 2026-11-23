@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：拱顶石（Keystone）纯受压传力图</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; }
+    svg { width: 100%; height: 215px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🪨 拱顶石（Keystone）：石头天生怕拉不怕压，拱形怎么把拉力彻底变没？</h1>
+        <p>点击放入最中间的 <strong>楔形拱顶石</strong>，再拖动桥面载重，看力线（黄线）如何沿着石头互相挤压一路导入两岸大地！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" id="kBtn" onclick="toggleKey()">🪨 插入核心拱顶石（Keystone）</button>
+        <div style="flex:1;min-width:200px;">
+          <label style="font-weight:800;font-size:13.5px;">🐘 桥顶重压：<span id="wVal" style="color:var(--tax-amber)">20</span> 吨</label>
+          <input id="wSl" type="range" min="5" max="100" value="20" style="width:100%;" />
+        </div>
+      </div>
+      <div class="stage"><svg viewBox="0 0 520 205" id="archSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let hasKey = false;
+    function toggleKey() {
+      hasKey = !hasKey;
+      document.getElementById("kBtn").textContent = hasKey ? "🔓 抽走拱顶石（观察塌陷）" : "🪨 插入核心拱顶石（Keystone）";
+      render();
+      if (hasKey && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      const w = parseInt(document.getElementById("wSl").value, 10);
+      document.getElementById("wVal").textContent = w;
+
+      let s = "";
+      // Abutments (banks)
+      s += `<rect x="40" y="135" width="70" height="60" rx="6" fill="#475569"/><rect x="410" y="135" width="70" height="60" rx="6" fill="#475569"/>`;
+      s += `<text x="75" y="170" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="800">左岸桥台</text>`;
+      s += `<text x="445" y="170" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="800">右岸桥台</text>`;
+
+      // Voussoirs (7 arch stones)
+      const cx = 260, cy = 195, r = 135;
+      for (let i = 0; i < 7; i++) {
+        const ang = (-145 + i * 18.3) * Math.PI / 180;
+        const isKey = i === 3;
+        if (isKey && !hasKey) continue;
+        const drop = hasKey ? 0 : 28;
+        const x = cx + Math.cos(ang) * r;
+        const y = cy + Math.sin(ang) * r + drop;
+        const deg = (ang * 180 / Math.PI) + 90;
+        s += `<g transform="translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${deg.toFixed(1)})">`;
+        s += `<polygon points="-16,-14 16,-14 12,14 -12,14" fill="${isKey ? "#f59e0b" : "#64748b"}" stroke="#fff" stroke-width="1.5"/>`;
+        s += `</g>`;
+      }
+
+      if (hasKey) {
+        const lw = 2.5 + (w / 100) * 5;
+        s += `<path d="M 105,155 Q 260,-5 415,155" fill="none" stroke="#38bdf8" stroke-width="${lw.toFixed(1)}" stroke-dasharray="7,4"/>`;
+        s += `<text x="260" y="28" text-anchor="middle" fill="#6ee7b7" font-size="12.5" font-weight="800">✅ 纯压力弧线贯通！越压越紧，零胶水稳扛 ${w} 吨！</text>`;
+      } else {
+        s += `<text x="260" y="34" text-anchor="middle" fill="#fca5a5" font-size="12.5" font-weight="800">💥 缺少中间楔形拱顶石，两侧石头瞬间向内垮塌！</text>`;
+      }
+      document.getElementById("archSvg").innerHTML = s;
+
+      document.getElementById("ahaBox").innerHTML = hasKey
+        ? "💡 <strong>石头越压越结实的秘密：</strong>楔形拱石上宽下窄，重力往下压时只能拼命往左右两侧挤紧邻居，把原本会掰断石头的拉力<strong>100% 转化成了石头最擅长的纯压力</strong>！这就是为什么“Keystone（拱顶石）”在英文里引申为“基石与核心支柱”！"
+        : "💡 <strong>顿悟时刻：</strong>点击 <strong>🪨 插入核心拱顶石</strong>，再拉高桥顶载重，亲眼见证千年石拱桥不用一滴胶水也不塌的力学奇迹！";
+    }
+    document.getElementById("wSl").addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>

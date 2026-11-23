@@ -6,10 +6,10 @@ window.TAXONOMY_DATA = {
   "stats": {
     "totalDomains": 10,
     "litDomains": 3,
-    "totalTopics": 75,
-    "totalPlannedTopics": 200,
+    "totalTopics": 79,
+    "totalPlannedTopics": 196,
     "totalBlueprintTopics": 275,
-    "totalToys": 225
+    "totalToys": 237
   },
   "tracks": [
     {
@@ -2435,24 +2435,7 @@ window.TAXONOMY_DATA = {
         {
           "id": "mechanics-structures",
           "title": "3. 机械、结构与材料力学（Mechanics & Structures）",
-          "plannedTopics": [
-            {
-              "slug": "engineering-mechanics-structures-01",
-              "title": "齿轮比与杠杆力矩"
-            },
-            {
-              "slug": "engineering-mechanics-structures-02",
-              "title": "桁架三角形与桥梁受力透视"
-            },
-            {
-              "slug": "engineering-mechanics-structures-03",
-              "title": "石头拱桥为何不用胶水也不塌"
-            },
-            {
-              "slug": "engineering-mechanics-structures-04",
-              "title": "应力集中（为何飞机窗必须是圆角）"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "power-signals",
@@ -2521,10 +2504,10 @@ window.TAXONOMY_DATA = {
           ]
         }
       ],
-      "liveTopicCount": 8,
-      "plannedTopicCount": 16,
+      "liveTopicCount": 12,
+      "plannedTopicCount": 12,
       "blueprintTopicCount": 24,
-      "liveToyCount": 24,
+      "liveToyCount": 36,
       "topics": [
         {
           "id": "engineering/engineering-control-feedback-01",
@@ -2621,6 +2604,55 @@ window.TAXONOMY_DATA = {
               "archetype": "scenario",
               "concept": "拉链汇流 Zipper Merge · 道路空间利用率 · 消除插队恐慌",
               "summary": "当双车道收窄成单车道时，对比“所有车提前挤进左道”与“开到汇合点一左一右拉链交替”的排队长龙差距！"
+            }
+          ]
+        },
+        {
+          "id": "engineering/engineering-mechanics-structures-01",
+          "slug": "engineering-mechanics-structures-01",
+          "domain": "engineering",
+          "branch": "mechanics-structures",
+          "order": 1,
+          "title": "齿轮比与杠杆力矩",
+          "icon": "⚙️",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "为什么山地车爬陡坡要挂“前小后大”的档位？机械世界里永远逃不掉的“省力必费距离”铁律是什么？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-mechanics-structures-02",
+            "engineering/engineering-systems-tradeoffs-04"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-mechanics-structures-01/01-gear-ratio-bike.html",
+              "file": "01-gear-ratio-bike.html",
+              "path": "./domains/engineering/engineering-mechanics-structures-01/01-gear-ratio-bike.html",
+              "title": "山地车变速齿轮比沙盘（扭矩 vs 转速）",
+              "icon": "🚲",
+              "archetype": "simulation",
+              "concept": "传动比 Gear Ratio · 扭矩与转速反比 · 功率守恒 P = τ·ω",
+              "summary": "调节主动轮与从动轮齿数，亲眼看双齿轮实时转速差与爬坡力矩变化，秒懂汽车 1 档起步、6 档巡航！"
+            },
+            {
+              "id": "engineering/engineering-mechanics-structures-01/02-lever-torque-balance.html",
+              "file": "02-lever-torque-balance.html",
+              "path": "./domains/engineering/engineering-mechanics-structures-01/02-lever-torque-balance.html",
+              "title": "阿基米德杠杆力矩跷跷板（SVG 平衡）",
+              "icon": "⚖️",
+              "archetype": "spatial",
+              "concept": "力矩 τ = F × d · 支点移动 · 机械增益 Mechanical Advantage",
+              "summary": "拖动小朋友在跷跷板上的位置，用 30kg 轻松撬起 90kg 大象，直观感受力臂长度的杠杆魔法！"
+            },
+            {
+              "id": "engineering/engineering-mechanics-structures-01/03-pulley-energy-conservation.html",
+              "file": "03-pulley-energy-conservation.html",
+              "path": "./domains/engineering/engineering-mechanics-structures-01/03-pulley-energy-conservation.html",
+              "title": "滑轮组能量守恒真相：省了一半力，多拉两倍绳！",
+              "icon": "🏗️",
+              "archetype": "builder",
+              "concept": "动滑轮省力 · 功 W = F × s 守恒 · 没有免费永动机",
+              "summary": "逐个给起重机挂上 1 到 4 个滑轮，实时对比手拉的力气和必须拉出的绳子长度，验证能量守恒！"
             }
           ]
         },
@@ -2723,6 +2755,55 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "engineering/engineering-mechanics-structures-02",
+          "slug": "engineering-mechanics-structures-02",
+          "domain": "engineering",
+          "branch": "mechanics-structures",
+          "order": 2,
+          "title": "桁架三角形与桥梁受力透视",
+          "icon": "🌉",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "为什么埃菲尔铁塔、塔吊和跨海大桥全都是由无数个“三角形”拼成的？一根斜撑杆怎么就把摇摇欲坠的方框变坚不可摧？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-mechanics-structures-03",
+            "engineering/engineering-systems-tradeoffs-02"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-mechanics-structures-02/01-square-vs-triangle-truss.html",
+              "file": "01-square-vs-triangle-truss.html",
+              "path": "./domains/engineering/engineering-mechanics-structures-02/01-square-vs-triangle-truss.html",
+              "title": "四边形塌陷 vs 三角形锁死（SVG 推力实验）",
+              "icon": "📐",
+              "archetype": "spatial",
+              "concept": "三角形几何刚性 · 斜撑杆 Bracing · 节点铰接",
+              "summary": "往木框右上角施加横向侧推力，亲眼看四边形一推就歪成平行四边形，加一根斜杆拼成两个三角形瞬间稳如磐石！"
+            },
+            {
+              "id": "engineering/engineering-mechanics-structures-02/02-bridge-tension-compression.html",
+              "file": "02-bridge-tension-compression.html",
+              "path": "./domains/engineering/engineering-mechanics-structures-02/02-bridge-tension-compression.html",
+              "title": "桥梁受力 X 光透视：受拉（红）vs 受压（蓝）",
+              "icon": "🌉",
+              "archetype": "simulation",
+              "concept": "拉力 Tension · 压力 Compression · 桁架轴向传力",
+              "summary": "让重型卡车驶过桁架桥中央，开启 X 光力学透视，看清桥顶杆件如何受压、桥底杆件如何受拉共同托起卡车！"
+            },
+            {
+              "id": "engineering/engineering-mechanics-structures-02/03-material-match-builder.html",
+              "file": "03-material-match-builder.html",
+              "path": "./domains/engineering/engineering-mechanics-structures-02/03-material-match-builder.html",
+              "title": "钢筋混凝土绝配装配台：谁抗压、谁抗拉？",
+              "icon": "🧱",
+              "archetype": "builder",
+              "concept": "混凝土抗压不抗拉 · 钢筋抗拉极强 · 复合材料互补",
+              "summary": "在纯混凝土梁受弯断裂现场，把钢筋精准埋进受拉的底部区域，看承重极限瞬间暴涨 5 倍！"
+            }
+          ]
+        },
+        {
           "id": "engineering/engineering-control-feedback-03",
           "slug": "engineering-control-feedback-03",
           "domain": "engineering",
@@ -2821,6 +2902,55 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "engineering/engineering-mechanics-structures-03",
+          "slug": "engineering-mechanics-structures-03",
+          "domain": "engineering",
+          "branch": "mechanics-structures",
+          "order": 3,
+          "title": "石头拱桥为何不用胶水也不塌",
+          "icon": "🏛️",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "赵州桥和古罗马石拱桥没用一滴现代水泥、没插一根钢筋，为什么站了一千多年、越重压反而越结实？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-mechanics-structures-02",
+            "engineering/engineering-mechanics-structures-04"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-mechanics-structures-03/01-keystone-arch-svg.html",
+              "file": "01-keystone-arch-svg.html",
+              "path": "./domains/engineering/engineering-mechanics-structures-03/01-keystone-arch-svg.html",
+              "title": "拱顶石（Keystone）纯受压传力图",
+              "icon": "🪨",
+              "archetype": "spatial",
+              "concept": "楔形拱石 · 纯压力传递 · 拱脚侧推力 Abutment",
+              "summary": "在 SVG 石拱桥上放置最顶端的楔形拱顶石，亲眼看垂直重力如何沿着弧线神奇转化为石头间的互相挤压！"
+            },
+            {
+              "id": "engineering/engineering-mechanics-structures-03/02-catenary-hanging-chain.html",
+              "file": "02-catenary-hanging-chain.html",
+              "path": "./domains/engineering/engineering-mechanics-structures-03/02-catenary-hanging-chain.html",
+              "title": "倒悬链线秘密：把垂下的铁链倒过来就是完美拱桥！",
+              "icon": "⛓️",
+              "archetype": "simulation",
+              "concept": "悬链线 Catenary · 胡克定律倒置 · 高迪圣家堂设计法",
+              "summary": "一键把自然下垂受纯拉力的铁链上下翻转 180°，亲眼见证“受纯拉的悬链倒过来就是受纯压的完美拱”！"
+            },
+            {
+              "id": "engineering/engineering-mechanics-structures-03/03-arch-abutment-collapse.html",
+              "file": "03-arch-abutment-collapse.html",
+              "path": "./domains/engineering/engineering-mechanics-structures-03/03-arch-abutment-collapse.html",
+              "title": "拱桥唯一死穴：拆掉两岸桥台（侧推力爆裂）",
+              "icon": "💥",
+              "archetype": "scenario",
+              "concept": "水平侧推力 Horizontal Thrust · 桥台支座 · 飞扶壁",
+              "summary": "为什么拱桥不怕从上往下压，却最怕两侧桥台往外滑？移走两岸桥台石墩，秒懂哥特大教堂飞扶壁的真正作用！"
+            }
+          ]
+        },
+        {
           "id": "engineering/engineering-control-feedback-04",
           "slug": "engineering-control-feedback-04",
           "domain": "engineering",
@@ -2915,6 +3045,55 @@ window.TAXONOMY_DATA = {
               "archetype": "scenario",
               "concept": "诱导需求 Induced Demand · 拆路治堵真实案例 · 电网与网络路由",
               "summary": "探索首尔清溪川、纽约百老汇与互联网 BGP 路由中的真实布雷斯悖论案例，打破“堵车就扩路”的线性思维！"
+            }
+          ]
+        },
+        {
+          "id": "engineering/engineering-mechanics-structures-04",
+          "slug": "engineering-mechanics-structures-04",
+          "domain": "engineering",
+          "branch": "mechanics-structures",
+          "order": 4,
+          "title": "应力集中（为何飞机窗必须是圆角）",
+          "icon": "✈️",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "1954 年世界首款喷气客机“彗星号”接连在万米高空解体，元凶竟然只是舷窗采用了好看的“直角方形”？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-reliability-safety-01",
+            "engineering/engineering-systems-tradeoffs-02"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-mechanics-structures-04/01-square-vs-round-window.html",
+              "file": "01-square-vs-round-window.html",
+              "path": "./domains/engineering/engineering-mechanics-structures-04/01-square-vs-round-window.html",
+              "title": "应力流线 SVG 透视：直角方窗 vs 圆角椭窗",
+              "icon": "🪟",
+              "archetype": "spatial",
+              "concept": "应力集中系数 Kt · 力流绕行拥堵 · 彗星号空难教训",
+              "summary": "调节舷窗圆角半径 r 从尖锐直角变成椭圆圆角，亲眼看密集的红色应力流线如何瞬间舒缓分散、峰值应力暴降 4 倍！"
+            },
+            {
+              "id": "engineering/engineering-mechanics-structures-04/02-crack-stop-drilling.html",
+              "file": "02-crack-stop-drilling.html",
+              "path": "./domains/engineering/engineering-mechanics-structures-04/02-crack-stop-drilling.html",
+              "title": "反直觉急救：在裂缝尽头“钻一个圆孔”就能阻止开裂？",
+              "icon": "🕳️",
+              "archetype": "scenario",
+              "concept": "裂纹尖端奇点 · 止裂孔 Stop-Drilling · 增大曲率半径",
+              "summary": "金属板出现一道不断蔓延的细裂纹！对比不管它与在裂纹最尖端钻一个圆孔，秒懂航空维修的经典止裂神技！"
+            },
+            {
+              "id": "engineering/engineering-mechanics-structures-04/03-metal-fatigue-paperclip.html",
+              "file": "03-metal-fatigue-paperclip.html",
+              "path": "./domains/engineering/engineering-mechanics-structures-04/03-metal-fatigue-paperclip.html",
+              "title": "金属疲劳计数器：为什么客机按“起降次数”而不是飞行里程报废？",
+              "icon": "📎",
+              "archetype": "simulation",
+              "concept": "金属疲劳 Metal Fatigue · 客舱增压泄压循环 · S-N 曲线",
+              "summary": "反复弯折一枚回形针（模拟客舱每次起飞增压/降落泄压），体验远低于屈服强度的循环应力如何悄悄攒出微裂纹！"
             }
           ]
         }

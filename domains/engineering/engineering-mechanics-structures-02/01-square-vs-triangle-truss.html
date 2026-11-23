@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：四边形塌陷 vs 三角形锁死 · SVG 推力实验</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; }
+    svg { width: 100%; height: 210px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📐 为什么铁塔与桥梁全由“三角形”组成？加一根斜杆瞬间锁死！</h1>
+        <p>拖动滑块往木框右上角施加 <strong>侧风推力</strong>，再勾选 <strong>🔩 加上一根对角斜撑杆（拼出两个三角形）</strong> 看看奇迹！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <div style="flex:1;min-width:220px;">
+          <label style="font-weight:850;font-size:14px;">💨 侧向风力推力：<span id="fVal" style="color:var(--tax-primary)">40</span> kN</label>
+          <input id="fSl" type="range" min="0" max="100" value="40" style="width:100%;margin-top:6px;" />
+        </div>
+        <label style="display:inline-flex;align-items:center;gap:8px;font-weight:850;font-size:14px;cursor:pointer;">
+          <input id="braceChk" type="checkbox" onchange="render()" /> 🔩 加装斜撑杆（变身三角形桁架！）
+        </label>
+      </div>
+
+      <div class="stage"><svg viewBox="0 0 500 200" id="trSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let acts = 0;
+    function render() {
+      const f = parseInt(document.getElementById("fSl").value, 10);
+      const braced = document.getElementById("braceChk").checked;
+      document.getElementById("fVal").textContent = f;
+
+      const shift = braced ? f * 0.04 : f * 1.15;
+      const x1 = 160, y1 = 165, x2 = 320, y2 = 165;
+      const tx1 = x1 + shift, ty1 = 55 + (braced ? 0 : shift * 0.16);
+      const tx2 = x2 + shift, ty2 = ty1;
+
+      let s = `<line x1="80" y1="165" x2="440" y2="165" stroke="#475569" stroke-width="4"/>`;
+      // Wind arrow
+      if (f > 5) {
+        s += `<line x1="${tx1 - 60}" y1="${ty1}" x2="${tx1 - 12}" y2="${ty1}" stroke="#f59e0b" stroke-width="4"/>`;
+        s += `<text x="${tx1 - 65}" y="${ty1 + 4}" text-anchor="end" fill="#fbbf24" font-size="11.5" font-weight="800">💨 ${f}kN</text>`;
+      }
+      // Frame bars
+      const col = braced ? "#10b981" : f > 55 ? "#ef4444" : "#38bdf8";
+      s += `<line x1="${x1}" y1="${y1}" x2="${tx1.toFixed(1)}" y2="${ty1.toFixed(1)}" stroke="${col}" stroke-width="7" stroke-linecap="round"/>`;
+      s += `<line x1="${x2}" y1="${y2}" x2="${tx2.toFixed(1)}" y2="${ty2.toFixed(1)}" stroke="${col}" stroke-width="7" stroke-linecap="round"/>`;
+      s += `<line x1="${tx1.toFixed(1)}" y1="${ty1.toFixed(1)}" x2="${tx2.toFixed(1)}" y2="${ty2.toFixed(1)}" stroke="${col}" stroke-width="7" stroke-linecap="round"/>`;
+      if (braced) {
+        s += `<line x1="${x1}" y1="${y1}" x2="${tx2.toFixed(1)}" y2="${ty2.toFixed(1)}" stroke="#fbbf24" stroke-width="6" stroke-linecap="round"/>`;
+      }
+      [[x1,y1],[x2,y2],[tx1,ty1],[tx2,ty2]].forEach(([px,py]) => {
+        s += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="6" fill="#fff"/>`;
+      });
+      s += `<text x="250" y="24" text-anchor="middle" fill="${braced ? "#6ee7b7" : "#fca5a5"}" font-size="12.5" font-weight="800">${braced ? "✅ 三角形几何锁死！纹丝不动（位移仅 " + shift.toFixed(1) + "mm）" : "⚠️ 四边形不稳！侧风一推就斜倒塌陷！"}</text>`;
+      document.getElementById("trSvg").innerHTML = s;
+
+      document.getElementById("ahaBox").innerHTML = braced
+        ? "💡 <strong>三角形是唯一具有“几何刚性”的多边形！</strong>只要三条边长度确定，角度就被数学彻底锁死，无法变形！加一根黄色斜撑杆把方框切成两个三角形，所有横向推力立刻变成杆件轴向拉力，铁塔桥梁从此坚不可摧！"
+        : "💡 <strong>顿悟时刻：</strong>把风力拉到 <strong>80 kN</strong> 看方框歪倒，再勾选 <strong>🔩 加装斜撑杆</strong> 亲眼见证三角形的稳固魔法！";
+      if (braced && f >= 40 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    document.getElementById("fSl").addEventListener("input", () => {
+      acts++;
+      render();
+      if (acts >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：应力流线 SVG 透视 · 直角方窗 vs 圆角椭窗</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 210px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🪟 应力集中（Stress Concentration）：为什么所有客机舷窗都是圆角？</h1>
+        <p>把金属机身里的拉力想象成平滑流淌的河水！向右把舷窗 <strong>圆角半径 r</strong> 从 <code>0（尖锐方窗）</code> 拉到 <code>40（椭圆圆窗）</code>，观察四角处的红色应力热点！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:850;font-size:14.5px;">⭕ 舷窗圆角半径 r：<span id="rVal" style="color:var(--tax-primary)">2</span> mm（角部应力放大倍数 Kt = <strong id="ktOut" style="color:var(--tax-red)">9.8×</strong>）</label>
+      <input id="rSl" type="range" min="1" max="42" value="2" style="width:100%;margin-top:8px;" />
+      <div class="stage"><svg viewBox="0 0 520 200" id="stSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const r = parseInt(document.getElementById("rSl").value, 10);
+      document.getElementById("rVal").textContent = r;
+      const kt = 1 + 2 * Math.sqrt(45 / r);
+      const danger = kt > 4.2;
+      const kEl = document.getElementById("ktOut");
+      kEl.textContent = kt.toFixed(1) + "×";
+      kEl.style.color = danger ? "var(--tax-red)" : "var(--tax-green)";
+
+      let s = "";
+      // Stress flow lines bending around window
+      [-56, -34, -14, 14, 34, 56].forEach(dy => {
+        const bend = Math.abs(dy) < 42 ? (dy > 0 ? 48 : -48) : dy;
+        s += `<path d="M 30,${100 + dy} Q 180,${100 + dy} 260,${100 + bend} T 490,${100 + dy}" fill="none" stroke="${danger && Math.abs(dy) < 35 ? "#f87171" : "#38bdf8"}" stroke-width="2" opacity="0.75"/>`;
+      });
+
+      // Fuselage window
+      s += `<rect x="200" y="58" width="120" height="84" rx="${r}" ry="${r}" fill="#020617" stroke="${danger ? "#ef4444" : "#10b981"}" stroke-width="4"/>`;
+      if (danger) {
+        [[203,61],[317,61],[203,139],[317,139]].forEach(([cx,cy]) => {
+          s += `<circle cx="${cx}" cy="${cy}" r="11" fill="rgba(239,68,68,0.55)"/><circle cx="${cx}" cy="${cy}" r="4" fill="#fef08a"/>`;
+        });
+      }
+      s += `<text x="260" y="22" text-anchor="middle" fill="${danger ? "#fca5a5" : "#6ee7b7"}" font-size="12" font-weight="800">${danger ? "🚨 尖角力流严重堵车！四角应力飙升 " + kt.toFixed(1) + " 倍，极易撕裂机身！" : "✅ 圆润绕行顺滑！应力峰值大降，安全飞行数万小时！"}</text>`;
+      document.getElementById("stSvg").innerHTML = s;
+
+      document.getElementById("ahaBox").innerHTML = !danger
+        ? "💡 <strong>用鲜血换来的航空准则：</strong>1954 年彗星号空难调查揭示，方窗尖角的局部应力是平滑机身的数倍，几千次增压后就在窗角撕出致命裂纹！把尖角改成<strong>圆角椭圆</strong>，力流像河水绕过鹅卵石一样平滑散开，彻底根治空难隐患！"
+        : "💡 <strong>顿悟时刻：</strong>把圆角半径 r 拉到 <strong>25 以上</strong>，亲眼看四角刺眼的红色应力热点瞬间熄灭！撕开零食包装袋的小缺口（V 字撕口）正是故意利用了反方向的应力集中！";
+    }
+    document.getElementById("rSl").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

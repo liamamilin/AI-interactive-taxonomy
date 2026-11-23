@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：拱桥唯一死穴 · 水平侧推力与飞扶壁</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; line-height: 1.75; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>💥 拱桥的唯一死穴：不怕千吨下压，只怕拱脚往外劈叉！</h1>
+        <p>巴黎圣母院外面为什么长着一排排像肋骨一样的<strong>“飞扶壁（Flying Buttress）”</strong>？切换下方结构一秒秒懂！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="mNo" onclick="pick('no')">💥 撤掉两侧支撑（高耸石拱顶向外猛推！）</button>
+        <button class="btn" id="mFly" onclick="pick('fly')">🏛️ 加上外部飞扶壁 / 巨型桥台（顶住侧推力！）</button>
+      </div>
+      <div class="box" id="outBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["no"]);
+    function pick(m) {
+      seen.add(m);
+      document.getElementById("mNo").classList.toggle("active", m === "no");
+      document.getElementById("mFly").classList.toggle("active", m === "fly");
+      const fly = m === "fly";
+      document.getElementById("outBox").innerHTML = fly
+        ? "✅ <strong>稳如泰山 + 腾出超大彩色玻璃窗！</strong><br>外部斜撑的<strong>飞扶壁</strong>像两只巨手从外面死死顶住拱顶向外的水平侧推力，并把力稳稳导入地基！于是教堂主墙再也不用修成 3 米厚的笨重堡垒，得以开出震撼千年的哥特式巨幅彩窗！"
+        : "💥 <strong>侧推力劈叉崩塌！</strong><br>拱形把竖直重力拐成了向左右两边猛踹的<strong>水平侧推力（Horizontal Thrust）</strong>。如果两侧桥台太轻或教堂高墙太薄，高墙就会被拱顶直接向外推倒，整座拱顶瞬间坠落！";
+      document.getElementById("ahaBox").innerHTML = fly
+        ? "💡 <strong>每一份美的背后都是力学：</strong>哥特大教堂标志性的外露飞扶壁，最初根本不是为了好看装饰，而是古代石匠为了对抗拱顶<strong>水平侧推力</strong>而发明的天才结构外骨骼！"
+        : "💡 <strong>力的守恒与转移：</strong>拱并没有消灭力，而是把竖直压力转成了水平外推力！点击 <strong>🏛️ 加上外部飞扶壁</strong> 看古代建筑师的惊艳解法。";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("no");
+  </script>
+</body>
+</html>

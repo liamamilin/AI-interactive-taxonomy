@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：止裂孔奇迹 · 在裂缝尖端钻圆孔</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; line-height: 1.7; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🕳️ 止裂孔奇迹（Stop-Drilling）：机翼裂了条缝，维修工竟然拿电钻往裂缝尽头钻了个洞？！</h1>
+        <p>直觉觉得“越钻洞越脆”，但力学公式 <code>Kt ∝ 1 / √r</code> 却给出了完全相反的答案！切换两种处理方式看看结果！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="mRaw" onclick="pick('raw')">💥 放任尖锐微裂纹（尖端半径 r ≈ 0.001mm）</button>
+        <button class="btn" id="mDrill" onclick="pick('drill')">🕳️ 在裂纹最尖端钻一个 5mm 圆孔（Stop-Drilling）</button>
+      </div>
+      <div class="box" id="outBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["raw"]);
+    function pick(m) {
+      seen.add(m);
+      document.getElementById("mRaw").classList.toggle("active", m === "raw");
+      document.getElementById("mDrill").classList.toggle("active", m === "drill");
+      const dr = m === "drill";
+      document.getElementById("outBox").innerHTML = dr
+        ? "✅ <strong>裂纹当场停步！（应力集中骤降 70 倍！）</strong><br>虽然牺牲了一小块金属，但把尖端曲率半径 <code>r</code> 从 0.001mm 强行放大到了 2.5mm，力流平滑绕过圆孔，裂纹彻底失去继续撕裂的能量！"
+        : "💥 <strong>极速撕裂断裂！</strong><br>裂纹尖端细如原子级刀锋（<code>r → 0</code>），导致局部应力放大趋近无穷大！哪怕很小的拉扯，也能像撕开零食袋一样顺着尖端瞬间把整块钢板劈成两半！";
+      document.getElementById("ahaBox").innerHTML = dr
+        ? "💡 <strong>反直觉的工程神技：</strong>无论是飞机蒙皮应急维修、钢桥养护还是吉他木板防裂，在裂纹最前端精准钻一个圆滑的<strong>止裂孔</strong>，都是用“主动挖掉一点肉”换取“彻底消灭尖端应力奇点”的经典绝活！"
+        : "💡 <strong>尖端即炸弹：</strong>只要存在极细尖角，应力就会疯狂聚集！点击 <strong>🕳️ 在尖端钻圆孔</strong> 看看奇迹。";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("raw");
+  </script>
+</body>
+</html>

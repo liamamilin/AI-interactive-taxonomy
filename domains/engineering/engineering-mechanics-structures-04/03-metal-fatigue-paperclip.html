@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：金属疲劳计数器 · 客机为何按起降次数报废</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .meter { padding: 16px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); }
+    .track { height: 18px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin: 10px 0; }
+    .fill { height: 100%; width: 0%; transition: width 0.2s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📎 金属疲劳（Metal Fatigue）：为什么一根掰不断的铁丝，来回折 10 次就齐根断掉？</h1>
+        <p>每次客机起飞爬升，客舱就像吹气球一样增压膨胀；降落时泄压收缩。点击模拟客机一次次 <strong>起降增压循环</strong>，观察微观疲劳损伤如何悄悄累积！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" id="bendBtn" onclick="bend()">✈️ 执行 +5,000 次起降增压循环</button>
+        <button class="btn sec" onclick="resetF()">↺ 换全新机身</button>
+        <span style="margin-left:auto;font-family:monospace;font-weight:850;">累计起降：<span id="cycOut" style="color:var(--tax-primary)">0</span> 次</span>
+      </div>
+
+      <div class="meter">
+        <div style="font-weight:850;font-size:14px;">🔬 铝合金蒙皮微观裂纹累积进度：<span id="dmgOut">0%</span></div>
+        <div class="track"><div class="fill" id="dmgBar" style="background:var(--tax-green);"></div></div>
+        <div id="stOut" style="font-size:13.5px;color:var(--tax-muted);">🟢 全新机身，远低于单次静力断裂极限（安全冗余 300%）</div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let cyc = 0;
+    function bend() {
+      if (cyc >= 30000) return;
+      cyc += 5000;
+      render();
+      if (cyc >= 25000 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    function resetF() { cyc = 0; render(); }
+
+    function render() {
+      const pct = Math.min(100, Math.round((cyc / 30000) * 100));
+      document.getElementById("cycOut").textContent = cyc.toLocaleString();
+      document.getElementById("dmgOut").textContent = pct + "%";
+      const bar = document.getElementById("dmgBar");
+      bar.style.width = pct + "%";
+      bar.style.background = pct >= 100 ? "var(--tax-red)" : pct >= 60 ? "var(--tax-amber)" : "var(--tax-green)";
+
+      if (pct >= 100) {
+        document.getElementById("stOut").innerHTML = "💥 <strong style='color:var(--tax-red)'>达到金属疲劳极限，突发脆性断裂！</strong>即使最后一次起降的压力远小于出厂承重极限！";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>客机寿命看“起降循环”而非总里程：</strong>短途航班一天吹放气球 8 次，比跨洋长途飞机的机身老得快得多！且金属疲劳发生前肉眼毫无变形预兆，因此民航必须强制按循环数做超声波探伤和到龄退役！";
+      } else {
+        document.getElementById("stOut").textContent = pct === 0 ? "🟢 全新机身，金属晶格完好无损" : `🟡 外观肉眼看不出任何异常，但晶界处微观疲劳裂纹已悄悄推进至 ${pct}%…`;
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>顿悟时刻：</strong>连续点击 <strong>✈️ 执行起降循环</strong> 直到 30,000 次，亲眼体会“平时毫发无损、临界点瞬间脆断”的金属疲劳魔咒！";
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

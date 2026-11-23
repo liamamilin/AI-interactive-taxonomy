@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：钢筋混凝土绝配装配台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; line-height: 1.7; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧱 钢筋混凝土绝配：混凝土这么硬，为什么梁底一定要埋钢筋？</h1>
+        <p>混凝土像饼干：<strong>极其抗压（砸不碎），但一掰就从底下拉裂</strong>！选择把钢筋埋在横梁的不同位置，测试极限承重！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="p0" onclick="pick(0)">⬜ 纯素混凝土（不放钢筋）</button>
+        <button class="btn" id="p1" onclick="pick(1)">⬆️ 把钢筋埋在横梁顶部</button>
+        <button class="btn" id="p2" onclick="pick(2)">⬇️ 把钢筋埋在横梁底部（受拉区！）</button>
+      </div>
+      <div class="box" id="outBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const DATA = {
+      0: {
+        txt: "💥 <strong>承载极限：仅 8 吨 → 底部瞬间脆断！</strong><br>重物压下时，横梁底部受拉，抗拉极弱的纯混凝土瞬间像干脆面一样从下往上裂开折断！",
+        aha: "💡 <strong>素混凝土的致命短板：</strong>抗压能力是抗拉能力的 10 倍以上！纯混凝土只适合做竖着压的柱子，绝对不敢单独做横梁！"
+      },
+      1: {
+        txt: "⚠️ <strong>承载极限：仅 9 吨 → 放错位置几乎白费！</strong><br>顶部本来就是受压区，混凝土自己就很抗压，把昂贵的抗拉钢筋埋在顶部完全没帮到底部受拉区！",
+        aha: "💡 <strong>好钢没用在刀刃上：</strong>再试试把钢筋埋到受拉最猛的<strong>横梁底部</strong>！"
+      },
+      2: {
+        txt: "✅ <strong>承载极限飙升至 52 吨（暴涨 6.5 倍！）</strong><br>顶部由廉价的混凝土扛压力，底部由强韧的钢筋扛拉力，而且两者热胀冷缩系数惊人一致，冬天夏天都不脱胶！",
+        aha: "💡 <strong>人类建筑史上最伟大的复合CP（钢筋混凝土）：</strong>让抗压王者混凝土住上面、抗拉王者钢筋住下面，各自干最擅长的活——才撑起了今天全世界的高楼大厦与跨海大桥！"
+      }
+    };
+    const seen = new Set([0]);
+    function pick(n) {
+      seen.add(n);
+      [0, 1, 2].forEach(i => document.getElementById("p" + i).classList.toggle("active", i === n));
+      document.getElementById("outBox").innerHTML = DATA[n].txt;
+      document.getElementById("ahaBox").innerHTML = DATA[n].aha;
+      if (n === 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0);
+  </script>
+</body>
+</html>

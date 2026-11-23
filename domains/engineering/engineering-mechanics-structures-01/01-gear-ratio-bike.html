@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：山地车变速齿轮比沙盘 · 扭矩 vs 转速</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    @media (max-width: 700px) { .ctrls { grid-template-columns: 1fr; } }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; text-align: center; }
+    .num { font-size: 24px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚲 山地车变速箱沙盘：为什么爬陡坡挂“前小后大”，平路飙车挂“前大后小”？</h1>
+        <p>假设你的双腿始终以恒定功率蹬车（60 转/分）。自由调节前牙盘（主动轮）与后飞轮（从动轮）齿数！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <div>
+          <label style="font-weight:850;font-size:14px;">⚙️ 前牙盘（脚踏主动轮）齿数：<span id="fVal" style="color:var(--tax-primary)">36</span> 齿</label>
+          <input id="fSl" type="range" min="22" max="52" step="2" value="36" style="width:100%;margin-top:6px;" />
+        </div>
+        <div>
+          <label style="font-weight:850;font-size:14px;">⚙️ 后飞轮（后轮从动轮）齿数：<span id="rVal" style="color:var(--tax-amber)">24</span> 齿</label>
+          <input id="rSl" type="range" min="12" max="42" step="2" value="24" style="width:100%;margin-top:6px;" />
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card"><div style="font-size:12px;color:var(--tax-muted);">传动比（前÷后）</div><div class="num" id="ratioOut" style="color:var(--tax-primary);">1.50×</div></div>
+        <div class="card"><div style="font-size:12px;color:var(--tax-muted);">后轮输出转速（极速）</div><div class="num" id="rpmOut" style="color:var(--tax-green);">90 RPM</div></div>
+        <div class="card"><div style="font-size:12px;color:var(--tax-muted);">后轮爬坡推力（扭矩）</div><div class="num" id="trqOut" style="color:var(--tax-amber);">0.67×</div></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const f = parseInt(document.getElementById("fSl").value, 10);
+      const r = parseInt(document.getElementById("rSl").value, 10);
+      document.getElementById("fVal").textContent = f;
+      document.getElementById("rVal").textContent = r;
+      const ratio = f / r;
+      const rpm = Math.round(60 * ratio);
+      const trq = 1 / ratio;
+
+      document.getElementById("ratioOut").textContent = ratio.toFixed(2) + "×";
+      document.getElementById("rpmOut").textContent = rpm + " RPM";
+      document.getElementById("trqOut").textContent = trq.toFixed(2) + "× 力矩";
+
+      document.getElementById("ahaBox").innerHTML = ratio < 0.85
+        ? `💡 <strong>超级爬坡档（前小后大，力矩放大 ${trq.toFixed(2)} 倍！）：</strong>你蹬一圈后轮只转 ${ratio.toFixed(2)} 圈，速度慢但推力翻倍——轻轻松松蹬上陡坡！汽车 1 档起步也是完全一样的原理！`
+        : ratio > 2.2
+          ? `💡 <strong>高速巡航档（前大后小，后轮飙到 ${rpm} RPM！）：</strong>蹬一圈后轮狂转 ${ratio.toFixed(2)} 圈，适合下坡和平路冲刺，但如果用来爬坡你会发现根本踩不动！`
+          : "💡 <strong>能量守恒铁律（功率 = 扭矩 × 转速）：</strong>齿轮箱从不凭空造能量，它只是机械世界的“货币兑换机”——试着调出<strong>前小后大（爬坡）</strong>和<strong>前大后小（冲刺）</strong>感受两极反转！";
+    }
+    ["fSl", "rSl"].forEach(id => document.getElementById(id).addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }));
+    render();
+  </script>
+</body>
+</html>

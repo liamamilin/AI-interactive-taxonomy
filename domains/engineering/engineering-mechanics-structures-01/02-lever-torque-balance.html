@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：阿基米德杠杆力矩跷跷板 · SVG 平衡</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 210px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚖️ 阿基米德跷跷板：30kg 小朋友怎么撬起 90kg 的大象？</h1>
+        <p>左侧 <strong>90kg 大象</strong> 固定坐在距离支点 <strong>2 米</strong> 处（力矩 = 180）。向右拖动右侧 <strong>30kg 小朋友</strong> 的座位距离，把跷跷板调成水平平衡！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:850;font-size:14.5px;">📏 小朋友距支点力臂 d：<span id="dVal" style="color:var(--tax-primary)">3.0</span> 米（右力矩 = <code>30 × d = <span id="tOut">90</span></code>）</label>
+      <input id="dSl" type="range" min="10" max="80" value="30" style="width:100%;margin-top:8px;" />
+      <div class="stage"><svg viewBox="0 0 540 200" id="lvSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const d = parseInt(document.getElementById("dSl").value, 10) / 10;
+      document.getElementById("dVal").textContent = d.toFixed(1);
+      const tL = 90 * 2;
+      const tR = 30 * d;
+      document.getElementById("tOut").textContent = tR.toFixed(0);
+
+      const diff = tR - tL;
+      const ang = Math.max(-18, Math.min(18, diff * 0.14));
+      const bal = Math.abs(diff) <= 6;
+
+      let s = `<polygon points="270,126 245,176 295,176" fill="#64748b"/>`;
+      s += `<g transform="rotate(${ang.toFixed(1)} 270 126)">`;
+      s += `<rect x="60" y="118" width="420" height="12" rx="6" fill="${bal ? "#10b981" : "#38bdf8"}"/>`;
+      // Elephant at left 2m -> x = 270 - 50 = 220
+      s += `<text x="215" y="108" text-anchor="middle" font-size="30">🐘</text><text x="215" y="144" text-anchor="middle" fill="#cbd5e1" font-size="10.5">90kg×2m=180</text>`;
+      // Kid at right d -> x = 270 + d*25
+      const kx = 270 + d * 24;
+      s += `<text x="${kx.toFixed(1)}" y="108" text-anchor="middle" font-size="26">🧒</text><text x="${kx.toFixed(1)}" y="144" text-anchor="middle" fill="#fcd34d" font-size="10.5">30kg×${d.toFixed(1)}m=${tR.toFixed(0)}</text>`;
+      s += `</g>`;
+      s += `<text x="270" y="24" text-anchor="middle" fill="${bal ? "#6ee7b7" : "#fca5a5"}" font-size="13" font-weight="800">${bal ? "✅ 完美水平平衡！30kg 成功撬平 90kg 大象！" : diff < 0 ? "⬅️ 大象太沉，把小朋友继续往右移！" : "➡️ 小朋友力矩过大，往左收一点！"}</text>`;
+      document.getElementById("lvSvg").innerHTML = s;
+
+      document.getElementById("ahaBox").innerHTML = bal
+        ? "💡 <strong>阿基米德力矩法则（F₁·d₁ = F₂·d₂）：</strong>只要力臂拉长到 <strong>6.0 米（大象力臂的 3 倍）</strong>，30kg 就能产生跟 90kg 一模一样的 180 单位转动力矩！这就是扳手越长越容易拧松生锈螺母的全部秘密！"
+        : "💡 <strong>顿悟时刻：</strong>拖动滑块把小朋友移到 <strong>6.0 米</strong> 处，让左右力矩同为 180，亲手撬平大象！";
+      if (bal && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    document.getElementById("dSl").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

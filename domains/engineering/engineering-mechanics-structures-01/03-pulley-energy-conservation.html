@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：滑轮组能量守恒真相 · 省力必费绳</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+    @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; text-align: center; }
+    .num { font-size: 26px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏗️ 滑轮组能量守恒：为什么挂 4 根承重绳只需 1/4 力气，但总功一焦耳也没省？</h1>
+        <p>要把一块 <strong>1,200 N</strong> 的巨石吊高 <strong>2 米</strong>。向右增加滑轮承重绳段数 <code>N</code>，观察拉力、拉绳长度与总功的变化！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:850;font-size:14.5px;">🪢 滑轮组承重绳段数 N：<span id="nVal" style="color:var(--tax-primary)">1</span> 根（1 = 仅定滑轮不省力）</label>
+      <input id="nSl" type="range" min="1" max="6" value="1" style="width:100%;margin-top:8px;" />
+
+      <div class="cards">
+        <div class="card"><div style="font-size:12.5px;color:var(--tax-muted);">💪 你需要使的拉力 F</div><div class="num" id="fOut" style="color:var(--tax-green);">1200 N</div></div>
+        <div class="card"><div style="font-size:12.5px;color:var(--tax-muted);">📏 你必须拉出的绳长 s</div><div class="num" id="sOut" style="color:var(--tax-amber);">2 米</div></div>
+        <div class="card" style="border-color:var(--tax-primary);"><div style="font-size:12.5px;color:var(--tax-muted);">⚡ 你消耗的总功 W = F × s</div><div class="num" id="wOut" style="color:var(--tax-primary);">2400 J（恒定！）</div></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const n = parseInt(document.getElementById("nSl").value, 10);
+      document.getElementById("nVal").textContent = n;
+      const f = 1200 / n;
+      const s = 2 * n;
+      document.getElementById("fOut").textContent = Math.round(f) + " N";
+      document.getElementById("sOut").textContent = s + " 米";
+      document.getElementById("wOut").textContent = "2400 J（纹丝不动！）";
+      document.getElementById("ahaBox").innerHTML = `💡 <strong>机械黄金法则（没有免费的午餐）：</strong>挂上 <strong>${n} 根承重绳</strong> 后，你只用 <strong>${Math.round(f)} N</strong> 的轻松小力就能吊起巨石，但代价是要辛苦拉出整整 <strong>${s} 米</strong> 绳子——总功永远等于 <code>2400 焦耳</code>！`;
+    }
+    document.getElementById("nSl").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>
