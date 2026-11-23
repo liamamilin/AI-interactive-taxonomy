@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：查询竞速 · 全表扫描 vs B+ 树叶子链表</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 14px; }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+    .track { height: 16px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin: 8px 0; }
+    .fill { height: 100%; width: 0%; transition: width 0.12s linear; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏎️ 范围查询竞速：<code>SELECT * FROM orders WHERE id BETWEEN 80000 AND 80020</code></h1>
+        <p>为什么 MySQL 用 <strong>B+ 树</strong> 而不是普通 B 树？点击发车，感受“所有叶子节点用双向链表手拉手”的范围扫描神速！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="btn" onclick="go()">▶ 执行范围查询竞速</button>
+
+      <div class="lane">
+        <div style="font-weight:850;font-size:14px;">⚡ B+ 树索引（3 步定位 80000 → 顺着叶子链表一滑到底）</div>
+        <div class="track"><div class="fill" id="f1" style="background:var(--tax-green);"></div></div>
+        <div id="s1" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+      </div>
+
+      <div class="lane">
+        <div style="font-weight:850;font-size:14px;">🐢 无索引全表扫描（逐行翻完 100,000 条记录）</div>
+        <div class="track"><div class="fill" id="f2" style="background:var(--tax-red);"></div></div>
+        <div id="s2" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>点击执行查询，看 B+ 树为什么既是点查王者，又是 <code>BETWEEN / ORDER BY</code> 范围查询的绝配！
+    </div>
+  </div>
+
+  <script>
+    let timer = null;
+    function go() {
+      if (timer) clearInterval(timer);
+      let p1 = 0, p2 = 0;
+      timer = setInterval(() => {
+        p1 = Math.min(100, p1 + 50);
+        p2 = Math.min(100, p2 + 6);
+        document.getElementById("f1").style.width = p1 + "%";
+        document.getElementById("f2").style.width = p2 + "%";
+        document.getElementById("s1").textContent = p1 >= 100 ? "✅ 耗时 0.8 ms（3 次树定位 + 顺链表顺序读 20 条！）" : `定位叶子链表 ${p1}%`;
+        document.getElementById("s2").textContent = p2 >= 100 ? "😵 耗时 1,450 ms（白白扫了 99,980 条无关记录！）" : `全表疯狂扫盘中 ${p2}%`;
+        if (p2 >= 100) {
+          clearInterval(timer);
+          document.getElementById("ahaBox").innerHTML = "💡 <strong>B+ 树超越普通 B 树的绝杀：</strong>普通 B 树做范围查询要上上下下反复回溯；而 B+ 树把所有真实数据集中在最底层叶子节点并用<strong>有序双向链表</strong>串联，找到起点后一路顺序横扫即可，对磁盘顺序 I/O 极其友好！";
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }, 110);
+    }
+  </script>
+</body>
+</html>

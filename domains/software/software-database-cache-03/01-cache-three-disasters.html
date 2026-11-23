@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：Redis 三大灾难急诊台 · 穿透 / 击穿 / 雪崩</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; line-height: 1.7; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚨 缓存三大灾难急诊台：一句话分清穿透、击穿与雪崩！</h1>
+        <p>切换下方三种高频面试 &amp; 线上真事故，再勾选“启用特效解药”看数据库负载如何瞬间归零！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="d1" onclick="pick(1)">🕳️ 1. 缓存穿透（查根本不存在的 ID=-1）</button>
+        <button class="btn" id="d2" onclick="pick(2)">🎯 2. 缓存击穿（爆款单品热点 Key 突然过期）</button>
+        <button class="btn" id="d3" onclick="pick(3)">❄️ 3. 缓存雪崩（10 万个 Key 在零点同时过期）</button>
+      </div>
+
+      <label style="display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;font-weight:850;font-size:14px;cursor:pointer;">
+        <input id="fixChk" type="checkbox" onchange="render()" /> 💊 启用对症架构解药
+      </label>
+
+      <div class="box" id="outBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let cur = 1;
+    const seen = new Set([1]);
+    const DATA = {
+      1: {
+        bad: "💥 <strong>穿透（Penetration）：</strong>黑客疯狂查询 <code>id = -9999</code>。Redis 没有 → 放行查 DB → DB 也没有 → 没法写入缓存 → 10 万次恶意请求全部直穿透射进数据库！",
+        good: "✅ <strong>解药：布隆过滤器 + 缓存空对象 (NULL)！</strong>请求先过布隆过滤器，不存在的 ID 100% 在内存层被秒拒，数据库 QPS 瞬间归 0！",
+        aha: "💡 <strong>口诀：穿透 = 查压根不存在的东西</strong>（两层防线全打穿），靠<strong>布隆过滤器 / 缓存空值</strong>挡在门外！"
+      },
+      2: {
+        bad: "💥 <strong>击穿（Breakdown）：</strong>全网最火的“iPhone 1 元秒杀”这 1 个超级热点 Key 刚好过期，同一毫秒涌进 5 万请求全部扑空，集体冲垮数据库！",
+        good: "✅ <strong>解药：互斥锁（Mutex / Singleflight）或热点永不过期！</strong>5 万人里只放 1 个代表去查数据库回填缓存，其余 49,999 人原地稍等 5ms 直接拿结果！",
+        aha: "💡 <strong>口诀：击穿 = 1 个超级热点 Key 突然失效</strong>（单点爆破），靠<strong>互斥锁单飞 / 逻辑过期</strong>守住单点！"
+      },
+      3: {
+        bad: "💥 <strong>雪崩（Avalanche）：</strong>程序员把 10 万件商品全设成“凌晨 00:00 整点过期”！零点钟声一响，全站缓存瞬间蒸发，数据库当场雪崩宕机！",
+        good: "✅ <strong>解药：TTL 加随机抖动（如 3600s + random(0~300s)）+ 多级缓存！</strong>让 10 万个 Key 错峰温和过期，流量曲线平滑如镜！",
+        aha: "💡 <strong>口诀：雪崩 = 大批 Key 集体同时失效</strong>（大面积坍塌），给 TTL 加上<strong>随机打散值</strong>就能轻松化解！"
+      }
+    };
+
+    function pick(n) {
+      cur = n;
+      seen.add(n);
+      [1, 2, 3].forEach(i => document.getElementById("d" + i).classList.toggle("active", i === n));
+      render();
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      const fix = document.getElementById("fixChk").checked;
+      document.getElementById("outBox").innerHTML = fix ? DATA[cur].good : DATA[cur].bad;
+      document.getElementById("ahaBox").innerHTML = DATA[cur].aha;
+      if (fix && seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+  </script>
+</body>
+</html>

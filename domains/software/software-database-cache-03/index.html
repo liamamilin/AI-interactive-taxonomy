@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>缓存击穿、穿透与雪崩 · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>❄️ 缓存击穿、穿透与雪崩</h1>
+        <p>明明加了 Redis 缓存，为什么大促零点一过，数据库还是被瞬间打挂？一图分清击穿、穿透、雪崩三大灾难！</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-cache-three-disasters.html">
+        <div class="hub-icon">🚨</div>
+        <div class="hub-tag">玩具 01 · 灾难急诊（Scenario）</div>
+        <div class="hub-title">Redis 三大灾难急诊台（穿透 / 击穿 / 雪崩）</div>
+        <div class="hub-desc">切换三种经典故障现场，一键注入布隆过滤器、互斥锁与随机 TTL 过期时间秒救数据库。</div>
+      </a>
+      <a class="hub-card" href="./02-lru-eviction-sandbox.html">
+        <div class="hub-icon">♻️</div>
+        <div class="hub-tag">玩具 02 · 淘汰沙盘（Simulation）</div>
+        <div class="hub-title">LRU 缓存淘汰传送带（最近最少使用）</div>
+        <div class="hub-desc">亲手点击请求不同数据块，直击 LRU 如何在有限内存里自动留下最热的数据。</div>
+      </a>
+      <a class="hub-card" href="./03-cache-aside-consistency.html">
+        <div class="hub-icon">⚖️</div>
+        <div class="hub-tag">玩具 03 · 时序对照（Blind-Lab）</div>
+        <div class="hub-title">双写一致性：先改库删缓存 vs 先删缓存改库</div>
+        <div class="hub-desc">复盘高并发下经典的缓存脏数据翻车时序，记牢 Cache-Aside 黄金更新法则。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

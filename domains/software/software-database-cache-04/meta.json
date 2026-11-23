@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "database-cache",
+  "order": 4,
+  "title": "LSM-Tree 顺序写加速",
+  "icon": "📝",
+  "subtitle": "为什么写日志、物联网时序库和 RocksDB/Kafka 抛弃了 B+ 树，靠“只追加不原地改”把写入速度拉爆 100 倍？",
+  "difficulty": "进阶",
+  "related": ["software/software-database-cache-01", "software/software-systems-os-02"],
+  "toys": {
+    "01-random-vs-seq-write.html": {
+      "title": "写入竞速：B+ 树随机改写 vs LSM-Tree 顺序追加",
+      "icon": "🏎️",
+      "archetype": "race",
+      "concept": "随机写 Random I/O · 顺序追加 Append-Only · 写吞吐代差",
+      "summary": "同步写入 10 万条监控日志，亲眼看 B+ 树满盘随机寻道页分裂，而 LSM-Tree 一路顺序追加秒速写完！"
+    },
+    "02-memtable-sstable-compaction.html": {
+      "title": "MemTable → SSTable 合并压缩流水线",
+      "icon": "🗜️",
+      "archetype": "builder",
+      "concept": "MemTable 内存表 · 不可变 SSTable · 后台 Compaction 合并",
+      "summary": "反复写入并修改同一个 Key，亲手触发刷盘与后台 Compaction，看多份旧记录如何合并瘦身成新文件。"
+    },
+    "03-read-write-space-amp.html": {
+      "title": "存储引擎不可能三角：读放大 / 写放大 / 空间放大",
+      "icon": "🔺",
+      "archetype": "simulation",
+      "concept": "RUM 猜想 · 读放大 vs 写放大 · B+ 树与 LSM-Tree 选型",
+      "summary": "在“读多写少电商”与“写多读少监控日志”之间切换，直观理解 B+ 树和 LSM-Tree 各自的统治区。"
+    }
+  }
+}

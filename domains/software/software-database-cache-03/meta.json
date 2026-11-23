@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "database-cache",
+  "order": 3,
+  "title": "缓存击穿、穿透与雪崩",
+  "icon": "❄️",
+  "subtitle": "明明加了 Redis 缓存，为什么大促零点一过，数据库还是被瞬间打挂？一图分清击穿、穿透、雪崩三大灾难！",
+  "difficulty": "入门",
+  "related": ["software/software-dsa-02", "software/software-systems-os-02"],
+  "toys": {
+    "01-cache-three-disasters.html": {
+      "title": "Redis 三大灾难急诊台（穿透 / 击穿 / 雪崩）",
+      "icon": "🚨",
+      "archetype": "scenario",
+      "concept": "缓存穿透 · 缓存击穿 · 缓存雪崩 · 对应解药",
+      "summary": "分别触发三种高并发流量灾难，亲手开出布隆过滤器、互斥锁与随机 TTL 过期时间三剂特效药！"
+    },
+    "02-lru-eviction-sandbox.html": {
+      "title": "LRU 缓存淘汰传送带（最近最少使用）",
+      "icon": "♻️",
+      "archetype": "simulation",
+      "concept": "LRU 缓存淘汰策略 · 哈希表 + 双向链表 · 命中率",
+      "summary": "向容量仅 3 格的缓存里不断访问热点与冷门页面，亲眼看命中项自动冲到队头、最久没用的被无情踢出！"
+    },
+    "03-cache-aside-consistency.html": {
+      "title": "双写一致性辩论：先改库删缓存 vs 先删缓存改库",
+      "icon": "⚖️",
+      "archetype": "blind-lab",
+      "concept": "Cache-Aside 旁路缓存 · 并发脏数据 · 延迟双删",
+      "summary": "在并发读写时序里对比两种更新顺序，亲眼看“先删缓存再改库”如何把旧脏数据重新写进 Redis！"
+    }
+  }
+}

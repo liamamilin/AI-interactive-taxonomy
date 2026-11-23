@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：转账停电演练 · ACID 与原子回滚</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.warn { background: var(--tax-red); border-color: var(--tax-red); }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .accts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; text-align: center; }
+    .money { font-size: 30px; font-weight: 900; font-family: ui-monospace, monospace; color: var(--tax-primary); margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚡ 转账停电演练：扣完钱突然断电，这 500 块钱会凭空蒸发吗？</h1>
+        <p>Alice 准备给 Bob 转账 <strong>¥500</strong>。依次点击 <strong>① 扣款 → ② 突然拔电源 → ③ 重启恢复</strong>，见证 ACID 原子性与 Undo Log 的威力！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" onclick="step(1)">① 执行 Alice -500（写 Undo Log）</button>
+        <button class="btn warn" onclick="step(2)">⚡ ② 机房突然断电！（Bob 还没 +500）</button>
+        <button class="btn sec" onclick="step(3)">🔌 ③ 来电重启：数据库自动回滚</button>
+      </div>
+
+      <div class="accts">
+        <div class="card"><div style="font-weight:850;">👩 Alice 余额</div><div class="money" id="aOut">¥1,000</div></div>
+        <div class="card"><div style="font-weight:850;">👨 Bob 余额</div><div class="money" id="bOut">¥1,000</div></div>
+      </div>
+      <div id="logOut" style="margin-top:12px;font-size:13.5px;font-weight:800;text-align:center;">账本总金额：¥2,000（守恒 ✅）</div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set();
+    function step(n) {
+      seen.add(n);
+      if (n === 1) {
+        document.getElementById("aOut").textContent = "¥500";
+        document.getElementById("bOut").textContent = "¥1,000";
+        document.getElementById("logOut").innerHTML = "📝 事务未提交：Undo Log 已记下“Alice 原值 = 1000”！总账暂为 ¥1,500";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>写数据前先记账（WAL / Undo Log）：</strong>现在快点红色按钮 <strong>⚡ 突然断电</strong> 看看会发生什么！";
+      } else if (n === 2) {
+        document.getElementById("aOut").textContent = "¥500 ⚠️";
+        document.getElementById("bOut").textContent = "¥1,000";
+        document.getElementById("logOut").innerHTML = "<span style='color:var(--tax-red)'>💥 断电瞬间！若没有事务机制，这 ¥500 就永远凭空蒸发了！</span>";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>危急时刻：</strong>事务只执行了一半就宕机！点击 <strong>🔌 ③ 来电重启</strong> 看数据库如何自愈。";
+      } else {
+        document.getElementById("aOut").textContent = "¥1,000 ✅";
+        document.getElementById("bOut").textContent = "¥1,000 ✅";
+        document.getElementById("logOut").innerHTML = "<span style='color:var(--tax-green)'>✅ 数据库发现事务未写 Commit 标记 → 按 Undo Log 自动回滚！总账恢复 ¥2,000！</span>";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>ACID 的原子性（Atomicity）与持久性（Durability）：</strong>未提交的半成品靠 <strong>Undo Log</strong> 撤销，已提交但还没刷盘的靠 <strong>Redo Log (WAL)</strong> 重放——哪怕下一秒机房着火，银行账本依然分毫不差！";
+      }
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+  </script>
+</body>
+</html>

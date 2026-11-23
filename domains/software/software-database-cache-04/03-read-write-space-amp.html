@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：存储引擎不可能三角 · B+ 树 vs LSM-Tree</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .bar-row { display: grid; grid-template-columns: 110px 1fr 90px; gap: 10px; align-items: center; margin: 12px 0; font-size: 13.5px; font-weight: 800; }
+    .track { height: 14px; background: var(--tax-surface-alt); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); }
+    .fill { height: 100%; border-radius: 999px; transition: width 0.25s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔺 存储引擎不可能三角（RUM 猜想）：为什么没有“全能神级数据库”？</h1>
+        <p><strong>读放大、写放大、空间放大</strong>三者最多只能极致优化其中两个！切换两大存储引擎家族对比它们的性格基因！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="eB" onclick="pick('b')">🌲 B+ 树家族（MySQL InnoDB / PostgreSQL）</button>
+        <button class="btn" id="eL" onclick="pick('l')">📝 LSM-Tree 家族（RocksDB / Cassandra / InfluxDB）</button>
+      </div>
+      <div id="bars"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const DATA = {
+      b: {
+        m: [
+          { l: "随机点查速度", v: 95, tag: "极快（1份数据）", c: "var(--tax-green)" },
+          { l: "海量写入吞吐", v: 48, tag: "一般（随机写）", c: "var(--tax-amber)" },
+          { l: "磁盘空间效率", v: 80, tag: "较高", c: "var(--tax-primary)" }
+        ],
+        aha: "💡 <strong>读多写少、强事务交易（选 B+ 树）：</strong>每条记录在硬盘里只存一份，查找极稳极快，是电商订单、银行核心账务的绝对霸主！"
+      },
+      l: {
+        m: [
+          { l: "随机点查速度", v: 65, tag: "需查多层+布隆", c: "var(--tax-amber)" },
+          { l: "海量写入吞吐", v: 98, tag: "极快（顺序写）", c: "var(--tax-green)" },
+          { l: "磁盘空间效率", v: 68, tag: "合并前有旧版", c: "var(--tax-primary)" }
+        ],
+        aha: "💡 <strong>写多读少、海量日志/时序/KV（选 LSM-Tree）：</strong>宁愿查询时多翻几个 SSTable（靠布隆过滤器加速），也要把写入吞吐拉满——这就是架构师选型永远看读写比例的原因！"
+      }
+    };
+    const seen = new Set(["b"]);
+    function pick(k) {
+      seen.add(k);
+      document.getElementById("eB").classList.toggle("active", k === "b");
+      document.getElementById("eL").classList.toggle("active", k === "l");
+      document.getElementById("bars").innerHTML = DATA[k].m.map(it => `
+        <div class="bar-row">
+          <span>${it.l}</span>
+          <div class="track"><div class="fill" style="width:${it.v}%;background:${it.c}"></div></div>
+          <span style="font-size:12px;text-align:right;color:${it.c};">${it.tag}</span>
+        </div>
+      `).join("");
+      document.getElementById("ahaBox").innerHTML = DATA[k].aha;
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("b");
+  </script>
+</body>
+</html>

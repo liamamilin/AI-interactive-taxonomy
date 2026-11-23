@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：MVCC 多版本快照链 · 读写不互相阻塞</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .chain { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 14px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); }
+    .ver { padding: 12px 14px; border-radius: 12px; background: var(--tax-surface); border: 1.5px solid var(--tax-border); font-family: monospace; font-size: 13px; font-weight: 800; }
+    .ver.snap { border-color: var(--tax-green); background: rgba(16,185,129,0.14); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📸 MVCC 多版本快照链：别人正在疯狂改数据，我怎么不加锁还能读到稳定快照？</h1>
+        <p>事务 A 在 <code>trx_id = 100</code> 时开启查询（记录了此刻的 ReadView）。点击下方按钮让其他事务不断修改商品价格，看版本链如何生长、事务 A 始终读到什么！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" onclick="updatePrice()">✏️ 其他事务把价格 +¥50 并提交</button>
+        <span style="margin-left:auto;font-weight:850;font-size:14px;">事务 A（快照 trx=100）读到的价格：<strong style="color:var(--tax-green);font-family:monospace;">¥100（纹丝不动！）</strong></span>
+      </div>
+      <div style="font-size:12.5px;color:var(--tax-muted);margin-bottom:6px;font-weight:750;">当前行与 Undo 历史版本链（从最新指向最旧）：</div>
+      <div class="chain" id="chainBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let versions = [{ trx: 90, price: 100 }];
+    let nextTrx = 105;
+
+    function updatePrice() {
+      const latest = versions[0].price;
+      versions.unshift({ trx: nextTrx, price: latest + 50 });
+      nextTrx += 5;
+      if (versions.length > 5) versions.pop();
+      render();
+      if (versions.length >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      document.getElementById("chainBox").innerHTML = versions.map((v, i) => {
+        const visibleToA = v.trx <= 100;
+        return `
+          <div class="ver ${visibleToA ? "snap" : ""}">
+            <div>版本 trx_id=${v.trx}</div>
+            <div style="font-size:16px;margin:4px 0;">¥${v.price}</div>
+            <div style="font-size:11px;color:${visibleToA ? "var(--tax-green)" : "var(--tax-muted)"};">${visibleToA ? "✅ 事务 A 可见" : "⏭️ 太新，跳过"}</div>
+          </div>
+          ${i < versions.length - 1 ? "<span style='font-weight:900;color:var(--tax-muted);'>→</span>" : ""}
+        `;
+      }).join("");
+
+      document.getElementById("ahaBox").innerHTML = versions.length >= 3
+        ? "💡 <strong>MVCC 读写不互斥的奥秘：</strong>数据库更新一行时并不直接覆盖抹掉旧值，而是把旧值串在 <strong>Undo 版本链</strong> 里！老事务 A 来读时，顺着链条自动跳过比自己年轻的版本，直接读到 <code>trx=90</code> 的历史快照——<strong>既不加锁、也不互相卡脖子</strong>！"
+        : "💡 <strong>顿悟时刻：</strong>连续点击上方按钮让其他事务把价格改几次，看最新版本不断冒头，而事务 A 如何顺着 Undo 链精准读回 ¥100！";
+    }
+    render();
+  </script>
+</body>
+</html>

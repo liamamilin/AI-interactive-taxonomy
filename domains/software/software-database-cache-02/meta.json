@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "database-cache",
+  "order": 2,
+  "title": "事务 ACID 与 MVCC 并发隔离",
+  "icon": "🏦",
+  "subtitle": "银行转账扣完钱突然停电怎么办？一万人同时读写同一张表，数据库怎么做到“读不阻塞写、写不阻塞读”？",
+  "difficulty": "进阶",
+  "related": ["software/software-systems-os-03", "software/software-distributed-01"],
+  "toys": {
+    "01-acid-power-outage.html": {
+      "title": "转账停电演练：WAL 预写日志与原子回滚",
+      "icon": "⚡",
+      "archetype": "scenario",
+      "concept": "ACID 原子性与持久性 · Undo Log 回滚 · Redo Log / WAL",
+      "summary": "在“Alice 扣款成功、Bob 还没入账”的瞬间拔掉服务器电源，亲眼看数据库怎么靠日志把钱分毫不差地找回来！"
+    },
+    "02-mvcc-snapshot-versions.html": {
+      "title": "MVCC 多版本快照链（Undo 版本链）",
+      "icon": "📸",
+      "archetype": "spatial",
+      "concept": "MVCC 多版本并发控制 · ReadView 快照读 · 读写不互斥",
+      "summary": "在事务 A 查询期间让事务 B 疯狂修改数据，顺着 Undo 版本链看事务 A 如何优雅读到“自己那一刻的历史快照”！"
+    },
+    "03-isolation-levels-lab.html": {
+      "title": "隔离级别调音台：脏读 / 不可重复读 / 幻读",
+      "icon": "🎛️",
+      "archetype": "simulation",
+      "concept": "RU / RC / RR / Serializable · 并发吞吐 vs 强一致权衡",
+      "summary": "逐档调高 SQL 隔离级别，直观对照四种并发异常的开关状态与吞吐性能代价。"
+    }
+  }
+}

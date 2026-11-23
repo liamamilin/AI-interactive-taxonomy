@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：SQL 隔离级别调音台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; text-align: center; }
+    .st { font-size: 20px; font-weight: 900; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎛️ 隔离级别调音台：为什么 MySQL 默认选“可重复读”，而不是最安全的“串行化”？</h1>
+        <p>拖动滑块切换 SQL 标准 4 档隔离级别，观察“脏读 / 不可重复读 / 幻读”与“并发吞吐量”之间的跷跷板！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">🎚️ 当前隔离级别：<span id="lvName" style="color:var(--tax-primary)">3. 可重复读（Repeatable Read · MySQL 默认）</span></label>
+      <input id="lvSlider" type="range" min="1" max="4" value="3" style="width:100%;margin-top:8px;" />
+
+      <div class="grid" id="gridBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const LEVELS = {
+      1: { name: "1. 读未提交（Read Uncommitted）", dirty: "💥 会发生", nonrep: "💥 会发生", phantom: "💥 会发生", tps: "100% 极快", aha: "💡 <strong>读未提交：</strong>能读到别人还没提交、随时会回滚的草稿数据（脏读），生产环境几乎禁用！" },
+      2: { name: "2. 读已提交（Read Committed · PG/Oracle 默认）", dirty: "✅ 已杜绝", nonrep: "💥 会发生", phantom: "💥 会发生", tps: "90% 很快", aha: "💡 <strong>读已提交（RC）：</strong>每次查询都重新拍一张新快照，杜绝脏读，且锁粒度小、并发极高，是 PostgreSQL 和 Oracle 的默认选择！" },
+      3: { name: "3. 可重复读（Repeatable Read · MySQL 默认）", dirty: "✅ 已杜绝", nonrep: "✅ 已杜绝", phantom: "🛡️ 间隙锁基本防住", tps: "78% 均衡", aha: "💡 <strong>可重复读（RR）：</strong>整个事务共用开头那张 ReadView 快照，保证同一事务里反复读结果完全一致；MySQL InnoDB 还用 Next-Key Lock 顺手挡住了大部分幻读！" },
+      4: { name: "4. 串行化（Serializable）", dirty: "✅ 已杜绝", nonrep: "✅ 已杜绝", phantom: "✅ 彻底杜绝", tps: "15% 排队龟速", aha: "💡 <strong>串行化：</strong>所有并发事务强行排成单队一个一个执行，绝对安全，但高并发系统直接堵死——工程架构永远是在<strong>一致性与吞吐量</strong>之间找甜点！" }
+    };
+    let drags = 0;
+    function render() {
+      const lv = parseInt(document.getElementById("lvSlider").value, 10);
+      const d = LEVELS[lv];
+      document.getElementById("lvName").textContent = d.name;
+      document.getElementById("gridBox").innerHTML = `
+        <div class="card"><div style="font-size:12px;color:var(--tax-muted);">脏读</div><div class="st">${d.dirty}</div></div>
+        <div class="card"><div style="font-size:12px;color:var(--tax-muted);">不可重复读</div><div class="st">${d.nonrep}</div></div>
+        <div class="card"><div style="font-size:12px;color:var(--tax-muted);">幻读</div><div class="st">${d.phantom}</div></div>
+        <div class="card"><div style="font-size:12px;color:var(--tax-muted);">并发吞吐</div><div class="st" style="color:var(--tax-primary);">${d.tps}</div></div>
+      `;
+      document.getElementById("ahaBox").innerHTML = d.aha;
+    }
+    document.getElementById("lvSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

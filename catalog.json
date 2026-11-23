@@ -5,10 +5,10 @@
   "stats": {
     "totalDomains": 10,
     "litDomains": 2,
-    "totalTopics": 55,
-    "totalPlannedTopics": 220,
+    "totalTopics": 59,
+    "totalPlannedTopics": 216,
     "totalBlueprintTopics": 275,
-    "totalToys": 165
+    "totalToys": 177
   },
   "tracks": [
     {
@@ -1214,24 +1214,7 @@
         {
           "id": "database-cache",
           "title": "4. 数据库、存储与缓存（Databases & Caching）",
-          "plannedTopics": [
-            {
-              "slug": "software-database-cache-01",
-              "title": "B+ 树索引为何快一万倍"
-            },
-            {
-              "slug": "software-database-cache-02",
-              "title": "事务 ACID 与 MVCC 并发隔离"
-            },
-            {
-              "slug": "software-database-cache-03",
-              "title": "缓存击穿、穿透与雪崩"
-            },
-            {
-              "slug": "software-database-cache-04",
-              "title": "LSM-Tree 顺序写加速"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "distributed",
@@ -1278,11 +1261,60 @@
           ]
         }
       ],
-      "liveTopicCount": 12,
-      "plannedTopicCount": 12,
+      "liveTopicCount": 16,
+      "plannedTopicCount": 8,
       "blueprintTopicCount": 24,
-      "liveToyCount": 36,
+      "liveToyCount": 48,
       "topics": [
+        {
+          "id": "software/software-database-cache-01",
+          "slug": "software-database-cache-01",
+          "domain": "software",
+          "branch": "database-cache",
+          "order": 1,
+          "title": "B+ 树索引为何快一万倍",
+          "icon": "🌲",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "千万级订单表里查一条记录，全表扫描要等 5 秒，加个 B+ 树索引为什么只要 3 次磁盘读取就能 1 毫秒命中？",
+          "difficulty": "进阶",
+          "related": [
+            "software/software-dsa-01",
+            "software/software-dsa-04"
+          ],
+          "toys": [
+            {
+              "id": "software/software-database-cache-01/01-bplustree-height-sim.html",
+              "file": "01-bplustree-height-sim.html",
+              "path": "./domains/software/software-database-cache-01/01-bplustree-height-sim.html",
+              "title": "B+ 树“矮胖哲学”：3 层装下 2,000 万行数据",
+              "icon": "📐",
+              "archetype": "simulation",
+              "concept": "多路平衡树 B+ Tree · 高扇出 Fan-out · 磁盘 I/O 次数",
+              "summary": "拖动单页分支数（扇出）与数据总行数，亲眼看同样 2,000 万行数据，二叉树高达 25 层而 B+ 树仅 3 层！"
+            },
+            {
+              "id": "software/software-database-cache-01/02-fullscan-vs-index-race.html",
+              "file": "02-fullscan-vs-index-race.html",
+              "path": "./domains/software/software-database-cache-01/02-fullscan-vs-index-race.html",
+              "title": "查询竞速：全表扫描 vs 聚簇索引 + 范围链表",
+              "icon": "🏎️",
+              "archetype": "race",
+              "concept": "Full Table Scan · B+ 树叶子双向链表 · 范围查询 BETWEEN",
+              "summary": "执行 `WHERE id BETWEEN 1020 AND 1050`，同屏对比全表扫盘与 B+ 树定位后顺着叶子链表一路扫出的速度差。"
+            },
+            {
+              "id": "software/software-database-cache-01/03-composite-index-leftmost.html",
+              "file": "03-composite-index-leftmost.html",
+              "path": "./domains/software/software-database-cache-01/03-composite-index-leftmost.html",
+              "title": "联合索引最左前缀诊所：为什么建了索引还是慢？",
+              "icon": "🩺",
+              "archetype": "scenario",
+              "concept": "联合索引 (a, b, c) · 最左前缀原则 · 索引失效排障",
+              "summary": "针对联合索引 `(city, age, score)` 诊断 4 条真实 SQL 语句，一秒看清哪条命中索引、哪条直接失效！"
+            }
+          ]
+        },
         {
           "id": "software/software-dsa-01",
           "slug": "software-dsa-01",
@@ -1427,6 +1459,55 @@
               "archetype": "simulation",
               "concept": "二进制补码 Two's Complement · 模运算 · 化减为加",
               "summary": "拨动 4 位补码表盘，看清为什么芯片根本不需要造“减法器”，靠绕圈加法就能优雅算出负数！"
+            }
+          ]
+        },
+        {
+          "id": "software/software-database-cache-02",
+          "slug": "software-database-cache-02",
+          "domain": "software",
+          "branch": "database-cache",
+          "order": 2,
+          "title": "事务 ACID 与 MVCC 并发隔离",
+          "icon": "🏦",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "银行转账扣完钱突然停电怎么办？一万人同时读写同一张表，数据库怎么做到“读不阻塞写、写不阻塞读”？",
+          "difficulty": "进阶",
+          "related": [
+            "software/software-systems-os-03",
+            "software/software-distributed-01"
+          ],
+          "toys": [
+            {
+              "id": "software/software-database-cache-02/01-acid-power-outage.html",
+              "file": "01-acid-power-outage.html",
+              "path": "./domains/software/software-database-cache-02/01-acid-power-outage.html",
+              "title": "转账停电演练：WAL 预写日志与原子回滚",
+              "icon": "⚡",
+              "archetype": "scenario",
+              "concept": "ACID 原子性与持久性 · Undo Log 回滚 · Redo Log / WAL",
+              "summary": "在“Alice 扣款成功、Bob 还没入账”的瞬间拔掉服务器电源，亲眼看数据库怎么靠日志把钱分毫不差地找回来！"
+            },
+            {
+              "id": "software/software-database-cache-02/02-mvcc-snapshot-versions.html",
+              "file": "02-mvcc-snapshot-versions.html",
+              "path": "./domains/software/software-database-cache-02/02-mvcc-snapshot-versions.html",
+              "title": "MVCC 多版本快照链（Undo 版本链）",
+              "icon": "📸",
+              "archetype": "spatial",
+              "concept": "MVCC 多版本并发控制 · ReadView 快照读 · 读写不互斥",
+              "summary": "在事务 A 查询期间让事务 B 疯狂修改数据，顺着 Undo 版本链看事务 A 如何优雅读到“自己那一刻的历史快照”！"
+            },
+            {
+              "id": "software/software-database-cache-02/03-isolation-levels-lab.html",
+              "file": "03-isolation-levels-lab.html",
+              "path": "./domains/software/software-database-cache-02/03-isolation-levels-lab.html",
+              "title": "隔离级别调音台：脏读 / 不可重复读 / 幻读",
+              "icon": "🎛️",
+              "archetype": "simulation",
+              "concept": "RU / RC / RR / Serializable · 并发吞吐 vs 强一致权衡",
+              "summary": "逐档调高 SQL 隔离级别，直观对照四种并发异常的开关状态与吞吐性能代价。"
             }
           ]
         },
@@ -1578,6 +1659,55 @@
           ]
         },
         {
+          "id": "software/software-database-cache-03",
+          "slug": "software-database-cache-03",
+          "domain": "software",
+          "branch": "database-cache",
+          "order": 3,
+          "title": "缓存击穿、穿透与雪崩",
+          "icon": "❄️",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "明明加了 Redis 缓存，为什么大促零点一过，数据库还是被瞬间打挂？一图分清击穿、穿透、雪崩三大灾难！",
+          "difficulty": "入门",
+          "related": [
+            "software/software-dsa-02",
+            "software/software-systems-os-02"
+          ],
+          "toys": [
+            {
+              "id": "software/software-database-cache-03/01-cache-three-disasters.html",
+              "file": "01-cache-three-disasters.html",
+              "path": "./domains/software/software-database-cache-03/01-cache-three-disasters.html",
+              "title": "Redis 三大灾难急诊台（穿透 / 击穿 / 雪崩）",
+              "icon": "🚨",
+              "archetype": "scenario",
+              "concept": "缓存穿透 · 缓存击穿 · 缓存雪崩 · 对应解药",
+              "summary": "分别触发三种高并发流量灾难，亲手开出布隆过滤器、互斥锁与随机 TTL 过期时间三剂特效药！"
+            },
+            {
+              "id": "software/software-database-cache-03/02-lru-eviction-sandbox.html",
+              "file": "02-lru-eviction-sandbox.html",
+              "path": "./domains/software/software-database-cache-03/02-lru-eviction-sandbox.html",
+              "title": "LRU 缓存淘汰传送带（最近最少使用）",
+              "icon": "♻️",
+              "archetype": "simulation",
+              "concept": "LRU 缓存淘汰策略 · 哈希表 + 双向链表 · 命中率",
+              "summary": "向容量仅 3 格的缓存里不断访问热点与冷门页面，亲眼看命中项自动冲到队头、最久没用的被无情踢出！"
+            },
+            {
+              "id": "software/software-database-cache-03/03-cache-aside-consistency.html",
+              "file": "03-cache-aside-consistency.html",
+              "path": "./domains/software/software-database-cache-03/03-cache-aside-consistency.html",
+              "title": "双写一致性辩论：先改库删缓存 vs 先删缓存改库",
+              "icon": "⚖️",
+              "archetype": "blind-lab",
+              "concept": "Cache-Aside 旁路缓存 · 并发脏数据 · 延迟双删",
+              "summary": "在并发读写时序里对比两种更新顺序，亲眼看“先删缓存再改库”如何把旧脏数据重新写进 Redis！"
+            }
+          ]
+        },
+        {
           "id": "software/software-dsa-03",
           "slug": "software-dsa-03",
           "domain": "software",
@@ -1721,6 +1851,55 @@
               "archetype": "simulation",
               "concept": "异步非阻塞 I/O · Event Loop · 为什么主线程不能写死循环",
               "summary": "往事件循环里投递网络请求、定时器与耗时重计算，亲眼看一个阻塞函数如何把整个页面卡成 PPT。"
+            }
+          ]
+        },
+        {
+          "id": "software/software-database-cache-04",
+          "slug": "software-database-cache-04",
+          "domain": "software",
+          "branch": "database-cache",
+          "order": 4,
+          "title": "LSM-Tree 顺序写加速",
+          "icon": "📝",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "为什么写日志、物联网时序库和 RocksDB/Kafka 抛弃了 B+ 树，靠“只追加不原地改”把写入速度拉爆 100 倍？",
+          "difficulty": "进阶",
+          "related": [
+            "software/software-database-cache-01",
+            "software/software-systems-os-02"
+          ],
+          "toys": [
+            {
+              "id": "software/software-database-cache-04/01-random-vs-seq-write.html",
+              "file": "01-random-vs-seq-write.html",
+              "path": "./domains/software/software-database-cache-04/01-random-vs-seq-write.html",
+              "title": "写入竞速：B+ 树随机改写 vs LSM-Tree 顺序追加",
+              "icon": "🏎️",
+              "archetype": "race",
+              "concept": "随机写 Random I/O · 顺序追加 Append-Only · 写吞吐代差",
+              "summary": "同步写入 10 万条监控日志，亲眼看 B+ 树满盘随机寻道页分裂，而 LSM-Tree 一路顺序追加秒速写完！"
+            },
+            {
+              "id": "software/software-database-cache-04/02-memtable-sstable-compaction.html",
+              "file": "02-memtable-sstable-compaction.html",
+              "path": "./domains/software/software-database-cache-04/02-memtable-sstable-compaction.html",
+              "title": "MemTable → SSTable 合并压缩流水线",
+              "icon": "🗜️",
+              "archetype": "builder",
+              "concept": "MemTable 内存表 · 不可变 SSTable · 后台 Compaction 合并",
+              "summary": "反复写入并修改同一个 Key，亲手触发刷盘与后台 Compaction，看多份旧记录如何合并瘦身成新文件。"
+            },
+            {
+              "id": "software/software-database-cache-04/03-read-write-space-amp.html",
+              "file": "03-read-write-space-amp.html",
+              "path": "./domains/software/software-database-cache-04/03-read-write-space-amp.html",
+              "title": "存储引擎不可能三角：读放大 / 写放大 / 空间放大",
+              "icon": "🔺",
+              "archetype": "simulation",
+              "concept": "RUM 猜想 · 读放大 vs 写放大 · B+ 树与 LSM-Tree 选型",
+              "summary": "在“读多写少电商”与“写多读少监控日志”之间切换，直观理解 B+ 树和 LSM-Tree 各自的统治区。"
             }
           ]
         },

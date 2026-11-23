@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：双写一致性对照 · 先改库还是先删缓存？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; line-height: 1.75; font-size: 13.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚖️ 缓存双写一致性：更新数据时，该“先删缓存再改库”还是“先改库再删缓存”？</h1>
+        <p>商品价格要从 <strong>¥100 改成 ¥200</strong>，与此同时有另一个并发读请求杀进来！切换两种顺序看谁更容易留下永久脏数据！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="mBad" onclick="pick('bad')">❌ 方案 A：先删缓存，再改数据库</button>
+        <button class="btn" id="mGood" onclick="pick('good')">✅ 方案 B：先改数据库，再删缓存（Cache-Aside）</button>
+      </div>
+      <div class="box" id="boxOut"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["bad"]);
+    function pick(m) {
+      seen.add(m);
+      document.getElementById("mBad").classList.toggle("active", m === "bad");
+      document.getElementById("mGood").classList.toggle("active", m === "good");
+      const good = m === "good";
+      document.getElementById("boxOut").innerHTML = good
+        ? "<strong>✅ Cache-Aside 推荐时序：</strong><br>1. 写请求先改数据库：价格变成 <strong>¥200</strong>；<br>2. 立刻删除 Redis 缓存；<br>3. 下一个读请求扑空，从数据库读到最新的 <strong>¥200</strong> 回填缓存！<br><span style='color:var(--tax-green)'>因为写数据库通常比读慢得多，几乎不可能出现脏数据倒灌！</span>"
+        : "<strong>💥 高频踩坑时序：</strong><br>1. 写请求先删掉了 Redis 缓存；<br>2. 就在改库这 10ms 间隙，并发读请求进来发现缓存空了，去库里读到了旧价 <strong>¥100</strong> 并写回 Redis！<br>3. 写请求把库改成 ¥200 完成——结果 Redis 里永远留着 <strong>¥100 脏数据</strong> 直到过期！";
+      document.getElementById("ahaBox").innerHTML = good
+        ? "💡 <strong>工程铁律（Cache-Aside Pattern）：</strong>更新数据时永远<strong>“先更新数据库，再删除缓存”</strong>（而且是<strong>删缓存</strong>而不是直接更新缓存，避免并发写乱序覆盖）！再加上短 TTL 兜底，就是大厂最稳的缓存一致性实践！"
+        : "💡 <strong>为什么“先删缓存”极易出脏数据？</strong>因为数据库写操作比读操作慢得多，删完缓存立刻制造了一个真空窗口让并发读把旧值重新灌回 Redis！切到 <strong>方案 B</strong> 对比一下。";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("bad");
+  </script>
+</body>
+</html>

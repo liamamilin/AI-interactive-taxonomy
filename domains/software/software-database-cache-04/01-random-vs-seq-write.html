@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：写入竞速 · B+ 树随机改写 vs LSM-Tree 顺序追加</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 14px; }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+    .track { height: 16px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin: 8px 0; }
+    .fill { height: 100%; width: 0%; transition: width 0.12s linear; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏎️ 顺序写 vs 随机写：为什么 LSM-Tree 写海量日志能比 B+ 树快几十倍？</h1>
+        <p>向数据库瞬间灌入 <strong>100,000 条乱序 Key</strong>！点击发车，对比 B+ 树原地随机寻道更新与 LSM-Tree 内存顺序追加！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="btn" onclick="go()">▶ 灌入 10 万条乱序写入请求</button>
+
+      <div class="lane">
+        <div style="font-weight:850;font-size:14px;">⚡ LSM-Tree（先写内存 MemTable + 磁盘顺序追加 WAL，绝不原地改！）</div>
+        <div class="track"><div class="fill" id="f1" style="background:var(--tax-green);"></div></div>
+        <div id="s1" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+      </div>
+
+      <div class="lane">
+        <div style="font-weight:850;font-size:14px;">🐢 B+ 树原地更新（满盘随机定位叶子页 + 频繁触发页分裂！）</div>
+        <div class="track"><div class="fill" id="f2" style="background:var(--tax-amber);"></div></div>
+        <div id="s2" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>点击起跑，看“把随机写变成顺序追加（Append-Only）”如何成为所有高吞吐存储系统的终极加速密码！
+    </div>
+  </div>
+
+  <script>
+    let timer = null;
+    function go() {
+      if (timer) clearInterval(timer);
+      let p1 = 0, p2 = 0;
+      timer = setInterval(() => {
+        p1 = Math.min(100, p1 + 34);
+        p2 = Math.min(100, p2 + 7);
+        document.getElementById("f1").style.width = p1 + "%";
+        document.getElementById("f2").style.width = p2 + "%";
+        document.getElementById("s1").textContent = p1 >= 100 ? "✅ 0.18 秒写完！（纯顺序写，磁盘带宽跑满！）" : `顺序追加写入中 ${p1}%`;
+        document.getElementById("s2").textContent = p2 >= 100 ? "😵 4.60 秒写完（随机 4KB 页读写 + 树分裂拖垮 IOPS）" : `随机寻道页分裂中 ${p2}%`;
+        if (p2 >= 100) {
+          clearInterval(timer);
+          document.getElementById("ahaBox").innerHTML = "💡 <strong>硬件第一性原理：</strong>无论是机械硬盘还是 SSD，<strong>顺序追加写的速度都远超随机原地修改</strong>！LSM-Tree（RocksDB / LevelDB / Cassandra / ClickHouse）靠着“先追加、后台再慢慢合并”把写入吞吐拉到了物理极限！";
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }, 110);
+    }
+  </script>
+</body>
+</html>

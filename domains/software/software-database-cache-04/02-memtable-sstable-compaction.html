@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：MemTable → SSTable 合并压缩流水线</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .layers { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .layers { grid-template-columns: 1fr; } }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; min-height: 110px; }
+    .chip { display: inline-block; padding: 5px 10px; border-radius: 8px; background: var(--tax-surface); border: 1px solid var(--tax-border); font-family: monospace; font-size: 12.5px; font-weight: 800; margin: 4px 4px 0 0; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🗜️ Compaction 后台合并：只追加不覆盖，硬盘不会很快被旧数据塞爆吗？</h1>
+        <p>先点两次 <strong>写入/修改</strong> 把记录追加进磁盘 SSTable（注意旧值还在！），再点击 <strong>🗜️ 执行后台 Compaction 合并</strong> 清理冗余旧版本和删除墓碑！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" onclick="writeOp('score=95')">✏️ 追加新值 score=95</button>
+        <button class="btn" onclick="writeOp('user=🪦TOMBSTONE')">🪦 追加删除墓碑 user=DEL</button>
+        <button class="btn sec" onclick="compact()">🗜️ 触发后台 Compaction 合并瘦身</button>
+      </div>
+
+      <div class="layers">
+        <div class="box">
+          <div style="font-weight:850;font-size:13.5px;margin-bottom:6px;">📄 L0 不可变 SSTable 碎片文件（新→旧）</div>
+          <div id="l0Box"></div>
+        </div>
+        <div class="box" style="border-color:var(--tax-green);">
+          <div style="font-weight:850;font-size:13.5px;margin-bottom:6px;">✨ L1 合并后的紧凑有序 SSTable</div>
+          <div id="l1Box"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let l0 = ["score=60", "user=Alice", "score=80"];
+    let l1 = [];
+    let compacted = false;
+
+    function writeOp(kv) {
+      l0.unshift(kv);
+      compacted = false;
+      render();
+    }
+
+    function compact() {
+      const map = new Map();
+      // 新值在前，只保留最新状态
+      l0.forEach(item => {
+        const [k, v] = item.split("=");
+        if (!map.has(k)) map.set(k, v);
+      });
+      l1 = [];
+      map.forEach((v, k) => {
+        if (!v.includes("TOMBSTONE")) l1.push(`${k}=${v}`);
+      });
+      l0 = [];
+      compacted = true;
+      render();
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      document.getElementById("l0Box").innerHTML = l0.length
+        ? l0.map(x => `<span class="chip">${x}</span>`).join("")
+        : "<span style='font-size:12.5px;color:var(--tax-muted);'>已全部合并清空 ✅</span>";
+      document.getElementById("l1Box").innerHTML = l1.length
+        ? l1.map(x => `<span class="chip" style="border-color:var(--tax-green);">${x}</span>`).join("")
+        : "<span style='font-size:12.5px;color:var(--tax-muted);'>等待触发 Compaction 合并…</span>";
+
+      document.getElementById("ahaBox").innerHTML = compacted
+        ? "💡 <strong>Compaction 瘦身成功！</strong>所有被覆盖的旧版 <code>score=60/80</code> 和打了墓碑（Tombstone）的 <code>user</code> 都被彻底丢弃，只留下最新、紧凑、有序的一份文件——这就是 LSM-Tree 兼顾极速写入与可控空间的核心秘密！"
+        : "💡 <strong>顿悟时刻：</strong>先点击追加新值或删除墓碑，再点 <strong>🗜️ 触发后台 Compaction</strong>，看多份碎片文件如何合并成干净的单文件！";
+    }
+    render();
+  </script>
+</body>
+</html>

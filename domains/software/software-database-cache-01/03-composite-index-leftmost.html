@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：联合索引最左前缀诊所</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .sql-btn { display: block; width: 100%; text-align: left; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-family: ui-monospace, monospace; font-size: 13px; font-weight: 750; cursor: pointer; margin-bottom: 10px; }
+    .sql-btn.active { border-color: var(--tax-primary); background: rgba(99,102,241,0.12); }
+    .diag { padding: 16px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-size: 14px; line-height: 1.65; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🩺 联合索引最左前缀诊所：明明建了索引，为什么 SQL 还是慢如蜗牛？</h1>
+        <p>假设表里建了联合索引 <code>INDEX idx_abc (city, age, score)</code>（就像先按姓氏、再按名字排好序的电话簿）。依次点击诊断 4 条 SQL！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="sql-btn active" id="q1" onclick="pick(1)">SQL 1: WHERE city = '北京' AND age = 25</button>
+      <button class="sql-btn" id="q2" onclick="pick(2)">SQL 2: WHERE age = 25 AND score = 90</button>
+      <button class="sql-btn" id="q3" onclick="pick(3)">SQL 3: WHERE city = '北京' AND age &gt; 20 AND score = 90</button>
+      <button class="sql-btn" id="q4" onclick="pick(4)">SQL 4: WHERE LEFT(city, 1) = '北'</button>
+
+      <div class="diag" id="diagBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const QS = {
+      1: {
+        res: "✅ <strong>完美命中索引（用到 city + age）！</strong><br>先按 city 锁定北京，北京内部又按 age 严格有序，直接二分直达！",
+        aha: "💡 <strong>最左前缀命中：</strong>只要从最左边的 <code>city</code> 开始连续匹配，索引就会全速生效！"
+      },
+      2: {
+        res: "❌ <strong>索引完全失效（退化为全表扫描）！</strong><br>跳过了最左边的 <code>city</code>！就像电话簿是按“姓氏→名字”排的，你只知道别人叫“伟”却不知道姓什么，只能从第一页翻到最后一页！",
+        aha: "💡 <strong>跳过最左列 = 索引白建：</strong>在没有锁定 city 的情况下，全表的 age 是散乱无序的，B+ 树根本用不上！"
+      },
+      3: {
+        res: "🟡 <strong>部分命中（city 与 age 命中，score 截断失效）！</strong><br>因为 <code>age &gt; 20</code> 是范围查询，21 岁和 22 岁的人混在一起时，<code>score</code> 不再全局有序，只能在范围里过滤！",
+        aha: "💡 <strong>范围查询后截断：</strong>建联合索引时，把<strong>等值查询列放前面、范围查询列（&gt; / &lt; / BETWEEN）放最后</strong>，就能榨干整棵索引！"
+      },
+      4: {
+        res: "❌ <strong>对索引列做函数计算导致失效！</strong><br>B+ 树里存的是原始的 <code>city</code>，不是 <code>LEFT(city, 1)</code> 的结果，改写成 <code>city LIKE '北%'</code> 即可立刻救活！",
+        aha: "💡 <strong>SQL 调优铁律：</strong>永远不要在 <code>WHERE</code> 条件的索引列上套函数或做算术运算（如 <code>age + 1 = 26</code>）！"
+      }
+    };
+    const seen = new Set([1]);
+    function pick(n) {
+      seen.add(n);
+      [1, 2, 3, 4].forEach(i => document.getElementById("q" + i).classList.toggle("active", i === n));
+      document.getElementById("diagBox").innerHTML = QS[n].res;
+      document.getElementById("ahaBox").innerHTML = QS[n].aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(1);
+  </script>
+</body>
+</html>

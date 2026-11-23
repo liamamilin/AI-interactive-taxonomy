@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "database-cache",
+  "order": 1,
+  "title": "B+ 树索引为何快一万倍",
+  "icon": "🌲",
+  "subtitle": "千万级订单表里查一条记录，全表扫描要等 5 秒，加个 B+ 树索引为什么只要 3 次磁盘读取就能 1 毫秒命中？",
+  "difficulty": "进阶",
+  "related": ["software/software-dsa-01", "software/software-dsa-04"],
+  "toys": {
+    "01-bplustree-height-sim.html": {
+      "title": "B+ 树“矮胖哲学”：3 层装下 2,000 万行数据",
+      "icon": "📐",
+      "archetype": "simulation",
+      "concept": "多路平衡树 B+ Tree · 高扇出 Fan-out · 磁盘 I/O 次数",
+      "summary": "拖动单页分支数（扇出）与数据总行数，亲眼看同样 2,000 万行数据，二叉树高达 25 层而 B+ 树仅 3 层！"
+    },
+    "02-fullscan-vs-index-race.html": {
+      "title": "查询竞速：全表扫描 vs 聚簇索引 + 范围链表",
+      "icon": "🏎️",
+      "archetype": "race",
+      "concept": "Full Table Scan · B+ 树叶子双向链表 · 范围查询 BETWEEN",
+      "summary": "执行 `WHERE id BETWEEN 1020 AND 1050`，同屏对比全表扫盘与 B+ 树定位后顺着叶子链表一路扫出的速度差。"
+    },
+    "03-composite-index-leftmost.html": {
+      "title": "联合索引最左前缀诊所：为什么建了索引还是慢？",
+      "icon": "🩺",
+      "archetype": "scenario",
+      "concept": "联合索引 (a, b, c) · 最左前缀原则 · 索引失效排障",
+      "summary": "针对联合索引 `(city, age, score)` 诊断 4 条真实 SQL 语句，一秒看清哪条命中索引、哪条直接失效！"
+    }
+  }
+}
