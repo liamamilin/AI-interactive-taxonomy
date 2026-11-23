@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：货币幻觉测试台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; transition:.15s; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎭 货币幻觉测试台：涨薪 5% 但物价涨 7%，你更富了吗？</h1><p>误区：只要工资条数字变大就是好消息。真相：人天生对“名义货币数字”有执念，常常忽略物价涨得更快！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+      <button class="btn active" onclick="pick(6,8,this)">陷阱 A：涨薪 +6%，通胀 +8%</button>
+      <button class="btn" onclick="pick(0,-2,this)">真相 B：不涨薪 0%，物价 -2%</button>
+      <button class="btn" onclick="pick(10,12,this)">高通胀 C：涨薪 +10%，通胀 +12%</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>名义涨薪幅度</span><span id="vW">+6%</span></label><input id="w" type="range" min="-5" max="15" step="1" value="6" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>物价变化幅度</span><span id="vP">+8%</span></label><input id="p" type="range" min="-5" max="15" step="1" value="8" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">原月薪购买力</div><div class="k-val">100 篮商品</div></div>
+      <div class="kpi"><div class="k-lbl">账面名义工资</div><div class="k-val" id="kNom" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">实际可买商品</div><div class="k-val" id="kReal">—</div></div>
+    </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+    function pick(w,p,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('w').value=w;
+      document.getElementById('p').value=p;
+      draw(true);
+    }
+    function draw(mark){
+      const w=+document.getElementById('w').value;
+      const p=+document.getElementById('p').value;
+      document.getElementById('vW').textContent=(w>=0?'+':'')+w+'%';
+      document.getElementById('vP').textContent=(p>=0?'+':'')+p+'%';
+      const nom=100*(1+w/100);
+      const real=nom/(1+p/100);
+      const diff=real-100;
+      const col=diff>=0?'#10b981':'#ef4444';
+      document.getElementById('svg').innerHTML=`
+        <line x1="340" y1="20" x2="340" y2="165" stroke="var(--tax-muted)" stroke-dasharray="4,4"/>
+        <text x="340" y="15" text-anchor="middle" font-size="10.5" fill="var(--tax-muted)">100 基准线</text>
+        <text x="20" y="58" font-size="12" font-weight="750" fill="var(--tax-text)">名义工资数字</text>
+        <rect x="140" y="40" width="${(nom*2).toFixed(1)}" height="28" rx="6" fill="#2563eb"/>
+        <text x="${(148+nom*2).toFixed(1)}" y="59" font-size="12" font-weight="800" fill="#2563eb">${nom.toFixed(1)} 元</text>
+        <text x="20" y="118" font-size="12" font-weight="750" fill="var(--tax-text)">真实购买力</text>
+        <rect x="140" y="100" width="${(real*2).toFixed(1)}" height="28" rx="6" fill="${col}"/>
+        <text x="${(148+real*2).toFixed(1)}" y="119" font-size="12" font-weight="800" fill="${col}">${real.toFixed(1)} 篮 (${diff>=0?'+':''}${diff.toFixed(1)}%)</text>
+      `;
+      document.getElementById('kNom').textContent=nom.toFixed(1)+' 元';
+      document.getElementById('kReal').textContent=real.toFixed(1)+' 篮';
+      document.getElementById('kReal').style.color=col;
+      document.getElementById('ahaBox').innerHTML = diff<0
+        ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>落入货币幻觉！名义工资看似变多到 ${nom.toFixed(0)}，但东西贵了 ${p}%，你实际能买到的商品少了 <strong>${Math.abs(diff).toFixed(1)}%</strong>！`
+        : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>真实赢家！不管名义数字涨没涨，你的实际购买力提升了 <strong>+${diff.toFixed(1)}%</strong>。永远用“能买多少实物”衡量财富！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);
+  </script>
+</body>
+</html>

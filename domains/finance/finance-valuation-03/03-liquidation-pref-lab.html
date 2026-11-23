@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：优先清算权警示台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚠️ 优先清算权警示台：为什么公司卖了 1 亿，创始人分不到一分钱？</h1><p>误区：公司卖了高价，所有股东按持股比例平分。真相：投资人协议里的“2x 优先清算权 + 参与分配”能合法抽干退出资金！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="setPref(1,this)">温和条款：1x 不参与分配</button>
+      <button class="btn" onclick="setPref(2,this)">苛刻条款：2x 优先清算 + 参与分配</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>最终并购卖出价格</span><span id="vExit">1.0 亿</span></label><input id="ex" type="range" min="40" max="300" step="10" value="100" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">VC 投资人拿走（曾投5000万占30%）</div><div class="k-val" id="kVC" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">创始人与员工拿走（占70%）</div><div class="k-val" id="kF" style="color:#10b981;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>let mult=1;
+    function setPref(m,btn){
+      mult=m;
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      draw(true);
+    }
+    function draw(mark){
+      const ex=+document.getElementById('ex').value;
+      document.getElementById('vExit').textContent=(ex/100).toFixed(1)+' 亿';
+      let vc=0, f=0;
+      if(mult===1){
+        vc = Math.min(ex, Math.max(50, ex*0.3));
+        f = ex - vc;
+      } else {
+        const pref = Math.min(ex, 50*2);
+        const rem = ex - pref;
+        vc = pref + rem*0.3;
+        f = rem*0.7;
+      }
+      const vcPct=vc/ex*100, fPct=f/ex*100;
+      document.getElementById('svg').innerHTML=`
+        <rect x="60" y="55" width="${(vcPct*4.8).toFixed(1)}" height="38" rx="6" fill="#ef4444"/>
+        <rect x="${(60+vcPct*4.8).toFixed(1)}" y="55" width="${(fPct*4.8).toFixed(1)}" height="38" rx="6" fill="#10b981"/>
+        <text x="${(60+vcPct*2.4).toFixed(1)}" y="79" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">VC ${vc.toFixed(0)}M</text>
+        ${fPct>10?`<text x="${(60+vcPct*4.8+fPct*2.4).toFixed(1)}" y="79" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">创始人 ${f.toFixed(0)}M</text>`:''}
+        <text x="300" y="130" text-anchor="middle" font-size="12" fill="var(--tax-muted)">并购总价 ${ex}M（1亿=100M）</text>
+      `;
+      document.getElementById('kVC').textContent=vc.toFixed(0)+' 百万';
+      document.getElementById('kF').textContent=f.toFixed(0)+' 百万';
+      document.getElementById('ahaBox').innerHTML=mult===2 && ex<=100
+        ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>在 2x 优先清算权下，哪怕公司卖了 <strong>1 亿</strong>，VC 先拿走 2×5000万=1亿，占股 70% 的创始人一分钱也分不到！`
+        : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>只看估值高没用！优先清算倍数和是否双重参与分配，直接决定了退出时钱进谁的口袋。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

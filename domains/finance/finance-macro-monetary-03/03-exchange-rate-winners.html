@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：本币贬值谁笑谁哭</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💱 本币贬值谁笑谁哭：外贸出口商 vs 海淘留学生</h1><p>误区：本币贬值是纯坏事（或纯好事）。真相：汇率变动是全球利益再分配——贬值补贴出口工厂，同时变相向海淘进口商和留学生征税！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>本币兑美元汇率变动</span><span id="vFX">贬值 -15%</span></label><input id="fx" type="range" min="-25" max="25" step="5" value="-15" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">出口商结汇利润变化</div><div class="k-val" id="kExp">—</div></div>
+      <div class="kpi"><div class="k-lbl">海淘/留学成本变化</div><div class="k-val" id="kImp">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const fx=+document.getElementById('fx').value;
+      document.getElementById('vFX').textContent=fx<0?`贬值 ${fx}%`:fx>0?`升值 +${fx}%`:'汇率不变 0%';
+      const expChg=-fx*1.4;
+      const impChg=-fx;
+      document.getElementById('svg').innerHTML=`
+        <line x1="300" y1="20" x2="300" y2="155" stroke="var(--tax-text)"/>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">外贸出口商盈利</text>
+        <rect x="${expChg>=0?300:300+expChg*4}" y="36" width="${Math.abs(expChg*4).toFixed(1)}" height="26" rx="5" fill="${expChg>=0?'#10b981':'#ef4444'}"/>
+        <text x="${expChg>=0?308+expChg*4:292+expChg*4}" y="54" text-anchor="${expChg>=0?'start':'end'}" font-size="12" font-weight="800" fill="${expChg>=0?'#10b981':'#ef4444'}">${expChg>=0?'+':''}${expChg.toFixed(0)}%</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">留学/海淘钱包压力</text>
+        <rect x="${impChg>=0?300:300+impChg*4}" y="96" width="${Math.abs(impChg*4).toFixed(1)}" height="26" rx="5" fill="${impChg>=0?'#ef4444':'#10b981'}"/>
+        <text x="${impChg>=0?308+impChg*4:292+impChg*4}" y="114" text-anchor="${impChg>=0?'start':'end'}" font-size="12" font-weight="800" fill="${impChg>=0?'#ef4444':'#10b981'}">${impChg>=0?'多花 +':'省下 '}${Math.abs(impChg).toFixed(0)}%</text>
+      `;
+      document.getElementById('kExp').textContent=(expChg>=0?'+':'')+expChg.toFixed(0)+'%';
+      document.getElementById('kExp').style.color=expChg>=0?'#10b981':'#ef4444';
+      document.getElementById('kImp').textContent=(impChg>=0?'多花 +':'省下 ')+Math.abs(impChg).toFixed(0)+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>汇率没有绝对的“好与坏”，只有利益切蛋糕！本币贬值让中国制造海外更有竞争力，但会让进口石油和出国旅游更昂贵。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

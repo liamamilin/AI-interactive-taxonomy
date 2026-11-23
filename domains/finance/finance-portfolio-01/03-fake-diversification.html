@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：伪分散化体检台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎭 伪分散化体检台：买了 10 只同涨同跌的科技股算分散吗？</h1><p>误区：持仓股票数量多就是分散风险。真相：如果 10 只标的底层因子高度相关（ρ=0.9），一遇行业寒冬会集体腰斩！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="pick(0.9,this)">伪分散：10 只同类科技股 (ρ=0.9)</button>
+      <button class="btn" onclick="pick(0.15,this)">真分散：跨资产全球组合 (ρ=0.15)</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>持仓平均相关度 ρ</span><span id="vR">0.90</span></label><input id="rho" type="range" min="0" max="0.95" step="0.05" value="0.9" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>持仓标的数目 N</span><span id="vN">10 只</span></label><input id="n" type="range" min="1" max="20" step="1" value="10" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">单只波动率</div><div class="k-val">30.0%</div></div>
+      <div class="kpi"><div class="k-lbl">实际组合波动率</div><div class="k-val" id="kVol">—</div></div>
+      <div class="kpi"><div class="k-lbl">分散效果评级</div><div class="k-val" id="kEval">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function pick(r,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('rho').value=r;
+      draw(true);
+    }
+    function draw(mark){
+      const rho=+document.getElementById('rho').value;
+      const n=+document.getElementById('n').value;
+      document.getElementById('vR').textContent=rho.toFixed(2);
+      document.getElementById('vN').textContent=n+' 只';
+      const vol=30*Math.sqrt((1+(n-1)*rho)/n);
+      const col=vol>24?'#ef4444':vol>16?'#f59e0b':'#10b981';
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="52" font-size="12" font-weight="750" fill="var(--tax-text)">单只股票风险</text>
+        <rect x="140" y="34" width="360" height="26" rx="6" fill="#94a3b8" opacity="0.5"/>
+        <text x="508" y="52" font-size="12" font-weight="750" fill="var(--tax-muted)">30.0%</text>
+        <text x="20" y="112" font-size="12" font-weight="750" fill="var(--tax-text)">${n}只组合风险</text>
+        <rect x="140" y="94" width="${(vol/30*360).toFixed(1)}" height="26" rx="6" fill="${col}"/>
+        <text x="${(148+vol/30*360).toFixed(1)}" y="112" font-size="12" font-weight="800" fill="${col}">${vol.toFixed(1)}%</text>
+      `;
+      document.getElementById('kVol').textContent=vol.toFixed(1)+'%';
+      document.getElementById('kVol').style.color=col;
+      document.getElementById('kEval').textContent=rho>0.6?'无效伪分散':'有效真分散';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕买了 ${n} 只股票，只要相关性高达 <strong>${rho.toFixed(2)}</strong>，组合波动仍高达 <strong>${vol.toFixed(1)}%</strong>！真正的分散必须跨越低相关资产类别。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

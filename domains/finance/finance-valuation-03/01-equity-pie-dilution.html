@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：融资蛋糕切分器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🍰 融资蛋糕切分器：持股比例变小 vs 身家暴涨（SVG）</h1><p>误区：融资稀释股份等于创始人吃亏。真相：把 100 万的蛋糕做大到 1 亿，哪怕占比从 100% 降到 60%，你的身家依然翻了 60 倍！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>融资轮次</span><span id="vRd">A 轮</span></label><input id="rd" type="range" min="0" max="3" step="1" value="1" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>单轮稀释比例</span><span id="vDil">20%</span></label><input id="dil" type="range" min="10" max="30" step="5" value="20" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">公司投后估值</div><div class="k-val" id="kVal" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">创始人持股比例</div><div class="k-val" id="kPct" style="color:#f59e0b;">—</div></div>
+      <div class="kpi"><div class="k-lbl">创始人个人身家</div><div class="k-val" id="kWorth" style="color:#10b981;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>const RDS=['天使前 (100万)','A 轮 (1000万)','B 轮 (5000万)','C 轮 (2亿)'];
+    const VALS=[100,1000,5000,20000];
+    function draw(mark){
+      const rd=+document.getElementById('rd').value;
+      const dil=+document.getElementById('dil').value/100;
+      document.getElementById('vRd').textContent=RDS[rd];
+      document.getElementById('vDil').textContent=(dil*100).toFixed(0)+'%';
+      const pct=Math.pow(1-dil, rd)*100;
+      const val=VALS[rd];
+      const worth=val*pct/100;
+      const r=62, cx=140, cy=92;
+      const ang=(pct/100)*2*Math.PI;
+      const x2=cx+r*Math.sin(ang), y2=cy-r*Math.cos(ang);
+      const large=pct>50?1:0;
+      const path = pct>=99.9 ? '' : `M${cx},${cy} L${cx},${cy-r} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z`;
+      document.getElementById('svg').innerHTML=`
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="#e2e8f0"/>
+        ${pct>=99.9?`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#10b981"/>`:`<path d="${path}" fill="#10b981"/>`}
+        <text x="260" y="68" font-size="14" font-weight="800" fill="var(--tax-text)">创始人占股：${pct.toFixed(1)}%</text>
+        <text x="260" y="96" font-size="13" fill="#2563eb">蛋糕总大小：${val>=10000?(val/10000).toFixed(1)+' 亿':val+' 万'}</text>
+        <text x="260" y="124" font-size="14" font-weight="800" fill="#10b981">个人身家：${worth>=10000?(worth/10000).toFixed(2)+' 亿':worth.toFixed(0)+' 万'}</text>
+      `;
+      document.getElementById('kVal').textContent=val>=10000?(val/10000)+' 亿':val+' 万';
+      document.getElementById('kPct').textContent=pct.toFixed(1)+'%';
+      document.getElementById('kWorth').textContent=worth>=10000?(worth/10000).toFixed(2)+' 亿':worth.toFixed(0)+' 万';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕持股稀释到 <strong>${pct.toFixed(1)}%</strong>，你的个人身家依然涨到了 <strong>${worth>=10000?(worth/10000).toFixed(2)+' 亿':worth.toFixed(0)+' 万'}</strong>。拥有大蛋糕的 51%，远胜于拥有小作坊的 100%！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

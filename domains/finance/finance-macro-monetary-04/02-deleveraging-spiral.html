@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：去杠杆踩踏螺旋</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌀 去杠杆踩踏螺旋：资产抛售与负债缩水赛跑（SVG）</h1><p>误区：泡沫破裂时只要大家纷纷卖资产还债，债务危机很快就能解决。真相：所有人同时抛售资产会砸崩物价（通缩），导致真实债务反而越还越重！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn primary" onclick="nextStep(true)">📉 推进下一轮集体抛售</button>
+      <button class="btn" onclick="resetSim()">重置周期</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">市场资产总市值</div><div class="k-val" id="kAst">—</div></div>
+      <div class="kpi"><div class="k-lbl">名义剩余债务</div><div class="k-val" id="kDebt">—</div></div>
+      <div class="kpi"><div class="k-lbl">真实杠杆率（债务÷资产）</div><div class="k-val" id="kLev" style="color:#ef4444;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>let ast=[100], debt=[60];
+    function resetSim(){ ast=[100]; debt=[60]; render(false); }
+    function nextStep(mark){
+      if(ast.length>=6) return;
+      const curA=ast[ast.length-1], curD=debt[debt.length-1];
+      ast.push(curA*0.76);
+      debt.push(Math.max(10, curD-6));
+      render(mark);
+    }
+    function render(mark){
+      const a=ast[ast.length-1], d=debt[debt.length-1];
+      const lev=d/a*100;
+      const x=i=>65+i*90, y=v=>165-(v/110)*135;
+      const pA=ast.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v).toFixed(1)}`).join(' ');
+      const pD=debt.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <path d="${pA}" fill="none" stroke="#2563eb" stroke-width="3.5"/>
+        <path d="${pD}" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="5,4"/>
+        <text x="${x(ast.length-1)+8}" y="${y(a)}" font-size="11.5" font-weight="800" fill="#2563eb">资产 ${a.toFixed(0)}</text>
+        <text x="${x(debt.length-1)+8}" y="${y(d)}" font-size="11.5" font-weight="800" fill="#ef4444">债务 ${d.toFixed(0)}</text>
+      `;
+      document.getElementById('kAst').textContent=a.toFixed(1)+' 万';
+      document.getElementById('kDebt').textContent=d.toFixed(1)+' 万';
+      document.getElementById('kLev').textContent=lev.toFixed(0)+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>费雪“债务-通缩螺旋”：资产价格跌得比还债速度还快！债务虽然从 60 万还到了 ${d.toFixed(0)} 万，真实负债率反而从 60% 恶化到了 <strong>${lev.toFixed(0)}%</strong>！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render(false);</script>
+</body>
+</html>

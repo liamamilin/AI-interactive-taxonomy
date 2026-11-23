@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：波动损耗竞速</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎢 波动损耗竞速：年均 +5% 的稳健资产 vs 大起大落的过山车</h1><p>误区：一年涨 50%、一年跌 50%，平均收益是 0%。真相：(1+0.5)×(1-0.5)=0.75，高波动本身就会白白吃掉复利！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>过山车振幅（±X%）</span><span id="vVol">±40%</span></label><input id="vol" type="range" min="0" max="70" step="5" value="40" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>稳健资产年化</span><span id="vSt">5%</span></label><input id="st" type="range" min="2" max="10" step="0.5" value="5" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">稳健派 10 年净值</div><div class="k-val" id="kSt" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">过山车算术平均</div><div class="k-val" id="kAvg">—</div></div>
+      <div class="kpi"><div class="k-lbl">过山车 10 年真实净值</div><div class="k-val" id="kRoller" style="color:#ef4444;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const v=+document.getElementById('vol').value/100;
+      const st=+document.getElementById('st').value/100;
+      document.getElementById('vVol').textContent='±'+(v*100).toFixed(0)+'%';
+      document.getElementById('vSt').textContent=(st*100).toFixed(1)+'%';
+      const stArr=[100], rArr=[100];
+      let a=100, b=100;
+      for(let t=1;t<=10;t++){
+        a=a*(1+st);
+        b=b*(t%2===1 ? (1+st+v) : (1+st-v));
+        stArr.push(a); rArr.push(b);
+      }
+      const maxV=Math.max(180, ...stArr, ...rArr);
+      const x=i=>48+(i/10)*520, y=val=>180-(val/maxV)*150;
+      const p=arr=>arr.map((val,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(val).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <line x1="48" y1="${y(100).toFixed(1)}" x2="568" y2="${y(100).toFixed(1)}" stroke="var(--tax-muted)" stroke-dasharray="4,4"/>
+        <path d="${p(stArr)}" fill="none" stroke="#10b981" stroke-width="3"/>
+        <path d="${p(rArr)}" fill="none" stroke="#ef4444" stroke-width="2.8"/>
+        <text x="565" y="${y(a)-6}" text-anchor="end" font-size="11.5" font-weight="750" fill="#10b981">稳健 ${a.toFixed(1)}</text>
+        <text x="565" y="${Math.min(182,y(b)+14)}" text-anchor="end" font-size="11.5" font-weight="750" fill="#ef4444">过山车 ${b.toFixed(1)}</text>
+      `;
+      document.getElementById('kSt').textContent=a.toFixed(1);
+      document.getElementById('kAvg').textContent='+'+(st*100).toFixed(1)+'% /年';
+      document.getElementById('kRoller').textContent=b.toFixed(1);
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>双方算术平均收益都是 +${(st*100).toFixed(1)}%，但过山车受 <strong>±${(v*100).toFixed(0)}%</strong> 波动损耗拖累，10 年后仅剩 <strong>${b.toFixed(1)}</strong>，被稳健资产（${a.toFixed(1)}）远远甩开！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

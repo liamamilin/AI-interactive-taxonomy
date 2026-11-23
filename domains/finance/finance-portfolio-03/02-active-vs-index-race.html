@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：零和博弈赛跑</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏃 零和博弈赛跑：为什么 85% 主动基金长期跑不赢指数？</h1><p>误区：基金经理都是名校精英，长期肯定能战胜市场平均。真相：市场平均减去高额费用，注定让绝大多数主动基金跑输指数！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>对比年限</span><span id="vY">15 年</span></label><input id="yrs" type="range" min="1" max="20" step="1" value="15" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">跑赢指数的基金比例</div><div class="k-val" id="kBeat" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">跑输指数的基金比例</div><div class="k-val" id="kLose" style="color:#ef4444;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const Y=+document.getElementById('yrs').value;
+      document.getElementById('vY').textContent=Y+' 年';
+      const beat=Math.max(8, Math.round(52*Math.exp(-0.095*Y)));
+      const lose=100-beat;
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">${Y} 年战绩分布</text>
+        <rect x="140" y="34" width="${(beat*4).toFixed(1)}" height="32" rx="6" fill="#10b981"/>
+        <rect x="${(140+beat*4).toFixed(1)}" y="34" width="${(lose*4).toFixed(1)}" height="32" rx="6" fill="#ef4444" opacity="0.85"/>
+        <text x="${(140+beat*2).toFixed(1)}" y="55" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${beat}% 赢</text>
+        <text x="${(140+beat*4+lose*2).toFixed(1)}" y="55" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${lose}% 跑输指数</text>
+        <text x="300" y="125" text-anchor="middle" font-size="12" fill="var(--tax-muted)">时间拉得越长，费率摩擦越会把正态分布整体左移</text>
+      `;
+      document.getElementById('kBeat').textContent=beat+'%';
+      document.getElementById('kLose').textContent=lose+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>1 年期可能靠运气有 45% 基金跑赢指数；拉长到 <strong>${Y} 年</strong>，只剩 <strong>${beat}%</strong> 跑赢——而且提前根本不知道谁是那少数幸存者！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

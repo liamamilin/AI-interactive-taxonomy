@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：保费去哪儿了</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🍰 保费去哪儿了：纯风险保费 vs 运营佣金（SVG）</h1><p>误区：既能保重疾、到期又能全额返还本金的保险最划算。真相：返还型保险不过是多收了你一倍保费，再把你的钱拿去低息理财返给你！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="show(0,this)">纯消费型重疾险（年交 4000 元）</button>
+      <button class="btn" onclick="show(1,this)">返还型重疾险（年交 11000 元）</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">真正用于买保障的纯保费</div><div class="k-val" style="color:#10b981;" id="kPure">—</div></div>
+      <div class="kpi"><div class="k-lbl">多交的理财资金/佣金</div><div class="k-val" style="color:#ef4444;" id="kExtra">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function show(i,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      const total=i===0?4000:11000;
+      const pure=3000, fee=i===0?1000:2500, inv=i===0?0:5500;
+      const scale=460/11000;
+      document.getElementById('svg').innerHTML=`
+        <rect x="60" y="55" width="${(pure*scale).toFixed(1)}" height="36" rx="4" fill="#10b981"/>
+        <rect x="${(60+pure*scale).toFixed(1)}" y="55" width="${(fee*scale).toFixed(1)}" height="36" rx="4" fill="#f59e0b"/>
+        ${inv>0?`<rect x="${(60+(pure+fee)*scale).toFixed(1)}" y="55" width="${(inv*scale).toFixed(1)}" height="36" rx="4" fill="#ef4444"/>`:''}
+        <text x="60" y="122" font-size="12" font-weight="750" fill="var(--tax-text)">总保费 ${total} 元 = 纯保障 3000 + 运营佣金 ${fee}${inv>0?' + 强制低息储蓄 '+inv:''}</text>
+      `;
+      document.getElementById('kPure').textContent='3,000 元';
+      document.getElementById('kExtra').textContent=(total-3000).toLocaleString()+' 元/年';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>保障归保障，理财归理财！把返还型多交的那 7000 元/年自己买国债或指数基金，收益往往远超“返还本金”！`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    show(0, document.querySelector('.btn.active'));</script>
+</body>
+</html>

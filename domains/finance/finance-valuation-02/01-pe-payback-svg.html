@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：市盈率回本倒计时</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⏳ 市盈率回本倒计时：静态 PE vs 成长型 PEG（SVG）</h1><p>误区：PE=50 倍一定比 PE=15 倍贵。真相：如果利润每年增长 50%，只要 6~7 年累计利润就能赚回买价，而零增长公司要等 15 年！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>当前市盈率 PE</span><span id="vPE">30 倍</span></label><input id="pe" type="range" min="8" max="60" step="2" value="30" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>净利润年增速 g</span><span id="vG">20%</span></label><input id="g" type="range" min="0" max="50" step="2" value="20" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">静态回本年数（不增长）</div><div class="k-val" id="kStat">—</div></div>
+      <div class="kpi"><div class="k-lbl">动态真实回本年数</div><div class="k-val" id="kDyn" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">PEG 估值指标 (PE÷G)</div><div class="k-val" id="kPeg" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const pe=+document.getElementById('pe').value;
+      const g=+document.getElementById('g').value/100;
+      document.getElementById('vPE').textContent=pe+' 倍';
+      document.getElementById('vG').textContent=(g*100).toFixed(0)+'%';
+      let cum=0, e=1, dynY=30;
+      const pts=[0];
+      for(let y=1;y<=25;y++){
+        e=e*(1+g);
+        cum+=e;
+        pts.push(cum);
+        if(dynY===30 && cum>=pe) dynY=y;
+      }
+      const maxV=Math.max(pe*1.3, ...pts.slice(0,16));
+      const x=i=>48+(i/15)*520, y=v=>175-Math.min(150,(v/maxV)*150);
+      const p=pts.slice(0,16).map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <line x1="48" y1="${y(pe).toFixed(1)}" x2="568" y2="${y(pe).toFixed(1)}" stroke="#ef4444" stroke-dasharray="5,4" stroke-width="2"/>
+        <text x="565" y="${y(pe)-5}" text-anchor="end" font-size="11" font-weight="750" fill="#ef4444">买入总成本线 (${pe})</text>
+        <path d="${p}" fill="none" stroke="#10b981" stroke-width="3.5"/>
+        <text x="300" y="192" text-anchor="middle" font-size="11" fill="var(--tax-muted)">0 年 → 15 年累计净利润曲线</text>
+      `;
+      const peg=g===0?99:(pe/(g*100));
+      document.getElementById('kStat').textContent=pe+' 年';
+      document.getElementById('kDyn').textContent=dynY>=30?'>25 年':dynY+' 年';
+      document.getElementById('kPeg').textContent=g===0?'∞':peg.toFixed(2);
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>彼得·林奇的 PEG 指标（PE÷增速）：当前 PEG = <strong>${g===0?'∞':peg.toFixed(2)}</strong>（低于 1 通常代表成长性物有所值），真实利润只需 <strong>${dynY>=30?'>25':dynY} 年</strong> 就能覆盖买价！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

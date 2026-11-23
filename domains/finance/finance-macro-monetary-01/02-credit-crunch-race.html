@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：信用收缩对比</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧊 信用收缩对比：准备金降到 5%，没人敢借钱时 M2 会涨吗？</h1><p>误区：只要央行降准放水，社会上的钱一定会立刻变多。真相：如果企业和居民因为悲观不愿借钱，“推绳子”效应会让货币乘数彻底失灵！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>银行放贷意愿 / 居民借贷需求</span><span id="vW">80%</span></label><input id="w" type="range" min="10" max="100" step="10" value="80" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">央行降准后理论上限（r=5%）</div><div class="k-val" style="color:#94a3b8;">20.0 倍</div></div>
+      <div class="kpi"><div class="k-lbl">实际生效货币乘数</div><div class="k-val" id="kAct" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const w=+document.getElementById('w').value/100;
+      document.getElementById('vW').textContent=(w*100).toFixed(0)+'%';
+      const effMult = 1 / (1 - 0.95*w);
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">理论上限 (20x)</text>
+        <rect x="150" y="36" width="380" height="26" rx="6" fill="#94a3b8" opacity="0.4"/>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">实际派生乘数</text>
+        <rect x="150" y="96" width="${(effMult/20*380).toFixed(1)}" height="26" rx="6" fill="${effMult<4?'#ef4444':'#2563eb'}"/>
+        <text x="${(158+effMult/20*380).toFixed(1)}" y="114" font-size="12.5" font-weight="800" fill="${effMult<4?'#ef4444':'#2563eb'}">${effMult.toFixed(1)}x</text>
+      `;
+      document.getElementById('kAct').textContent=effMult.toFixed(1)+' 倍';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当借贷意愿降到 ${(w*100).toFixed(0)}%，货币乘数从 20 倍骤降到 <strong>${effMult.toFixed(1)} 倍</strong>！央行降准只是把水放进水池，没人喝水就会陷入“流动性陷阱”。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

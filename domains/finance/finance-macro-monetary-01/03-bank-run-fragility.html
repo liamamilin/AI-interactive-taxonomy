@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：部分准备金与银行挤兑</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏃‍♂️ 部分准备金的两面性：平时放大经济，危机时怕挤兑</h1><p>误区：我存进银行的 100 万现金就锁在金库里等我随时取。真相：银行只留了 10% 在金库，其余 90% 全贷出去了——一旦大家同时来取钱就会爆发挤兑！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>储户同时挤兑取款比例</span><span id="vR">15%</span></label><input id="run" type="range" min="0" max="50" step="5" value="15" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">银行金库可用现金</div><div class="k-val" style="color:#10b981;">10%</div></div>
+      <div class="kpi"><div class="k-lbl">银行偿付状态</div><div class="k-val" id="kSt">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const r=+document.getElementById('run').value;
+      document.getElementById('vR').textContent=r+'%';
+      const busted=r>10;
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">金库现货储备</text>
+        <rect x="150" y="36" width="80" height="26" rx="5" fill="#10b981"/>
+        <text x="238" y="54" font-size="12" font-weight="750" fill="#10b981">10%（其余 90% 已放贷）</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">今日取款需求</text>
+        <rect x="150" y="96" width="${(r*8).toFixed(1)}" height="26" rx="5" fill="${busted?'#ef4444':'#2563eb'}"/>
+        <text x="${(158+r*8).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${busted?'#ef4444':'#2563eb'}">${r}% ${busted?'💥 击穿现金储备！':''}</text>
+      `;
+      document.getElementById('kSt').textContent=busted?'💥 触发挤兑破产危机':'正常兑付';
+      document.getElementById('kSt').style.color=busted?'#ef4444':'#10b981';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>这就是现代银行的先天脆弱性，也是为什么国家必须设立<strong>存款保险制度</strong>与<strong>央行最后贷款人</strong>来稳定预期！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

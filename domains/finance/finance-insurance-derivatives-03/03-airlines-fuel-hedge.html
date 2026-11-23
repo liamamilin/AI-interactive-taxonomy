@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：航空公司油价对冲台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>✈️ 航空公司油价对冲台：不锁油价会怎样，锁反了又会怎样？</h1><p>误区：航空公司买航油套保就是为了在期货上赚钱。真相：套保只能锁死成本区间，如果赌单边方向甚至超额套保，油价暴跌时反而会在期货上巨亏！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn" onclick="pick('none',this)">裸奔不套保（随行就市）</button>
+      <button class="btn active" onclick="pick('match',this)">1:1 精准套保（锁死 80 美元/桶）</button>
+      <button class="btn" onclick="pick('over',this)">2:1 过度投机超配</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>国际油价变动</span><span id="vOil">110 美元</span></label><input id="oil" type="range" min="40" max="130" step="5" value="110" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">实际购油净成本</div><div class="k-val" id="kCost">—</div></div>
+      <div class="kpi"><div class="k-lbl">风险评价</div><div class="k-val" id="kEval">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>let md='match';
+    function pick(m,btn){
+      md=m;
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      draw(true);
+    }
+    function draw(mark){
+      const oil=+document.getElementById('oil').value;
+      document.getElementById('vOil').textContent=oil+' 美元';
+      const ratio = md==='none'?0 : md==='match'?1 : 2;
+      const futGain = (oil - 80)*ratio;
+      const netCost = oil - futGain;
+      const col = Math.abs(netCost-80)<5 ? '#10b981' : netCost>95 ? '#ef4444' : '#f59e0b';
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">现货航油市场价</text>
+        <rect x="150" y="36" width="${(oil*2.8).toFixed(1)}" height="26" rx="5" fill="#94a3b8"/>
+        <text x="${(158+oil*2.8).toFixed(1)}" y="54" font-size="12" font-weight="750" fill="var(--tax-text)">${oil} 美元</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">套保后净成本</text>
+        <rect x="150" y="96" width="${Math.max(10,netCost*2.8).toFixed(1)}" height="26" rx="5" fill="${col}"/>
+        <text x="${(158+Math.max(10,netCost*2.8)).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${col}">${netCost.toFixed(0)} 美元/桶</text>
+      `;
+      document.getElementById('kCost').textContent=netCost.toFixed(0)+' 美元/桶';
+      document.getElementById('kEval').textContent=md==='match'?'完美锁定预算':md==='none'?'油价暴涨即亏损':'油价跌时反遭重创！';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>1:1 套保能把航油成本稳稳锁死在 80 美元；而 2:1 超配就从“保值”变成了“赌博”，当油价跌到 40 美元时净成本反而飙到 120 美元！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：费雪实际利率天平</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; transition:.15s; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 费雪实际利率天平：剔除通胀幻觉（SVG）</h1><p>误区：银行给 3% 利息就是赚了 3%。真相：费雪公式 r_real ≈ r_nom - 通胀率，高通胀下的存款每天都在缩水！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>名义利率（账面）</span><span id="vN">4.0%</span></label><input id="nom" type="range" min="0" max="10" step="0.2" value="4" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>通货膨胀率</span><span id="vI">3.0%</span></label><input id="inf" type="range" min="-2" max="10" step="0.2" value="3" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 190"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">精确实际利率</div><div class="k-val" id="kReal">—</div></div>
+      <div class="kpi"><div class="k-lbl">10 万元 1 年后实际购买力</div><div class="k-val" id="kPur">—</div></div>
+      <div class="kpi"><div class="k-lbl">购买力状态</div><div class="k-val" id="kSt">—</div></div>
+    </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+    function draw(mark){
+      const n=+document.getElementById('nom').value/100;
+      const i=+document.getElementById('inf').value/100;
+      const real=((1+n)/(1+i)-1)*100;
+      document.getElementById('vN').textContent=(n*100).toFixed(1)+'%';
+      document.getElementById('vI').textContent=(i*100).toFixed(1)+'%';
+      const deg=Math.max(-22,Math.min(22,-real*2.5));
+      const col=real>=0?'#10b981':'#ef4444';
+      document.getElementById('svg').innerHTML=`
+        <polygon points="300,155 280,178 320,178" fill="var(--tax-muted)"/>
+        <g transform="rotate(${deg.toFixed(1)} 300 135)">
+          <line x1="120" y1="135" x2="480" y2="135" stroke="var(--tax-text)" stroke-width="5" stroke-linecap="round"/>
+          <rect x="105" y="75" width="110" height="54" rx="10" fill="#2563eb" opacity="0.18" stroke="#2563eb" stroke-width="2"/>
+          <text x="160" y="98" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2563eb">名义利息</text>
+          <text x="160" y="118" text-anchor="middle" font-size="14" font-weight="850" fill="#2563eb">+${(n*100).toFixed(1)}%</text>
+          <rect x="385" y="75" width="110" height="54" rx="10" fill="#ef4444" opacity="0.18" stroke="#ef4444" stroke-width="2"/>
+          <text x="440" y="98" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ef4444">物价通胀</text>
+          <text x="440" y="118" text-anchor="middle" font-size="14" font-weight="850" fill="#ef4444">${(i*100).toFixed(1)}%</text>
+        </g>
+        <text x="300" y="34" text-anchor="middle" font-size="15" font-weight="850" fill="${col}">实际利率：${real>=0?'+':''}${real.toFixed(2)}%</text>
+      `;
+      document.getElementById('kReal').textContent=(real>=0?'+':'')+real.toFixed(2)+'%';
+      document.getElementById('kReal').style.color=col;
+      document.getElementById('kPur').textContent=(10*(1+real/100)).toFixed(2)+' 万';
+      document.getElementById('kSt').textContent=real>0.5?'实际购买力增长':real<-0.5?'负利率缩水':'勉强保本';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>费雪精确公式 (1+r_nom)÷(1+通胀)-1 = <strong>${real.toFixed(2)}%</strong>。当名义利率跑不过通胀，天平向亏损端倾斜，存钱等于慢性失血！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);
+  </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：久期敏感度竞速</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📏 久期敏感度竞速：1 年短债 vs 30 年超长债谁跌得狠？（SVG）</h1><p>误区：同样是美国国债，1 年期和 30 年期风险差不多。真相：加息 2%，1 年短债只跌 2%，30 年超长债价格直接腰斩级别的跌！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>央行加息幅度（Δr）</span><span id="vR">+2.0%</span></label><input id="dr" type="range" min="-2" max="4" step="0.25" value="2" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">1 年短债涨跌</div><div class="k-val" id="k1">—</div></div>
+      <div class="kpi"><div class="k-lbl">10 年中债涨跌</div><div class="k-val" id="k10">—</div></div>
+      <div class="kpi"><div class="k-lbl">30 年超长债涨跌</div><div class="k-val" id="k30">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const dr=+document.getElementById('dr').value;
+      document.getElementById('vR').textContent=(dr>=0?'+':'')+dr.toFixed(2)+'%';
+      const items=[{lbl:'1 年短债 (D≈1)', d:1},{lbl:'5 年期 (D≈4.5)', d:4.5},{lbl:'10 年中债 (D≈8.5)', d:8.5},{lbl:'30 年超长债 (D≈20)', d:20}];
+      let html=`<line x1="280" y1="18" x2="280" y2="165" stroke="var(--tax-text)" stroke-width="1.5"/>`;
+      items.forEach((it,i)=>{
+        const chg=-it.d*dr;
+        const w=Math.min(230, Math.abs(chg)*4.5);
+        const x=chg>=0 ? 280 : 280-w;
+        const col=chg>=0?'#10b981':'#ef4444';
+        const y=32+i*34;
+        html+=`<text x="18" y="${y+16}" font-size="11.5" font-weight="750" fill="var(--tax-text)">${it.lbl}</text>
+        <rect x="${x.toFixed(1)}" y="${y}" width="${w.toFixed(1)}" height="22" rx="5" fill="${col}"/>
+        <text x="${(chg>=0?288+w:x-8).toFixed(1)}" y="${y+15}" text-anchor="${chg>=0?'start':'end'}" font-size="11.5" font-weight="800" fill="${col}">${chg>=0?'+':''}${chg.toFixed(1)}%</text>`;
+      });
+      document.getElementById('svg').innerHTML=html;
+      document.getElementById('k1').textContent=(-1*dr>=0?'+':'')+(-1*dr).toFixed(1)+'%';
+      document.getElementById('k10').textContent=(-8.5*dr>=0?'+':'')+(-8.5*dr).toFixed(1)+'%';
+      document.getElementById('k30').textContent=(-20*dr>=0?'+':'')+(-20*dr).toFixed(1)+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>超长债的波动率一点不输股票！利率变动 <strong>${dr>=0?'+':''}${dr.toFixed(2)}%</strong>，30 年超长债价格就会剧烈摆动 <strong>${(-20*dr).toFixed(1)}%</strong>！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

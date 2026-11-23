@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：梭哈派 vs 半凯利派竞速</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏁 梭哈派 vs 半凯利派 50 轮实战竞速（SVG）</h1><p>误区：运气好全押几把就能财务自由。真相：重仓梭哈只要遇上连续两次黑天鹅就出局，半凯利派才能稳定滚雪球！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn primary" onclick="runRace(true)">🎲 模拟 50 轮实战对决</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">半凯利派（15%仓位）终值</div><div class="k-val" id="kHalf" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">激进重仓派（65%仓位）终值</div><div class="k-val" id="kAgg" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">本轮胜率统计</div><div class="k-val" id="kWin">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function runRace(mark){
+      let h=100, a=100, wins=0;
+      const hArr=[100], aArr=[100];
+      for(let i=0;i<50;i++){
+        const win=Math.random()<0.6;
+        if(win) wins++;
+        h=h*(win?1.15:0.85);
+        a=a*(win?1.65:0.35);
+        hArr.push(h); aArr.push(a);
+      }
+      const maxV=Math.max(200, ...hArr, ...aArr);
+      const x=i=>48+(i/50)*520, y=v=>182-(Math.log10(Math.max(1,v))/Math.log10(Math.max(200,maxV)))*155;
+      const p=arr=>arr.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <line x1="48" y1="${y(100).toFixed(1)}" x2="568" y2="${y(100).toFixed(1)}" stroke="var(--tax-muted)" stroke-dasharray="4,4"/>
+        <path d="${p(hArr)}" fill="none" stroke="#10b981" stroke-width="3"/>
+        <path d="${p(aArr)}" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+        <text x="565" y="${Math.max(18,y(h)-6).toFixed(1)}" text-anchor="end" font-size="11.5" font-weight="750" fill="#10b981">半凯利 ${h.toFixed(0)}</text>
+        <text x="565" y="${Math.min(180,y(a)+14).toFixed(1)}" text-anchor="end" font-size="11.5" font-weight="750" fill="#ef4444">重仓派 ${a.toFixed(1)}</text>
+      `;
+      document.getElementById('kHalf').textContent=h.toFixed(1);
+      document.getElementById('kAgg').textContent=a.toFixed(2);
+      document.getElementById('kWin').textContent=wins+'/50 次 ('+(wins*2)+'%)';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>50 轮胜率 ${(wins*2)}% 的好局里，重仓派（65%仓）只要遇到连续几场亏损就几乎清零（终值 ${a.toFixed(2)}），而半凯利派稳稳滚到 <strong>${h.toFixed(1)}</strong>！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    runRace(false);</script>
+</body>
+</html>

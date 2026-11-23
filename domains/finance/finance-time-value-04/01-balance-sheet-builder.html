@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：个人资产负债表装配台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; transition:.15s; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📊 个人资产负债表装配台：你的豪车是资产还是负债？</h1><p>误区：花 50 万买车，觉得多了一笔 50 万资产。真相：真正能把钱放进口袋的才是生息资产，不断掏走油费保养的其实是负债！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>生息资产（股基/收租房）</span><span id="vA">60 万</span></label><input id="a" type="range" min="0" max="300" step="10" value="60" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>消费品（自住车/电子产品）</span><span id="vC">40 万</span></label><input id="c" type="range" min="0" max="150" step="5" value="40" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>有息负债（房贷/车贷）</span><span id="vL">80 万</span></label><input id="l" type="range" min="0" max="300" step="10" value="80" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">净资产（资产-负债）</div><div class="k-val" id="kNet">—</div></div>
+      <div class="kpi"><div class="k-lbl">年被动现金流（按5%生息-12%贬值）</div><div class="k-val" id="kCF">—</div></div>
+      <div class="kpi"><div class="k-lbl">资产健康度</div><div class="k-val" id="kStat">—</div></div>
+    </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+    function draw(mark){
+      const a=+document.getElementById('a').value;
+      const c=+document.getElementById('c').value;
+      const l=+document.getElementById('l').value;
+      document.getElementById('vA').textContent=a+' 万';
+      document.getElementById('vC').textContent=c+' 万';
+      document.getElementById('vL').textContent=l+' 万';
+      const net=a+c-l;
+      const cf=a*0.05 - c*0.12 - l*0.04;
+      const maxV=Math.max(100, a+c, l);
+      const scale=360/maxV;
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="54" font-size="12" font-weight="750" fill="var(--tax-text)">资产端</text>
+        <rect x="90" y="34" width="${(a*scale).toFixed(1)}" height="30" rx="5" fill="#10b981"/>
+        <rect x="${(90+a*scale).toFixed(1)}" y="34" width="${(c*scale).toFixed(1)}" height="30" rx="5" fill="#f59e0b"/>
+        <text x="${(96+(a+c)*scale).toFixed(1)}" y="54" font-size="11.5" font-weight="750" fill="var(--tax-text)">生息 ${a}万 + 消耗 ${c}万</text>
+        <text x="20" y="114" font-size="12" font-weight="750" fill="var(--tax-text)">负债端</text>
+        <rect x="90" y="94" width="${(l*scale).toFixed(1)}" height="30" rx="5" fill="#ef4444"/>
+        <text x="${(96+l*scale).toFixed(1)}" y="114" font-size="11.5" font-weight="750" fill="#ef4444">负债 ${l}万</text>
+        <rect x="90" y="146" width="12" height="10" fill="#10b981"/><text x="106" y="155" font-size="11" fill="var(--tax-muted)">生息资产(+现金流)</text>
+        <rect x="240" y="146" width="12" height="10" fill="#f59e0b"/><text x="256" y="155" font-size="11" fill="var(--tax-muted)">消耗品(持续贬值+维护)</text>
+      `;
+      document.getElementById('kNet').textContent=net.toFixed(0)+' 万';
+      document.getElementById('kCF').textContent=(cf>=0?'+':'')+cf.toFixed(1)+' 万/年';
+      document.getElementById('kCF').style.color=cf>=0?'#10b981':'#ef4444';
+      document.getElementById('kStat').textContent=cf>0?'正向现金流':'现金流净流出';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>富人买生息资产，穷人买看起来像资产的消耗品！当前你的年现金流净额为 <strong>${cf>=0?'+':''}${cf.toFixed(1)} 万/年</strong>。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);
+  </script>
+</body>
+</html>

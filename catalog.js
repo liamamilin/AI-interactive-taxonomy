@@ -5,11 +5,11 @@ window.TAXONOMY_DATA = {
   "subtitle": "围绕“人”的 10 大认知领域 · 每个复杂概念 2 分钟玩懂",
   "stats": {
     "totalDomains": 10,
-    "litDomains": 4,
-    "totalTopics": 115,
-    "totalPlannedTopics": 160,
+    "litDomains": 5,
+    "totalTopics": 139,
+    "totalPlannedTopics": 136,
     "totalBlueprintTopics": 275,
-    "totalToys": 345
+    "totalToys": 417
   },
   "tracks": [
     {
@@ -900,141 +900,1216 @@ window.TAXONOMY_DATA = {
         {
           "id": "time-value",
           "title": "1. 时间价值与个人财务（Time Value & Personal Finance）",
-          "plannedTopics": [
-            {
-              "slug": "finance-time-value-01",
-              "title": "复利曲线 vs 通胀侵蚀（72 法则）"
-            },
-            {
-              "slug": "finance-time-value-02",
-              "title": "房贷等额本息 vs 等额本金真相"
-            },
-            {
-              "slug": "finance-time-value-03",
-              "title": "名义利率 vs 实际利率"
-            },
-            {
-              "slug": "finance-time-value-04",
-              "title": "个人现金流与资产负债表"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "risk-leverage",
           "title": "2. 风险、杠杆与波动数学（Risk, Leverage & Volatility）",
-          "plannedTopics": [
-            {
-              "slug": "finance-risk-leverage-01",
-              "title": "跌 50% 要涨 100%（波动损耗）"
-            },
-            {
-              "slug": "finance-risk-leverage-02",
-              "title": "杠杆倍数与强平爆仓线"
-            },
-            {
-              "slug": "finance-risk-leverage-03",
-              "title": "凯利公式（梭哈必死 vs 最优仓位）"
-            },
-            {
-              "slug": "finance-risk-leverage-04",
-              "title": "尾部风险与黑天鹅"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "portfolio",
           "title": "3. 资产配置与投资组合（Portfolio & Allocation）",
-          "plannedTopics": [
-            {
-              "slug": "finance-portfolio-01",
-              "title": "有效前沿与低相关性降波"
-            },
-            {
-              "slug": "finance-portfolio-02",
-              "title": "股债定期再平衡"
-            },
-            {
-              "slug": "finance-portfolio-03",
-              "title": "指数被动投资与费率复利侵蚀"
-            },
-            {
-              "slug": "finance-portfolio-04",
-              "title": "定投微笑曲线的边界条件"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "valuation",
           "title": "4. 资产估值与公司金融（Valuation & Corporate Finance）",
-          "plannedTopics": [
-            {
-              "slug": "finance-valuation-01",
-              "title": "现金流折现（DCF 未来钱折今天）"
-            },
-            {
-              "slug": "finance-valuation-02",
-              "title": "市盈率（PE）与成长预期陷阱"
-            },
-            {
-              "slug": "finance-valuation-03",
-              "title": "创业股权稀释与融资蛋糕"
-            },
-            {
-              "slug": "finance-valuation-04",
-              "title": "债券价格与利率跷跷板"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "insurance-derivatives",
           "title": "5. 保险、期权与风险对冲（Insurance & Derivatives）",
-          "plannedTopics": [
-            {
-              "slug": "finance-insurance-derivatives-01",
-              "title": "保险精算与大数定律"
-            },
-            {
-              "slug": "finance-insurance-derivatives-02",
-              "title": "期权盈亏曲线（Call / Put）"
-            },
-            {
-              "slug": "finance-insurance-derivatives-03",
-              "title": "期货套期保值（锁定价格）"
-            },
-            {
-              "slug": "finance-insurance-derivatives-04",
-              "title": "逆向选择与免赔额机制"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "macro-monetary",
           "title": "6. 宏观经济与货币周期（Macroeconomics & Monetary）",
-          "plannedTopics": [
+          "plannedTopics": []
+        }
+      ],
+      "liveTopicCount": 24,
+      "plannedTopicCount": 0,
+      "blueprintTopicCount": 24,
+      "liveToyCount": 72,
+      "topics": [
+        {
+          "id": "finance/finance-insurance-derivatives-01",
+          "slug": "finance-insurance-derivatives-01",
+          "domain": "finance",
+          "branch": "insurance-derivatives",
+          "order": 1,
+          "title": "保险精算与大数定律",
+          "icon": "🏥",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "重疾一次赔 50 万，保费每年只要几千元，保险公司靠什么不赔穿？什么时候千万别买保险？",
+          "difficulty": "入门",
+          "related": [
+            "finance/finance-insurance-derivatives-04",
+            "science/science-probability-stats-02"
+          ],
+          "toys": [
             {
-              "slug": "finance-macro-monetary-01",
-              "title": "货币乘数与部分准备金"
+              "id": "finance/finance-insurance-derivatives-01/01-risk-pooling-sim.html",
+              "file": "01-risk-pooling-sim.html",
+              "path": "./domains/finance/finance-insurance-derivatives-01/01-risk-pooling-sim.html",
+              "title": "风险池大数聚合器：10 人保单会破产，10 万人稳赚（SVG）",
+              "icon": "🛟",
+              "archetype": "simulation",
+              "concept": "风险池 Risk Pooling · 大数定律 · 方差随 √N 缩小",
+              "summary": "调节参保人数 N（从 10 人到 10000 人），亲眼看见赔付率波动如何收敛成精准的精算预期！"
             },
             {
-              "slug": "finance-macro-monetary-02",
-              "title": "央行加息 / 降息传导链"
+              "id": "finance/finance-insurance-derivatives-01/02-expected-value-paradox.html",
+              "file": "02-expected-value-paradox.html",
+              "path": "./domains/finance/finance-insurance-derivatives-01/02-expected-value-paradox.html",
+              "title": "负期望却必买？理解“边际效用递减”与灾备保险",
+              "icon": "💡",
+              "archetype": "scenario",
+              "concept": "期望收益为负 · 效用函数 · 转移不可承受之痛",
+              "summary": "对比手机碎屏险（小额高频）与百万医疗/定期寿险（大额低频），选出真正该买的保险！"
             },
             {
-              "slug": "finance-macro-monetary-03",
-              "title": "汇率与蒙代尔不可能三角"
+              "id": "finance/finance-insurance-derivatives-01/03-premium-breakdown-svg.html",
+              "file": "03-premium-breakdown-svg.html",
+              "path": "./domains/finance/finance-insurance-derivatives-01/03-premium-breakdown-svg.html",
+              "title": "保费去哪儿了：纯风险保费 vs 运营佣金（SVG）",
+              "icon": "🍰",
+              "archetype": "spatial",
+              "concept": "精算纯保费 · 附加费用 · 消费型 vs 返还型",
+              "summary": "拆解消费型重疾险与昂贵返还型保险的保费去向，看清“既保又返本”到底多收了多少！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-macro-monetary-01",
+          "slug": "finance-macro-monetary-01",
+          "domain": "finance",
+          "branch": "macro-monetary",
+          "order": 1,
+          "title": "货币乘数与部分准备金",
+          "icon": "🏦",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "央行只印了 100 亿元基础货币，社会上为什么能凭空多出 800 亿甚至 1000 亿广义货币 M2？",
+          "difficulty": "入门",
+          "related": [
+            "finance/finance-macro-monetary-02",
+            "finance/finance-macro-monetary-04"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-macro-monetary-01/01-money-multiplier-svg.html",
+              "file": "01-money-multiplier-svg.html",
+              "path": "./domains/finance/finance-macro-monetary-01/01-money-multiplier-svg.html",
+              "title": "货币乘数造币机：100 元存进银行如何滚出 1000 元？（SVG）",
+              "icon": "🖨️",
+              "archetype": "simulation",
+              "concept": "部分准备金 · 货币乘数 1/r · 贷款创造存款",
+              "summary": "调节法定存款准备金率 r，亲眼看见 100 元原始现金经过“存-贷-再存”循环滚成庞大 M2！"
             },
             {
-              "slug": "finance-macro-monetary-04",
-              "title": "债务周期与泡沫破裂（明斯基时刻）"
+              "id": "finance/finance-macro-monetary-01/02-credit-crunch-race.html",
+              "file": "02-credit-crunch-race.html",
+              "path": "./domains/finance/finance-macro-monetary-01/02-credit-crunch-race.html",
+              "title": "信用收缩对比：准备金降到 5%，没人敢借钱时 M2 会涨吗？",
+              "icon": "🧊",
+              "archetype": "race",
+              "concept": "超额准备金 · 推绳子效应 · 信用乘数失灵",
+              "summary": "对比“企业踊跃贷款”与“全社会去杠杆不敢借钱”，看懂央行降准为什么有时拉不动货币！"
+            },
+            {
+              "id": "finance/finance-macro-monetary-01/03-bank-run-fragility.html",
+              "file": "03-bank-run-fragility.html",
+              "path": "./domains/finance/finance-macro-monetary-01/03-bank-run-fragility.html",
+              "title": "部分准备金的两面性：平时放大经济，危机时怕挤兑",
+              "icon": "🏃",
+              "archetype": "scenario",
+              "concept": "银行挤兑 · 存款保险制度 · 最后贷款人",
+              "summary": "理解为什么现代金融必须有央行“最后贷款人”与存款保险制度来兜底部分准备金体系！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-portfolio-01",
+          "slug": "finance-portfolio-01",
+          "domain": "finance",
+          "branch": "portfolio",
+          "order": 1,
+          "title": "有效前沿与低相关性降波",
+          "icon": "🧺",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "把两个各自都会剧烈波动的资产混在一起，为什么组合整体波动率居然能比它们各自都更低？",
+          "difficulty": "进阶",
+          "related": [
+            "finance/finance-portfolio-02",
+            "engineering/engineering-systems-tradeoffs-01"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-portfolio-01/01-correlation-cancel-svg.html",
+              "file": "01-correlation-cancel-svg.html",
+              "path": "./domains/finance/finance-portfolio-01/01-correlation-cancel-svg.html",
+              "title": "相关性对冲透视镜：当 ρ = -1 时波动彻底消失！（SVG）",
+              "icon": "〰️",
+              "archetype": "simulation",
+              "concept": "相关系数 ρ · 组合方差降维 · 金融唯一免费午餐",
+              "summary": "拖动资产 A 与资产 B 的相关系数 ρ（从 +1 到 -1），亲眼看见合成组合曲线如何一点点被熨平！"
+            },
+            {
+              "id": "finance/finance-portfolio-01/02-markowitz-frontier-svg.html",
+              "file": "02-markowitz-frontier-svg.html",
+              "path": "./domains/finance/finance-portfolio-01/02-markowitz-frontier-svg.html",
+              "title": "马科维茨有效前沿弓形图（SVG）",
+              "icon": "🏹",
+              "archetype": "spatial",
+              "concept": "有效前沿 · 夏普比率 · 分散化魔术",
+              "summary": "调节股票与黄金的配比权重，在“风险-收益”平面上画出向左侧凸出的神奇弓形有效前沿！"
+            },
+            {
+              "id": "finance/finance-portfolio-01/03-fake-diversification.html",
+              "file": "03-fake-diversification.html",
+              "path": "./domains/finance/finance-portfolio-01/03-fake-diversification.html",
+              "title": "伪分散化体检台：买了 10 只同涨同跌的科技股算分散吗？",
+              "icon": "🩺",
+              "archetype": "scenario",
+              "concept": "跨资产低相关 · 同质化集中风险 · 股债黄金互补",
+              "summary": "诊断两份看似分散的投资组合，识别出那些其实高度相关、崩盘时一起跳水的假分散！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-risk-leverage-01",
+          "slug": "finance-risk-leverage-01",
+          "domain": "finance",
+          "branch": "risk-leverage",
+          "order": 1,
+          "title": "跌 50% 要涨 100%（波动损耗）",
+          "icon": "📉",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "今天涨 10%、明天跌 10%，听起来不赚不赔？为什么波动越大，你的账户其实亏得越多？",
+          "difficulty": "入门",
+          "related": [
+            "finance/finance-risk-leverage-02",
+            "finance/finance-portfolio-01"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-risk-leverage-01/01-asymmetric-loss-svg.html",
+              "file": "01-asymmetric-loss-svg.html",
+              "path": "./domains/finance/finance-risk-leverage-01/01-asymmetric-loss-svg.html",
+              "title": "涨跌不对称曲线：跌 50% 为什么必须涨 100% 才能回本？（SVG）",
+              "icon": "📐",
+              "archetype": "spatial",
+              "concept": "几何平均 vs 算术平均 · 回本所需涨幅 1/(1-d)-1",
+              "summary": "拖动回撤幅度滑块，看跌 20%、50%、80% 后分别需要涨多少倍才能回到起点！"
+            },
+            {
+              "id": "finance/finance-risk-leverage-01/02-volatility-drag-race.html",
+              "file": "02-volatility-drag-race.html",
+              "path": "./domains/finance/finance-risk-leverage-01/02-volatility-drag-race.html",
+              "title": "波动损耗竞速：年均 +5% 的稳健资产 vs 大起大落的过山车",
+              "icon": "🎢",
+              "archetype": "race",
+              "concept": "波动拖累 Volatility Drag · σ²/2 损耗",
+              "summary": "对比算术平均收益相同的两只基金，亲眼看见“+50% 然后 -50%”是如何让你亏掉 25% 本金的！"
+            },
+            {
+              "id": "finance/finance-risk-leverage-01/03-drawdown-guard-scenario.html",
+              "file": "03-drawdown-guard-scenario.html",
+              "path": "./domains/finance/finance-risk-leverage-01/03-drawdown-guard-scenario.html",
+              "title": "大回撤风控抉择台：保本止损比盲目追高重要十倍",
+              "icon": "🛡️",
+              "archetype": "scenario",
+              "concept": "最大回撤控制 · 巴菲特第一条军规",
+              "summary": "在市场暴跌周期里对比死扛深套与提前控制回撤的账户复苏速度！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-time-value-01",
+          "slug": "finance-time-value-01",
+          "domain": "finance",
+          "branch": "time-value",
+          "order": 1,
+          "title": "复利曲线 vs 通胀侵蚀（72 法则）",
+          "icon": "📈",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "为什么前十年几乎看不出复利效果，而第 25 年后突然一飞冲天？把钱存着不动到底有多亏？",
+          "difficulty": "入门",
+          "related": [
+            "finance/finance-time-value-03",
+            "finance/finance-portfolio-03"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-time-value-01/01-compound-vs-inflation-svg.html",
+              "file": "01-compound-vs-inflation-svg.html",
+              "path": "./domains/finance/finance-time-value-01/01-compound-vs-inflation-svg.html",
+              "title": "复利曲线 vs 通胀侵蚀赛跑（SVG）",
+              "icon": "🚀",
+              "archetype": "simulation",
+              "concept": "指数复利 · 通胀购买力缩水 · 时间拐点",
+              "summary": "调节年化收益率与通胀率，在 30 年 SVG 曲线上亲眼看见名义财富与真实购买力的剪刀差！"
+            },
+            {
+              "id": "finance/finance-time-value-01/02-rule-of-72-calc.html",
+              "file": "02-rule-of-72-calc.html",
+              "path": "./domains/finance/finance-time-value-01/02-rule-of-72-calc.html",
+              "title": "72 法则心算器：你的钱几年翻一倍？（SVG）",
+              "icon": "⏱️",
+              "archetype": "spatial",
+              "concept": "72 法则 (72÷r) · 翻倍周期 · 指数直觉",
+              "summary": "拖动年化收益率滑块，对比“72÷利率”心算翻倍年数与精确对数翻倍年数的惊人吻合！"
+            },
+            {
+              "id": "finance/finance-time-value-01/03-early-vs-late-race.html",
+              "file": "03-early-vs-late-race.html",
+              "path": "./domains/finance/finance-time-value-01/03-early-vs-late-race.html",
+              "title": "早投 10 年 vs 晚投 10 年竞速：谁能跑赢复利？",
+              "icon": "🏃",
+              "archetype": "race",
+              "concept": "时间权重 · 复利后半程爆发 · 早期本金优势",
+              "summary": "对比 25 岁投 10 年就停手 vs 35 岁连投 30 年，看时间在复利末端有多恐怖！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-valuation-01",
+          "slug": "finance-valuation-01",
+          "domain": "finance",
+          "branch": "valuation",
+          "order": 1,
+          "title": "现金流折现（DCF 未来钱折今天）",
+          "icon": "💵",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "未来第 10 年才能拿到手的 100 万，今天到底值多少钱？为什么央行一加息，高成长科技股就暴跌？",
+          "difficulty": "进阶",
+          "related": [
+            "finance/finance-valuation-02",
+            "finance/finance-valuation-04"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-valuation-01/01-dcf-discount-bars.html",
+              "file": "01-dcf-discount-bars.html",
+              "path": "./domains/finance/finance-valuation-01/01-dcf-discount-bars.html",
+              "title": "现金流折现压缩机：利率一高，远期画的大饼瞬间缩水！（SVG）",
+              "icon": "📉",
+              "archetype": "simulation",
+              "concept": "折现率 r · 现值 PV=CF/(1+r)^t · 久期敏感度",
+              "summary": "拖动无风险折现率 r，亲眼看见第 10 年的 100 万大饼在今天的值钱程度如何剧烈跳水！"
+            },
+            {
+              "id": "finance/finance-valuation-01/02-growth-vs-value-duration.html",
+              "file": "02-growth-vs-value-duration.html",
+              "path": "./domains/finance/finance-valuation-01/02-growth-vs-value-duration.html",
+              "title": "科技成长股 vs 传统收息股：为什么加息专杀远期概念股？（SVG）",
+              "icon": "⚡",
+              "archetype": "race",
+              "concept": "久期 Duration · 远期现金流权重 · 估值杀",
+              "summary": "对比“今年就分红的价值股”与“10 年后才盈利的科技股”在加息 3% 后的估值暴跌幅度！"
+            },
+            {
+              "id": "finance/finance-valuation-01/03-dcf-trap-scenario.html",
+              "file": "03-dcf-trap-scenario.html",
+              "path": "./domains/finance/finance-valuation-01/03-dcf-trap-scenario.html",
+              "title": "DCF 估值体检台：改 1% 永续增长率就能把估值吹翻倍？",
+              "icon": "🎭",
+              "archetype": "scenario",
+              "concept": "终值 Terminal Value 占比 · 垃圾进垃圾出",
+              "summary": "体验投行分析师如何通过微调永续增长率 g 把同一家公司算出天差地别的估值！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-insurance-derivatives-02",
+          "slug": "finance-insurance-derivatives-02",
+          "domain": "finance",
+          "branch": "insurance-derivatives",
+          "order": 2,
+          "title": "期权盈亏曲线（Call / Put）",
+          "icon": "📐",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "为什么买期权“亏损封顶、盈利无限”，而裸卖期权却“盈利封顶、亏损无限”？",
+          "difficulty": "进阶",
+          "related": [
+            "finance/finance-insurance-derivatives-01",
+            "finance/finance-risk-leverage-04"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-insurance-derivatives-02/01-option-payoff-svg.html",
+              "file": "01-option-payoff-svg.html",
+              "path": "./domains/finance/finance-insurance-derivatives-02/01-option-payoff-svg.html",
+              "title": "期权盈亏折线图：看涨 Call 与看跌 Put 四象限（SVG）",
+              "icon": "📈",
+              "archetype": "spatial",
+              "concept": "行权价 Strike · 权利金 Premium · 非线性损益",
+              "summary": "一键切换买看涨、卖看涨、买看跌、卖看跌四种头寸，亲眼看见那条经典的折角盈亏曲线！"
+            },
+            {
+              "id": "finance/finance-insurance-derivatives-02/02-protective-put-sim.html",
+              "file": "02-protective-put-sim.html",
+              "path": "./domains/finance/finance-insurance-derivatives-02/02-protective-put-sim.html",
+              "title": "期权就是股票的“车险”：用看跌期权锁死暴跌下限（SVG）",
+              "icon": "🛡️",
+              "archetype": "simulation",
+              "concept": "保护性看跌期权 Protective Put · 底部兜底",
+              "summary": "给满仓股票买一张看跌期权（Put），哪怕市场腰斩 50%，账户净值也被死死托在地板上方！"
+            },
+            {
+              "id": "finance/finance-insurance-derivatives-02/03-time-decay-theta.html",
+              "file": "03-time-decay-theta.html",
+              "path": "./domains/finance/finance-insurance-derivatives-02/03-time-decay-theta.html",
+              "title": "时间价值（Theta）流失赛：为什么买末日期权十赌九输？",
+              "icon": "⏳",
+              "archetype": "race",
+              "concept": "时间价值衰减 · Theta 加速 · 买方敌对时间",
+              "summary": "观察距离到期日最后 30 天里，期权时间价值是如何像融化的冰块一样加速归零的！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-macro-monetary-02",
+          "slug": "finance-macro-monetary-02",
+          "domain": "finance",
+          "branch": "macro-monetary",
+          "order": 2,
+          "title": "央行加息 / 降息传导链",
+          "icon": "🎛️",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "央行把基准利率调高 0.25%，怎么会一层层传导到房贷、股市、汇率和菜市场物价？",
+          "difficulty": "入门",
+          "related": [
+            "finance/finance-macro-monetary-01",
+            "finance/finance-valuation-01"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-macro-monetary-02/01-rate-transmission-chain.html",
+              "file": "01-rate-transmission-chain.html",
+              "path": "./domains/finance/finance-macro-monetary-02/01-rate-transmission-chain.html",
+              "title": "货币政策多米诺传导链：加息 vs 降息全景图（SVG）",
+              "icon": "🔗",
+              "archetype": "spatial",
+              "concept": "基准利率 · 借贷成本 · 资产定价 · 经济冷热调节",
+              "summary": "一键切换“央行暴力加息”与“央行降息放水”，观察信贷、股市、房贷、汇率与通胀的连锁反应！"
+            },
+            {
+              "id": "finance/finance-macro-monetary-02/02-taylor-rule-sim.html",
+              "file": "02-taylor-rule-sim.html",
+              "path": "./domains/finance/finance-macro-monetary-02/02-taylor-rule-sim.html",
+              "title": "央行行长模拟器：通胀高企与经济衰退同时来怎么办？",
+              "icon": "🏛️",
+              "archetype": "simulation",
+              "concept": "泰勒规则 · 双重使命（稳物价 vs 保就业） · 滞胀两难",
+              "summary": "调节基准利率应对过热通胀、温和衰退与滞胀危机，体验美联储主席最煎熬的权衡！"
+            },
+            {
+              "id": "finance/finance-macro-monetary-02/03-policy-lag-trap.html",
+              "file": "03-policy-lag-trap.html",
+              "path": "./domains/finance/finance-macro-monetary-02/03-policy-lag-trap.html",
+              "title": "货币政策滞后陷阱：今天加息，为什么 12 个月后经济才降温？",
+              "icon": "🚿",
+              "archetype": "scenario",
+              "concept": "货币政策时滞 · 淋浴水龙头效应 · 过度紧缩风险",
+              "summary": "理解为什么央行总容易“加息加过头”或“降息太晚”，因为经济体像反应迟钝的热水龙头！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-portfolio-02",
+          "slug": "finance-portfolio-02",
+          "domain": "finance",
+          "branch": "portfolio",
+          "order": 2,
+          "title": "股债定期再平衡",
+          "icon": "⚖️",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "每年把涨太多的股票卖掉一点、补买跌下来的国债，为什么这个笨办法竟能自动实现“高抛低吸”？",
+          "difficulty": "入门",
+          "related": [
+            "finance/finance-portfolio-01",
+            "finance/finance-portfolio-04"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-portfolio-02/01-rebalance-seesaw-sim.html",
+              "file": "01-rebalance-seesaw-sim.html",
+              "path": "./domains/finance/finance-portfolio-02/01-rebalance-seesaw-sim.html",
+              "title": "50/50 再平衡机械臂：自动高抛低吸演示（SVG）",
+              "icon": "🦾",
+              "archetype": "simulation",
+              "concept": "定期再平衡 · 纪律性逆向操作 · 风险锚定",
+              "summary": "运行多轮牛熊交替，对比“放任不管”与“每年强行拉回 50/50 比例”的收益与回撤表现！"
+            },
+            {
+              "id": "finance/finance-portfolio-02/02-drift-risk-race.html",
+              "file": "02-drift-risk-race.html",
+              "path": "./domains/finance/finance-portfolio-02/02-drift-risk-race.html",
+              "title": "仓位漂移风险赛：牛市后半程你的 50/50 怎么变成了 85/15？",
+              "icon": "⚠️",
+              "archetype": "race",
+              "concept": "资产漂移 Asset Drift · 隐性加风险 · 崩盘重伤",
+              "summary": "看着连续三年牛市后不平衡组合股票占比飙到 80%+，随后在熊市里遭遇毁灭性打击！"
+            },
+            {
+              "id": "finance/finance-portfolio-02/03-rebalance-freq-lab.html",
+              "file": "03-rebalance-freq-lab.html",
+              "path": "./domains/finance/finance-portfolio-02/03-rebalance-freq-lab.html",
+              "title": "再平衡频率测试台：每天调 vs 每年调，哪个更省手续费？",
+              "icon": "📅",
+              "archetype": "scenario",
+              "concept": "交易摩擦成本 · 阈值再平衡 · 年度再平衡",
+              "summary": "对比每日高频调仓与年度/阈值调仓的净收益，避开过度交易税费陷阱！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-risk-leverage-02",
+          "slug": "finance-risk-leverage-02",
+          "domain": "finance",
+          "branch": "risk-leverage",
+          "order": 2,
+          "title": "杠杆倍数与强平爆仓线",
+          "icon": "⚡",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "10 倍杠杆只需跌不到 10% 就会瞬间归零爆仓——哪怕第二天价格涨上天也已经与你无关！",
+          "difficulty": "进阶",
+          "related": [
+            "finance/finance-risk-leverage-01",
+            "finance/finance-risk-leverage-03"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-risk-leverage-02/01-liquidation-line-svg.html",
+              "file": "01-liquidation-line-svg.html",
+              "path": "./domains/finance/finance-risk-leverage-02/01-liquidation-line-svg.html",
+              "title": "杠杆强平爆仓线透视镜（SVG）",
+              "icon": "💥",
+              "archetype": "simulation",
+              "concept": "杠杆倍数 L · 爆仓阈值 1/L · 强平归零",
+              "summary": "拖动杠杆倍数（1× 到 20×），看能承受的市场反向波动空间是如何迅速缩窄到一条细线的！"
+            },
+            {
+              "id": "finance/finance-risk-leverage-02/02-margin-call-path.html",
+              "file": "02-margin-call-path.html",
+              "path": "./domains/finance/finance-risk-leverage-02/02-margin-call-path.html",
+              "title": "路径依赖陷阱：最终涨了 50%，为什么加杠杆的人还是爆仓了？（SVG）",
+              "icon": "📉",
+              "archetype": "spatial",
+              "concept": "路径依赖 · 黎明前爆仓 · 强平不可逆",
+              "summary": "看着价格先急跌 15% 再暴涨 50%，对比现货满仓（大赚）与 8 倍杠杆（中途已归零出局）！"
+            },
+            {
+              "id": "finance/finance-risk-leverage-02/03-leverage-trap-scenario.html",
+              "file": "03-leverage-trap-scenario.html",
+              "path": "./domains/finance/finance-risk-leverage-02/03-leverage-trap-scenario.html",
+              "title": "金融杠杆审计台：哪些资产能借钱，哪些绝不能加杠杆？",
+              "icon": "⚖️",
+              "archetype": "scenario",
+              "concept": "流动性错配 · 强平机制 · 低波长债 vs 高波股票",
+              "summary": "对比无强平条款的 30 年低息房贷 vs 实时盯市强平的 10 倍期货合约！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-time-value-02",
+          "slug": "finance-time-value-02",
+          "domain": "finance",
+          "branch": "time-value",
+          "order": 2,
+          "title": "房贷等额本息 vs 等额本金真相",
+          "icon": "🏠",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "等额本金总利息少十几万，是不是就一定比等额本息更划算？提前还贷到底在第几年最值？",
+          "difficulty": "入门",
+          "related": [
+            "finance/finance-time-value-01",
+            "finance/finance-time-value-03"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-time-value-02/01-mortgage-split-svg.html",
+              "file": "01-mortgage-split-svg.html",
+              "path": "./domains/finance/finance-time-value-02/01-mortgage-split-svg.html",
+              "title": "房贷本金/利息拆解透视镜（SVG）",
+              "icon": "🧱",
+              "archetype": "spatial",
+              "concept": "等额本息 · 等额本金 · 资金占用时间",
+              "summary": "拖动还款月份游标，看等额本息前期为什么几乎全在还利息，以及两者的总利息差从何而来！"
+            },
+            {
+              "id": "finance/finance-time-value-02/02-prepay-timing-sim.html",
+              "file": "02-prepay-timing-sim.html",
+              "path": "./domains/finance/finance-time-value-02/02-prepay-timing-sim.html",
+              "title": "提前还贷黄金窗口计算器：第几年还最省钱？（SVG）",
+              "icon": "✂️",
+              "archetype": "simulation",
+              "concept": "剩余本金 · 机会成本 · 提前还贷拐点",
+              "summary": "拖动提前还贷的年份，实时算出省下的利息与投资机会成本，打破“等额本息前半段还完就亏”误区！"
+            },
+            {
+              "id": "finance/finance-time-value-02/03-loan-choice-scenario.html",
+              "file": "03-loan-choice-scenario.html",
+              "path": "./domains/finance/finance-time-value-02/03-loan-choice-scenario.html",
+              "title": "买房贷款抉择台：高薪稳定 vs 现金流吃紧怎么选？",
+              "icon": "🗝️",
+              "archetype": "scenario",
+              "concept": "资金时间价值 · 月供压力 · 通胀稀释负债",
+              "summary": "在不同利率与投资回报环境下选出更优房贷方案，理解为什么两种还款方式年化资金成本其实一模一样！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-valuation-02",
+          "slug": "finance-valuation-02",
+          "domain": "finance",
+          "branch": "valuation",
+          "order": 2,
+          "title": "市盈率（PE）与成长预期陷阱",
+          "icon": "🏷️",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "PE = 5 倍的股票一定很便宜、PE = 50 倍的股票一定很贵吗？为什么周期股总在 PE 最低时暴跌？",
+          "difficulty": "入门",
+          "related": [
+            "finance/finance-valuation-01",
+            "finance/finance-valuation-03"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-valuation-02/01-pe-payback-svg.html",
+              "file": "01-pe-payback-svg.html",
+              "path": "./domains/finance/finance-valuation-02/01-pe-payback-svg.html",
+              "title": "市盈率回本倒计时：静态 PE vs 成长型 PEG（SVG）",
+              "icon": "⏳",
+              "archetype": "simulation",
+              "concept": "市盈率 PE=市值/利润 · 利润增速 g · PEG=PE/g",
+              "summary": "调节利润年增速 g，对比“10 倍 PE 但零增长”与“30 倍 PE 但年增 40%”哪家更快赚回本金！"
+            },
+            {
+              "id": "finance/finance-valuation-02/02-cyclical-pe-trap.html",
+              "file": "02-cyclical-pe-trap.html",
+              "path": "./domains/finance/finance-valuation-02/02-cyclical-pe-trap.html",
+              "title": "周期股低 PE 陷阱：为什么周期顶峰 PE 最低反而是卖点？（SVG）",
+              "icon": "🌊",
+              "archetype": "spatial",
+              "concept": "周期股景气顶峰 · 利润虚高拉低 PE · 戴维斯双杀",
+              "summary": "滑动周期阶段，亲眼看见盈利暴涨时 PE 看起来极低（诱多），随后盈利腰斩股价崩盘！"
+            },
+            {
+              "id": "finance/finance-valuation-02/03-pe-audit-scenario.html",
+              "file": "03-pe-audit-scenario.html",
+              "path": "./domains/finance/finance-valuation-02/03-pe-audit-scenario.html",
+              "title": "价值投资者避坑台：低 PE 垃圾股 vs 合理 PE 好公司",
+              "icon": "🕵️",
+              "archetype": "scenario",
+              "concept": "价值陷阱 Value Trap · 盈利可持续性 · 戴维斯双击",
+              "summary": "辨别衰退夕阳行业假便宜与高成长好生意，避开“越跌 PE 越高”的价值陷阱！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-insurance-derivatives-03",
+          "slug": "finance-insurance-derivatives-03",
+          "domain": "finance",
+          "branch": "insurance-derivatives",
+          "order": 3,
+          "title": "期货套期保值（锁定价格）",
+          "icon": "🌾",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "种小麦的怕秋收跌价、买面粉的怕涨价——期货最初不是为了投机暴富，而是让双方提前锁死未来价格！",
+          "difficulty": "入门",
+          "related": [
+            "finance/finance-insurance-derivatives-02",
+            "finance/finance-risk-leverage-02"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-insurance-derivatives-03/01-hedging-lock-svg.html",
+              "file": "01-hedging-lock-svg.html",
+              "path": "./domains/finance/finance-insurance-derivatives-03/01-hedging-lock-svg.html",
+              "title": "农场主套保锁价器：现货盈亏 + 期货对冲 = 利润纹丝不动（SVG）",
+              "icon": "🚜",
+              "archetype": "simulation",
+              "concept": "套期保值 Hedging · 基差对冲 · 消除价格不确定性",
+              "summary": "拖动秋收时的小麦市价（从暴跌到暴涨），亲眼看见做空期货如何与现货盈亏完美抵消，锁死利润！"
+            },
+            {
+              "id": "finance/finance-insurance-derivatives-03/02-speculator-vs-hedger.html",
+              "file": "02-speculator-vs-hedger.html",
+              "path": "./domains/finance/finance-insurance-derivatives-03/02-speculator-vs-hedger.html",
+              "title": "套保者 vs 投机者：没有投机者接盘，套保能成吗？",
+              "icon": "🤝",
+              "archetype": "scenario",
+              "concept": "风险转移 · 流动性提供者 · 期货市场生态",
+              "summary": "理解为什么健康的期货市场既需要锁价的实体企业，也需要愿意承担波动的投机资金！"
+            },
+            {
+              "id": "finance/finance-insurance-derivatives-03/03-airlines-fuel-hedge.html",
+              "file": "03-airlines-fuel-hedge.html",
+              "path": "./domains/finance/finance-insurance-derivatives-03/03-airlines-fuel-hedge.html",
+              "title": "航空公司油价对冲台：不锁油价会怎样，锁反了又会怎样？",
+              "icon": "✈️",
+              "archetype": "blind-lab",
+              "concept": "成本锁定 · 双向锁定放弃暴跌红利 · 过度套保风险",
+              "summary": "对比不套保（随油价裸奔）与锁定油价后遇到油价暴跌时“期货账面巨亏”的舆论陷阱！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-macro-monetary-03",
+          "slug": "finance-macro-monetary-03",
+          "domain": "finance",
+          "branch": "macro-monetary",
+          "order": 3,
+          "title": "汇率与蒙代尔不可能三角",
+          "icon": "🔺",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "为什么一个国家永远无法同时做到“汇率固定、资金自由出入、还能自己独立降息”？",
+          "difficulty": "进阶",
+          "related": [
+            "finance/finance-macro-monetary-02",
+            "engineering/engineering-systems-tradeoffs-01"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-macro-monetary-03/01-trilemma-triangle-svg.html",
+              "file": "01-trilemma-triangle-svg.html",
+              "path": "./domains/finance/finance-macro-monetary-03/01-trilemma-triangle-svg.html",
+              "title": "蒙代尔不可能三角选择器：三选二，谁也逃不掉！（SVG）",
+              "icon": "🔺",
+              "archetype": "spatial",
+              "concept": "蒙代尔-弗莱明不可能三角 · 三角选边 · 国际金融约束",
+              "summary": "点击挑选你想保住的两个宏观目标，实时高亮对应的现实国家模板（美国、香港、中国内地）与被放弃的一角！"
+            },
+            {
+              "id": "finance/finance-macro-monetary-03/02-carry-trade-arbitrage.html",
+              "file": "02-carry-trade-arbitrage.html",
+              "path": "./domains/finance/finance-macro-monetary-03/02-carry-trade-arbitrage.html",
+              "title": "固定汇率套利拆穿器：为什么硬扛固定汇率一定会被热钱狙击？",
+              "icon": "💸",
+              "archetype": "simulation",
+              "concept": "套利套汇 · 外汇储备耗竭 · 索罗斯狙击英镑",
+              "summary": "在资本自由流动下强行一边降息一边死守固定汇率，亲眼看见外汇储备在套利潮中几天内被抽干！"
+            },
+            {
+              "id": "finance/finance-macro-monetary-03/03-exchange-rate-winners.html",
+              "file": "03-exchange-rate-winners.html",
+              "path": "./domains/finance/finance-macro-monetary-03/03-exchange-rate-winners.html",
+              "title": "本币贬值谁笑谁哭：外贸出口商 vs 海淘留学生",
+              "icon": "💱",
+              "archetype": "scenario",
+              "concept": "汇率双向影响 · 出口竞争力 · 进口通胀",
+              "summary": "切换本币升值与贬值，看懂汇率变动如何在外贸、旅游和跨国公司之间重新分配利益！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-portfolio-03",
+          "slug": "finance-portfolio-03",
+          "domain": "finance",
+          "branch": "portfolio",
+          "order": 3,
+          "title": "指数被动投资与费率复利侵蚀",
+          "icon": "💸",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "每年多收 1.5% 的基金“管理费”听起来像毛毛雨？放到 30 年复利里，它能吞掉你三分之一的退休金！",
+          "difficulty": "入门",
+          "related": [
+            "finance/finance-time-value-01",
+            "finance/finance-portfolio-01"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-portfolio-03/01-fee-erosion-svg.html",
+              "file": "01-fee-erosion-svg.html",
+              "path": "./domains/finance/finance-portfolio-03/01-fee-erosion-svg.html",
+              "title": "费率复利黑洞：0.1% ETF vs 1.8% 主动基金 30 年差距（SVG）",
+              "icon": "🕳️",
+              "archetype": "simulation",
+              "concept": "复利负效应 · 管理费率摩擦 · 成本确定而收益不确定",
+              "summary": "调节年化管理费率，亲眼看见那看似不起眼的 1.5% 费率是如何随着复利滚雪球吃掉巨额资产的！"
+            },
+            {
+              "id": "finance/finance-portfolio-03/02-active-vs-index-race.html",
+              "file": "02-active-vs-index-race.html",
+              "path": "./domains/finance/finance-portfolio-03/02-active-vs-index-race.html",
+              "title": "零和博弈赛跑：为什么 85% 主动基金长期跑不赢指数？",
+              "icon": "🏆",
+              "archetype": "race",
+              "concept": "夏普算术法则 · 市场平均扣除费率 · 指数基金",
+              "summary": "模拟 20 名基金经理在扣除 1.5% 费率后与低费率指数基金同场跑 15 年，数数几个能赢！"
+            },
+            {
+              "id": "finance/finance-portfolio-03/03-cost-matters-scenario.html",
+              "file": "03-cost-matters-scenario.html",
+              "path": "./domains/finance/finance-portfolio-03/03-cost-matters-scenario.html",
+              "title": "投资成本审计台：看穿“免申购费但年费 2%”的文字游戏",
+              "icon": "🔎",
+              "archetype": "scenario",
+              "concept": "一次性费用 vs 每年复利费 · 隐性换手税",
+              "summary": "对比“一次性收 1%”与“每年收 1.5% 销售服务费”，算出长期持有者的真实成本！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-risk-leverage-03",
+          "slug": "finance-risk-leverage-03",
+          "domain": "finance",
+          "branch": "risk-leverage",
+          "order": 3,
+          "title": "凯利公式（梭哈必死 vs 最优仓位）",
+          "icon": "🎰",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "哪怕给你一个胜率 60%、赔率 1:1 的必赚赌局，为什么每次全押（梭哈）最后也一定会输光？",
+          "difficulty": "进阶",
+          "related": [
+            "finance/finance-risk-leverage-01",
+            "finance/finance-risk-leverage-02"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-risk-leverage-03/01-kelly-growth-curve.html",
+              "file": "01-kelly-growth-curve.html",
+              "path": "./domains/finance/finance-risk-leverage-03/01-kelly-growth-curve.html",
+              "title": "凯利仓位抛物线：押太少赚得慢，押太多反而亏光！（SVG）",
+              "icon": "📈",
+              "archetype": "simulation",
+              "concept": "凯利公式 f*=p-q/b · 几何增长率最大化 · 过度下注灾难",
+              "summary": "调节下注仓位比例 f（0% 到 100%），在 SVG 曲线上亲眼看见仓位超过 2f* 后长期复利增长率跌入负数！"
+            },
+            {
+              "id": "finance/finance-risk-leverage-03/02-allin-vs-kelly-race.html",
+              "file": "02-allin-vs-kelly-race.html",
+              "path": "./domains/finance/finance-risk-leverage-03/02-allin-vs-kelly-race.html",
+              "title": "梭哈派 vs 半凯利派 50 轮实战竞速（SVG）",
+              "icon": "🏁",
+              "archetype": "race",
+              "concept": "全仓归零风险 · 半凯利平滑曲线 · 长期复利胜出",
+              "summary": "在 60% 胜率金币局中让“每次全押”与“每次押 20% 仓位”同台跑 50 轮，看谁笑到最后！"
+            },
+            {
+              "id": "finance/finance-risk-leverage-03/03-half-kelly-wisdom.html",
+              "file": "03-half-kelly-wisdom.html",
+              "path": "./domains/finance/finance-risk-leverage-03/03-half-kelly-wisdom.html",
+              "title": "半凯利实战抉择：为什么职业投资人只下凯利建议的一半？",
+              "icon": "🧠",
+              "archetype": "scenario",
+              "concept": "参数估计误差 · 半凯利 Half-Kelly · 75% 收益换 50% 波动",
+              "summary": "理解现实中胜率只是估算值，打五折下“半凯利”能以极小收益代价大幅砍掉爆仓风险！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-time-value-03",
+          "slug": "finance-time-value-03",
+          "domain": "finance",
+          "branch": "time-value",
+          "order": 3,
+          "title": "名义利率 vs 实际利率",
+          "icon": "🏷️",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "存款利息 3%、物价涨 4%，你到底是赚了钱还是在倒贴钱？费雪方程式揭示金钱的真实购买力！",
+          "difficulty": "入门",
+          "related": [
+            "finance/finance-time-value-01",
+            "finance/finance-macro-monetary-02"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-time-value-03/01-fisher-equation-svg.html",
+              "file": "01-fisher-equation-svg.html",
+              "path": "./domains/finance/finance-time-value-03/01-fisher-equation-svg.html",
+              "title": "费雪实际利率天平：剔除通胀幻觉（SVG）",
+              "icon": "⚖️",
+              "archetype": "simulation",
+              "concept": "费雪方程式 r ≈ i - π · 负实际利率 · 货币幻觉",
+              "summary": "调节名义利率与通胀率，看看什么时候会出现“利息越存越穷”的负实际利率陷阱！"
+            },
+            {
+              "id": "finance/finance-time-value-03/02-money-illusion-test.html",
+              "file": "02-money-illusion-test.html",
+              "path": "./domains/finance/finance-time-value-03/02-money-illusion-test.html",
+              "title": "货币幻觉测试台：涨薪 5% 但通胀 7%，你更富了还是更穷了？",
+              "icon": "🎭",
+              "archetype": "blind-lab",
+              "concept": "货币幻觉 Money Illusion · 真实购买力 · 名义数字陷阱",
+              "summary": "对比高通胀高名义加薪 vs 低通胀低名义加薪，测试你是否会被表面数字欺骗！"
+            },
+            {
+              "id": "finance/finance-time-value-03/03-negative-rate-debt.html",
+              "file": "03-negative-rate-debt.html",
+              "path": "./domains/finance/finance-time-value-03/03-negative-rate-debt.html",
+              "title": "负实际利率下的赢家与输家：存钱的人 vs 借低息长债的人",
+              "icon": "💸",
+              "archetype": "scenario",
+              "concept": "通胀税 · 债务稀释 · 实物资产保值",
+              "summary": "在高通胀+低利率环境下，看清谁在悄悄为谁买单！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-valuation-03",
+          "slug": "finance-valuation-03",
+          "domain": "finance",
+          "branch": "valuation",
+          "order": 3,
+          "title": "创业股权稀释与融资蛋糕",
+          "icon": "🎂",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "融了三轮资后，创始人的股份从 100% 稀释到 25%，他到底是被资本割韭菜了，还是赚翻了？",
+          "difficulty": "入门",
+          "related": [
+            "finance/finance-valuation-01",
+            "finance/finance-valuation-02"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-valuation-03/01-equity-pie-dilution.html",
+              "file": "01-equity-pie-dilution.html",
+              "path": "./domains/finance/finance-valuation-03/01-equity-pie-dilution.html",
+              "title": "融资蛋糕切分器：持股比例变小 vs 身家暴涨（SVG）",
+              "icon": "🍰",
+              "archetype": "builder",
+              "concept": "股权稀释 · 投前/投后估值 · 做大蛋糕",
+              "summary": "一轮轮点击引入天使、A轮、B轮融资，亲眼看见创始人比例缩小，但手里那块蛋糕的绝对价值暴涨 100 倍！"
+            },
+            {
+              "id": "finance/finance-valuation-03/02-pre-vs-post-money.html",
+              "file": "02-pre-vs-post-money.html",
+              "path": "./domains/finance/finance-valuation-03/02-pre-vs-post-money.html",
+              "title": "投前 vs 投后估值陷阱：1000 万估值融 200 万占多少股？",
+              "icon": "🧮",
+              "archetype": "spatial",
+              "concept": "Pre-money vs Post-money · 期权池稀释",
+              "summary": "切换“投前估值 1000 万”与“投后估值 1000 万”，瞬间看清一字之差带来的股权比例差距！"
+            },
+            {
+              "id": "finance/finance-valuation-03/03-liquidation-pref-lab.html",
+              "file": "03-liquidation-pref-lab.html",
+              "path": "./domains/finance/finance-valuation-03/03-liquidation-pref-lab.html",
+              "title": "优先清算权警示台：为什么公司卖了 1 亿，创始人分不到一分钱？",
+              "icon": "📜",
+              "archetype": "scenario",
+              "concept": "优先清算权 Liquidation Preference · 对赌陷阱",
+              "summary": "推演带有 2 倍优先清算权的融资条款在公司低价出售时的真实分钱顺序！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-insurance-derivatives-04",
+          "slug": "finance-insurance-derivatives-04",
+          "domain": "finance",
+          "branch": "insurance-derivatives",
+          "order": 4,
+          "title": "逆向选择与免赔额机制",
+          "icon": "🕵️",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "为什么所有保险都有“1 万免赔额”和“3 个月等待期”？如果不设这些门槛，好人与保险池怎么会被一起拖垮？",
+          "difficulty": "进阶",
+          "related": [
+            "finance/finance-insurance-derivatives-01",
+            "finance/finance-risk-leverage-04"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-insurance-derivatives-04/01-adverse-selection-spiral.html",
+              "file": "01-adverse-selection-spiral.html",
+              "path": "./domains/finance/finance-insurance-derivatives-04/01-adverse-selection-spiral.html",
+              "title": "逆向选择死亡螺旋：好人退保后，保费如何一轮轮飙升？（SVG）",
+              "icon": "🌀",
+              "archetype": "simulation",
+              "concept": "逆向选择 · 柠檬市场 · 死亡螺旋",
+              "summary": "点击推进精算定价周期，亲眼看见“只剩高风险人群留下来”如何逼着保费翻倍再翻倍直至市场崩盘！"
+            },
+            {
+              "id": "finance/finance-insurance-derivatives-04/02-deductible-moral-hazard.html",
+              "file": "02-deductible-moral-hazard.html",
+              "path": "./domains/finance/finance-insurance-derivatives-04/02-deductible-moral-hazard.html",
+              "title": "免赔额与共付率沙盘：为什么小病全报销反而让保费暴涨？",
+              "icon": "🚧",
+              "archetype": "spatial",
+              "concept": "道德风险 Moral Hazard · 1 万免赔额 · 过滤高频小赔",
+              "summary": "调节免赔额门槛，直观看到设了 1 万免赔额后，省掉多少琐碎理赔管理费并把保费压低 70%！"
+            },
+            {
+              "id": "finance/finance-insurance-derivatives-04/03-waiting-period-scenario.html",
+              "file": "03-waiting-period-scenario.html",
+              "path": "./domains/finance/finance-insurance-derivatives-04/03-waiting-period-scenario.html",
+              "title": "精算风控机制台：等待期、健康告知与免赔额分别在防什么？",
+              "icon": "🛡️",
+              "archetype": "scenario",
+              "concept": "信息不对称 · 事前逆向选择 · 事后道德风险",
+              "summary": "匹配保险合同中的三大经典条款与它们各自精准防范的人性漏洞！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-macro-monetary-04",
+          "slug": "finance-macro-monetary-04",
+          "domain": "finance",
+          "branch": "macro-monetary",
+          "order": 4,
+          "title": "债务周期与泡沫破裂（明斯基时刻）",
+          "icon": "🫧",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "为什么越是风平浪静、人人赚钱的繁荣期，反而正在悄悄孕育最惨烈的金融崩盘（明斯基时刻）？",
+          "difficulty": "进阶",
+          "related": [
+            "finance/finance-macro-monetary-01",
+            "finance/finance-risk-leverage-02"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-macro-monetary-04/01-minsky-stages-svg.html",
+              "file": "01-minsky-stages-svg.html",
+              "path": "./domains/finance/finance-macro-monetary-04/01-minsky-stages-svg.html",
+              "title": "明斯基三阶段演化仪：对冲型 → 投机型 → 庞氏融资（SVG）",
+              "icon": "🎭",
+              "archetype": "spatial",
+              "concept": "明斯基时刻 · 稳定性孕育不稳定性 · 庞氏融资",
+              "summary": "切换债务周期的三大阶段，看清社会借款人是如何一步步从“还本付息”滑向“靠资产涨价借新还旧”的！"
+            },
+            {
+              "id": "finance/finance-macro-monetary-04/02-deleveraging-spiral.html",
+              "file": "02-deleveraging-spiral.html",
+              "path": "./domains/finance/finance-macro-monetary-04/02-deleveraging-spiral.html",
+              "title": "去杠杆踩踏螺旋：资产抛售与负债缩水赛跑（SVG）",
+              "icon": "🌀",
+              "archetype": "simulation",
+              "concept": "债务通缩螺旋 · 费雪踩踏 · 甩卖压低抵押品价值",
+              "summary": "点击触发信贷收紧，看全社会一起卖房卖股还债时，为什么资产越卖越便宜、真实债务反而越还越多！"
+            },
+            {
+              "id": "finance/finance-macro-monetary-04/03-bubble-checklist-lab.html",
+              "file": "03-bubble-checklist-lab.html",
+              "path": "./domains/finance/finance-macro-monetary-04/03-bubble-checklist-lab.html",
+              "title": "泡沫破灭前夜体检台：这一次真的不一样吗？",
+              "icon": "🔍",
+              "archetype": "scenario",
+              "concept": "疯狂加杠杆 · 借新还旧 · 泡沫识别信号",
+              "summary": "审视历史经典泡沫信号，识别“全民借钱买资产且指望接盘侠涨价”的明斯基临界点！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-portfolio-04",
+          "slug": "finance-portfolio-04",
+          "domain": "finance",
+          "branch": "portfolio",
+          "order": 4,
+          "title": "定投微笑曲线的边界条件",
+          "icon": "😊",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "为什么大家都说“跌了定投摊平成本，涨回来就赚”？如果跌下去十年不回来，或者投到后期本金太大怎么办？",
+          "difficulty": "进阶",
+          "related": [
+            "finance/finance-portfolio-02",
+            "finance/finance-portfolio-03"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-portfolio-04/01-smile-curve-svg.html",
+              "file": "01-smile-curve-svg.html",
+              "path": "./domains/finance/finance-portfolio-04/01-smile-curve-svg.html",
+              "title": "定投微笑曲线 vs 倒霉哭脸曲线（SVG）",
+              "icon": "📈",
+              "archetype": "simulation",
+              "concept": "微笑曲线 · 钝化效应 · 止盈必要性",
+              "summary": "切换 V 型先跌后涨、倒 V 型先涨后跌、L 型一跌不起三种走势，打破“定投永远稳赚”的神话！"
+            },
+            {
+              "id": "finance/finance-portfolio-04/02-dca-blunting-lab.html",
+              "file": "02-dca-blunting-lab.html",
+              "path": "./domains/finance/finance-portfolio-04/02-dca-blunting-lab.html",
+              "title": "定投钝化探测器：为什么第 10 年的定投几乎摊不动成本？",
+              "icon": "🧱",
+              "archetype": "spatial",
+              "concept": "定投钝化 · 新增资金占比下降 · 后期靠再平衡",
+              "summary": "拖动定投进行年数，直观看到第 1 年每月 1000 元能拉低均价 20%，第 10 年只能拉低 0.5%！"
+            },
+            {
+              "id": "finance/finance-portfolio-04/03-dca-exit-scenario.html",
+              "file": "03-dca-exit-scenario.html",
+              "path": "./domains/finance/finance-portfolio-04/03-dca-exit-scenario.html",
+              "title": "定投止盈抉择台：定投不设止盈会怎样？",
+              "icon": "🎯",
+              "archetype": "scenario",
+              "concept": "定投微笑终点 · 倒 V 回吐 · 估值止盈",
+              "summary": "在市场高估沸腾时选择“继续死扛到底” vs “分批止盈落袋”，看清完整微笑曲线的收尾！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-risk-leverage-04",
+          "slug": "finance-risk-leverage-04",
+          "domain": "finance",
+          "branch": "risk-leverage",
+          "order": 4,
+          "title": "尾部风险与黑天鹅",
+          "icon": "🦢",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "为什么“百年一遇”的金融危机每隔十年就来一次？正态模型忽略的肥尾如何团灭空头？",
+          "difficulty": "进阶",
+          "related": [
+            "finance/finance-risk-leverage-02",
+            "science/science-probability-stats-04"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-risk-leverage-04/01-fat-tail-crash-svg.html",
+              "file": "01-fat-tail-crash-svg.html",
+              "path": "./domains/finance/finance-risk-leverage-04/01-fat-tail-crash-svg.html",
+              "title": "肥尾黑天鹅透视镜：正态钟形模型如何低估崩盘概率？（SVG）",
+              "icon": "📉",
+              "archetype": "spatial",
+              "concept": "肥尾分布 Fat Tail · VaR 模型失效 · 极端事件",
+              "summary": "对比正态分布（预测百万年一次暴跌）与真实市场肥尾（每十年来一次），看清金融危机根源！"
+            },
+            {
+              "id": "finance/finance-risk-leverage-04/02-picking-pennies-steamroller.html",
+              "file": "02-picking-pennies-steamroller.html",
+              "path": "./domains/finance/finance-risk-leverage-04/02-picking-pennies-steamroller.html",
+              "title": "压路机前捡硬币模拟器：99 次稳赚小钱 vs 1 次亏光所有",
+              "icon": "🪙",
+              "archetype": "simulation",
+              "concept": "负偏度收益 · 卖出虚值看跌期权陷阱 · 假稳健",
+              "summary": "点击体验“99% 胜率每天稳定赚 1%”策略，看第 N 天黑天鹅降临时如何连本带利一次吐光！"
+            },
+            {
+              "id": "finance/finance-risk-leverage-04/03-barbell-antifragile.html",
+              "file": "03-barbell-antifragile.html",
+              "path": "./domains/finance/finance-risk-leverage-04/03-barbell-antifragile.html",
+              "title": "塔勒布“杠铃策略”装配台：90% 极稳现金 + 10% 极高赔率期权",
+              "icon": "🏋️",
+              "archetype": "builder",
+              "concept": "杠铃策略 Barbell · 反脆弱 · 截断下行保留无限上行",
+              "summary": "对比“中等风险全仓中庸配置”与“90% 国债 + 10% 黑天鹅期权”在崩盘中的截然不同结局！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-time-value-04",
+          "slug": "finance-time-value-04",
+          "domain": "finance",
+          "branch": "time-value",
+          "order": 4,
+          "title": "个人现金流与资产负债表",
+          "icon": "🧾",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "月入三万为什么依然月光甚至随时破产？分清“真资产”与“伪资产（消费品）”是财务自由第一课！",
+          "difficulty": "入门",
+          "related": [
+            "finance/finance-time-value-01",
+            "finance/finance-portfolio-01"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-time-value-04/01-balance-sheet-builder.html",
+              "file": "01-balance-sheet-builder.html",
+              "path": "./domains/finance/finance-time-value-04/01-balance-sheet-builder.html",
+              "title": "个人资产负债表装配台：你的豪车是资产还是负债？",
+              "icon": "🚙",
+              "archetype": "builder",
+              "concept": "生息资产 · 消耗性负债 · 净资产 Net Worth",
+              "summary": "把房子、车子、基金、信用卡分期拖进财务报表，实时算出你的真实净资产与每月被动现金流！"
+            },
+            {
+              "id": "finance/finance-time-value-04/02-cashflow-rat-race.html",
+              "file": "02-cashflow-rat-race.html",
+              "path": "./domains/finance/finance-time-value-04/02-cashflow-rat-race.html",
+              "title": "现金流跑道沙盘：工资停发时你能撑几个月？（SVG）",
+              "icon": "⏳",
+              "archetype": "simulation",
+              "concept": "财务跑道 Runway · 储蓄率 · 应急备用金",
+              "summary": "调节月收入与储蓄率，直观计算一旦失业你的财务跑道长度与实现被动收入覆盖支出的年数！"
+            },
+            {
+              "id": "finance/finance-time-value-04/03-lifestyle-creep-trap.html",
+              "file": "03-lifestyle-creep-trap.html",
+              "path": "./domains/finance/finance-time-value-04/03-lifestyle-creep-trap.html",
+              "title": "“高薪穷人”陷阱检验：加薪后消费同步升级有多可怕？",
+              "icon": "🛍️",
+              "archetype": "scenario",
+              "concept": "生活方式膨胀 Lifestyle Creep · 储蓄率决定自由时间",
+              "summary": "对比涨薪后维持储蓄率 vs 消费同步升级，看净资产积累速度拉开十倍差距！"
+            }
+          ]
+        },
+        {
+          "id": "finance/finance-valuation-04",
+          "slug": "finance-valuation-04",
+          "domain": "finance",
+          "branch": "valuation",
+          "order": 4,
+          "title": "债券价格与利率跷跷板",
+          "icon": "⚖️",
+          "color": "#d97706",
+          "soft": "#fffbeb",
+          "subtitle": "国债不是保本固定收益吗？为什么央行一加息，很多债券基金净值也会大跌甚至暴雷？",
+          "difficulty": "进阶",
+          "related": [
+            "finance/finance-valuation-01",
+            "finance/finance-macro-monetary-02"
+          ],
+          "toys": [
+            {
+              "id": "finance/finance-valuation-04/01-bond-seesaw-svg.html",
+              "file": "01-bond-seesaw-svg.html",
+              "path": "./domains/finance/finance-valuation-04/01-bond-seesaw-svg.html",
+              "title": "债券利率跷跷板：市场利率涨，手里的老债券价格必跌！（SVG）",
+              "icon": "⚖️",
+              "archetype": "simulation",
+              "concept": "利率与债价反比 · 票面利率锁定 · 折价转让",
+              "summary": "调节市场新发国债利率，亲眼看见手头锁定 3% 利息的 10 年期老债券市价如何实时暴跌或暴涨！"
+            },
+            {
+              "id": "finance/finance-valuation-04/02-duration-sensitivity-race.html",
+              "file": "02-duration-sensitivity-race.html",
+              "path": "./domains/finance/finance-valuation-04/02-duration-sensitivity-race.html",
+              "title": "久期敏感度竞速：1 年短债 vs 30 年超长债谁跌得狠？",
+              "icon": "⏳",
+              "archetype": "race",
+              "concept": "久期 Duration · 利率敏感度 · 硅谷银行破产教训",
+              "summary": "模拟市场利率突然上行 2%，对比 1 年期国债与 30 年期国债的跌幅差距！"
+            },
+            {
+              "id": "finance/finance-valuation-04/03-svb-bank-run-scenario.html",
+              "file": "03-svb-bank-run-scenario.html",
+              "path": "./domains/finance/finance-valuation-04/03-svb-bank-run-scenario.html",
+              "title": "硅谷银行破产复盘台：买了最安全的美国国债怎么还会破产？",
+              "icon": "🏦",
+              "archetype": "scenario",
+              "concept": "期限错配 · 浮亏变实亏 · 流动性挤兑",
+              "summary": "推演银行用活期存款满仓 10 年期低息国债后遭遇美联储暴力加息与储户挤兑的连锁崩溃！"
             }
           ]
         }
-      ],
-      "liveTopicCount": 0,
-      "plannedTopicCount": 24,
-      "blueprintTopicCount": 24,
-      "liveToyCount": 0,
-      "topics": []
+      ]
     },
     {
       "id": "science",

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：硅谷银行破产复盘台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏦 硅谷银行破产复盘台：买了最安全的美国国债怎么还会破产？</h1><p>误区：美国国债没有违约风险，银行买国债肯定安全。真相：短债（储户活期存款）配长债（10年期国债）导致严重期限错配，暴涨加息+挤兑直接击穿银行净资本！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="step(0,this)">1. 2021低息期：买满 10 年国债</button>
+      <button class="btn" onclick="step(1,this)">2. 2022暴力加息：国债市值浮亏</button>
+      <button class="btn" onclick="step(2,this)">3. 储户恐慌挤兑：被迫割肉清盘</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">国债资产现值</div><div class="k-val" id="kAst">—</div></div>
+      <div class="kpi"><div class="k-lbl">储户活期存款负债</div><div class="k-val">1000 亿</div></div>
+      <div class="kpi"><div class="k-lbl">银行净资本</div><div class="k-val" id="kEq">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>const ST=[
+      {ast:1080, eq:80, col:'#10b981', msg:'利率 1.5%，国债票息稳健，表面一切风平浪静。'},
+      {ast:910, eq:-90, col:'#f59e0b', msg:'美联储加息至 5%！10 年期长债价格暴跌，银行账面出现 170 亿浮亏（暂未卖出所以财报看不见）。'},
+      {ast:880, eq:-120, col:'#ef4444', msg:'科技公司储户集中取款 400 亿！银行被迫市价抛售国债变现，浮亏变成 120 亿实亏，净资本直接归零破产！'}
+    ];
+    function step(i,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      const s=ST[i];
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">国债资产现值</text>
+        <rect x="140" y="36" width="${(s.ast/1200*400).toFixed(1)}" height="28" rx="6" fill="${s.col}"/>
+        <text x="${(148+s.ast/1200*400).toFixed(1)}" y="55" font-size="12" font-weight="800" fill="${s.col}">${s.ast} 亿</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">储户存款负债</text>
+        <rect x="140" y="96" width="${(1000/1200*400).toFixed(1)}" height="28" rx="6" fill="#2563eb"/>
+        <text x="${(148+1000/1200*400).toFixed(1)}" y="115" font-size="12" font-weight="800" fill="#2563eb">1000 亿</text>
+      `;
+      document.getElementById('kAst').textContent=s.ast+' 亿';
+      document.getElementById('kEq').textContent=(s.eq>=0?'+':'')+s.eq+' 亿';
+      document.getElementById('kEq').style.color=s.col;
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>${s.msg}`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    step(0, document.querySelector('.btn.active'));</script>
+</body>
+</html>

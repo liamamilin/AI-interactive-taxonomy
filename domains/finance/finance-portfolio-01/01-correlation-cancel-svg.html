@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：相关性对冲透视镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔀 相关性对冲透视镜：当 ρ = -1 时波动彻底消失！（SVG）</h1><p>误区：买两个不同资产，组合波动就只是两者的平均值。真相：只要它们不完全同涨同跌（ρ < 1），组合波动就会神秘消失！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn" onclick="setRho(1,this)">完全同向 ρ = +1.0</button>
+      <button class="btn active" onclick="setRho(0,this)">完全无关 ρ = 0.0</button>
+      <button class="btn" onclick="setRho(-1,this)">完美负相关 ρ = -1.0</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>资产 A/B 相关系数 ρ</span><span id="vRho">0.0</span></label><input id="rho" type="range" min="-1" max="1" step="0.1" value="0" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">单资产波动率</div><div class="k-val">20.0%</div></div>
+      <div class="kpi"><div class="k-lbl">50/50 组合波动率</div><div class="k-val" id="kVol" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">免费降波幅度</div><div class="k-val" id="kDrop" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function setRho(v,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('rho').value=v;
+      draw(true);
+    }
+    function draw(mark){
+      const rho=+document.getElementById('rho').value;
+      document.getElementById('vRho').textContent=rho.toFixed(1);
+      const portVol=20*Math.sqrt(0.5+0.5*rho);
+      const aPts=[], bPts=[], cPts=[];
+      for(let i=0;i<=40;i++){
+        const t=i*0.35;
+        const va=Math.sin(t)*45;
+        const vb=(rho*Math.sin(t)+Math.sqrt(Math.max(0,1-rho*rho))*Math.cos(t))*45;
+        const vc=(va+vb)/2;
+        const x=40+i*13;
+        aPts.push(`${i?'L':'M'}${x},${(105-va).toFixed(1)}`);
+        bPts.push(`${i?'L':'M'}${x},${(105-vb).toFixed(1)}`);
+        cPts.push(`${i?'L':'M'}${x},${(105-vc).toFixed(1)}`);
+      }
+      document.getElementById('svg').innerHTML=`
+        <line x1="40" y1="105" x2="565" y2="105" stroke="var(--tax-border)"/>
+        <path d="${aPts.join(' ')}" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="4,4"/>
+        <path d="${bPts.join(' ')}" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="4,4"/>
+        <path d="${cPts.join(' ')}" fill="none" stroke="#10b981" stroke-width="3.5"/>
+        <text x="560" y="24" text-anchor="end" font-size="12" font-weight="800" fill="#10b981">绿线=组合净值波动 (${portVol.toFixed(1)}%)</text>
+      `;
+      document.getElementById('kVol').textContent=portVol.toFixed(1)+'%';
+      document.getElementById('kDrop').textContent='-'+((20-portVol)/20*100).toFixed(0)+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当相关性 ρ = <strong>${rho.toFixed(1)}</strong> 时，组合波动从 20% 降到 <strong>${portVol.toFixed(1)}%</strong>。这就是金融界唯一“免费的午餐”——低相关性分散！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

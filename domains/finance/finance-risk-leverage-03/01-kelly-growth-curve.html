@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：凯利仓位抛物线</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎯 凯利仓位抛物线：押太少赚得慢，押太多反而亏光！（SVG）</h1><p>误区：胜率 60%、赔率 1:1 的好机会就应该满仓梭哈。真相：满仓只要输一次就归零，最优仓位在抛物线顶点 f* = p - q/b！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>胜率 p</span><span id="vP">60%</span></label><input id="p" type="range" min="35" max="85" step="1" value="60" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>净赔率 b（赢赚几倍）</span><span id="vB">1.0x</span></label><input id="b" type="range" min="0.5" max="3" step="0.1" value="1" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>你的下注仓位 f</span><span id="vF">20%</span></label><input id="f" type="range" min="1" max="99" step="1" value="20" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">全凯利最优仓位 f*</div><div class="k-val" id="kStar" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">当前仓位预期对数增长率</div><div class="k-val" id="kG">—</div></div>
+      <div class="kpi"><div class="k-lbl">半凯利稳健建议</div><div class="k-val" id="kHalf" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const p=+document.getElementById('p').value/100;
+      const b=+document.getElementById('b').value;
+      const f=+document.getElementById('f').value/100;
+      const q=1-p;
+      document.getElementById('vP').textContent=(p*100).toFixed(0)+'%';
+      document.getElementById('vB').textContent=b.toFixed(1)+'x';
+      document.getElementById('vF').textContent=(f*100).toFixed(0)+'%';
+      const fStar=Math.max(0, p - q/b);
+      const g=frac=>p*Math.log(1+b*frac)+q*Math.log(1-frac);
+      const gCur=g(f)*100;
+      const pts=[];
+      const zeroY=145;
+      for(let k=1;k<=98;k+=2){
+        const val=g(k/100)*100;
+        const x=48+(k/100)*520;
+        const y=Math.min(190, Math.max(15, zeroY - val*6));
+        pts.push(`${k===1?'M':'L'}${x.toFixed(1)},${y.toFixed(1)}`);
+      }
+      const cx=48+f*520, cy=Math.min(190, Math.max(15, zeroY-gCur*6));
+      const sx=48+fStar*520, sy=Math.min(190, Math.max(15, zeroY-g(fStar)*100*6));
+      document.getElementById('svg').innerHTML=`
+        <line x1="48" y1="${zeroY}" x2="568" y2="${zeroY}" stroke="#ef4444" stroke-dasharray="4,4"/>
+        <text x="565" y="${zeroY-4}" text-anchor="end" font-size="10.5" fill="#ef4444">长期不亏不赚零线</text>
+        <path d="${pts.join(' ')}" fill="none" stroke="#2563eb" stroke-width="3"/>
+        <circle cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" r="5" fill="#10b981"/>
+        <text x="${sx.toFixed(1)}" y="${Math.max(16,sy-10).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="750" fill="#10b981">f*=${(fStar*100).toFixed(0)}%</text>
+        <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="6" fill="#f59e0b"/>
+      `;
+      document.getElementById('kStar').textContent=(fStar*100).toFixed(1)+'%';
+      document.getElementById('kG').textContent=(gCur>=0?'+':'')+gCur.toFixed(2)+'% /轮';
+      document.getElementById('kG').style.color=gCur>=0?'#10b981':'#ef4444';
+      document.getElementById('kHalf').textContent=(fStar*50).toFixed(1)+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>凯利顶点在 <strong>${(fStar*100).toFixed(1)}%</strong>。一旦超过两倍凯利仓位，即使胜率高达 ${(p*100).toFixed(0)}%，长期对数增长率也会跌破零线走向破产！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

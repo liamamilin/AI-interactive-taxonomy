@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：固定汇率套利拆穿器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🦈 固定汇率套利拆穿器：为什么硬扛固定汇率一定会被热钱狙击？</h1><p>误区：只要政府宣布汇率固定且加息稳住经济，就能长治久安。真相：一旦允许资本自由进出，热钱会借低息币换高息币无风险套利，直到抽干央行外汇储备！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>本国 vs 国际利率利差</span><span id="vSp">+4.0%</span></label><input id="sp" type="range" min="0" max="8" step="0.5" value="4" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>热钱套利规模（亿美元）</span><span id="vHot">400 亿</span></label><input id="hot" type="range" min="100" max="800" step="50" value="400" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">央行外汇储备安全线</div><div class="k-val">500 亿美元</div></div>
+      <div class="kpi"><div class="k-lbl">热钱无风险套利收益</div><div class="k-val" id="kProf" style="color:#f59e0b;">—</div></div>
+      <div class="kpi"><div class="k-lbl">汇率防线状态</div><div class="k-val" id="kDef">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const sp=+document.getElementById('sp').value;
+      const hot=+document.getElementById('hot').value;
+      document.getElementById('vSp').textContent='+'+sp.toFixed(1)+'%';
+      document.getElementById('vHot').textContent=hot+' 亿';
+      const broken=hot>=500;
+      const prof=hot*(sp/100);
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">央行外汇储备</text>
+        <rect x="140" y="36" width="250" height="26" rx="5" fill="#10b981"/>
+        <text x="398" y="54" font-size="12" font-weight="750" fill="#10b981">500 亿</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">热钱抽血冲击</text>
+        <rect x="140" y="96" width="${(hot/800*400).toFixed(1)}" height="26" rx="5" fill="${broken?'#ef4444':'#f59e0b'}"/>
+        <text x="${(148+hot/800*400).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${broken?'#ef4444':'#f59e0b'}">${hot} 亿 ${broken?'💥 击穿防线！':''}</text>
+      `;
+      document.getElementById('kProf').textContent=prof.toFixed(1)+' 亿美元/年';
+      document.getElementById('kDef').textContent=broken?'💥 外储耗尽被迫贬值':'勉强守住';
+      document.getElementById('kDef').style.color=broken?'#ef4444':'#10b981';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>固定汇率+高利差+资本自由流动=给索罗斯等国际对冲基金发无风险红包！外储一旦被抽干，汇率防线就会瞬间崩盘！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

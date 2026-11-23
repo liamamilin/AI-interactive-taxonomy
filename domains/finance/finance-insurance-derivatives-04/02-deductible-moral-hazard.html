@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：免赔额与共付率沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏥 免赔额与共付率沙盘：为什么小病全报销反而让保费暴涨？</h1><p>误区：0 免赔额、100% 全额报销对投保人最划算。真相：一旦看感冒发烧全免费，道德风险会导致医院挤爆，最后保费翻倍全由投保人自己买单！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>年度免赔额门槛</span><span id="vD">10,000 元</span></label><input id="ded" type="range" min="0" max="20000" step="2000" value="10000" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">年度保费成本</div><div class="k-val" id="kPrem" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">小病过度医疗溢价</div><div class="k-val" id="kMor" style="color:#ef4444;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const d=+document.getElementById('ded').value;
+      document.getElementById('vD').textContent=d.toLocaleString()+' 元';
+      const moral=Math.round(3200*Math.exp(-d/5000));
+      const prem=350+moral;
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">大病纯风险保费</text>
+        <rect x="160" y="38" width="40" height="24" rx="4" fill="#10b981"/>
+        <text x="208" y="55" font-size="12" font-weight="750" fill="#10b981">350 元（极便宜！）</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">小病道德风险成本</text>
+        <rect x="160" y="98" width="${(moral/3500*360).toFixed(1)}" height="24" rx="4" fill="#ef4444"/>
+        <text x="${(168+moral/3500*360).toFixed(1)}" y="115" font-size="12" font-weight="750" fill="#ef4444">+${moral} 元</text>
+      `;
+      document.getElementById('kPrem').textContent=prem+' 元/年';
+      document.getElementById('kMor').textContent=moral+' 元';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>百万医疗险设置 <strong>1 万元免赔额</strong>，把小额医疗留给个人自担，瞬间消灭了绝大部分道德风险，才把保费打到了几百元！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

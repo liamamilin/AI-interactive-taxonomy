@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：蒙代尔不可能三角</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔺 蒙代尔不可能三角选择器：三选二，谁也逃不掉！（SVG）</h1><p>误区：好的金融政策能做到既自由兑换、汇率又固定、央行又能独立调息。真相：经济学铁律规定三个角最多只能选两个，贪心必遭汇率狙击！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="pick(0,this)">🇺🇸 欧美模式：资本自由 + 独立货币（放弃固定汇率）</button>
+      <button class="btn" onclick="pick(1,this)">🇭🇰 联系汇率：固定汇率 + 资本自由（放弃独立货币）</button>
+      <button class="btn" onclick="pick(2,this)">⚖️ 稳健管控：固定汇率 + 独立货币（限制资本自由）</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">保留的两项核心能力</div><div class="k-val" id="kKeep" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">必须牺牲的第三角</div><div class="k-val" id="kDrop" style="color:#ef4444;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>const TRI=[
+      {keep:'资本自由流动 + 货币政策独立', drop:'汇率随市场自由浮动', a:1, b:1, c:0},
+      {keep:'固定汇率 + 资本自由流动', drop:'央行利率必须紧跟美联储', a:0, b:1, c:1},
+      {keep:'汇率稳定 + 货币政策独立', drop:'实施跨境资本额度管制', a:1, b:0, c:1}
+    ];
+    function pick(i,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      const t=TRI[i];
+      document.getElementById('svg').innerHTML=`
+        <polygon points="300,32 140,170 460,170" fill="none" stroke="var(--tax-border)" stroke-width="3"/>
+        <circle cx="300" cy="32" r="22" fill="${t.a?'#10b981':'#ef4444'}"/><text x="300" y="36" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">${t.a?'✔ 独立':'✘ 放弃'}</text>
+        <text x="300" y="70" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-text)">货币政策独立性</text>
+        <circle cx="140" cy="170" r="22" fill="${t.b?'#10b981':'#ef4444'}"/><text x="140" y="174" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">${t.b?'✔ 自由':'✘ 管制'}</text>
+        <text x="140" y="138" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-text)">资本自由流动</text>
+        <circle cx="460" cy="170" r="22" fill="${t.c?'#10b981':'#ef4444'}"/><text x="460" y="174" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">${t.c?'✔ 固定':'✘ 浮动'}</text>
+        <text x="460" y="138" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-text)">汇率固定稳定</text>
+      `;
+      document.getElementById('kKeep').textContent=t.keep;
+      document.getElementById('kDrop').textContent=t.drop;
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>不可能三角是金融界最冷酷的守恒定律——试图三者兼得的国家，最终都会在外汇储备耗尽时爆发货币危机！`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0, document.querySelector('.btn.active'));</script>
+</body>
+</html>

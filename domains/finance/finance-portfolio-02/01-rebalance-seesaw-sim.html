@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：50/50 再平衡机械臂</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 50/50 再平衡机械臂：自动高抛低吸演示（SVG）</h1><p>误区：每次大涨舍不得卖、大跌不敢买，全靠心态撑着。真相：定期股债再平衡，就是用机械纪律强迫你自动高抛低吸！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>股市本轮涨跌幅</span><span id="vS">+40%</span></label><input id="stk" type="range" min="-50" max="80" step="5" value="40" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>债市本轮涨跌幅</span><span id="vB">+4%</span></label><input id="bnd" type="range" min="-10" max="20" step="2" value="4" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">波动后总资产</div><div class="k-val" id="kTot">—</div></div>
+      <div class="kpi"><div class="k-lbl">股票占比漂移至</div><div class="k-val" id="kPct">—</div></div>
+      <div class="kpi"><div class="k-lbl">再平衡机械操作</div><div class="k-val" id="kAct" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const gs=+document.getElementById('stk').value/100;
+      const gb=+document.getElementById('bnd').value/100;
+      document.getElementById('vS').textContent=(gs>=0?'+':'')+(gs*100).toFixed(0)+'%';
+      document.getElementById('vB').textContent=(gb>=0?'+':'')+(gb*100).toFixed(0)+'%';
+      const s=50*(1+gs), b=50*(1+gb), tot=s+b;
+      const sp=s/tot*100, diff=s-tot/2;
+      const deg=Math.max(-18,Math.min(18,(sp-50)*0.7));
+      document.getElementById('svg').innerHTML=`
+        <polygon points="300,150 282,175 318,175" fill="var(--tax-muted)"/>
+        <g transform="rotate(${deg.toFixed(1)} 300 132)">
+          <line x1="120" y1="132" x2="480" y2="132" stroke="var(--tax-text)" stroke-width="5"/>
+          <rect x="105" y="75" width="110" height="52" rx="8" fill="#ef4444" opacity="0.2" stroke="#ef4444"/>
+          <text x="160" y="96" text-anchor="middle" font-size="11.5" font-weight="700" fill="#ef4444">股票 ${s.toFixed(1)}万</text>
+          <text x="160" y="116" text-anchor="middle" font-size="12" font-weight="800" fill="#ef4444">${sp.toFixed(1)}%</text>
+          <rect x="385" y="75" width="110" height="52" rx="8" fill="#10b981" opacity="0.2" stroke="#10b981"/>
+          <text x="440" y="96" text-anchor="middle" font-size="11.5" font-weight="700" fill="#10b981">债券 ${b.toFixed(1)}万</text>
+          <text x="440" y="116" text-anchor="middle" font-size="12" font-weight="800" fill="#10b981">${(100-sp).toFixed(1)}%</text>
+        </g>
+        <text x="300" y="30" text-anchor="middle" font-size="13" font-weight="800" fill="#2563eb">${diff>0?'自动卖出股票 '+diff.toFixed(1)+'万 → 买入债券':'自动卖出债券 '+Math.abs(diff).toFixed(1)+'万 → 抄底股票'}</text>
+      `;
+      document.getElementById('kTot').textContent=tot.toFixed(1)+' 万';
+      document.getElementById('kPct').textContent=sp.toFixed(1)+'%';
+      document.getElementById('kAct').textContent=diff>0?`卖股买债 ${diff.toFixed(1)}万`:`卖债买股 ${Math.abs(diff).toFixed(1)}万`;
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>50/50 再平衡让你无需预测市场：股票暴涨就自动止盈 <strong>${Math.max(0,diff).toFixed(1)} 万</strong> 落袋债券，股票暴跌就自动卖债抄底！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

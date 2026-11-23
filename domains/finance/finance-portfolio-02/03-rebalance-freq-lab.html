@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：再平衡频率测试台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⏱️ 再平衡频率测试台：每天调 vs 每年调，哪个更省手续费？</h1><p>误区：越频繁调仓越能精准锁定 50/50。真相：高频调仓不仅手续费惊人，还会过早卖飞大牛股的趋势红利！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn" onclick="pick(250,this)">每日调仓（250次/年）</button>
+      <button class="btn" onclick="pick(12,this)">每月调仓（12次/年）</button>
+      <button class="btn active" onclick="pick(1,this)">每年调仓（1次/年）</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">10 年累计调仓次数</div><div class="k-val" id="kCnt">—</div></div>
+      <div class="kpi"><div class="k-lbl">摩擦手续费损耗</div><div class="k-val" id="kFee" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">10 年净收益倍数</div><div class="k-val" id="kNet" style="color:#10b981;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function pick(freq,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      const cnt=freq*10;
+      const feeLoss = freq===250 ? 28.5 : freq===12 ? 4.2 : 0.8;
+      const net = freq===250 ? 1.88 : freq===12 ? 2.18 : 2.24;
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">十年净终值</text>
+        <rect x="140" y="38" width="${(net*160).toFixed(1)}" height="24" rx="6" fill="#10b981"/>
+        <text x="${(148+net*160).toFixed(1)}" y="55" font-size="12" font-weight="800" fill="#10b981">${net.toFixed(2)}x 本金</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">交易滑点与税费</text>
+        <rect x="140" y="98" width="${(feeLoss*11).toFixed(1)}" height="24" rx="6" fill="#ef4444"/>
+        <text x="${(148+feeLoss*11).toFixed(1)}" y="115" font-size="12" font-weight="800" fill="#ef4444">-${feeLoss.toFixed(1)}%</text>
+      `;
+      document.getElementById('kCnt').textContent=cnt+' 次';
+      document.getElementById('kFee').textContent='-'+feeLoss.toFixed(1)+'%';
+      document.getElementById('kNet').textContent=net.toFixed(2)+' 倍';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>实证研究表明，<strong>每年调仓 1 次</strong>（或偏离 ±5% 阈值再调）不仅省下大量交易费用，还能顺便吃到动量趋势！`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(1, document.querySelector('.btn.active'));</script>
+</body>
+</html>

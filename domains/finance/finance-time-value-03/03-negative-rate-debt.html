@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：负实际利率下的赢家与输家</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; transition:.15s; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💸 负实际利率下的赢家与输家：存钱的人 vs 借低息长债的人</h1><p>误区：欠债一定吃亏，存钱一定稳妥。真相：当通胀高于借款利率，债务的真实购买力每年都在自动缩水！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+      <button class="btn active" onclick="preset(2.5,5.0,this)">负实际利率（通胀 5% > 利率 2.5%）</button>
+      <button class="btn" onclick="preset(4.5,1.5,this)">正实际利率（利率 4.5% > 通胀 1.5%）</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>名义存/贷利率</span><span id="vR">2.5%</span></label><input id="r" type="range" min="1" max="8" step="0.5" value="2.5" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>通胀率</span><span id="vI">5.0%</span></label><input id="inf" type="range" min="0" max="8" step="0.5" value="5" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>持有年限</span><span id="vY">15 年</span></label><input id="yrs" type="range" min="5" max="30" step="1" value="15" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">100万存款真实价值</div><div class="k-val" id="kSav">—</div></div>
+      <div class="kpi"><div class="k-lbl">100万贷款真实负担</div><div class="k-val" id="kDebt">—</div></div>
+      <div class="kpi"><div class="k-lbl">财富转移方向</div><div class="k-val" id="kDir" style="color:#2563eb;">—</div></div>
+    </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+    function preset(r,i,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('r').value=r;
+      document.getElementById('inf').value=i;
+      draw(true);
+    }
+    function draw(mark){
+      const r=+document.getElementById('r').value/100;
+      const inf=+document.getElementById('inf').value/100;
+      const Y=+document.getElementById('yrs').value;
+      document.getElementById('vR').textContent=(r*100).toFixed(1)+'%';
+      document.getElementById('vI').textContent=(inf*100).toFixed(1)+'%';
+      document.getElementById('vY').textContent=Y+' 年';
+      const savArr=[], debtArr=[];
+      for(let t=0;t<=Y;t++){
+        const realFactor=Math.pow((1+r)/(1+inf),t);
+        savArr.push(100*realFactor);
+        debtArr.push(100/Math.pow(1+inf,t));
+      }
+      const maxV=Math.max(140, ...savArr, ...debtArr);
+      const x=t=>48+(t/Y)*525;
+      const y=v=>170-(v/maxV)*140;
+      const p=a=>a.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <line x1="48" y1="${y(100).toFixed(1)}" x2="573" y2="${y(100).toFixed(1)}" stroke="var(--tax-muted)" stroke-dasharray="4,4"/>
+        <path d="${p(savArr)}" fill="none" stroke="#2563eb" stroke-width="3"/>
+        <path d="${p(debtArr)}" fill="none" stroke="#10b981" stroke-width="3"/>
+        <text x="568" y="${y(savArr[Y])-6}" text-anchor="end" font-size="11.5" font-weight="750" fill="#2563eb">存款购买力 ${savArr[Y].toFixed(0)}万</text>
+        <text x="568" y="${y(debtArr[Y])+14}" text-anchor="end" font-size="11.5" font-weight="750" fill="#10b981">债务真实压力 ${debtArr[Y].toFixed(0)}万</text>
+      `;
+      document.getElementById('kSav').textContent=savArr[Y].toFixed(1)+' 万';
+      document.getElementById('kDebt').textContent=debtArr[Y].toFixed(1)+' 万';
+      document.getElementById('kDir').textContent=r<inf?'储户补贴借款人':'借款人支付高息';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当通胀率（${(inf*100).toFixed(1)}%）高于名义利率（${(r*100).toFixed(1)}%）时，${Y} 年后 100 万现金只值 <strong>${savArr[Y].toFixed(1)} 万</strong>；而持有低息长债的人，债务真实压力随通胀被稀释到仅剩 <strong>${debtArr[Y].toFixed(1)} 万</strong>！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);
+  </script>
+</body>
+</html>

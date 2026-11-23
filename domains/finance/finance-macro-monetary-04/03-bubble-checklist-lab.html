@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：泡沫破灭前夜体检台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚨 泡沫破灭前夜体检台：这一次真的不一样吗？</h1><p>误区：新科技革命/新时代来了，过去的估值规律统统失效。真相：历史上每一次大泡沫顶峰，人们都喊着“这次不一样”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>“这次不一样”情绪狂热度</span><span id="v1">80%</span></label><input id="s1" type="range" min="0" max="100" step="10" value="80" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>场外借贷/配资杠杆率</span><span id="v2">70%</span></label><input id="s2" type="range" min="0" max="100" step="10" value="70" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>菜市场/出租车司机都在谈论</span><span id="v3">60%</span></label><input id="s3" type="range" min="0" max="100" step="10" value="60" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">综合泡沫危急指数</div><div class="k-val" id="kIdx">—</div></div>
+      <div class="kpi"><div class="k-lbl">应对策略建议</div><div class="k-val" id="kAct">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const v1=+document.getElementById('s1').value;
+      const v2=+document.getElementById('s2').value;
+      const v3=+document.getElementById('s3').value;
+      document.getElementById('v1').textContent=v1+'%';
+      document.getElementById('v2').textContent=v2+'%';
+      document.getElementById('v3').textContent=v3+'%';
+      const score=Math.round((v1+v2+v3)/3);
+      const col=score>=75?'#ef4444':score>=45?'#f59e0b':'#10b981';
+      document.getElementById('svg').innerHTML=`
+        <rect x="60" y="55" width="480" height="34" rx="10" fill="var(--tax-border)" opacity="0.35"/>
+        <rect x="60" y="55" width="${(score*4.8).toFixed(1)}" height="34" rx="10" fill="${col}"/>
+        <text x="300" y="77" text-anchor="middle" font-size="14" font-weight="850" fill="#fff">泡沫警报指数：${score} / 100</text>
+        <text x="300" y="128" text-anchor="middle" font-size="12" fill="var(--tax-muted)">金融史最昂贵的四个字：“这次不一样 (This time is different)”</text>
+      `;
+      document.getElementById('kIdx').textContent=score+' / 100';
+      document.getElementById('kIdx').style.color=col;
+      document.getElementById('kAct').textContent=score>=75?'清掉杠杆，分批止盈！':score>=45?'保持警惕，做好再平衡':'正常定投持有';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当周围平时从不理财的人都在晒收益率、普遍用高杠杆且宣称旧估值体系过时的时候，泡沫破裂往往就在咫尺之间！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：投前 vs 投后估值陷阱</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📐 投前 vs 投后估值陷阱：1000 万估值融 200 万占多少股？</h1><p>误区：估值 1000 万融 200 万，投资人占 20%。真相：这取决于“投前”还是“投后”——一字之差，股权占比差出一大截！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="setType('pre',this)">投前估值（Pre-money）1000万</button>
+      <button class="btn" onclick="setType('post',this)">投后估值（Post-money）1000万</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>融资额</span><span id="vI">200 万</span></label><input id="inv" type="range" min="100" max="500" step="50" value="200" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 165"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">投后总估值</div><div class="k-val" id="kPost">—</div></div>
+      <div class="kpi"><div class="k-lbl">投资人占股</div><div class="k-val" id="kInv" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">老股东剩余占股</div><div class="k-val" id="kOld" style="color:#10b981;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>let tp='pre';
+    function setType(t,btn){
+      tp=t;
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      draw(true);
+    }
+    function draw(mark){
+      const inv=+document.getElementById('inv').value;
+      document.getElementById('vI').textContent=inv+' 万';
+      const post = tp==='pre' ? 1000+inv : 1000;
+      const invPct = inv/post*100;
+      const oldPct = 100-invPct;
+      document.getElementById('svg').innerHTML=`
+        <rect x="60" y="55" width="${(oldPct*4.8).toFixed(1)}" height="38" rx="6" fill="#10b981"/>
+        <rect x="${(60+oldPct*4.8).toFixed(1)}" y="55" width="${(invPct*4.8).toFixed(1)}" height="38" rx="6" fill="#2563eb"/>
+        <text x="${(60+oldPct*2.4).toFixed(1)}" y="79" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">老股东 ${oldPct.toFixed(1)}%</text>
+        <text x="${(60+oldPct*4.8+invPct*2.4).toFixed(1)}" y="79" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">${invPct.toFixed(1)}%</text>
+        <text x="300" y="130" text-anchor="middle" font-size="12" fill="var(--tax-muted)">${tp==='pre'?`投后估值 = 1000 + ${inv} = ${post}万，投资人占 ${inv}÷${post}`:`投后估值锁定 1000万，投资人直接占 ${inv}÷1000`}</text>
+      `;
+      document.getElementById('kPost').textContent=post+' 万';
+      document.getElementById('kInv').textContent=invPct.toFixed(1)+'%';
+      document.getElementById('kOld').textContent=oldPct.toFixed(1)+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>签 TS 融资条款时一定要盯紧是 <strong>Pre-money</strong> 还是 <strong>Post-money</strong>！融 ${inv} 万在两种口径下投资人占股差了 ${(inv/1000*100 - inv/(1000+inv)*100).toFixed(1)}%！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

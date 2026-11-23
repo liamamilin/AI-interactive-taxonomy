@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：房贷本金/利息拆解透视镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; transition:.15s; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏠 房贷本金/利息拆解透视镜（SVG）</h1><p>误区：以为每月还房贷都在老老实实还本金。真相：等额本息前 5 年，你交的大部分都是银行利息！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+      <button class="btn active" onclick="setMode('equal',this)">等额本息（月供固定）</button>
+      <button class="btn" onclick="setMode('prin',this)">等额本金（本金固定）</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>贷款总额</span><span id="vP">100 万</span></label><input id="p" type="range" min="30" max="500" step="10" value="100" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>年利率</span><span id="vR">3.5%</span></label><input id="r" type="range" min="2" max="6" step="0.1" value="3.5" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>贷款年限</span><span id="vY">30 年</span></label><input id="y" type="range" min="10" max="30" step="5" value="30" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">首月月供</div><div class="k-val" id="kFirst">—</div></div>
+      <div class="kpi"><div class="k-lbl">第 1 期利息占比</div><div class="k-val" id="kIntPct" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">总利息支出</div><div class="k-val" id="kTotInt" style="color:#f59e0b;">—</div></div>
+      <div class="kpi"><div class="k-lbl">还款总额</div><div class="k-val" id="kTot">—</div></div>
+    </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+    let mode='equal';
+    function setMode(m,btn){
+      mode=m;
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      draw(true);
+    }
+    function draw(mark){
+      const P=+document.getElementById('p').value*10000;
+      const r=(+document.getElementById('r').value/100)/12;
+      const Y=+document.getElementById('y').value;
+      const N=Y*12;
+      document.getElementById('vP').textContent=(P/10000).toFixed(0)+' 万';
+      document.getElementById('vR').textContent=document.getElementById('r').value+'%';
+      document.getElementById('vY').textContent=Y+' 年';
+      let rem=P, totInt=0, firstPay=0, firstInt=0;
+      const yrPrin=[], yrInt=[];
+      const emi = P*r*Math.pow(1+r,N)/(Math.pow(1+r,N)-1);
+      const fixPrin = P/N;
+      for(let y=0;y<Y;y++){
+        let yp=0, yi=0;
+        for(let m=0;m<12;m++){
+          const intr=rem*r;
+          const pr = mode==='equal' ? (emi-intr) : fixPrin;
+          if(y===0 && m===0){ firstPay=pr+intr; firstInt=intr; }
+          rem=Math.max(0,rem-pr);
+          yp+=pr; yi+=intr; totInt+=intr;
+        }
+        yrPrin.push(yp); yrInt.push(yi);
+      }
+      const maxBar=Math.max(...yrPrin.map((v,i)=>v+yrInt[i]));
+      const bw=520/Y;
+      let bars='';
+      for(let i=0;i<Y;i++){
+        const hP=(yrPrin[i]/maxBar)*155, hI=(yrInt[i]/maxBar)*155;
+        const xx=45+i*bw;
+        bars+=`<rect x="${xx.toFixed(1)}" y="${(185-hP).toFixed(1)}" width="${Math.max(4,bw-2).toFixed(1)}" height="${hP.toFixed(1)}" fill="#10b981"/>
+        <rect x="${xx.toFixed(1)}" y="${(185-hP-hI).toFixed(1)}" width="${Math.max(4,bw-2).toFixed(1)}" height="${hI.toFixed(1)}" fill="#ef4444" opacity="0.85"/>`;
+      }
+      document.getElementById('svg').innerHTML=`
+        ${bars}
+        <line x1="40" y1="185" x2="575" y2="185" stroke="var(--tax-border)"/>
+        <rect x="400" y="10" width="12" height="10" fill="#10b981"/><text x="416" y="19" font-size="11" fill="var(--tax-text)">本金</text>
+        <rect x="460" y="10" width="12" height="10" fill="#ef4444"/><text x="476" y="19" font-size="11" fill="var(--tax-text)">利息</text>
+        <text x="305" y="203" text-anchor="middle" font-size="11" fill="var(--tax-muted)">第 1 年 → 第 ${Y} 年每年本息构成</text>
+      `;
+      document.getElementById('kFirst').textContent=firstPay.toFixed(0)+' 元';
+      document.getElementById('kIntPct').textContent=(firstInt/firstPay*100).toFixed(1)+'%';
+      document.getElementById('kTotInt').textContent=(totInt/10000).toFixed(1)+' 万';
+      document.getElementById('kTot').textContent=((P+totInt)/10000).toFixed(1)+' 万';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>${mode==='equal'?'等额本息':'等额本金'}模式下，首月月供 <strong>${firstPay.toFixed(0)} 元</strong> 中有 <strong>${(firstInt/firstPay*100).toFixed(1)}%</strong> 是利息！${Y} 年总利息高达 ${(totInt/10000).toFixed(1)} 万。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);
+  </script>
+</body>
+</html>

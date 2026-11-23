@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：明斯基三阶段演化仪</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💣 明斯基三阶段演化仪：对冲型 → 投机型 → 庞氏融资（SVG）</h1><p>误区：金融泡沫破裂都是因为外部突然出了坏消息。真相：长期的稳定本身就会孕育不稳定，市场会自发滑向只能靠借新还旧续命的“庞氏融资”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="pick(0,this)">1. 对冲型融资（稳健期）</button>
+      <button class="btn" onclick="pick(1,this)">2. 投机型融资（狂热期）</button>
+      <button class="btn" onclick="pick(2,this)">3. 庞氏融资（明斯基前夜）</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">经营现金流</div><div class="k-val" id="kCF">—</div></div>
+      <div class="kpi"><div class="k-lbl">到期债务本息</div><div class="k-val" id="kDebt">—</div></div>
+      <div class="kpi"><div class="k-lbl">系统脆弱性</div><div class="k-val" id="kFrag">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>const ST=[
+      {cf:120, pri:50, intr:20, col:'#10b981', frag:'极低（现金流覆盖本金+利息）', msg:'收入足够还清本金和利息，经济处于健康复苏期。'},
+      {cf:45, pri:50, intr:35, col:'#f59e0b', frag:'中等（只够还利息，本金靠续贷）', msg:'大家开始加杠杆，收入只够付利息，必须靠银行不断滚续本金！'},
+      {cf:15, pri:60, intr:50, col:'#ef4444', frag:'💥 极危（连利息都还不起！）', msg:'庞氏融资阶段：连利息都付不起，只能靠资产不断暴涨或借新债还旧债！一旦涨势停滞即刻爆发“明斯基时刻”！'}
+    ];
+    function pick(i,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      const s=ST[i];
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">经营真实现金流</text>
+        <rect x="150" y="36" width="${(s.cf*3.2).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
+        <text x="${(158+s.cf*3.2).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#10b981">${s.cf} 万</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">到期利息+本金</text>
+        <rect x="150" y="96" width="${(s.intr*3.2).toFixed(1)}" height="26" rx="4" fill="#ef4444"/>
+        <rect x="${(150+s.intr*3.2).toFixed(1)}" y="96" width="${(s.pri*3.2).toFixed(1)}" height="26" rx="4" fill="#f59e0b" opacity="0.7"/>
+        <text x="${(158+(s.intr+s.pri)*3.2).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${s.col}">利息${s.intr}+本金${s.pri}</text>
+      `;
+      document.getElementById('kCF').textContent=s.cf+' 万';
+      document.getElementById('kDebt').textContent=(s.intr+s.pri)+' 万';
+      document.getElementById('kFrag').textContent=s.frag;
+      document.getElementById('kFrag').style.color=s.col;
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>${s.msg}`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0, document.querySelector('.btn.active'));</script>
+</body>
+</html>

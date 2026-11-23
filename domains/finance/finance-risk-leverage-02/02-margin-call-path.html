@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：路径依赖陷阱</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚡ 路径依赖陷阱：最终涨了 50%，为什么加杠杆的人还是爆仓了？（SVG）</h1><p>误区：只要看准最终方向能涨，加杠杆就能躺赢。真相：现货只看终点，杠杆看沿途每一次波动——半路跌穿强平线就再也没机会等反弹！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="setL(1,this)">1x 现货（熬过深蹲）</button>
+      <button class="btn" onclick="setL(3,this)">3x 杠杆</button>
+      <button class="btn" onclick="setL(5,this)">5x 杠杆（半路爆仓）</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>杠杆倍数</span><span id="vL">1x</span></label><input id="lev" type="range" min="1" max="8" step="1" value="1" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>中途最大深蹲跌幅</span><span id="vDip">-25%</span></label><input id="dip" type="range" min="10" max="45" step="5" value="25" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">标的终点涨幅</div><div class="k-val" style="color:#10b981;">+50%</div></div>
+      <div class="kpi"><div class="k-lbl">杠杆最低权益</div><div class="k-val" id="kMin">—</div></div>
+      <div class="kpi"><div class="k-lbl">你的最终结果</div><div class="k-val" id="kFin">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function setL(l,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('lev').value=l;
+      draw(true);
+    }
+    function draw(mark){
+      const L=+document.getElementById('lev').value;
+      const dip=+document.getElementById('dip').value;
+      document.getElementById('vL').textContent=L+'x';
+      document.getElementById('vDip').textContent='-'+dip+'%';
+      const spot=[100, 100*(1-dip*0.5/100), 100*(1-dip/100), 100*(1-dip*0.3/100), 120, 150];
+      const levArr=[100];
+      let busted=false, minEq=100;
+      for(let i=1;i<spot.length;i++){
+        if(busted){ levArr.push(0); continue; }
+        const stepRet=(spot[i]-spot[i-1])/spot[i-1];
+        const next=levArr[i-1]*(1+stepRet*L);
+        if(next<=15){ busted=true; levArr.push(0); minEq=0; }
+        else { levArr.push(next); minEq=Math.min(minEq,next); }
+      }
+      const maxV=Math.max(180, ...spot, ...levArr);
+      const x=i=>50+i*100, y=v=>180-(v/maxV)*150;
+      const p=a=>a.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <line x1="50" y1="${y(15).toFixed(1)}" x2="550" y2="${y(15).toFixed(1)}" stroke="#ef4444" stroke-dasharray="4,4"/>
+        <text x="55" y="${y(15)-4}" font-size="10.5" fill="#ef4444">强平爆仓红线</text>
+        <path d="${p(spot)}" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="5,4"/>
+        <path d="${p(levArr)}" fill="none" stroke="${busted?'#ef4444':'#2563eb'}" stroke-width="3.5"/>
+        <text x="545" y="${y(spot[5])-6}" text-anchor="end" font-size="11" fill="var(--tax-muted)">标的 150</text>
+        <text x="545" y="${Math.min(176,y(levArr[5])+14)}" text-anchor="end" font-size="12" font-weight="800" fill="${busted?'#ef4444':'#2563eb'}">${busted?'💥 0（半路出局）':'账户 '+levArr[5].toFixed(0)}</text>
+      `;
+      document.getElementById('kMin').textContent=minEq.toFixed(0);
+      document.getElementById('kFin').textContent=busted?'💥 半路爆仓归零':levArr[5].toFixed(0);
+      document.getElementById('kFin').style.color=busted?'#ef4444':'#10b981';
+      document.getElementById('ahaBox').innerHTML=busted
+        ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕标的最终大涨 +50%，只要中途回撤 <strong>-${dip}%</strong>，${L}x 杠杆就已经半路爆仓，后面暴涨与你彻底无关！`
+        : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>当前 ${L}x 杠杆扛住了 -${dip}% 的中途深蹲（最低权益 ${minEq.toFixed(0)}），但如果再加高杠杆就会在黎明前被清盘！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

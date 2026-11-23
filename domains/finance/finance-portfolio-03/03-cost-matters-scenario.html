@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：投资成本审计台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔍 投资成本审计台：看穿“免申购费但年费 2%”的文字游戏</h1><p>误区：买基金只要看“0 申购费”就是省钱。真相：一次性申购费只收一次，每年按总资产抽血的隐形年费（管理费+托管+销售服务费）才是大头！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="pick(0,this)">方案 A：1% 一次性申购费 + 0.15% 年费</button>
+      <button class="btn" onclick="pick(1,this)">方案 B：0 申购费 + 2.0% 年管理费</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">第 1 年总费用</div><div class="k-val" id="kY1">—</div></div>
+      <div class="kpi"><div class="k-lbl">10 年累计总扣费</div><div class="k-val" id="kY10" style="color:#ef4444;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function pick(i,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      const arrA=[], arrB=[];
+      let fA=1.0, fB=0.0, aA=99, aB=100;
+      for(let y=1;y<=10;y++){
+        aA*=1.07; aB*=1.07;
+        const cA=aA*0.0015, cB=aB*0.02;
+        fA+=cA; fB+=cB; aA-=cA; aB-=cB;
+        arrA.push(fA); arrB.push(fB);
+      }
+      const maxV=Math.max(30,...arrB);
+      const x=t=>48+(t/9)*510, y=v=>168-(v/maxV)*135;
+      const p=a=>a.map((v,k)=>`${k?'L':'M'}${x(k).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <line x1="48" y1="168" x2="558" y2="168" stroke="var(--tax-border)"/>
+        <path d="${p(arrA)}" fill="none" stroke="#10b981" stroke-width="3"/>
+        <path d="${p(arrB)}" fill="none" stroke="#ef4444" stroke-width="3"/>
+        <text x="554" y="${y(arrA[9])+14}" text-anchor="end" font-size="11.5" font-weight="750" fill="#10b981">方案A 累计扣费 ${arrA[9].toFixed(1)}万</text>
+        <text x="554" y="${y(arrB[9])-6}" text-anchor="end" font-size="11.5" font-weight="750" fill="#ef4444">方案B 累计扣费 ${arrB[9].toFixed(1)}万</text>
+      `;
+      document.getElementById('kY1').textContent=(i===0?arrA[0]:arrB[0]).toFixed(2)+' 万';
+      document.getElementById('kY10').textContent=(i===0?arrA[9]:arrB[9]).toFixed(1)+' 万';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“免申购费”只是诱饵！100 万买 10 年，每年 2% 的复利年费最终要抽走 <strong>${arrB[9].toFixed(1)} 万</strong>，远超方案 A 的 ${arrA[9].toFixed(1)} 万！`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0, document.querySelector('.btn.active'));</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：马科维茨有效前沿弓形图</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏹 马科维茨有效前沿弓形图（SVG）</h1><p>误区：股票比债券高风险，所以全买债券最稳。真相：在全债券里掺入 15%~20% 股票，总风险反而比纯债券还低！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>股票仓位比例</span><span id="vW">30%</span></label><input id="w" type="range" min="0" max="100" step="5" value="30" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>股债相关系数 ρ</span><span id="vR">-0.2</span></label><input id="rho" type="range" min="-0.6" max="0.8" step="0.1" value="-0.2" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 215"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">组合预期年化收益</div><div class="k-val" id="kRet" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">组合波动风险</div><div class="k-val" id="kRisk" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">夏普比率（性价比）</div><div class="k-val" id="kSh">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const w=+document.getElementById('w').value/100;
+      const rho=+document.getElementById('rho').value;
+      document.getElementById('vW').textContent=(w*100).toFixed(0)+'%';
+      document.getElementById('vR').textContent=rho.toFixed(1);
+      const rS=9, sS=18, rB=3.5, sB=5;
+      const calc=(ws)=>{
+        const ret=ws*rS+(1-ws)*rB;
+        const vol=Math.sqrt((ws*sS)**2 + ((1-ws)*sB)**2 + 2*ws*(1-ws)*rho*sS*sB);
+        return {ret,vol};
+      };
+      const pts=[];
+      for(let i=0;i<=100;i+=5){
+        const p=calc(i/100);
+        const x=60+(p.vol/20)*480, y=185-(p.ret/10)*155;
+        pts.push(`${i===0?'M':'L'}${x.toFixed(1)},${y.toFixed(1)}`);
+      }
+      const cur=calc(w);
+      const cx=60+(cur.vol/20)*480, cy=185-(cur.ret/10)*155;
+      document.getElementById('svg').innerHTML=`
+        <line x1="60" y1="185" x2="555" y2="185" stroke="var(--tax-border)"/>
+        <line x1="60" y1="20" x2="60" y2="185" stroke="var(--tax-border)"/>
+        <path d="${pts.join(' ')}" fill="none" stroke="#2563eb" stroke-width="3.5"/>
+        <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="7" fill="#f59e0b"/>
+        <text x="${(cx+10).toFixed(1)}" y="${(cy-4).toFixed(1)}" font-size="12" font-weight="800" fill="#f59e0b">当前 (${cur.vol.toFixed(1)}%, ${cur.ret.toFixed(1)}%)</text>
+        <text x="310" y="205" text-anchor="middle" font-size="11" fill="var(--tax-muted)">组合波动率（风险）→</text>
+      `;
+      document.getElementById('kRet').textContent=cur.ret.toFixed(2)+'%';
+      document.getElementById('kRisk').textContent=cur.vol.toFixed(2)+'%';
+      document.getElementById('kSh').textContent=((cur.ret-2)/cur.vol).toFixed(2);
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>注意到弓形曲线向左凸起的那一段了吗？在纯债券里加入少量股票，收益提高的同时组合总风险反而比纯债券（5%）更低！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

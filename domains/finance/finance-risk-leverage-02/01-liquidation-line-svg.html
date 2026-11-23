@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：杠杆强平爆仓线透视镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💥 杠杆强平爆仓线透视镜（SVG）</h1><p>误区：10 倍杠杆只是收益放大 10 倍，跌 10% 才亏光。真相：券商在维持担保比例前就会强行平仓，实际只要跌 7%~8% 你就被踢出局！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn" onclick="setL(2,this)">2 倍杠杆（安全边际宽）</button>
+      <button class="btn active" onclick="setL(5,this)">5 倍杠杆</button>
+      <button class="btn" onclick="setL(10,this)">10 倍合约</button>
+      <button class="btn" onclick="setL(20,this)">20 倍极高风险</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>杠杆倍数</span><span id="vL">5x</span></label><input id="lev" type="range" min="1" max="25" step="1" value="5" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>标的价格变动</span><span id="vChg">-10%</span></label><input id="chg" type="range" min="-35" max="35" step="1" value="-10" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">强平爆仓跌幅线</div><div class="k-val" id="kLiq" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">当前自有本金权益</div><div class="k-val" id="kEq">—</div></div>
+      <div class="kpi"><div class="k-lbl">账户状态</div><div class="k-val" id="kSt">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function setL(l,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('lev').value=l;
+      draw(true);
+    }
+    function draw(mark){
+      const L=+document.getElementById('lev').value;
+      const chg=+document.getElementById('chg').value;
+      document.getElementById('vL').textContent=L+'x';
+      document.getElementById('vChg').textContent=(chg>=0?'+':'')+chg+'%';
+      const liqDrop = L<=1 ? -100 : -(1/L)*0.85*100;
+      const eq = Math.max(0, 100 + chg*L);
+      const isLiq = chg <= liqDrop;
+      const barW = Math.min(460, (eq/250)*460);
+      document.getElementById('svg').innerHTML=`
+        <rect x="60" y="36" width="460" height="36" rx="8" fill="var(--tax-border)" opacity="0.35"/>
+        <rect x="60" y="36" width="${isLiq?0:barW.toFixed(1)}" height="36" rx="8" fill="${isLiq?'#ef4444':eq>=100?'#10b981':'#f59e0b'}"/>
+        <line x1="${(60+(100/250)*460).toFixed(1)}" y1="26" x2="${(60+(100/250)*460).toFixed(1)}" y2="82" stroke="var(--tax-text)" stroke-dasharray="4,4"/>
+        <text x="${(60+(100/250)*460).toFixed(1)}" y="20" text-anchor="middle" font-size="11" fill="var(--tax-muted)">初始本金 100%</text>
+        <text x="60" y="110" font-size="13" font-weight="800" fill="${isLiq?'#ef4444':'var(--tax-text)'}">${isLiq?'💥 触发强制平仓！本金已归零':'当前权益：'+eq.toFixed(0)+'%'}</text>
+        <text x="60" y="140" font-size="12" fill="var(--tax-muted)">在 ${L}x 杠杆下，标的只需下跌 ${Math.abs(liqDrop).toFixed(1)}% 即触发强平（含维持保证金缓冲）</text>
+      `;
+      document.getElementById('kLiq').textContent=L<=1?'无强平':liqDrop.toFixed(1)+'%';
+      document.getElementById('kEq').textContent=(isLiq?0:eq).toFixed(0)+'%';
+      document.getElementById('kSt').textContent=isLiq?'💥 已爆仓':'存活';
+      document.getElementById('kSt').style.color=isLiq?'#ef4444':'#10b981';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>${L} 倍杠杆下，标的只要下跌 <strong>${Math.abs(liqDrop).toFixed(1)}%</strong> 就会被强平。市场正常回调 10% 就能让 10 倍杠杆彻底清零！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

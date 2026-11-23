@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：费率复利黑洞</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🕳️ 费率复利黑洞：0.1% ETF vs 1.8% 主动基金 30 年差距（SVG）</h1><p>误区：每年收 1.8% 管理费跟 0.1% 差不多，才差一点点。真相：复利不仅放大收益，也同样按指数级放大管理费扣款！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>底层资产毛年化</span><span id="vR">8%</span></label><input id="r" type="range" min="4" max="12" step="0.5" value="8" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>主动基金年费率</span><span id="vF">1.8%</span></label><input id="f" type="range" min="0.5" max="3" step="0.1" value="1.8" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>投资年限</span><span id="vY">30 年</span></label><input id="yrs" type="range" min="10" max="40" step="5" value="30" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">0.1% 指数 ETF 终值</div><div class="k-val" id="kEtf" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">高费率基金终值</div><div class="k-val" id="kAct" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">被费率黑洞吞噬</div><div class="k-val" id="kLost" style="color:#f59e0b;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const r=+document.getElementById('r').value/100;
+      const f=+document.getElementById('f').value/100;
+      const Y=+document.getElementById('yrs').value;
+      document.getElementById('vR').textContent=(r*100).toFixed(1)+'%';
+      document.getElementById('vF').textContent=(f*100).toFixed(1)+'%';
+      document.getElementById('vY').textContent=Y+' 年';
+      const eArr=[], aArr=[];
+      for(let t=0;t<=Y;t++){
+        eArr.push(10*Math.pow(1+r-0.001,t));
+        aArr.push(10*Math.pow(1+r-f,t));
+      }
+      const maxV=Math.max(30,...eArr);
+      const x=t=>48+(t/Y)*520, y=v=>182-(v/maxV)*152;
+      const p=a=>a.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+      const lost=eArr[Y]-aArr[Y];
+      document.getElementById('svg').innerHTML=`
+        <line x1="48" y1="182" x2="568" y2="182" stroke="var(--tax-border)"/>
+        <path d="${p(eArr)}" fill="none" stroke="#10b981" stroke-width="3"/>
+        <path d="${p(aArr)}" fill="none" stroke="#ef4444" stroke-width="3"/>
+        <text x="565" y="${Math.max(18,y(eArr[Y])-6).toFixed(1)}" text-anchor="end" font-size="11.5" font-weight="750" fill="#10b981">ETF ${eArr[Y].toFixed(1)}万</text>
+        <text x="565" y="${Math.min(176,y(aArr[Y])+14).toFixed(1)}" text-anchor="end" font-size="11.5" font-weight="750" fill="#ef4444">主动基 ${aArr[Y].toFixed(1)}万</text>
+      `;
+      document.getElementById('kEtf').textContent=eArr[Y].toFixed(1)+' 万';
+      document.getElementById('kAct').textContent=aArr[Y].toFixed(1)+' 万';
+      document.getElementById('kLost').textContent=lost.toFixed(1)+' 万 ('+(lost/eArr[Y]*100).toFixed(0)+'%)';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>10 万元投资 ${Y} 年，仅仅 ${(f*100).toFixed(1)}% 的年费率就悄悄吃掉了你本该拿到的 <strong>${lost.toFixed(1)} 万</strong>（占比 ${(lost/eArr[Y]*100).toFixed(0)}%）！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

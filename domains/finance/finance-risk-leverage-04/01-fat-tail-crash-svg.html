@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：肥尾黑天鹅透视镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🦢 肥尾黑天鹅透视镜：正态钟形模型如何低估崩盘概率？（SVG）</h1><p>误区：金融教科书假设涨跌服从正态分布，百年一遇崩盘真的百年才来一次。真相：真实市场拥有极厚的“肥尾”，黑天鹅每隔几年就光顾一次！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="setTail(1,this)">高斯正态幻想（瘦尾）</button>
+      <button class="btn" onclick="setTail(3.2,this)">真实金融市场（肥尾）</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>尾部肥厚系数</span><span id="vT">1.0</span></label><input id="tail" type="range" min="1" max="4" step="0.2" value="1" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">单日暴跌 >5% 概率</div><div class="k-val" id="kProb" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">30 年遭遇极端崩盘次数</div><div class="k-val" id="kCnt" style="color:#f59e0b;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function setTail(t,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('tail').value=t;
+      draw(true);
+    }
+    function draw(mark){
+      const t=+document.getElementById('tail').value;
+      document.getElementById('vT').textContent=t.toFixed(1);
+      const normPts=[], fatPts=[];
+      for(let z=-4;z<=4;z+=0.15){
+        const x=300+z*62;
+        const yn=Math.exp(-0.5*z*z);
+        const yf=Math.pow(1+(z*z)/t, -(t+1)/2);
+        normPts.push(`${z===-4?'M':'L'}${x.toFixed(1)},${(178-yn*140).toFixed(1)}`);
+        fatPts.push(`${z===-4?'M':'L'}${x.toFixed(1)},${(178-yf*140).toFixed(1)}`);
+      }
+      const crashProb = (0.0001 * Math.pow(t, 4.2) * 100);
+      const cnt = Math.max(0.1, crashProb*75);
+      document.getElementById('svg').innerHTML=`
+        <rect x="40" y="25" width="95" height="153" fill="#ef4444" opacity="0.12"/>
+        <text x="87" y="42" text-anchor="middle" font-size="10.5" font-weight="750" fill="#ef4444">黑天鹅左尾区</text>
+        <line x1="40" y1="178" x2="560" y2="178" stroke="var(--tax-border)"/>
+        <path d="${normPts.join(' ')}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,4"/>
+        <path d="${fatPts.join(' ')}" fill="none" stroke="#ef4444" stroke-width="3"/>
+      `;
+      document.getElementById('kProb').textContent=crashProb.toFixed(3)+'%';
+      document.getElementById('kCnt').textContent='约 '+cnt.toFixed(1)+' 次';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当肥尾系数升至 <strong>${t.toFixed(1)}</strong>，极端左尾面积急剧抬升！金融危机并非“千年一遇”，把正态分布当真就会在黑天鹅中裸泳。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

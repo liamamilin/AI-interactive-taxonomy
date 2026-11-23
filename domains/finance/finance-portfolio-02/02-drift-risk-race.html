@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：仓位漂移风险赛</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌊 仓位漂移风险赛：牛市后半程你的 50/50 怎么变成了 85/15？</h1><p>误区：牛市不调仓，利润滚得越多越好。真相：放任牛市仓位漂移会让你在泡沫顶峰变成接近满仓股票，熊市一来惨遭血洗！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="setMode(true,this)">开启年度再平衡（守住 50/50）</button>
+      <button class="btn" onclick="setMode(false,this)">放任漂移（牛市后半程变 80/20）</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">第 4 年牛市顶峰净值</div><div class="k-val" id="kPeak" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">第 5 年股灾（-45%）后</div><div class="k-val" id="kCrash" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">顶峰最大回撤</div><div class="k-val" id="kDD">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function setMode(reb,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      const sRet=[0.35,0.40,0.35,0.30,-0.45,0.20];
+      const bRet=[0.04,0.03,0.04,0.05,0.06,0.04];
+      let s=50, b=50;
+      const arr=[100], stPct=[50];
+      for(let i=0;i<sRet.length;i++){
+        s=s*(1+sRet[i]); b=b*(1+bRet[i]);
+        const tot=s+b;
+        arr.push(tot); stPct.push(s/tot*100);
+        if(reb){ s=tot/2; b=tot/2; }
+      }
+      const maxV=Math.max(250,...arr);
+      const x=i=>55+i*85, y=v=>180-(v/maxV)*150;
+      const p=arr.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <line x1="55" y1="${y(100).toFixed(1)}" x2="565" y2="${y(100).toFixed(1)}" stroke="var(--tax-muted)" stroke-dasharray="4,4"/>
+        <path d="${p}" fill="none" stroke="${reb?'#10b981':'#ef4444'}" stroke-width="3.5"/>
+        ${arr.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v).toFixed(1)}" r="4.5" fill="${reb?'#10b981':'#ef4444'}"/><text x="${x(i)}" y="${(y(v)-9).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="750" fill="var(--tax-text)">${v.toFixed(0)}</text>`).join('')}
+      `;
+      const dd=(arr[4]-arr[5])/arr[4]*100;
+      document.getElementById('kPeak').textContent=arr[4].toFixed(1);
+      document.getElementById('kCrash').textContent=arr[5].toFixed(1);
+      document.getElementById('kDD').textContent='-'+dd.toFixed(1)+'%';
+      document.getElementById('ahaBox').innerHTML=reb
+        ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>每年再平衡把牛市利润锁进债券，第 5 年股灾回撤仅 <strong>-${dd.toFixed(1)}%</strong>，大跌后净值仍稳在 ${arr[5].toFixed(1)}！`
+        : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>连续 4 年牛市后，股票占比漂移到 <strong>${stPct[4].toFixed(0)}%</strong>！第 5 年股灾一口气暴跌 <strong>-${dd.toFixed(1)}%</strong>，远超原始风控底线！`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    setMode(true, document.querySelector('.btn.active'));</script>
+</body>
+</html>

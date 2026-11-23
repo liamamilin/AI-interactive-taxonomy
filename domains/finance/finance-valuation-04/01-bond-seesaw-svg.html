@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：债券利率跷跷板</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 债券利率跷跷板：市场利率涨，手里的老债券价格必跌！（SVG）</h1><p>误区：买国债和债券基金稳赚不赔，肯定不会跌。真相：市场利率一涨，票息低的旧债券没人要，只能打折降价才能卖出去！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>当前市场新发利率</span><span id="vR">3.0%</span></label><input id="r" type="range" min="1" max="7" step="0.2" value="3" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>债券剩余期限（久期）</span><span id="vD">10 年</span></label><input id="dur" type="range" min="1" max="20" step="1" value="10" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">旧债券票面利率</div><div class="k-val">3.0%</div></div>
+      <div class="kpi"><div class="k-lbl">市场公允交易价格</div><div class="k-val" id="kP">—</div></div>
+      <div class="kpi"><div class="k-lbl">账面价格涨跌</div><div class="k-val" id="kChg">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const r=+document.getElementById('r').value;
+      const dur=+document.getElementById('dur').value;
+      document.getElementById('vR').textContent=r.toFixed(1)+'%';
+      document.getElementById('vD').textContent=dur+' 年';
+      const chg=-(r-3)*dur*0.9;
+      const price=100+chg;
+      const deg=Math.max(-20,Math.min(20,(r-3)*5));
+      const col=chg>=0?'#10b981':'#ef4444';
+      document.getElementById('svg').innerHTML=`
+        <polygon points="300,150 282,175 318,175" fill="var(--tax-muted)"/>
+        <g transform="rotate(${deg.toFixed(1)} 300 132)">
+          <line x1="120" y1="132" x2="480" y2="132" stroke="var(--tax-text)" stroke-width="5"/>
+          <rect x="105" y="75" width="110" height="52" rx="8" fill="#2563eb" opacity="0.2" stroke="#2563eb"/>
+          <text x="160" y="96" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2563eb">市场利率</text>
+          <text x="160" y="116" text-anchor="middle" font-size="14" font-weight="800" fill="#2563eb">${r.toFixed(1)}%</text>
+          <rect x="385" y="75" width="110" height="52" rx="8" fill="${col}" opacity="0.2" stroke="${col}"/>
+          <text x="440" y="96" text-anchor="middle" font-size="11.5" font-weight="700" fill="${col}">旧债券价格</text>
+          <text x="440" y="116" text-anchor="middle" font-size="14" font-weight="800" fill="${col}">${price.toFixed(1)} 元</text>
+        </g>
+      `;
+      document.getElementById('kP').textContent=price.toFixed(1)+' 元';
+      document.getElementById('kChg').textContent=(chg>=0?'+':'')+chg.toFixed(1)+'%';
+      document.getElementById('kChg').style.color=col;
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>记住公式：<strong>价格变化 ≈ -久期 × 利率变化</strong>。市场利率涨到 ${r.toFixed(1)}%，手里的 ${dur} 年期旧债券现价立刻跌到 <strong>${price.toFixed(1)} 元</strong>！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

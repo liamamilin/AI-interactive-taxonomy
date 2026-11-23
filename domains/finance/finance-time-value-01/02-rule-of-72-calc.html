@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：72 法则心算器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; transition:.15s; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⏱️ 72 法则心算器：你的钱几年翻一倍？（SVG）</h1><p>误区：以为 6% 和 12% 收益差不多。真相：6% 要 12 年翻倍，12% 只要 6 年——30 年后差距是 2.5 倍 vs 30 倍！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+      <button class="btn" onclick="setR(2,this)">银行定存 2%</button>
+      <button class="btn active" onclick="setR(8,this)">宽基指数 8%</button>
+      <button class="btn" onclick="setR(15,this)">高成长 15%</button>
+      <button class="btn" onclick="setR(24,this)">巴菲特级 24%</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>年化收益率 r</span><span id="vR">8%</span></label><input id="r" type="range" min="1" max="30" step="0.5" value="8" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>对比参考周期（年）</span><span id="vY">30 年</span></label><input id="yrs" type="range" min="10" max="50" step="5" value="30" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">72 法则估算翻倍</div><div class="k-val" id="k72" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">精确对数翻倍</div><div class="k-val" id="kExact" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">误差</div><div class="k-val" id="kErr">—</div></div>
+      <div class="kpi"><div class="k-lbl">周期内翻倍次数</div><div class="k-val" id="kMult" style="color:#f59e0b;">—</div></div>
+    </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+    function setR(val,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('r').value=val;
+      draw(true);
+    }
+    function draw(mark){
+      const r=+document.getElementById('r').value;
+      const Y=+document.getElementById('yrs').value;
+      document.getElementById('vR').textContent=r+'%';
+      document.getElementById('vY').textContent=Y+' 年';
+      const est=72/r;
+      const exact=Math.log(2)/Math.log(1+r/100);
+      const mult=Math.pow(1+r/100,Y);
+      document.getElementById('k72').textContent=est.toFixed(1)+' 年';
+      document.getElementById('kExact').textContent=exact.toFixed(1)+' 年';
+      document.getElementById('kErr').textContent=Math.abs(est-exact).toFixed(2)+' 年';
+      document.getElementById('kMult').textContent=mult.toFixed(1)+' 倍';
+      let bars='';
+      const rates=[2,4,6,8,12,18,24];
+      rates.forEach((rt,idx)=>{
+        const y72=72/rt;
+        const w=Math.min(410, (y72/36)*410);
+        const isCur=Math.abs(rt-r)<1.5;
+        const yy=22+idx*24;
+        bars+=`<text x="16" y="${yy+13}" font-size="11.5" font-weight="${isCur?'800':'600'}" fill="${isCur?'#2563eb':'var(--tax-text)'}">${rt}%</text>
+        <rect x="65" y="${yy}" width="${w.toFixed(1)}" height="16" rx="5" fill="${isCur?'#2563eb':'#94a3b8'}" opacity="${isCur?'0.95':'0.45'}"/>
+        <text x="${(72+w).toFixed(1)}" y="${yy+12}" font-size="11" font-weight="700" fill="${isCur?'#2563eb':'var(--tax-muted)'}">${y72.toFixed(1)} 年翻倍</text>`;
+      });
+      document.getElementById('svg').innerHTML=bars;
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>记住心算口诀 <strong>72 ÷ 年化收益率</strong>！在 ${r}% 收益下约 ${est.toFixed(1)} 年翻一倍（精确值为 ${exact.toFixed(1)} 年），${Y} 年后本金放大 <strong>${mult.toFixed(1)} 倍</strong>。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);
+  </script>
+</body>
+</html>

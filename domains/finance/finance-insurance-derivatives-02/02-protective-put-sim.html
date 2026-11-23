@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：期权保护性看跌车险</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🛡️ 期权就是股票的“车险”：用看跌期权锁死暴跌下限（SVG）</h1><p>误区：期权只是赌博工具。真相：持有股票的同时买入看跌期权（Protective Put），就像给爱车买盗抢险，再大暴跌也绝不伤及底线！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>股市意外涨跌幅</span><span id="vS">-30%</span></label><input id="chg" type="range" min="-50" max="50" step="5" value="-30" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">裸奔持仓最终资产</div><div class="k-val" id="kNaked" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">买了 Put 车险最终资产</div><div class="k-val" id="kIns" style="color:#10b981;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const chg=+document.getElementById('chg').value;
+      document.getElementById('vS').textContent=(chg>=0?'+':'')+chg+'%';
+      const naked=100+chg;
+      const ins=Math.max(90, 100+chg)-4;
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">裸奔股票市值</text>
+        <rect x="140" y="36" width="${(naked*2.8).toFixed(1)}" height="28" rx="6" fill="${naked<90?'#ef4444':'#2563eb'}"/>
+        <text x="${(148+naked*2.8).toFixed(1)}" y="55" font-size="12" font-weight="800" fill="${naked<90?'#ef4444':'#2563eb'}">${naked} 万</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">加装 Put 保险</text>
+        <rect x="140" y="96" width="${(ins*2.8).toFixed(1)}" height="28" rx="6" fill="#10b981"/>
+        <text x="${(148+ins*2.8).toFixed(1)}" y="115" font-size="12" font-weight="800" fill="#10b981">${ins} 万（锁死底线 86万）</text>
+      `;
+      document.getElementById('kNaked').textContent=naked+' 万';
+      document.getElementById('kIns').textContent=ins+' 万';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>花了 4 万买保护性看跌期权后，哪怕股市腰斩 -50%，你的组合净值也被死死托在 <strong>86 万</strong> 以上，同时照样享受上涨收益！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：半凯利实战抉择</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🛡️ 半凯利实战抉择：为什么职业投资人只下凯利建议的一半？</h1><p>误区：算出了全凯利仓位就直接照满下。真相：现实中胜率是估算出来的，半凯利只牺牲 25% 收益却能砍掉 75% 波动！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn" onclick="setFrac(0.5,this)">半凯利（0.5×f*）</button>
+      <button class="btn active" onclick="setFrac(1.0,this)">全凯利（1.0×f*）</button>
+      <button class="btn" onclick="setFrac(1.5,this)">过度下注（1.5×f*）</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>凯利倍数系数</span><span id="vK">1.0x</span></label><input id="k" type="range" min="0.2" max="1.8" step="0.1" value="1.0" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">长期增长效率</div><div class="k-val" id="kRet" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">净值波动方差</div><div class="k-val" id="kVol" style="color:#f59e0b;">—</div></div>
+      <div class="kpi"><div class="k-lbl">容错安全边际</div><div class="k-val" id="kSafe" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function setFrac(val,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('k').value=val;
+      draw(true);
+    }
+    function draw(mark){
+      const k=+document.getElementById('k').value;
+      document.getElementById('vK').textContent=k.toFixed(1)+'x';
+      const retPct = Math.max(0, (2*k - k*k)*100);
+      const volPct = (k*k)*100;
+      const safe = k<=0.6?'极高':k<=1.05?'中等':'危险（模型高估即爆）';
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">复利增长保留率</text>
+        <rect x="160" y="38" width="${(retPct*3.5).toFixed(1)}" height="24" rx="5" fill="#10b981"/>
+        <text x="${(168+retPct*3.5).toFixed(1)}" y="55" font-size="12" font-weight="750" fill="#10b981">${retPct.toFixed(0)}%</text>
+        <text x="20" y="110" font-size="12" font-weight="750" fill="var(--tax-text)">净值剧烈波动</text>
+        <rect x="160" y="93" width="${Math.min(380,volPct*1.2).toFixed(1)}" height="24" rx="5" fill="${k>1?'#ef4444':'#f59e0b'}"/>
+        <text x="${(168+Math.min(380,volPct*1.2)).toFixed(1)}" y="110" font-size="12" font-weight="750" fill="${k>1?'#ef4444':'#f59e0b'}">${volPct.toFixed(0)}%</text>
+      `;
+      document.getElementById('kRet').textContent=retPct.toFixed(0)+'%';
+      document.getElementById('kVol').textContent=volPct.toFixed(0)+'%';
+      document.getElementById('kSafe').textContent=safe;
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>半凯利（0.5x）只放弃了 25% 的极限增长率（保留 75%），却把净值波动直接砍掉 <strong>75%</strong>（方差降为 25%）！这就是职业交易员的核心秘诀。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

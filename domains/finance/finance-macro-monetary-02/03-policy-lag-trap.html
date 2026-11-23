@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：货币政策滞后陷阱</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⏱️ 货币政策滞后陷阱：今天加息，为什么 12 个月后经济才降温？</h1><p>误区：今天加息，明天物价就应该立刻跌下来。真相：货币政策存在 12~18 个月的漫长滞后期，等看到降温再停手往往已经加过头了！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn" onclick="pick(true,this)">盯着当下看（等物价跌了再停加息）</button>
+      <button class="btn active" onclick="pick(false,this)">预判滞后效应（提前踩刹车停手）</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">18 个月后经济着陆</div><div class="k-val" id="kLand">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function pick(overhike,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      const arr = overhike ? [4,4.2,4.3,4.0,3.2,1.5,-1.2,-2.8] : [4,4.2,4.1,3.5,2.8,2.3,2.1,2.0];
+      const x=i=>60+i*68, y=v=>130-v*20;
+      const p=arr.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <line x1="55" y1="130" x2="555" y2="130" stroke="#ef4444" stroke-dasharray="4,4"/>
+        <text x="555" y="125" text-anchor="end" font-size="10.5" fill="#ef4444">衰退零线</text>
+        <path d="${p}" fill="none" stroke="${overhike?'#ef4444':'#10b981'}" stroke-width="3.5"/>
+        ${arr.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v).toFixed(1)}" r="4.5" fill="${overhike?'#ef4444':'#10b981'}"/>`).join('')}
+      `;
+      document.getElementById('kLand').textContent=overhike?'💥 硬着陆严重衰退 (-2.8%)':'✅ 软着陆 (+2.0%)';
+      document.getElementById('kLand').style.color=overhike?'#ef4444':'#10b981';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>就像开远洋巨轮或调淋浴水温，货币政策有 12 个月以上的延迟！盯着后视镜猛加息，一定会把经济推入衰退！`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(false, document.querySelector('.btn.active'));</script>
+</body>
+</html>

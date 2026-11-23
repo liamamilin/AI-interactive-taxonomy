@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：套保者 vs 投机者</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🤝 套保者 vs 投机者：没有投机者接盘，套保能成吗？</h1><p>误区：期货市场里的投机者都是害虫，只应该允许实体企业做套保。真相：如果没有投机者提供对手盘流动性，企业根本找不到人接盘！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="pick(true,this)">有投机者提供流动性（正常市场）</button>
+      <button class="btn" onclick="pick(false,this)">禁止所有投机者（纯套保孤岛）</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">实体企业套保滑点成本</div><div class="k-val" id="kSlip">—</div></div>
+      <div class="kpi"><div class="k-lbl">风险转移成功率</div><div class="k-val" id="kOk">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function pick(hasSpec,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('svg').innerHTML = hasSpec ? `
+        <rect x="45" y="55" width="140" height="60" rx="10" fill="#10b981" opacity="0.2" stroke="#10b981" stroke-width="2"/>
+        <text x="115" y="90" text-anchor="middle" font-size="13" font-weight="800" fill="#10b981">农场主（想卖空）</text>
+        <line x1="185" y1="85" x2="235" y2="85" stroke="#2563eb" stroke-width="3"/>
+        <rect x="235" y="45" width="130" height="80" rx="12" fill="#2563eb" opacity="0.2" stroke="#2563eb" stroke-width="2"/>
+        <text x="300" y="80" text-anchor="middle" font-size="13" font-weight="800" fill="#2563eb">投机者池</text>
+        <text x="300" y="102" text-anchor="middle" font-size="11" fill="var(--tax-muted)">承接风险+提供深度</text>
+        <line x1="365" y1="85" x2="415" y2="85" stroke="#2563eb" stroke-width="3"/>
+        <rect x="415" y="55" width="140" height="60" rx="10" fill="#f59e0b" opacity="0.2" stroke="#f59e0b" stroke-width="2"/>
+        <text x="485" y="90" text-anchor="middle" font-size="13" font-weight="800" fill="#f59e0b">食品厂（想买多）</text>
+      ` : `
+        <rect x="45" y="55" width="150" height="60" rx="10" fill="#ef4444" opacity="0.15" stroke="#ef4444" stroke-width="2"/>
+        <text x="120" y="90" text-anchor="middle" font-size="12.5" font-weight="800" fill="#ef4444">农场主（想卖空）</text>
+        <text x="300" y="90" text-anchor="middle" font-size="14" font-weight="800" fill="#ef4444">❌ 买方缺席，无法成交！</text>
+        <rect x="415" y="55" width="140" height="60" rx="10" fill="#94a3b8" opacity="0.2" stroke="#94a3b8"/>
+        <text x="485" y="90" text-anchor="middle" font-size="12" fill="var(--tax-muted)">食品厂还没下订单</text>
+      `;
+      document.getElementById('kSlip').textContent=hasSpec?'0.05%（极低）':'无法成交 / 滑点 >8%';
+      document.getElementById('kOk').textContent=hasSpec?'99.8%':'不足 15%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>实体企业的买和卖时间上永远错位，正是投机者靠承担价格波动风险赚取价差，才撑起了整个套期保值生态！`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(true, document.querySelector('.btn.active'));</script>
+</body>
+</html>

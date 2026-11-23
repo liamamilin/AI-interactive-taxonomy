@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：现金流跑道沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; transition:.15s; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏃 现金流跑道沙盘：工资停发时你能撑几个月？（SVG）</h1><p>误区：月入 3 万就是富人。真相：如果月开销也是 2.9 万，一旦失业，你的财务跑道只有几天！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>流动应急存款</span><span id="vS">12 万</span></label><input id="sav" type="range" min="0" max="60" step="2" value="12" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>月固定刚性支出</span><span id="vE">1.2 万</span></label><input id="exp" type="range" min="0.4" max="4" step="0.2" value="1.2" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>月被动收入（房租/股息）</span><span id="vP">0.2 万</span></label><input id="pas" type="range" min="0" max="4" step="0.2" value="0.2" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">每月净烧钱速度</div><div class="k-val" id="kBurn">—</div></div>
+      <div class="kpi"><div class="k-lbl">失业生存跑道</div><div class="k-val" id="kRunway">—</div></div>
+      <div class="kpi"><div class="k-lbl">财务自由度</div><div class="k-val" id="kFree" style="color:#2563eb;">—</div></div>
+    </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+    function draw(mark){
+      const sav=+document.getElementById('sav').value;
+      const exp=+document.getElementById('exp').value;
+      const pas=+document.getElementById('pas').value;
+      document.getElementById('vS').textContent=sav+' 万';
+      document.getElementById('vE').textContent=exp.toFixed(1)+' 万';
+      document.getElementById('vP').textContent=pas.toFixed(1)+' 万';
+      const burn=exp-pas;
+      const months=burn<=0?999:sav/burn;
+      const freePct=Math.min(100,(pas/exp)*100);
+      const pts=[];
+      const maxM=24;
+      for(let m=0;m<=maxM;m++){
+        const rem=Math.max(0,sav-burn*m);
+        pts.push(`${m?'L':'M'}${(48+m*(520/maxM)).toFixed(1)},${(150-(rem/Math.max(sav,10))*120).toFixed(1)}`);
+      }
+      document.getElementById('svg').innerHTML=`
+        <line x1="48" y1="150" x2="568" y2="150" stroke="#ef4444" stroke-dasharray="4,4"/>
+        <text x="568" y="145" text-anchor="end" font-size="10.5" fill="#ef4444">现金耗尽破产线 (0元)</text>
+        <path d="${pts.join(' ')}" fill="none" stroke="${burn<=0?'#10b981':'#2563eb'}" stroke-width="3.5"/>
+        <text x="48" y="22" font-size="12" font-weight="750" fill="var(--tax-text)">未来 24 个月现金余量曲线</text>
+      `;
+      document.getElementById('kBurn').textContent=burn<=0?'净流入 +'+(Math.abs(burn)).toFixed(1)+' 万/月':burn.toFixed(1)+' 万/月';
+      document.getElementById('kRunway').textContent=burn<=0?'无限（已财务自由）':months.toFixed(1)+' 个月';
+      document.getElementById('kRunway').style.color=months>=6?'#10b981':'#ef4444';
+      document.getElementById('kFree').textContent=freePct.toFixed(0)+'%';
+      document.getElementById('ahaBox').innerHTML=burn<=0
+        ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>你的被动收入已覆盖 100% 刚性支出，跑道无限长——这就是真正的“跳出老鼠赛跑”！`
+        : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>失业后你每月净消耗 <strong>${burn.toFixed(1)} 万</strong>，当前存款可支撑 <strong>${months.toFixed(1)} 个月</strong>（安全底线建议 ≥ 6 个月）。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);
+  </script>
+</body>
+</html>

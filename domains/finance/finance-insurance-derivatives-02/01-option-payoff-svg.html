@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：期权盈亏折线图</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📈 期权盈亏折线图：看涨 Call 与看跌 Put 四象限（SVG）</h1><p>误区：期权跟股票一样只是涨跌成正比。真相：期权买方“亏损封顶（仅限权利金），收益无限”，卖方则恰恰相反！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="setType('call_buy',this)">买看涨 (Long Call)</button>
+      <button class="btn" onclick="setType('put_buy',this)">买看跌 (Long Put)</button>
+      <button class="btn" onclick="setType('call_sell',this)">卖看涨 (Short Call)</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>到期标的价格 S</span><span id="vS">110 元</span></label><input id="s" type="range" min="60" max="150" step="2" value="110" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>行权价 K=100 / 权利金</span><span id="vP">8 元</span></label><input id="prem" type="range" min="2" max="20" step="1" value="8" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">到期净盈亏</div><div class="k-val" id="kPnl">—</div></div>
+      <div class="kpi"><div class="k-lbl">盈亏平衡点</div><div class="k-val" id="kBE" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>let tp='call_buy';
+    function setType(t,btn){
+      tp=t;
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      draw(true);
+    }
+    function calc(s,p){
+      if(tp==='call_buy') return Math.max(0,s-100)-p;
+      if(tp==='put_buy') return Math.max(0,100-s)-p;
+      return p-Math.max(0,s-100);
+    }
+    function draw(mark){
+      const s=+document.getElementById('s').value;
+      const p=+document.getElementById('prem').value;
+      document.getElementById('vS').textContent=s+' 元';
+      document.getElementById('vP').textContent=p+' 元';
+      const pts=[];
+      for(let x0=60;x0<=150;x0+=5){
+        const pnl=calc(x0,p);
+        const x=55+((x0-60)/90)*490;
+        const y=105-pnl*2.2;
+        pts.push(`${x0===60?'M':'L'}${x.toFixed(1)},${Math.max(15,Math.min(185,y)).toFixed(1)}`);
+      }
+      const curPnl=calc(s,p);
+      const cx=55+((s-60)/90)*490, cy=Math.max(15,Math.min(185,105-curPnl*2.2));
+      document.getElementById('svg').innerHTML=`
+        <line x1="55" y1="105" x2="545" y2="105" stroke="var(--tax-muted)" stroke-dasharray="4,4"/>
+        <line x1="${55+(40/90)*490}" y1="15" x2="${55+(40/90)*490}" y2="185" stroke="var(--tax-border)"/>
+        <path d="${pts.join(' ')}" fill="none" stroke="${curPnl>=0?'#10b981':'#ef4444'}" stroke-width="3.5"/>
+        <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="6" fill="#2563eb"/>
+      `;
+      document.getElementById('kPnl').textContent=(curPnl>=0?'+':'')+curPnl.toFixed(0)+' 元';
+      document.getElementById('kPnl').style.color=curPnl>=0?'#10b981':'#ef4444';
+      document.getElementById('kBE').textContent=tp==='put_buy'?(100-p)+' 元':(100+p)+' 元';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>期权非线性的“折角”正是它最迷人的地方：买方最多只亏掉权利金 <strong>${p} 元</strong>，而卖方赚取固定权利金却可能承受无限亏损！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

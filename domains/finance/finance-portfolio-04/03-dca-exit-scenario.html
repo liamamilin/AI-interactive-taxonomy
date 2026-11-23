@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：定投止盈抉择台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚪 定投止盈抉择台：定投不设止盈会怎样？</h1><p>误区：定投只要一直傻傻拿着不动就行。真相：在高波动市场，不设止盈的定投很可能经历过山车，把 5 年盈利在 1 年熊市里全吐回去！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn" onclick="pick(false,this)">死拿不卖（坐完整轮牛熊过山车）</button>
+      <button class="btn active" onclick="pick(true,this)">目标止盈（+30% 落袋转入债券后重启）</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">周期末累计收益</div><div class="k-val" id="kFin">—</div></div>
+      <div class="kpi"><div class="k-lbl">过程最大回撤</div><div class="k-val" id="kDD">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function pick(takeProfit,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      const hold=[100,115,138,165,120,92];
+      const tp=[100,115,134,138,142,146];
+      const arr=takeProfit?tp:hold;
+      const x=i=>60+i*96, y=v=>175-(v/180)*145;
+      const p=arr.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <line x1="55" y1="${y(100).toFixed(1)}" x2="555" y2="${y(100).toFixed(1)}" stroke="var(--tax-muted)" stroke-dasharray="4,4"/>
+        <path d="${p}" fill="none" stroke="${takeProfit?'#10b981':'#ef4444'}" stroke-width="3.5"/>
+        ${arr.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v).toFixed(1)}" r="5" fill="${takeProfit?'#10b981':'#ef4444'}"/><text x="${x(i)}" y="${(y(v)-9).toFixed(1)}" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-text)">${v}</text>`).join('')}
+      `;
+      document.getElementById('kFin').textContent=takeProfit?'+46%（稳稳落袋）':'-8%（白忙一场）';
+      document.getElementById('kFin').style.color=takeProfit?'#10b981':'#ef4444';
+      document.getElementById('kDD').textContent=takeProfit?'0%':'-44%';
+      document.getElementById('ahaBox').innerHTML=takeProfit
+        ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>“会买的是徒弟，会卖的是师傅！”达到目标收益率后落袋为安并开启下一轮，才能真正锁住微笑曲线的果实。`
+        : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>曾一度浮盈 +65%，但因为没有止盈纪律，一轮熊市就把前期全部定投成果打回亏损（-8%）！`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(true, document.querySelector('.btn.active'));</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：央行行长模拟器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎩 央行行长模拟器：通胀高企与经济衰退同时来怎么办？</h1><p>误区：央行行长的工作很简单，经济差就降息、经济好就加息。真相：当“高通胀”与“高失业”同时爆发（滞胀），加息会搞死就业，降息会引爆恶性通胀！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>当前通胀率</span><span id="vI">5.5%</span></label><input id="inf" type="range" min="0" max="10" step="0.5" value="5.5" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>GDP 缺口（负代表衰退）</span><span id="vG">-1.5%</span></label><input id="gap" type="range" min="-5" max="4" step="0.5" value="-1.5" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">泰勒规则建议利率</div><div class="k-val" id="kRate" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">宏观经济状态</div><div class="k-val" id="kSt">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const inf=+document.getElementById('inf').value;
+      const gap=+document.getElementById('gap').value;
+      document.getElementById('vI').textContent=inf.toFixed(1)+'%';
+      document.getElementById('vG').textContent=(gap>=0?'+':'')+gap.toFixed(1)+'%';
+      const rate=Math.max(0, 2 + inf + 0.5*(inf-2) + 0.5*gap);
+      const stag=inf>=4.5 && gap<=-1;
+      document.getElementById('svg').innerHTML=`
+        <rect x="60" y="45" width="480" height="32" rx="8" fill="var(--tax-border)" opacity="0.35"/>
+        <rect x="60" y="45" width="${Math.min(480, rate*38).toFixed(1)}" height="32" rx="8" fill="${stag?'#ef4444':'#2563eb'}"/>
+        <text x="${Math.min(520, 68+rate*38).toFixed(1)}" y="66" font-size="13" font-weight="800" fill="${stag?'#ef4444':'#2563eb'}">建议基准利率 ${rate.toFixed(2)}%</text>
+        <text x="60" y="120" font-size="12" fill="var(--tax-muted)">泰勒公式：r = 2% + 通胀 + 0.5×(通胀-2%) + 0.5×GDP缺口</text>
+      `;
+      document.getElementById('kRate').textContent=rate.toFixed(2)+'%';
+      document.getElementById('kSt').textContent=stag?'⚠️ 滞胀两难困境':inf>4?'过热高通胀':gap<-1?'经济衰退':'温和均衡';
+      document.getElementById('ahaBox').innerHTML=stag
+        ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>这就是最可怕的<strong>滞胀（Stagflation）</strong>！通胀高达 ${inf.toFixed(1)}% 但经济已萎缩 ${gap.toFixed(1)}%，货币政策彻底陷入两难！`
+        : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>泰勒规则帮你权衡通胀与就业：当前政策利率应锚定在 <strong>${rate.toFixed(2)}%</strong> 附近。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

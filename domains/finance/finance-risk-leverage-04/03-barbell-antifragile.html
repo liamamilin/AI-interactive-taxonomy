@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：塔勒布“杠铃策略”装配台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏋️ 塔勒布“杠铃策略”装配台：90% 极稳现金 + 10% 极高赔率期权</h1><p>误区：稳健投资就是买一堆“中等风险”的理财产品。真相：中等风险往往暗藏隐性爆雷，杠铃两端配置才能锁死下限、敞开上限！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn" onclick="setCfg(0,100,0,this)">全买“中等风险”产品（伪稳健）</button>
+      <button class="btn active" onclick="setCfg(90,0,10,this)">塔勒布杠铃（90% 国债 + 10% 高赔率）</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>极安全国债/现金比例</span><span id="vS">90%</span></label><input id="safe" type="range" min="0" max="100" step="5" value="90" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>极高赔率探索仓比例</span><span id="vR">10%</span></label><input id="risk" type="range" min="0" max="100" step="5" value="10" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">中等风险灰色地带</div><div class="k-val" id="kMid">—</div></div>
+      <div class="kpi"><div class="k-lbl">极端崩盘时最低保底</div><div class="k-val" id="kFloor" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">极端风口爆发潜力</div><div class="k-val" id="kUpside" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function setCfg(s,m,r,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('safe').value=s;
+      document.getElementById('risk').value=r;
+      draw(true);
+    }
+    function draw(mark){
+      let s=+document.getElementById('safe').value;
+      let r=+document.getElementById('risk').value;
+      if(s+r>100){ r=100-s; document.getElementById('risk').value=r; }
+      const mid=100-s-r;
+      document.getElementById('vS').textContent=s+'%';
+      document.getElementById('vR').textContent=r+'%';
+      const floor = s*1.02 + mid*0.35;
+      const upside = s*1.02 + mid*1.08 + r*8;
+      document.getElementById('svg').innerHTML=`
+        <line x1="110" y1="95" x2="490" y2="95" stroke="var(--tax-text)" stroke-width="6"/>
+        <circle cx="110" cy="95" r="${(14+s*0.38).toFixed(1)}" fill="#10b981" opacity="0.85"/>
+        <text x="110" y="99" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${s}%</text>
+        <text x="110" y="160" text-anchor="middle" font-size="11.5" font-weight="750" fill="#10b981">极安全底座</text>
+        <rect x="245" y="77" width="110" height="36" rx="8" fill="#f59e0b" opacity="${mid>0?0.85:0.2}"/>
+        <text x="300" y="99" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">中险 ${mid}%</text>
+        <circle cx="490" cy="95" r="${(14+r*0.38).toFixed(1)}" fill="#2563eb" opacity="0.85"/>
+        <text x="490" y="99" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${r}%</text>
+        <text x="490" y="160" text-anchor="middle" font-size="11.5" font-weight="750" fill="#2563eb">高赔率期权</text>
+      `;
+      document.getElementById('kMid').textContent=mid+'%';
+      document.getElementById('kFloor').textContent=floor.toFixed(0)+'% 本金';
+      document.getElementById('kUpside').textContent=upside.toFixed(0)+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>杠铃策略把 <strong>${s}%</strong> 锁在极安全的底座上保证永远不下牌桌，同时用 <strong>${r}%</strong> 博取黑天鹅级超高赔率，彻底避开暗藏雷区的中等风险！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：“高薪穷人”陷阱检验</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; transition:.15s; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🛍️ “高薪穷人”陷阱检验：加薪后消费同步升级有多可怕？</h1><p>误区：只要努力升职加薪，自然就会有存款。真相：当消费随着收入同步膨胀（Lifestyle Creep），40 岁时你的抗风险能力甚至不如刚毕业！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+      <button class="btn active" onclick="preset(15,0.6,this)">普通消费升级（储蓄率随加薪保持）</button>
+      <button class="btn" onclick="preset(15,0.92,this)">高薪月光陷阱（消费同步膨胀）</button>
+      <button class="btn" onclick="preset(15,0.35,this)">克制复利派（加薪不加消费）</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>年薪增长率</span><span id="vG">8%</span></label><input id="g" type="range" min="2" max="15" step="1" value="8" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>消费占收入比例</span><span id="vC">60%</span></label><input id="c" type="range" min="20" max="98" step="2" value="60" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">15 年后年收入</div><div class="k-val" id="kInc">—</div></div>
+      <div class="kpi"><div class="k-lbl">15 年后累计净资产</div><div class="k-val" id="kSav" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">按新消费标准的失业跑道</div><div class="k-val" id="kRun" style="color:#2563eb;">—</div></div>
+    </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+    function preset(y,c,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('c').value=Math.round(c*100);
+      draw(true);
+    }
+    function draw(mark){
+      const g=+document.getElementById('g').value/100;
+      const cRatio=+document.getElementById('c').value/100;
+      document.getElementById('vG').textContent=(g*100).toFixed(0)+'%';
+      document.getElementById('vC').textContent=(cRatio*100).toFixed(0)+'%';
+      let wealth=0, inc=15;
+      const wArr=[0], expArr=[inc*cRatio];
+      for(let t=1;t<=15;t++){
+        inc=inc*(1+g);
+        const exp=inc*cRatio;
+        wealth=wealth*1.06 + (inc-exp);
+        wArr.push(wealth); expArr.push(exp);
+      }
+      const maxV=Math.max(80, ...wArr);
+      const x=i=>48+(i/15)*525, y=v=>175-(v/maxV)*145;
+      const p=a=>a.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <line x1="48" y1="175" x2="573" y2="175" stroke="var(--tax-border)"/>
+        <path d="${p(wArr)}" fill="none" stroke="#10b981" stroke-width="3"/>
+        <path d="${p(expArr)}" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="5,4"/>
+        <text x="568" y="${Math.max(18,y(wealth)-6).toFixed(1)}" text-anchor="end" font-size="11.5" font-weight="750" fill="#10b981">净资产 ${wealth.toFixed(0)}万</text>
+        <text x="568" y="${Math.min(170,y(expArr[15])+12).toFixed(1)}" text-anchor="end" font-size="11" fill="#ef4444">年开销 ${(inc*cRatio).toFixed(0)}万</text>
+      `;
+      const runMonths = (wealth / (inc*cRatio)) * 12;
+      document.getElementById('kInc').textContent=inc.toFixed(0)+' 万/年';
+      document.getElementById('kSav').textContent=wealth.toFixed(0)+' 万';
+      document.getElementById('kRun').textContent=runMonths.toFixed(1)+' 个月';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当你把 ${(cRatio*100).toFixed(0)}% 的收入都用于消费升级，15 年后年开销涨到 <strong>${(inc*cRatio).toFixed(0)} 万</strong>，积蓄仅够支撑 <strong>${runMonths.toFixed(1)} 个月</strong>！保持生活标准温和增长，把加薪增量存进复利池才是破局之道。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);
+  </script>
+</body>
+</html>

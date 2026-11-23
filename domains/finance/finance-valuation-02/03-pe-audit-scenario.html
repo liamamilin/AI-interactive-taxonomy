@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：价值投资者避坑台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔍 价值投资者避坑台：低 PE 垃圾股 vs 合理 PE 好公司</h1><p>误区：市盈率越低越安全，只买 5 倍 PE 的公司。真相：低 PE 可能是因为行业正在永久萎缩，便宜没好货才是最贵的价值陷阱！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="pick(0,this)">公司 A：5 倍 PE 传统萎缩夕阳厂</button>
+      <button class="btn" onclick="pick(1,this)">公司 B：22 倍 PE 稳健护城河龙头</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">第 1 年每股利润</div><div class="k-val" id="kE1">—</div></div>
+      <div class="kpi"><div class="k-lbl">第 8 年每股利润</div><div class="k-val" id="kE8">—</div></div>
+      <div class="kpi"><div class="k-lbl">8 年真实累计回报</div><div class="k-val" id="kRet">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function pick(i,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      const g = i===0 ? -0.18 : 0.14;
+      const pe0 = i===0 ? 5 : 22;
+      const arr=[1];
+      for(let y=1;y<=8;y++) arr.push(arr[y-1]*(1+g));
+      const maxV=Math.max(3,...arr);
+      const x=k=>55+k*60, y=v=>165-(v/maxV)*130;
+      const p=arr.map((v,k)=>`${k?'L':'M'}${x(k)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <line x1="55" y1="${y(1).toFixed(1)}" x2="545" y2="${y(1).toFixed(1)}" stroke="var(--tax-muted)" stroke-dasharray="4,4"/>
+        <path d="${p}" fill="none" stroke="${i===0?'#ef4444':'#10b981'}" stroke-width="3.5"/>
+        ${arr.map((v,k)=>`<circle cx="${x(k)}" cy="${y(v).toFixed(1)}" r="4" fill="${i===0?'#ef4444':'#10b981'}"/><text x="${x(k)}" y="${(y(v)-8).toFixed(1)}" text-anchor="middle" font-size="10.5" fill="var(--tax-text)">${v.toFixed(2)}</text>`).join('')}
+      `;
+      document.getElementById('kE1').textContent='1.00 元 (PE='+pe0+')';
+      document.getElementById('kE8').textContent=arr[8].toFixed(2)+' 元';
+      document.getElementById('kRet').textContent=i===0?'-55%（价值陷阱）':'+185%（时间的朋友）';
+      document.getElementById('kRet').style.color=i===0?'#ef4444':'#10b981';
+      document.getElementById('ahaBox').innerHTML=i===0
+        ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>5 倍 PE 看似便宜，但业务每年萎缩 -18%，8 年后利润只剩 ${arr[8].toFixed(2)} 元，股价越跌越便宜，永远回不了本！`
+        : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>22 倍 PE 看似贵，但持续 14% 复利增长在 8 年后把利润推高到 <strong>${arr[8].toFixed(2)} 元</strong>——以合理价格买好公司，才是真正的价值投资！`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0, document.querySelector('.btn.active'));</script>
+</body>
+</html>

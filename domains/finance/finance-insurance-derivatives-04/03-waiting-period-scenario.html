@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：精算风控机制台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🛡️ 精算风控机制台：等待期、健康告知与免赔额分别在防什么？</h1><p>误区：保险公司设等待期和健康告知是故意刁难患者。真相：没有这两道防火墙，“查出癌症才买保险”的带病投保会瞬间击穿风险池！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="pick(0,this)">90~180 天等待期</button>
+      <button class="btn" onclick="pick(1,this)">如实健康告知</button>
+      <button class="btn" onclick="pick(2,this)">1 万元免赔额</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">防堵漏洞类型</div><div class="k-val" id="kType" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">对守规矩投保人的好处</div><div class="k-val" id="kBen" style="color:#10b981;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>const ITEMS=[
+      {t:'防“带病突击投保”', b:'防止查出重病后连夜买保险，保住全体健康人的低保费', pct:88},
+      {t:'防“隐瞒病史逆向选择”', b:'高危人群单独核保加费，避免劣币驱逐良币', pct:92},
+      {t:'防“小病过度就医道德风险”', b:'过滤掉高频小额理赔与手续费，实现百元保百万', pct:85}
+    ];
+    function pick(i,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      const d=ITEMS[i];
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="58" font-size="13" font-weight="800" fill="var(--tax-text)">风控拦截效率</text>
+        <rect x="150" y="38" width="${(d.pct*3.8).toFixed(1)}" height="28" rx="6" fill="#10b981"/>
+        <text x="${(158+d.pct*3.8).toFixed(1)}" y="57" font-size="12.5" font-weight="800" fill="#10b981">${d.pct}% 风险拦截</text>
+        <text x="20" y="122" font-size="12.5" fill="var(--tax-muted)">核心作用：${d.b}</text>
+      `;
+      document.getElementById('kType').textContent=d.t;
+      document.getElementById('kBen').textContent='保费降低 40%~70%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>${d.t}——看似严格的条款，其实是在保护绝大多数健康守约的投保人不为少数骗保者买单！`;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick(0, document.querySelector('.btn.active'));</script>
+</body>
+</html>

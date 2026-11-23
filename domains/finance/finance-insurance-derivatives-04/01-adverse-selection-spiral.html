@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：逆向选择死亡螺旋</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌀 逆向选择死亡螺旋：好人退保后，保费如何一轮轮飙升？（SVG）</h1><p>误区：只要把所有人都按同一价格统一承保就最公平。真相：如果健康人觉得贵而退保，池子里全剩高危人群，保费会被推向天价直到崩溃！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn primary" onclick="nextRound(true)">▶️ 推进下一轮（健康人退保）</button>
+      <button class="btn" onclick="resetPool()">重置保池</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">当前演化轮次</div><div class="k-val" id="kRd">第 1 轮</div></div>
+      <div class="kpi"><div class="k-lbl">健康人留存比例</div><div class="k-val" id="kHeal" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">平均精算保费</div><div class="k-val" id="kPrem" style="color:#ef4444;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>let round=1, hRatio=80, hist=[2600];
+    function resetPool(){ round=1; hRatio=80; hist=[2600]; render(false); }
+    function nextRound(mark){
+      if(round>=6) return;
+      round++;
+      hRatio=Math.max(0, hRatio-18);
+      const avg = (hRatio*1000 + (100-hRatio)*9000)/100;
+      hist.push(avg);
+      render(mark);
+    }
+    function render(mark){
+      const avg=hist[hist.length-1];
+      const x=i=>65+i*90, y=v=>165-(v/9500)*135;
+      const p=hist.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <path d="${p}" fill="none" stroke="#ef4444" stroke-width="3.5"/>
+        ${hist.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v).toFixed(1)}" r="5" fill="#ef4444"/><text x="${x(i)}" y="${(y(v)-9).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="750" fill="var(--tax-text)">¥${v.toFixed(0)}</text>`).join('')}
+      `;
+      document.getElementById('kRd').textContent='第 '+round+' 轮';
+      document.getElementById('kHeal').textContent=hRatio+'%';
+      document.getElementById('kPrem').textContent='¥'+avg.toFixed(0);
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>每一轮涨价都会逼走最健康的那批人，留下赔付率最高的人，最终保费飙至 <strong>¥${avg.toFixed(0)}</strong>，保险市场彻底坍塌！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render(false);</script>
+</body>
+</html>

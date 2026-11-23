@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：买房贷款抉择台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; transition:.15s; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 买房贷款抉择台：高薪稳定 vs 现金流吃紧怎么选？</h1><p>误区：总利息少就一定选等额本金。真相：买房还要看现金流安全垫与资金的机会成本！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+      <button class="btn active" onclick="pick(0,this)">场景 A：现金流紧张的刚需族</button>
+      <button class="btn" onclick="pick(1,this)">场景 B：高薪稳定且无高收益投资</button>
+      <button class="btn" onclick="pick(2,this)">场景 C：手里有年化 6%+ 稳健渠道</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>家庭月收入</span><span id="vInc">2.0 万</span></label><input id="inc" type="range" min="1" max="6" step="0.2" value="2" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>房贷利率</span><span id="vR">3.5%</span></label><input id="r" type="range" min="2.5" max="5.5" step="0.1" value="3.5" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">等额本息月供/收入比</div><div class="k-val" id="kR1" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">等额本金首月/收入比</div><div class="k-val" id="kR2" style="color:#f59e0b;">—</div></div>
+      <div class="kpi"><div class="k-lbl">推荐方案</div><div class="k-val" id="kRec" style="color:#10b981;">—</div></div>
+    </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+    let sc=0;
+    function pick(i,btn){
+      sc=i;
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(i===0){ document.getElementById('inc').value=1.4; }
+      if(i===1){ document.getElementById('inc').value=3.5; }
+      if(i===2){ document.getElementById('inc').value=2.5; }
+      draw(true);
+    }
+    function draw(mark){
+      const inc=+document.getElementById('inc').value*10000;
+      const r=(+document.getElementById('r').value/100)/12;
+      document.getElementById('vInc').textContent=(inc/10000).toFixed(1)+' 万';
+      document.getElementById('vR').textContent=document.getElementById('r').value+'%';
+      const P=1500000, N=360;
+      const mEqual=P*r*Math.pow(1+r,N)/(Math.pow(1+r,N)-1);
+      const mPrin1=P/N + P*r;
+      const dti1=mEqual/inc*100, dti2=mPrin1/inc*100;
+      const w1=Math.min(380, dti1*4.5), w2=Math.min(380, dti2*4.5);
+      document.getElementById('svg').innerHTML=`
+        <line x1="${(150+50*4.5).toFixed(1)}" y1="20" x2="${(150+50*4.5).toFixed(1)}" y2="155" stroke="#ef4444" stroke-dasharray="4,4"/>
+        <text x="${(150+50*4.5).toFixed(1)}" y="16" text-anchor="middle" font-size="11" fill="#ef4444">50% 月供警戒红线</text>
+        <text x="18" y="62" font-size="12" font-weight="750" fill="var(--tax-text)">等额本息月供</text>
+        <rect x="150" y="44" width="${w1.toFixed(1)}" height="26" rx="6" fill="#2563eb"/>
+        <text x="${(158+w1).toFixed(1)}" y="62" font-size="12" font-weight="750" fill="#2563eb">${mEqual.toFixed(0)}元 (${dti1.toFixed(0)}%)</text>
+        <text x="18" y="118" font-size="12" font-weight="750" fill="var(--tax-text)">等额本金首月</text>
+        <rect x="150" y="100" width="${w2.toFixed(1)}" height="26" rx="6" fill="#f59e0b"/>
+        <text x="${(158+w2).toFixed(1)}" y="118" font-size="12" font-weight="750" fill="#f59e0b">${mPrin1.toFixed(0)}元 (${dti2.toFixed(0)}%)</text>
+      `;
+      document.getElementById('kR1').textContent=dti1.toFixed(1)+'%';
+      document.getElementById('kR2').textContent=dti2.toFixed(1)+'%';
+      const rec = dti2>45 || sc===2 ? '等额本息' : '等额本金';
+      document.getElementById('kRec').textContent=rec;
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>以 150 万贷款为例，等额本金首月月供高达 <strong>${mPrin1.toFixed(0)} 元</strong>。如果月供占收入超过 45% 或手头有更高收益投资，<strong>等额本息</strong>能帮你保住现金流与通胀套利空间！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);
+  </script>
+</body>
+</html>

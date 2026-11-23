@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：压路机前捡硬币模拟器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🪙 压路机前捡硬币模拟器：99 次稳赚小钱 vs 1 次亏光所有</h1><p>误区：连续 20 个月稳赚不赔的策略一定是神策略。真相：很多高胜率低赔率策略只是在压路机前捡硬币，一脚踩空即归零！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn primary" onclick="step10(true)">🪙 再捡 10 轮硬币（看压路机何时来）</button>
+      <button class="btn" onclick="resetSim()">重置账户</button>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">累计捡硬币次数</div><div class="k-val" id="kN">0 次</div></div>
+      <div class="kpi"><div class="k-lbl">当前账户净值</div><div class="k-val" id="kEq" style="color:#10b981;">100</div></div>
+      <div class="kpi"><div class="k-lbl">是否被压路机碾压</div><div class="k-val" id="kHit">暂未</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>let hist=[100], eq=100, busted=false;
+    function resetSim(){ hist=[100]; eq=100; busted=false; render(false); }
+    function step10(mark){
+      if(busted) return;
+      for(let i=0;i<10;i++){
+        if(Math.random()<0.04){ eq=5; busted=true; hist.push(eq); break; }
+        else { eq+=3; hist.push(eq); }
+      }
+      render(mark);
+    }
+    function render(mark){
+      const maxV=Math.max(160, ...hist);
+      const n=Math.max(1,hist.length-1);
+      const x=i=>48+(i/n)*520, y=v=>175-(v/maxV)*145;
+      const p=hist.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <line x1="48" y1="${y(100).toFixed(1)}" x2="568" y2="${y(100).toFixed(1)}" stroke="var(--tax-muted)" stroke-dasharray="4,4"/>
+        <path d="${p}" fill="none" stroke="${busted?'#ef4444':'#10b981'}" stroke-width="3"/>
+        <circle cx="${x(hist.length-1).toFixed(1)}" cy="${y(eq).toFixed(1)}" r="6" fill="${busted?'#ef4444':'#10b981'}"/>
+      `;
+      document.getElementById('kN').textContent=(hist.length-1)+' 次';
+      document.getElementById('kEq').textContent=eq.toFixed(0);
+      document.getElementById('kEq').style.color=busted?'#ef4444':'#10b981';
+      document.getElementById('kHit').textContent=busted?'💥 已碾压归零！':'暂未（危险累计中）';
+      document.getElementById('ahaBox').innerHTML=busted
+        ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>连赢几十次攒下的所有小硬币，在第 ${hist.length-1} 轮一次黑天鹅中瞬间蒸发！千万别把“高胜率”当成“低风险”。`
+        : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>平滑向上的资金曲线极具迷惑性！点击按钮继续模拟，亲眼见证“负偏态”策略是如何突然断崖暴跌的。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render(false);</script>
+</body>
+</html>

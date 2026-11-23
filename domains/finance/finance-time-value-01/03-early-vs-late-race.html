@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：早投 10 年 vs 晚投 10 年竞速</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; transition:.15s; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏃 早投 10 年 vs 晚投 10 年竞速：谁能跑赢复利？</h1><p>误区：等以后工资高了再多存钱也一样。真相：早投 10 年停手不投，往往能赢过晚投 30 年不停的人！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+      <button class="btn active" onclick="setCfg(8,2,this)">默认 8% 年化</button>
+      <button class="btn" onclick="setCfg(5,2,this)">保守 5% 年化</button>
+      <button class="btn" onclick="setCfg(11,2,this)">进取 11% 年化</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>年化收益率</span><span id="vR">8%</span></label><input id="r" type="range" min="3" max="14" step="0.5" value="8" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>每年定投金额</span><span id="vA">2.0 万</span></label><input id="amt" type="range" min="1" max="10" step="0.5" value="2" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 220"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">早鸟（25~35岁投10年）总本金</div><div class="k-val" id="kEPrin">—</div></div>
+      <div class="kpi"><div class="k-lbl">早鸟 65 岁资产</div><div class="k-val" id="kEFin" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">晚鸟（35~65岁投30年）总本金</div><div class="k-val" id="kLPrin">—</div></div>
+      <div class="kpi"><div class="k-lbl">晚鸟 65 岁资产</div><div class="k-val" id="kLFin" style="color:#2563eb;">—</div></div>
+    </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+    function setCfg(r,a,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('r').value=r;
+      document.getElementById('amt').value=a;
+      draw(true);
+    }
+    function draw(mark){
+      const r=+document.getElementById('r').value/100;
+      const amt=+document.getElementById('amt').value;
+      document.getElementById('vR').textContent=(r*100).toFixed(1)+'%';
+      document.getElementById('vA').textContent=amt.toFixed(1)+' 万';
+      let e=0, l=0;
+      const eArr=[0], lArr=[0];
+      for(let age=26;age<=65;age++){
+        if(age<=35) e=(e+amt)*(1+r); else e=e*(1+r);
+        if(age>35) l=(l+amt)*(1+r);
+        eArr.push(e); lArr.push(l);
+      }
+      const maxV=Math.max(50, ...eArr, ...lArr);
+      const x=i=>48+(i/40)*525;
+      const y=v=>188-(v/maxV)*158;
+      const path=arr=>arr.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <line x1="48" y1="188" x2="573" y2="188" stroke="var(--tax-border)"/>
+        <line x1="${x(10).toFixed(1)}" y1="20" x2="${x(10).toFixed(1)}" y2="188" stroke="var(--tax-muted)" stroke-dasharray="4,4"/>
+        <text x="${x(10)+4}" y="32" font-size="10.5" fill="var(--tax-muted)">35岁：早鸟停投 / 晚鸟起跑</text>
+        <path d="${path(eArr)}" fill="none" stroke="#10b981" stroke-width="3"/>
+        <path d="${path(lArr)}" fill="none" stroke="#2563eb" stroke-width="3"/>
+        <text x="568" y="${Math.max(18,y(e)-6).toFixed(1)}" text-anchor="end" font-size="11.5" font-weight="750" fill="#10b981">早鸟 ${e.toFixed(0)}万</text>
+        <text x="568" y="${Math.min(182,y(l)+14).toFixed(1)}" text-anchor="end" font-size="11.5" font-weight="750" fill="#2563eb">晚鸟 ${l.toFixed(0)}万</text>
+      `;
+      document.getElementById('kEPrin').textContent=(amt*10).toFixed(0)+' 万';
+      document.getElementById('kEFin').textContent=e.toFixed(1)+' 万';
+      document.getElementById('kLPrin').textContent=(amt*30).toFixed(0)+' 万';
+      document.getElementById('kLFin').textContent=l.toFixed(1)+' 万';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>早鸟只掏了 <strong>${(amt*10).toFixed(0)} 万</strong> 本金，65 岁滚出 <strong>${e.toFixed(1)} 万</strong>；晚鸟掏了 3 倍本金（${(amt*30).toFixed(0)} 万），最终却${e>=l?'仍落后':'只略微反超'}（${l.toFixed(1)} 万）。复利最值钱的是最早的 10 年！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);
+  </script>
+</body>
+</html>
