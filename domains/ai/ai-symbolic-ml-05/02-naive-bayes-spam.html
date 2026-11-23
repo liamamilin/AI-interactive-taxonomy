@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：朴素贝叶斯垃圾邮件秤</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .word-pool { display: flex; flex-wrap: wrap; gap: 9px; margin: 12px 0 18px; }
+    .w-chip {
+      padding: 9px 14px; border-radius: 12px; font-size: 13.5px; font-weight: 750;
+      border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-ink);
+      cursor: pointer; transition: all 0.14s ease;
+    }
+    .w-chip.on.spam { background: var(--tax-red-soft); border-color: var(--tax-red); color: var(--tax-red); }
+    .w-chip.on.ham { background: var(--tax-green-soft); border-color: var(--tax-green); color: var(--tax-green); }
+    .meter-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 16px; padding: 18px; }
+    .prob-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+    .prob-big { font-size: 34px; font-weight: 900; font-family: ui-monospace, monospace; }
+    .scale-bar { height: 18px; border-radius: 999px; background: var(--tax-green); overflow: hidden; display: flex; }
+    .scale-spam { height: 100%; background: var(--tax-red); transition: width 0.28s ease; }
+    .chain { margin-top: 14px; font-size: 13px; color: var(--tax-muted); line-height: 1.7; }
+    .mult-tag { display: inline-block; padding: 2px 7px; border-radius: 6px; font-family: monospace; font-weight: 750; margin: 2px; background: var(--tax-surface); border: 1px solid var(--tax-border); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📧 朴素贝叶斯垃圾邮件秤：每个词都在给概率投票</h1>
+        <p>点击勾选邮件正文里出现的关键词，观察每个词的「似然比（Spam 出现率 / 正常出现率）」如何连乘更新最终判断。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div style="font-weight:800;font-size:14.5px;">✉️ 点击组装这封待审核邮件的关键词：</div>
+      <div class="word-pool" id="wordPool"></div>
+
+      <div class="meter-box">
+        <div class="prob-head">
+          <span style="font-weight:800;font-size:15px;" id="verdictLabel">⚖️ 初始先验（50% / 50%）</span>
+          <span class="prob-big" id="spamPct">50.0%</span>
+        </div>
+        <div class="scale-bar"><div class="scale-spam" id="spamBar" style="width:50%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:750;margin-top:6px;">
+          <span style="color:var(--tax-red)">🚨 垃圾邮件概率</span>
+          <span style="color:var(--tax-green)">✅ 正常邮件概率</span>
+        </div>
+        <div class="chain" id="calcChain"></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>为什么叫“朴素（Naive）”贝叶斯？因为它做了一个大胆又极其高效的简化假设：<strong>把每个词当成彼此独立的证人，直接把它们的似然倍率相乘</strong>——虽然现实里词与词有关联，但在垃圾邮件过滤上却快得惊人且准确率极高！
+    </div>
+  </div>
+
+  <script>
+    const WORDS = [
+      { id: "prize", text: "🎁 恭喜中奖", ratio: 12.0, type: "spam" },
+      { id: "free", text: "💸 免费领取", ratio: 6.5, type: "spam" },
+      { id: "urgent", text: "⚠️ 账户即将冻结", ratio: 9.0, type: "spam" },
+      { id: "click", text: "🔗 立即点击验证", ratio: 4.5, type: "spam" },
+      { id: "meeting", text: "📅 周会纪要", ratio: 0.12, type: "ham" },
+      { id: "pr", text: "💻 代码评审 PR", ratio: 0.08, type: "ham" },
+      { id: "invoice", text: "🧾 报销发票", ratio: 0.35, type: "ham" },
+      { id: "schedule", text: "🗓️ 项目排期更新", ratio: 0.18, type: "ham" }
+    ];
+
+    const selected = new Set(["prize"]);
+    let clicks = 0;
+
+    function render() {
+      const pool = document.getElementById("wordPool");
+      pool.innerHTML = WORDS.map(w => `
+        <button class="w-chip ${selected.has(w.id) ? "on " + w.type : ""}" data-id="${w.id}">
+          ${w.text} <span style="opacity:0.75;font-size:11.5px;">(×${w.ratio})</span>
+        </button>
+      `).join("");
+
+      // Start with prior odds = 1 (50% spam, 50% ham)
+      let odds = 1.0;
+      const picked = WORDS.filter(w => selected.has(w.id));
+      picked.forEach(w => { odds *= w.ratio; });
+      const prob = (odds / (1 + odds)) * 100;
+
+      document.getElementById("spamPct").textContent = prob.toFixed(1) + "%";
+      document.getElementById("spamPct").style.color = prob >= 60 ? "var(--tax-red)" : prob <= 40 ? "var(--tax-green)" : "var(--tax-amber)";
+      document.getElementById("spamBar").style.width = prob.toFixed(1) + "%";
+      document.getElementById("verdictLabel").textContent =
+        prob >= 75 ? "🚨 高度疑似垃圾邮件（拦截）" :
+        prob <= 25 ? "✅ 放心放行：正常办公邮件" : "🤔 边界模糊：建议人工确认";
+
+      const chain = document.getElementById("calcChain");
+      if (!picked.length) {
+        chain.innerHTML = "未选中任何关键词，维持初始先验赔率 <code>1.0</code>（垃圾概率 50%）。点击上方词语试试！";
+      } else {
+        const tags = picked.map(w => `<span class="mult-tag">${w.text} ×${w.ratio}</span>`).join(" × ");
+        chain.innerHTML = `<strong>贝叶斯赔率连乘：</strong>先验(1.0) × ${tags} = <strong>${odds.toFixed(2)}</strong> → 换算后验概率 <strong>${prob.toFixed(1)}%</strong>`;
+      }
+    }
+
+    document.getElementById("wordPool").addEventListener("click", (e) => {
+      const btn = e.target.closest(".w-chip");
+      if (!btn) return;
+      const id = btn.dataset.id;
+      if (selected.has(id)) selected.delete(id); else selected.add(id);
+      clicks++;
+      render();
+      if (clicks >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    render();
+  </script>
+</body>
+</html>

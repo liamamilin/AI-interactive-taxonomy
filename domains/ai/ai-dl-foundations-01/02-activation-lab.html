@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：激活函数变形记 · 梯度消失与 ReLU</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 14px; }
+    .seg { display: inline-flex; background: var(--tax-surface-alt); padding: 4px; border-radius: 12px; gap: 4px; border: 1px solid var(--tax-border); }
+    .seg button { border: none; background: transparent; color: var(--tax-muted); font-weight: 750; font-size: 13px; padding: 7px 12px; border-radius: 9px; cursor: pointer; }
+    .seg button.active { background: var(--tax-surface); color: var(--tax-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } }
+    .svg-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 12px; }
+    svg { width: 100%; height: 280px; display: block; }
+    .card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .kv { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px dashed var(--tax-border); padding-bottom: 8px; }
+    .kv strong { font-size: 22px; font-family: ui-monospace, monospace; }
+    .pill { display: inline-block; padding: 5px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 800; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📈 激活函数变形记：为什么 Sigmoid 会卡死深层网络，ReLU 却行？</h1>
+        <p>切换 4 种激活函数并拖动输入值 <code>x</code>，同屏观察蓝线（输出值）与橙线（梯度导数）的变化。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="controls">
+        <div class="seg" id="fnSeg">
+          <button data-fn="linear">Linear（无激活）</button>
+          <button data-fn="sigmoid" class="active">Sigmoid（经典老将）</button>
+          <button data-fn="tanh">Tanh（零中心）</button>
+          <button data-fn="relu">ReLU（现代主力）</button>
+        </div>
+        <div style="flex:1;min-width:200px;">
+          <label style="font-size:13.5px;font-weight:800;">🎛️ 输入信号 x：<span id="xVal" style="color:var(--tax-primary)">4.5</span></label>
+          <input id="xSlider" type="range" min="-60" max="60" value="45" style="width:100%;margin-top:4px;" />
+        </div>
+      </div>
+
+      <div class="layout">
+        <div class="svg-box">
+          <svg id="actSvg" viewBox="0 0 500 280"></svg>
+          <div style="font-size:12px;color:var(--tax-muted);margin-top:6px;display:flex;gap:14px;">
+            <span>🔵 蓝实线：激活输出 f(x)</span>
+            <span>🟠 橙虚线：学习梯度 f'(x)</span>
+          </div>
+        </div>
+        <div class="card">
+          <div><span class="pill" id="gradPill">⚠️ 梯度消失警告</span></div>
+          <div class="kv"><span>神经元输出 f(x)</span><strong id="fxOut" style="color:var(--tax-primary)">0.989</strong></div>
+          <div class="kv"><span>当前梯度 f'(x)</span><strong id="dfxOut" style="color:var(--tax-amber)">0.011</strong></div>
+          <div class="kv"><span>经过 10 层连乘后剩余信号</span><strong id="deepOut" style="color:var(--tax-red)">0.00%</strong></div>
+          <div style="font-size:12.5px;color:var(--tax-muted);" id="fnNote"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>把输入 <code>x</code> 拖到 <strong>+4.5</strong> 再对比 <strong>Sigmoid</strong> 和 <strong>ReLU</strong>——Sigmoid 导数跌到 0.01，传过 10 层直接彻底归零（梯度消失）；而 ReLU 正半轴导数恒为 1，让几百层深度网络终于能顺畅训练！
+    </div>
+  </div>
+
+  <script>
+    const FNS = {
+      linear: {
+        f: x => x * 0.35,
+        df: () => 0.35,
+        note: "没有非线性激活时，100 层线性矩阵相乘在数学上完全等价于 1 层单矩阵，网络永远只能画直线！"
+      },
+      sigmoid: {
+        f: x => 1 / (1 + Math.exp(-x)),
+        df: x => { const s = 1 / (1 + Math.exp(-x)); return s * (1 - s); },
+        note: "Sigmoid 最大导数只有 0.25，一旦 |x| > 3 曲线彻底躺平，反向传播时误差信号每过一层就被猛砍一刀。"
+      },
+      tanh: {
+        f: x => Math.tanh(x),
+        df: x => 1 - Math.tanh(x) ** 2,
+        note: "Tanh 解决了输出零中心化问题（中心导数可达 1），但在两端依然会饱和躺平导致梯度消失。"
+      },
+      relu: {
+        f: x => Math.max(0, x * 0.35),
+        df: x => (x > 0 ? 1 : 0),
+        note: "ReLU（max(0, x)）把负数砍成 0、正数原样放行：既引入了折弯非线性，又让正区梯度恒为 1，永不饱和！"
+      }
+    };
+
+    let curFn = "sigmoid";
+    const seen = new Set(["sigmoid"]);
+
+    function render() {
+      const x = parseInt(document.getElementById("xSlider").value, 10) / 10;
+      document.getElementById("xVal").textContent = x.toFixed(1);
+      const spec = FNS[curFn];
+      const fx = spec.f(x);
+      const dfx = spec.df(x);
+      const tenLayer = Math.pow(Math.abs(dfx), 10) * 100;
+
+      const toX = v => 250 + (v / 6) * 215;
+      const toY = v => 165 - Math.max(-1.6, Math.min(2.2, v)) * 62;
+
+      let fPath = "", dfPath = "";
+      for (let i = 0; i <= 120; i++) {
+        const vx = -6 + (12 * i) / 120;
+        const sx = toX(vx);
+        fPath += (i === 0 ? "M" : "L") + `${sx.toFixed(1)},${toY(spec.f(vx)).toFixed(1)} `;
+        dfPath += (i === 0 ? "M" : "L") + `${sx.toFixed(1)},${toY(spec.df(vx)).toFixed(1)} `;
+      }
+
+      const svg = document.getElementById("actSvg");
+      let html = `<line x1="30" y1="165" x2="475" y2="165" stroke="var(--tax-border)" stroke-width="1.5"/>`;
+      html += `<line x1="250" y1="15" x2="250" y2="265" stroke="var(--tax-border)" stroke-width="1.5"/>`;
+      html += `<path d="${dfPath}" fill="none" stroke="var(--tax-amber)" stroke-width="2.2" stroke-dasharray="6,4"/>`;
+      html += `<path d="${fPath}" fill="none" stroke="var(--tax-primary)" stroke-width="3.2"/>`;
+      html += `<line x1="${toX(x)}" y1="20" x2="${toX(x)}" y2="260" stroke="var(--tax-muted)" stroke-width="1" stroke-dasharray="3,3"/>`;
+      html += `<circle cx="${toX(x)}" cy="${toY(fx)}" r="6" fill="var(--tax-primary)" stroke="#fff" stroke-width="2"/>`;
+      html += `<circle cx="${toX(x)}" cy="${toY(dfx)}" r="5.5" fill="var(--tax-amber)" stroke="#fff" stroke-width="2"/>`;
+      svg.innerHTML = html;
+
+      document.getElementById("fxOut").textContent = fx.toFixed(3);
+      document.getElementById("dfxOut").textContent = dfx.toFixed(3);
+      document.getElementById("deepOut").textContent = tenLayer < 0.01 ? "< 0.01%" : tenLayer.toFixed(1) + "%";
+      document.getElementById("fnNote").textContent = spec.note;
+
+      const pill = document.getElementById("gradPill");
+      if (curFn === "linear") {
+        pill.textContent = "🚫 无非线性：多层退化为单层";
+        pill.style.background = "var(--tax-amber-soft)"; pill.style.color = "var(--tax-amber)";
+      } else if (dfx < 0.05) {
+        pill.textContent = "🚨 梯度消失 / 神经元死亡区";
+        pill.style.background = "var(--tax-red-soft)"; pill.style.color = "var(--tax-red)";
+      } else if (dfx >= 0.99) {
+        pill.textContent = "✅ 梯度高速通道（无损回传）";
+        pill.style.background = "var(--tax-green-soft)"; pill.style.color = "var(--tax-green)";
+      } else {
+        pill.textContent = "⚠️ 梯度逐层衰减中";
+        pill.style.background = "var(--tax-amber-soft)"; pill.style.color = "var(--tax-amber)";
+      }
+    }
+
+    document.getElementById("fnSeg").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      curFn = e.target.dataset.fn;
+      seen.add(curFn);
+      document.querySelectorAll("#fnSeg button").forEach(b => b.classList.toggle("active", b === e.target));
+      render();
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    document.getElementById("xSlider").addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>

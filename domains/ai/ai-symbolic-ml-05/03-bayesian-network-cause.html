@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：贝叶斯因果网 · 解释消除效应</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .bn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 680px; margin: 0 auto; }
+    .bn-node {
+      background: var(--tax-surface-alt); border: 2px solid var(--tax-border); border-radius: 16px;
+      padding: 16px; text-align: center; transition: border-color 0.2s ease;
+    }
+    .bn-node.obs-true { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .bn-node.obs-false { border-color: var(--tax-red); background: var(--tax-red-soft); }
+    .bn-title { font-size: 16px; font-weight: 850; margin-bottom: 6px; }
+    .bn-prob { font-size: 32px; font-weight: 900; font-family: ui-monospace, monospace; color: var(--tax-primary); margin: 4px 0 10px; }
+    .btn-row { display: inline-flex; gap: 6px; }
+    .ev-btn {
+      border: 1px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-muted);
+      padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 750; cursor: pointer;
+    }
+    .ev-btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .arrow-bar { text-align: center; font-size: 22px; color: var(--tax-primary); margin: 10px 0; font-weight: 900; }
+    .bottom-node { max-width: 340px; margin: 0 auto; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🌧️ 贝叶斯因果网：草地湿了，到底是下雨还是洒水器？</h1>
+        <p>先点亮下方「草地湿了 = 是」，观察上方两个原因概率同时飙升；接着再把「洒水器 = 是」锁死，亲眼见证“解释消除效应”！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="bn-grid">
+        <div class="bn-node" id="nodeRain">
+          <div class="bn-title">🌧️ 原因 A：昨晚下雨了</div>
+          <div class="bn-prob" id="pRain">20.0%</div>
+          <div class="btn-row" data-var="R">
+            <button class="ev-btn active" data-val="null">未知</button>
+            <button class="ev-btn" data-val="1">确认为真</button>
+            <button class="ev-btn" data-val="0">确认为假</button>
+          </div>
+        </div>
+        <div class="bn-node" id="nodeSprinkler">
+          <div class="bn-title">💦 原因 B：洒水器开了</div>
+          <div class="bn-prob" id="pSprinkler">30.0%</div>
+          <div class="btn-row" data-var="S">
+            <button class="ev-btn active" data-val="null">未知</button>
+            <button class="ev-btn" data-val="1">确认为真</button>
+            <button class="ev-btn" data-val="0">确认为假</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow-bar">↘ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↙</div>
+
+      <div class="bn-node bottom-node" id="nodeWet">
+        <div class="bn-title">🌿 结果 C：门口草地是湿的</div>
+        <div class="bn-prob" id="pWet">44.0%</div>
+        <div class="btn-row" data-var="W">
+          <button class="ev-btn active" data-val="null">未知</button>
+          <button class="ev-btn" data-val="1">确认为真</button>
+          <button class="ev-btn" data-val="0">确认为假</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>下雨（先验 20%）和洒水器（先验 30%）原本完全独立。现在试着按顺序操作：<strong>① 把「草地是湿的」设为真 → ② 再把「洒水器开了」设为真</strong>，看看下雨的概率会发生什么惊人逆转！
+    </div>
+  </div>
+
+  <script>
+    // Exact Joint Distribution over (R, S, W):
+    // P(R=1) = 0.2, P(S=1) = 0.3 (independent priors)
+    // P(W=1 | R, S): (0,0)->0.02, (1,0)->0.90, (0,1)->0.85, (1,1)->0.99
+    const ev = { R: null, S: null, W: null };
+    let ops = 0;
+
+    function pW(r, s) {
+      if (r === 1 && s === 1) return 0.99;
+      if (r === 1 && s === 0) return 0.90;
+      if (r === 0 && s === 1) return 0.85;
+      return 0.02;
+    }
+
+    function infer() {
+      let sumAll = 0, sumR = 0, sumS = 0, sumW = 0;
+      for (const r of [0, 1]) {
+        if (ev.R !== null && ev.R !== r) continue;
+        const pr = r ? 0.2 : 0.8;
+        for (const s of [0, 1]) {
+          if (ev.S !== null && ev.S !== s) continue;
+          const ps = s ? 0.3 : 0.7;
+          for (const w of [0, 1]) {
+            if (ev.W !== null && ev.W !== w) continue;
+            const pw = w ? pW(r, s) : (1 - pW(r, s));
+            const joint = pr * ps * pw;
+            sumAll += joint;
+            if (r) sumR += joint;
+            if (s) sumS += joint;
+            if (w) sumW += joint;
+          }
+        }
+      }
+      const res = { R: sumR / sumAll, S: sumS / sumAll, W: sumW / sumAll };
+      document.getElementById("pRain").textContent = (res.R * 100).toFixed(1) + "%";
+      document.getElementById("pSprinkler").textContent = (res.S * 100).toFixed(1) + "%";
+      document.getElementById("pWet").textContent = (res.W * 100).toFixed(1) + "%";
+
+      const setCls = (id, v) => {
+        const el = document.getElementById(id);
+        el.classList.remove("obs-true", "obs-false");
+        if (v === 1) el.classList.add("obs-true");
+        if (v === 0) el.classList.add("obs-false");
+      };
+      setCls("nodeRain", ev.R); setCls("nodeSprinkler", ev.S); setCls("nodeWet", ev.W);
+
+      const aha = document.getElementById("ahaBox");
+      if (ev.W === 1 && ev.S === 1 && ev.R === null) {
+        aha.innerHTML = `💡 <strong>顿悟时刻（触发“解释消除效应 Explaining Away”！）：</strong>看到草地湿了时，下雨概率曾飙升到 <strong>42%+</strong>；但一旦你又发现“洒水器确实开了”，草地湿润已经被完美解释，下雨的概率瞬间暴跌回 <strong>${(res.R * 100).toFixed(1)}%</strong>！原本独立的两个原因，因为共享同一个结果而产生了反向竞争。`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      } else if (ev.W === 1 && ev.S === 0 && ev.R === null) {
+        aha.innerHTML = `💡 <strong>顿悟时刻（排他追凶！）：</strong>草地湿了，且你确认“洒水器没开”，那几乎只剩下一个嫌疑人——下雨概率瞬间飙升到 <strong>${(res.R * 100).toFixed(1)}%</strong>！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      } else if (ev.W === 1 && ev.S === null && ev.R === null) {
+        aha.innerHTML = `💡 <strong>第一步观察到位：</strong>看到草地湿了，下雨概率从 20% 涨到 <strong>${(res.R * 100).toFixed(1)}%</strong>，洒水器概率也涨到 <strong>${(res.S * 100).toFixed(1)}%</strong>。现在试着把「洒水器开了」设为<strong>确认为真</strong>！`;
+      }
+    }
+
+    document.querySelectorAll(".btn-row").forEach(row => {
+      row.addEventListener("click", (e) => {
+        if (e.target.tagName !== "BUTTON") return;
+        const v = row.dataset.var;
+        const raw = e.target.dataset.val;
+        ev[v] = raw === "null" ? null : parseInt(raw, 10);
+        row.querySelectorAll("button").forEach(b => b.classList.toggle("active", b === e.target));
+        ops++;
+        infer();
+        if (ops >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+      });
+    });
+
+    infer();
+  </script>
+</body>
+</html>

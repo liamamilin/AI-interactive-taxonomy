@@ -5,10 +5,10 @@
   "stats": {
     "totalDomains": 10,
     "litDomains": 1,
-    "totalTopics": 19,
-    "totalPlannedTopics": 256,
+    "totalTopics": 22,
+    "totalPlannedTopics": 253,
     "totalBlueprintTopics": 275,
-    "totalToys": 57
+    "totalToys": 66
   },
   "tracks": [
     {
@@ -1499,25 +1499,12 @@
         {
           "id": "symbolic-ml",
           "title": "1. 经典与符号智能（Symbolic AI & Classic ML）",
-          "plannedTopics": [
-            {
-              "slug": "ai-symbolic-ml-04",
-              "title": "无监督学习（聚类 / PCA 降维）"
-            },
-            {
-              "slug": "ai-symbolic-ml-05",
-              "title": "贝叶斯推断与概率图模型"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "dl-foundations",
           "title": "2. 神经网络与深度学习基石（Deep Learning）",
           "plannedTopics": [
-            {
-              "slug": "ai-dl-foundations-01",
-              "title": "感知机与激活函数"
-            },
             {
               "slug": "ai-dl-foundations-02",
               "title": "反向传播与残差连接（ResNet）"
@@ -1641,11 +1628,60 @@
           ]
         }
       ],
-      "liveTopicCount": 19,
-      "plannedTopicCount": 24,
+      "liveTopicCount": 22,
+      "plannedTopicCount": 21,
       "blueprintTopicCount": 43,
-      "liveToyCount": 57,
+      "liveToyCount": 66,
       "topics": [
+        {
+          "id": "ai/ai-dl-foundations-01",
+          "slug": "ai-dl-foundations-01",
+          "domain": "ai",
+          "branch": "dl-foundations",
+          "order": 1,
+          "title": "感知机与激活函数",
+          "icon": "⚡",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "一颗人工神经元为什么连“异或”都算不出来？加上隐藏层和非线性折弯，奇迹就发生了。",
+          "difficulty": "入门",
+          "related": [
+            "ai/ai-symbolic-ml-03",
+            "ai/ai-dl-foundations-02"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-dl-foundations-01/01-perceptron-xor-wall.html",
+              "file": "01-perceptron-xor-wall.html",
+              "path": "./domains/ai/ai-dl-foundations-01/01-perceptron-xor-wall.html",
+              "title": "感知机与 XOR 死局",
+              "icon": "🚧",
+              "archetype": "spatial",
+              "concept": "单层感知机 · 线性不可分 · 多层隐藏层破局",
+              "summary": "亲手转动一条直线去切 AND、OR 与 XOR 四个点，切到死胡同时一键加入隐藏层见证历史破局。"
+            },
+            {
+              "id": "ai/ai-dl-foundations-01/02-activation-lab.html",
+              "file": "02-activation-lab.html",
+              "path": "./domains/ai/ai-dl-foundations-01/02-activation-lab.html",
+              "title": "激活函数变形记",
+              "icon": "📈",
+              "archetype": "simulation",
+              "concept": "非线性激活 · Sigmoid 梯度消失 · ReLU 崛起",
+              "summary": "对比 Linear、Sigmoid、Tanh 与 ReLU 的函数与导数曲线，直观看到 Sigmoid 为何会卡死深层网络。"
+            },
+            {
+              "id": "ai/ai-dl-foundations-01/03-universal-approx.html",
+              "file": "03-universal-approx.html",
+              "path": "./domains/ai/ai-dl-foundations-01/03-universal-approx.html",
+              "title": "神经元积木工坊",
+              "icon": "🧱",
+              "archetype": "builder",
+              "concept": "ReLU 折线叠加 · 万能近似定理 · 宽度表达力",
+              "summary": "增加 ReLU 神经元数量，亲眼看着几根简单的直拐杖折线拼出一条光滑的正弦曲线。"
+            }
+          ]
+        },
         {
           "id": "ai/ai-symbolic-ml-01",
           "slug": "ai-symbolic-ml-01",
@@ -1945,6 +1981,55 @@
           ]
         },
         {
+          "id": "ai/ai-symbolic-ml-04",
+          "slug": "ai-symbolic-ml-04",
+          "domain": "ai",
+          "branch": "symbolic-ml",
+          "order": 4,
+          "title": "无监督学习（聚类 / PCA 降维）",
+          "icon": "🧲",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "没有标准答案、没有人工标签，AI 怎么自己发现人群圈层、压缩高维数据并抓出异常？",
+          "difficulty": "入门",
+          "related": [
+            "ai/ai-symbolic-ml-03",
+            "ai/token-embedding-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-symbolic-ml-04/01-kmeans-magnet.html",
+              "file": "01-kmeans-magnet.html",
+              "path": "./domains/ai/ai-symbolic-ml-04/01-kmeans-magnet.html",
+              "title": "K-Means 质心磁铁实验室",
+              "icon": "🧲",
+              "archetype": "spatial",
+              "concept": "K-Means 聚类 · 质心迭代 · 形状局限",
+              "summary": "单步观察样本认领质心与质心搬家收敛过程，并切换月牙形数据看清 K-Means 的盲区。"
+            },
+            {
+              "id": "ai/ai-symbolic-ml-04/02-pca-shadow.html",
+              "file": "02-pca-shadow.html",
+              "path": "./domains/ai/ai-symbolic-ml-04/02-pca-shadow.html",
+              "title": "PCA 降维手电筒",
+              "icon": "🔦",
+              "archetype": "simulation",
+              "concept": "主成分分析 PCA · 最大方差投影 · 维度压缩",
+              "summary": "旋转投影轴像打手电筒照出点云影子，找到信息保留率最高的“黄金主成分方向”。"
+            },
+            {
+              "id": "ai/ai-symbolic-ml-04/03-anomaly-radar.html",
+              "file": "03-anomaly-radar.html",
+              "path": "./domains/ai/ai-symbolic-ml-04/03-anomaly-radar.html",
+              "title": "无标签抓内鬼：异常检测雷达",
+              "icon": "📡",
+              "archetype": "scenario",
+              "concept": "异常检测 · 密度/距离阈值 · 漏报与误杀权衡",
+              "summary": "在无标注的信用卡交易分布中调节警报圈半径，权衡抓出盗刷与误杀正常用户的代价。"
+            }
+          ]
+        },
+        {
           "id": "ai/llm-infra-toys",
           "slug": "llm-infra-toys",
           "domain": "ai",
@@ -2041,6 +2126,55 @@
               "archetype": "interactive",
               "concept": "任务拆解 · Human-in-the-Loop",
               "summary": "对比手把手副驾驶、高危刹车与 YOLO 全自动 3 秒删老板合同的职场社死现场。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-symbolic-ml-05",
+          "slug": "ai-symbolic-ml-05",
+          "domain": "ai",
+          "branch": "symbolic-ml",
+          "order": 5,
+          "title": "贝叶斯推断与概率图模型",
+          "icon": "🎲",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "面对充满不确定性的现实世界，AI 怎么用新证据不断更新信念、并在因果网络里反向追凶？",
+          "difficulty": "入门",
+          "related": [
+            "ai/ai-symbolic-ml-04",
+            "ai/llm-evals-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-symbolic-ml-05/01-bayes-base-rate.html",
+              "file": "01-bayes-base-rate.html",
+              "path": "./domains/ai/ai-symbolic-ml-05/01-bayes-base-rate.html",
+              "title": "体检阳性真得病了吗？",
+              "icon": "🩺",
+              "archetype": "simulation",
+              "concept": "贝叶斯定理 · 先验概率 · 基率谬误",
+              "summary": "用 1000 人人群方阵直观揭秘：为什么 99% 准确的体检报阳性，罕见病真实患病率却不到 10%？"
+            },
+            {
+              "id": "ai/ai-symbolic-ml-05/02-naive-bayes-spam.html",
+              "file": "02-naive-bayes-spam.html",
+              "path": "./domains/ai/ai-symbolic-ml-05/02-naive-bayes-spam.html",
+              "title": "朴素贝叶斯垃圾邮件秤",
+              "icon": "📧",
+              "archetype": "builder",
+              "concept": "朴素贝叶斯 · 条件独立假设 · 似然比累乘",
+              "summary": "自由拼装邮件关键词，看每个词的似然比如何一步步把天平压向垃圾邮件或正常邮件。"
+            },
+            {
+              "id": "ai/ai-symbolic-ml-05/03-bayesian-network-cause.html",
+              "file": "03-bayesian-network-cause.html",
+              "path": "./domains/ai/ai-symbolic-ml-05/03-bayesian-network-cause.html",
+              "title": "贝叶斯因果网：草地湿了谁干的？",
+              "icon": "🌧️",
+              "archetype": "spatial",
+              "concept": "有向概率图 · 联合推理 · 解释消除效应",
+              "summary": "在“下雨 + 洒水器 → 草地湿润”因果网上勾选证据，亲手触发反直觉的“解释消除效应”。"
             }
           ]
         },

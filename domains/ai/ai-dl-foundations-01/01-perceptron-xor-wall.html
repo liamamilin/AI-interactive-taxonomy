@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：感知机与 XOR 死局 · 线性不可分</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+    .seg { display: inline-flex; background: var(--tax-surface-alt); padding: 4px; border-radius: 12px; gap: 4px; border: 1px solid var(--tax-border); }
+    .seg button { border: none; background: transparent; color: var(--tax-muted); font-weight: 750; font-size: 13px; padding: 7px 12px; border-radius: 9px; cursor: pointer; }
+    .seg button.active { background: var(--tax-surface); color: var(--tax-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .layout { display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } }
+    .svg-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 12px; }
+    svg { width: 100%; height: 300px; display: block; }
+    .panel-right { display: flex; flex-direction: column; gap: 12px; }
+    .box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 12px; padding: 14px; }
+    .acc-big { font-size: 32px; font-weight: 900; font-family: ui-monospace, monospace; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚧 感知机与 XOR 死局：为什么一刀切不开“异或”？</h1>
+        <p>转动一条直线把绿点（1）和红点（0）分开。AND 和 OR 轻松搞定，但切到 XOR 时你会亲历 1969 年引发第一次 AI 寒冬的著名死局！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="controls">
+        <div class="seg" id="gateSeg">
+          <button data-gate="AND" class="active">AND（且）</button>
+          <button data-gate="OR">OR（或）</button>
+          <button data-gate="XOR">XOR（异或 · 死局！）</button>
+        </div>
+        <button class="tax-btn" id="mlpBtn" style="display:none;">⚡ 加入隐藏层（2 条线破局！）</button>
+      </div>
+
+      <div class="layout">
+        <div class="svg-box">
+          <svg id="xorSvg" viewBox="0 0 420 300"></svg>
+        </div>
+        <div class="panel-right">
+          <div class="box">
+            <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">当前切分准确率</div>
+            <div class="acc-big" id="accVal" style="color:var(--tax-green)">100% (4/4)</div>
+          </div>
+          <div class="box" id="sliderBox">
+            <label style="font-size:13px;font-weight:800;">📐 直线方向（权重比 w1/w2）：<span id="angOut">45°</span></label>
+            <input id="angSlider" type="range" min="0" max="360" value="45" style="width:100%;margin:6px 0 12px;" />
+            <label style="font-size:13px;font-weight:800;">↔️ 直线平移（偏置 Bias）：<span id="biasOut">-0.8</span></label>
+            <input id="biasSlider" type="range" min="-150" max="150" value="-80" style="width:100%;margin-top:6px;" />
+          </div>
+          <div class="box" style="font-size:13px;color:var(--tax-muted);" id="descBox">
+            单层感知机公式：<code>y = (w1·x1 + w2·x2 + b) > 0</code>，本质只能画<strong>一条直线</strong>。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>先在 AND/OR 上把准确率调到 100%，再点上方 <strong>XOR（异或）</strong> 试试——无论怎么拧，单条直线最多只能切对 3/4 个点！
+    </div>
+  </div>
+
+  <script>
+    const GATES = {
+      AND: [{x:0,y:0,c:0},{x:1,y:0,c:0},{x:0,y:1,c:0},{x:1,y:1,c:1}],
+      OR:  [{x:0,y:0,c:0},{x:1,y:0,c:1},{x:0,y:1,c:1},{x:1,y:1,c:1}],
+      XOR: [{x:0,y:0,c:0},{x:1,y:0,c:1},{x:0,y:1,c:1},{x:1,y:1,c:0}]
+    };
+
+    let gate = "AND";
+    let useMLP = false;
+
+    function render() {
+      const ang = parseInt(document.getElementById("angSlider").value, 10);
+      const bias = parseInt(document.getElementById("biasSlider").value, 10) / 100;
+      document.getElementById("angOut").textContent = ang + "°";
+      document.getElementById("biasOut").textContent = bias.toFixed(2);
+
+      const rad = (ang * Math.PI) / 180;
+      const w1 = Math.cos(rad), w2 = Math.sin(rad);
+
+      const toX = x => 110 + x * 200;
+      const toY = y => 230 - y * 160;
+      const svg = document.getElementById("xorSvg");
+      let html = `<rect x="40" y="25" width="340" height="245" rx="10" fill="var(--tax-surface)" stroke="var(--tax-border)"/>`;
+
+      const pts = GATES[gate];
+      let correct = 0;
+
+      if (useMLP && gate === "XOR") {
+        // Two parallel lines forming a diagonal band isolating (0,1) and (1,0)
+        // Line 1: x + y = 0.5  -> (0,0.5) to (0.5,0)
+        // Line 2: x + y = 1.5  -> (0.5,1) to (1,0.5)
+        const p1 = `${toX(-0.2)},${toY(0.7)}`, p2 = `${toX(0.7)},${toY(-0.2)}`;
+        const p3 = `${toX(1.2)},${toY(0.3)}`, p4 = `${toX(0.3)},${toY(1.2)}`;
+        html += `<polygon points="${p1} ${p2} ${p3} ${p4}" fill="var(--tax-green-soft)" opacity="0.75"/>`;
+        html += `<line x1="${toX(-0.2)}" y1="${toY(0.7)}" x2="${toX(0.7)}" y2="${toY(-0.2)}" stroke="var(--tax-green)" stroke-width="2.5" stroke-dasharray="6,4"/>`;
+        html += `<line x1="${toX(0.3)}" y1="${toY(1.2)}" x2="${toX(1.2)}" y2="${toY(0.3)}" stroke="var(--tax-green)" stroke-width="2.5" stroke-dasharray="6,4"/>`;
+        correct = 4;
+      } else {
+        // Draw single decision boundary: w1*(x-0.5) + w2*(y-0.5) + bias = 0
+        // Shade positive half-plane approximately using a grid
+        for (let gx = 40; gx < 380; gx += 17) {
+          for (let gy = 25; gy < 270; gy += 16) {
+            const dx = (gx + 8 - 110) / 200 - 0.5;
+            const dy = (230 - (gy + 8)) / 160 - 0.5;
+            const v = w1 * dx + w2 * dy + bias;
+            html += `<rect x="${gx}" y="${gy}" width="17" height="16" fill="${v > 0 ? "var(--tax-green)" : "var(--tax-red)"}" opacity="0.11"/>`;
+          }
+        }
+        // Line center point & direction
+        const cx = 0.5 - w1 * bias, cy = 0.5 - w2 * bias;
+        const tx = -w2, ty = w1;
+        html += `<line x1="${toX(cx - tx * 2)}" y1="${toY(cy - ty * 2)}" x2="${toX(cx + tx * 2)}" y2="${toY(cy + ty * 2)}" stroke="var(--tax-primary)" stroke-width="3"/>`;
+
+        for (const p of pts) {
+          const pred = (w1 * (p.x - 0.5) + w2 * (p.y - 0.5) + bias) > 0 ? 1 : 0;
+          if (pred === p.c) correct++;
+        }
+      }
+
+      for (const p of pts) {
+        const sx = toX(p.x), sy = toY(p.y);
+        html += `<circle cx="${sx}" cy="${sy}" r="16" fill="${p.c ? "var(--tax-green)" : "var(--tax-red)"}" stroke="#fff" stroke-width="3"/>`;
+        html += `<text x="${sx}" y="${sy + 5}" text-anchor="middle" fill="#fff" font-size="13" font-weight="900">${p.c}</text>`;
+        html += `<text x="${sx}" y="${sy + 32}" text-anchor="middle" fill="var(--tax-muted)" font-size="11.5" font-weight="700">(${p.x}, ${p.y})</text>`;
+      }
+      svg.innerHTML = html;
+
+      const pct = Math.round((correct / 4) * 100);
+      const accEl = document.getElementById("accVal");
+      accEl.textContent = `${pct}% (${correct}/4)`;
+      accEl.style.color = pct === 100 ? "var(--tax-green)" : "var(--tax-red)";
+    }
+
+    document.getElementById("gateSeg").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      gate = e.target.dataset.gate;
+      useMLP = false;
+      document.querySelectorAll("#gateSeg button").forEach(b => b.classList.toggle("active", b === e.target));
+      document.getElementById("mlpBtn").style.display = gate === "XOR" ? "inline-block" : "none";
+      document.getElementById("sliderBox").style.opacity = "1";
+      if (gate === "AND") { document.getElementById("angSlider").value = 45; document.getElementById("biasSlider").value = -35; }
+      if (gate === "OR") { document.getElementById("angSlider").value = 45; document.getElementById("biasSlider").value = 35; }
+      if (gate === "XOR") {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（XOR 死局）：</strong>绿点 (0,1) 与 (1,0) 站在对角线上，红点 (0,0) 与 (1,1) 站在另一条对角线上——任何单条直线都绝对切不开！点击上方「⚡ 加入隐藏层」破局！`;
+      }
+      render();
+    });
+
+    document.getElementById("mlpBtn").addEventListener("click", () => {
+      useMLP = !useMLP;
+      document.getElementById("mlpBtn").textContent = useMLP ? "↩️ 退回单层感知机" : "⚡ 加入隐藏层（2 条线破局！）";
+      document.getElementById("sliderBox").style.opacity = useMLP ? "0.4" : "1";
+      if (useMLP) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（多层感知机 MLP 诞生！）：</strong>加上隐藏层后，网络同时画出 <strong>2 条直线</strong> 再做组合（逻辑“与”），围出一条斜向安全带，100% 切开 XOR！这就是深度学习必须“多层叠加”的起点。`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+      render();
+    });
+
+    document.getElementById("angSlider").addEventListener("input", render);
+    document.getElementById("biasSlider").addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>

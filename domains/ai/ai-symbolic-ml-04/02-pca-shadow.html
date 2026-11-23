@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：PCA 降维手电筒 · 主成分最大方差</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 14px; }
+    .layout { display: grid; grid-template-columns: 1.45fr 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } }
+    .svg-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 12px; }
+    svg { width: 100%; height: 310px; display: block; }
+    .card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .big-pct { font-size: 36px; font-weight: 900; font-family: ui-monospace, monospace; color: var(--tax-primary); }
+    .bar-bg { height: 12px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); }
+    .bar-fill { height: 100%; background: var(--tax-green); transition: width 0.15s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔦 PCA 降维手电筒：如何把 2D 压成 1D 却几乎不丢信息？</h1>
+        <p>拖动角度滑块旋转绿色投影轴，观察所有蓝点投射到轴上的橙色影子。影子铺得越开，保留的原始差异信息就越多！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrl-row">
+        <div style="flex:1;min-width:220px;">
+          <label style="font-size:14px;font-weight:800;">🧭 旋转投影轴角度：<span id="angVal" style="color:var(--tax-primary)">0°</span></label>
+          <input id="angSlider" type="range" min="0" max="180" value="0" style="width:100%;margin-top:6px;" />
+        </div>
+        <button class="tax-btn" id="optBtn">✨ 自动锁定第一主成分（PC1）</button>
+      </div>
+
+      <div class="layout">
+        <div class="svg-box">
+          <svg id="pcaSvg" viewBox="0 0 460 310"></svg>
+        </div>
+        <div class="card">
+          <div>
+            <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">当前角度保留的原始信息量（解释方差比）</div>
+            <div class="big-pct" id="pctVal">50.0%</div>
+            <div class="bar-bg"><div class="bar-fill" id="pctBar" style="width:50%"></div></div>
+          </div>
+          <div style="font-size:13px;color:var(--tax-muted);">
+            • <strong>投影损失（灰虚线总长）</strong>：<span id="lossVal" style="color:var(--tax-red);font-weight:800;">—</span><br/>
+            • <strong>几何等价性</strong>：让影子方差<strong>最大</strong>的方向，在数学上严格等价于让垂直投影误差<strong>最小</strong>的方向！
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>试着把投影轴转到 <strong>~32°（顺着椭圆长轴）</strong> 和 <strong>~122°（垂直短轴）</strong> 对比一下——前者只用 1 个数字就保留了 93%+ 的信息，后者所有点全挤成一团！
+    </div>
+  </div>
+
+  <script>
+    // Correlated 2D cloud rotated around ~32 degrees
+    const RAW = [];
+    let s = 77;
+    const rnd = () => { s = (s * 1664525 + 1013904223) % 4294967296; return s / 4294967296; };
+    const trueAng = (32 * Math.PI) / 180;
+    for (let i = 0; i < 28; i++) {
+      const u = (rnd() - 0.5) * 260;
+      const v = (rnd() - 0.5) * 62;
+      const x = u * Math.cos(trueAng) - v * Math.sin(trueAng);
+      const y = u * Math.sin(trueAng) + v * Math.cos(trueAng);
+      RAW.push({ x, y });
+    }
+    // Center data
+    const mx = RAW.reduce((a, p) => a + p.x, 0) / RAW.length;
+    const my = RAW.reduce((a, p) => a + p.y, 0) / RAW.length;
+    const PTS = RAW.map(p => ({ x: p.x - mx, y: p.y - my }));
+    const totalVar = PTS.reduce((a, p) => a + p.x * p.x + p.y * p.y, 0);
+
+    // Exact PC1 angle via 2x2 covariance
+    const cxx = PTS.reduce((a, p) => a + p.x * p.x, 0);
+    const cyy = PTS.reduce((a, p) => a + p.y * p.y, 0);
+    const cxy = PTS.reduce((a, p) => a + p.x * p.y, 0);
+    let bestRad = 0.5 * Math.atan2(2 * cxy, cxx - cyy);
+    if (bestRad < 0) bestRad += Math.PI;
+    const bestDeg = Math.round((bestRad * 180) / Math.PI);
+
+    function render() {
+      const deg = parseInt(document.getElementById("angSlider").value, 10);
+      document.getElementById("angVal").textContent = deg + "°";
+      const rad = (deg * Math.PI) / 180;
+      const ux = Math.cos(rad), uy = Math.sin(rad);
+      const cx = 230, cy = 155;
+
+      let projVar = 0, reconErr = 0;
+      const svg = document.getElementById("pcaSvg");
+      let html = `<line x1="${(cx - ux * 195).toFixed(1)}" y1="${(cy - uy * 195).toFixed(1)}" x2="${(cx + ux * 195).toFixed(1)}" y2="${(cy + uy * 195).toFixed(1)}" stroke="var(--tax-green)" stroke-width="3"/>`;
+
+      for (const p of PTS) {
+        const t = p.x * ux + p.y * uy;
+        const px = t * ux, py = t * uy;
+        projVar += t * t;
+        reconErr += (p.x - px) ** 2 + (p.y - py) ** 2;
+        html += `<line x1="${(cx + p.x).toFixed(1)}" y1="${(cy + p.y).toFixed(1)}" x2="${(cx + px).toFixed(1)}" y2="${(cy + py).toFixed(1)}" stroke="var(--tax-muted)" stroke-width="1" stroke-dasharray="3,3" opacity="0.45"/>`;
+        html += `<circle cx="${(cx + px).toFixed(1)}" cy="${(cy + py).toFixed(1)}" r="4" fill="var(--tax-amber)"/>`;
+        html += `<circle cx="${(cx + p.x).toFixed(1)}" cy="${(cy + p.y).toFixed(1)}" r="5" fill="var(--tax-primary)" stroke="#fff" stroke-width="1.2"/>`;
+      }
+      svg.innerHTML = html;
+
+      const pct = (projVar / totalVar) * 100;
+      document.getElementById("pctVal").textContent = pct.toFixed(1) + "%";
+      document.getElementById("pctBar").style.width = pct.toFixed(1) + "%";
+      document.getElementById("lossVal").textContent = (100 - pct).toFixed(1) + "%";
+
+      if (Math.abs(deg - bestDeg) <= 5) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（找到 PC1！）：</strong>在 <strong>${deg}°</strong> 方向上，把二维数据砍掉一半维度压成一维，竟然保留了 <strong>${pct.toFixed(1)}%</strong> 的核心信息！这就是数据压缩与高维可视化（如词向量降维）的基石。`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+
+    document.getElementById("angSlider").addEventListener("input", render);
+    document.getElementById("optBtn").addEventListener("click", () => {
+      document.getElementById("angSlider").value = bestDeg;
+      render();
+    });
+    render();
+  </script>
+</body>
+</html>

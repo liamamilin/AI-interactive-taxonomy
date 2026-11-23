@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：K-Means 质心磁铁实验室</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+    .seg { display: inline-flex; background: var(--tax-surface-alt); padding: 4px; border-radius: 12px; gap: 4px; border: 1px solid var(--tax-border); }
+    .seg button { border: none; background: transparent; color: var(--tax-muted); font-weight: 750; font-size: 13px; padding: 7px 12px; border-radius: 9px; cursor: pointer; }
+    .seg button.active { background: var(--tax-surface); color: var(--tax-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .btn-ghost { border: 1px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-ink); border-radius: 10px; padding: 8px 13px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .svg-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 12px; }
+    svg { width: 100%; height: 320px; display: block; }
+    .status-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧲 K-Means 质心磁铁实验室：没有标签，数据怎么自己抱团？</h1>
+        <p>反复点击「推进 1 步」，观察“每个点找最近磁铁 → 磁铁移到族群中心”的交替循环；再切到月牙形数据看看 K-Means 的盲区。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="controls">
+        <div class="seg" id="shapeSeg">
+          <button data-shape="blobs" class="active">🫧 3 团标准数据</button>
+          <button data-shape="moons">🌙 交错双月牙（盲区测试）</button>
+        </div>
+        <div class="seg" id="kSeg">
+          <button data-k="2">K = 2</button>
+          <button data-k="3" class="active">K = 3</button>
+          <button data-k="4">K = 4</button>
+        </div>
+        <button class="tax-btn" id="stepBtn">⏭️ 推进 1 步</button>
+        <button class="btn-ghost" id="resetBtn">🎲 重置随机磁铁</button>
+      </div>
+
+      <div class="svg-box">
+        <svg id="kmSvg" viewBox="0 0 640 320"></svg>
+        <div class="status-row">
+          <span id="phaseLabel">当前阶段：初始随机撒下质心（点击推进开始）</span>
+          <span>迭代轮数：<strong id="iterNum" style="color:var(--tax-primary)">0</strong> · 簇内总距离：<strong id="inertiaVal">—</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>K-Means 本质只有两句循环——<strong>① 每个样本站队离自己最近的质心；② 每个质心搬到自己队员的平均中心</strong>，直到大家不再换队为止！
+    </div>
+  </div>
+
+  <script>
+    const COLORS = ["#2563eb", "#dc2626", "#059669", "#d97706"];
+    let shape = "blobs";
+    let K = 3;
+    let pts = [];
+    let centroids = [];
+    let stepType = "assign"; // assign | move
+    let iter = 0;
+    let seed = 101;
+    let totalClicks = 0;
+
+    function rand() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
+
+    function buildDataset() {
+      pts = [];
+      if (shape === "blobs") {
+        const centers = [[165, 110], [470, 95], [320, 240]];
+        for (const [cx, cy] of centers) {
+          for (let i = 0; i < 20; i++) {
+            const a = rand() * Math.PI * 2;
+            const r = Math.sqrt(rand()) * 58;
+            pts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r, c: -1 });
+          }
+        }
+      } else {
+        // Two interlocking crescents
+        for (let i = 0; i < 30; i++) {
+          const t = (i / 29) * Math.PI;
+          pts.push({ x: 250 + Math.cos(t) * 125 + (rand() - 0.5) * 18, y: 175 - Math.sin(t) * 95 + (rand() - 0.5) * 18, c: -1 });
+          pts.push({ x: 375 - Math.cos(t) * 125 + (rand() - 0.5) * 18, y: 145 + Math.sin(t) * 95 + (rand() - 0.5) * 18, c: -1 });
+        }
+      }
+      initCentroids();
+    }
+
+    function initCentroids() {
+      centroids = [];
+      for (let i = 0; i < K; i++) {
+        centroids.push({ x: 110 + rand() * 420, y: 60 + rand() * 200 });
+      }
+      pts.forEach(p => p.c = -1);
+      stepType = "assign";
+      iter = 0;
+      document.getElementById("phaseLabel").textContent = "当前阶段：随机放置了 K 个磁铁质心，点击「推进 1 步」开始站队";
+      render();
+    }
+
+    function doStep() {
+      totalClicks++;
+      if (stepType === "assign") {
+        let changed = 0;
+        for (const p of pts) {
+          let best = 0, bestD = Infinity;
+          centroids.forEach((c, idx) => {
+            const d = (p.x - c.x) ** 2 + (p.y - c.y) ** 2;
+            if (d < bestD) { bestD = d; best = idx; }
+          });
+          if (p.c !== best) changed++;
+          p.c = best;
+        }
+        stepType = "move";
+        document.getElementById("phaseLabel").textContent = changed === 0
+          ? "✅ 已完全收敛！所有样本不再换队。"
+          : `阶段① 样本站队完成（${changed} 个点切换了阵营），下一步：质心搬家`;
+      } else {
+        for (let i = 0; i < K; i++) {
+          const members = pts.filter(p => p.c === i);
+          if (members.length) {
+            centroids[i].x = members.reduce((s, p) => s + p.x, 0) / members.length;
+            centroids[i].y = members.reduce((s, p) => s + p.y, 0) / members.length;
+          }
+        }
+        iter++;
+        stepType = "assign";
+        document.getElementById("phaseLabel").textContent = `阶段② 质心搬家到各簇中心（第 ${iter} 轮完成），下一步：重新站队`;
+      }
+      render();
+      if (shape === "moons" && iter >= 2) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（几何盲区）：</strong>看到没？在“交错双月牙”上，K-Means 只会按直线距离画势力范围，硬生生把月牙拦腰斩断！遇到这种非球形分布，就需要 <strong>DBSCAN</strong> 等基于密度的聚类算法。`;
+      }
+      if (totalClicks >= 4 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      const svg = document.getElementById("kmSvg");
+      let html = "";
+      let inertia = 0;
+      for (const p of pts) {
+        const col = p.c >= 0 ? COLORS[p.c % COLORS.length] : "#94a3b8";
+        if (p.c >= 0) {
+          const c = centroids[p.c];
+          inertia += Math.hypot(p.x - c.x, p.y - c.y);
+          html += `<line x1="${p.x.toFixed(1)}" y1="${p.y.toFixed(1)}" x2="${c.x.toFixed(1)}" y2="${c.y.toFixed(1)}" stroke="${col}" stroke-width="1" opacity="0.22"/>`;
+        }
+        html += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5.5" fill="${col}" stroke="#fff" stroke-width="1.2"/>`;
+      }
+      centroids.forEach((c, idx) => {
+        const col = COLORS[idx % COLORS.length];
+        html += `<rect x="${(c.x - 10).toFixed(1)}" y="${(c.y - 10).toFixed(1)}" width="20" height="20" rx="5" fill="${col}" stroke="#fff" stroke-width="2.5"/>`;
+        html += `<text x="${c.x.toFixed(1)}" y="${(c.y + 4).toFixed(1)}" text-anchor="middle" fill="#fff" font-size="11" font-weight="900">C${idx+1}</text>`;
+      });
+      svg.innerHTML = html;
+      document.getElementById("iterNum").textContent = iter;
+      document.getElementById("inertiaVal").textContent = inertia > 0 ? Math.round(inertia).toLocaleString() : "—";
+    }
+
+    document.getElementById("shapeSeg").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      shape = e.target.dataset.shape;
+      document.querySelectorAll("#shapeSeg button").forEach(b => b.classList.toggle("active", b === e.target));
+      if (shape === "moons") {
+        K = 2;
+        document.querySelectorAll("#kSeg button").forEach(b => b.classList.toggle("active", b.dataset.k === "2"));
+      }
+      buildDataset();
+    });
+    document.getElementById("kSeg").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      K = parseInt(e.target.dataset.k, 10);
+      document.querySelectorAll("#kSeg button").forEach(b => b.classList.toggle("active", b === e.target));
+      initCentroids();
+    });
+    document.getElementById("stepBtn").addEventListener("click", doStep);
+    document.getElementById("resetBtn").addEventListener("click", () => { seed += 37; initCentroids(); });
+
+    buildDataset();
+  </script>
+</body>
+</html>
