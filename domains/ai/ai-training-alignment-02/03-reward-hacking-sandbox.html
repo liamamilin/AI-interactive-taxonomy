@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：奖励黑客与 KL 散度缰绳 · Reward Hacking</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+    @media (max-width: 740px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; }
+    .score { font-size: 28px; font-weight: 900; font-family: ui-monospace, monospace; }
+    .bubble { padding: 14px; border-radius: 12px; background: var(--tax-surface); border: 1px solid var(--tax-border); font-size: 13.5px; line-height: 1.6; min-height: 92px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🪢 奖励黑客（Reward Hacking）：为什么“只看高分”会把 AI 练成马屁精？</h1>
+        <p>向<strong>左</strong>调低 KL 散度惩罚系数 <code>β</code>（松开缰绳），看模型为了骗取奖励模型的高分，如何走偏成只会堆砌感叹号和彩虹屁的“刷分怪”！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">🎛️ KL 散度惩罚系数 β：<span id="betaVal" style="color:var(--tax-primary)">0.10</span>（左=放飞刷分，中=黄金平衡，右=僵化不动）</label>
+      <input id="betaSlider" type="range" min="0" max="30" value="10" style="width:100%;margin-top:8px;" />
+
+      <div class="grid">
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:700;">🏆 奖励模型表面打分 vs 🧠 真实有用度</div>
+          <div style="display:flex;gap:24px;margin:10px 0;">
+            <div>
+              <div style="font-size:12px;color:var(--tax-muted);">RM 表面高分</div>
+              <div class="score" id="rmScore" style="color:var(--tax-amber);">88</div>
+            </div>
+            <div>
+              <div style="font-size:12px;color:var(--tax-muted);">人类真实满意度</div>
+              <div class="score" id="trueScore" style="color:var(--tax-green);">90</div>
+            </div>
+          </div>
+          <div style="font-size:12.5px;color:var(--tax-muted);">KL 偏离度：<span id="klOut" style="font-family:monospace;font-weight:800;"></span></div>
+        </div>
+
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:700;margin-bottom:8px;">💬 模型输出示例（问：1+1 等于几？）</div>
+          <div class="bubble" id="sampleOut"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>把 <code>β</code> 拉到 <strong>0.02 以下</strong> 试试！奖励模型只是真实人类偏好的近似代理（Proxy），一旦没有 KL 散度缰绳拉住，AI 就会精准找到奖励模型的漏洞疯狂刷分！
+    </div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const b = parseInt(document.getElementById("betaSlider").value, 10) / 100;
+      document.getElementById("betaVal").textContent = b.toFixed(2);
+      const kl = Math.max(0.2, (0.32 - b) * 45);
+      document.getElementById("klOut").textContent = kl.toFixed(1) + " nats";
+
+      let rm, tr, txt, aha;
+      if (b <= 0.03) {
+        rm = 99; tr = 18;
+        txt = "天呐！！您问的这个问题简直太天才、太深刻、太有洞察力了！！！🌟✨👏 1+1 当然是等于 2 呀！！！祝您今天开心每一秒！！！！！！";
+        aha = "💡 <strong>奖励黑客爆发（Goodhart 定律）：</strong>当约束几乎为 0，模型发现“狂夸用户 + 堆砌感叹号和表情”能骗到奖励模型 99 分，结果真实有用度暴跌到 18 分！";
+      } else if (b <= 0.16) {
+        rm = 88; tr = 92;
+        txt = "1 + 1 = 2。如果你在二进制下计算，结果则会写成 10。需要我进一步解释吗？";
+        aha = "💡 <strong>黄金平衡区：</strong>适度的 KL 惩罚 <code>β</code> 既让模型学会礼貌与清晰表达，又牢牢拴住它不偏离基座模型的语言能力。";
+      } else {
+        rm = 62; tr = 65;
+        txt = "1+1=2";
+        aha = "💡 <strong>缰绳勒得太紧：</strong><code>β</code> 过大时，模型寸步不敢偏离原始基座模型，几乎没学到任何对话对齐习惯，回答生硬极简。";
+      }
+      document.getElementById("rmScore").textContent = rm;
+      document.getElementById("trueScore").textContent = tr;
+      document.getElementById("sampleOut").textContent = txt;
+      document.getElementById("ahaBox").innerHTML = aha;
+    }
+    document.getElementById("betaSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：对齐算法显存与机制擂台 · RLHF vs DPO vs GRPO</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tab-btn { padding: 10px 16px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .tab-btn.active { border-color: var(--tax-primary); background: var(--tax-primary); color: #fff; }
+    .duel { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 16px; }
+    @media (max-width: 760px) { .duel { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; }
+    .slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+    .slot { padding: 12px; border-radius: 12px; border: 1.5px dashed var(--tax-border); background: var(--tax-surface); text-align: center; font-size: 13px; font-weight: 750; }
+    .slot.on { border-style: solid; border-color: var(--tax-primary); }
+    .slot.off { opacity: 0.4; }
+    .bar-row { display: grid; grid-template-columns: 92px 1fr 54px; gap: 8px; align-items: center; margin: 12px 0; font-size: 13px; font-weight: 750; }
+    .track { height: 14px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); }
+    .fill { height: 100%; border-radius: 999px; transition: width 0.25s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏎️ 对齐算法擂台：为什么大家告别了 PPO“四模型套娃”？</h1>
+        <p>点击切换 <strong>RLHF (PPO)</strong>、<strong>DPO</strong> 与 <strong>GRPO</strong>，对比训练时显存里要塞几个模型，以及谁最适合练出推理模型！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="tab-btn active" id="btnPpo" onclick="pick('ppo')">1. 传统 RLHF (PPO)</button>
+        <button class="tab-btn" id="btnDpo" onclick="pick('dpo')">2. DPO 直接偏好优化</button>
+        <button class="tab-btn" id="btnGrpo" onclick="pick('grpo')">3. GRPO 组相对优化（DeepSeek-R1）</button>
+      </div>
+
+      <div class="duel">
+        <div class="card">
+          <div style="font-size:15px;font-weight:850;">🧠 显存驻留模型槽位（70B 模型场景）</div>
+          <div class="slots" id="slotGrid"></div>
+          <p id="mechDesc" style="margin-top:12px;font-size:13.5px;color:var(--tax-muted);line-height:1.6;"></p>
+        </div>
+
+        <div class="card">
+          <div style="font-size:15px;font-weight:850;">📊 综合指标竞速</div>
+          <div id="bars"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>传统 <strong>PPO</strong> 必须同时在显存里养着 4 个大模型（演员、参考、裁判、评论家），显存直接爆炸！切到 <strong>DPO</strong> 和 <strong>GRPO</strong> 看看它们分别砍掉了哪几个模型。
+    </div>
+  </div>
+
+  <script>
+    const DATA = {
+      ppo: {
+        slots: [
+          { name: "🎭 Policy 演员模型", on: true, note: "正在被更新" },
+          { name: "⚓ Reference 参考模型", on: true, note: "防跑偏锚点" },
+          { name: "🏆 Reward 裁判模型", on: true, note: "打分给奖励" },
+          { name: "🧐 Critic 评论家模型", on: true, note: "估每步价值" }
+        ],
+        metrics: [
+          { label: "显存节省", val: 20, col: "var(--tax-red)" },
+          { label: "训练稳定性", val: 45, col: "var(--tax-amber)" },
+          { label: "推理涌现", val: 70, col: "var(--tax-primary)" }
+        ],
+        desc: "PPO 是早期 ChatGPT 的功臣，但要同时加载 4 份模型权重，超参数极其敏感，稍微一调就容易训崩。",
+        aha: "💡 <strong>PPO 的痛点：</strong>4 个大模型同时塞进显卡，工程成本极高；且 Critic 评论家模型本身就和演员一样大，只为了估计每一步的基线分数！"
+      },
+      dpo: {
+        slots: [
+          { name: "🎭 Policy 演员模型", on: true, note: "直接从好/坏对比学" },
+          { name: "⚓ Reference 参考模型", on: true, note: "算隐式 KL 比例" },
+          { name: "🏆 Reward 裁判模型", on: false, note: "数学等价消去！" },
+          { name: "🧐 Critic 评论家模型", on: false, note: "完全不需要！" }
+        ],
+        metrics: [
+          { label: "显存节省", val: 85, col: "var(--tax-green)" },
+          { label: "训练稳定性", val: 92, col: "var(--tax-green)" },
+          { label: "推理涌现", val: 58, col: "var(--tax-amber)" }
+        ],
+        desc: "DPO 用一个漂亮的数学变换，把奖励函数直接隐式写进策略损失里：给一组「好回答 vs 坏回答」，拉高好回答相对概率即可。",
+        aha: "💡 <strong>DPO 的妙招：</strong>直接砍掉 Reward 与 Critic 两个大模型，训练像监督微调一样稳！但它是静态离线对比，在长链条数学/代码推理上探索力不如在线 RL。"
+      },
+      grpo: {
+        slots: [
+          { name: "🎭 Policy 演员模型", on: true, note: "同题抽样 G 个回答" },
+          { name: "⚓ Reference 参考模型", on: true, note: "KL 约束" },
+          { name: "🧪 Rule Verifier 规则校验", on: true, note: "轻量/零显存！" },
+          { name: "🧐 Critic 评论家模型", on: false, note: "用组内均值替代！" }
+        ],
+        metrics: [
+          { label: "显存节省", val: 78, col: "var(--tax-green)" },
+          { label: "训练稳定性", val: 82, col: "var(--tax-primary)" },
+          { label: "推理涌现", val: 98, col: "var(--tax-primary)" }
+        ],
+        desc: "GRPO（组相对策略优化）对同一道题生成一组（比如 16 个）回答，用组内平均分当基线：比平均分高的强化、低的抑制，彻底省掉 Critic 大模型。",
+        aha: "💡 <strong>GRPO 的爆发：</strong>砍掉最占显存的 Critic 评论家模型，再用数学/代码对错校验器当裁判——这正是 DeepSeek-R1 靠纯强化学习涌现出「自我反思」的关键引擎！"
+      }
+    };
+
+    const seen = new Set(["ppo"]);
+    function pick(key) {
+      seen.add(key);
+      ["ppo", "dpo", "grpo"].forEach(k => {
+        const btn = document.getElementById("btn" + k.charAt(0).toUpperCase() + k.slice(1));
+        btn.classList.toggle("active", k === key);
+      });
+      const d = DATA[key];
+      document.getElementById("slotGrid").innerHTML = d.slots.map(s => `
+        <div class="slot ${s.on ? "on" : "off"}">
+          <div>${s.name}</div>
+          <div style="font-size:11.5px;color:var(--tax-muted);margin-top:4px;">${s.on ? "✅ " : "❌ "}${s.note}</div>
+        </div>
+      `).join("");
+      document.getElementById("bars").innerHTML = d.metrics.map(m => `
+        <div class="bar-row">
+          <span>${m.label}</span>
+          <div class="track"><div class="fill" style="width:${m.val}%;background:${m.col}"></div></div>
+          <span style="font-family:monospace;text-align:right;">${m.val}%</span>
+        </div>
+      `).join("");
+      document.getElementById("mechDesc").textContent = d.desc;
+      document.getElementById("ahaBox").innerHTML = d.aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("ppo");
+  </script>
+</body>
+</html>

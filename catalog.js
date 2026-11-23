@@ -6,10 +6,10 @@ window.TAXONOMY_DATA = {
   "stats": {
     "totalDomains": 10,
     "litDomains": 1,
-    "totalTopics": 28,
-    "totalPlannedTopics": 247,
+    "totalTopics": 30,
+    "totalPlannedTopics": 245,
     "totalBlueprintTopics": 275,
-    "totalToys": 84
+    "totalToys": 90
   },
   "tracks": [
     {
@@ -1515,12 +1515,7 @@ window.TAXONOMY_DATA = {
         {
           "id": "training-alignment",
           "title": "4. 训练、微调与对齐（Training & Alignment）",
-          "plannedTopics": [
-            {
-              "slug": "ai-training-alignment-02",
-              "title": "偏好对齐进阶（DPO / GRPO / 宪法 AI）"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "multimodal-gen",
@@ -1573,12 +1568,7 @@ window.TAXONOMY_DATA = {
         {
           "id": "applied-agents",
           "title": "7. 应用架构、RAG 与 Agent 系统",
-          "plannedTopics": [
-            {
-              "slug": "ai-applied-agents-01",
-              "title": "Workflow 编排 vs 自主 Agent 边界"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "infra-safety",
@@ -1603,10 +1593,10 @@ window.TAXONOMY_DATA = {
           ]
         }
       ],
-      "liveTopicCount": 28,
-      "plannedTopicCount": 15,
+      "liveTopicCount": 30,
+      "plannedTopicCount": 13,
       "blueprintTopicCount": 43,
-      "liveToyCount": 84,
+      "liveToyCount": 90,
       "topics": [
         {
           "id": "ai/ai-dl-foundations-01",
@@ -2452,6 +2442,56 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "ai/ai-training-alignment-02",
+          "slug": "ai-training-alignment-02",
+          "domain": "ai",
+          "branch": "training-alignment",
+          "order": 5,
+          "title": "偏好对齐进阶（DPO / GRPO / 宪法 AI）",
+          "icon": "⚖️",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "为什么大家开始放弃传统 PPO 四模型套娃，转向 DPO、GRPO 和让 AI 自己按“宪法”改作业？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/llm-training-toys",
+            "ai/llm-finetuning-toys",
+            "ai/reasoning-model-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-training-alignment-02/01-rlhf-vs-dpo-vs-grpo.html",
+              "file": "01-rlhf-vs-dpo-vs-grpo.html",
+              "path": "./domains/ai/ai-training-alignment-02/01-rlhf-vs-dpo-vs-grpo.html",
+              "title": "对齐算法显存与机制擂台",
+              "icon": "🏎️",
+              "archetype": "race",
+              "concept": "RLHF (PPO) · DPO 直接偏好优化 · GRPO 组相对策略优化",
+              "summary": "切换 RLHF、DPO 与 GRPO 三种对齐范式，直观对比显存模型数量、奖励模型依赖与推理涌现能力。"
+            },
+            {
+              "id": "ai/ai-training-alignment-02/02-constitutional-ai-critique.html",
+              "file": "02-constitutional-ai-critique.html",
+              "path": "./domains/ai/ai-training-alignment-02/02-constitutional-ai-critique.html",
+              "title": "宪法 AI 自我批评剧场",
+              "icon": "📜",
+              "archetype": "scenario",
+              "concept": "Constitutional AI · RLAIF · 自我批评与重写",
+              "summary": "面对危险或越界提问，亲手触发“初稿 → 宪法审查 → 自我重写”三步闭环，看 AI 如何自己教自己变安全。"
+            },
+            {
+              "id": "ai/ai-training-alignment-02/03-reward-hacking-sandbox.html",
+              "file": "03-reward-hacking-sandbox.html",
+              "path": "./domains/ai/ai-training-alignment-02/03-reward-hacking-sandbox.html",
+              "title": "奖励黑客与 KL 散度缰绳",
+              "icon": "🪢",
+              "archetype": "simulation",
+              "concept": "Reward Hacking · KL 散度惩罚 β · 刷分崩坏",
+              "summary": "调节 KL 惩罚系数 β，亲眼看见没有缰绳的模型如何为了迎合奖励函数而变成只会堆砌感叹号的“马屁精”。"
+            }
+          ]
+        },
+        {
           "id": "ai/agent-harness-toys",
           "slug": "agent-harness-toys",
           "domain": "ai",
@@ -2498,6 +2538,56 @@ window.TAXONOMY_DATA = {
               "archetype": "interactive",
               "concept": "客观验收官 · 死循环检测 · 熔断器",
               "summary": "绝不轻信 AI 的“我修好了”，组合三大验收与熔断机关护送火箭安全升空。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-applied-agents-01",
+          "slug": "ai-applied-agents-01",
+          "domain": "ai",
+          "branch": "applied-agents",
+          "order": 6,
+          "title": "Workflow 编排 vs 自主 Agent 边界",
+          "icon": "🧭",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "不是所有业务都该用自主 Agent！什么时候该用写死步骤的 Workflow，什么时候才放权给 Agent 自己循环？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/agent-interactive-toys",
+            "ai/agent-harness-toys",
+            "ai/multi-agent-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-applied-agents-01/01-determinism-vs-autonomy.html",
+              "file": "01-determinism-vs-autonomy.html",
+              "path": "./domains/ai/ai-applied-agents-01/01-determinism-vs-autonomy.html",
+              "title": "确定性 vs 自主性决策光谱仪",
+              "icon": "🎛️",
+              "archetype": "simulation",
+              "concept": "Workflow 确定性 · Agent 自主性 · 成本与延迟权衡",
+              "summary": "调节任务规则清晰度与单次出错代价，实时算出应该采用固定 Workflow 还是开放式 Agent 循环。"
+            },
+            {
+              "id": "ai/ai-applied-agents-01/02-workflow-vs-agent-race.html",
+              "file": "02-workflow-vs-agent-race.html",
+              "path": "./domains/ai/ai-applied-agents-01/02-workflow-vs-agent-race.html",
+              "title": "双栏实战竞速：报销单 vs 模糊调研",
+              "icon": "🏁",
+              "archetype": "race",
+              "concept": "可控流水线 · 自主规划循环 · Token 账单差异",
+              "summary": "在“标准发票报销”与“开放式竞品调研”两个任务上同时跑 Workflow 和 Agent，对比耗时、费用与成功率。"
+            },
+            {
+              "id": "ai/ai-applied-agents-01/03-architecture-router-builder.html",
+              "file": "03-architecture-router-builder.html",
+              "path": "./domains/ai/ai-applied-agents-01/03-architecture-router-builder.html",
+              "title": "生产级混合架构装配台",
+              "icon": "🧱",
+              "archetype": "builder",
+              "concept": "Hybrid Pattern · 路由网关 · 受限循环",
+              "summary": "把业务环节装配到“硬编码节点 / LLM 路由 / 自主沙箱”三层，搭出既省钱又抗造的生产级 AI 系统。"
             }
           ]
         },

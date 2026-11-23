@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：双栏实战竞速 · Workflow vs 自主 Agent</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.primary { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 740px) { .duel { grid-template-columns: 1fr; } }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; }
+    .track { height: 14px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin: 10px 0; }
+    .fill { height: 100%; width: 0%; background: var(--tax-primary); transition: width 0.25s ease; }
+    .log { font-family: ui-monospace, monospace; font-size: 12.5px; color: var(--tax-muted); line-height: 1.6; min-height: 84px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏁 双栏实战竞速：标准报销单 vs 模糊竞品调研</h1>
+        <p>选一个任务场景并点击 <strong>“同时发车”</strong>，看看固定 Workflow 和自主 Agent 谁更快、谁更省钱、谁又会卡死！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn primary" id="scInvoice" onclick="setScenario('invoice')">场景 A：100 张固定格式发票报销</button>
+        <button class="btn" id="scResearch" onclick="setScenario('research')">场景 B：全网模糊调研新竞品定价</button>
+        <button class="btn primary" style="margin-left:auto;" onclick="runRace()">▶ 同时发车竞速</button>
+      </div>
+
+      <div class="duel">
+        <div class="lane">
+          <div style="font-size:15px;font-weight:850;">⛓️ 固定 Workflow 流水线</div>
+          <div class="track"><div class="fill" id="wfBar"></div></div>
+          <div class="log" id="wfLog">等待发车…</div>
+        </div>
+        <div class="lane">
+          <div style="font-size:15px;font-weight:850;">🤖 自主循环 Agent</div>
+          <div class="track"><div class="fill" id="agBar" style="background:var(--tax-green);"></div></div>
+          <div class="log" id="agLog">等待发车…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>分别在 <strong>场景 A</strong> 和 <strong>场景 B</strong> 下点击“同时发车”，感受两套架构在不同战场上的悬殊表现！
+    </div>
+  </div>
+
+  <script>
+    let current = "invoice";
+    const doneScenarios = new Set();
+    let timer = null;
+
+    const SCENARIOS = {
+      invoice: {
+        wfSteps: ["1. OCR 固定字段提取（0.4s）", "2. 税号正则校验（0.1s）", "3. 写入财务库 ✅ 耗时 1.2s · 花费 $0.002"],
+        agSteps: ["1. 思考：我要先看懂这张发票…", "2. 自主调用 OCR 并反复核对抬头（4 轮循环）", "3. 完成 ✅ 耗时 11.5s · 花费 $0.048（贵 24 倍！）"],
+        wfEnd: 100, agEnd: 100,
+        aha: "💡 <strong>场景 A 结论（Workflow 完胜）：</strong>固定格式报销单用自主 Agent 纯属浪费！Agent 每轮都要带完整上下文重新思考，<strong>耗时慢 10 倍、账单贵 24 倍</strong>，还可能突然发挥创意改掉格式。"
+      },
+      research: {
+        wfSteps: ["1. 请求预设官网 /pricing", "2. 遭遇 404（竞品把定价页改成了 /plans）", "3. 流水线报错中断 ❌ 完成度 33%"],
+        agSteps: ["1. 访问 /pricing 失败 → 自动改用站内搜索", "2. 在博客公告里找到最新阶梯报价", "3. 交叉验证后生成表格 ✅ 耗时 9.8s · 成功交付"],
+        wfEnd: 35, agEnd: 100,
+        aha: "💡 <strong>场景 B 结论（自主 Agent 完胜）：</strong>遇到网页改版、信息分散等<strong>无法预先写死分支</strong>的开放环境时，Agent 的“观察 → 换路 → 重试”循环才是不可替代的核心价值！"
+      }
+    };
+
+    function setScenario(sc) {
+      current = sc;
+      document.getElementById("scInvoice").classList.toggle("primary", sc === "invoice");
+      document.getElementById("scResearch").classList.toggle("primary", sc === "research");
+      document.getElementById("wfBar").style.width = "0%";
+      document.getElementById("agBar").style.width = "0%";
+      document.getElementById("wfLog").textContent = "已切换至" + (sc === "invoice" ? "场景 A" : "场景 B") + "，点击「同时发车」开始。";
+      document.getElementById("agLog").textContent = "等待发车…";
+    }
+
+    function runRace() {
+      if (timer) clearInterval(timer);
+      const d = SCENARIOS[current];
+      let tick = 0;
+      document.getElementById("wfBar").style.width = "10%";
+      document.getElementById("agBar").style.width = "10%";
+      timer = setInterval(() => {
+        tick++;
+        if (tick === 1) {
+          document.getElementById("wfBar").style.width = "50%";
+          document.getElementById("agBar").style.width = "35%";
+          document.getElementById("wfLog").innerHTML = d.wfSteps.slice(0, 2).join("<br>");
+          document.getElementById("agLog").innerHTML = d.agSteps[0];
+        } else if (tick === 2) {
+          document.getElementById("wfBar").style.width = d.wfEnd + "%";
+          document.getElementById("agBar").style.width = "70%";
+          document.getElementById("wfLog").innerHTML = d.wfSteps.join("<br>");
+          document.getElementById("agLog").innerHTML = d.agSteps.slice(0, 2).join("<br>");
+        } else {
+          clearInterval(timer);
+          document.getElementById("agBar").style.width = d.agEnd + "%";
+          document.getElementById("agLog").innerHTML = d.agSteps.join("<br>");
+          document.getElementById("ahaBox").innerHTML = d.aha;
+          doneScenarios.add(current);
+          if (doneScenarios.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }, 450);
+    }
+  </script>
+</body>
+</html>

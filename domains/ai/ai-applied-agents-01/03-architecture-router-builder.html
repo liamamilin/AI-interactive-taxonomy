@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：生产级混合架构装配台 · Hybrid Agent</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .task-row { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; align-items: center; padding: 12px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 10px; }
+    @media (max-width: 720px) { .task-row { grid-template-columns: 1fr; } }
+    select { padding: 8px 10px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-text); font-weight: 750; }
+    .scorebar { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; font-weight: 850; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧱 生产级混合架构装配台：外层用 Workflow 锁死，局部才放 Agent 探索</h1>
+        <p>为智能客服系统的 4 个真实环节选择最合适的执行层，看看怎样搭配才能兼顾<strong>高可靠性</strong>与<strong>低成本</strong>！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div id="rows"></div>
+      <div class="scorebar" id="scoreBar"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const TASKS = [
+      { id: "auth", name: "① 用户身份鉴权与订单查询", best: "code", tip: "严格确定性，必须用传统 API/SQL" },
+      { id: "intent", name: "② 识别用户是“退货”还是“问物流”", best: "route", tip: "用小模型做单步分类路由最省最快" },
+      { id: "debug", name: "③ 排查复杂技术故障并多轮查文档", best: "agent", tip: "需要多轮搜索验证，最适合自主 Agent" },
+      { id: "refund", name: "④ 执行打款退款操作", best: "code", tip: "资金动作绝不能交给随机循环，必须硬编码 + 人工审批" }
+    ];
+    const choices = { auth: "agent", intent: "agent", debug: "code", refund: "agent" };
+
+    function render() {
+      document.getElementById("rows").innerHTML = TASKS.map(t => `
+        <div class="task-row">
+          <div>
+            <div style="font-weight:850;font-size:14px;">${t.name}</div>
+            <div style="font-size:12px;color:var(--tax-muted);margin-top:2px;">提示：${t.tip}</div>
+          </div>
+          <select onchange="setChoice('${t.id}', this.value)">
+            <option value="code" ${choices[t.id] === "code" ? "selected" : ""}>硬编码确定性节点</option>
+            <option value="route" ${choices[t.id] === "route" ? "selected" : ""}>单步 LLM 路由</option>
+            <option value="agent" ${choices[t.id] === "agent" ? "selected" : ""}>多轮自主 Agent</option>
+          </select>
+        </div>
+      `).join("");
+
+      const hits = TASKS.filter(t => choices[t.id] === t.best).length;
+      const risk = (choices.auth === "agent" || choices.refund === "agent") ? "⚠️ 高危（资金/鉴权失控风险）" : "✅ 安全可控";
+      document.getElementById("scoreBar").innerHTML = `
+        <span>架构匹配度：<span style="color:var(--tax-primary)">${hits} / 4</span></span>
+        <span>安全审计：<span>${risk}</span></span>
+      `;
+      document.getElementById("ahaBox").innerHTML = hits === 4
+        ? "💡 <strong>满分架构师！</strong>成熟的生产级 AI 系统从不是“一个大 Agent 管到底”，而是<strong>确定性代码管资金与权限 + 轻量路由分流 + 局部受限 Agent 攻克开放难题</strong>！"
+        : "💡 <strong>顿悟时刻：</strong>试着把 4 个环节都调到最合适的执行层（尤其别让自主 Agent 直接碰鉴权和打款！）。";
+      if (hits === 4 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function setChoice(id, val) {
+      choices[id] = val;
+      render();
+    }
+    render();
+  </script>
+</body>
+</html>
