@@ -7,28 +7,51 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .viewport { position: relative; height: 210px; border-radius: 16px; overflow: hidden; border: 1.5px solid var(--tax-border); background: linear-gradient(180deg, #1e293b 0%, #334155 60%, #475569 100%); margin-top: 14px; }
-    .layer { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; transition: left 0.06s linear; user-select: none; }
+    .ctrls { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .slider-box { flex: 1; min-width: 220px; }
+    .btn { padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .stage { display: grid; grid-template-columns: 1.35fr 0.65fr; gap: 14px; }
+    @media (max-width: 740px) { .stage { grid-template-columns: 1fr; } }
+    canvas { width: 100%; height: 240px; border-radius: 16px; border: 1.5px solid var(--tax-border); background: #0f172a; display: block; }
+    .side { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; }
+    .row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px dashed var(--tax-border); }
+    .row:last-child { border-bottom: none; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
       <div>
-        <h1>👓 单目深度与 3D 视差：空间智能如何从一张平面照片“看穿”远近纵深？</h1>
-        <p>AI 模型先为平面图的每个像素预测出深度值（Depth Map），再按“近快远慢”的几何规律移动各层。左右拖动 <strong>观察者视角</strong>，亲手体验 2D 变 3D 的立体视差！</p>
+        <h1>👓 单目深度与 3D 视差：空间智能如何从平面像素“看穿”三维纵深？</h1>
+        <p>左右拖动 <strong>观察者水平位移</strong>，并切换 <strong>深度热力图（Depth Map）</strong>，亲眼看近景、中景、远山如何按 <code>1 / z</code> 几何规律产生立体视差！</p>
       </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
 
     <div class="tax-panel">
-      <label style="font-size:14.5px;font-weight:850;">👀 观察者水平位移：<span id="xVal" style="color:var(--tax-primary)">0</span>（前景位移大、远山几乎不动）</label>
-      <input id="xSlider" type="range" min="-100" max="100" value="0" style="width:100%;margin-top:8px;" />
+      <div class="ctrls">
+        <div class="slider-box">
+          <label style="font-size:14px;font-weight:850;">👀 观察者横向移动 X：<span id="xVal" style="color:var(--tax-primary)">0</span> cm</label>
+          <input id="xSlider" type="range" min="-100" max="100" value="0" style="width:100%;margin-top:6px;" />
+        </div>
+        <button class="btn active" id="bRgb" onclick="setMode('rgb')">🎨 彩色立体视图</button>
+        <button class="btn" id="bDepth" onclick="setMode('depth')">🌡️ 深度热力图（Depth Map）</button>
+      </div>
 
-      <div class="viewport">
-        <div class="layer" id="far" style="top:22px;font-size:48px;opacity:0.75;">🏔️ ⛰️ 🏔️</div>
-        <div class="layer" id="mid" style="top:78px;font-size:44px;">🌲 🏠 🌲</div>
-        <div class="layer" id="near" style="top:132px;font-size:52px;">🐕 🪴</div>
+      <div class="stage">
+        <canvas id="cv" width="520" height="240"></canvas>
+        <div class="side">
+          <div>
+            <div style="font-weight:850;font-size:14px;margin-bottom:8px;">📐 各层深度与实时视差位移</div>
+            <div class="row"><span>🏔️ 远山（z = 80m）</span><strong id="dFar" style="font-family:monospace;">0 px</strong></div>
+            <div class="row"><span>🏠 中景木屋（z = 12m）</span><strong id="dMid" style="font-family:monospace;">0 px</strong></div>
+            <div class="row"><span>🐕 前景小狗（z = 2.5m）</span><strong id="dNear" style="font-family:monospace;color:var(--tax-primary);">0 px</strong></div>
+          </div>
+          <div style="font-size:12px;color:var(--tax-muted);margin-top:10px;line-height:1.5;">
+            热力图规则：<strong>暖红/亮黄 = 离镜头极近</strong>，<strong>深蓝/暗紫 = 极远背景</strong>。
+          </div>
+        </div>
       </div>
     </div>
 
@@ -36,23 +59,125 @@
   </div>
 
   <script>
-    let drags = 0;
-    function render() {
-      const x = parseInt(document.getElementById("xSlider").value, 10);
-      document.getElementById("xVal").textContent = x;
-      document.getElementById("far").style.left = `calc(50% + ${(-x * 0.12).toFixed(1)}px)`;
-      document.getElementById("mid").style.left = `calc(50% + ${(-x * 0.45).toFixed(1)}px)`;
-      document.getElementById("near").style.left = `calc(50% + ${(-x * 1.05).toFixed(1)}px)`;
+    const cv = document.getElementById("cv");
+    const ctx = cv.getContext("2d");
+    let mode = "rgb";
+    let interacts = 0;
 
-      document.getElementById("ahaBox").innerHTML = Math.abs(x) >= 50
-        ? "💡 <strong>三维视差立现！</strong>因为有了准确的深度估计（Depth Anything / VGGT 等模型），AI 就能区分 1 米外的小狗和 1000 米外的雪山——这正是李飞飞等学者强调的<strong>空间智能（Spatial Intelligence）</strong>，也是机器人抓取和 AR 遮挡的基础！"
-        : "💡 <strong>顿悟时刻：</strong>把滑块大幅向左、向右来回拖动，感受前景（近）、中景、远景（远）截然不同的运动视差速度！";
+    function setMode(m) {
+      mode = m;
+      interacts++;
+      document.getElementById("bRgb").classList.toggle("active", m === "rgb");
+      document.getElementById("bDepth").classList.toggle("active", m === "depth");
+      render();
+      if (interacts >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function drawMountain(offsetX, isDepth) {
+      ctx.fillStyle = isDepth ? "#1e1b4b" : "#334155";
+      ctx.beginPath();
+      ctx.moveTo(-40 + offsetX, 170);
+      ctx.lineTo(110 + offsetX, 55);
+      ctx.lineTo(240 + offsetX, 145);
+      ctx.lineTo(380 + offsetX, 45);
+      ctx.lineTo(560 + offsetX, 170);
+      ctx.closePath();
+      ctx.fill();
+      if (!isDepth) {
+        ctx.fillStyle = "#e2e8f0";
+        ctx.beginPath();
+        ctx.moveTo(110 + offsetX, 55);
+        ctx.lineTo(86 + offsetX, 82);
+        ctx.lineTo(134 + offsetX, 82);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    function drawHouse(offsetX, isDepth) {
+      const x = 230 + offsetX;
+      ctx.fillStyle = isDepth ? "#7c3aed" : "#f59e0b";
+      ctx.fillRect(x, 118, 72, 54);
+      ctx.fillStyle = isDepth ? "#a855f7" : "#dc2626";
+      ctx.beginPath();
+      ctx.moveTo(x - 10, 118);
+      ctx.lineTo(x + 36, 84);
+      ctx.lineTo(x + 82, 118);
+      ctx.closePath();
+      ctx.fill();
+      if (!isDepth) {
+        ctx.fillStyle = "#fef08a";
+        ctx.fillRect(x + 26, 134, 20, 22);
+      }
+    }
+
+    function drawDog(offsetX, isDepth) {
+      const x = 240 + offsetX;
+      ctx.fillStyle = isDepth ? "#fde047" : "#fb923c";
+      ctx.beginPath();
+      ctx.roundRect(x - 24, 152, 54, 34, 12);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x + 28, 146, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = isDepth ? "#fef08a" : "#7c2d12";
+      ctx.fillRect(x - 16, 184, 8, 22);
+      ctx.fillRect(x + 12, 184, 8, 22);
+      if (!isDepth) {
+        ctx.fillStyle = "#0f172a";
+        ctx.beginPath();
+        ctx.arc(x + 34, 143, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function render() {
+      const camX = parseInt(document.getElementById("xSlider").value, 10);
+      document.getElementById("xVal").textContent = camX;
+      const isDepth = mode === "depth";
+
+      const farShift = -camX * 0.14;
+      const midShift = -camX * 0.55;
+      const nearShift = -camX * 1.35;
+
+      document.getElementById("dFar").textContent = farShift.toFixed(1) + " px";
+      document.getElementById("dMid").textContent = midShift.toFixed(1) + " px";
+      document.getElementById("dNear").textContent = nearShift.toFixed(1) + " px";
+
+      // Sky & ground
+      const g = ctx.createLinearGradient(0, 0, 0, 240);
+      if (isDepth) {
+        g.addColorStop(0, "#020617");
+        g.addColorStop(0.68, "#0f172a");
+        g.addColorStop(1, "#f97316");
+      } else {
+        g.addColorStop(0, "#0f172a");
+        g.addColorStop(0.65, "#1e3a8a");
+        g.addColorStop(1, "#166534");
+      }
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 520, 240);
+
+      drawMountain(farShift, isDepth);
+      ctx.fillStyle = isDepth ? "#4c1d95" : "#15803d";
+      ctx.fillRect(0, 168, 520, 72);
+      drawHouse(midShift, isDepth);
+      drawDog(nearShift, isDepth);
+
+      // Camera frustum indicator
+      ctx.fillStyle = "rgba(255,255,255,0.85)";
+      ctx.font = "bold 12px monospace";
+      ctx.fillText(isDepth ? "DEPTH MAP (z^-1)" : "RGB PARALLAX VIEW", 14, 22);
+
+      document.getElementById("ahaBox").innerHTML = isDepth
+        ? "💡 <strong>单目深度图（Depth Map）揭秘：</strong>像 Depth Anything / VGGT 这类空间智能模型，只需看一张 2D 照片就能为每个像素算出相对距离 <code>z</code>（越暖越近、越暗越远），进而按 <code>Δx ∝ 1/z</code> 重建真实 3D 视差和遮挡关系！"
+        : "💡 <strong>顿悟时刻：</strong>大幅左右拖动观察者滑块，再点击切换到 <strong>🌡️ 深度热力图</strong>，看清 AI 如何从二维平面反推出三维世界！";
     }
 
     document.getElementById("xSlider").addEventListener("input", () => {
-      drags++;
+      interacts++;
       render();
-      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+      if (interacts >= 3 && window.ToySDK) window.ToySDK.markCompleted();
     });
     render();
   </script>

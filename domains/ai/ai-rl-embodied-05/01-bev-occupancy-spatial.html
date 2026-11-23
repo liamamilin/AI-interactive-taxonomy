@@ -3,64 +3,125 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>玩具 01：BEV 上帝视角与占用网络（Occupancy）</title>
+  <title>玩具 01：BEV 上帝视角与 3D 占用网络 · 交互雷达</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
-    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
     .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
-    .road { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; max-width: 480px; margin: 0 auto; padding: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; }
-    .vox { height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 800; background: var(--tax-surface); border: 1px solid var(--tax-border); }
-    .vox.occ { background: rgba(239,68,68,0.22); border-color: var(--tax-red); color: var(--tax-red); }
-    .vox.ego { background: rgba(99,102,241,0.24); border-color: var(--tax-primary); }
+    .stage { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 14px; align-items: center; }
+    @media (max-width: 740px) { .stage { grid-template-columns: 1fr; } }
+    svg { width: 100%; height: 260px; border-radius: 16px; border: 1.5px solid var(--tax-border); background: #0f172a; display: block; cursor: pointer; }
+    .side { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 14px; font-size: 13.5px; line-height: 1.65; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
       <div>
-        <h1>🛰️ BEV + 占用网络（Occupancy）：遇到没见过的“侧翻卡车”，智驾怎么不直接撞上去？</h1>
-        <p>前方车道横着一辆<strong>白色侧翻货车 + 掉落的异形沙发</strong>（白名单里没有这个类别）。切换两种感知系统看看结果！</p>
+        <h1>🛰️ BEV + 占用网络（Occupancy）：遇到没见过的异形障碍物，智驾如何保命绕行？</h1>
+        <p><strong>点击下方俯视车道</strong>可任意放置/移除“侧翻货车与掉落沙发”（白名单未知物体），并切换两种感知架构观察自车规划轨迹！</p>
       </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
 
     <div class="tax-panel">
-      <div class="tabs">
-        <button class="btn active" id="bOld" onclick="setMode('old')">📦 传统 2D 白名单检测框（只认车/人/锥桶）</button>
-        <button class="btn" id="bOcc" onclick="setMode('occ')">🧱 BEV + 3D 占用网络（体素空间占位）</button>
+      <div class="ctrls">
+        <button class="btn active" id="bOld" onclick="setMode('old')">📦 传统 2D 白名单检测框（只认车/人）</button>
+        <button class="btn" id="bOcc" onclick="setMode('occ')">🧱 BEV + 3D 占用网络（空间体素占位）</button>
       </div>
-      <div class="road" id="roadGrid"></div>
+
+      <div class="stage">
+        <svg viewBox="0 0 420 260" id="bevSvg" onclick="toggleObstacle(event)"></svg>
+        <div class="side" id="sideInfo"></div>
+      </div>
     </div>
 
     <div class="tax-aha" id="ahaBox"></div>
   </div>
 
   <script>
+    let mode = "old";
+    let obs = [{ r: 2, c: 2 }, { r: 2, c: 3 }, { r: 3, c: 3 }];
     const seen = new Set(["old"]);
+
     function setMode(m) {
+      mode = m;
       seen.add(m);
       document.getElementById("bOld").classList.toggle("active", m === "old");
       document.getElementById("bOcc").classList.toggle("active", m === "occ");
-      const occ = m === "occ";
-      const cells = Array.from({ length: 18 }, (_, i) => {
-        if (i === 14) return `<div class="vox ego">🚗 自车</div>`;
-        if ([2, 3, 4, 8, 9].includes(i)) {
-          return occ
-            ? `<div class="vox occ">🧱 占用</div>`
-            : `<div class="vox" style="color:var(--tax-muted);">❓ 未知(忽略)</div>`;
-        }
-        return `<div class="vox">⬜ 通行</div>`;
-      });
-      document.getElementById("roadGrid").innerHTML = cells.join("");
-
-      document.getElementById("ahaBox").innerHTML = occ
-        ? "💡 <strong>占用网络（Occupancy Network）救命原理：</strong>它先把 8 路摄像头特征通过 BEV Transformer 投影到统一俯视 3D 网格，再把空间切成无数个“乐高体素块”。<strong>根本不管前方是侧翻卡车、落石还是外星飞船，只要体素被占用了就绝不撞上去！</strong>"
-        : "💡 <strong>传统白名单检测的致命盲区：</strong>如果训练清单里只有“正常行驶的汽车”，遇到侧翻的白色货车底盘或马路上的怪异掉落物，检测框置信度过低会直接漏检！切到 <strong>BEV + 占用网络</strong> 看看解法！";
+      render();
       if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
     }
-    setMode("old");
+
+    function toggleObstacle(e) {
+      const svg = document.getElementById("bevSvg");
+      const rect = svg.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 420;
+      const y = ((e.clientY - rect.top) / rect.height) * 260;
+      const c = Math.floor((x - 60) / 50);
+      const r = Math.floor((y - 20) / 44);
+      if (c < 0 || c > 5 || r < 0 || r > 3) return;
+      const idx = obs.findIndex(o => o.r === r && o.c === c);
+      if (idx >= 0) obs.splice(idx, 1);
+      else obs.push({ r, c });
+      render();
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      const isOcc = mode === "occ";
+      let s = "";
+      // Road & 8-camera frustum glow
+      s += `<rect x="55" y="10" width="310" height="240" rx="10" fill="#1e293b" stroke="#334155" stroke-width="2" />`;
+      s += `<line x1="160" y1="10" x2="160" y2="250" stroke="#475569" stroke-dasharray="8,8" stroke-width="2" />`;
+      s += `<line x1="260" y1="10" x2="260" y2="250" stroke="#475569" stroke-dasharray="8,8" stroke-width="2" />`;
+      // Camera FOV cone from ego
+      s += `<polygon points="210,215 70,25 350,25" fill="rgba(99,102,241,0.12)" />`;
+
+      // Voxel grid (4 rows x 6 cols)
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 6; c++) {
+          const x = 60 + c * 50, y = 20 + r * 44;
+          const has = obs.some(o => o.r === r && o.c === c);
+          if (has) {
+            if (isOcc) {
+              s += `<rect x="${x+3}" y="${y+3}" width="44" height="38" rx="6" fill="rgba(239,68,68,0.45)" stroke="#ef4444" stroke-width="2" />`;
+              s += `<text x="${x+25}" y="${y+26}" text-anchor="middle" fill="#fecaca" font-size="11" font-weight="800">🧱 占用</text>`;
+            } else {
+              s += `<rect x="${x+3}" y="${y+3}" width="44" height="38" rx="6" fill="rgba(148,163,184,0.12)" stroke="#64748b" stroke-dasharray="4,3" />`;
+              s += `<text x="${x+25}" y="${y+26}" text-anchor="middle" fill="#94a3b8" font-size="10">❓漏检</text>`;
+            }
+          } else {
+            s += `<rect x="${x+3}" y="${y+3}" width="44" height="38" rx="6" fill="rgba(255,255,255,0.03)" stroke="rgba(148,163,184,0.12)" />`;
+          }
+        }
+      }
+
+      // Path planning line
+      const blockedCenter = obs.some(o => o.c === 2 || o.c === 3);
+      if (isOcc && blockedCenter) {
+        s += `<path d="M210,215 C210,165 110,155 110,30" fill="none" stroke="#10b981" stroke-width="4" stroke-dasharray="6,4" />`;
+      } else {
+        s += `<path d="M210,215 L210,30" fill="none" stroke="${blockedCenter ? "#ef4444" : "#10b981"}" stroke-width="4" stroke-dasharray="6,4" />`;
+      }
+
+      // Ego car
+      s += `<rect x="194" y="198" width="32" height="44" rx="8" fill="#6366f1" stroke="#fff" stroke-width="2" />`;
+      s += `<text x="210" y="224" text-anchor="middle" fill="#fff" font-size="11" font-weight="800">自车</text>`;
+
+      document.getElementById("bevSvg").innerHTML = s;
+
+      document.getElementById("sideInfo").innerHTML = isOcc
+        ? `<strong>✅ BEV + 3D 占用网络已激活</strong><br><br>8 路摄像头特征已融合成统一俯视 3D 体素网格，检测到 <strong>${obs.length} 个被占用体素</strong>。<br><br>规划器无需知道这是侧翻卡车还是沙发，自动生成<strong>绿色安全变道绕行轨迹</strong>！`
+        : `<strong>🚨 传统 2D 白名单检测框</strong><br><br>前方有 <strong>${obs.length} 块异形障碍物</strong>，但因不在预设分类白名单里全部漏检！<br><br>规划器误以为前方畅通，画出<strong style="color:var(--tax-red)">红色直撞轨迹</strong>！`;
+
+      document.getElementById("ahaBox").innerHTML = isOcc
+        ? "💡 <strong>空间占用（Occupancy）的终极安全哲学：</strong>现实世界的长尾异形物体永远穷举不完；把世界离散成 3D 乐高体素，<strong>不管那是什么，只要空间被占了就不撞上去</strong>——这正是现代高阶智驾（如 Tesla FSD / 华为 ADS）的核心感知底座！"
+        : "💡 <strong>顿悟时刻：</strong>点击车道格子可自由增减未知障碍物，再点击切换到 <strong>🧱 BEV + 3D 占用网络</strong>，看规划轨迹如何瞬间从“直撞”变成“丝滑变道”！";
+    }
+    render();
   </script>
 </body>
 </html>

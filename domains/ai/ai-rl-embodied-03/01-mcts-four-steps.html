@@ -3,71 +3,172 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>玩具 01：MCTS 四步循环 · 选择→扩展→模拟→回传</title>
+  <title>玩具 01：MCTS 四步循环 · 动态博弈树推演</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .steps { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
-    .btn { padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
-    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
-    .tree { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; }
-    .row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-    .nd { padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface); font-size: 13px; font-weight: 800; text-align: center; min-width: 110px; }
-    .nd.hi { border-color: var(--tax-primary); background: rgba(99,102,241,0.14); }
-    .nd.win { border-color: var(--tax-green); background: rgba(16,185,129,0.16); }
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .stage { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; }
+    svg { width: 100%; height: 260px; display: block; }
+    .pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; background: var(--tax-surface); border: 1px solid var(--tax-border); }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
       <div>
-        <h1>🌳 MCTS 四步循环：如何在不穷举的情况下，把算力全砸在“妙手”上？</h1>
-        <p>依次点击下面 4 个阶段，走完一轮标准的 <strong>蒙特卡洛树搜索（MCTS）</strong> 迭代，看胜率是如何向上回传更新的！</p>
+        <h1>🌳 MCTS 动态博弈树：如何在不穷举的情况下，把算力全砸在“妙手”上？</h1>
+        <p>点击 <strong>“单步推进”</strong> 亲历 <code>选择 → 扩展 → 评估 → 回传</code> 四步循环，或点击 <strong>“快进 5 轮”</strong> 看高胜率分支如何自动长粗！</p>
       </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
 
     <div class="tax-panel">
-      <div class="steps">
-        <button class="btn active" id="s1" onclick="go(1)">① Selection 选择</button>
-        <button class="btn" id="s2" onclick="go(2)">② Expansion 扩展</button>
-        <button class="btn" id="s3" onclick="go(3)">③ Simulation 模拟/评估</button>
-        <button class="btn" id="s4" onclick="go(4)">④ Backprop 反向回传</button>
+      <div class="ctrls">
+        <button class="btn" onclick="nextStep()">▶ 单步推进（4 步循环）</button>
+        <button class="btn sec" onclick="runBurst()">⚡ 快进 5 轮模拟</button>
+        <button class="btn sec" onclick="resetTree()">↺ 重置树</button>
+        <span class="pill" id="phaseTag">当前阶段：准备就绪</span>
+        <span class="pill">总模拟次数：<strong id="totOut">10</strong></span>
       </div>
-      <div class="tree" id="treeBox"></div>
+
+      <div class="stage">
+        <svg viewBox="0 0 560 250" id="treeSvg"></svg>
+      </div>
     </div>
 
     <div class="tax-aha" id="ahaBox"></div>
   </div>
 
   <script>
-    const seen = new Set([1]);
-    function go(n) {
-      seen.add(n);
-      [1, 2, 3, 4].forEach(i => document.getElementById("s" + i).classList.toggle("active", i === n));
-      const rootStat = n === 4 ? "12 / 21 (+1)" : "11 / 20";
-      const leftStat = n === 4 ? "8 / 11 (+1)" : "7 / 10";
-      const leafHtml = n >= 2 ? `<div class="row"><div class="nd ${n >= 3 ? "win" : "hi"}">新着法 A1<br>${n === 2 ? "0 / 0（刚长出）" : n === 3 ? "⚡ 价值网判胜 +1" : "1 / 1 ✅"}</div></div>` : "";
+    let nodes = [];
+    let phase = 0; // 0=idle, 1=select, 2=expand, 3=sim, 4=backprop
+    let activePath = [];
+    let lastWin = 1;
+    let stepsDone = 0;
 
-      document.getElementById("treeBox").innerHTML = `
-        <div class="row"><div class="nd ${n === 1 || n === 4 ? "hi" : ""}">根节点（当前盘面）<br>${rootStat}</div></div>
-        <div class="row">
-          <div class="nd ${n === 1 || n === 4 ? "hi" : ""}">分支 A（高潜）<br>${leftStat}</div>
-          <div class="nd">分支 B（普通）<br>4 / 10</div>
-        </div>
-        ${leafHtml}
-      `;
-
-      const ahas = {
-        1: "💡 <strong>① 选择（Selection）：</strong>从根节点出发，按 <strong>UCB/PUCT 公式</strong> 挑选兼顾“高胜率 + 探索潜力”的分支（这里选中分支 A）。",
-        2: "💡 <strong>② 扩展（Expansion）：</strong>到达叶节点后，把一个还没走过的候选新着法（A1）挂到树上。",
-        3: "💡 <strong>③ 模拟/评估（Simulation）：</strong>传统 MCTS 会随机快下到底看输赢；AlphaGo 直接调用<strong>价值神经网络</strong>瞬间给出胜率评估！",
-        4: "💡 <strong>④ 反向回传（Backpropagation）：</strong>把新节点赢下的 +1 一路沿着来时的路径写回分支 A 和根节点！重复几千次后，<strong>最有希望的分支长得又深又粗，烂着法根本不浪费算力</strong>——这就是“慢思考”搜索的精髓！"
-      };
-      document.getElementById("ahaBox").innerHTML = ahas[n];
-      if (seen.size >= 4 && window.ToySDK) window.ToySDK.markCompleted();
+    function initData() {
+      nodes = [
+        { id: 0, parent: null, label: "根节点", x: 280, y: 36, w: 6, n: 10, trueP: 0.6 },
+        { id: 1, parent: 0, label: "着法 A (妙手)", x: 130, y: 122, w: 4, n: 5, trueP: 0.85 },
+        { id: 2, parent: 0, label: "着法 B (平庸)", x: 280, y: 122, w: 1, n: 3, trueP: 0.35 },
+        { id: 3, parent: 0, label: "着法 C (陷阱)", x: 430, y: 122, w: 1, n: 2, trueP: 0.15 }
+      ];
+      phase = 0;
+      activePath = [];
     }
-    go(1);
+
+    function ucb(nd, parentN) {
+      if (nd.n === 0) return 999;
+      return nd.w / nd.n + 1.15 * Math.sqrt(Math.log(Math.max(1, parentN)) / nd.n);
+    }
+
+    function pickBestChild(pid) {
+      const children = nodes.filter(x => x.parent === pid);
+      if (!children.length) return null;
+      const pN = nodes[pid].n;
+      return children.reduce((best, cur) => (ucb(cur, pN) > ucb(best, pN) ? cur : best), children[0]);
+    }
+
+    function doOnePhase() {
+      if (phase === 0 || phase === 4) {
+        // Selection
+        phase = 1;
+        const chosen = pickBestChild(0);
+        activePath = [0, chosen.id];
+        const grand = pickBestChild(chosen.id);
+        if (grand && Math.random() < 0.55) activePath.push(grand.id);
+      } else if (phase === 1) {
+        // Expansion
+        phase = 2;
+        const leafId = activePath[activePath.length - 1];
+        const leaf = nodes[leafId];
+        const existing = nodes.filter(x => x.parent === leafId).length;
+        if (nodes.length < 11 && leaf.y < 180 && existing < 2) {
+          const nid = nodes.length;
+          const offset = existing === 0 ? -46 : 46;
+          nodes.push({
+            id: nid, parent: leafId, label: leaf.label.slice(0, 3) + "-" + (existing + 1),
+            x: Math.max(55, Math.min(505, leaf.x + offset)), y: 208,
+            w: 0, n: 0, trueP: leaf.trueP
+          });
+          activePath.push(nid);
+        }
+      } else if (phase === 2) {
+        // Simulation / Value Net
+        phase = 3;
+        const leaf = nodes[activePath[activePath.length - 1]];
+        lastWin = Math.random() < leaf.trueP ? 1 : 0;
+      } else if (phase === 3) {
+        // Backprop
+        phase = 4;
+        activePath.forEach(id => {
+          nodes[id].n += 1;
+          nodes[id].w += lastWin;
+        });
+      }
+      stepsDone++;
+    }
+
+    function nextStep() {
+      doOnePhase();
+      render();
+      if (stepsDone >= 4 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function runBurst() {
+      for (let i = 0; i < 20; i++) doOnePhase();
+      render();
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function resetTree() {
+      initData();
+      render();
+    }
+
+    function render() {
+      const names = ["准备就绪", "① Selection 选择高 UCB 路径", "② Expansion 扩展新叶节点", `③ Simulation 价值网判${lastWin ? "胜 (+1)" : "负 (+0)"}`, "④ Backprop 胜率一路回传根节点！"];
+      document.getElementById("phaseTag").textContent = "当前阶段：" + names[phase];
+      document.getElementById("totOut").textContent = nodes[0].n;
+
+      let svg = "";
+      // Edges
+      nodes.forEach(nd => {
+        if (nd.parent === null) return;
+        const p = nodes[nd.parent];
+        const onPath = activePath.includes(nd.id) && activePath.includes(p.id);
+        const w = Math.min(6, 1.5 + nd.n * 0.22);
+        svg += `<line x1="${p.x}" y1="${p.y}" x2="${nd.x}" y2="${nd.y}" stroke="${onPath ? "var(--tax-primary)" : "var(--tax-border)"}" stroke-width="${onPath ? Math.max(3.5, w) : w}" />`;
+      });
+
+      // Nodes
+      nodes.forEach(nd => {
+        const onPath = activePath.includes(nd.id);
+        const fill = onPath ? (phase === 3 || phase === 4 ? (lastWin ? "#10b981" : "#f59e0b") : "#6366f1") : "var(--tax-surface)";
+        const stroke = onPath ? "#fff" : "var(--tax-primary)";
+        const tc = onPath ? "#fff" : "var(--tax-text)";
+        const rate = nd.n ? Math.round((nd.w / nd.n) * 100) + "%" : "新";
+        svg += `
+          <g>
+            <rect x="${nd.x - 48}" y="${nd.y - 22}" width="96" height="44" rx="12" fill="${fill}" stroke="${stroke}" stroke-width="2" />
+            <text x="${nd.x}" y="${nd.y - 4}" text-anchor="middle" fill="${tc}" font-size="11" font-weight="800">${nd.label}</text>
+            <text x="${nd.x}" y="${nd.y + 13}" text-anchor="middle" fill="${tc}" font-size="10.5" font-family="monospace">${nd.w}/${nd.n} (${rate})</text>
+          </g>
+        `;
+      });
+      document.getElementById("treeSvg").innerHTML = svg;
+
+      const a = nodes[1], b = nodes[2], c = nodes[3];
+      document.getElementById("ahaBox").innerHTML = nodes[0].n >= 15
+        ? `💡 <strong>非对称生长的魔力！</strong>看看线条粗细：妙手分支 A 已经自动吸引了 <strong>${a.n} 次</strong>模拟（胜率 ${Math.round(a.w/a.n*100)}%），而烂着法 C 只花了 ${c.n} 次就被冷落！MCTS 不搞平均主义，把 90% 的算力全砸在最有潜力的胜招上！`
+        : "💡 <strong>顿悟时刻：</strong>连续点击 <strong>单步推进</strong> 或 <strong>快进 5 轮</strong>，观察 UCB 公式如何自动把搜索树向高胜率的「着法 A」倾斜！";
+    }
+
+    initData();
+    render();
   </script>
 </body>
 </html>

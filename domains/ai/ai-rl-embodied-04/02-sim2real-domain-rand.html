@@ -3,62 +3,158 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>玩具 02：Sim2Real 域随机化闯关沙盘</title>
+  <title>玩具 02：Sim2Real 域随机化闯关沙盘 · 物理演示</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
     .checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
     @media (max-width: 720px) { .checks { grid-template-columns: 1fr; } }
-    .chk { display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-weight: 750; font-size: 13px; cursor: pointer; }
-    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
-    .num { font-size: 26px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+    .chk { display: flex; align-items: center; gap: 8px; padding: 11px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-weight: 750; font-size: 13px; cursor: pointer; }
+    .btn { padding: 9px 16px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    canvas { width: 100%; height: 200px; border-radius: 16px; border: 1.5px solid var(--tax-border); background: #0f172a; display: block; margin-top: 12px; }
+    .bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
       <div>
-        <h1>🌍 Sim2Real 域随机化：为什么在电脑里健步如飞的机器狗，一到真实草地就劈叉？</h1>
-        <p>真机训练太贵太容易摔坏，大家都在 GPU 仿真器（如 Isaac Gym）里并行训一万只机器狗。勾选下方<strong>域随机化（Domain Randomization）</strong>扰动项，看现实成功率如何飙升！</p>
+        <h1>🌍 Sim2Real 域随机化：为什么温室仿真训出的机器狗，一出门就劈叉摔倒？</h1>
+        <p>勾选下方仿真器里的 <strong>域随机化（Domain Randomization）</strong> 扰动，然后点击 <strong>“放到真实户外测试”</strong>，亲眼看机器狗闯过碎石、湿滑冰面与侧风突袭！</p>
       </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
 
     <div class="tax-panel">
       <div class="checks">
-        <label class="chk"><input type="checkbox" id="r1" onchange="render()" /> 🧊 随机化地面摩擦力与坡度</label>
-        <label class="chk"><input type="checkbox" id="r2" onchange="render()" /> ⚖️ 随机化电机延迟与负载重量</label>
-        <label class="chk"><input type="checkbox" id="r3" onchange="render()" /> 💡 随机化摄像头光照与外力踹一脚</label>
+        <label class="chk"><input type="checkbox" id="r1" onchange="updateStatus()" /> 🧊 随机化地面摩擦与碎石坡度</label>
+        <label class="chk"><input type="checkbox" id="r2" onchange="updateStatus()" /> ⚖️ 随机化电机延迟与负载重量</label>
+        <label class="chk"><input type="checkbox" id="r3" onchange="updateStatus()" /> 💨 随机化外力推搡与阵风扰动</label>
       </div>
 
-      <div class="cards">
-        <div class="card">
-          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">💻 虚拟仿真器行走成功率</div>
-          <div class="num" id="simOut" style="color:var(--tax-primary);">99%</div>
-        </div>
-        <div class="card">
-          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">🏞️ 迁移到真实物理世界成功率</div>
-          <div class="num" id="realOut" style="color:var(--tax-red);">18%</div>
-        </div>
+      <div class="bar">
+        <button class="btn" onclick="startRun()">🐕 放到真实户外场地测试！</button>
+        <span style="font-weight:850;font-size:14px;">真机迁移预期成功率：<strong id="rateOut" style="color:var(--tax-red);font-family:monospace;">18%</strong></span>
       </div>
+
+      <canvas id="cv" width="560" height="200"></canvas>
     </div>
 
     <div class="tax-aha" id="ahaBox"></div>
   </div>
 
   <script>
-    function render() {
-      const n = ["r1", "r2", "r3"].filter(id => document.getElementById(id).checked).length;
-      const real = [18, 46, 74, 95][n];
-      document.getElementById("realOut").textContent = real + "%";
-      document.getElementById("realOut").style.color = real >= 90 ? "var(--tax-green)" : "var(--tax-red)";
-      document.getElementById("ahaBox").innerHTML = n === 3
-        ? "💡 <strong>Sim2Real 零样本迁移通关！</strong>既然永远无法把仿真器做得和真实世界 100% 一模一样，那就反其道而行之：在仿真里故意把物理参数、光照和阻力疯狂随机化——<strong>让真实世界看起来只是仿真随机分布里的普通一员</strong>！"
-        : "💡 <strong>Sim2Real 鸿沟：</strong>在完美无瑕的温室仿真里训出来的机器人，只要真实地板滑了一点点就会当场摔倒！把上方 3 项域随机化全部勾上试试！";
-      if (n === 3 && window.ToySDK) window.ToySDK.markCompleted();
+    const cv = document.getElementById("cv");
+    const ctx = cv.getContext("2d");
+    let anim = null;
+    let dogX = 48, tick = 0, crashed = false, finished = false;
+
+    function getLevel() {
+      return ["r1", "r2", "r3"].filter(id => document.getElementById(id).checked).length;
     }
-    render();
+
+    function updateStatus() {
+      const lv = getLevel();
+      const rate = [18, 48, 76, 96][lv];
+      const el = document.getElementById("rateOut");
+      el.textContent = rate + "%";
+      el.style.color = rate >= 90 ? "var(--tax-green)" : "var(--tax-red)";
+      drawScene();
+    }
+
+    function drawDog(x, y, tilt, phase, fallen) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(fallen ? 0.65 : tilt);
+      // Body
+      ctx.fillStyle = fallen ? "#ef4444" : "#38bdf8";
+      ctx.beginPath();
+      ctx.roundRect(-24, -14, 48, 22, 8);
+      ctx.fill();
+      // Head
+      ctx.fillStyle = "#e0f2fe";
+      ctx.fillRect(18, -22, 16, 14);
+      // Legs
+      ctx.strokeStyle = "#f8fafc";
+      ctx.lineWidth = 4;
+      const swing = fallen ? 0 : Math.sin(phase) * 9;
+      [[-16, swing], [-6, -swing], [10, -swing], [18, swing]].forEach(([lx, sw]) => {
+        ctx.beginPath();
+        ctx.moveTo(lx, 6);
+        ctx.lineTo(lx + sw, 26);
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+
+    function drawScene() {
+      ctx.fillStyle = "#0f172a";
+      ctx.fillRect(0, 0, 560, 200);
+
+      // Terrain zones: Normal -> Ice -> Bumps -> Wind -> Finish
+      ctx.fillStyle = "#334155"; ctx.fillRect(0, 152, 140, 48);
+      ctx.fillStyle = "#0284c7"; ctx.fillRect(140, 152, 120, 48);
+      ctx.fillStyle = "#78350f"; ctx.fillRect(260, 152, 130, 48);
+      ctx.fillStyle = "#334155"; ctx.fillRect(390, 152, 170, 48);
+
+      // Bumps
+      ctx.fillStyle = "#a16207";
+      for (let bx = 272; bx < 380; bx += 26) {
+        ctx.beginPath(); ctx.arc(bx, 152, 9, Math.PI, 0); ctx.fill();
+      }
+
+      // Labels
+      ctx.fillStyle = "#cbd5e1";
+      ctx.font = "bold 11px sans-serif";
+      ctx.fillText("平滑起点", 36, 176);
+      ctx.fillText("🧊 湿滑冰面", 168, 176);
+      ctx.fillText("🪨 碎石颠簸", 292, 176);
+      ctx.fillText("💨 侧风干扰 → 🏁 终点", 412, 176);
+
+      const bumpY = (dogX > 260 && dogX < 390 && !crashed) ? -Math.abs(Math.sin(dogX * 0.14)) * 7 : 0;
+      const tilt = (dogX > 260 && dogX < 390) ? Math.sin(dogX * 0.15) * 0.12 : 0;
+      drawDog(dogX, 126 + bumpY, tilt, tick * 0.35, crashed);
+
+      if (crashed) {
+        ctx.fillStyle = "#fca5a5";
+        ctx.font = "bold 14px sans-serif";
+        ctx.fillText("💥 策略过拟合仿真温室，遇到真实扰动当场劈叉！", 110, 44);
+      } else if (finished) {
+        ctx.fillStyle = "#6ee7b7";
+        ctx.font = "bold 14px sans-serif";
+        ctx.fillText("✅ 零样本稳健通关！真实世界不过是随机分布里的普通一天！", 80, 44);
+      }
+    }
+
+    function startRun() {
+      if (anim) cancelAnimationFrame(anim);
+      const lv = getLevel();
+      const failX = lv === 0 ? 185 : lv === 1 ? 305 : lv === 2 ? 430 : 999;
+      dogX = 48; tick = 0; crashed = false; finished = false;
+
+      function step() {
+        tick++;
+        dogX += 3.2;
+        if (dogX >= failX) {
+          crashed = true;
+          drawScene();
+          document.getElementById("ahaBox").innerHTML = `💡 <strong>Sim2Real 翻车（仅勾选 ${lv}/3 项）：</strong>机器狗在完美仿真里拿到 99 分，但一踩到没见过的湿滑冰面或阵风就立刻失衡！把上方 <strong>3 项域随机化全部勾上</strong> 再测一次！`;
+          return;
+        }
+        if (dogX >= 515) {
+          finished = true;
+          drawScene();
+          document.getElementById("ahaBox").innerHTML = "💡 <strong>Sim2Real 零样本迁移通关！</strong>既然永远造不出和现实 100% 一致的完美仿真器，就故意在仿真里把摩擦、负重和推搡疯狂随机化——让机器狗学会“见招拆招的本能”，真机一上地就能稳健狂奔！";
+          if (window.ToySDK) window.ToySDK.markCompleted();
+          return;
+        }
+        drawScene();
+        anim = requestAnimationFrame(step);
+      }
+      step();
+    }
+
+    updateStatus();
   </script>
 </body>
 </html>
