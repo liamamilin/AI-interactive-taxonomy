@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎯 心流三要素：目标清晰 + 即时反馈</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎯 心流三要素：目标清晰 + 即时反馈</h1><p>打游戏每一秒都知道要打哪只怪、血条实时跳动；而很多职场工作既不知道“做到什么算好”，又要等两周才听反馈——大脑根本无从沉浸！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>下一步具体目标清晰度</span><span id="vClr">80%</span></label><input type="range" id="sClr" min="10" max="100" value="80" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>行动后的反馈即时性</span><span id="vFbk">75%</span></label><input type="range" id="sFbk" min="10" max="100" value="75" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">心流沉浸指数</div><div class="k-val" id="kFlw">—</div></div>
+        <div class="kpi"><div class="k-lbl">工作体验</div><div class="k-val" id="kExp">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const clr=+document.getElementById('sClr').value, fbk=+document.getElementById('sFbk').value;
+  document.getElementById('vClr').textContent=clr+'%';
+  document.getElementById('vFbk').textContent=fbk+'%';
+  const flw=Math.round(Math.sqrt(clr*fbk));
+  document.getElementById('kFlw').textContent=flw+' / 100';
+  document.getElementById('kFlw').style.color=flw>=70?'#059669':'#f59e0b';
+  document.getElementById('kExp').textContent=flw>=70?'🌊 丝滑忘我沉浸':'😵 边做边自我怀疑内耗';
+  const w=Math.max(15, flw*4.4);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="32" font-size="13" font-weight="800" fill="var(--tax-text)">心流沉浸度 = 清晰目标 (${clr}%) × 即时反馈 (${fbk}%) 的几何耦合</text>
+    <rect x="30" y="66" width="440" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="30" y="66" width="${w.toFixed(0)}" height="38" rx="8" fill="${flw>=70?'#059669':'#3b82f6'}"/>
+    <text x="${Math.min(480, 38+w).toFixed(0)}" y="91" font-size="14" font-weight="850" fill="${flw>=70?'#059669':'#2563eb'}">${flw} 分</text>
+    <text x="30" y="148" font-size="12" fill="var(--tax-muted)">想把枯燥工作变成心流游戏？给它拆出清晰的“本小时通关清单”，并建立即时可见的进度条！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>程序员爱写代码、医生爱做手术、玩家爱打排位，底层共性都是：目标极清晰、每一步都有毫秒到分钟级的即时反馈。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

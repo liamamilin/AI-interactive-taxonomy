@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💓 把紧张当成兴奋：心跳加速的重新归因</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💓 把紧张当成兴奋：心跳加速的重新归因</h1><p>哈佛商学院实验：上台演讲前心跳 120 时，默念“我好冷静”往往失败（生理状态反差太大）；改说“我好兴奋！”竟能让表现飙升！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setM('calm',this)">自我催眠：“我一点都不紧张，我很冷静”</button>
+        <button class="btn" onclick="setM('excite',this)">高唤醒重评：“心跳加速说明我超兴奋，准备好了！”</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>上台前生理心跳唤醒强度</span><span id="vHr">80%（手心出汗）</span></label><input type="range" id="sHr" min="30" max="100" value="80" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">认知-生理冲突损耗</div><div class="k-val" id="kCnf">—</div></div>
+        <div class="kpi"><div class="k-lbl">演讲/面试综合得分</div><div class="k-val" id="kScr">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let sm='calm';
+function setM(m,btn){ sm=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const hr=+document.getElementById('sHr').value;
+  document.getElementById('vHr').textContent=hr+'%';
+  const cnf=sm==='calm' ? Math.round(hr*0.78) : Math.round(hr*0.18);
+  const scr=sm==='calm' ? Math.max(35, Math.round(88 - cnf*0.55)) : Math.min(96, Math.round(68 + hr*0.24));
+  document.getElementById('kCnf').textContent=cnf+'%';
+  document.getElementById('kCnf').style.color=cnf>40?'#ef4444':'#059669';
+  document.getElementById('kScr').textContent=scr+' 分';
+  document.getElementById('kScr').style.color='#059669';
+  const w=Math.max(15, scr*4.4);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">焦虑和兴奋都是“高唤醒”状态，顺势借力远比强行压抑容易！</text>
+    <rect x="30" y="68" width="440" height="40" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="30" y="68" width="${w.toFixed(0)}" height="40" rx="8" fill="${sm==='excite'?'#059669':'#f59e0b'}"/>
+    <text x="${Math.min(480, 38+w).toFixed(0)}" y="94" font-size="14" font-weight="850" fill="${sm==='excite'?'#059669':'#d97706'}">${scr} 分</text>
+    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">${sm==='calm'?'试图从高唤醒一步跳到低唤醒（冷静），身体根本不信，反而引发二次焦虑！':'把高唤醒的肾上腺素贴上“兴奋挑战”标签，血管舒张，能量直接变燃料！'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>心跳加速不是你怯场的证明，而是身体正在往你大脑和肌肉里泵送额外氧气与能量。接住它，说一句“我很兴奋”！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

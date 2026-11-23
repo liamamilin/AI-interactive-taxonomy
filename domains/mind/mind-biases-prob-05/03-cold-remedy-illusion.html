@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍵 感冒偏方为何总显得“吃一次就好”？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🍵 感冒偏方为何总显得“吃一次就好”？</h1><p>普通感冒会在第 3 天达到难受峰值，第 4~7 天靠免疫系统自然好转——而你偏偏总是在最难受的第 3 天才去喝偏方！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>忍到第几天才喝“神奇偏方”</span><span id="vDay">第 3 天（最难受）</span></label><input type="range" id="sDay" min="1" max="6" value="3" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>偏方真实药理有效率</span><span id="vEff">0%（纯安慰剂）</span></label><input type="range" id="sEff" min="0" max="40" value="0" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">喝完次日症状变化</div><div class="k-val" id="kChg">—</div></div>
+        <div class="kpi"><div class="k-lbl">大脑主观印象</div><div class="k-val" id="kImp">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const day=+document.getElementById('sDay').value, eff=+document.getElementById('sEff').value;
+  document.getElementById('vDay').textContent='第 '+day+' 天';
+  document.getElementById('vEff').textContent=eff+'%';
+  const curve=[15, 48, 82, 95, 68, 40, 18, 8];
+  const cur=curve[day], nxt=Math.max(5, Math.round(curve[day+1]*(1 - eff/100)));
+  const diff=nxt - cur;
+  document.getElementById('kChg').textContent=(diff<0?'骤降 ':'上升 ')+diff+' 分';
+  document.getElementById('kChg').style.color=diff<0?'#059669':'#ef4444';
+  document.getElementById('kImp').textContent=diff<-15?'✨ 哇，这偏方神了!':'😐 好像没啥用';
+  let pts=[];
+  for(let i=0;i<curve.length;i++) pts.push(`${(50+i*70).toFixed(0)},${(172-curve[i]*1.3).toFixed(0)}`);
+  const cx=50+day*70, cy=172-cur*1.3;
+  document.getElementById('svg').innerHTML=`
+    <text x="50" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">自限性感冒自然病程（纵轴 = 症状难受度）</text>
+    <line x1="50" y1="172" x2="555" y2="172" stroke="var(--tax-border)" stroke-width="1.5"/>
+    <polyline points="${pts.join(' ')}" fill="none" stroke="#3b82f6" stroke-width="3"/>
+    <circle cx="${cx}" cy="${cy.toFixed(0)}" r="9" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+    <text x="${Math.min(460,cx+12)}" y="${Math.max(48,cy-8).toFixed(0)}" font-size="12" font-weight="800" fill="#d97706">第 ${day} 天喝偏方</text>
+    <text x="50" y="192" font-size="11" fill="var(--tax-muted)">Day 0</text>
+    <text x="255" y="192" font-size="11" font-weight="750" fill="#ef4444">Day 3 症状峰值</text>
+    <text x="520" y="192" font-size="11" fill="var(--tax-muted)">Day 7 痊愈</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只要我们在症状最痛的峰值才出手干预，哪怕干预物是零药效的糖水，次日也必定好转——这就是没有对照组的个人经验极不可靠的原因！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🖥️ 书桌选择架构：把好习惯放到伸手可及处</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🖥️ 书桌选择架构：把好习惯放到伸手可及处</h1><p>谷歌办公室实验：仅仅把矿泉水放在视线平齐层、把含糖汽水藏到磨砂玻璃后面，员工喝水量暴涨 47%！你的书桌也是如此。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>手机距离书桌的物理距离</span><span id="vPh">0.3 米（手边）</span></label><input type="range" id="sPh" min="0" max="10" step="0.5" value="0.5" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>桌面待办/书本是否提前摊开就绪</span><span id="vRdy">60%</span></label><input type="range" id="sRdy" min="10" max="100" value="60" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">每晚有效深度专注占比</div><div class="k-val" id="kFoc">—</div></div>
+        <div class="kpi"><div class="k-lbl">无意识解锁手机次数</div><div class="k-val" id="kUnl">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const ph=+document.getElementById('sPh').value, rdy=+document.getElementById('sRdy').value;
+  document.getElementById('vPh').textContent=ph===0?'0 米（紧贴手边）':(ph>=5?ph.toFixed(1)+' 米（客厅/另室）':ph.toFixed(1)+' 米');
+  document.getElementById('vRdy').textContent=rdy+'%';
+  const foc=Math.min(95, Math.round(28 + Math.min(ph,6)*8.2 + rdy*0.24));
+  const unl=Math.max(1, Math.round(24*Math.exp(-ph*0.42)));
+  document.getElementById('kFoc').textContent=foc+'%';
+  document.getElementById('kFoc').style.color=foc>=70?'#059669':'#ef4444';
+  document.getElementById('kUnl').textContent=unl+' 次/晚';
+  const wF=Math.max(12, foc*4.6);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">物理空间改造带来的净专注率跃升（手机距你 ${ph.toFixed(1)} 米）</text>
+    <rect x="30" y="68" width="460" height="40" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="30" y="68" width="${wF.toFixed(0)}" height="40" rx="8" fill="${foc>=70?'#059669':'#f59e0b'}"/>
+    <text x="${Math.min(500, 38+wF).toFixed(0)}" y="94" font-size="14" font-weight="850" fill="${foc>=70?'#059669':'#d97706'}">${foc}%</text>
+    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">研究证明：哪怕手机扣在桌上静音，只要留在视线范围内，就会持续占用大脑监控带宽！放到另屋最有效。</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>成为自己生活空间的“建筑师”——把明晚想读的书提前翻开放在枕边，把手机充电器插在客厅，让环境替你自律！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

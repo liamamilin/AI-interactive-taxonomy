@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⏱️ 心流爬坡期：15 分钟才入戏，1 秒被打断</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⏱️ 心流爬坡期：15 分钟才入戏，1 秒被打断</h1><p>进入深度心流需要大约 15~20 分钟的“热机爬坡”，但只要中间插进来一条 30 秒的会议或消息，你就得从零重新爬坡！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>单段无打扰连续时长</span><span id="vBlk">45 分钟</span></label><input type="range" id="sBlk" min="10" max="90" step="5" value="45" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>心流热机启动耗时</span><span id="vWrm">15 分钟</span></label><input type="range" id="sWrm" min="10" max="25" value="15" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">单段有效心流净时长</div><div class="k-val" id="kNet">—</div></div>
+        <div class="kpi"><div class="k-lbl">2 小时总计心流产出</div><div class="k-val" id="kTwo">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const blk=+document.getElementById('sBlk').value, wrm=+document.getElementById('sWrm').value;
+  document.getElementById('vBlk').textContent=blk+' 分钟';
+  document.getElementById('vWrm').textContent=wrm+' 分钟';
+  const net=Math.max(0, blk - wrm);
+  const segs=Math.floor(120/blk);
+  const two=segs*net;
+  document.getElementById('kNet').textContent=net+' 分钟';
+  document.getElementById('kTwo').textContent=two+' / 120 分钟';
+  document.getElementById('kTwo').style.color=two>=70?'#059669':'#ef4444';
+  const wW=Math.max(8, Math.min(440, (Math.min(blk,wrm)/90)*440));
+  const wN=Math.max(0, Math.min(440-wW, (net/90)*440));
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="32" font-size="13" font-weight="800" fill="var(--tax-text)">单段 ${blk} 分钟结构：橙色=热机爬坡 (${wrm}m)，绿色=真正心流 (${net}m)</text>
+    <rect x="30" y="66" width="${wW.toFixed(0)}" height="42" rx="6" fill="#f59e0b"/>
+    ${wN>0?`<rect x="${(30+wW).toFixed(0)}" y="66" width="${wN.toFixed(0)}" height="42" rx="6" fill="#059669"/>`:''}
+    <text x="30" y="148" font-size="12" fill="var(--tax-muted)">${net===0?'⚠️ 碎片时长短于热机期，2 小时里你一直在原地反复预热，心流总产出为 0！':'连续 60~90 分钟的整块时间，只需付一次热机税，即可收割大段高效心流！'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>日历上被零星会议切碎的 4 个“半小时空隙”，加起来远不如一整块不受打扰的 2 小时！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🕊️ 习得性无助形成与“小胜破冰”器（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🕊️ 习得性无助形成与“小胜破冰”器（SVG）</h1><p>塞利格曼经典研究：当个体反复经历“无论怎么努力结果都一样糟”的不可控挫败后，即使后来环境变好了，也会放弃一切反抗——唯有通过“微小但 100% 可控的胜利”才能重启大脑掌控回路！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>前期经历“努力无效”受挫轮次</span><span id="vFail">6 次</span></label><input type="range" id="sFail" min="0" max="10" value="6" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>近期刻意设计的“可控微胜利”次数</span><span id="vWin">3 次</span></label><input type="range" id="sWin" min="0" max="10" value="3" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">主观自我效能感（掌控感）</div><div class="k-val" id="kEff">—</div></div>
+        <div class="kpi"><div class="k-lbl">面对新机会时的反应</div><div class="k-val" id="kSt">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const fail=+document.getElementById('sFail').value, win=+document.getElementById('sWin').value;
+  document.getElementById('vFail').textContent=fail+' 次';
+  document.getElementById('vWin').textContent=win+' 次';
+  const eff=Math.max(5, Math.min(98, Math.round(60 - fail*7.5 + win*8.8)));
+  const st=eff<35?'😔 习得性无助（门开了也不走）':(eff<65?'🌱 破冰试探中':'🕊️ 恢复掌控，主动出击');
+  document.getElementById('kEff').textContent=eff+'%';
+  document.getElementById('kEff').style.color=eff>=65?'#059669':(eff<35?'#ef4444':'#f59e0b');
+  document.getElementById('kSt').textContent=st;
+  const w=Math.max(12, eff*4.4);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">大脑“行动-结果因果感”电量条（低于 35% 进入习得性无助）</text>
+    <rect x="30" y="68" width="440" height="40" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="30" y="68" width="${w.toFixed(0)}" height="40" rx="8" fill="${eff>=65?'#059669':(eff<35?'#ef4444':'#f59e0b')}"/>
+    <line x1="${30+35*4.4}" y1="54" x2="${30+35*4.4}" y2="122" stroke="#ef4444" stroke-dasharray="4,3" stroke-width="2"/>
+    <text x="${Math.min(480, 38+w).toFixed(0)}" y="94" font-size="14" font-weight="850" fill="${eff>=65?'#059669':(eff<35?'#ef4444':'#d97706')}">${eff}%</text>
+    <text x="30" y="152" font-size="12" fill="var(--tax-muted)">走出低谷的秘诀不是喊口号，而是立刻做 3 件极小、但你 100% 能亲手搞定的事，重启因果感！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>无助感是“学”出来的，掌控感同样可以通过一个个小胜重新“学”回来！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

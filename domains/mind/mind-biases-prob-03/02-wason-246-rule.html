@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧪 沃森 2-4-6 实验：证实 vs 证伪</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧪 沃森 2-4-6 实验：证实 vs 证伪</h1><p>给你数列 2-4-6 猜规律。多数人只会试 8-10-12、14-16-18（全返回“对”），却从不试 1-2-3（打破“偶数”假设）——结果永远发现不了真实规律只是“递增数列”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>主动设计“反例”测试的比例</span><span id="vFal">50%</span></label><input type="range" id="sFal" min="0" max="100" value="50" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>隐藏规则空间复杂度</span><span id="vCmp">3 维</span></label><input type="range" id="sCmp" min="1" max="5" value="3" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">10 次试错内发现真相概率</div><div class="k-val" id="kHit">—</div></div>
+        <div class="kpi"><div class="k-lbl">信息增益效率</div><div class="k-val" id="kInf">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const fal=+document.getElementById('sFal').value, cmp=+document.getElementById('sCmp').value;
+  document.getElementById('vFal').textContent=fal+'%';
+  document.getElementById('vCmp').textContent=cmp+' 维';
+  const hit=Math.max(8, Math.min(97, Math.round(18 + fal*0.85 - (cmp-1)*6)));
+  document.getElementById('kHit').textContent=hit+'%';
+  document.getElementById('kHit').style.color=hit>=70?'#059669':'#ef4444';
+  document.getElementById('kInf').textContent=fal>=50?'高（快速剪枝假说）':'极低（原地自我陶醉）';
+  const wH=Math.max(12, hit*3.8);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">发现真实规律的概率（反例测试比例 ${fal}%）</text>
+    <rect x="20" y="65" width="420" height="36" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="65" width="${Math.min(420,wH).toFixed(0)}" height="36" rx="8" fill="${hit>=70?'#059669':'#f59e0b'}"/>
+    <text x="${Math.min(450,28+wH).toFixed(0)}" y="89" font-size="14" font-weight="850" fill="${hit>=70?'#059669':'#d97706'}">${hit}%</text>
+    <text x="20" y="142" font-size="12" fill="var(--tax-muted)">${fal<20?'只测“应该对”的例子，就算连中 10 次“正确”，你也依然被困在过窄的错误假设里！':'一次故意触发“错误”的反例测试，砍掉的错误空间比 10 次正向验证还多！'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>1000 只白天鹅也证明不了“所有天鹅都是白的”，但 1 只黑天鹅就能立刻升级你的认知边界。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

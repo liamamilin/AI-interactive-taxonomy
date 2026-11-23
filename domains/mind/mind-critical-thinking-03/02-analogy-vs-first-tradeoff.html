@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚖️ 何时用类比？何时用第一性原理？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 何时用类比？何时用第一性原理？</h1><p>第一性原理极度耗费脑力和时间——买瓶矿泉水不需要从水分子结构算起。高手把类比留给 95% 的日常琐事，把第一性原理砸在 5% 的核心拐点！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>该决策的长期影响权重（赌注大小）</span><span id="vStk">75%</span></label><input type="range" id="sStk" min="10" max="100" value="75" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>可投入深度拆解的时间预算</span><span id="vTim">70%</span></label><input type="range" id="sTim" min="10" max="100" value="70" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">最优思维模式路由</div><div class="k-val" id="kMod">—</div></div>
+        <div class="kpi"><div class="k-lbl">投入产出比</div><div class="k-val" id="kRoi">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const stk=+document.getElementById('sStk').value, tim=+document.getElementById('sTim').value;
+  document.getElementById('vStk').textContent=stk+'%';
+  document.getElementById('vTim').textContent=tim+'%';
+  const useFp=(stk>=55 && tim>=45);
+  const roi=useFp ? Math.round(stk*1.15) : Math.round(65 + (100-stk)*0.3);
+  document.getElementById('kMod').textContent=useFp?'⚛️ 启动第一性原理深拆':'⚡ 用成熟类比快速搞定';
+  document.getElementById('kMod').style.color=useFp?'#8b5cf6':'#059669';
+  document.getElementById('kRoi').textContent=roi+' 分';
+  const px=70 + tim*4.5, py=172 - stk*1.3;
+  document.getElementById('svg').innerHTML=`
+    <text x="70" y="24" font-size="13" font-weight="800" fill="var(--tax-text)">思维工具路由矩阵（右上角高赌注+充裕时间 = 第一性原理区）</text>
+    <rect x="70" y="42" width="450" height="130" rx="8" fill="var(--tax-border)" opacity="0.16"/>
+    <rect x="272" y="42" width="248" height="60" rx="6" fill="#8b5cf6" opacity="0.2"/>
+    <text x="396" y="76" text-anchor="middle" font-size="12" font-weight="850" fill="#7c3aed">⚛️ 第一性原理区</text>
+    <text x="170" y="140" text-anchor="middle" font-size="12" font-weight="800" fill="#059669">⚡ 高效类比/最佳实践区</text>
+    <circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="9" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+    <text x="520" y="192" text-anchor="end" font-size="11" fill="var(--tax-muted)">时间充裕度 →</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>类比让你省电活着，第一性原理让你实现跃迁。在日常用好类比节省精力，才能在关键一役里全力启动第一性原理！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

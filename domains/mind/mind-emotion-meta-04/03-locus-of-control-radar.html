@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⭕ 控制圈 vs 关注圈：把精力收回可控处</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⭕ 控制圈 vs 关注圈：把精力收回可控处</h1><p>斯多葛哲学与心理学共同的减压黄金律：把 80% 精力花在天气、别人脸色、大盘涨跌（不可控关注圈），只会越焦虑越无力；收回控制圈，掌控感立刻膨胀！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>投入在“自身可控行动”的精力占比</span><span id="vCtl">70%</span></label><input type="range" id="sCtl" min="5" max="95" value="70" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>外界不确定噪音强度</span><span id="vNoi">65%</span></label><input type="range" id="sNoi" min="10" max="100" value="65" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">内心掌控感</div><div class="k-val" id="kMst">—</div></div>
+        <div class="kpi"><div class="k-lbl">无谓精神内耗</div><div class="k-val" id="kAnx">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const ctl=+document.getElementById('sCtl').value, noi=+document.getElementById('sNoi').value;
+  document.getElementById('vCtl').textContent=ctl+'%';
+  document.getElementById('vNoi').textContent=noi+'%';
+  const mst=Math.min(98, Math.round(ctl*0.92 + (100-noi)*0.1));
+  const anx=Math.max(5, Math.round((100-ctl)*(noi/100)));
+  document.getElementById('kMst').textContent=mst+'%';
+  document.getElementById('kMst').style.color=mst>=60?'#059669':'#f59e0b';
+  document.getElementById('kAnx').textContent=anx+'%';
+  document.getElementById('kAnx').style.color=anx>40?'#ef4444':'#059669';
+  const rIn=Math.max(18, 20 + ctl*0.55);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">同心圆可视化：内圈=你能直接控制的行动，外圈=不可控噪音</text>
+    <circle cx="170" cy="115" r="78" fill="#ef4444" opacity="0.14" stroke="#ef4444" stroke-dasharray="4,3"/>
+    <circle cx="170" cy="115" r="${rIn.toFixed(1)}" fill="#059669" opacity="0.78"/>
+    <text x="170" y="119" text-anchor="middle" font-size="12" font-weight="850" fill="#fff">控制圈 ${ctl}%</text>
+    <rect x="295" y="55" width="275" height="120" rx="12" fill="var(--tax-border)" opacity="0.18"/>
+    <text x="315" y="84" font-size="12.5" font-weight="800" fill="#059669">✅ 控制圈内（专注投入）：</text>
+    <text x="315" y="106" font-size="11.5" fill="var(--tax-muted)">今日作息、准备深度、回应态度</text>
+    <text x="315" y="136" font-size="12.5" font-weight="800" fill="#ef4444">❌ 关注圈外（果断放手）：</text>
+    <text x="315" y="158" font-size="11.5" fill="var(--tax-muted)">别人评价、已成过去、宏观黑天鹅</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当你把精力持续灌注进控制圈，你的控制圈本身会越变越大；相反，整天盯着不可控的事抱怨，只会让自己的影响力越缩越小。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

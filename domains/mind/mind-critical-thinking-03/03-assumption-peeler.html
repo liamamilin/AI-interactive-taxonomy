@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧅 隐含假设剥洋葱：物理定律 vs 历史包袱</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧅 隐含假设剥洋葱：物理定律 vs 历史包袱</h1><p>许多被奉为铁律的“行规”（如火箭必须一次性报废），剥开一看根本不是物理定律，只是没人质疑过的历史习惯。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>连续追问“为什么必须这样”的深度</span><span id="vDep">4 层</span></label><input type="range" id="sDep" min="1" max="5" value="4" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>原有流程中真实“物理硬约束”占比</span><span id="vPhy">20%</span></label><input type="range" id="sPhy" min="10" max="50" value="20" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">已剥离的虚假行规包袱</div><div class="k-val" id="kPel">—</div></div>
+        <div class="kpi"><div class="k-lbl">释放的创新自由度</div><div class="k-val" id="kFre">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const dep=+document.getElementById('sDep').value, phy=+document.getElementById('sPhy').value;
+  document.getElementById('vDep').textContent=dep+' 层';
+  document.getElementById('vPhy').textContent=phy+'%';
+  const fake=100 - phy;
+  const peeled=Math.round(fake*(dep/5));
+  document.getElementById('kPel').textContent=peeled+'%';
+  document.getElementById('kFre').textContent='+'+peeled+'% 设计空间';
+  document.getElementById('kFre').style.color='#059669';
+  let rings='';
+  for(let i=5;i>=1;i--){
+    const r=22 + i*14;
+    const isGone=(6-i)<=dep && i>1;
+    rings+=`<circle cx="155" cy="110" r="${r}" fill="${i===1?'#3b82f6':(isGone?'none':'#f59e0b')}" opacity="${i===1?'0.85':(isGone?'0.35':'0.22')}" stroke="${i===1?'#2563eb':'#d97706'}" stroke-dasharray="${isGone?'4,3':''}" stroke-width="2"/>`;
+  }
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">逐层剥离历史惯例，直达最核心的物理/数学公理（蓝核）</text>
+    ${rings}
+    <text x="155" y="114" text-anchor="middle" font-size="11" font-weight="850" fill="#fff">物理底线</text>
+    <rect x="295" y="55" width="275" height="112" rx="12" fill="var(--tax-border)" opacity="0.18"/>
+    <text x="315" y="84" font-size="12.5" font-weight="800" fill="var(--tax-text)">当前已追问 ${dep} 层“为什么”：</text>
+    <text x="315" y="110" font-size="12" fill="#059669">✓ 剥离虚假惯例：${peeled}%</text>
+    <text x="315" y="134" font-size="12" fill="#2563eb">● 不可违背物理硬核：${phy}%</text>
+    <text x="315" y="156" font-size="11" fill="var(--tax-muted)">凡是“大家一直这么干”的，都可以重写！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>检验一条限制是不是真约束，只需问：“它违背物理学定律吗？”如果不违背，它就只是一个待打破的旧假设。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

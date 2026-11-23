@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍦 混杂变量幕后黑手：冰淇淋与溺水（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🍦 混杂变量幕后黑手：冰淇淋与溺水（SVG）</h1><p>数据里冰淇淋销量和溺水事故高度正相关（r=0.92），但禁售冰淇淋根本救不了任何人——因为真正驱动两者的幕后变量是“夏季高温”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>幕后混杂变量：夏季气温</span><span id="vTmp">34 °C</span></label><input type="range" id="sTmp" min="10" max="40" value="34" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>人为干预：对冰淇淋打折促销</span><span id="vAds">50%</span></label><input type="range" id="sAds" min="0" max="100" value="50" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">冰淇淋销量指数</div><div class="k-val" id="kIce">—</div></div>
+        <div class="kpi"><div class="k-lbl">真实溺水风险指数</div><div class="k-val" id="kDrw">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const tmp=+document.getElementById('sTmp').value, ads=+document.getElementById('sAds').value;
+  document.getElementById('vTmp').textContent=tmp+' °C';
+  document.getElementById('vAds').textContent=ads+'%';
+  const ice=Math.min(100, Math.round((tmp-8)*2.3 + ads*0.26));
+  const drw=Math.max(5, Math.min(100, Math.round((tmp-8)*2.8)));
+  document.getElementById('kIce').textContent=ice+' 分';
+  document.getElementById('kDrw').textContent=drw+' 分 (不受打折影响!)';
+  document.getElementById('kDrw').style.color=drw>=70?'#ef4444':'#059669';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">因果有向图（DAG）：试着拉动“促销滑块”，溺水风险纹丝不动！</text>
+    <rect x="215" y="42" width="170" height="44" rx="10" fill="#f59e0b" opacity="0.2" stroke="#f59e0b" stroke-width="2"/>
+    <text x="300" y="69" text-anchor="middle" font-size="13" font-weight="850" fill="#d97706">☀️ 夏季高温 ${tmp}°C</text>
+    <line x1="255" y1="86" x2="145" y2="128" stroke="#f59e0b" stroke-width="2.5"/>
+    <line x1="345" y1="86" x2="455" y2="128" stroke="#f59e0b" stroke-width="2.5"/>
+    <rect x="55" y="130" width="175" height="48" rx="10" fill="#3b82f6" opacity="0.16" stroke="#3b82f6" stroke-width="2"/>
+    <text x="142" y="159" text-anchor="middle" font-size="12.5" font-weight="800" fill="#2563eb">🍦 冰淇淋销量 ${ice}</text>
+    <rect x="370" y="130" width="175" height="48" rx="10" fill="#ef4444" opacity="0.16" stroke="#ef4444" stroke-width="2"/>
+    <text x="457" y="159" text-anchor="middle" font-size="12.5" font-weight="800" fill="#ef4444">🏊 溺水风险 ${drw}</text>
+    <line x1="236" y1="154" x2="364" y2="154" stroke="#94a3b8" stroke-dasharray="4,4" stroke-width="2"/>
+    <text x="300" y="148" text-anchor="middle" font-size="11" font-weight="800" fill="#ef4444">无直接因果 ❌</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>看到两个指标同步上涨，先找背后有没有隐藏的“共同原因（混杂变量）”——把变量 A 单独动一动，看 B 动不动，才是检验因果的试金石。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

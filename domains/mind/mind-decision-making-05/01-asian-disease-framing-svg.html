@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🖼️ 经典疾病决策框架翻转器（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🖼️ 经典疾病决策框架翻转器（SVG）</h1><p>特沃斯基与卡尼曼 1981 年著名实验：面对 600 名患者，两个方案数学期望完全一样，但换一种表述方式，72% 的人立刻推翻自己刚才的选择！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setF('gain',this)">收益框架：“肯定救活 200 人”</button>
+        <button class="btn" onclick="setF('loss',this)">损失框架：“肯定死去 400 人”</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>决策者情绪化/直觉依赖度</span><span id="vEmo">75%</span></label><input type="range" id="sEmo" min="10" max="100" value="75" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">选“稳妥方案”比例</div><div class="k-val" id="kSafe">—</div></div>
+        <div class="kpi"><div class="k-lbl">选“1/3 全活豪赌”比例</div><div class="k-val" id="kRisk">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let mode='gain';
+function setF(m,btn){ mode=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const emo=+document.getElementById('sEmo').value;
+  document.getElementById('vEmo').textContent=emo+'%';
+  const shift=Math.round(emo*0.32);
+  const safe=mode==='gain' ? (50 + shift) : (50 - shift);
+  const risk=100 - safe;
+  document.getElementById('kSafe').textContent=safe+'%';
+  document.getElementById('kRisk').textContent=risk+'%';
+  const wS=Math.max(12, safe*3.6), wR=Math.max(12, risk*3.6);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">数学完全等价（均救活 200 人 / 死亡 400 人），仅改表述后的投票结果</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">选确定方案</text>
+    <rect x="145" y="64" width="${wS.toFixed(0)}" height="28" rx="6" fill="#059669"/>
+    <text x="${(153+wS).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#059669">${safe}%</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">选豪赌方案</text>
+    <rect x="145" y="120" width="${wR.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
+    <text x="${(153+wR).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#ef4444">${risk}%</text>
+    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">${mode==='gain'?'收益框架激活了“落袋为安”心理，大家压倒性选稳妥！':'损失框架激活了“不甘心白死 400 人”的赌徒心理，大家瞬间转向豪赌！'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>防框架效应的疫苗很简单：每当别人给你呈现一个极有煽动性的选项时，强迫自己在脑子里把它翻译成“反面等价表述”再重读一遍！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

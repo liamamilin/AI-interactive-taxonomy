@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚾ 运动与乐器：随机变奏为何比死磕单动作稳？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚾ 运动与乐器：随机变奏为何比死磕单动作稳？</h1><p>经典棒球实验：A 组连打 15 个直球再打 15 个曲球；B 组随机混打。结果比赛时随机组的打击率显著碾压分块组！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>训练球路/曲目随机切换率</span><span id="vRnd">80%</span></label><input type="range" id="sRnd" min="0" max="100" value="80" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>基础动作是否已入门</span><span id="vBas">75%</span></label><input type="range" id="sBas" min="15" max="100" value="75" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">正式比赛命中率</div><div class="k-val" id="kHit">—</div></div>
+        <div class="kpi"><div class="k-lbl">训练策略建议</div><div class="k-val" id="kAdv">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const rnd=+document.getElementById('sRnd').value, bas=+document.getElementById('sBas').value;
+  document.getElementById('vRnd').textContent=rnd+'%';
+  document.getElementById('vBas').textContent=bas+'%';
+  const hit=bas<40
+    ? Math.max(15, Math.round(35 + bas*0.5 - rnd*0.18))
+    : Math.max(25, Math.min(95, Math.round(42 + bas*0.25 + rnd*0.32)));
+  const adv=bas<40?'🌱 零基础先适度分块定型':'🏆 已入门立刻切入随机交错';
+  document.getElementById('kHit').textContent=hit+'%';
+  document.getElementById('kHit').style.color=hit>=70?'#059669':'#f59e0b';
+  document.getElementById('kAdv').textContent=adv;
+  const w=Math.max(15, hit*4.2);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">正式比赛临场表现（基础 ${bas}% × 随机交错 ${rnd}%）</text>
+    <rect x="20" y="65" width="460" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="20" y="65" width="${Math.min(460,w).toFixed(0)}" height="38" rx="8" fill="${hit>=70?'#059669':'#f59e0b'}"/>
+    <text x="${Math.min(490, 28+w).toFixed(0)}" y="90" font-size="14" font-weight="850" fill="${hit>=70?'#059669':'#d97706'}">${hit}%</text>
+    <text x="20" y="145" font-size="12" fill="var(--tax-muted)">${bas<40?'新手连基本挥棒轨迹都没成型时，过早随机容易手忙脚乱；先小块定型！':'一旦掌握基础动作，随机混打强迫小脑每次重新提取运动程序，实战极稳！'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“先小块入门，再尽早交错”——每次被迫重新加载动作程序，看似别扭，实则在锻造真正的临场肌肉记忆。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📦 工作记忆槽位溢出器（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📦 工作记忆槽位溢出器（SVG）</h1><p>现代认知心理学（Cowan 模型）发现：在无法默念复述的情况下，人类纯工作记忆的核心容量其实只有大约 4 个活跃槽位。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>待同时记住的新信息项</span><span id="vItems">7 项</span></label><input type="range" id="sItems" min="2" max="12" value="7" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>大脑后台挂起的焦虑/打断任务</span><span id="vBg">1 项</span></label><input type="range" id="sBg" min="0" max="3" value="1" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">可用核心槽位</div><div class="k-val" id="kCap">—</div></div>
+        <div class="kpi"><div class="k-lbl">被挤出遗忘项</div><div class="k-val" id="kDrop">—</div></div>
+        <div class="kpi"><div class="k-lbl">瞬时保留率</div><div class="k-val" id="kRate">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const items=+document.getElementById('sItems').value, bg=+document.getElementById('sBg').value;
+  document.getElementById('vItems').textContent=items+' 项';
+  document.getElementById('vBg').textContent=bg+' 项';
+  const cap=Math.max(1, 5 - bg);
+  const kept=Math.min(items, cap);
+  const drop=Math.max(0, items - cap);
+  const rate=Math.round(kept/items*100);
+  document.getElementById('kCap').textContent=cap+' 槽';
+  document.getElementById('kDrop').textContent=drop+' 项';
+  document.getElementById('kDrop').style.color=drop>0?'#ef4444':'#059669';
+  document.getElementById('kRate').textContent=rate+'%';
+  let boxes='';
+  for(let i=0;i<5;i++){
+    const x=30+i*108;
+    const isBg=i>=cap;
+    const filled=!isBg && i<kept;
+    const fill=isBg?'#f59e0b':(filled?'#3b82f6':'var(--tax-border)');
+    const op=isBg?'0.28':(filled?'0.9':'0.25');
+    const lbl=isBg?'后台打断占用':(filled?('信息 #'+(items-kept+i+1)):'空闲槽位');
+    boxes+=`<rect x="${x}" y="52" width="96" height="62" rx="10" fill="${fill}" opacity="${op}" stroke="${isBg?'#d97706':(filled?'#2563eb':'var(--tax-border)')}" stroke-width="2"/>
+      <text x="${x+48}" y="88" text-anchor="middle" font-size="11.5" font-weight="800" fill="${filled?'#fff':'var(--tax-text)'}">${lbl}</text>`;
+  }
+  let dropped='';
+  for(let i=0;i<Math.min(drop,7);i++){
+    const x=30+i*76;
+    dropped+=`<rect x="${x}" y="148" width="66" height="30" rx="6" fill="#ef4444" opacity="0.18" stroke="#ef4444" stroke-dasharray="3,2"/>
+      <text x="${x+33}" y="167" text-anchor="middle" font-size="11" font-weight="750" fill="#ef4444">溢出 #${i+1}</text>`;
+  }
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">大脑工作记忆核心槽位（总计 5 槽，后台占用 ${bg} 槽）</text>
+    ${boxes}
+    <text x="30" y="138" font-size="12" font-weight="750" fill="${drop>0?'#ef4444':'#059669'}">${drop>0?'以下早期信息已被新输入无情挤出内存：':'当前信息完全装得下，无溢出丢失。'}</text>
+    ${dropped}`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>工作记忆就是人类大脑的“超小号 L1 缓存”。把待办事项记在脑子里（后台占用）会直接偷走你思考当下问题的槽位，写到纸上才是最便宜的内存扩容。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

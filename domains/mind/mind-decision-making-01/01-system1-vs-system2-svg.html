@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚡ 双系统能耗与接管开关（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚡ 双系统能耗与接管开关（SVG）</h1><p>卡尼曼《思考，快与慢》：系统 1 自动高速且省电，系统 2 理性严谨但极耗电。只要你又累又赶时间，系统 2 就会直接罢工！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>决策时间紧迫度</span><span id="vUrg">70%</span></label><input type="range" id="sUrg" min="10" max="100" value="70" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>大脑当前疲劳/缺觉程度</span><span id="vFat">60%</span></label><input type="range" id="sFat" min="0" max="100" value="60" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">系统 2 介入验算概率</div><div class="k-val" id="kS2">—</div></div>
+        <div class="kpi"><div class="k-lbl">主导决策引擎</div><div class="k-val" id="kDom">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const urg=+document.getElementById('sUrg').value, fat=+document.getElementById('sFat').value;
+  document.getElementById('vUrg').textContent=urg+'%';
+  document.getElementById('vFat').textContent=fat+'%';
+  const s2=Math.max(4, Math.min(96, Math.round(105 - urg*0.52 - fat*0.48)));
+  const s1=100 - s2;
+  document.getElementById('kS2').textContent=s2+'%';
+  document.getElementById('kS2').style.color=s2>=50?'#059669':'#ef4444';
+  document.getElementById('kDom').textContent=s2>=50?'🧠 系统 2 理性接管':'⚡ 系统 1 直觉拍板';
+  const w1=Math.max(10, s1*4.8), w2=Math.max(10, s2*4.8);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">双系统决策权实时拉锯条</text>
+    <rect x="30" y="64" width="${w1.toFixed(0)}" height="44" rx="6" fill="#f59e0b"/>
+    <rect x="${(30+w1).toFixed(0)}" y="64" width="${w2.toFixed(0)}" height="44" rx="6" fill="#3b82f6"/>
+    <text x="30" y="136" font-size="12.5" font-weight="800" fill="#d97706">⚡ 系统 1（快/省电/易偏误）：${s1}%</text>
+    <text x="320" y="136" font-size="12.5" font-weight="800" fill="#2563eb">🧠 系统 2（慢/耗电/严谨）：${s2}%</text>
+    <text x="30" y="176" font-size="11.5" fill="var(--tax-muted)">所有“限时 3 分钟秒杀”营销话术，本质都是在拉满紧迫度、强制踢走系统 2！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>重大决定前强制“睡一觉再签字”，不是拖延，而是把决策权从疲惫的系统 1 手里夺回给清醒的系统 2。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

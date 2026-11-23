@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍸 鸡尾酒会效应：双耳分听过滤器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🍸 鸡尾酒会效应：双耳分听过滤器</h1><p>在吵闹的派对上你能屏蔽几十人的闲聊专心听对面说话，但只要远处有人轻声喊你的名字，你瞬间就能听清——这就是衰减过滤模型的神奇之处。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>背景派对噪音强度</span><span id="vNoi">65 dB</span></label><input type="range" id="sNoi" min="20" max="95" value="65" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>旁听信号自我相关性（如喊你名字）</span><span id="vRel">80%</span></label><input type="range" id="sRel" min="10" max="100" value="80" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 215"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">无关闲聊衰减后强度</div><div class="k-val" id="kAtt">—</div></div>
+        <div class="kpi"><div class="k-lbl">个人关键词唤醒阈值</div><div class="k-val" id="kThr">—</div></div>
+        <div class="kpi"><div class="k-lbl">听觉通道捕获</div><div class="k-val" id="kCap">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const noi=+document.getElementById('sNoi').value, rel=+document.getElementById('sRel').value;
+  document.getElementById('vNoi').textContent=noi+' dB';
+  document.getElementById('vRel').textContent=rel+'%';
+  const att=Math.max(5, Math.round(noi*0.22));
+  const thr=Math.max(12, Math.round(90 - rel*0.65));
+  const sig=Math.round(noi*0.35 + rel*0.42);
+  const hit=sig>=thr;
+  document.getElementById('kAtt').textContent=att+' dB';
+  document.getElementById('kThr').textContent=thr+' 分';
+  document.getElementById('kCap').textContent=hit?'⚡ 击穿屏障被听见':'🔇 留在潜意识背景';
+  document.getElementById('kCap').style.color=hit?'#f59e0b':'#64748b';
+  const wMain=Math.max(10, Math.min(200, 175 - noi*0.5));
+  const wBg=Math.max(8, Math.min(200, att*2));
+  const wName=Math.max(10, Math.min(200, sig*2));
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">特雷斯曼衰减过滤器：三路声音进入意识的强度</text>
+    <rect x="190" y="45" width="16" height="150" rx="6" fill="#6366f1" opacity="0.25"/>
+    <text x="198" y="40" text-anchor="middle" font-size="10.5" font-weight="800" fill="#6366f1">注意滤网</text>
+    <text x="20" y="76" font-size="12" font-weight="750" fill="var(--tax-text)">面对面主对话</text>
+    <rect x="220" y="60" width="${wMain}" height="24" rx="6" fill="#059669"/>
+    <text x="${228+wMain}" y="76" font-size="11.5" font-weight="750" fill="#059669">清晰通行</text>
+    <text x="20" y="122" font-size="12" font-weight="750" fill="var(--tax-text)">邻桌无关八卦</text>
+    <rect x="220" y="106" width="${wBg}" height="24" rx="6" fill="#94a3b8"/>
+    <text x="${228+wBg}" y="122" font-size="11.5" fill="var(--tax-muted)">被衰减至 ${att} dB</text>
+    <text x="20" y="168" font-size="12" font-weight="750" fill="var(--tax-text)">远处喊你名字</text>
+    <rect x="220" y="152" width="${wName}" height="24" rx="6" fill="${hit?'#f59e0b':'#cbd5e1'}"/>
+    <text x="${228+wName}" y="168" font-size="11.5" font-weight="750" fill="${hit?'#d97706':'var(--tax-muted)'}">${hit?'突破低阈值唤醒!':'未达唤醒阈值'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>注意力滤网不是完全关掉的闸门，而是“调小音量”。大脑后台仍在偷偷扫描低音量通道，一旦撞上你的名字、危险词或高频关注点，立刻拉响警报。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

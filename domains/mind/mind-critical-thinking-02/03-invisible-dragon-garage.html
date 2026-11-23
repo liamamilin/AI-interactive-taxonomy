@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐉 萨根“车库里的喷火龙”检验器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🐉 萨根“车库里的喷火龙”检验器</h1><p>我说我家车库有条喷火龙。你说看不见，我说它隐形；你撒面粉看脚印，我说它漂浮；你测红外，我说它喷无热火——一条无法被任何手段检测的龙，和根本没有龙有什么区别？</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>科学排查手段数量（目视/红外/声纳/重量）</span><span id="vTst">4 项</span></label><input type="range" id="sTst" min="1" max="5" value="4" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>辩护者事后追加的“隐形/免责借口”数</span><span id="vExc">3 个</span></label><input type="range" id="sExc" min="0" max="5" value="3" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">剩余可观测物理差异</div><div class="k-val" id="kDif">—</div></div>
+        <div class="kpi"><div class="k-lbl">萨根剃刀判定</div><div class="k-val" id="kVer">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const tst=+document.getElementById('sTst').value, exc=+document.getElementById('sExc').value;
+  document.getElementById('vTst').textContent=tst+' 项';
+  document.getElementById('vExc').textContent=exc+' 个';
+  const dif=Math.max(0, 100 - exc*20);
+  document.getElementById('kDif').textContent=dif+'%';
+  document.getElementById('kDif').style.color=dif<=20?'#ef4444':'#059669';
+  document.getElementById('kVer').textContent=dif<=20?'💨 与“根本没有龙”完全等价':'🔍 尚保留可检验特征';
+  const w=Math.max(6, dif*4.4);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">“车库里有龙”与“空车库”之间剩下的可观测差异</text>
+    <rect x="30" y="68" width="440" height="40" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="30" y="68" width="${w.toFixed(0)}" height="40" rx="8" fill="${dif<=20?'#ef4444':'#3b82f6'}"/>
+    <text x="${Math.min(480, 38+w).toFixed(0)}" y="94" font-size="14" font-weight="850" fill="${dif<=20?'#ef4444':'#2563eb'}">${dif}%</text>
+    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">非凡的主张需要非凡的证据；举证责任永远在声称“有龙”的一方，而不是让别人证明“没龙”！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>每当有人为了圆谎而不断发明新的免责补丁（“心诚则灵、不灵是你不够诚”），立刻亮出卡尔·萨根的车库喷火龙！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🕳️ 沉没成本黑洞：止损 vs 死扛对比（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🕳️ 沉没成本黑洞：止损 vs 死扛对比（SVG）</h1><p>已经花掉且收不回来的钱是“沉没成本”。理性决策只看未来的增量成本与增量收益，但损失厌恶常逼着我们拿更多好钱去救坏钱！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>前期已砸沉没成本（收不回）</span><span id="vSnk">100 万</span></label><input type="range" id="sSnk" min="20" max="300" step="20" value="100" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>继续追加投入 60 万的真实翻盘胜率</span><span id="vWin">15%</span></label><input type="range" id="sWin" min="5" max="80" step="5" value="15" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">立刻止损总净值</div><div class="k-val" id="kStop">—</div></div>
+        <div class="kpi"><div class="k-lbl">继续硬扛期望总净值</div><div class="k-val" id="kCont">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const snk=+document.getElementById('sSnk').value, win=+document.getElementById('sWin').value;
+  document.getElementById('vSnk').textContent=snk+' 万';
+  document.getElementById('vWin').textContent=win+'%';
+  const stopNet=-snk;
+  const contDelta=(win/100)*150 - 60;
+  const contNet=Math.round(-snk + contDelta);
+  const betterStop=contDelta<0;
+  document.getElementById('kStop').textContent=stopNet+' 万';
+  document.getElementById('kCont').textContent=contNet+' 万 (增量 '+(contDelta>=0?'+':'')+contDelta.toFixed(0)+'万)';
+  document.getElementById('kCont').style.color=betterStop?'#ef4444':'#059669';
+  const sc=1.1;
+  const w1=Math.max(16, Math.min(360, Math.abs(stopNet)*sc));
+  const w2=Math.max(16, Math.min(360, Math.abs(contNet)*sc));
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">最终总亏损额对比（增量期望收益 = ${win}% × 150万 - 60万 = ${contDelta.toFixed(0)}万）</text>
+    <text x="20" y="84" font-size="12.5" font-weight="750" fill="var(--tax-text)">立刻止损总亏</text>
+    <rect x="145" y="66" width="${w1.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
+    <text x="${(153+w1).toFixed(0)}" y="85" font-size="12" font-weight="800" fill="#2563eb">${stopNet} 万</text>
+    <text x="20" y="140" font-size="12.5" font-weight="750" fill="var(--tax-text)">追加硬扛总亏</text>
+    <rect x="145" y="122" width="${w2.toFixed(0)}" height="28" rx="6" fill="${betterStop?'#ef4444':'#059669'}"/>
+    <text x="${(153+w2).toFixed(0)}" y="141" font-size="12" font-weight="800" fill="${betterStop?'#ef4444':'#059669'}">${contNet} 万</text>
+    <text x="20" y="182" font-size="11.5" fill="var(--tax-muted)">注意：无论前期砸了 20 万还是 300 万，决策正负号只取决于未来增量 (${contDelta.toFixed(0)}万)！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“已经投入太多了不能白费”是商业和人生中最昂贵的一句话。过去的钱已经走了，别再把未来的钱和时间也送进去陪葬。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

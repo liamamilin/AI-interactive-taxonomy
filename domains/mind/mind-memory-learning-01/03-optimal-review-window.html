@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎯 最佳复习点：太早无效，太晚重学</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎯 最佳复习点：太早无效，太晚重学</h1><p>刚背完 5 分钟就再看一遍，因为毫无提取难度，几乎不增加长期记忆强度；拖到彻底忘光再背，又得从零重学。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>触发复习时的剩余记忆率</span><span id="vRem">55%</span></label><input type="range" id="sRem" min="10" max="98" value="55" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>新知识抽象难度</span><span id="vDif">50%</span></label><input type="range" id="sDif" min="10" max="90" value="50" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">单次复习记忆增益</div><div class="k-val" id="kGain">—</div></div>
+        <div class="kpi"><div class="k-lbl">区间诊断</div><div class="k-val" id="kZone">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const rem=+document.getElementById('sRem').value, dif=+document.getElementById('sDif').value;
+  document.getElementById('vRem').textContent=rem+'%';
+  document.getElementById('vDif').textContent=dif+'%';
+  const opt=42 + dif*0.25;
+  const gain=Math.max(8, Math.round(98*Math.exp(-Math.pow((rem-opt)/26, 2))));
+  const zone=rem>opt+20?'😴 太早复习（虚假流畅感）':(rem<opt-20?'🔄 太晚复习（被迫从零重学）':'🎯 必要难度黄金区');
+  document.getElementById('kGain').textContent='+'+gain+' 分';
+  document.getElementById('kGain').style.color=gain>=75?'#059669':'#f59e0b';
+  document.getElementById('kZone').textContent=zone;
+  let pts=[];
+  for(let r=10;r<=98;r+=2){
+    const g=98*Math.exp(-Math.pow((r-opt)/26, 2));
+    const x=45+(r-10)*5.8, y=170-g*1.25;
+    pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+  }
+  const cx=45+(rem-10)*5.8, cy=170-gain*1.25;
+  document.getElementById('svg').innerHTML=`
+    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">复习时机收益倒 U 曲线（最佳点约剩余 ${opt.toFixed(0)}% 时）</text>
+    <line x1="45" y1="170" x2="560" y2="170" stroke="var(--tax-border)" stroke-width="1.5"/>
+    <polyline points="${pts.join(' ')}" fill="none" stroke="#059669" stroke-width="3"/>
+    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+    <text x="45" y="192" font-size="11" fill="var(--tax-muted)">10%（几乎忘光）</text>
+    <text x="270" y="192" font-size="11" font-weight="750" fill="#059669">黄金提取区</text>
+    <text x="495" y="192" font-size="11" fill="var(--tax-muted)">98%（刚背完）</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>大脑遵循“必要难度”原则：觉得复习起来有点费劲、需要搜肠刮肚想 3 秒钟时，恰恰是神经连接强化最快的一刻！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✈️ 飞行教官错觉：骂完进步的数学真相（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>✈️ 飞行教官错觉：骂完进步的数学真相（SVG）</h1><p>卡尼曼曾对空军教官指出：学员超常发挥（含大量好运）后，下一次大概率回落均值——教官刚好在此时夸奖，就误以为“夸奖有害”；骂完进步同理！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>单次着陆中“随机风速/运气”占比</span><span id="vLuck">60%</span></label><input type="range" id="sLuck" min="10" max="90" value="60" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>本次异常表现偏离均值幅度</span><span id="vDev">+30 分</span></label><input type="range" id="sDev" min="-35" max="35" step="5" value="30" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">本次成绩（均值 70）</div><div class="k-val" id="kNow">—</div></div>
+        <div class="kpi"><div class="k-lbl">无任何赏罚下一次预期</div><div class="k-val" id="kNxt">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const luck=+document.getElementById('sLuck').value, dev=+document.getElementById('sDev').value;
+  document.getElementById('vLuck').textContent=luck+'%';
+  document.getElementById('vDev').textContent=(dev>=0?'+':'')+dev+' 分';
+  const now=70 + dev;
+  const nxt=Math.round(70 + dev*(1 - luck/100));
+  const delta=nxt - now;
+  document.getElementById('kNow').textContent=now+' 分';
+  document.getElementById('kNxt').textContent=nxt+' 分 ('+(delta>=0?'+':'')+delta+')';
+  document.getElementById('kNxt').style.color=delta>0?'#059669':(delta<0?'#ef4444':'#64748b');
+  const yMean=110, yNow=110 - dev*1.7, yNxt=110 - (nxt-70)*1.7;
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">两次连续着陆成绩的统计学自动回归（蓝虚线 = 真实均值 70）</text>
+    <line x1="45" y1="${yMean}" x2="555" y2="${yMean}" stroke="#3b82f6" stroke-dasharray="5,4" stroke-width="2"/>
+    <line x1="160" y1="${yNow.toFixed(1)}" x2="430" y2="${yNxt.toFixed(1)}" stroke="${delta>=0?'#059669':'#ef4444'}" stroke-width="3.5"/>
+    <circle cx="160" cy="${yNow.toFixed(1)}" r="9" fill="#f59e0b"/>
+    <text x="160" y="${(yNow-14).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="800" fill="#d97706">本次 ${now} 分 (${dev>10?'教官夸奖':(dev<-10?'教官痛骂':'平平无奇')})</text>
+    <circle cx="430" cy="${yNxt.toFixed(1)}" r="9" fill="${delta>=0?'#059669':'#ef4444'}"/>
+    <text x="430" y="${(yNxt-14).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="800" fill="${delta>=0?'#059669':'#ef4444'}">下次预期 ${nxt} 分</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>极端好之后变普通、极端差之后变正常，是纯概率现象！把统计回归当成惩罚有效，是职场和教育里最隐蔽的“虐待强化循环”。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

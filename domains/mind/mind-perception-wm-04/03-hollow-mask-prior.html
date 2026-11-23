@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎭 凹面具错觉：强先验如何击败双眼立体感？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎭 凹面具错觉：强先验如何击败双眼立体感？</h1><p>把一张向内凹陷的人脸面具背面朝向你，即使双目视差明确告诉你它是凹的，大脑依然会强行把它翻转成“凸出来的正常人脸”。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>“人脸必凸”进化先验强度</span><span id="vFace">90%</span></label><input type="range" id="sFace" min="20" max="100" value="90" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>近距离双目立体视差线索</span><span id="vBin">50%</span></label><input type="range" id="sBin" min="10" max="100" value="50" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">大脑翻转判定</div><div class="k-val" id="kFlip">—</div></div>
+        <div class="kpi"><div class="k-lbl">先验压制余量</div><div class="k-val" id="kMar">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const face=+document.getElementById('sFace').value, bin=+document.getElementById('sBin').value;
+  document.getElementById('vFace').textContent=face+'%';
+  document.getElementById('vBin').textContent=bin+'%';
+  const diff=face - bin;
+  const illusion=diff>0;
+  document.getElementById('kFlip').textContent=illusion?'🎭 强行看成凸人脸（错觉）':'🔍 识破真实凹面具';
+  document.getElementById('kFlip').style.color=illusion?'#8b5cf6':'#059669';
+  document.getElementById('kMar').textContent=(diff>=0?'+':'')+diff+' 分';
+  const curve=illusion? 'M 260 65 Q 345 110 260 155' : 'M 260 65 Q 195 110 260 155';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">侧面剖面对比：物理凹面 vs 大脑知觉重建</text>
+    <path d="M 120 65 Q 75 110 120 155" fill="none" stroke="#64748b" stroke-width="4"/>
+    <text x="110" y="180" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-muted)">物理真实：向内凹陷</text>
+    <text x="195" y="114" font-size="22" fill="var(--tax-muted)">→</text>
+    <path d="${curve}" fill="none" stroke="${illusion?'#8b5cf6':'#059669'}" stroke-width="5"/>
+    <text x="285" y="180" text-anchor="middle" font-size="11.5" font-weight="800" fill="${illusion?'#8b5cf6':'#059669'}">${illusion?'大脑脑补：向外凸出!':'大脑接受：真实凹陷'}</text>
+    <rect x="405" y="68" width="165" height="84" rx="10" fill="var(--tax-border)" opacity="0.22"/>
+    <text x="488" y="96" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-text)">先验 ${face} vs 视差 ${bin}</text>
+    <text x="488" y="124" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">${illusion?'走到极近距离才能打破错觉':'近距高视差击败了先验'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>凹面具错觉证明了“眼见未必为实”——只要某个先验在进化史上 99.99% 正确（人脸总是凸的），大脑宁可否决眼睛的立体信号也要坚持先验。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

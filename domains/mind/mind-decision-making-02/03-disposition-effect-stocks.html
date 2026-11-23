@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📊 处置效应：为何散户总爱卖盈留亏？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📊 处置效应：为何散户总爱卖盈留亏？</h1><p>股票涨了 20% 急着落袋为安（生怕利润回吐）；股票跌了 20% 却死活不肯止损（不卖就不算真亏，宁愿赌它反弹）！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>当前持仓盈亏幅度（相对买入价）</span><span id="vPnl">-25%</span></label><input type="range" id="sPnl" min="-50" max="50" step="5" value="-25" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>交易者损失厌恶程度</span><span id="vAv">75%</span></label><input type="range" id="sAv" min="10" max="100" value="75" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">风险偏好自动翻转</div><div class="k-val" id="kPref">—</div></div>
+        <div class="kpi"><div class="k-lbl">散户冲动操作</div><div class="k-val" id="kAct">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const pnl=+document.getElementById('sPnl').value, av=+document.getElementById('sAv').value;
+  document.getElementById('vPnl').textContent=(pnl>=0?'+':'')+pnl+'%';
+  document.getElementById('vAv').textContent=av+'%';
+  const isGain=pnl>0, isLoss=pnl<0;
+  const sellProb=isGain ? Math.min(95, Math.round(45 + pnl*0.6 + av*0.25)) : (isLoss ? Math.max(5, Math.round(40 + pnl*0.4 - av*0.2)) : 50);
+  document.getElementById('kPref').textContent=isGain?'🛡️ 风险厌恶（求稳）':(isLoss?'🎰 风险寻求（赌回本）':'⚖️ 中性');
+  document.getElementById('kAct').textContent=isGain?('急着卖出概率 '+sellProb+'%'):(isLoss?('死扛不卖概率 '+(100-sellProb)+'%'):'观望');
+  document.getElementById('kAct').style.color=isGain?'#f59e0b':(isLoss?'#ef4444':'#64748b');
+  const wS=Math.max(12, sellProb*3.6), wH=Math.max(12, (100-sellProb)*3.6);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">盈亏状态如何逆转人类风险偏好（当前 ${pnl>=0?'+':''}${pnl}%）</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">立刻卖出倾向</text>
+    <rect x="145" y="64" width="${wS.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
+    <text x="${(153+wS).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#2563eb">${sellProb}%</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">继续死拿倾向</text>
+    <rect x="145" y="120" width="${wH.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
+    <text x="${(153+wH).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#ef4444">${100-sellProb}%</text>
+    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">结果就是“剪掉鲜花（卖掉好资产），浇灌杂草（死扛烂资产）”！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>资产本身并不知道你是多少钱买它的！忘掉成本价，只看未来预期价值，才能破除处置效应。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

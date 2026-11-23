@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎟️ 心理账户：丢电影票 vs 丢现金悖论</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎟️ 心理账户：丢电影票 vs 丢现金悖论</h1><p>经济学家理查德·塞勒的经典实验：两种情境下你损失的净财富完全都是 100 元，但人们在“丢票”时拒绝再买，在“丢钞票”时却照买不误！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>电影票单价金额</span><span id="vPr">100 元</span></label><input type="range" id="sPr" min="40" max="300" step="20" value="100" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>心理分账刻板程度</span><span id="vRig">75%</span></label><input type="range" id="sRig" min="10" max="100" value="75" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">丢现金后仍愿买票比例</div><div class="k-val" id="kCash">—</div></div>
+        <div class="kpi"><div class="k-lbl">丢电影票后愿重买比例</div><div class="k-val" id="kTkt">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const pr=+document.getElementById('sPr').value, rig=+document.getElementById('sRig').value;
+  document.getElementById('vPr').textContent=pr+' 元';
+  document.getElementById('vRig').textContent=rig+'%';
+  const cash=Math.max(45, Math.min(95, Math.round(92 - pr*0.08)));
+  const tkt=Math.max(12, Math.round(cash - rig*0.52));
+  document.getElementById('kCash').textContent=cash+'%';
+  document.getElementById('kTkt').textContent=tkt+'%';
+  document.getElementById('kTkt').style.color='#ef4444';
+  const wC=Math.max(12, cash*3.6), wT=Math.max(12, tkt*3.6);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">净资产同样减少 ${pr} 元，两个场景下继续看电影的意愿</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">丢了 ${pr} 元现金</text>
+    <rect x="155" y="64" width="${wC.toFixed(0)}" height="28" rx="6" fill="#059669"/>
+    <text x="${(163+wC).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#059669">${cash}% 照买不误</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">丢了 ${pr} 元门票</text>
+    <rect x="155" y="120" width="${wT.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
+    <text x="${(163+wT).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#ef4444">${tkt}% 愿意重买</text>
+    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">原因：重买门票会被记入“娱乐账户”感觉花双倍价钱(${pr*2}元)，丢现金则被摊进“总资产”不心疼！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>钱在经济学上是完全同质可替代的，但大脑却悄悄给钱贴上了“血汗钱、娱乐钱、意外钱”等小信封，导致荒诞的消费双标。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

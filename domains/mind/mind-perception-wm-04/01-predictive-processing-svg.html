@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚖️ 贝叶斯大脑：先验脑补 vs 感官输入（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 贝叶斯大脑：先验脑补 vs 感官输入（SVG）</h1><p>现代神经科学认为：大脑是一台“预测机器”。它不断自上而下生成对世界的猜测（先验），只用眼睛传来的“预测误差”去微调它。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>大脑先验信念确信度（脑补权重）</span><span id="vPri">70%</span></label><input type="range" id="sPri" min="10" max="95" value="70" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>外界感官信号清晰度（光线/信噪比）</span><span id="vSen">40%</span></label><input type="range" id="sSen" min="10" max="95" value="40" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">最终知觉偏向</div><div class="k-val" id="kPer">—</div></div>
+        <div class="kpi"><div class="k-lbl">预测误差修正力</div><div class="k-val" id="kErr">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const pri=+document.getElementById('sPri').value, sen=+document.getElementById('sSen').value;
+  document.getElementById('vPri').textContent=pri+'%';
+  document.getElementById('vSen').textContent=sen+'%';
+  const wSen=sen/(pri+sen);
+  const pos=Math.round(wSen*100);
+  document.getElementById('kPer').textContent=pos<40?'🔮 先验脑补主导':(pos>60?'👁️ 客观感官主导':'⚖️ 先验与现实平衡');
+  document.getElementById('kPer').style.color=pos<40?'#8b5cf6':(pos>60?'#059669':'#3b82f6');
+  document.getElementById('kErr').textContent=pos+'%';
+  const xPos=70 + pos*4.6;
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">主观知觉合成点 = 先验预测 × 精度 + 感官输入 × 清晰度</text>
+    <rect x="70" y="92" width="460" height="14" rx="7" fill="var(--tax-border)" opacity="0.4"/>
+    <circle cx="70" cy="99" r="14" fill="#8b5cf6"/>
+    <text x="70" y="72" text-anchor="middle" font-size="12" font-weight="800" fill="#8b5cf6">大脑先验 (0)</text>
+    <text x="70" y="135" text-anchor="middle" font-size="11" fill="var(--tax-muted)">比如“草丛里有蛇”</text>
+    <circle cx="530" cy="99" r="14" fill="#059669"/>
+    <text x="530" y="72" text-anchor="middle" font-size="12" font-weight="800" fill="#059669">真实感官 (100)</text>
+    <text x="530" y="135" text-anchor="middle" font-size="11" fill="var(--tax-muted)">实际只是麻绳</text>
+    <circle cx="${xPos.toFixed(1)}" cy="99" r="18" fill="#f59e0b" stroke="#fff" stroke-width="3"/>
+    <text x="${xPos.toFixed(1)}" y="148" text-anchor="middle" font-size="12.5" font-weight="850" fill="#d97706">你实际“看到”的结果 (${pos})</text>
+    <text x="30" y="188" font-size="11.5" fill="var(--tax-muted)">光线越暗（感官清晰度低）或恐惧越强（先验权重高），你就越容易“杯弓蛇影”！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>知觉本质上是“受控的幻觉”——当外界模糊不清时，大脑会自动把先验猜测当成现实直接投影到你的视野里。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

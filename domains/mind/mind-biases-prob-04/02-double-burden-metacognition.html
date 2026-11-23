@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎯 双重诅咒：能力差所以测不出自己差</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎯 双重诅咒：能力差所以测不出自己差</h1><p>判断一篇文章写得好不好、一段代码有没有 Bug，所需的技能和“亲自写好它”是同一套技能——这就是新手的双重负担。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>测试者真实百分位排名</span><span id="vAct">20%</span></label><input type="range" id="sAct" min="5" max="95" value="20" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>外部客观打分标尺清晰度</span><span id="vRub">30%</span></label><input type="range" id="sRub" min="0" max="100" value="30" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">自评百分位排名</div><div class="k-val" id="kEst">—</div></div>
+        <div class="kpi"><div class="k-lbl">自评误差</div><div class="k-val" id="kErr">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const act=+document.getElementById('sAct').value, rub=+document.getElementById('sRub').value;
+  document.getElementById('vAct').textContent='前 '+(100-act)+'% (第 '+act+' 百分位)';
+  document.getElementById('vRub').textContent=rub+'%';
+  const rawEst=58 + (act-50)*0.32;
+  const est=Math.round(rawEst*(1-rub/130) + act*(rub/130));
+  const err=est - act;
+  document.getElementById('kEst').textContent='第 '+est+' 百分位';
+  document.getElementById('kErr').textContent=(err>=0?'高估 +':'低估 ')+err;
+  document.getElementById('kErr').style.color=Math.abs(err)>20?'#ef4444':'#059669';
+  const wA=Math.max(10, act*3.6), wE=Math.max(10, est*3.6);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">真实排名 vs 主观自评排名（百分位）</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">真实水平</text>
+    <rect x="135" y="64" width="${wA.toFixed(0)}" height="28" rx="6" fill="#059669"/>
+    <text x="${(143+wA).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#059669">${act}%</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">主观自评</text>
+    <rect x="135" y="120" width="${wE.toFixed(0)}" height="28" rx="6" fill="#8b5cf6"/>
+    <text x="${(143+wE).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#8b5cf6">${est}%</text>
+    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">引入清晰的外部客观标尺（如盲测、代码评审、对照范例），能迅速缩小盲目高估！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>摆脱盲目自信的解药不是“更谦虚”，而是给自己装上“外部客观仪表盘”。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

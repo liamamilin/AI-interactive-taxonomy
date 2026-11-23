@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📚 性格画像 vs 职业人数基数陷阱</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📚 性格画像 vs 职业人数基数陷阱</h1><p>史蒂夫害羞、一丝不苟、酷爱整理。他更可能是图书管理员还是农民？多数人选图书管理员，却忘了农民总人数是图书管理员的 20 倍！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>农民人数 / 图书管理员人数倍率</span><span id="vRat">20 倍</span></label><input type="range" id="sRat" min="1" max="40" value="20" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>该性格在图书管理员 vs 农民中的相对契合度</span><span id="vFit">4 倍</span></label><input type="range" id="sFit" min="1" max="10" value="4" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">是图书管理员的概率</div><div class="k-val" id="kLib">—</div></div>
+        <div class="kpi"><div class="k-lbl">是农民的概率</div><div class="k-val" id="kFrm">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const rat=+document.getElementById('sRat').value, fit=+document.getElementById('sFit').value;
+  document.getElementById('vRat').textContent=rat+' 倍';
+  document.getElementById('vFit').textContent=fit+' 倍';
+  const libW=1*fit, frmW=rat*1;
+  const pLib=Math.round(libW/(libW+frmW)*100);
+  const pFrm=100 - pLib;
+  document.getElementById('kLib').textContent=pLib+'%';
+  document.getElementById('kFrm').textContent=pFrm+'%';
+  document.getElementById('kFrm').style.color='#059669';
+  const wL=Math.max(12, pLib*3.6), wF=Math.max(12, pFrm*3.6);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">符合“害羞爱整理”画像的人群中，两类职业的真实占比</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">图书管理员</text>
+    <rect x="145" y="64" width="${wL.toFixed(0)}" height="28" rx="6" fill="#8b5cf6"/>
+    <text x="${(153+wL).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#8b5cf6">${pLib}%</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">农民</text>
+    <rect x="145" y="120" width="${wF.toFixed(0)}" height="28" rx="6" fill="#059669"/>
+    <text x="${(153+wF).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${pFrm}%</text>
+    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">只要农民人数基数 (${rat}x) 远大于性格匹配倍率 (${fit}x)，概率天平就牢牢倒向农民！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>刻板印象（代表性启发式）会让我们忘记先看大盘人数比例。做任何判断前，先查基础比率！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔤 语境劫持：为什么乱序汉字也能秒读？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔤 语境劫持：为什么乱序汉字也能秒读？</h1><p>“研表究明，汉字的序顺并不定一能影阅响读。”当你读这句话毫不费力时，正是自上而下的语言模型在自动纠错。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>语境熟悉度（高频成语/常识）</span><span id="vFam">85%</span></label><input type="range" id="sFam" min="15" max="100" value="85" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>局部字序错乱比例</span><span id="vScr">30%</span></label><input type="range" id="sScr" min="0" max="80" value="30" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">阅读流畅度</div><div class="k-val" id="kFlu">—</div></div>
+        <div class="kpi"><div class="k-lbl">自己校对漏掉错字率</div><div class="k-val" id="kMiss">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const fam=+document.getElementById('sFam').value, scr=+document.getElementById('sScr').value;
+  document.getElementById('vFam').textContent=fam+'%';
+  document.getElementById('vScr').textContent=scr+'%';
+  const flu=Math.max(10, Math.min(99, Math.round(fam*0.95 - scr*0.55 + 15)));
+  const miss=Math.max(5, Math.min(95, Math.round(fam*0.85 - scr*0.25)));
+  document.getElementById('kFlu').textContent=flu+'%';
+  document.getElementById('kMiss').textContent=miss+'%';
+  document.getElementById('kMiss').style.color=miss>60?'#ef4444':'#059669';
+  const wFlu=Math.max(10, flu*3.4), wMiss=Math.max(10, miss*3.4);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">自上而下自动补全的双刃剑：读得快 vs 校对瞎</text>
+    <text x="20" y="80" font-size="12.5" font-weight="750" fill="var(--tax-text)">顺畅理解度</text>
+    <rect x="165" y="62" width="${wFlu.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
+    <text x="${(173+wFlu).toFixed(0)}" y="81" font-size="12" font-weight="800" fill="#3b82f6">${flu}%</text>
+    <text x="20" y="134" font-size="12.5" font-weight="750" fill="var(--tax-text)">校对漏错率</text>
+    <rect x="165" y="116" width="${wMiss.toFixed(0)}" height="28" rx="6" fill="#ef4444" opacity="0.82"/>
+    <text x="${(173+wMiss).toFixed(0)}" y="135" font-size="12" font-weight="800" fill="#ef4444">${miss}%</text>
+    <text x="20" y="178" font-size="11.5" fill="var(--tax-muted)">文章越是自己刚写完的（熟悉度极高），大脑越会直接播放“预期原句”，让你死活看不出错别字！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>想抓出自己文章里的错别字？倒着读、换字体、或放一天再看——本质都是在故意削弱大脑的“自上而下先验”，逼迫眼睛重新逐字扫描。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

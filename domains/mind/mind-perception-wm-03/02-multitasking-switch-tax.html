@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔀 多任务切换税：注意残留计算器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔀 多任务切换税：注意残留计算器</h1><p>你以为回一条微信只花了 30 秒，但前一个任务的“注意残留”会让大脑多花十几分钟才能重新爬回深度专注态。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>每小时主动/被动切屏次数</span><span id="vSw">6 次/小时</span></label><input type="range" id="sSw" min="0" max="15" value="6" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>主任务思考深度（重入成本）</span><span id="vDep">6 分钟/次</span></label><input type="range" id="sDep" min="1" max="15" value="6" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">每小时有效深度时间</div><div class="k-val" id="kEff">—</div></div>
+        <div class="kpi"><div class="k-lbl">切换税损耗占比</div><div class="k-val" id="kTax">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const sw=+document.getElementById('sSw').value, dep=+document.getElementById('sDep').value;
+  document.getElementById('vSw').textContent=sw+' 次/小时';
+  document.getElementById('vDep').textContent=dep+' 分钟/次';
+  const lost=Math.min(58, sw*(0.5 + dep*0.75));
+  const eff=Math.max(2, 60 - lost);
+  const tax=Math.round(lost/60*100);
+  document.getElementById('kEff').textContent=eff.toFixed(0)+' 分钟';
+  document.getElementById('kEff').style.color=eff<25?'#ef4444':'#059669';
+  document.getElementById('kTax').textContent=tax+'%';
+  let segs='';
+  const chunks=Math.max(1, sw+1);
+  const totalW=540;
+  const segW=totalW/chunks;
+  for(let i=0;i<chunks;i++){
+    const x=30+i*segW;
+    const taxW=i===0?0:Math.min(segW*0.92, (0.5+dep*0.75)/60*totalW);
+    const goodW=Math.max(2, segW - taxW);
+    if(taxW>0) segs+=`<rect x="${x.toFixed(1)}" y="68" width="${taxW.toFixed(1)}" height="52" fill="#ef4444" opacity="0.82"/>`;
+    segs+=`<rect x="${(x+taxW).toFixed(1)}" y="68" width="${goodW.toFixed(1)}" height="52" fill="#059669" opacity="0.88"/>`;
+  }
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">60 分钟时间轴切碎示意（绿色=深度流，红色=注意残留恢复期）</text>
+    ${segs}
+    <text x="30" y="152" font-size="12" fill="var(--tax-muted)">每小时切屏 ${sw} 次 × 重入成本 ${dep} 分钟 → 实际深度产出仅剩 ${eff.toFixed(0)} 分钟（损耗 ${tax}%）</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>人类根本不会真正的“并行多任务”，只是在高速“上下文切换”。关闭弹窗、把消息集中到固定时段统一回复，是回报率最高的时间管理术。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

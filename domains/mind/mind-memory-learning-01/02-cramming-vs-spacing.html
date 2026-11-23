@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚔️ 考前突击 vs 间隔复习：30 天留存对决</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚔️ 考前突击 vs 间隔复习：30 天留存对决</h1><p>同样花 4 小时学习，一次性连学 4 小时只能在明天考场救急；拆成 4 天各 1 小时，30 天后依然牢记。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>总学习投入时间（两组完全相同）</span><span id="vHrs">4 小时</span></label><input type="range" id="sHrs" min="2" max="10" value="4" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>考试/应用距今时间</span><span id="vDay">30 天后</span></label><input type="range" id="sDay" min="1" max="60" value="30" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">集中突击留存率</div><div class="k-val" id="kCram">—</div></div>
+        <div class="kpi"><div class="k-lbl">分散间隔留存率</div><div class="k-val" id="kSpac">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const hrs=+document.getElementById('sHrs').value, day=+document.getElementById('sDay').value;
+  document.getElementById('vHrs').textContent=hrs+' 小时';
+  document.getElementById('vDay').textContent=day+' 天后';
+  const cram=Math.max(4, Math.min(96, Math.round((68+hrs*3)*Math.exp(-day/(2.8+hrs*0.4)))));
+  const spac=Math.max(12, Math.min(98, Math.round((72+hrs*2.6)*Math.exp(-day/(18+hrs*4.5)))));
+  document.getElementById('kCram').textContent=cram+'%';
+  document.getElementById('kCram').style.color=cram<40?'#ef4444':'#f59e0b';
+  document.getElementById('kSpac').textContent=spac+'%';
+  document.getElementById('kSpac').style.color='#059669';
+  const w1=Math.max(10, cram*3.6), w2=Math.max(10, spac*3.6);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">投入相同 ${hrs} 小时，在 ${day} 天后的知识留存对比</text>
+    <text x="20" y="84" font-size="12.5" font-weight="750" fill="var(--tax-text)">一次性突击</text>
+    <rect x="145" y="66" width="${w1.toFixed(0)}" height="30" rx="6" fill="#f59e0b"/>
+    <text x="${(153+w1).toFixed(0)}" y="86" font-size="12.5" font-weight="800" fill="#d97706">${cram}%</text>
+    <text x="20" y="140" font-size="12.5" font-weight="750" fill="var(--tax-text)">间隔分散学习</text>
+    <rect x="145" y="122" width="${w2.toFixed(0)}" height="30" rx="6" fill="#059669"/>
+    <text x="${(153+w2).toFixed(0)}" y="142" font-size="12.5" font-weight="800" fill="#059669">${spac}%</text>
+    <text x="20" y="184" font-size="11.5" fill="var(--tax-muted)">${day<=2?'极短期（1~2天）突击看起来和分散差不多，这就是“突击有效”的最大错觉！':'拉长时间维度后，间隔学习以零额外时间成本碾压突击！'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>如果你只是为了明天上午考完就忘，突击确实能混过去；但凡是你想带走一辈子的技能，分散学习才是唯一解。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

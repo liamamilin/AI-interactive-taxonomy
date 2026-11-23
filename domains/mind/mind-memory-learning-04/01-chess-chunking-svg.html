@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>♟️ 象棋大师的“作弊器”：真实棋局 vs 乱摆棋盘（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>♟️ 象棋大师的“作弊器”：真实棋局 vs 乱摆棋盘（SVG）</h1><p>Chase & Simon 经典实验：看 5 秒真实棋局，大师能还原 22 颗子，新手仅 4 颗；但把棋子随机乱摆，大师立刻跌回 5 颗！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>棋手领域经验（模式库规模）</span><span id="vExp">85%（特级大师）</span></label><input type="range" id="sExp" min="10" max="100" value="85" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>棋局符合真实战术规律比例</span><span id="vReal">90%（真实对局）</span></label><input type="range" id="sReal" min="0" max="100" value="90" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">5 秒记住棋子数（满 25）</div><div class="k-val" id="kCnt">—</div></div>
+        <div class="kpi"><div class="k-lbl">单个工作记忆槽打包量</div><div class="k-val" id="kPack">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const exp=+document.getElementById('sExp').value, real=+document.getElementById('sReal').value;
+  document.getElementById('vExp').textContent=exp+'%'+(exp>=80?'（大师）':(exp>=45?'（业余高手）':'（新手）'));
+  document.getElementById('vReal').textContent=real+'%'+(real>=75?'（真实对局）':(real>=30?'（半随机）':'（纯乱摆）'));
+  const bonus=(exp/100)*(real/100)*19;
+  const cnt=Math.min(25, Math.round(4 + bonus));
+  const pack=(cnt/4).toFixed(1);
+  document.getElementById('kCnt').textContent=cnt+' / 25 颗';
+  document.getElementById('kCnt').style.color=cnt>=16?'#059669':'#f59e0b';
+  document.getElementById('kPack').textContent=pack+' 颗/槽';
+  let cells='';
+  for(let i=0;i<25;i++){
+    const col=i%5, row=Math.floor(i/5);
+    const x=45+col*48, y=42+row*28;
+    const ok=i<cnt;
+    cells+=`<rect x="${x}" y="${y}" width="42" height="23" rx="4" fill="${ok?'#059669':'var(--tax-border)'}" opacity="${ok?'0.88':'0.25'}"/>
+      <text x="${x+21}" y="${y+15}" text-anchor="middle" font-size="11" fill="${ok?'#fff':'var(--tax-muted)'}">${ok?'♟':'·'}</text>`;
+  }
+  document.getElementById('svg').innerHTML=`
+    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">5 秒扫视后准确复原的棋子矩阵（25 颗）</text>
+    ${cells}
+    <rect x="315" y="48" width="255" height="126" rx="12" fill="var(--tax-border)" opacity="0.18"/>
+    <text x="332" y="76" font-size="12.5" font-weight="800" fill="var(--tax-text)">为什么大师在乱摆盘上也失灵？</text>
+    <text x="332" y="102" font-size="11.5" fill="var(--tax-muted)">大师的工作记忆照样只有 4 个槽！</text>
+    <text x="332" y="124" font-size="11.5" fill="var(--tax-muted)">真实对局里他能把“王车易位”等</text>
+    <text x="332" y="144" font-size="11.5" fill="var(--tax-muted)">6 颗子压成 1 个组块；乱摆盘无法</text>
+    <text x="332" y="164" font-size="11.5" fill="var(--tax-muted)">打包，瞬间打回 4~5 颗原形。</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>专家不是天生内存比你大，而是脑子里装了几万个“高压缩比组块”。所谓“一眼看穿的直觉”，不过是高密度组块的瞬间模式匹配。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

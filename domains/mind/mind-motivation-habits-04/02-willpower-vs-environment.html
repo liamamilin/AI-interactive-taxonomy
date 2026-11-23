@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔋 意志力硬扛 vs 屏蔽诱惑：全天胜率曲线</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔋 意志力硬扛 vs 屏蔽诱惑：全天胜率曲线</h1><p>心理学追踪研究发现：高自控力人群并不是“更能忍受诱惑”，而是他们主动设计生活，让自己一天遇到诱惑的次数远少于常人！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>全天直面诱惑的暴露次数（如零食摆桌）</span><span id="vExp">12 次</span></label><input type="range" id="sExp" min="1" max="25" value="12" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>单次抵抗成功概率（意志力）</span><span id="vRes">85%</span></label><input type="range" id="sRes" min="50" max="98" value="85" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">全天一次不破戒的概率</div><div class="k-val" id="kAll">—</div></div>
+        <div class="kpi"><div class="k-lbl">防线结论</div><div class="k-val" id="kVer">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const exp=+document.getElementById('sExp').value, res=+document.getElementById('sRes').value;
+  document.getElementById('vExp').textContent=exp+' 次';
+  document.getElementById('vRes').textContent=res+'%';
+  const all=Math.max(1, Math.round(Math.pow(res/100, exp)*100));
+  document.getElementById('kAll').textContent=all+'%';
+  document.getElementById('kAll').style.color=all>=65?'#059669':'#ef4444';
+  document.getElementById('kVer').textContent=all>=65?'✅ 暴露极少，轻松守住':'💥 久守必失（连乘坍塌）';
+  let pts=[];
+  for(let n=1;n<=25;n++){
+    const p=Math.pow(res/100, n)*100;
+    pts.push(`${(45+n*20).toFixed(1)},${(172-p*1.3).toFixed(1)}`);
+  }
+  const cx=45+exp*20, cy=172-all*1.3;
+  document.getElementById('svg').innerHTML=`
+    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">连乘陷阱：单次 ${res}% 自控力，连续扛 ${exp} 次后全天守约率只剩 ${all}%</text>
+    <line x1="45" y1="172" x2="555" y2="172" stroke="var(--tax-border)" stroke-width="1.5"/>
+    <polyline points="${pts.join(' ')}" fill="none" stroke="#ef4444" stroke-width="3"/>
+    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="#3b82f6" stroke="#fff" stroke-width="2"/>
+    <text x="45" y="192" font-size="11" fill="var(--tax-muted)">暴露 1 次</text>
+    <text x="515" y="192" font-size="11" fill="var(--tax-muted)">25 次</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕你的意志力高达 85%，只要把薯片放在手边路过 15 次，全天不吃的概率就跌破 9%！根本不买回家，暴露次数直接降为 0。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

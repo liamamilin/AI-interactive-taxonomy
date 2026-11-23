@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔄 练习期顺手 vs 考场识别率反转（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔄 练习期顺手 vs 考场识别率反转（SVG）</h1><p>集中刷题（AAA-BBB-CCC）跳过了一个最关键的技能——“先判断这题属于哪一类”。交错练习（ABC-BCA-CAB）在练习时让你难受，却在真实综合考场大获全胜。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>练习题型交错混合度</span><span id="vMix">75%</span></label><input type="range" id="sMix" min="0" max="100" value="75" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>易混淆题型种类数</span><span id="vTyp">4 类</span></label><input type="range" id="sTyp" min="2" max="6" value="4" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">练习当下顺手度</div><div class="k-val" id="kPra">—</div></div>
+        <div class="kpi"><div class="k-lbl">一周后综合考场得分</div><div class="k-val" id="kExm">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const mix=+document.getElementById('sMix').value, typ=+document.getElementById('sTyp').value;
+  document.getElementById('vMix').textContent=mix+'%';
+  document.getElementById('vTyp').textContent=typ+' 类';
+  const pra=Math.max(30, Math.round(92 - mix*0.32 - typ*2));
+  const exm=Math.max(25, Math.min(95, Math.round(38 + mix*0.52 - (typ-2)*3)));
+  document.getElementById('kPra').textContent=pra+' 分';
+  document.getElementById('kExm').textContent=exm+' 分';
+  document.getElementById('kExm').style.color=exm>=70?'#059669':'#ef4444';
+  const wP=Math.max(12, pra*3.6), wE=Math.max(12, exm*3.6);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">练习表现 vs 综合实战的惊人反转</text>
+    <text x="20" y="84" font-size="12.5" font-weight="750" fill="var(--tax-text)">练习当下正确率</text>
+    <rect x="155" y="66" width="${wP.toFixed(0)}" height="28" rx="6" fill="#94a3b8"/>
+    <text x="${(163+wP).toFixed(0)}" y="85" font-size="12" font-weight="800" fill="var(--tax-muted)">${pra} 分</text>
+    <text x="20" y="140" font-size="12.5" font-weight="750" fill="var(--tax-text)">综合考场得分</text>
+    <rect x="155" y="122" width="${wE.toFixed(0)}" height="28" rx="6" fill="${exm>=70?'#059669':'#f59e0b'}"/>
+    <text x="${(163+wE).toFixed(0)}" y="141" font-size="12" font-weight="800" fill="${exm>=70?'#059669':'#d97706'}">${exm} 分</text>
+    <text x="20" y="184" font-size="11.5" fill="var(--tax-muted)">${mix<30?'⚠️ 集中连刷让你当下很爽，但一进考场看到混合题瞬间懵圈！':'✅ 交错练习强迫你每题都重做“特征辨别”，实战能力大幅提升！'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>刷题时感到“顺滑无阻”往往是危险信号——那意味着你只是在机械复用上一题的模板，并没有真正训练出“看穿题型”的判别力。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

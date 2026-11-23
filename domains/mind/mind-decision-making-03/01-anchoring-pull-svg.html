@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚓ 数字锚点引力场（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚓ 数字锚点引力场（SVG）</h1><p>哪怕是当着你的面转出来的随机幸运轮盘数字，也会在潜意识里拉偏你的估值——因为人类习惯从锚点出发往回微调，但几乎总是“调整不足”。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>商家先抛出的“原价锚点”</span><span id="vAnc">1200 元</span></label><input type="range" id="sAnc" min="200" max="2000" step="50" value="1200" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>买家对该品类的专业熟悉度</span><span id="vKno">30%</span></label><input type="range" id="sKno" min="5" max="100" value="30" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">商品客观真实价值</div><div class="k-val">500 元</div></div>
+        <div class="kpi"><div class="k-lbl">被锚点拉偏后的心理估价</div><div class="k-val" id="kEst">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const anc=+document.getElementById('sAnc').value, kno=+document.getElementById('sKno').value;
+  document.getElementById('vAnc').textContent=anc+' 元';
+  document.getElementById('vKno').textContent=kno+'%';
+  const pull=Math.max(0.08, 0.72 - kno*0.006);
+  const est=Math.round(500 + (anc - 500)*pull);
+  const bias=est - 500;
+  document.getElementById('kEst').textContent=est+' 元 ('+(bias>=0?'+':'')+bias+')';
+  document.getElementById('kEst').style.color=Math.abs(bias)>150?'#ef4444':'#059669';
+  const xTrue=60 + (500/2000)*480;
+  const xAnc=60 + (anc/2000)*480;
+  const xEst=60 + (est/2000)*480;
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">估值数轴（200 ~ 2000 元）：锚点如何拽走你的判断</text>
+    <line x1="60" y1="108" x2="540" y2="108" stroke="var(--tax-border)" stroke-width="6" stroke-linecap="round"/>
+    <line x1="${xTrue.toFixed(1)}" y1="108" x2="${xEst.toFixed(1)}" y2="108" stroke="#ef4444" stroke-width="6"/>
+    <circle cx="${xTrue.toFixed(1)}" cy="108" r="9" fill="#059669"/>
+    <text x="${xTrue.toFixed(1)}" y="84" text-anchor="middle" font-size="11.5" font-weight="800" fill="#059669">真值 500</text>
+    <circle cx="${xAnc.toFixed(1)}" cy="108" r="9" fill="#8b5cf6"/>
+    <text x="${xAnc.toFixed(1)}" y="142" text-anchor="middle" font-size="11.5" font-weight="800" fill="#8b5cf6">⚓ 锚点 ${anc}</text>
+    <circle cx="${xEst.toFixed(1)}" cy="108" r="11" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+    <text x="${xEst.toFixed(1)}" y="168" text-anchor="middle" font-size="12" font-weight="850" fill="#d97706">你的心理估价 ${est}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>谈判与砍价时，面对对方离谱的初始高锚，千万别顺着它还价——最好的防御是直接宣布“这个数字毫无意义，我们从客观成本重新算起”。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

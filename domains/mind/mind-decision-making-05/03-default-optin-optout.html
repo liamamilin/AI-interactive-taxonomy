@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>☑️ 默认选项框架：器官捐献率 12% vs 99%</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>☑️ 默认选项框架：器官捐献率 12% vs 99%</h1><p>德国与奥地利文化语言几乎相同，器官捐献率却一个是 12%、一个是 99.9%——唯一区别只是表格上那一行“默认不勾”还是“默认勾选”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setD('in',this)">Opt-in：默认不参与（需主动勾选）</button>
+        <button class="btn" onclick="setD('out',this)">Opt-out：默认参与（需主动取消）</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>修改默认选项的填表繁琐度（摩擦）</span><span id="vFrc">65%</span></label><input type="range" id="sFrc" min="10" max="100" value="65" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">最终社会参与率</div><div class="k-val" id="kPar">—</div></div>
+        <div class="kpi"><div class="k-lbl">选择架构威力</div><div class="k-val" id="kPow">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let dm='in';
+function setD(m,btn){ dm=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const frc=+document.getElementById('sFrc').value;
+  document.getElementById('vFrc').textContent=frc+'%';
+  const par=dm==='in' ? Math.max(8, Math.round(45 - frc*0.35)) : Math.min(99, Math.round(62 + frc*0.37));
+  document.getElementById('kPar').textContent=par+'%';
+  document.getElementById('kPar').style.color=par>=70?'#059669':'#f59e0b';
+  document.getElementById('kPow').textContent=dm==='in'?'默认阻力抑制了善意':'现状偏差放大了参与';
+  const w=Math.max(12, par*4.6);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">仅改变“默认勾选框”位置后的最终参与率</text>
+    <rect x="30" y="68" width="460" height="42" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="30" y="68" width="${w.toFixed(0)}" height="42" rx="8" fill="${par>=70?'#059669':'#f59e0b'}"/>
+    <text x="${Math.min(500, 38+w).toFixed(0)}" y="95" font-size="15" font-weight="850" fill="${par>=70?'#059669':'#d97706'}">${par}%</text>
+    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">养老金自动扣款、软件自动续费、隐私默认授权——谁设计了“默认值”，谁就决定了 80% 人的最终选择。</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>不存在绝对中立的选择界面！理解默认框架后，你既能看穿商家的自动续费套路，也能为自己设计“默认健康、默认存钱”的生活系统。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

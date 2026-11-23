@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📚 专家直觉 = 5 万个高质量组块</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📚 专家直觉 = 5 万个高质量组块</h1><p>面对同一个复杂系统故障，新手需要占满 12 个工作记忆槽导致当场死机，专家却能把整个子系统折叠成 2 个组块从容应对。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>问题包含的底层零件数</span><span id="vPts">16 个</span></label><input type="range" id="sPts" min="4" max="24" value="16" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>单组块平均抽象压缩比</span><span id="vCmp">4:1</span></label><input type="range" id="sCmp" min="1" max="6" value="4" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">压缩后占用槽位</div><div class="k-val" id="kSlt">—</div></div>
+        <div class="kpi"><div class="k-lbl">留给战略推演的余量</div><div class="k-val" id="kFre">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const pts=+document.getElementById('sPts').value, cmp=+document.getElementById('sCmp').value;
+  document.getElementById('vPts').textContent=pts+' 个';
+  document.getElementById('vCmp').textContent=cmp+':1';
+  const slots=Math.ceil(pts/cmp);
+  const free=Math.max(0, 5 - slots);
+  document.getElementById('kSlt').textContent=slots+' 槽';
+  document.getElementById('kSlt').style.color=slots<=4?'#059669':'#ef4444';
+  document.getElementById('kFre').textContent=free>0?('剩余 '+free+' 槽可做全局创新'):'0 槽（深陷细节泥潭）';
+  const wRaw=Math.max(12, Math.min(340, pts*14));
+  const wCmp=Math.max(12, Math.min(340, slots*14));
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">抽象组块如何释放高层战略思考带宽</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">新手逐件处理</text>
+    <rect x="145" y="64" width="${wRaw}" height="28" rx="6" fill="#ef4444" opacity="0.8"/>
+    <text x="${153+wRaw}" y="83" font-size="12" font-weight="800" fill="#ef4444">${pts} 槽（严重爆表）</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">专家组块折叠</text>
+    <rect x="145" y="120" width="${wCmp}" height="28" rx="6" fill="${slots<=4?'#059669':'#f59e0b'}"/>
+    <text x="${153+wCmp}" y="139" font-size="12" font-weight="800" fill="${slots<=4?'#059669':'#d97706'}">${slots} 槽</text>
+    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">每把底层细节打包成稳定组块，你就能多腾出一格工作记忆去思考更高维度的全局问题。</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>学编程记设计模式、学写作背叙事结构、学医学背综合征——人类一切高阶学习的本质，都是不断把低层细节打包成高层组块。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

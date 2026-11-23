@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔦 注意聚光灯与无意视盲（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔦 注意聚光灯与无意视盲（SVG）</h1><p>人类视觉并非高清摄像机，而是极窄的“注意聚光灯”。当你把带宽锁死在主任务上时，聚光灯外的大猩猩会被大脑直接滤除。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>主任务认知专注度</span><span id="vFoc">75%</span></label><input type="range" id="sFoc" min="10" max="100" value="75" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>意外目标显著度（对比度）</span><span id="vSal">45%</span></label><input type="range" id="sSal" min="10" max="100" value="45" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 220"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">注意聚光灯半径</div><div class="k-val" id="kRad">—</div></div>
+        <div class="kpi"><div class="k-lbl">察觉“大猩猩”概率</div><div class="k-val" id="kDet">—</div></div>
+        <div class="kpi"><div class="k-lbl">视盲状态</div><div class="k-val" id="kSt">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const foc=+document.getElementById('sFoc').value, sal=+document.getElementById('sSal').value;
+  document.getElementById('vFoc').textContent=foc+'%';
+  document.getElementById('vSal').textContent=sal+'%';
+  const rad=Math.max(28, 125 - foc*0.85);
+  const det=Math.max(2, Math.min(98, Math.round(100 - foc*0.85 + sal*0.45)));
+  const blind=det<45;
+  document.getElementById('kRad').textContent=rad.toFixed(0)+' px';
+  document.getElementById('kDet').textContent=det+'%';
+  document.getElementById('kDet').style.color=blind?'#ef4444':'#059669';
+  document.getElementById('kSt').textContent=blind?'🦍 触发无意视盲':'👀 成功察觉异常';
+  const gOp=(det/100).toFixed(2);
+  document.getElementById('svg').innerHTML=`
+    <rect x="20" y="18" width="560" height="184" rx="12" fill="#0f172a"/>
+    <circle cx="230" cy="110" r="${rad.toFixed(1)}" fill="#fef08a" opacity="0.22" stroke="#facc15" stroke-width="2" stroke-dasharray="5,4"/>
+    <circle cx="230" cy="110" r="18" fill="#38bdf8"/>
+    <text x="230" y="114" text-anchor="middle" font-size="11" font-weight="800" fill="#0f172a">传球</text>
+    <text x="230" y="148" text-anchor="middle" font-size="11" fill="#fde047">主任务聚光灯</text>
+    <g opacity="${gOp}">
+      <circle cx="420" cy="110" r="30" fill="#ef4444" opacity="0.25"/>
+      <text x="420" y="119" text-anchor="middle" font-size="30">🦍</text>
+      <text x="420" y="156" text-anchor="middle" font-size="11" font-weight="750" fill="#f87171">意外大猩猩 (可见度 ${det}%)</text>
+    </g>
+    <text x="36" y="38" font-size="12" fill="#cbd5e1">大脑感知画面（非光圈区域被主动抑制）</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“视而不见”不是眼睛瞎了，而是大脑带宽有限时的主动剪枝——你越死盯眼前单一 KPI，越容易对旁边走过的巨大风险（大猩猩）浑然不觉。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

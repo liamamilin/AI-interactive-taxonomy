@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>☕ 禀赋效应：一旦拥有，身价翻倍</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>☕ 禀赋效应：一旦拥有，身价翻倍</h1><p>经典马克杯实验：刚拿到免费印校徽水杯的学生，平均要价 7 美元才肯卖；而没拿到杯子的同班同学，最高只愿出 3 美元买！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>物品市场客观公允价</span><span id="vVal">50 元</span></label><input type="range" id="sVal" min="20" max="200" step="10" value="50" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>持有时间与心理情感依恋</span><span id="vAtt">70%</span></label><input type="range" id="sAtt" min="10" max="100" value="70" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">买家最高愿付 (WTP)</div><div class="k-val" id="kWtp">—</div></div>
+        <div class="kpi"><div class="k-lbl">卖家最低愿售 (WTA)</div><div class="k-val" id="kWta">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const val=+document.getElementById('sVal').value, att=+document.getElementById('sAtt').value;
+  document.getElementById('vVal').textContent=val+' 元';
+  document.getElementById('vAtt').textContent=att+'%';
+  const wtp=Math.round(val*0.85);
+  const wta=Math.round(val*(1.15 + att*0.011));
+  document.getElementById('kWtp').textContent=wtp+' 元';
+  document.getElementById('kWta').textContent=wta+' 元 ('+(wta/wtp).toFixed(1)+'x)';
+  document.getElementById('kWta').style.color='#ef4444';
+  const sc=340/Math.max(wta, 250);
+  const w1=Math.max(15, wtp*sc), w2=Math.max(15, wta*sc);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">同一件物品的心理定价撕裂（市场价 ${val} 元）</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">买家出价 WTP</text>
+    <rect x="145" y="64" width="${w1.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
+    <text x="${(153+w1).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#2563eb">${wtp} 元</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">卖家要价 WTA</text>
+    <rect x="145" y="120" width="${w2.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
+    <text x="${(153+w2).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#ef4444">${wta} 元</text>
+    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">“免费试用 30 天”之所以转化率极高，正是因为第 10 天起你的大脑已把它算成“我的东西”！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>检验禀赋效应的灵魂拷问：如果我现在手里没这件东西，而是握着等额现金，我还愿意花原价把它买回来吗？`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

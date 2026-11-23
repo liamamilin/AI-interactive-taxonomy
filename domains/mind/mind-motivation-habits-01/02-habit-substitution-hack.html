@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔧 戒除坏习惯密码：保留提示与奖赏，替换反应</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔧 戒除坏习惯密码：保留提示与奖赏，替换反应</h1><p>查尔斯·杜希格《习惯的力量》：坏习惯的神经印记永远不会彻底抹除，硬憋只会报复性反弹；唯一有效的改法是保留旧提示和旧奖赏，只偷换中间的行为！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>新替代动作满足同一底层渴求的匹配度</span><span id="vFit">80%</span></label><input type="range" id="sFit" min="15" max="100" value="80" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>日常压力/疲劳触发频率</span><span id="vStr">60%</span></label><input type="range" id="sStr" min="10" max="100" value="60" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">硬扛压抑 30 天成功率</div><div class="k-val" id="kWil">—</div></div>
+        <div class="kpi"><div class="k-lbl">习惯替换 30 天成功率</div><div class="k-val" id="kSub">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const fit=+document.getElementById('sFit').value, str=+document.getElementById('sStr').value;
+  document.getElementById('vFit').textContent=fit+'%';
+  document.getElementById('vStr').textContent=str+'%';
+  const wil=Math.max(8, Math.round(48 - str*0.38));
+  const sub=Math.max(20, Math.min(94, Math.round(28 + fit*0.68 - str*0.12)));
+  document.getElementById('kWil').textContent=wil+'%';
+  document.getElementById('kSub').textContent=sub+'%';
+  document.getElementById('kSub').style.color='#059669';
+  const w1=Math.max(12, wil*3.6), w2=Math.max(12, sub*3.6);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">高压状态下 30 天不破戒成功率对比</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">纯靠意志力硬憋</text>
+    <rect x="155" y="64" width="${w1.toFixed(0)}" height="28" rx="6" fill="#ef4444" opacity="0.8"/>
+    <text x="${(163+w1).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#ef4444">${wil}%</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">偷换中间动作</text>
+    <rect x="155" y="120" width="${w2.toFixed(0)}" height="28" rx="6" fill="#059669"/>
+    <text x="${(163+w2).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${sub}%</text>
+    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">例：下午 3 点想吃高糖零食（提示=无聊疲劳），换成“泡杯气泡茶 + 站起走 5 分钟”满足同一放松奖赏！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>先找出坏习惯背后到底在满足什么情绪奖赏（解压、社交还是逃避无聊），再用无害动作精准接盘！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

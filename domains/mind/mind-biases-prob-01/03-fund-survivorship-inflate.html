@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📊 基金排行榜里的“清盘隐身术”</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📊 基金排行榜里的“清盘隐身术”</h1><p>金融数据库如果自动剔除那些亏到清盘关门的基金，剩下基金的平均历史年化收益率就会凭空虚高好几个百分点！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>10 年间因亏损清盘的基金比例</span><span id="vDie">40%</span></label><input type="range" id="sDie" min="0" max="70" value="40" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>全市场真实平均年化收益</span><span id="vTrue">5.0%</span></label><input type="range" id="sTrue" min="1" max="12" step="0.5" value="5" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">排行榜显示“现存平均”</div><div class="k-val" id="kShow">—</div></div>
+        <div class="kpi"><div class="k-lbl">幸存者偏差虚增水分</div><div class="k-val" id="kInf">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const die=+document.getElementById('sDie').value, tr=+document.getElementById('sTrue').value;
+  document.getElementById('vDie').textContent=die+'%';
+  document.getElementById('vTrue').textContent=tr.toFixed(1)+'%';
+  const inf=die*0.075;
+  const shown=tr + inf;
+  document.getElementById('kShow').textContent=shown.toFixed(1)+'%';
+  document.getElementById('kInf').textContent='+'+inf.toFixed(1)+'% 水分';
+  document.getElementById('kInf').style.color=inf>2?'#ef4444':'#f59e0b';
+  const wT=Math.max(12, Math.min(280, tr*15)), wS=Math.max(12, Math.min(280, shown*15));
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">10 年年化收益率：全样本真相 vs 剔除清盘后的榜单</text>
+    <text x="20" y="84" font-size="12.5" font-weight="750" fill="var(--tax-text)">全样本真实平均</text>
+    <rect x="160" y="66" width="${wT.toFixed(0)}" height="28" rx="6" fill="#059669"/>
+    <text x="${(168+wT).toFixed(0)}" y="85" font-size="12" font-weight="800" fill="#059669">${tr.toFixed(1)}%</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">现存榜单平均</text>
+    <rect x="160" y="120" width="${wS.toFixed(0)}" height="28" rx="6" fill="#ef4444" opacity="0.82"/>
+    <text x="${(168+wS).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#ef4444">${shown.toFixed(1)}% (虚高 +${inf.toFixed(1)}%)</text>
+    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">亏钱的基金悄悄合并清盘从榜单消失，活下来的基金把平均线强行拉高。</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>看任何历史回测或行业平均回报时，第一件事就是检查数据库里有没有“已退市/已清盘”样本。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📉 前景理论 S 形价值函数（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📉 前景理论 S 形价值函数（SVG）</h1><p>卡尼曼与特沃斯基获得诺贝尔经济学奖的核心曲线：盈利区上凸（边际快乐递减），亏损区下凹且斜率陡峭 2.25 倍！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>损益金额大小（±元）</span><span id="vAmt">100 元</span></label><input type="range" id="sAmt" min="20" max="500" step="20" value="100" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>损失厌恶系数 λ（人类均值 2.25）</span><span id="vLam">2.25</span></label><input type="range" id="sLam" min="1.0" max="3.5" step="0.05" value="2.25" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 220"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">赚到金额的主观快乐</div><div class="k-val" id="kGain">—</div></div>
+        <div class="kpi"><div class="k-lbl">亏掉同额的主观痛苦</div><div class="k-val" id="kLoss">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const amt=+document.getElementById('sAmt').value, lam=+document.getElementById('sLam').value;
+  document.getElementById('vAmt').textContent=amt+' 元';
+  document.getElementById('vLam').textContent=lam.toFixed(2);
+  const vG=Math.pow(amt, 0.88);
+  const vL=-lam*Math.pow(amt, 0.88);
+  document.getElementById('kGain').textContent='+'+vG.toFixed(1)+' 效用';
+  document.getElementById('kGain').style.color='#059669';
+  document.getElementById('kLoss').textContent=vL.toFixed(1)+' 效用';
+  document.getElementById('kLoss').style.color='#ef4444';
+  const ox=300, oy=95;
+  let ptsG=[], ptsL=[];
+  for(let x=0;x<=500;x+=20){
+    ptsG.push(`${(ox+x*0.5).toFixed(1)},${(oy-Math.pow(x,0.88)*0.25).toFixed(1)}`);
+    ptsL.push(`${(ox-x*0.5).toFixed(1)},${(oy+Math.min(110, lam*Math.pow(x,0.88)*0.25)).toFixed(1)}`);
+  }
+  const gx=ox+amt*0.5, gy=oy-vG*0.25;
+  const lx=ox-amt*0.5, ly=oy+Math.min(110, -vL*0.25);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="24" font-size="13" font-weight="800" fill="var(--tax-text)">前景理论主观价值曲线（原点 = 当前心理参照点）</text>
+    <line x1="40" y1="${oy}" x2="560" y2="${oy}" stroke="var(--tax-border)" stroke-width="1.5"/>
+    <line x1="${ox}" y1="30" x2="${ox}" y2="210" stroke="var(--tax-border)" stroke-width="1.5"/>
+    <polyline points="${ptsG.join(' ')}" fill="none" stroke="#059669" stroke-width="3"/>
+    <polyline points="${ptsL.join(' ')}" fill="none" stroke="#ef4444" stroke-width="3"/>
+    <circle cx="${gx.toFixed(1)}" cy="${gy.toFixed(1)}" r="6" fill="#059669"/>
+    <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="6" fill="#ef4444"/>
+    <text x="480" y="${oy-8}" font-size="11" font-weight="750" fill="#059669">盈利区 (+${amt})</text>
+    <text x="50" y="${oy-8}" font-size="11" font-weight="750" fill="#ef4444">亏损区 (-${amt})</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>损失厌恶是人类进化的生存护盾——原始社会少吃一顿肉只是饿肚子，丢掉口粮却可能活不过冬天。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

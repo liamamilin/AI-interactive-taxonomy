@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎁 意外之财效应：奖金为何比工资花得快？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎁 意外之财效应：奖金为何比工资花得快？</h1><p>退税到账 2000 元、股市赚 2000 元、加班攒下 2000 元——明明都是你银行卡里完全等价的 2000 元，消费冲动却天差地别！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>这笔钱的“意外/白捡感”程度</span><span id="vWnd">80%（退税/红包）</span></label><input type="range" id="sWnd" min="0" max="100" value="80" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>到账金额</span><span id="vAmt">2000 元</span></label><input type="range" id="sAmt" min="500" max="10000" step="500" value="2000" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">30 天内被冲动花掉比例</div><div class="k-val" id="kSpd">—</div></div>
+        <div class="kpi"><div class="k-lbl">最终留存储蓄金额</div><div class="k-val" id="kSav">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const wnd=+document.getElementById('sWnd').value, amt=+document.getElementById('sAmt').value;
+  document.getElementById('vWnd').textContent=wnd+'%'+(wnd>=70?'（意外之财）':(wnd>=30?'（年终奖金）':'（辛苦月薪）'));
+  document.getElementById('vAmt').textContent=amt+' 元';
+  const spd=Math.min(92, Math.round(18 + wnd*0.68));
+  const savAmt=Math.round(amt*(100-spd)/100);
+  const spdAmt=amt - savAmt;
+  document.getElementById('kSpd').textContent=spd+'% ('+spdAmt+' 元)';
+  document.getElementById('kSpd').style.color=spd>=60?'#ef4444':'#059669';
+  document.getElementById('kSav').textContent=savAmt+' 元';
+  const wSp=Math.max(10, spd*5.2), wSv=Math.max(10, (100-spd)*5.2);
+  document.getElementById('svg').innerHTML=`
+    <text x="40" y="32" font-size="13" font-weight="800" fill="var(--tax-text)">同一笔 ${amt} 元在 30 天后的去向切片</text>
+    <rect x="40" y="65" width="${wSp.toFixed(0)}" height="44" rx="6" fill="#f59e0b"/>
+    <rect x="${(40+wSp).toFixed(0)}" y="65" width="${wSv.toFixed(0)}" height="44" rx="6" fill="#059669"/>
+    <text x="40" y="136" font-size="12.5" font-weight="800" fill="#d97706">🛍️ 非必要挥霍：${spdAmt} 元 (${spd}%)</text>
+    <text x="320" y="136" font-size="12.5" font-weight="800" fill="#059669">🏦 理性储蓄/投资：${savAmt} 元 (${100-spd}%)</text>
+    <text x="40" y="176" font-size="11.5" fill="var(--tax-muted)">赌场把现金换成筹码、平台发满减券，全都是在利用心理账户降低你花钱的心痛感！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>收到奖金或退税时，立刻把它混进工资主账户静置 48 小时——洗掉“意外标签”，就能守住真金白银。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

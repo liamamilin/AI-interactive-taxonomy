@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔬 双重标准显微镜：严审反方，轻信己方</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔬 双重标准显微镜：严审反方，轻信己方</h1><p>面对支持自己的数据，我们问“我可以相信它吗？”；面对反对自己的数据，我们问“我必须相信它吗？”——这种双标让辩论越辩越分裂。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>对己方有利证据的采信门槛</span><span id="vPro">20 分（极宽松）</span></label><input type="range" id="sPro" min="10" max="90" value="20" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>对反方不利证据的挑刺门槛</span><span id="vCon">85 分（极苛刻）</span></label><input type="range" id="sCon" min="10" max="95" value="85" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">双标不对称指数</div><div class="k-val" id="kAsy">—</div></div>
+        <div class="kpi"><div class="k-lbl">看完中立报告后的净偏移</div><div class="k-val" id="kShf">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const pro=+document.getElementById('sPro').value, con=+document.getElementById('sCon').value;
+  document.getElementById('vPro').textContent=pro+' 分';
+  document.getElementById('vCon').textContent=con+' 分';
+  const asy=con - pro;
+  const passPro=Math.max(5, 100 - pro);
+  const passCon=Math.max(5, 100 - con);
+  document.getElementById('kAsy').textContent=(asy>=0?'+':'')+asy+' 分';
+  document.getElementById('kAsy').style.color=Math.abs(asy)>35?'#ef4444':'#059669';
+  document.getElementById('kShf').textContent=asy>15?'↗️ 反而更偏执':(asy<-15?'↙️ 过度自我怀疑':'⚖️ 客观对称更新');
+  const wP=Math.max(10, passPro*3.6), wC=Math.max(10, passCon*3.6);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">同等质量（60 分）的正反证据通过大脑滤网的比例</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">支持我的证据</text>
+    <rect x="145" y="64" width="${wP.toFixed(0)}" height="28" rx="6" fill="#059669"/>
+    <text x="${(153+wP).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#059669">放行 ${passPro}%</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">反对我的证据</text>
+    <rect x="145" y="120" width="${wC.toFixed(0)}" height="28" rx="6" fill="#ef4444" opacity="0.82"/>
+    <text x="${(153+wC).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#ef4444">放行 ${passCon}%</text>
+    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">想检测自己有没有双标？做“反转测试”：如果这份数据的结论刚好相反，我还会用同样理由挑刺吗？</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>聪明人反而更容易陷入动机性推理——因为他们更擅长为自己想相信的结论找出精致的辩护理由。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

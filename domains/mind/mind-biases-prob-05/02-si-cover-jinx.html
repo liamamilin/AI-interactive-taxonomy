@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏆 体育画报封面魔咒：巅峰后的必然回调</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏆 体育画报封面魔咒：巅峰后的必然回调</h1><p>谁能登上杂志封面？一定是本赛季“实力 + 爆棚运气”同时拉满的人。而下赛季运气回归正常，成绩自然回调——杂志可没下咒！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>球员真实长期实力</span><span id="vSkl">80 分</span></label><input type="range" id="sSkl" min="60" max="95" value="80" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>本赛季超常运气加成</span><span id="vBon">+16 分</span></label><input type="range" id="sBon" min="0" max="20" value="16" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">夺冠上封面赛季分</div><div class="k-val" id="kCur">—</div></div>
+        <div class="kpi"><div class="k-lbl">下赛季预期回落</div><div class="k-val" id="kDrop">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const skl=+document.getElementById('sSkl').value, bon=+document.getElementById('sBon').value;
+  document.getElementById('vSkl').textContent=skl+' 分';
+  document.getElementById('vBon').textContent='+'+bon+' 分';
+  const cur=Math.min(100, skl+bon);
+  const wS=skl*3.2, wB=bon*3.2;
+  document.getElementById('kCur').textContent=cur+' 分';
+  document.getElementById('kDrop').textContent='-'+bon+' 分（运气归零）';
+  document.getElementById('kDrop').style.color=bon>=10?'#ef4444':'#059669';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">表现拆解 = 稳定实力（蓝）+ 不可复制的当季运气（金）</text>
+    <text x="20" y="84" font-size="12.5" font-weight="750" fill="var(--tax-text)">上封面赛季</text>
+    <rect x="135" y="66" width="${wS.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
+    ${wB>0?`<rect x="${(135+wS).toFixed(0)}" y="66" width="${wB.toFixed(0)}" height="28" rx="6" fill="#f59e0b"/>`:''}
+    <text x="${(143+wS+wB).toFixed(0)}" y="85" font-size="12" font-weight="800" fill="#d97706">${cur} 分</text>
+    <text x="20" y="140" font-size="12.5" font-weight="750" fill="var(--tax-text)">下赛季均值</text>
+    <rect x="135" y="122" width="${wS.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
+    <text x="${(143+wS).toFixed(0)}" y="141" font-size="12" font-weight="800" fill="#2563eb">${skl} 分</text>
+    <text x="20" y="182" font-size="11.5" fill="var(--tax-muted)">同理也适用于“年度冠军基金”——买去年的第一名，往往是在为不可持续的运气买单。</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>任何“榜首魔咒”背后都没有超自然力量，只有极端高光时刻里必然掺杂的随机好运。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

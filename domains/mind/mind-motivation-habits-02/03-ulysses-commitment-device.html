@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚓ 奥德修斯契约：用事前锁定战胜未来的自己</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚓ 奥德修斯契约：用事前锁定战胜未来的自己</h1><p>奥德修斯明知自己听见海妖歌声必会发疯，于是提前让水手把自己绑在桅杆上——这就是承诺机制：在理智时给冲动的自己上锁！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>眼前即时诱惑强度</span><span id="vTmp">80 分</span></label><input type="range" id="sTmp" min="20" max="100" value="80" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>事前设定的违约代价（押金/公开打卡）</span><span id="vPen">50 分</span></label><input type="range" id="sPen" min="0" max="100" value="50" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">破功的净诱惑值</div><div class="k-val" id="kNet">—</div></div>
+        <div class="kpi"><div class="k-lbl">契约防线结果</div><div class="k-val" id="kRes">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const tmp=+document.getElementById('sTmp').value, pen=+document.getElementById('sPen').value;
+  document.getElementById('vTmp').textContent=tmp+' 分';
+  document.getElementById('vPen').textContent=pen+' 分';
+  const net=tmp - pen;
+  const hold=net<=45;
+  document.getElementById('kNet').textContent=net+' 分 (防线阈值 45)';
+  document.getElementById('kRes').textContent=hold?'✅ 契约锁住冲动，守住目标':'❌ 违约代价太轻，防线失守';
+  document.getElementById('kRes').style.color=hold?'#059669':'#ef4444';
+  const wT=Math.max(12, tmp*3.6), wP=Math.max(8, pen*3.6);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">即时诱惑 vs 事前承诺惩罚（把未来成本搬到眼前）</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">海妖诱惑拉力</text>
+    <rect x="145" y="64" width="${wT.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
+    <text x="${(153+wT).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#ef4444">${tmp} 分</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">事前违约罚金</text>
+    <rect x="145" y="120" width="${wP.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
+    <text x="${(153+wP).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#2563eb">-${pen} 分</text>
+    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">例：约教练上课（爽约扣课时费）、给手机装定时锁、拉朋友一起公开对赌打卡！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>真正自律的高手从不赌自己“明天会不会犯懒”，他们只在今天清醒时把明天的退路焊死。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

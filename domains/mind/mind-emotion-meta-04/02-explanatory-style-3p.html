@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧭 归因风格 3P 诊断仪：悲观 vs 韧性</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧭 归因风格 3P 诊断仪：悲观 vs 韧性</h1><p>面对一次失败，悲观归因会同时拉满三个毒维度：永久性（永远这样）、普遍性（干啥都不行）、个人化（全是我蠢）；韧性归因则把失败精准限缩在“这一次、这一件事、可改方法”。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>永久化 + 泛化程度（“永远/一切都完了”）</span><span id="vPerm">70%</span></label><input type="range" id="sPerm" min="0" max="100" value="70" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>把具体方法失误升级成“人格否定”程度</span><span id="vPers">60%</span></label><input type="range" id="sPers" min="0" max="100" value="60" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">心理复原力得分</div><div class="k-val" id="kRes">—</div></div>
+        <div class="kpi"><div class="k-lbl">情绪恢复耗时</div><div class="k-val" id="kRec">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const perm=+document.getElementById('sPerm').value, pers=+document.getElementById('sPers').value;
+  document.getElementById('vPerm').textContent=perm+'%';
+  document.getElementById('vPers').textContent=pers+'%';
+  const res=Math.max(8, Math.round(100 - perm*0.55 - pers*0.38));
+  const rec=Math.max(1, Math.round(1 + (100-res)*0.22));
+  document.getElementById('kRes').textContent=res+' 分';
+  document.getElementById('kRes').style.color=res>=65?'#059669':'#ef4444';
+  document.getElementById('kRec').textContent='约 '+rec+' 天';
+  const w=Math.max(15, res*4.4);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">塞利格曼 3P 归因模型 → 心理复原力仪表盘</text>
+    <rect x="30" y="68" width="440" height="40" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="30" y="68" width="${w.toFixed(0)}" height="40" rx="8" fill="${res>=65?'#059669':'#ef4444'}"/>
+    <text x="${Math.min(480, 38+w).toFixed(0)}" y="94" font-size="14" font-weight="850" fill="${res>=65?'#059669':'#ef4444'}">${res} 分</text>
+    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">把“我天生不是这块料”改写成“这次准备不够，下次换个模板”——精准隔离伤害，不让单点失败烧毁整片森林！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>允许自己犯错，但不允许把“一次失误”写成“终身判决书”。把归因限定在具体、暂时、可改进的方法上！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

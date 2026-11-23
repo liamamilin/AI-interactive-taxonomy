@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏔️ 达克效应“愚昧之山”曲线（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏔️ 达克效应“愚昧之山”曲线（SVG）</h1><p>刚学了一点皮毛时，你压根不知道这个领域有多深，所以自信爆棚；学得越深，见识到未知的冰山越大，自信反而跌入绝望之谷。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>当前领域真实熟练度</span><span id="vCmp">18%</span></label><input type="range" id="sCmp" min="2" max="100" value="18" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>高质量实战/同行纠错反馈</span><span id="vFbk">25%</span></label><input type="range" id="sFbk" min="0" max="100" value="25" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 215"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">主观自信心</div><div class="k-val" id="kCnf">—</div></div>
+        <div class="kpi"><div class="k-lbl">所处阶段</div><div class="k-val" id="kStg">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const c=+document.getElementById('sCmp').value, fbk=+document.getElementById('sFbk').value;
+  document.getElementById('vCmp').textContent=c+'%';
+  document.getElementById('vFbk').textContent=fbk+'%';
+  function confAt(x){
+    const raw=15 + 80*Math.exp(-Math.pow((x-16)/11,2)) + 0.72*x - 22*Math.exp(-Math.pow((x-42)/15,2));
+    const damp=fbk/100;
+    return Math.max(10, Math.min(98, raw*(1-damp*0.45) + x*(damp*0.45)));
+  }
+  const cnf=Math.round(confAt(c));
+  const stg=c<28?'🏔️ 愚昧之山（不知深浅）':(c<55?'🕳️ 绝望之谷（看见未知冰山）':(c<82?'🧗 开悟之坡（稳步对齐）':'🎓 持续平稳高原'));
+  document.getElementById('kCnf').textContent=cnf+'%';
+  document.getElementById('kStg').textContent=stg;
+  let pts=[];
+  for(let x=2;x<=100;x+=2){
+    pts.push(`${(45+x*5.1).toFixed(1)},${(178-confAt(x)*1.35).toFixed(1)}`);
+  }
+  const cx=45+c*5.1, cy=178-cnf*1.35;
+  document.getElementById('svg').innerHTML=`
+    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">自信心 vs 真实能力曲线（虚线 = 完美自知对角线）</text>
+    <line x1="45" y1="178" x2="555" y2="178" stroke="var(--tax-border)" stroke-width="1.5"/>
+    <line x1="45" y1="178" x2="555" y2="43" stroke="#94a3b8" stroke-dasharray="4,4"/>
+    <polyline points="${pts.join(' ')}" fill="none" stroke="#8b5cf6" stroke-width="3"/>
+    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+    <text x="45" y="198" font-size="11" fill="var(--tax-muted)">新手 (0%)</text>
+    <text x="260" y="198" font-size="11" fill="var(--tax-muted)">进阶 (50%)</text>
+    <text x="515" y="198" font-size="11" fill="var(--tax-muted)">大师 (100%)</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当你开始觉得自己“什么都不懂、好焦虑”时别灰心——那恰恰说明你已经走下愚昧之山，真正摸到这个领域的门槛了！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>
