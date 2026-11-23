@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚖️ 沉没成本与机会成本天平（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 沉没成本与机会成本天平（SVG）</h1><p>误区：我们已经在这个项目上花了 500 万，现在停掉岂不是血本无归？真相：那 500 万无论停不停都已经花掉了！唯一该算的是“未来再投 300 万”投在这里赚得多，还是投给新项目赚得多！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+       <div class="ctrl-box"><label><span>历史已花掉的沉没成本（干扰项）</span><span id="vS">500 万</span></label><input id="sunk" type="range" min="100" max="1000" step="100" value="500" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>老项目未来再投 300 万的预期回款</span><span id="vOld">200 万 (仍亏)</span></label><input id="oldR" type="range" min="50" max="500" step="50" value="200" oninput="draw(true)"></div>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">老项目未来净回报 (减新投300万)</div><div class="k-val" id="kOld">—</div></div>
+       <div class="kpi"><div class="k-lbl">转投新项目的机会回报</div><div class="k-val" style="color:#10b981;">+250 万</div></div>
+       <div class="kpi"><div class="k-lbl">理性决策</div><div class="k-val" id="kDec">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+       const s=+document.getElementById('sunk').value, o=+document.getElementById('oldR').value;
+       document.getElementById('vS').textContent=s+' 万';
+       document.getElementById('vOld').textContent=o+' 万';
+       const netOld=o-300, netNew=250;
+       const stop=netNew>netOld;
+       document.getElementById('svg').innerHTML=`
+         <text x="20" y="50" font-size="11.5" fill="var(--tax-muted)">历史已花 ${s}万（无论选谁都已沉没，必须从大脑里擦掉！）</text>
+         <text x="20" y="92" font-size="12" font-weight="750" fill="var(--tax-text)">继续砸老项目</text>
+         <rect x="140" y="74" width="${Math.max(10, (o/550)*350).toFixed(1)}" height="24" rx="5" fill="${netOld>=0?'#2563eb':'#ef4444'}"/>
+         <text x="${(148+Math.max(10, (o/550)*350)).toFixed(1)}" y="91" font-size="12" font-weight="800" fill="${netOld>=0?'#2563eb':'#ef4444'}">净赚 ${netOld>=0?'+':''}${netOld} 万</text>
+         <text x="20" y="142" font-size="12" font-weight="750" fill="var(--tax-text)">止损转投新项目</text>
+         <rect x="140" y="124" width="${(550/550*350).toFixed(1)}" height="24" rx="5" fill="#10b981"/>
+         <text x="498" y="141" font-size="12" font-weight="800" fill="#10b981">净赚 +250 万</text>
+       `;
+       document.getElementById('kOld').textContent=(netOld>=0?'+':'')+netOld+' 万';
+       document.getElementById('kOld').style.color=netOld>=0?'#2563eb':'#ef4444';
+       document.getElementById('kDec').textContent=stop?'✂️ 立刻止损转投新项目':'继续老项目';
+       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>注意到吗？不管历史沉没成本是 100 万还是 1000 万，它对未来决策的权重都是 <strong>0</strong>！留着未来 300 万去赚新项目的 +250 万才是正解。`;
+       if(mark && window.ToySDK) window.ToySDK.markCompleted();
+     }
+     draw(false);</script>
+</body>
+</html>

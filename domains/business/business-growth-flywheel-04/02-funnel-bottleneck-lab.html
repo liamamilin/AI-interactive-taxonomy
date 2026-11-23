@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌪️ 转化漏斗木桶器：修哪一环 ROI 最高？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌪️ 转化漏斗木桶器：修哪一环 ROI 最高？</h1><p>误区：只要产品总成交不够高，就应该找市场部买更多流量。真相：漏斗乘法公式下，把短板环节转化率翻倍（如 10%→20%）等于直接让最终成交翻倍，比买流量便宜得多！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+       <div class="ctrl-box"><label><span>注册转化率</span><span id="v1">30%</span></label><input id="c1" type="range" min="10" max="60" step="5" value="30" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>新手激活率</span><span id="v2">20%</span></label><input id="c2" type="range" min="10" max="60" step="5" value="20" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>付费转化率</span><span id="v3">10%</span></label><input id="c3" type="range" min="5" max="30" step="5" value="10" oninput="draw(true)"></div>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">10000 曝光最终付费数</div><div class="k-val" id="kEnd" style="color:#10b981;">—</div></div>
+       <div class="kpi"><div class="k-lbl">总端到端转化率</div><div class="k-val" id="kTot" style="color:#2563eb;">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+       const c1=+document.getElementById('c1').value/100;
+       const c2=+document.getElementById('c2').value/100;
+       const c3=+document.getElementById('c3').value/100;
+       document.getElementById('v1').textContent=(c1*100).toFixed(0)+'%';
+       document.getElementById('v2').textContent=(c2*100).toFixed(0)+'%';
+       document.getElementById('v3').textContent=(c3*100).toFixed(0)+'%';
+       const s0=10000, s1=s0*c1, s2=s1*c2, s3=s2*c3;
+       const items=[['曝光',s0,'#94a3b8'],['注册',s1,'#2563eb'],['激活',s2,'#f59e0b'],['付费',s3,'#10b981']];
+       document.getElementById('svg').innerHTML=items.map((it,i)=>{
+         const w=Math.max(8, (it[1]/s0)*380), y=24+i*36;
+         return `<text x="20" y="${y+17}" font-size="12" font-weight="750" fill="var(--tax-text)">${it[0]}</text>
+         <rect x="90" y="${y}" width="${w.toFixed(1)}" height="24" rx="5" fill="${it[2]}"/>
+         <text x="${(98+w).toFixed(1)}" y="${y+17}" font-size="12" font-weight="800" fill="${it[2]}">${Math.round(it[1]).toLocaleString()} 人</text>`;
+       }).join('');
+       document.getElementById('kEnd').textContent=Math.round(s3)+' 单';
+       document.getElementById('kTot').textContent=(c1*c2*c3*100).toFixed(2)+'%';
+       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>漏斗是乘法不是加法！任何一环提升 1 倍（比如把新手激活从 20% 改到 40%），最终成交单数就会立竿见影翻整整 1 倍（达 ${Math.round(s3*2)} 单）！`;
+       if(mark && window.ToySDK) window.ToySDK.markCompleted();
+     }
+     draw(false);</script>
+</body>
+</html>

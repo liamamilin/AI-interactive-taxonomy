@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔗 沟通连线爆炸器：N(N-1)/2（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔗 沟通连线爆炸器：N(N-1)/2（SVG）</h1><p>误区：10 个人干活是 5 个人的 2 倍快。真相：沟通连线随人数平方增长，团队大了大家全在开会对齐，没人干活！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>团队沟通人数 N</span><span id="vN">6 人</span></label><input id="n" type="range" min="3" max="20" step="1" value="6" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>每条连线每周对齐耗时</span><span id="vM">15 分钟</span></label><input id="mins" type="range" min="5" max="30" step="5" value="15" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">沟通连线数量 N(N-1)/2</div><div class="k-val" id="kE" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">每周总开会沟通耗时</div><div class="k-val" id="kHrs">—</div></div>
+      <div class="kpi"><div class="k-lbl">剩余干活有效时间</div><div class="k-val" id="kWork" style="color:#10b981;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const n=+document.getElementById('n').value, mins=+document.getElementById('mins').value;
+      document.getElementById('vN').textContent=n+' 人';
+      document.getElementById('vM').textContent=mins+' 分钟';
+      const pts=[];
+      for(let i=0;i<n;i++){
+        const a=(i/n)*Math.PI*2-Math.PI/2;
+        pts.push([300+Math.cos(a)*74, 98+Math.sin(a)*74]);
+      }
+      let lines='', dots='';
+      for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
+        lines+=`<line x1="${pts[i][0].toFixed(1)}" y1="${pts[i][1].toFixed(1)}" x2="${pts[j][0].toFixed(1)}" y2="${pts[j][1].toFixed(1)}" stroke="#ef4444" opacity="0.25" stroke-width="1.2"/>`;
+      }
+      pts.forEach(p=>dots+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="5" fill="#2563eb"/>`);
+      document.getElementById('svg').innerHTML=lines+dots;
+      const edges=n*(n-1)/2, hrs=(edges*mins)/60;
+      const work=Math.max(10, Math.round(100 - (hrs/(n*40))*100));
+      document.getElementById('kE').textContent=edges+' 条';
+      document.getElementById('kHrs').textContent=hrs.toFixed(1)+' 小时';
+      document.getElementById('kWork').textContent=work+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>人数扩到 <strong>${n} 人</strong> 时，沟通连线飙到 <strong>${edges} 条</strong>，全员每周光对齐就要烧掉 ${hrs.toFixed(1)} 小时！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

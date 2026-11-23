@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🤝 利益对齐沙盘：固定工资 vs 期权分红怎么配？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🤝 利益对齐沙盘：固定工资 vs 期权分红怎么配？</h1><p>误区：职业经理人拿高额固定月薪就会尽心尽力为股东着想。真相：必须结合“长期股权占比 + 归属锁定期”，才能消除短期透支！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>长期股权/分红激励占比</span><span id="vEq">30%</span></label><input id="eq" type="range" min="0" max="80" step="10" value="30" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>期权归属锁定期 (Vesting)</span><span id="vYr">4 年</span></label><input id="yr" type="range" min="1" max="6" step="1" value="4" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">公司 5 年长期价值增长</div><div class="k-val" id="kVal" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">短期刷数据透支风险</div><div class="k-val" id="kRisk" style="color:#ef4444;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const eq=+document.getElementById('eq').value, yr=+document.getElementById('yr').value;
+      document.getElementById('vEq').textContent=eq+'%';
+      document.getElementById('vYr').textContent=yr+' 年';
+      const val=Math.min(98, Math.round(25 + eq*0.65 + yr*4.5));
+      const risk=Math.max(5, Math.round(90 - eq*0.75 - yr*5));
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">长期价值创造意愿</text>
+        <rect x="170" y="36" width="${(val*3.5).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
+        <text x="${(178+val*3.5).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#10b981">${val}/100</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">短期主义与推诿风险</text>
+        <rect x="170" y="96" width="${(risk*3.5).toFixed(1)}" height="26" rx="5" fill="#ef4444"/>
+        <text x="${(178+risk*3.5).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="#ef4444">${risk}/100</text>
+      `;
+      document.getElementById('kVal').textContent=val+' / 100';
+      document.getElementById('kRisk').textContent=risk+' / 100';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>${eq}% 股权配上 ${yr} 年锁定期，能把长期创造意愿拉到 <strong>${val} 分</strong>，把短期透支压到 <strong>${risk} 分</strong>！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

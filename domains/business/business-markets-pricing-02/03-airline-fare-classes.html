@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✈️ 机票头等舱与经济舱：为什么商务客愿多付 4 倍价钱？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>✈️ 机票头等舱与经济舱：为什么商务客愿多付 4 倍价钱？</h1><p>误区：头等舱贵 4 倍是因为那顿飞机餐和大座椅值那么多钱。真相：高价票买的是“临期购票 + 随时免费退改签”的确定性！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="setCfg(1,1,this)">商务出差（明天飞+需退改）</button>
+      <button class="btn" onclick="setCfg(30,0,this)">大学生穷游（提前30天+不退改）</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>距离起飞提前预订天数</span><span id="vD">1 天</span></label><input id="days" type="range" min="1" max="45" step="1" value="1" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>免费退改签灵活性需求</span><span id="vFlex">极高</span></label><input id="flex" type="range" min="0" max="1" step="1" value="1" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">系统匹配票价</div><div class="k-val" id="kCab" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">航空公司毛利率</div><div class="k-val" id="kMar" style="color:#10b981;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function setCfg(d,f,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('days').value=d;
+      document.getElementById('flex').value=f;
+      draw(true);
+    }
+    function draw(mark){
+      const d=+document.getElementById('days').value, f=+document.getElementById('flex').value;
+      document.getElementById('vD').textContent=d+' 天';
+      document.getElementById('vFlex').textContent=f?'极高 (可退改)':'低 (不可退改)';
+      const p=Math.round(700 + (45-d)*45 + f*1100);
+      const mar=Math.min(88, Math.round((p-600)/p*100));
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">动态匹配机票价格</text>
+        <rect x="160" y="36" width="${(p/4000*360).toFixed(1)}" height="26" rx="5" fill="${p>2000?'#2563eb':'#10b981'}"/>
+        <text x="${(168+p/4000*360).toFixed(1)}" y="54" font-size="12.5" font-weight="800" fill="${p>2000?'#2563eb':'#10b981'}">¥${p}</text>
+        <text x="20" y="115" font-size="12" fill="var(--tax-muted)">临期 ${d} 天订票 + ${f?'免费退改':'锁定不可退'} → 精确筛选出支付意愿！</text>
+      `;
+      document.getElementById('kCab').textContent='¥'+p;
+      document.getElementById('kMar').textContent=mar+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>一架飞机上 80% 的利润往往来自临期、要退改的 20% 商务客（当前票价 <strong>¥${p}</strong>）！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

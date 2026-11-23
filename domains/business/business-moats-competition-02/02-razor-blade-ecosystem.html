@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🪒 剃须刀+刀片模式：硬件白送，耗材生态锁死十年</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🪒 剃须刀+刀片模式：硬件白送，耗材生态锁死十年</h1><p>误区：卖打印机/游戏机当然要在硬件上把利润赚足。真相：把主机按成本价贱卖普及进千万家庭，再靠专有高毛利墨盒/订阅赚十年！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>主机首购售价（成本500）</span><span id="vH">300 元</span></label><input id="hw" type="range" min="100" max="1500" step="100" value="300" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>每年高毛利耗材/订阅消费</span><span id="vB">400 元</span></label><input id="bl" type="range" min="0" max="800" step="100" value="400" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">主机普及销量估算</div><div class="k-val" id="kVol" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">5 年单客总毛利</div><div class="k-val" id="kLtv">—</div></div>
+      <div class="kpi"><div class="k-lbl">5 年总利润池</div><div class="k-val" id="kTot" style="color:#10b981;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const hw=+document.getElementById('hw').value, bl=+document.getElementById('bl').value;
+      document.getElementById('vH').textContent=hw+' 元';
+      document.getElementById('vB').textContent=bl+' 元/年';
+      const vol=Math.max(10, Math.round(120*Math.exp(-(hw-100)/700)));
+      const ltv=(hw-500) + 5*(bl*0.75);
+      const tot=vol*ltv;
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">主机销量规模</text>
+        <rect x="140" y="36" width="${(vol/120*360).toFixed(1)}" height="26" rx="5" fill="#2563eb"/>
+        <text x="${(148+vol/120*360).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#2563eb">${vol} 万台</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">5年总利润池</text>
+        <rect x="140" y="96" width="${Math.max(10, Math.min(360, tot/300000*360)).toFixed(1)}" height="26" rx="5" fill="${tot>=0?'#10b981':'#ef4444'}"/>
+        <text x="${(148+Math.max(10, Math.min(360, tot/300000*360))).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${tot>=0?'#10b981':'#ef4444'}">${(tot/10000).toFixed(1)} 亿元</text>
+      `;
+      document.getElementById('kVol').textContent=vol+' 万台';
+      document.getElementById('kLtv').textContent=ltv.toFixed(0)+' 元';
+      document.getElementById('kTot').textContent=(tot/10000).toFixed(1)+' 亿元';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕主机倒贴 200 元卖（300 元），只要能把销量冲到 ${vol} 万台并靠耗材赚 5 年，总利润池高达 <strong>${(tot/10000).toFixed(1)} 亿元</strong>！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔍 瓶颈五步法寻宝：把最贵的资源保护起来</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔍 瓶颈五步法寻宝：把最贵的资源保护起来</h1><p>误区：想提升瓶颈部门产出，只能重金再招一个同等高手。真相：花很少的钱雇一个助手替瓶颈剥离杂活，就能让瓶颈纯产出立刻暴增！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>初级助手替瓶颈剥离的杂活比例</span><span id="vP">50%</span></label><input id="pct" type="range" min="0" max="60" step="10" value="50" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>瓶颈环节单次交付商业价值</span><span id="vVal">20 万</span></label><input id="val" type="range" min="10" max="50" step="5" value="20" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">瓶颈核心有效产出</div><div class="k-val" id="kOut" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">整条流水线月增利润</div><div class="k-val" id="kProf" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const p=+document.getElementById('pct').value, v=+document.getElementById('val').value;
+      document.getElementById('vP').textContent=p+'%';
+      document.getElementById('vVal').textContent=v+' 万';
+      const core=35+p, admin=100-core;
+      const gain=(p/35)*v*2;
+      document.getElementById('svg').innerHTML=`
+        <rect x="60" y="55" width="${(core*4.8).toFixed(1)}" height="36" rx="5" fill="#10b981"/>
+        <rect x="${(60+core*4.8).toFixed(1)}" y="55" width="${(admin*4.8).toFixed(1)}" height="36" rx="5" fill="#94a3b8"/>
+        <text x="${(60+core*2.4).toFixed(1)}" y="78" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">核心瓶颈产出 ${core}%</text>
+        ${admin>8?`<text x="${(60+core*4.8+admin*2.4).toFixed(1)}" y="78" text-anchor="middle" font-size="11.5" font-weight="750" fill="#fff">杂活 ${admin}%</text>`:''}
+      `;
+      document.getElementById('kOut').textContent=core+'%';
+      document.getElementById('kProf').textContent='+'+gain.toFixed(0)+' 万/月';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>剥离 ${p}% 杂活后，最贵的瓶颈资源专注核心，整条线月增利润 <strong>+${gain.toFixed(0)} 万</strong>，远超一个助手的工资！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

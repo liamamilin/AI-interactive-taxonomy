@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📉 平均成本瀑布曲线：软件 vs 餐厅（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📉 平均成本瀑布曲线：软件 vs 餐厅（SVG）</h1><p>误区：卖一百万份东西，总成本肯定也是卖一份的一百万倍。真相：研发软件花了 100 万后，卖第 1 份成本 100 万，卖第 100 万份时每份摊薄成 1 元！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+       <button class="btn active" onclick="setType('sw',this)">纯软件/数字产品（固定100万 + 边际0元）</button>
+       <button class="btn" onclick="setType('rest',this)">线下餐饮（固定10万 + 边际30元食材人工）</button>
+     </div>
+     <div class="ctrl-grid">
+       <div class="ctrl-box"><label><span>累计销售份数</span><span id="vQ">10,000 份</span></label><input id="q" type="range" min="100" max="100000" step="500" value="10000" oninput="draw(true)"></div>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">单份平均总成本</div><div class="k-val" id="kAvg" style="color:#2563eb;">—</div></div>
+       <div class="kpi"><div class="k-lbl">若售价 50 元的单份毛利</div><div class="k-val" id="kMar" style="color:#10b981;">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>let tp='sw';
+     function setType(t,btn){
+       tp=t;
+       document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+       if(btn) btn.classList.add('active');
+       draw(true);
+     }
+     function draw(mark){
+       const q=+document.getElementById('q').value;
+       document.getElementById('vQ').textContent=q.toLocaleString()+' 份';
+       const fix=tp==='sw'?1000000:100000, mc=tp==='sw'?0.5:30;
+       const avg=fix/q + mc;
+       const pts=[];
+       for(let k=1000;k<=100000;k+=3000){
+         const a=fix/k+mc;
+         const x=48+(k/100000)*520, y=165-Math.min(140,(a/300)*140);
+         pts.push(`${k===1000?'M':'L'}${x.toFixed(1)},${y.toFixed(1)}`);
+       }
+       document.getElementById('svg').innerHTML=`
+         <line x1="48" y1="${(165-(50/300)*140).toFixed(1)}" x2="568" y2="${(165-(50/300)*140).toFixed(1)}" stroke="#10b981" stroke-dasharray="4,4"/>
+         <text x="565" y="${(160-(50/300)*140).toFixed(1)}" text-anchor="end" font-size="10.5" fill="#10b981">售价 50元线</text>
+         <path d="${pts.join(' ')}" fill="none" stroke="#2563eb" stroke-width="3.5"/>
+       `;
+       document.getElementById('kAvg').textContent=avg.toFixed(1)+' 元';
+       document.getElementById('kMar').textContent=(50-avg).toFixed(1)+' 元';
+       document.getElementById('ahaBox').innerHTML=tp==='sw'
+         ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>软件销量到 ${q.toLocaleString()} 份时，单份成本摊薄至 <strong>${avg.toFixed(1)} 元</strong>，剩下几乎全是纯利润！小对手刚起步卖 1000 份时成本高达 1000 元，根本打不过！`
+         : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>餐饮的边际食材和人力成本永远卡在 30 元下不去，单份成本最低只能逼近 30 元，很难形成赢家通吃！`;
+       if(mark && window.ToySDK) window.ToySDK.markCompleted();
+     }
+     draw(false);</script>
+</body>
+</html>

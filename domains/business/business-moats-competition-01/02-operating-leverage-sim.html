@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚖️ 经营杠杆放大器：高固定成本生意的盈亏临界点</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚖️ 经营杠杆放大器：高固定成本生意的盈亏临界点</h1><p>误区：固定成本高的生意风险一定差。真相：一旦销量跨过盈亏平衡点，高经营杠杆会把营收的每一分增长成倍放大为净利润！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>年度销量 (万件)</span><span id="vQ">60 万</span></label><input id="q" type="range" min="10" max="120" step="5" value="60" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>固定研发/厂房成本</span><span id="vF">400 万</span></label><input id="fix" type="range" min="200" max="600" step="50" value="400" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">盈亏平衡点销量</div><div class="k-val" id="kBE">—</div></div>
+      <div class="kpi"><div class="k-lbl">总营收 (单价10元)</div><div class="k-val" id="kRev">—</div></div>
+      <div class="kpi"><div class="k-lbl">净利润</div><div class="k-val" id="kProf">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const q=+document.getElementById('q').value, fix=+document.getElementById('fix').value;
+      document.getElementById('vQ').textContent=q+' 万';
+      document.getElementById('vF').textContent=fix+' 万';
+      const rev=q*10, cost=fix+q*2, prof=rev-cost, be=fix/8;
+      const x=k=>55+((k-10)/110)*490, y=v=>165-(v/1300)*135;
+      document.getElementById('svg').innerHTML=`
+        <line x1="${x(10)}" y1="${y(100).toFixed(1)}" x2="${x(120)}" y2="${y(1200).toFixed(1)}" stroke="#10b981" stroke-width="3"/>
+        <line x1="${x(10)}" y1="${y(fix+20).toFixed(1)}" x2="${x(120)}" y2="${y(fix+240).toFixed(1)}" stroke="#ef4444" stroke-width="3"/>
+        <circle cx="${x(be).toFixed(1)}" cy="${y(be*10).toFixed(1)}" r="5" fill="var(--tax-muted)"/>
+        <circle cx="${x(q).toFixed(1)}" cy="${y(rev).toFixed(1)}" r="5.5" fill="#10b981"/>
+      `;
+      document.getElementById('kBE').textContent=be.toFixed(1)+' 万件';
+      document.getElementById('kRev').textContent=rev+' 万';
+      document.getElementById('kProf').textContent=(prof>=0?'+':'')+prof+' 万';
+      document.getElementById('kProf').style.color=prof>=0?'#10b981':'#ef4444';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>固定成本 ${fix} 万时，盈亏平衡线在 <strong>${be.toFixed(1)} 万件</strong>！跨过它之后，每多卖 1 万件就净赚 8 万纯利！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

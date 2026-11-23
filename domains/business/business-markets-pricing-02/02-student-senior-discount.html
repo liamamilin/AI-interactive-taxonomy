@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎬 电影院学生半价实验室：谁才是利润大头？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎬 电影院学生半价实验室：谁才是利润大头？</h1><p>误区：电影院给学生半价是亏本赚吆喝。真相：电影放映的边际成本几乎为 0，只要学生票价高于 0，空着也是空着的座位卖出去就是纯赚！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+       <div class="ctrl-box"><label><span>学生半价票价（原价 60 元）</span><span id="vP">30 元</span></label><input id="p" type="range" min="15" max="55" step="5" value="30" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>原本空着的剩余座位数</span><span id="vS">40 座</span></label><input id="s" type="range" min="10" max="80" step="10" value="40" oninput="draw(true)"></div>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">正价客贡献</div><div class="k-val">3,600 元</div></div>
+       <div class="kpi"><div class="k-lbl">学生半价纯增量利润</div><div class="k-val" id="kStu" style="color:#10b981;">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+       const p=+document.getElementById('p').value, s=+document.getElementById('s').value;
+       document.getElementById('vP').textContent=p+' 元';
+       document.getElementById('vS').textContent=s+' 座';
+       const extra=p*s;
+       document.getElementById('svg').innerHTML=`
+         <rect x="60" y="55" width="240" height="36" rx="5" fill="#2563eb"/>
+         <rect x="302" y="55" width="${(extra/3600*240).toFixed(1)}" height="36" rx="5" fill="#10b981"/>
+         <text x="180" y="78" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">正价 3600元</text>
+         <text x="${(302+extra/3600*120).toFixed(1)}" y="78" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">+${extra}元</text>
+         <text x="300" y="130" text-anchor="middle" font-size="12" fill="var(--tax-muted)">多放进去 ${s} 个学生，电费空调几乎不增加成本！</text>
+       `;
+       document.getElementById('kStu').textContent='+'+extra.toLocaleString()+' 元';
+       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只要能凭学生证防住正价客冒充，把空座以 ${p} 元卖给学生，每场直接多赚 <strong>+${extra} 元</strong> 纯利润！`;
+       if(mark && window.ToySDK) window.ToySDK.markCompleted();
+     }
+     draw(false);</script>
+</body>
+</html>

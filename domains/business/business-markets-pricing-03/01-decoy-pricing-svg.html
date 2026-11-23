@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📰 经济学人“诱饵效应”实验台（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📰 经济学人“诱饵效应”实验台（SVG）</h1><p>误区：人的偏好是独立固定的，不会因为多了一个没人选的废选项而改变。真相：插入一个“故意显得很亏”的诱饵选项，能把高价套餐销量拉升到 84%！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn" onclick="setDecoy(0,this)">无诱饵（仅两档对比）</button>
+      <button class="btn active" onclick="setDecoy(1,this)">加入“仅纸质 125$”诱饵档</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>全能版高价套餐定价 ($)</span><span id="vHi">$125</span></label><input id="hi" type="range" min="99" max="169" step="10" value="125" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">选 59$ 便宜档比例</div><div class="k-val" id="kLow">—</div></div>
+      <div class="kpi"><div class="k-lbl">选高价全能档比例</div><div class="k-val" id="kHigh" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">平均客单价 (ARPU)</div><div class="k-val" id="kArpu" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>let has=1;
+    function setDecoy(h,btn){
+      has=h;
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      draw(true);
+    }
+    function draw(mark){
+      const hi=+document.getElementById('hi').value;
+      document.getElementById('vHi').textContent='$'+hi;
+      const baseHigh=Math.max(15, 45-(hi-99)*0.4);
+      const high=Math.round(has ? Math.min(88, baseHigh+45) : baseHigh);
+      const low=100-high;
+      const arpu=(low*59+high*hi)/100;
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">59$ 电子版</text>
+        <rect x="140" y="36" width="${(low*3.8).toFixed(1)}" height="26" rx="5" fill="#94a3b8"/>
+        <text x="${(148+low*3.8).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="var(--tax-text)">${low}%</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">$${hi} 电子+纸质</text>
+        <rect x="140" y="96" width="${(high*3.8).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
+        <text x="${(148+high*3.8).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="#10b981">${high}%</text>
+      `;
+      document.getElementById('kLow').textContent=low+'%';
+      document.getElementById('kHigh').textContent=high+'%';
+      document.getElementById('kArpu').textContent='$'+arpu.toFixed(1);
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>加入诱饵后，高价档（$${hi}）销量冲到 <strong>${high}%</strong>，人均客单价飙至 <strong>$${arpu.toFixed(1)}</strong>！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

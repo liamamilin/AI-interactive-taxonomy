@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎨 差异化破局台：如何跳出同质化价格战？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎨 差异化破局台：如何跳出同质化价格战？</h1><p>误区：只要把成本压到全行业最低就能赢。真相：同质化压价没有赢家，只有提高产品差异化，才能扛住对手的疯狂补贴！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="setCfg(10,30,this)">同质化白牌（差异度 10%）</button>
+      <button class="btn" onclick="setCfg(80,30,this)">强品牌差异化（差异度 80%）</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>品牌/体验差异化强度</span><span id="vDif">10%</span></label><input id="dif" type="range" min="0" max="100" step="10" value="10" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>对手降价补贴力度</span><span id="vCut">-30%</span></label><input id="cut" type="range" min="10" max="60" step="5" value="30" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">你的核心客流留存率</div><div class="k-val" id="kKeep">—</div></div>
+      <div class="kpi"><div class="k-lbl">仍能守住的毛利率</div><div class="k-val" id="kMar">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function setCfg(d,c,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('dif').value=d;
+      document.getElementById('cut').value=c;
+      draw(true);
+    }
+    function draw(mark){
+      const dif=+document.getElementById('dif').value, cut=+document.getElementById('cut').value;
+      document.getElementById('vDif').textContent=dif+'%';
+      document.getElementById('vCut').textContent='-'+cut+'%';
+      const keep=Math.max(5, Math.min(95, Math.round(dif*0.85 + (60-cut)*0.3)));
+      const mar=Math.max(2, Math.round(dif*0.48 + (60-cut)*0.1));
+      const col=keep>=60?'#10b981':keep>=35?'#f59e0b':'#ef4444';
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">客流留存率</text>
+        <rect x="140" y="36" width="${(keep*3.8).toFixed(1)}" height="26" rx="6" fill="${col}"/>
+        <text x="${(148+keep*3.8).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="${col}">${keep}%</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">健康毛利率</text>
+        <rect x="140" y="96" width="${(mar*5).toFixed(1)}" height="26" rx="6" fill="${col}"/>
+        <text x="${(148+mar*5).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${col}">${mar}%</text>
+      `;
+      document.getElementById('kKeep').textContent=keep+'%';
+      document.getElementById('kMar').textContent=mar+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当差异化高达 <strong>${dif}%</strong> 时，即使对手暴力降价 -${cut}%，仍有 <strong>${keep}%</strong> 用户留下来为你买单！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

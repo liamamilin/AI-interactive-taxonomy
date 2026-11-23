@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌟 超级明星效应：数字时代为什么头部赚得比过去多 100 倍？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌟 超级明星效应：数字时代为什么头部赚得比过去多 100 倍？</h1><p>误区：长尾经济会让所有小创作者和超级明星平分天下。真相：数字复制半径越大，消费者就越只选第一名，头部通吃全行业利润池的比例就越夸张！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>产品数字复制半径（本地→全球）</span><span id="vR">80%</span></label><input id="rad" type="range" min="10" max="100" step="10" value="80" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">Top 1% 头部拿走收入占比</div><div class="k-val" id="kTop" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">其余 99% 从业者分得</div><div class="k-val" id="kRest" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const rad=+document.getElementById('rad').value;
+      document.getElementById('vR').textContent=rad+'%';
+      const top=Math.round(12 + rad*0.72), rest=100-top;
+      document.getElementById('svg').innerHTML=`
+        <rect x="60" y="55" width="${(top*4.8).toFixed(1)}" height="36" rx="5" fill="#ef4444"/>
+        <rect x="${(60+top*4.8).toFixed(1)}" y="55" width="${(rest*4.8).toFixed(1)}" height="36" rx="5" fill="#2563eb"/>
+        <text x="${(60+top*2.4).toFixed(1)}" y="78" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">头部1% 拿 ${top}%</text>
+        <text x="${(60+top*4.8+rest*2.4).toFixed(1)}" y="78" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${rest}%</text>
+        <text x="300" y="128" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">当最好的东西可以零成本服务全球，消费者干嘛还要将就第二名？</text>
+      `;
+      document.getElementById('kTop').textContent=top+'%';
+      document.getElementById('kRest').textContent=rest+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>传播半径越接近全球零边际复制（${rad}%），Top 1% 超级明星通吃的收入份额就越飙升至 <strong>${top}%</strong>！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

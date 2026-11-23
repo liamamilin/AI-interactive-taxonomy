@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧱 迁移成本门槛仪：对手便宜 20% 为什么还是换不动？（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧱 迁移成本门槛仪：对手便宜 20% 为什么还是换不动？（SVG）</h1><p>误区：只要我的产品比行业老大便宜 20%、功能强 10%，用户一定会立刻跳槽过来。真相：隐性的时间、学习和数据搬家成本高过省下的那点钱，用户根本懒得动！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+       <div class="ctrl-box"><label><span>新竞品每年能帮你省多少钱</span><span id="vSave">500 元</span></label><input id="save" type="range" min="100" max="3000" step="100" value="500" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>团队学习+数据迁移隐性代价</span><span id="vCost">1500 元</span></label><input id="cost" type="range" min="200" max="3000" step="100" value="1500" oninput="draw(true)"></div>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">迁移净收益（第1年）</div><div class="k-val" id="kNet">—</div></div>
+       <div class="kpi"><div class="k-lbl">用户最终决策</div><div class="k-val" id="kDec">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+       const s=+document.getElementById('save').value, c=+document.getElementById('cost').value;
+       document.getElementById('vSave').textContent=s+' 元';
+       document.getElementById('vCost').textContent=c+' 元';
+       const net=s-c, move=net>300;
+       document.getElementById('svg').innerHTML=`
+         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">竞品省钱诱惑</text>
+         <rect x="150" y="36" width="${(s/3000*360).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
+         <text x="${(158+s/3000*360).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#10b981">+${s} 元</text>
+         <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">隐性迁移折腾代价</text>
+         <rect x="150" y="96" width="${(c/3000*360).toFixed(1)}" height="26" rx="5" fill="#ef4444"/>
+         <text x="${(158+c/3000*360).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="#ef4444">-${c} 元</text>
+       `;
+       document.getElementById('kNet').textContent=(net>=0?'+':'')+net+' 元';
+       document.getElementById('kNet').style.color=move?'#10b981':'#ef4444';
+       document.getElementById('kDec').textContent=move?'🚀 值得迁移！':'😴 懒得折腾，继续留守';
+       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>想从有高转换成本的巨头手里抢人，产品不能只“好一点点”，必须提供 <strong>10 倍好</strong> 或极其痛快的“一键无痛搬家工具”！`;
+       if(mark && window.ToySDK) window.ToySDK.markCompleted();
+     }
+     draw(false);</script>
+</body>
+</html>

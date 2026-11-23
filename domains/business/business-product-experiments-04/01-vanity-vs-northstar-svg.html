@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🪞 虚荣指标 vs 北极星指标照妖镜（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🪞 虚荣指标 vs 北极星指标照妖镜（SVG）</h1><p>误区：累计注册用户突破 500 万，说明公司蒸蒸日上！真相：在老用户高流失下，“累计”数字照样一路狂飙，只有北极星活跃指标才会拉响警报！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>老用户月度真实流失率</span><span id="vCh">30%</span></label><input id="ch" type="range" min="5" max="45" step="5" value="30" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>每月市场部新买注册量</span><span id="vIn">20 万</span></label><input id="inU" type="range" min="10" max="40" step="5" value="20" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">第 8 月累计注册 (虚荣指标)</div><div class="k-val" id="kVan" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">第 8 月真实活跃 (北极星)</div><div class="k-val" id="kAct" style="color:#ef4444;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const ch=+document.getElementById('ch').value/100, inU=+document.getElementById('inU').value;
+      document.getElementById('vCh').textContent=(ch*100).toFixed(0)+'%';
+      document.getElementById('vIn').textContent=inU+' 万';
+      let cum=0, act=0; const vArr=[], aArr=[];
+      for(let m=1;m<=8;m++){ cum+=inU; act=act*(1-ch)+inU; vArr.push(cum); aArr.push(act); }
+      const maxV=Math.max(100, cum);
+      const x=i=>55+i*70, y=v=>165-(v/maxV)*135;
+      const pV=vArr.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v).toFixed(1)}`).join(' ');
+      const pA=aArr.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <path d="${pV}" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="5,4"/>
+        <path d="${pA}" fill="none" stroke="#ef4444" stroke-width="3.5"/>
+        <text x="545" y="${y(cum)-5}" text-anchor="end" font-size="11" font-weight="750" fill="#2563eb">累计 ${cum}万</text>
+        <text x="545" y="${y(act)+14}" text-anchor="end" font-size="11" font-weight="750" fill="#ef4444">真实活跃 ${act.toFixed(0)}万</text>
+      `;
+      document.getElementById('kVan').textContent=cum+' 万';
+      document.getElementById('kAct').textContent=act.toFixed(0)+' 万';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>累计注册量永远向上飞奔到 ${cum} 万，但真实活跃却被 ${(ch*100).toFixed(0)}% 流失率死死按在 ${act.toFixed(0)} 万！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

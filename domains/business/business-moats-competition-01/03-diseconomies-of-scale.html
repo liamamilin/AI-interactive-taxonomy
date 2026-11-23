@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🦖 规模不经济警报：公司大到一定程度为什么反而效率变低？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🦖 规模不经济警报：公司大到一定程度为什么反而效率变低？</h1><p>误区：企业规模越大，单件成本永远越低。真相：当大公司人数过多、审批层级膨胀时，“内部官僚沟通成本”会迅速反超生产节约！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>企业人员与产线规模</span><span id="vS">10,000 人</span></label><input id="s" type="range" min="1" max="10" step="1" value="5" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>组织官僚繁琐程度</span><span id="vB">1.0x</span></label><input id="bur" type="range" min="0.5" max="1.8" step="0.1" value="1.0" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">单位生产分摊成本</div><div class="k-val" id="kProd" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">大公司病内耗成本</div><div class="k-val" id="kBur" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">综合总成本</div><div class="k-val" id="kTot">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const s=+document.getElementById('s').value, bur=+document.getElementById('bur').value;
+      document.getElementById('vS').textContent=(s*2000).toLocaleString()+' 人';
+      document.getElementById('vB').textContent=bur.toFixed(1)+'x';
+      const calc=k=>{ const p=80/Math.pow(k,0.55), b=2.2*bur*Math.pow(k,1.65); return {p,b,t:p+b}; };
+      const pts=[];
+      for(let k=1;k<=10;k+=0.5){
+        const c=calc(k);
+        pts.push(`${k===1?'M':'L'}${(55+(k-1)*54).toFixed(1)},${(165-(c.t/160)*135).toFixed(1)}`);
+      }
+      const cur=calc(s), cx=55+(s-1)*54, cy=165-(cur.t/160)*135;
+      document.getElementById('svg').innerHTML=`<path d="${pts.join(' ')}" fill="none" stroke="#2563eb" stroke-width="3.5"/><circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="6" fill="#f59e0b"/>`;
+      document.getElementById('kProd').textContent=cur.p.toFixed(1)+' 元';
+      document.getElementById('kBur').textContent=cur.b.toFixed(1)+' 元';
+      document.getElementById('kTot').textContent=cur.t.toFixed(1)+' 元';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>组织越官僚（${bur.toFixed(1)}x），规模不经济来得越早！大公司必须靠扁平化和内部创业抵御内耗。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

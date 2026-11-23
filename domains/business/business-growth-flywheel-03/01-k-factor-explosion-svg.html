@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚀 K 值裂变相变临界仪：0.9 vs 1.1 的天壤之别（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚀 K 值裂变相变临界仪：0.9 vs 1.1 的天壤之别（SVG）</h1><p>误区：K=0.9 也不错了，只差 1.0 一点点。真相：K<1 无论多接近 1 最终都会衰减归零；唯有 K>1 才能突破临界点实现指数级自发爆炸！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+       <div class="ctrl-box"><label><span>每个用户平均发出邀请数 i</span><span id="vI">4 人</span></label><input id="inv" type="range" min="1" max="10" step="1" value="4" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>被邀请者注册转化率 c</span><span id="vC">28%</span></label><input id="conv" type="range" min="5" max="50" step="1" value="28" oninput="draw(true)"></div>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">病毒系数 K (i × c)</div><div class="k-val" id="kVal">—</div></div>
+       <div class="kpi"><div class="k-lbl">100 颗种子 10 轮后总用户</div><div class="k-val" id="kTot" style="color:#2563eb;">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+       const i=+document.getElementById('inv').value, c=+document.getElementById('conv').value/100;
+       const K=i*c;
+       document.getElementById('vI').textContent=i+' 人';
+       document.getElementById('vC').textContent=(c*100).toFixed(0)+'%';
+       let cur=100, tot=100;
+       const arr=[100];
+       for(let r=1;r<=10;r++){ cur=cur*K; tot+=cur; arr.push(cur); }
+       const maxV=Math.max(150, ...arr);
+       const x=k=>48+(k/10)*520, y=v=>175-(v/maxV)*145;
+       const p=arr.map((v,k)=>`${k?'L':'M'}${x(k).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+       const col=K>=1?'#10b981':'#ef4444';
+       document.getElementById('svg').innerHTML=`
+         <path d="${p}" fill="none" stroke="${col}" stroke-width="3.5"/>
+         <text x="560" y="24" text-anchor="end" font-size="12" font-weight="800" fill="${col}">第10轮新增：${arr[10].toFixed(0)} 人</text>
+       `;
+       document.getElementById('kVal').textContent=K.toFixed(2);
+       document.getElementById('kVal').style.color=col;
+       document.getElementById('kTot').textContent=Math.round(tot).toLocaleString()+' 人';
+       document.getElementById('ahaBox').innerHTML=K>=1
+         ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>K = <strong>${K.toFixed(2)} ≥ 1</strong>！每 100 个种子用户 10 轮滚出 <strong>${Math.round(tot).toLocaleString()}</strong> 人，无需再花一分钱买量！`
+         : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>K = <strong>${K.toFixed(2)} &lt; 1</strong>，虽然有裂变辅助（总放大至 ${Math.round(tot)} 人），但每轮新增终将衰减归零，无法脱离广告输血！`;
+       if(mark && window.ToySDK) window.ToySDK.markCompleted();
+     }
+     draw(false);</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏁 重复博弈锦标赛：好人、恶狼与一报还一报</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🏁 重复博弈锦标赛：好人、恶狼与一报还一报</h1><p>误区：商场上最狠的“永远背叛”总能占尽便宜。真相：在多轮重复博弈里，善良但有底线的“一报还一报”才是最终赢家！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row"><button class="btn primary" onclick="runTour(true)">⚔️ 重新运行 30 轮博弈锦标赛</button></div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>环境误判噪音（手滑背叛率）</span><span id="vN">5%</span></label><input id="noise" type="range" min="0" max="25" step="5" value="5" oninput="runTour(true)"></div>
+      <div class="ctrl-box"><label><span>合作每轮奖励分</span><span id="vR">3 分</span></label><input id="rew" type="range" min="2" max="5" step="1" value="3" oninput="runTour(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">宽容版一报还一报</div><div class="k-val" id="kGen" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">严格一报还一报 (TFT)</div><div class="k-val" id="kTft" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">永远背叛（恶狼）</div><div class="k-val" id="kAllD" style="color:#ef4444;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function play(s1,s2,noise,rew){
+      let sc1=0, p1=1, p2=1;
+      const M=[[1,5],[0,rew]];
+      for(let r=0;r<30;r++){
+        let m1=s1==='D'?0:s1==='TFT'?(r===0?1:p2):(r===0?1:(p2===0 && Math.random()<0.25?1:p2));
+        let m2=s2==='D'?0:s2==='TFT'?(r===0?1:p1):(r===0?1:(p1===0 && Math.random()<0.25?1:p1));
+        if(Math.random()<noise) m1=1-m1;
+        if(Math.random()<noise) m2=1-m2;
+        sc1+=M[m1][m2]; p1=m1; p2=m2;
+      }
+      return sc1;
+    }
+    function runTour(mark){
+      const noise=+document.getElementById('noise').value/100;
+      const rew=+document.getElementById('rew').value;
+      document.getElementById('vN').textContent=(noise*100).toFixed(0)+'%';
+      document.getElementById('vR').textContent=rew+' 分';
+      const strats=['GTFT','TFT','D'];
+      const tot={GTFT:0,TFT:0,D:0};
+      for(let a of strats) for(let b of strats) tot[a]+=play(a,b,noise,rew);
+      const maxV=Math.max(280,tot.GTFT,tot.TFT,tot.D);
+      const items=[['宽容一报还一报 (偶有原谅)',tot.GTFT,'#10b981'],['严格一报还一报 (TFT)',tot.TFT,'#2563eb'],['永远背叛 (恶狼)',tot.D,'#ef4444']];
+      document.getElementById('svg').innerHTML=items.map((it,i)=>{
+        const w=(it[1]/maxV)*320, y=32+i*46;
+        return `<text x="20" y="${y+18}" font-size="12" font-weight="750" fill="var(--tax-text)">${it[0]}</text>
+        <rect x="195" y="${y}" width="${w.toFixed(1)}" height="26" rx="6" fill="${it[2]}"/>
+        <text x="${(203+w).toFixed(1)}" y="${y+18}" font-size="12.5" font-weight="800" fill="${it[2]}">${it[1]} 分</text>`;
+      }).join('');
+      document.getElementById('kGen').textContent=tot.GTFT+' 分';
+      document.getElementById('kTft').textContent=tot.TFT+' 分';
+      document.getElementById('kAllD').textContent=tot.D+' 分';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当误判噪音升至 <strong>${(noise*100).toFixed(0)}%</strong> 时，严格 TFT 会陷入无休止互相报复；而偶尔原谅一次误会的“宽容版一报还一报”拿下了 <strong>${tot.GTFT} 分</strong> 最高分！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    runTour(false);</script>
+</body>
+</html>

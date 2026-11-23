@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💸 双寡头价格战均衡推演器（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💸 双寡头价格战均衡推演器（SVG）</h1><p>误区：两家垄断巨头一定能默契维持高价。真相：只要产品同质化，降价 1 元就能抢走对手全部客户——最终双双杀到贴着成本线喘气！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+       <div class="ctrl-box"><label><span>你的咖啡定价（成本 8 元）</span><span id="vP1">20 元</span></label><input id="p1" type="range" min="8" max="28" step="1" value="20" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>对手咖啡定价</span><span id="vP2">18 元</span></label><input id="p2" type="range" min="8" max="28" step="1" value="18" oninput="draw(true)"></div>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">你的市场份额</div><div class="k-val" id="kS1">—</div></div>
+       <div class="kpi"><div class="k-lbl">你的总利润（百杯）</div><div class="k-val" id="kProf1" style="color:#2563eb;">—</div></div>
+       <div class="kpi"><div class="k-lbl">对手最佳反击动作</div><div class="k-val" id="kResp" style="color:#ef4444;">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+       const p1=+document.getElementById('p1').value;
+       const p2=+document.getElementById('p2').value;
+       document.getElementById('vP1').textContent=p1+' 元';
+       document.getElementById('vP2').textContent=p2+' 元';
+       const s1 = p1<p2 ? 90 : p1===p2 ? 50 : 10;
+       const prof1 = s1*(p1-8);
+       const prof2 = (100-s1)*(p2-8);
+       document.getElementById('svg').innerHTML=`
+         <line x1="60" y1="150" x2="540" y2="150" stroke="#ef4444" stroke-dasharray="4,4"/>
+         <text x="540" y="145" text-anchor="end" font-size="10.5" fill="#ef4444">边际成本线 8元</text>
+         <rect x="150" y="${(150-(p1-8)*5).toFixed(1)}" width="80" height="${((p1-8)*5).toFixed(1)}" rx="6" fill="#2563eb"/>
+         <text x="190" y="${(142-(p1-8)*5).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="800" fill="#2563eb">你 ${p1}元</text>
+         <rect x="350" y="${(150-(p2-8)*5).toFixed(1)}" width="80" height="${((p2-8)*5).toFixed(1)}" rx="6" fill="#f59e0b"/>
+         <text x="390" y="${(142-(p2-8)*5).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="800" fill="#f59e0b">对手 ${p2}元</text>
+       `;
+       document.getElementById('kS1').textContent=s1+'%';
+       document.getElementById('kProf1').textContent=prof1+' 元';
+       document.getElementById('kResp').textContent=p1>8?'降价到 '+(p1-1)+' 元抢走你90%客户！':'已贴成本线，无法再降';
+       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>这就是著名的“伯川德悖论”：只要两家卖一模一样的东西，哪怕只有两个玩家，价格战也会把利润杀到 <strong>0</strong>（最终双双停在 8 元成本线）！`;
+       if(mark && window.ToySDK) window.ToySDK.markCompleted();
+     }
+     draw(false);</script>
+</body>
+</html>

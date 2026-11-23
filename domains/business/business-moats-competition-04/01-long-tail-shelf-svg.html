@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📚 物理货架 vs 无限货架长尾面积仪（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📚 物理货架 vs 无限货架长尾面积仪（SVG）</h1><p>误区：冷门小众商品单品销量太少，卖它根本不划算。真相：当货架存储和上架成本接近零时，千万个冷门长尾加起来的总面积能超越头部热门商品！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>货架可容纳商品种数 (Top N)</span><span id="vN">20 种</span></label><input id="n" type="range" min="10" max="100" step="10" value="20" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>长尾平缓度（小众需求丰富度）</span><span id="vA">0.85</span></label><input id="alp" type="range" min="0.5" max="1.3" step="0.1" value="0.85" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">吃到全市场总销量比例</div><div class="k-val" id="kCap" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">长尾额外增量市场</div><div class="k-val" id="kTail" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const n=+document.getElementById('n').value, alp=+document.getElementById('alp').value;
+      document.getElementById('vN').textContent=n+' 种';
+      document.getElementById('vA').textContent=alp.toFixed(2);
+      let bars='', tot=0, cap=0, head=0;
+      for(let i=1;i<=20;i++){
+        const h=140/Math.pow(i,alp);
+        tot+=h;
+        if(i<=4) head+=h;
+        const inShelf=i<=(n/5);
+        if(inShelf) cap+=h;
+        bars+=`<rect x="${45+(i-1)*25}" y="${(170-h).toFixed(1)}" width="18" height="${h.toFixed(1)}" rx="3" fill="${i<=4?'#2563eb':inShelf?'#10b981':'#94a3b8'}" opacity="${inShelf?0.9:0.3}"/>`;
+      }
+      const pct=cap/tot*100, hPct=head/tot*100;
+      document.getElementById('svg').innerHTML=bars+`<line x1="${45+(n/5)*25}" y1="15" x2="${45+(n/5)*25}" y2="175" stroke="#ef4444" stroke-dasharray="4,4"/>`;
+      document.getElementById('kCap').textContent=pct.toFixed(0)+'%';
+      document.getElementById('kTail').textContent='+'+Math.max(0,pct-hPct).toFixed(0)+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>长尾越平缓，前 20% 爆款占的比例越低（仅 ${hPct.toFixed(0)}%），无限数字货架吃下的长尾增量（+${Math.max(0,pct-hPct).toFixed(0)}%）就越惊人！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

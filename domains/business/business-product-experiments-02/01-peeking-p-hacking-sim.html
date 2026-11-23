@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>👀 偷看实验结果陷阱：A/A 测试也能跑出假显著？（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>👀 偷看实验结果陷阱：A/A 测试也能跑出假显著？（SVG）</h1><p>误区：只要今天看到 p < 0.05 显著胜出，就可以提前结束 A/B 测试上线了！真相：偷看次数越多，假阳性误报率飙升得越恐怖！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>实验期间偷看数据并早停次数</span><span id="vK">1 次</span></label><input id="k" type="range" min="1" max="20" step="1" value="1" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>名义显著性门槛 α</span><span id="vA">5% (p<0.05)</span></label><input id="alp" type="range" min="1" max="10" step="1" value="5" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">真实假阳性误报率</div><div class="k-val" id="kFpr" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">实验结论可信度</div><div class="k-val" id="kTrust">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const k=+document.getElementById('k').value, alp=+document.getElementById('alp').value/100;
+      document.getElementById('vK').textContent=k+' 次';
+      document.getElementById('vA').textContent=(alp*100).toFixed(0)+'%';
+      const fpr = Math.min(75, (1 - Math.pow(1-alp, 1+(k-1)*0.45))*100);
+      const col=fpr<=8?'#10b981':fpr<=20?'#f59e0b':'#ef4444';
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">废改版误判显著概率</text>
+        <rect x="190" y="36" width="${(fpr*4.8).toFixed(1)}" height="28" rx="6" fill="${col}"/>
+        <text x="${(198+fpr*4.8).toFixed(1)}" y="55" font-size="12.5" font-weight="800" fill="${col}">${fpr.toFixed(1)}%</text>
+        <text x="20" y="115" font-size="12" fill="var(--tax-muted)">即使 A 组和 B 组完全一样，偷看 ${k} 次也会把误报率推高到 ${fpr.toFixed(1)}%！</text>
+      `;
+      document.getElementById('kFpr').textContent=fpr.toFixed(1)+'%';
+      document.getElementById('kFpr').style.color=col;
+      document.getElementById('kTrust').textContent=k===1?'✅ 严格受控':'⚠️ 统计污染！';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>规范 A/B 测试必须提前锁死样本量跑满周期！中途偷看 ${k} 次直接让误报率暴涨至 <strong>${fpr.toFixed(1)}%</strong>！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

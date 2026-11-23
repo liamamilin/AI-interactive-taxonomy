@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎁 双向激励设计台：只奖老用户 vs 双向发红包</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎁 双向激励设计台：只奖老用户 vs 双向发红包</h1><p>误区：拉新奖励全发给老用户，他自然会拼命帮我推销。真相：同时给被邀请的朋友发红包，能解除老用户的社交羞耻感，让 K 值跃过 1.0！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>给老用户的邀请奖励</span><span id="vOld">10 元</span></label><input id="oldR" type="range" min="0" max="20" step="2" value="10" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>给新朋友的见面红包</span><span id="vNew">10 元</span></label><input id="newR" type="range" min="0" max="20" step="2" value="10" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">单人总奖励成本</div><div class="k-val" id="kCost">—</div></div>
+      <div class="kpi"><div class="k-lbl">最终病毒系数 K</div><div class="k-val" id="kK" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const o=+document.getElementById('oldR').value, n=+document.getElementById('newR').value;
+      document.getElementById('vOld').textContent=o+' 元';
+      document.getElementById('vNew').textContent=n+' 元';
+      const inv=1.2 + Math.sqrt(o)*1.1;
+      const cv=0.08 + Math.sqrt(n)*0.075;
+      const K=inv*cv;
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">病毒系数 K 表现</text>
+        <rect x="150" y="36" width="${Math.min(360, K/1.8*360).toFixed(1)}" height="28" rx="6" fill="${K>=1?'#10b981':'#ef4444'}"/>
+        <text x="${(158+Math.min(360, K/1.8*360)).toFixed(1)}" y="55" font-size="12.5" font-weight="800" fill="${K>=1?'#10b981':'#ef4444'}">K = ${K.toFixed(2)} ${K>=1?'🚀 爆发':'🥀 熄火'}</text>
+        <text x="20" y="115" font-size="12" fill="var(--tax-muted)">老用户发邀 ${inv.toFixed(1)} 人 × 好友转化率 ${(cv*100).toFixed(0)}%</text>
+      `;
+      document.getElementById('kCost').textContent=(o+n)+' 元';
+      document.getElementById('kK').textContent=K.toFixed(2);
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>试着把 20 元全给老用户（20+0） vs 双向平分（10+10）！你会发现同样预算下，双向激励才能把 K 值推过 1.0！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

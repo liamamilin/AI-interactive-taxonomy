@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🗣️ 极客要酷，大众要稳：两类用户的核心痛点翻译器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🗣️ 极客要酷，大众要稳：两类用户的核心痛点翻译器</h1><p>误区：用技术白皮书和跑分参数去说服普通企业客户。真相：实用主义大众只关心“好不好上手、同行谁在用、坏了谁兜底”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>售后保障与傻瓜化程度</span><span id="vS">80%</span></label><input id="srv" type="range" min="10" max="100" step="10" value="80" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>行业头部同行背书案例</span><span id="vC">5 家</span></label><input id="cas" type="range" min="0" max="10" step="1" value="5" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">实用主义大众签单转化率</div><div class="k-val" id="kCv" style="color:#10b981;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const srv=+document.getElementById('srv').value, cas=+document.getElementById('cas').value;
+      document.getElementById('vS').textContent=srv+'%';
+      document.getElementById('vC').textContent=cas+' 家';
+      const cv=Math.min(55, Math.round(srv*0.25 + cas*2.5));
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="65" font-size="12" font-weight="750" fill="var(--tax-text)">大众市场签单率</text>
+        <rect x="150" y="45" width="${(cv*6.5).toFixed(1)}" height="30" rx="6" fill="${cv>=25?'#10b981':'#ef4444'}"/>
+        <text x="${(158+cv*6.5).toFixed(1)}" y="65" font-size="13" font-weight="800" fill="${cv>=25?'#10b981':'#ef4444'}">${cv}%</text>
+        <text x="20" y="122" font-size="12" fill="var(--tax-muted)">大众不买单一技术参数，他们买“同行都在用的可靠完整解决方案”！</text>
+      `;
+      document.getElementById('kCv').textContent=cv+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当同行案例达到 ${cas} 家、交付傻瓜化达 ${srv}% 时，大众签单率飙升至 <strong>${cv}%</strong>！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

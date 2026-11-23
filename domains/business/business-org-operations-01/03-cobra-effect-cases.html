@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐍 眼镜蛇效应警示台：为什么发赏金抓蛇反而越抓越多？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🐍 眼镜蛇效应警示台：为什么发赏金抓蛇反而越抓越多？</h1><p>误区：只要重赏之下，问题就一定会被快速消灭。真相：如果抓一条蛇的赏金高过养蛇成本，聪明人就会专门在家办养蛇场拿去领赏！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+       <button class="btn active" onclick="pick(0,this)">1. 初始期：重赏抓野生眼镜蛇</button>
+       <button class="btn" onclick="pick(1,this)">2. 套利期：聪明人开始建养蛇场</button>
+       <button class="btn" onclick="pick(2,this)">3. 崩盘期：取消赏金后全放生</button>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">城市里真实蛇数量</div><div class="k-val" id="kSnake" style="color:#ef4444;">—</div></div>
+       <div class="kpi"><div class="k-lbl">政府财政累计支出</div><div class="k-val" id="kCost">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>const ST=[
+       {sn:1000, cost:'10万', msg:'刚开始效果显著，街上野生蛇确实变少了，领导非常满意！'},
+       {sn:2500, cost:'120万', msg:'有人发现“养一条蛇成本 5 元，卖给政府领赏 50 元”，全城暗地里开了几十家地下养蛇场！'},
+       {sn:8000, cost:'150万(血亏)', msg:'政府发现被薅羊毛赶紧取消赏金，养蛇户把几十万条无用的蛇全放生到街上——蛇患比治理前翻了 8 倍！'}
+     ];
+     function pick(i,btn){
+       document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+       if(btn) btn.classList.add('active');
+       const s=ST[i];
+       document.getElementById('svg').innerHTML=`
+         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">城市眼镜蛇存量</text>
+         <rect x="160" y="36" width="${(s.sn/8000*360).toFixed(1)}" height="28" rx="6" fill="#ef4444"/>
+         <text x="${(168+s.sn/8000*360).toFixed(1)}" y="55" font-size="12.5" font-weight="800" fill="#ef4444">${s.sn} 条</text>
+         <text x="20" y="115" font-size="12" fill="var(--tax-muted)">现象复盘：${s.msg}</text>
+       `;
+       document.getElementById('kSnake').textContent=s.sn+' 条';
+       document.getElementById('kCost').textContent=s.cost;
+       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>设计任何奖励或补贴机制前，必问自己一句：<strong>“如果我是最狡猾的套利者，我会怎么利用这个规则反过来赚钱？”</strong>`;
+       if(window.ToySDK) window.ToySDK.markCompleted();
+     }
+     pick(0,document.querySelector('.btn.active'));</script>
+</body>
+</html>

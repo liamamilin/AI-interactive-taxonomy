@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔧 降流失 vs 降获客费：哪个对利润的杠杆更大？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔧 降流失 vs 降获客费：哪个对利润的杠杆更大？</h1><p>误区：产品利润不够高，赶紧砍市场部广告费。真相：把月流失率砍半，LTV 直接翻倍——修补漏水的水桶比拼命往里倒水有效十倍！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+       <button class="btn" onclick="pick('base',this)">基准状态（CAC 300 / 月流失 10%）</button>
+       <button class="btn" onclick="pick('cac',this)">方案 A：砍掉 20% 获客费</button>
+       <button class="btn active" onclick="pick('churn',this)">方案 B：把月流失率从 10% 降到 5%</button>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">单客净赚利润 (LTV - CAC)</div><div class="k-val" id="kNet" style="color:#10b981;">—</div></div>
+       <div class="kpi"><div class="k-lbl">相比基准提升</div><div class="k-val" id="kUp" style="color:#2563eb;">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function pick(m,btn){
+       document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+       if(btn) btn.classList.add('active');
+       const cac = m==='cac'?240:300;
+       const ltv = m==='churn'?1200:600;
+       const net = ltv-cac;
+       const up = (net-300)/300*100;
+       document.getElementById('svg').innerHTML=`
+         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">生命周期 LTV</text>
+         <rect x="140" y="36" width="${(ltv/1300*360).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
+         <text x="${(148+ltv/1300*360).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#10b981">¥${ltv}</text>
+         <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">单客净赚利润</text>
+         <rect x="140" y="96" width="${(net/1300*360).toFixed(1)}" height="26" rx="5" fill="#2563eb"/>
+         <text x="${(148+net/1300*360).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="#2563eb">¥${net}</text>
+       `;
+       document.getElementById('kNet').textContent='¥'+net;
+       document.getElementById('kUp').textContent=(up>=0?'+':'')+up.toFixed(0)+'%';
+       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>省 20% 广告费只让净利润涨 20%；而把流失率从 10% 降到 5%，直接让单客净利润暴涨 <strong>+200%</strong>（从 300 元飙到 900 元）！`;
+       if(window.ToySDK) window.ToySDK.markCompleted();
+     }
+     pick('churn',document.querySelector('.btn.active'));</script>
+</body>
+</html>

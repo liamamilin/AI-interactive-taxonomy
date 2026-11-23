@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📦 三档 SaaS 订阅定价装配台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📦 三档 SaaS 订阅定价装配台</h1><p>误区：产品只卖一个统一价格最简单明了。真相：三档定价利用“折中偏见”，能同时抓住小客户、把主力推向中档高毛利区、并用天价旗舰版锚定品牌价值！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+       <div class="ctrl-box"><label><span>旗舰版锚定价格 (元/月)</span><span id="vH">499 元</span></label><input id="hi" type="range" min="199" max="999" step="50" value="499" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>专业版主推价格 (元/月)</span><span id="vM">99 元</span></label><input id="mid" type="range" min="49" max="199" step="10" value="99" oninput="draw(true)"></div>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">主力选择专业版占比</div><div class="k-val" id="kPct" style="color:#10b981;">—</div></div>
+       <div class="kpi"><div class="k-lbl">综合 ARPU 收入</div><div class="k-val" id="kArpu" style="color:#2563eb;">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+       const hi=+document.getElementById('hi').value, mid=+document.getElementById('mid').value;
+       document.getElementById('vH').textContent=hi+' 元';
+       document.getElementById('vM').textContent=mid+' 元';
+       const ratio=hi/mid;
+       const midShare=Math.min(72, Math.max(30, Math.round(35 + Math.min(4, ratio)*9)));
+       const loShare=Math.round((100-midShare)*0.75);
+       const hiShare=100-midShare-loShare;
+       const arpu=(loShare*29 + midShare*mid + hiShare*hi)/100;
+       document.getElementById('svg').innerHTML=`
+         <rect x="65" y="75" width="130" height="80" rx="10" fill="#94a3b8" opacity="0.2" stroke="#94a3b8"/>
+         <text x="130" y="105" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-text)">基础版 ¥29</text>
+         <text x="130" y="130" text-anchor="middle" font-size="13" font-weight="800" fill="var(--tax-muted)">占 ${loShare}%</text>
+         <rect x="225" y="45" width="150" height="110" rx="12" fill="#10b981" opacity="0.2" stroke="#10b981" stroke-width="2.5"/>
+         <text x="300" y="85" text-anchor="middle" font-size="13" font-weight="800" fill="#10b981">⭐ 专业版 ¥${mid}</text>
+         <text x="300" y="115" text-anchor="middle" font-size="15" font-weight="850" fill="#10b981">占 ${midShare}%</text>
+         <rect x="405" y="75" width="130" height="80" rx="10" fill="#2563eb" opacity="0.2" stroke="#2563eb"/>
+         <text x="470" y="105" text-anchor="middle" font-size="12" font-weight="750" fill="#2563eb">旗舰版 ¥${hi}</text>
+         <text x="470" y="130" text-anchor="middle" font-size="13" font-weight="800" fill="#2563eb">占 ${hiShare}%</text>
+       `;
+       document.getElementById('kPct').textContent=midShare+'%';
+       document.getElementById('kArpu').textContent='¥'+arpu.toFixed(0)+' /月';
+       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>天价旗舰版（¥${hi}）哪怕没几个人买，它的真正任务是把中间的专业版（¥${mid}）衬托得极具性价比！`;
+       if(mark && window.ToySDK) window.ToySDK.markCompleted();
+     }
+     draw(false);</script>
+</body>
+</html>

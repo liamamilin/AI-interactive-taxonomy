@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔔 创新扩散钟形曲线与鸿沟透视镜（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔔 创新扩散钟形曲线与鸿沟透视镜（SVG）</h1><p>误区：只要早期极客粉丝口碑好，产品就会顺理成章扩散给所有人。真相：极客喜欢酷炫，大众只要求稳定与同行背书——产品成熟度不够就会摔死在鸿沟里！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>当前产品普及阶段</span><span id="vS">早期采用者</span></label><input id="st" type="range" min="0" max="4" step="1" value="1" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>产品稳定性与交付完善度</span><span id="vMat">45%</span></label><input id="mat" type="range" min="20" max="100" step="10" value="45" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">当前用户群体</div><div class="k-val" id="kWho" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">跨鸿沟成功概率</div><div class="k-val" id="kOk" style="color:#10b981;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>const SEG=[
+      {n:'创新者 (2.5%)', c:'#8b5cf6'},
+      {n:'早期采用者 (13.5%)', c:'#2563eb'},
+      {n:'早期大众 (34%)', c:'#10b981'},
+      {n:'晚期大众 (34%)', c:'#f59e0b'},
+      {n:'落后者 (16%)', c:'#94a3b8'}
+    ];
+    function draw(mark){
+      const idx=+document.getElementById('st').value, mat=+document.getElementById('mat').value;
+      const s=SEG[idx];
+      document.getElementById('vS').textContent=s.n;
+      document.getElementById('vMat').textContent=mat+'%';
+      const bars=[2.5,13.5,34,34,16];
+      document.getElementById('svg').innerHTML=bars.map((v,i)=>{
+        const x=65+i*102+(i>=2?18:0), h=v*3.6, act=i===idx;
+        return `<rect x="${x}" y="${(165-h).toFixed(1)}" width="66" height="${h.toFixed(1)}" rx="6" fill="${SEG[i].c}" opacity="${act?0.95:0.35}"/>
+        <text x="${x+33}" y="${(158-h).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="800" fill="${SEG[i].c}">${v}%</text>`;
+      }).join('')+`<line x1="252" y1="20" x2="252" y2="170" stroke="#ef4444" stroke-dasharray="4,4" stroke-width="2.5"/>`;
+      document.getElementById('kWho').textContent=s.n;
+      document.getElementById('kOk').textContent=(mat>=70?'82% (可跨过)':'18% (易坠沟)');
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>早期采用者容忍 45% 成熟度的半成品，但想拿下 34% 的实用大众，必须把稳定交付成熟度拉到 70% 以上！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

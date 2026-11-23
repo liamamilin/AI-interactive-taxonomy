@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📉 同期群留存曲线透视镜：生死线在哪里？（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📉 同期群留存曲线透视镜：生死线在哪里？（SVG）</h1><p>误区：看总用户数上涨就觉得产品很健康。真相：只有把同一批新用户单独拎出来画留存曲线，最终能“走平在零线之上”的产品才算活下来！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn active" onclick="setCfg(25,40,this)">健康 PMF 产品</button>
+      <button class="btn" onclick="setCfg(0,55,this)">漏水伪需求产品</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>长期核心留存底线 (%)</span><span id="vFl">25%</span></label><input id="fl" type="range" min="0" max="45" step="5" value="25" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>前期不匹配用户流失速度</span><span id="vDec">40%</span></label><input id="dec" type="range" min="20" max="80" step="10" value="40" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">次日留存</div><div class="k-val" id="kD1">—</div></div>
+      <div class="kpi"><div class="k-lbl">第 90 天留存稳态</div><div class="k-val" id="kD90">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function setCfg(f,d,btn){
+      document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      document.getElementById('fl').value=f;
+      document.getElementById('dec').value=d;
+      draw(true);
+    }
+    function draw(mark){
+      const fl=+document.getElementById('fl').value, dec=+document.getElementById('dec').value/100;
+      document.getElementById('vFl').textContent=fl+'%';
+      document.getElementById('vDec').textContent=(dec*100).toFixed(0)+'%';
+      const arr=[100];
+      for(let i=1;i<=7;i++) arr.push(Math.round(fl + (100-fl)*Math.exp(-i*dec*1.2)));
+      const x=i=>55+i*70, y=v=>165-(v/105)*135;
+      const p=arr.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v).toFixed(1)}`).join(' ');
+      const col=fl>=15?'#10b981':'#ef4444';
+      document.getElementById('svg').innerHTML=`
+        <path d="${p}" fill="none" stroke="${col}" stroke-width="3.5"/>
+        ${arr.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v).toFixed(1)}" r="4.5" fill="${col}"/><text x="${x(i)}" y="${(y(v)-9).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="750" fill="var(--tax-text)">${v}%</text>`).join('')}
+      `;
+      document.getElementById('kD1').textContent=arr[1]+'%';
+      document.getElementById('kD90').textContent=arr[7]+'%';
+      document.getElementById('kD90').style.color=col;
+      document.getElementById('ahaBox').innerHTML=fl>=15
+        ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>留存曲线最终稳稳走平在 <strong>${arr[7]}%</strong>！说明留下来的老用户已经真正离不开你的产品！`
+        : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>长期留存底线接近 0% 时，曲线一路掉进地板——再大的前期买量也救不活一个没留存的产品！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🗺️ 局部网络 vs 全局网络：为什么外卖和打车容易打持久战？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🗺️ 局部网络 vs 全局网络：为什么外卖和打车容易打持久战？</h1><p>误区：只要拿到全国第一，就能像微信一样高枕无忧。真相：网络覆盖范围越局部、用户“多归属双开”越容易，平台壁垒就越脆弱！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>用户多归属比例（同时装几个App）</span><span id="vM">70%</span></label><input id="mh" type="range" min="0" max="100" step="10" value="70" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>网络跨城全局连接度</span><span id="vG">20%</span></label><input id="gl" type="range" min="10" max="100" step="10" value="20" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">护城河坚固指数</div><div class="k-val" id="kDef">—</div></div>
+      <div class="kpi"><div class="k-lbl">被补贴战偷袭风险</div><div class="k-val" id="kRisk">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const mh=+document.getElementById('mh').value, gl=+document.getElementById('gl').value;
+      document.getElementById('vM').textContent=mh+'%';
+      document.getElementById('vG').textContent=gl+'%';
+      const def=Math.max(10, Math.round(gl*0.6 + (100-mh)*0.4));
+      const col=def>=70?'#10b981':def>=45?'#f59e0b':'#ef4444';
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">护城河坚固度</text>
+        <rect x="140" y="36" width="${(def*3.8).toFixed(1)}" height="28" rx="6" fill="${col}"/>
+        <text x="${(148+def*3.8).toFixed(1)}" y="55" font-size="12" font-weight="800" fill="${col}">${def} / 100</text>
+        <text x="20" y="115" font-size="12" fill="var(--tax-muted)">多归属越高（哪家便宜用哪家）+ 仅局部城市连接 → 护城河越薄！</text>
+      `;
+      document.getElementById('kDef').textContent=def+' / 100';
+      document.getElementById('kRisk').textContent=def<50?'极高（补贴战常发区）':'极低';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>全局连接度 ${gl}%、多归属 ${mh}% 时护城河仅 <strong>${def} 分</strong>——只有降低多归属（如专属会员体系），才能锁住用户！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎯 中位选民与产品趋同演进</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎯 中位选民与产品趋同演进</h1><p>误区：两款竞品本来定位不同，应该各自服务小众人群。真相：为了抢夺中间庞大的大众市场，两款产品会自发越改越像！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+       <div class="ctrl-box"><label><span>产品 A 定位（0极简 ~ 100全能）</span><span id="vA">20</span></label><input id="a" type="range" min="5" max="95" step="5" value="20" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>产品 B 定位（0极简 ~ 100全能）</span><span id="vB">80</span></label><input id="b" type="range" min="5" max="95" step="5" value="80" oninput="draw(true)"></div>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">产品 A 捕获用户</div><div class="k-val" id="kA" style="color:#2563eb;">—</div></div>
+       <div class="kpi"><div class="k-lbl">产品 B 捕获用户</div><div class="k-val" id="kB" style="color:#10b981;">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+       const a=+document.getElementById('a').value, b=+document.getElementById('b').value;
+       document.getElementById('vA').textContent=a;
+       document.getElementById('vB').textContent=b;
+       let sA=0, sB=0, bars='';
+       for(let x0=10;x0<=90;x0+=10){
+         const w=Math.exp(-Math.pow((x0-50)/22,2))*100;
+         const toA=Math.abs(x0-a)<=Math.abs(x0-b);
+         if(toA) sA+=w; else sB+=w;
+         const xx=60+(x0-10)*6, h=w*1.2;
+         bars+=`<rect x="${xx}" y="${(160-h).toFixed(1)}" width="36" height="${h.toFixed(1)}" rx="4" fill="${toA?'#2563eb':'#10b981'}" opacity="0.75"/>`;
+       }
+       document.getElementById('svg').innerHTML=bars+`<circle cx="${60+(a-10)*6+18}" cy="168" r="6" fill="#2563eb"/><circle cx="${60+(b-10)*6+18}" cy="168" r="6" fill="#10b981"/>`;
+       const tot=sA+sB;
+       document.getElementById('kA').textContent=(sA/tot*100).toFixed(0)+'%';
+       document.getElementById('kB').textContent=(sB/tot*100).toFixed(0)+'%';
+       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>因为大众偏好呈中间高、两头低的钟形分布，谁往中间靠谁就吃下最多用户——最终所有主流产品都长得越来越像！`;
+       if(mark && window.ToySDK) window.ToySDK.markCompleted();
+     }
+     draw(false);</script>
+</body>
+</html>

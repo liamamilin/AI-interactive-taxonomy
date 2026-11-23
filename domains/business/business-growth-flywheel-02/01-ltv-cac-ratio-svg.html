@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📏 LTV/CAC 单位经济健康仪（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📏 LTV/CAC 单位经济健康仪（SVG）</h1><p>误区：只要用户数在涨，亏点广告费买流量迟早能赚回来。真相：如果获取一个用户的成本 CAC 大于他一辈子贡献的毛利 LTV，卖一单亏一单，越做死得越快！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+       <div class="ctrl-box"><label><span>获客成本 CAC</span><span id="vC">300 元</span></label><input id="cac" type="range" min="50" max="800" step="50" value="300" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>用户月贡献毛利</span><span id="vM">60 元</span></label><input id="mar" type="range" min="20" max="150" step="10" value="60" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>月流失率 Churn</span><span id="vCh">5%</span></label><input id="ch" type="range" min="2" max="25" step="1" value="5" oninput="draw(true)"></div>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">用户生命周期 LTV</div><div class="k-val" id="kLtv" style="color:#10b981;">—</div></div>
+       <div class="kpi"><div class="k-lbl">LTV / CAC 健康比</div><div class="k-val" id="kRatio">—</div></div>
+       <div class="kpi"><div class="k-lbl">获客回本周期</div><div class="k-val" id="kPay">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+       const cac=+document.getElementById('cac').value;
+       const mar=+document.getElementById('mar').value;
+       const ch=+document.getElementById('ch').value/100;
+       document.getElementById('vC').textContent=cac+' 元';
+       document.getElementById('vM').textContent=mar+' 元';
+       document.getElementById('vCh').textContent=(ch*100).toFixed(0)+'%';
+       const ltv=mar/ch, ratio=ltv/cac, pay=cac/mar;
+       const col=ratio>=3?'#10b981':ratio>=1?'#f59e0b':'#ef4444';
+       const maxV=Math.max(1500, cac, ltv);
+       document.getElementById('svg').innerHTML=`
+         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">获客成本 CAC</text>
+         <rect x="140" y="36" width="${(cac/maxV*360).toFixed(1)}" height="26" rx="5" fill="#ef4444"/>
+         <text x="${(148+cac/maxV*360).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#ef4444">¥${cac}</text>
+         <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">生命周期毛利 LTV</text>
+         <rect x="140" y="96" width="${(ltv/maxV*360).toFixed(1)}" height="26" rx="5" fill="${col}"/>
+         <text x="${(148+ltv/maxV*360).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${col}">¥${ltv.toFixed(0)} (${ratio.toFixed(1)}x)</text>
+       `;
+       document.getElementById('kLtv').textContent='¥'+ltv.toFixed(0);
+       document.getElementById('kRatio').textContent=ratio.toFixed(1)+' : 1';
+       document.getElementById('kRatio').style.color=col;
+       document.getElementById('kPay').textContent=pay.toFixed(1)+' 个月';
+       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>SaaS 与订阅生意的黄金标准是 <strong>LTV / CAC ≥ 3</strong> 且回本周期 < 12 个月！当前比值为 <strong>${ratio.toFixed(1)}</strong>，${ratio<1?'属于越卖越亏的危险模型！':ratio<3?'勉强保本但抗风险弱':'具备健康扩张资格！'}`;
+       if(mark && window.ToySDK) window.ToySDK.markCompleted();
+     }
+     draw(false);</script>
+</body>
+</html>

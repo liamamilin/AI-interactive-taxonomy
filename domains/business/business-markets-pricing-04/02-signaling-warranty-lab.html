@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🛡️ 信号传递破解台：7天无理由与官方延保如何救市？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🛡️ 信号传递破解台：7天无理由与官方延保如何救市？</h1><p>误区：好商家只要在广告里喊“我卖的是好车”就能挽回信任。真相：烂车商家也会喊同样的口号，唯有“坏了全额赔+高质保”这种烂货赔不起的硬信号才有效！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>质保赔付年限</span><span id="vY">2 年</span></label><input id="yrs" type="range" min="0" max="5" step="1" value="2" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>事故烂车年内故障概率</span><span id="vF">60%</span></label><input id="fail" type="range" min="20" max="90" step="10" value="60" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">好车商质保成本</div><div class="k-val" id="kGood" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">烂车商冒充赔付净利</div><div class="k-val" id="kBad">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const yrs=+document.getElementById('yrs').value, fail=+document.getElementById('fail').value/100;
+      document.getElementById('vY').textContent=yrs+' 年';
+      document.getElementById('vF').textContent=(fail*100).toFixed(0)+'%';
+      const gCost=yrs*0.15, bNet=2.5 - yrs*fail*3.5;
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">好车质保成本</text>
+        <rect x="150" y="36" width="${(gCost*60).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
+        <text x="${(158+gCost*60).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#10b981">仅 ${gCost.toFixed(1)} 万</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">烂车冒充净利</text>
+        <rect x="150" y="96" width="${Math.max(12, Math.abs(bNet)*45).toFixed(1)}" height="26" rx="5" fill="${bNet<0?'#94a3b8':'#ef4444'}"/>
+        <text x="${(158+Math.max(12, Math.abs(bNet)*45)).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${bNet<0?'#10b981':'#ef4444'}">${bNet>=0?'+'+bNet.toFixed(1)+'万(仍敢骗)':bNet.toFixed(1)+'万(必亏，不敢骗！)'}</text>
+      `;
+      document.getElementById('kGood').textContent=gCost.toFixed(2)+' 万';
+      document.getElementById('kBad').textContent=(bNet>=0?'+':'')+bNet.toFixed(1)+' 万';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当提供 <strong>${yrs} 年质保</strong> 时，烂车商冒充好车的期望利润跌到 <strong>${bNet.toFixed(1)} 万</strong>！好信号必须是“坏人学不起的高成本承诺”。`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

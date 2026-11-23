@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎯 不同商业模式的北极星指标配对台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎯 不同商业模式的北极星指标配对台</h1><p>误区：所有互联网公司的北极星指标都应该统一用 DAU（日活跃用户数）。真相：不同生意的价值瞬间完全不同——Airbnb 是“成功预订夜数”，Slack 是“发满 2000 条消息的团队数”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+       <button class="btn active" onclick="pick(0,this)">🏠 Airbnb（住宿交易平台）</button>
+       <button class="btn" onclick="pick(1,this)">🎵 Spotify（音乐流媒体）</button>
+       <button class="btn" onclick="pick(2,this)">💬 Slack（团队协同）</button>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">真正的北极星指标</div><div class="k-val" id="kNs" style="color:#10b981;">—</div></div>
+       <div class="kpi"><div class="k-lbl">应警惕的误导虚荣指标</div><div class="k-val" id="kBad" style="color:#ef4444;">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>const NS=[
+       {ns:'成功预订入住的总夜数', bad:'App 安装量 / 房源浏览量', why:'只有房客住进去、房东收到钱，双边价值才算真正发生！'},
+       {ns:'订阅用户每周听歌总时长', bad:'注册账号总数', why:'听歌时长越长，说明歌单推荐越准，下个月续费概率越高！'},
+       {ns:'发送超过 2000 条消息的活跃团队数', bad:'单人下载登录次数', why:'Slack 内部数据证明：团队跨过 2000 条消息后留存率高达 93%！'}
+     ];
+     function pick(i,btn){
+       document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));
+       if(btn) btn.classList.add('active');
+       const d=NS[i];
+       document.getElementById('svg').innerHTML=`
+         <rect x="60" y="42" width="480" height="74" rx="12" fill="#10b981" opacity="0.15" stroke="#10b981" stroke-width="2"/>
+         <text x="300" y="72" text-anchor="middle" font-size="14" font-weight="800" fill="#10b981">🧭 北极星：${d.ns}</text>
+         <text x="300" y="98" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">底层原因：${d.why}</text>
+       `;
+       document.getElementById('kNs').textContent=d.ns;
+       document.getElementById('kBad').textContent=d.bad;
+       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>北极星指标 = <strong>“用户真正感受到产品核心价值的那一瞬间”</strong>，同时又能直接撬动公司长期营收！`;
+       if(window.ToySDK) window.ToySDK.markCompleted();
+     }
+     pick(0,document.querySelector('.btn.active'));</script>
+</body>
+</html>

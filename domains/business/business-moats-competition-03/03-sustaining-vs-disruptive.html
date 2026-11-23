@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚡ 延续性创新 vs 颠覆性创新识别台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚡ 延续性创新 vs 颠覆性创新识别台</h1><p>误区：只要是新技术就是颠覆式创新。真相：让原有好客户更满意的是延续性创新；只有大幅降价并把“原本用不起的新人”拉进来的才叫颠覆式创新！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>价格降低幅度 (%)</span><span id="vCut">-60%</span></label><input id="cut" type="range" min="0" max="80" step="10" value="60" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>新入门用户市场放大倍数</span><span id="vMul">5x</span></label><input id="mul" type="range" min="1" max="10" step="1" value="5" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">创新类型判定</div><div class="k-val" id="kType">—</div></div>
+      <div class="kpi"><div class="k-lbl">突破巨头概率</div><div class="k-val" id="kProb" style="color:#10b981;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const cut=+document.getElementById('cut').value, mul=+document.getElementById('mul').value;
+      document.getElementById('vCut').textContent='-'+cut+'%';
+      document.getElementById('vMul').textContent=mul+'x';
+      const dis=cut>=40 && mul>=3;
+      const prob=dis?Math.min(88, 30+cut*0.5+mul*2):15;
+      document.getElementById('svg').innerHTML=`
+        <rect x="60" y="45" width="480" height="72" rx="12" fill="${dis?'#10b981':'#2563eb'}" opacity="0.16" stroke="${dis?'#10b981':'#2563eb'}" stroke-width="2"/>
+        <text x="300" y="76" text-anchor="middle" font-size="14" font-weight="800" fill="${dis?'#10b981':'#2563eb'}">${dis?'🔥 颠覆性创新（降价 -'+cut+'%，开辟 '+mul+' 倍新人群）':'🛠️ 延续性创新（在巨头主战场正面硬刚）'}</text>
+        <text x="300" y="100" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">突破巨头封锁成功概率：${prob.toFixed(0)}%</text>
+      `;
+      document.getElementById('kType').textContent=dis?'颠覆性创新':'延续性创新';
+      document.getElementById('kProb').textContent=prob.toFixed(0)+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>创业公司千万别做“贵 20% 但好一点”的延续性创新去正面撞巨头，要通过大幅降门槛开启 ${mul} 倍非消费新人群！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

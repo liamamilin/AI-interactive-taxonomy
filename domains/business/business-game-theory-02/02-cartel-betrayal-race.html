@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🛢️ 价格联盟为何必崩？欧佩克减产背叛赛</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🛢️ 价格联盟为何必崩？欧佩克减产背叛赛</h1><p>误区：同行坐下来签个限产保价协议，就能永久垄断高利润。真相：成员越多、秘密折扣越狠，卡特尔联盟从内部瓦解得越快！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="btn-row">
+      <button class="btn primary" onclick="step(true)">▶️ 推进下一轮（看谁先偷卖）</button>
+      <button class="btn" onclick="resetSim()">重置联盟协议</button>
+    </div>
+    <div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>联盟成员数量 N</span><span id="vN">6 家</span></label><input id="n" type="range" min="2" max="15" step="1" value="6" oninput="resetSim(true)"></div>
+      <div class="ctrl-box"><label><span>单轮秘密降价幅度</span><span id="vD">20%</span></label><input id="disc" type="range" min="5" max="35" step="5" value="20" oninput="resetSim(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">当前市场均价</div><div class="k-val" id="kP" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">联盟利润留存率</div><div class="k-val" id="kTot" style="color:#ef4444;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>let prices=[100];
+    function resetSim(mark){ prices=[100]; render(mark); }
+    function step(mark){
+      if(prices.length>=6) return;
+      const n=+document.getElementById('n').value, d=+document.getElementById('disc').value/100;
+      const decay=1 - d*(0.6 + n*0.04);
+      prices.push(Math.max(22, prices[prices.length-1]*decay));
+      render(mark);
+    }
+    function render(mark){
+      const n=+document.getElementById('n').value, d=+document.getElementById('disc').value;
+      document.getElementById('vN').textContent=n+' 家';
+      document.getElementById('vD').textContent=d+'%';
+      const cur=prices[prices.length-1];
+      const x=i=>65+i*90, y=v=>165-(v/110)*135;
+      const p=prices.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v).toFixed(1)}`).join(' ');
+      document.getElementById('svg').innerHTML=`
+        <path d="${p}" fill="none" stroke="#ef4444" stroke-width="3.5"/>
+        ${prices.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v).toFixed(1)}" r="5" fill="#ef4444"/><text x="${x(i)}" y="${(y(v)-9).toFixed(1)}" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-text)">¥${v.toFixed(0)}</text>`).join('')}
+      `;
+      document.getElementById('kP').textContent='¥'+cur.toFixed(0);
+      document.getElementById('kTot').textContent=Math.max(0,((cur-20)/80*100)).toFixed(0)+'%';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>联盟成员多达 <strong>${n} 家</strong> 时，互相监督极难！只要有人偷打 ${d}% 暗折多出货，价格联盟立刻开启踩踏崩盘！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render(false);</script>
+</body>
+</html>

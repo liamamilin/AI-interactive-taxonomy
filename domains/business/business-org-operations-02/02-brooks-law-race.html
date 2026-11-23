@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐢 人月神话沙盘：项目延期时再加人手会更快吗？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🐢 人月神话沙盘：项目延期时再加人手会更快吗？</h1><p>误区：5 个人还需要 2 个月，现在马上调 5 个新人进来，1 个月就能搞定。真相：新人培训损耗加上沟通翻倍，项目反而会比原来更晚交付！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>临时空降塞入的新人数</span><span id="vAdd">3 人</span></label><input id="add" type="range" min="0" max="10" step="1" value="3" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>每位新人拖慢老员工带教比例</span><span id="vDrag">15%</span></label><input id="drag" type="range" min="5" max="25" step="5" value="15" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">老团队原定交付</div><div class="k-val">60 天</div></div>
+      <div class="kpi"><div class="k-lbl">加人后预计真实交付</div><div class="k-val" id="kDays" style="color:#ef4444;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const add=+document.getElementById('add').value, drag=+document.getElementById('drag').value;
+      document.getElementById('vAdd').textContent=add+' 人';
+      document.getElementById('vDrag').textContent=drag+'%';
+      const days = add===0 ? 60 : Math.round(60 + add*(drag*0.35) + (add*add)*0.35);
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">原团队不加人</text>
+        <rect x="140" y="36" width="180" height="26" rx="5" fill="#10b981"/>
+        <text x="328" y="54" font-size="12" font-weight="800" fill="#10b981">60 天交付</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">加 ${add} 个新人后</text>
+        <rect x="140" y="96" width="${Math.min(380, days*2.5).toFixed(1)}" height="26" rx="5" fill="${days>60?'#ef4444':'#10b981'}"/>
+        <text x="${(148+Math.min(380, days*2.5)).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${days>60?'#ef4444':'#10b981'}">${days} 天 (+${days-60}天)</text>
+      `;
+      document.getElementById('kDays').textContent=days+' 天';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>布鲁克斯法则：向已延期的项目硬塞 ${add} 个新人，反而多拖延了 <strong>${days-60} 天</strong>！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

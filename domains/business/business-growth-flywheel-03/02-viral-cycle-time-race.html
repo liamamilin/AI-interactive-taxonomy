@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⏱️ 传播周期竞速：K=1.2 但周期 1 天 vs 30 天的差距</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⏱️ 传播周期竞速：K=1.2 但周期 1 天 vs 30 天的差距</h1><p>误区：只要把 K 值做大于 1 就足够了，快慢无所谓。真相：周期越短，30 天内的指数幂次越大，用户量差出几十倍！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>单轮病毒传播周期 (天)</span><span id="vT">3 天</span></label><input id="ct" type="range" min="2" max="15" step="1" value="3" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>单轮病毒系数 K</span><span id="vK">1.25</span></label><input id="k" type="range" min="0.8" max="1.6" step="0.05" value="1.25" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">30 天内裂变轮次</div><div class="k-val" id="kRds" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">1000 种子 30 天裂变规模</div><div class="k-val" id="kEnd" style="color:#10b981;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const ct=+document.getElementById('ct').value, K=+document.getElementById('k').value;
+      document.getElementById('vT').textContent=ct+' 天';
+      document.getElementById('vK').textContent=K.toFixed(2);
+      const rds=Math.floor(30/ct);
+      let tot=1000, cur=1000;
+      for(let i=0;i<rds;i++){ cur*=K; tot+=cur; }
+      const slow=1000+1000*K+1000*K*K;
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">当前周期 (${ct}天/轮)</text>
+        <rect x="160" y="36" width="${Math.min(360, (Math.log10(tot)/6)*360).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
+        <text x="${(168+Math.min(360, (Math.log10(tot)/6)*360)).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#10b981">${Math.round(tot).toLocaleString()} 人</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">慢周期 (15天/轮)</text>
+        <rect x="160" y="96" width="${(Math.log10(slow)/6*360).toFixed(1)}" height="26" rx="5" fill="#94a3b8"/>
+        <text x="${(168+Math.log10(slow)/6*360).toFixed(1)}" y="114" font-size="12" font-weight="750" fill="var(--tax-muted)">${Math.round(slow).toLocaleString()} 人</text>
+      `;
+      document.getElementById('kRds').textContent=rds+' 轮';
+      document.getElementById('kEnd').textContent=Math.round(tot).toLocaleString()+' 人';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>K=${K.toFixed(2)} 且周期仅 ${ct} 天时，30 天滚完 ${rds} 轮达到 <strong>${Math.round(tot).toLocaleString()} 人</strong>！缩短分享链路的每一秒都是复利！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

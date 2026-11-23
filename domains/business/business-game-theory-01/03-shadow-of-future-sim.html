@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔮 未来折现因子沙盘：为什么一锤子买卖最容易坑人？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔮 未来折现因子沙盘：为什么一锤子买卖最容易坑人？</h1><p>误区：人性本善或本恶决定了商业信誉。真相：决定诚信的是“未来还会再见面的概率 δ”与“单次背叛暴利”的权衡！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>未来继续合作的概率 δ</span><span id="vD">70%</span></label><input id="delta" type="range" min="10" max="95" step="5" value="70" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>单次背叛捞一票的暴利</span><span id="vT">5 分</span></label><input id="tempt" type="range" min="4" max="12" step="1" value="5" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">长期合作总现值</div><div class="k-val" id="kCoop" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">捞一票背叛后总现值</div><div class="k-val" id="kBet" style="color:#ef4444;">—</div></div>
+      <div class="kpi"><div class="k-lbl">市场信任状态</div><div class="k-val" id="kSt">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const d=+document.getElementById('delta').value/100;
+      const T=+document.getElementById('tempt').value;
+      document.getElementById('vD').textContent=(d*100).toFixed(0)+'%';
+      document.getElementById('vT').textContent=T+' 分';
+      const coop=3/(1-d), betray=T+d*(1/(1-d));
+      const maxV=Math.max(65,coop,betray);
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">长期诚信合作现值</text>
+        <rect x="175" y="36" width="${(coop/maxV*350).toFixed(1)}" height="28" rx="6" fill="#10b981"/>
+        <text x="${(183+coop/maxV*350).toFixed(1)}" y="55" font-size="12" font-weight="800" fill="#10b981">${coop.toFixed(1)}</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">背叛捞一票现值</text>
+        <rect x="175" y="96" width="${(betray/maxV*350).toFixed(1)}" height="28" rx="6" fill="#ef4444"/>
+        <text x="${(183+betray/maxV*350).toFixed(1)}" y="115" font-size="12" font-weight="800" fill="#ef4444">${betray.toFixed(1)}</text>
+      `;
+      const ok=coop>=betray;
+      document.getElementById('kCoop').textContent=coop.toFixed(1)+' 分';
+      document.getElementById('kBet').textContent=betray.toFixed(1)+' 分';
+      document.getElementById('kSt').textContent=ok?'🤝 诚信自然涌现':'⚠️ 宰客背叛划算';
+      document.getElementById('kSt').style.color=ok?'#10b981':'#ef4444';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当背叛暴利高达 <strong>${T} 分</strong> 时，只有回头客概率 δ 足够大（当前 ${(d*100).toFixed(0)}%），长期合作的现值才能压倒一次性宰客诱惑！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚧 流水线瓶颈木桶器：优化非瓶颈全是浪费（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚧 流水线瓶颈木桶器：优化非瓶颈全是浪费（SVG）</h1><p>误区：每个部门效率提升 20%，公司总产能就会提升 20%。真相：一条流水线的总吞吐量只由最窄的那根“瓶颈管”决定，其余环节跑得越快只会堆出越多半成品！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+       <div class="ctrl-box"><label><span>需求设计产能 (个/周)</span><span id="v1">20</span></label><input id="s1" type="range" min="5" max="30" step="1" value="20" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>编码开发产能 (个/周)</span><span id="v2">18</span></label><input id="s2" type="range" min="5" max="30" step="1" value="18" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>测试验收产能 (个/周)</span><span id="v3">6</span></label><input id="s3" type="range" min="3" max="30" step="1" value="6" oninput="draw(true)"></div>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">整条流水线真正总交付</div><div class="k-val" id="kOut" style="color:#2563eb;">—</div></div>
+       <div class="kpi"><div class="k-lbl">当前系统唯一瓶颈</div><div class="k-val" id="kBot" style="color:#ef4444;">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+       const a=+document.getElementById('s1').value, b=+document.getElementById('s2').value, c=+document.getElementById('s3').value;
+       document.getElementById('v1').textContent=a; document.getElementById('v2').textContent=b; document.getElementById('v3').textContent=c;
+       const out=Math.min(a,b,c);
+       const names=['需求设计','编码开发','测试验收'], vals=[a,b,c];
+       const minIdx=vals.indexOf(out);
+       document.getElementById('svg').innerHTML=vals.map((v,i)=>{
+         const x=55+i*175, h=v*4.2, isBot=i===minIdx;
+         return `<rect x="${x}" y="${(155-h).toFixed(1)}" width="90" height="${h.toFixed(1)}" rx="6" fill="${isBot?'#ef4444':'#2563eb'}" opacity="${isBot?0.9:0.55}"/>
+         <text x="${x+45}" y="${(147-h).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="800" fill="${isBot?'#ef4444':'#2563eb'}">${v}</text>
+         <text x="${x+45}" y="170" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-text)">${names[i]}</text>`;
+       }).join('')+`<line x1="40" y1="${(155-out*4.2).toFixed(1)}" x2="560" y2="${(155-out*4.2).toFixed(1)}" stroke="#ef4444" stroke-dasharray="5,4" stroke-width="2"/>`;
+       document.getElementById('kOut').textContent=out+' 个/周';
+       document.getElementById('kBot').textContent=names[minIdx];
+       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>高德拉特铁律：<strong>在非瓶颈环节节省的每一小时都是幻觉！</strong>当前瓶颈卡在 <strong>${names[minIdx]} (${out})</strong>，哪怕把另外两环提到 30，每周依然只能交付 ${out} 个！`;
+       if(mark && window.ToySDK) window.ToySDK.markCompleted();
+     }
+     draw(false);</script>
+</body>
+</html>

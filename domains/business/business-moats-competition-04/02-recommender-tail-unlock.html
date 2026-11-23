@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🤖 推荐算法解锁长尾实验室：没有推荐，长尾只是僵尸库存</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🤖 推荐算法解锁长尾实验室：没有推荐，长尾只是僵尸库存</h1><p>误区：只要把 100 万件冷门商品全传上网站，长尾市场就自动赚钱了。真相：必须靠搜索与推荐算法不断提升匹配精度，才能把沉睡的长尾变现！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>推荐算法精准度</span><span id="vAcc">80%</span></label><input id="acc" type="range" min="10" max="95" step="5" value="80" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>平台长尾商品/内容丰富度</span><span id="vCat">70%</span></label><input id="cat" type="range" min="20" max="100" step="10" value="70" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">长尾内容有效点击率</div><div class="k-val" id="kClick" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">用户留存满意度</div><div class="k-val" id="kSat" style="color:#2563eb;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const acc=+document.getElementById('acc').value, cat=+document.getElementById('cat').value;
+      document.getElementById('vAcc').textContent=acc+'%';
+      document.getElementById('vCat').textContent=cat+'%';
+      const click=Math.round((acc/100)*(cat/100)*65);
+      const sat=Math.round(35 + acc*0.5 + cat*0.1);
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">长尾分发占比</text>
+        <rect x="140" y="36" width="${(click*5.5).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
+        <text x="${(148+click*5.5).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#10b981">${click}% 流量精准流向长尾</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">用户留存满意度</text>
+        <rect x="140" y="96" width="${(sat*3.6).toFixed(1)}" height="26" rx="5" fill="#2563eb"/>
+        <text x="${(148+sat*3.6).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="#2563eb">${sat}/100</text>
+      `;
+      document.getElementById('kClick').textContent=click+'%';
+      document.getElementById('kSat').textContent=sat+'/100';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>长尾丰富度 ${cat}% 时，如果算法精准度只有 10%，长尾全是死库存；只有算法精准度提到 ${acc}%，冷门神作才能精准找到知音！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

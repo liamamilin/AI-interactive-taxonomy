@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍦 海滩冰棍摊博弈沙盘（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🍦 海滩冰棍摊博弈沙盘（SVG）</h1><p>误区：两家竞争对手应该各自占领海滩 25% 和 75% 处，让游客走最少路。真相：只要一方往中间挪，就能抢走对方客源，最后双方必然肩并肩挤在 50%！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+       <div class="ctrl-box"><label><span>摊位 A 位置 (米)</span><span id="vA">250 m</span></label><input id="a" type="range" min="50" max="950" step="25" value="250" oninput="draw(true)"></div>
+       <div class="ctrl-box"><label><span>摊位 B 位置 (米)</span><span id="vB">750 m</span></label><input id="b" type="range" min="50" max="950" step="25" value="750" oninput="draw(true)"></div>
+     </div>
+     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+     <div class="kpi-row">
+       <div class="kpi"><div class="k-lbl">摊位 A 客源份额</div><div class="k-val" id="kA" style="color:#2563eb;">—</div></div>
+       <div class="kpi"><div class="k-lbl">摊位 B 客源份额</div><div class="k-val" id="kB" style="color:#ef4444;">—</div></div>
+       <div class="kpi"><div class="k-lbl">游客平均步行距离</div><div class="k-val" id="kWalk">—</div></div>
+     </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+       const a=+document.getElementById('a').value;
+       const b=+document.getElementById('b').value;
+       document.getElementById('vA').textContent=a+' m';
+       document.getElementById('vB').textContent=b+' m';
+       const mid=(a+b)/2;
+       const shareA = a===b ? 50 : a<b ? mid/10 : (1000-mid)/10;
+       const shareB = 100-shareA;
+       const xa=50+(a/1000)*500, xb=50+(b/1000)*500, xm=50+(mid/1000)*500;
+       document.getElementById('svg').innerHTML=`
+         <rect x="50" y="70" width="500" height="22" rx="6" fill="var(--tax-border)" opacity="0.4"/>
+         <line x1="${xm}" y1="45" x2="${xm}" y2="115" stroke="var(--tax-muted)" stroke-dasharray="4,4"/>
+         <circle cx="${xa}" cy="81" r="14" fill="#2563eb"/><text x="${xa}" y="85" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">A</text>
+         <circle cx="${xb}" cy="81" r="14" fill="#ef4444"/><text x="${xb}" y="85" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">B</text>
+         <text x="300" y="145" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">0m 海滩西端 ←————— 分界点 ${mid.toFixed(0)}m —————→ 1000m 海滩东端</text>
+       `;
+       const walk = Math.abs(a-b)<100 ? 250 : 125;
+       document.getElementById('kA').textContent=shareA.toFixed(1)+'%';
+       document.getElementById('kB').textContent=shareB.toFixed(1)+'%';
+       document.getElementById('kWalk').textContent='约 '+walk+' 米';
+       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>试着把 A 往中间拉到 480m！你会发现 A 立刻抢到接近 50%+ 的客流，逼得 B 也必须紧贴过来——这就是麦当劳和肯德基永远门对门的数学原因！`;
+       if(mark && window.ToySDK) window.ToySDK.markCompleted();
+     }
+     draw(false);</script>
+</body>
+</html>

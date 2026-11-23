@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📏 样本量门槛计算器：为什么 200 个用户测不出 1% 提升？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📏 样本量门槛计算器：为什么 200 个用户测不出 1% 提升？</h1><p>误区：随便找几百个用户分组测两天就能看出按钮颜色对转化率的影响。真相：想检测微小变化，所需样本量按平方反比暴增！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>想测出的转化率绝对提升 (MDE)</span><span id="vM">2.0%</span></label><input id="mde" type="range" min="0.5" max="10" step="0.5" value="2" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>产品日均活跃流量 (DAU)</span><span id="vDau">2,000 人</span></label><input id="dau" type="range" min="500" max="20000" step="500" value="2000" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">每组所需最低样本量</div><div class="k-val" id="kN" style="color:#2563eb;">—</div></div>
+      <div class="kpi"><div class="k-lbl">需要连续跑多少天</div><div class="k-val" id="kDays" style="color:#f59e0b;">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const mde=+document.getElementById('mde').value/100, dau=+document.getElementById('dau').value;
+      document.getElementById('vM').textContent=(mde*100).toFixed(1)+'%';
+      document.getElementById('vDau').textContent=dau.toLocaleString()+' 人';
+      const n=Math.round(16*0.1*0.9/(mde*mde));
+      const days=Math.ceil((n*2)/dau);
+      document.getElementById('svg').innerHTML=`
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">每组所需样本量</text>
+        <rect x="160" y="36" width="${Math.min(360, Math.log10(n)*65).toFixed(1)}" height="28" rx="6" fill="#2563eb"/>
+        <text x="${(168+Math.min(360, Math.log10(n)*65)).toFixed(1)}" y="55" font-size="12.5" font-weight="800" fill="#2563eb">${n.toLocaleString()} 人/组</text>
+        <text x="20" y="115" font-size="12" fill="var(--tax-muted)">在日活 ${dau.toLocaleString()} 人下，A/B 两组需连续跑 ${days} 天才能出统计显著结果！</text>
+      `;
+      document.getElementById('kN').textContent=n.toLocaleString()+' 人';
+      document.getElementById('kDays').textContent=days+' 天';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>日活 ${dau.toLocaleString()} 人想测出 ${(mde*100).toFixed(1)}% 提升需要跑 <strong>${days} 天</strong>！小团队别做微调实验，要做大跨步改版！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📈 性能过剩与低端颠覆轨迹图（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📈 性能过剩与低端颠覆轨迹图（SVG）</h1><p>误区：巨头失败是因为管理层愚蠢或技术落后。真相：巨头拼命服务最高端客户导致“性能过剩”，让简陋便宜的小产品从低端悄悄爬上来一口吃掉主流市场！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel"><div class="ctrl-grid">
+      <div class="ctrl-box"><label><span>时间推进 (第 T 年)</span><span id="vT">第 4 年</span></label><input id="t" type="range" min="1" max="8" step="1" value="4" oninput="draw(true)"></div>
+      <div class="ctrl-box"><label><span>颠覆者每年迭代增速</span><span id="vSp">9.5 分/年</span></label><input id="sp" type="range" min="5" max="14" step="1.5" value="9.5" oninput="draw(true)"></div>
+    </div>
+    <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+    <div class="kpi-row">
+      <div class="kpi"><div class="k-lbl">主流用户够用红线</div><div class="k-val" style="color:#94a3b8;">60 分</div></div>
+      <div class="kpi"><div class="k-lbl">颠覆者当前性能</div><div class="k-val" id="kDis" style="color:#10b981;">—</div></div>
+      <div class="kpi"><div class="k-lbl">市场格局状态</div><div class="k-val" id="kSt">—</div></div>
+    </div></div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>function draw(mark){
+      const T=+document.getElementById('t').value, sp=+document.getElementById('sp').value;
+      document.getElementById('vT').textContent='第 '+T+' 年';
+      document.getElementById('vSp').textContent=sp.toFixed(1)+' 分/年';
+      const gPts=[], dPts=[];
+      for(let i=1;i<=8;i++){
+        const x=55+(i-1)*70, g=55+i*7, d=12+i*sp;
+        gPts.push(`${i===1?'M':'L'}${x},${(175-Math.min(130,g)*1.1).toFixed(1)}`);
+        dPts.push(`${i===1?'M':'L'}${x},${(175-Math.min(130,d)*1.1).toFixed(1)}`);
+      }
+      const curD=12+T*sp, over=curD>=60, cx=55+(T-1)*70;
+      document.getElementById('svg').innerHTML=`
+        <line x1="55" y1="${175-60*1.1}" x2="545" y2="${175-60*1.1}" stroke="#94a3b8" stroke-dasharray="5,4" stroke-width="2"/>
+        <path d="${gPts.join(' ')}" fill="none" stroke="#2563eb" stroke-width="3"/>
+        <path d="${dPts.join(' ')}" fill="none" stroke="#10b981" stroke-width="3.5"/>
+        <circle cx="${cx}" cy="${(175-Math.min(130,curD)*1.1).toFixed(1)}" r="6" fill="#10b981"/>
+      `;
+      document.getElementById('kDis').textContent=curD.toFixed(0)+' 分';
+      document.getElementById('kSt').textContent=over?'💥 颠覆者达标！廉价替代巨头':'低端蛰伏打磨中';
+      document.getElementById('kSt').style.color=over?'#ef4444':'#2563eb';
+      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当颠覆者每年进步 ${sp.toFixed(1)} 分并越过大众 60 分线，便宜一半的它立刻通吃主流市场！`;
+      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    draw(false);</script>
+</body>
+</html>
