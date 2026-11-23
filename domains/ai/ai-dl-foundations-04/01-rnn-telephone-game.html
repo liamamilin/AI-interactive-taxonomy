@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：RNN 传话筒失忆实验</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .sentence-box {
+      background: var(--tax-surface-alt); border: 1px solid var(--tax-border);
+      border-radius: 14px; padding: 16px; font-size: 15px; line-height: 1.8; margin: 14px 0;
+    }
+    .key-tok { background: var(--tax-primary); color: #fff; padding: 2px 8px; border-radius: 7px; font-weight: 800; }
+    .filler-tok { display: inline-block; padding: 1px 6px; margin: 2px; border-radius: 6px; background: var(--tax-surface); border: 1px solid var(--tax-border); font-size: 13px; color: var(--tax-muted); }
+    .pred-tok { padding: 2px 10px; border-radius: 7px; font-weight: 850; }
+    .bars { display: flex; align-items: flex-end; gap: 4px; height: 110px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 12px; padding: 12px 10px 6px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+    .bar-fill { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.2s ease; min-height: 3px; }
+    .meta-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: 750; margin-top: 10px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📢 RNN 传话筒失忆实验：句子一长，为什么忘了开头？</h1>
+        <p>RNN 每次读入新词都要把旧记忆揉进同一个隐藏向量里。拖动中间插入的废话词数，看句首「法国」记忆浓度如何一路跌穿底线！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div>
+        <label style="font-size:14.5px;font-weight:800;">📏 中间插入的无关背景词数：<span id="gapVal" style="color:var(--tax-primary)">2</span> 词</label>
+        <input id="gapSlider" type="range" min="1" max="20" value="2" style="width:100%;margin-top:6px;" />
+      </div>
+
+      <div class="sentence-box" id="sentBox"></div>
+
+      <div style="font-size:12.5px;font-weight:750;color:var(--tax-muted);margin-bottom:6px;">📉 句首主语「法国」在隐藏状态 h(t) 中的残余浓度（每传 1 步衰减 20%）：</div>
+      <div class="bars" id="decayBars"></div>
+      <div class="meta-row">
+        <span>句首「法国」残余记忆：<strong id="memPct" style="color:var(--tax-primary)">64.0%</strong></span>
+        <span id="verdictText"></span>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>把中间废话拖到 <strong>12 词以上</strong>——由于普通 RNN 只有一个小小的隐藏状态接力棒，每读一个新词就会冲淡旧信息（<code>0.80<sup>t</sup></code>），走到句尾时「法国」只剩不到 5%，模型彻底忘了主角是哪国人！
+    </div>
+  </div>
+
+  <script>
+    const FILLERS = [
+      "昨天","在","咖啡馆","点了","一杯","热拿铁","顺便","聊了","天气","足球","电影",
+      "旅行","摄影","周末","计划","猫猫","耳机","键盘","地铁","书店"
+    ];
+    let moved = 0;
+
+    function render() {
+      const gap = parseInt(document.getElementById("gapSlider").value, 10);
+      document.getElementById("gapVal").textContent = gap;
+
+      const decay = 0.80;
+      const remain = Math.pow(decay, gap) * 100;
+      const ok = remain >= 18;
+
+      const fillersHtml = FILLERS.slice(0, gap).map(w => `<span class="filler-tok">${w}</span>`).join("");
+      const predHtml = ok
+        ? `<span class="pred-tok" style="background:var(--tax-green-soft);color:var(--tax-green);">法语 ✅</span>`
+        : `<span class="pred-tok" style="background:var(--tax-red-soft);color:var(--tax-red);">英语 ❌（已失忆，瞎猜高频词）</span>`;
+
+      document.getElementById("sentBox").innerHTML =
+        `我在 <span class="key-tok">法国</span> 长大，${fillersHtml} ……所以我说一口流利的 ${predHtml}。`;
+
+      let bHtml = "";
+      for (let i = 0; i <= gap; i++) {
+        const pct = Math.pow(decay, i) * 100;
+        const col = pct >= 35 ? "var(--tax-primary)" : pct >= 18 ? "var(--tax-amber)" : "var(--tax-red)";
+        bHtml += `<div class="bar-col"><div class="bar-fill" style="height:${pct.toFixed(1)}%;background:${col};"></div></div>`;
+      }
+      document.getElementById("decayBars").innerHTML = bHtml;
+      document.getElementById("memPct").textContent = remain.toFixed(1) + "%";
+      document.getElementById("verdictText").innerHTML = ok
+        ? `<span style="color:var(--tax-green)">记忆清晰，准确预测“法语”</span>`
+        : `<span style="color:var(--tax-red)">信号被稀释殆尽，发生长期依赖失忆！</span>`;
+
+      if (gap >= 12) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（传话筒失忆！）：</strong>仅仅隔了 <strong>${gap}</strong> 个词，「法国」的记忆浓度就暴跌到 <strong>${remain.toFixed(1)}%</strong>！这也是为什么科学家后来发明了带独立“传送带”的 LSTM，并最终走向全局直连的 Transformer。`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+
+    document.getElementById("gapSlider").addEventListener("input", () => { moved++; render(); if (moved >= 3 && window.ToySDK) window.ToySDK.markCompleted(); });
+    render();
+  </script>
+</body>
+</html>

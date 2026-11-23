@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：ResNet 残差高速路 · 跳跃连接原理</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+    @media (max-width: 740px) { .duel { grid-template-columns: 1fr; } }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; }
+    .lane h3 { font-size: 15.5px; font-weight: 850; margin-bottom: 6px; }
+    .big-pct { font-size: 32px; font-weight: 900; font-family: ui-monospace, monospace; margin: 6px 0; }
+    .bars { display: flex; align-items: flex-end; gap: 3px; height: 110px; padding: 8px 4px 0; background: var(--tax-surface); border-radius: 10px; border: 1px solid var(--tax-border); }
+    .b { flex: 1; border-radius: 3px 3px 0 0; transition: height 0.2s ease; min-height: 2px; }
+    .formula { font-size: 12.5px; color: var(--tax-muted); margin-top: 8px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🛣️ ResNet 残差高速路：为什么加一根导线，网络就能堆到 100 层？</h1>
+        <p>向右拉高网络深度，同屏观察误差梯度从最后一层倒推回第 1 层时，普通网络与 ResNet 谁先彻底“失联”！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div>
+        <label style="font-size:14.5px;font-weight:800;">🏗️ 网络总深度：<span id="depthVal" style="color:var(--tax-primary)">20</span> 层（每层普通变换衰减系数 0.80）</label>
+        <input id="depthSlider" type="range" min="4" max="60" value="20" style="width:100%;margin-top:8px;" />
+      </div>
+
+      <div class="duel">
+        <div class="lane" style="border-color:var(--tax-red);">
+          <h3>🧱 普通直连网络（Plain Net）</h3>
+          <div style="font-size:12px;color:var(--tax-muted);">第 1 层收到的反向梯度残留：</div>
+          <div class="big-pct" id="plainPct" style="color:var(--tax-red)">1.15%</div>
+          <div class="bars" id="plainBars"></div>
+          <div class="formula">公式：<code>y = F(x)</code> → 反向连乘 <code>0.80<sup>L</sup></code>，越靠前梯度越趋近于 0！</div>
+        </div>
+
+        <div class="lane" style="border-color:var(--tax-green);">
+          <h3>⚡ 残差网络（ResNet 跳跃连接）</h3>
+          <div style="font-size:12px;color:var(--tax-muted);">第 1 层收到的反向梯度残留：</div>
+          <div class="big-pct" id="resPct" style="color:var(--tax-green)">100%+</div>
+          <div class="bars" id="resBars"></div>
+          <div class="formula">公式：<code>y = F(x) + x</code> → 求导自带 <code>+ 1</code> 高速直通车，梯度永不归零！</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>把层数拖到 <strong>50 层</strong>看看——普通直连网络的前 30 层已经彻底收不到任何梯度（变成“植物人层”）；而何恺明提出的 <strong>ResNet 残差连接（+x）</strong> 给梯度修了一条无衰减高速路，后来连 Transformer、GPT 大模型每一层都标配了这根救命导线！
+    </div>
+  </div>
+
+  <script>
+    let moved = 0;
+    function render() {
+      const L = parseInt(document.getElementById("depthSlider").value, 10);
+      document.getElementById("depthVal").textContent = L;
+
+      const decay = 0.80;
+      const plainFirst = Math.pow(decay, L) * 100;
+      document.getElementById("plainPct").textContent = plainFirst < 0.01 ? "< 0.01% (失联)" : plainFirst.toFixed(2) + "%";
+      document.getElementById("resPct").textContent = "100.0% (满格直达)";
+
+      // Sample 24 bars from Layer 1 (left) to Layer L (right)
+      const N = 24;
+      let pHtml = "", rHtml = "";
+      for (let i = 0; i < N; i++) {
+        const layerFromEnd = Math.round(((N - 1 - i) / (N - 1)) * L);
+        const pH = Math.max(2, Math.pow(decay, layerFromEnd) * 100);
+        // ResNet has identity path = 1.0 plus small residual signal
+        const rH = Math.min(100, 82 + 18 * Math.pow(decay, layerFromEnd));
+        pHtml += `<div class="b" style="height:${pH.toFixed(1)}%;background:var(--tax-red);opacity:${0.35 + 0.65 * (pH/100)};"></div>`;
+        rHtml += `<div class="b" style="height:${rH.toFixed(1)}%;background:var(--tax-green);"></div>`;
+      }
+      document.getElementById("plainBars").innerHTML = pHtml;
+      document.getElementById("resBars").innerHTML = rHtml;
+
+      if (L >= 40) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（百层密码破解！）：</strong>在 <strong>${L}</strong> 层深度下，普通网络的浅层梯度只剩 <strong>${plainFirst < 0.001 ? "0.000%" : plainFirst.toFixed(3) + "%"}</strong>，彻底学不动；而 ResNet 的 <code>y = F(x) + x</code> 让误差信号沿着 <code>+x</code> 畅通无阻回传到最底层，彻底打开了超深网络的大门！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+
+    document.getElementById("depthSlider").addEventListener("input", () => {
+      moved++;
+      render();
+      if (moved >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

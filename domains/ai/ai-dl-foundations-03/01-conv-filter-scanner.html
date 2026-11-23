@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：卷积核扫描镜 · 3×3 边缘提取</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .seg { display: inline-flex; flex-wrap: wrap; background: var(--tax-surface-alt); padding: 4px; border-radius: 12px; gap: 4px; border: 1px solid var(--tax-border); margin-bottom: 16px; }
+    .seg button { border: none; background: transparent; color: var(--tax-muted); font-weight: 750; font-size: 13px; padding: 7px 12px; border-radius: 9px; cursor: pointer; }
+    .seg button.active { background: var(--tax-surface); color: var(--tax-primary); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .stage { display: grid; grid-template-columns: 1.15fr 0.75fr 1fr; gap: 16px; align-items: center; }
+    @media (max-width: 820px) { .stage { grid-template-columns: 1fr; } }
+    .box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 14px; text-align: center; }
+    .box-title { font-size: 13px; font-weight: 800; margin-bottom: 10px; color: var(--tax-muted); }
+    .px-grid { display: grid; gap: 3px; margin: 0 auto; max-width: 245px; }
+    .px {
+      aspect-ratio: 1; border-radius: 5px; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; font-family: ui-monospace, monospace; border: 1.5px solid transparent;
+    }
+    .px.in-win { border-color: var(--tax-amber); box-shadow: inset 0 0 0 1.5px var(--tax-amber); }
+    .px.out-cell { cursor: pointer; transition: transform 0.12s ease; }
+    .px.out-cell:hover { transform: scale(1.06); }
+    .px.out-active { border-color: var(--tax-primary); box-shadow: 0 0 0 2px var(--tax-primary); }
+    .k-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; max-width: 150px; margin: 0 auto; }
+    .k-cell {
+      aspect-ratio: 1; border-radius: 8px; background: var(--tax-surface); border: 1.5px solid var(--tax-primary);
+      display: flex; align-items: center; justify-content: center; font-weight: 900; font-family: monospace; font-size: 14px;
+    }
+    .calc-bar { margin-top: 14px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 12px; padding: 12px 14px; font-size: 13px; font-family: ui-monospace, monospace; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔍 卷积核扫描镜：3×3 小数字表，怎么抠出物体的边缘？</h1>
+        <p>切换不同 3×3 卷积核，再点击右侧特征图的任意一格，实时透视黄色扫描窗与卷积核逐格相乘求和的魔术！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="seg" id="kSeg">
+        <button data-k="vert" class="active">📏 竖直边缘核（找竖线）</button>
+        <button data-k="horiz">➖ 水平边缘核（找横线）</button>
+        <button data-k="blur">🌫️ 均值模糊核（平滑去噪）</button>
+        <button data-k="sharp">✨ 锐化核（突出细节）</button>
+      </div>
+
+      <div class="stage">
+        <div class="box">
+          <div class="box-title">1️⃣ 输入灰度图（7×7 像素，十字图案）</div>
+          <div class="px-grid" id="inGrid" style="grid-template-columns:repeat(7,1fr);"></div>
+        </div>
+
+        <div class="box">
+          <div class="box-title">2️⃣ 3×3 卷积核（滤波器）</div>
+          <div class="k-grid" id="kGrid"></div>
+          <div style="font-size:12px;color:var(--tax-muted);margin-top:8px;" id="kDesc"></div>
+        </div>
+
+        <div class="box">
+          <div class="box-title">3️⃣ 输出特征图（5×5，点击任一格检视）</div>
+          <div class="px-grid" id="outGrid" style="grid-template-columns:repeat(5,1fr);max-width:190px;"></div>
+        </div>
+      </div>
+
+      <div class="calc-bar" id="calcBar"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>卷积并不玄妙——它就是拿着一个 3×3 模板在图片上滑动做<strong>“相似度打分（点积）”</strong>：左亮右暗的地方遇上「左 -1 右 +1」的竖边核，分数瞬间飙高，竖直边缘就被精准抠出来了！
+    </div>
+  </div>
+
+  <script>
+    // 7x7 crisp plus/cross image (0 = dark, 10 = bright)
+    const IMG = [
+      [0, 0, 0, 10, 0, 0, 0],
+      [0, 0, 0, 10, 0, 0, 0],
+      [0, 0, 0, 10, 0, 0, 0],
+      [10,10,10,10,10,10,10],
+      [0, 0, 0, 10, 0, 0, 0],
+      [0, 0, 0, 10, 0, 0, 0],
+      [0, 0, 0, 10, 0, 0, 0]
+    ];
+
+    const KERNELS = {
+      vert:  { w: [[-1,0,1],[-1,0,1],[-1,0,1]], desc: "左减右：只对竖直方向的明暗跳变产生强烈响应！" },
+      horiz: { w: [[-1,-1,-1],[0,0,0],[1,1,1]], desc: "上减下：只对水平方向的明暗跳变产生强烈响应！" },
+      blur:  { w: [[1,1,1],[1,1,1],[1,1,1]], div: 9, desc: "9 格取平均：把尖锐边缘抹平，用于平滑降噪。" },
+      sharp: { w: [[0,-1,0],[-1,5,-1],[0,-1,0]], desc: "放大中心减去四周：把线条对比度拉到极致。" }
+    };
+
+    let curK = "vert";
+    let selR = 1, selC = 1;
+    const seenK = new Set(["vert"]);
+
+    function convAt(r, c, spec) {
+      let sum = 0;
+      for (let dr = 0; dr < 3; dr++) {
+        for (let dc = 0; dc < 3; dc++) {
+          sum += IMG[r + dr][c + dc] * spec.w[dr][dc];
+        }
+      }
+      return spec.div ? Math.round(sum / spec.div) : sum;
+    }
+
+    function render() {
+      const spec = KERNELS[curK];
+      document.getElementById("kDesc").textContent = spec.desc;
+
+      // Render Kernel
+      document.getElementById("kGrid").innerHTML = spec.w.flat().map(v =>
+        `<div class="k-cell" style="color:${v > 0 ? "var(--tax-green)" : v < 0 ? "var(--tax-red)" : "var(--tax-muted)"}">${v > 0 ? "+" + v : v}</div>`
+      ).join("");
+
+      // Render 7x7 Input
+      let inHtml = "";
+      for (let r = 0; r < 7; r++) {
+        for (let c = 0; c < 7; c++) {
+          const val = IMG[r][c];
+          const inWin = r >= selR && r < selR + 3 && c >= selC && c < selC + 3;
+          const bg = val ? "var(--tax-primary)" : "var(--tax-surface)";
+          const fg = val ? "#fff" : "var(--tax-muted)";
+          inHtml += `<div class="px ${inWin ? "in-win" : ""}" style="background:${bg};color:${fg};">${val}</div>`;
+        }
+      }
+      document.getElementById("inGrid").innerHTML = inHtml;
+
+      // Render 5x5 Output
+      let outHtml = "";
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const val = convAt(r, c, spec);
+          const absV = Math.min(30, Math.abs(val));
+          const active = r === selR && c === selC;
+          const bg = val > 2 ? `rgba(5,150,105,${0.2 + absV / 40})` : val < -2 ? `rgba(220,38,38,${0.2 + absV / 40})` : "var(--tax-surface)";
+          outHtml += `<div class="px out-cell ${active ? "out-active" : ""}" data-r="${r}" data-c="${c}" style="background:${bg};color:var(--tax-ink);">${val}</div>`;
+        }
+      }
+      document.getElementById("outGrid").innerHTML = outHtml;
+
+      const curVal = convAt(selR, selC, spec);
+      document.getElementById("calcBar").innerHTML =
+        `📍 当前聚焦输出格 <strong>(${selR + 1}, ${selC + 1})</strong>：左侧 3×3 黄框像素与卷积核对应相乘再求和${spec.div ? " ÷ 9" : ""} = <strong style="color:var(--tax-primary);font-size:15px;">${curVal}</strong>`;
+    }
+
+    document.getElementById("kSeg").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      curK = e.target.dataset.k;
+      seenK.add(curK);
+      document.querySelectorAll("#kSeg button").forEach(b => b.classList.toggle("active", b === e.target));
+      render();
+      if (seenK.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    document.getElementById("outGrid").addEventListener("click", (e) => {
+      const cell = e.target.closest(".out-cell");
+      if (!cell) return;
+      selR = parseInt(cell.dataset.r, 10);
+      selC = parseInt(cell.dataset.c, 10);
+      render();
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：LSTM 三道记忆阀门 · 细胞状态传送带</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .gates { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px; }
+    @media (max-width: 760px) { .gates { grid-template-columns: 1fr; } }
+    .gate-card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .gate-title { font-size: 14px; font-weight: 850; margin-bottom: 4px; }
+    .gate-sub { font-size: 12px; color: var(--tax-muted); margin-bottom: 10px; }
+    .belt-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 16px; padding: 18px; }
+    .belt-track { height: 22px; background: var(--tax-surface); border-radius: 999px; border: 1px solid var(--tax-border); overflow: hidden; display: flex; margin: 10px 0; }
+    .seg-key { height: 100%; background: var(--tax-primary); transition: width 0.25s ease; }
+    .seg-noise { height: 100%; background: var(--tax-amber); transition: width 0.25s ease; }
+    .out-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .badge { padding: 6px 14px; border-radius: 999px; font-size: 13.5px; font-weight: 850; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚰 LSTM 三道记忆阀门：怎么护送关键记忆穿过 15 句废话？</h1>
+        <p>情景：传送带上装着核心线索「🇫🇷 法国」，中途涌来一堆「☕ 天气/咖啡」废话。亲手调好三道阀门，让句尾正确输出「法语」！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="gates">
+        <div class="gate-card">
+          <div class="gate-title">1️⃣ 遗忘门（Forget Gate）：<span id="fVal" style="color:var(--tax-primary)">50%</span></div>
+          <div class="gate-sub">决定<strong>保留多少</strong>旧传送带记忆（越高越不易忘记「法国」）</div>
+          <input id="fSlider" type="range" min="0" max="100" value="50" style="width:100%;" />
+        </div>
+        <div class="gate-card">
+          <div class="gate-title">2️⃣ 输入门（Input Gate）：<span id="iVal" style="color:var(--tax-amber)">70%</span></div>
+          <div class="gate-sub">决定<strong>放进多少</strong>当前废话噪音（遇到无关词应关小！）</div>
+          <input id="iSlider" type="range" min="0" max="100" value="70" style="width:100%;" />
+        </div>
+        <div class="gate-card">
+          <div class="gate-title">3️⃣ 输出门（Output Gate）：<span id="oVal" style="color:var(--tax-green)">40%</span></div>
+          <div class="gate-sub">句尾填空时，决定把传送带里的记忆<strong>释放多少</strong>给预测层</div>
+          <input id="oSlider" type="range" min="0" max="100" value="40" style="width:100%;" />
+        </div>
+      </div>
+
+      <div class="belt-box">
+        <div style="font-size:13.5px;font-weight:800;">🛤️ LSTM 细胞状态传送带（Cell State）内部成分：</div>
+        <div class="belt-track">
+          <div class="seg-key" id="keyBar" style="width:40%"></div>
+          <div class="seg-noise" id="noiseBar" style="width:40%"></div>
+        </div>
+        <div style="display:flex;gap:16px;font-size:12px;color:var(--tax-muted);flex-wrap:wrap;">
+          <span>🔵 核心线索「法国」占比：<strong id="keyPct">40%</strong></span>
+          <span>🟠 中途废话噪音占比：<strong id="noisePct">40%</strong></span>
+          <span>📤 最终有效输出信号：<strong id="outSig" style="color:var(--tax-primary)">16%</strong></span>
+        </div>
+        <div class="out-row">
+          <span style="font-size:14px;">句尾预测：“……所以我精通 ____”</span>
+          <span class="badge" id="predBadge">❓ 信号不足，预测模糊</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>试着把<strong>遗忘门拉高（≥85%）</strong>、把废话时的<strong>输入门关小（≤20%）</strong>、并在句尾<strong>打开输出门（≥80%）</strong>——这就是 LSTM 击败传统 RNN 的秘诀：专门修一条加减法传送带，用门控开关精准保护重要长期记忆！
+    </div>
+  </div>
+
+  <script>
+    function render() {
+      const f = parseInt(document.getElementById("fSlider").value, 10) / 100;
+      const inp = parseInt(document.getElementById("iSlider").value, 10) / 100;
+      const o = parseInt(document.getElementById("oSlider").value, 10) / 100;
+
+      document.getElementById("fVal").textContent = Math.round(f * 100) + "%";
+      document.getElementById("iVal").textContent = Math.round(inp * 100) + "%";
+      document.getElementById("oVal").textContent = Math.round(o * 100) + "%";
+
+      // After 5 filler steps: key survives as f^5, noise accumulates proportionally to inp
+      const keyRaw = Math.pow(f, 3);
+      const noiseRaw = inp * 1.1;
+      const total = Math.max(0.01, keyRaw + noiseRaw);
+      const keyShare = (keyRaw / total) * 100;
+      const noiseShare = (noiseRaw / total) * 100;
+      const effectiveOut = keyRaw * (keyRaw / total) * o * 100;
+
+      document.getElementById("keyBar").style.width = keyShare.toFixed(1) + "%";
+      document.getElementById("noiseBar").style.width = noiseShare.toFixed(1) + "%";
+      document.getElementById("keyPct").textContent = keyShare.toFixed(1) + "%";
+      document.getElementById("noisePct").textContent = noiseShare.toFixed(1) + "%";
+      document.getElementById("outSig").textContent = effectiveOut.toFixed(1) + "%";
+
+      const badge = document.getElementById("predBadge");
+      if (effectiveOut >= 52) {
+        badge.textContent = "✅ 精准输出：「法语」！（长记忆护送成功）";
+        badge.style.background = "var(--tax-green-soft)"; badge.style.color = "var(--tax-green)";
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>顿悟时刻（阀门调校完美！）：</strong>遗忘门拉满保住了「法国」，输入门关紧把废话挡在传送带外，输出门在句尾一把释放——这就是 LSTM 统治 NLP 界近十年的“门控传送带”机制！`;
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      } else if (noiseShare > 60) {
+        badge.textContent = "❌ 噪音淹没：输出无关词「咖啡」";
+        badge.style.background = "var(--tax-red-soft)"; badge.style.color = "var(--tax-red)";
+      } else if (o < 0.5) {
+        badge.textContent = "🔒 记忆留住了，但输出门没打开！";
+        badge.style.background = "var(--tax-amber-soft)"; badge.style.color = "var(--tax-amber)";
+      } else {
+        badge.textContent = "⚠️ 遗忘门太低，「法国」半路漏光了";
+        badge.style.background = "var(--tax-amber-soft)"; badge.style.color = "var(--tax-amber)";
+      }
+    }
+
+    ["fSlider", "iSlider", "oSlider"].forEach(id => document.getElementById(id).addEventListener("input", render));
+    render();
+  </script>
+</body>
+</html>

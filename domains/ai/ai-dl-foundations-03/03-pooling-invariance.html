@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：池化抗抖动实验 · Max Pooling 平移不变性</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .dpad { display: inline-flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .stage { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+    @media (max-width: 740px) { .stage { grid-template-columns: 1fr; } }
+    .box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 16px; text-align: center; }
+    .g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; max-width: 220px; margin: 12px auto; }
+    .g2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 150px; margin: 22px auto; }
+    .cell {
+      aspect-ratio: 1; border-radius: 8px; background: var(--tax-surface); border: 1.5px solid var(--tax-border);
+      display: flex; align-items: center; justify-content: center; font-weight: 900; font-family: monospace; font-size: 15px;
+    }
+    .cell.hot { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .cell.q-tl { box-shadow: inset 0 0 0 2px rgba(37,99,235,0.28); }
+    .cell.q-tr { box-shadow: inset 0 0 0 2px rgba(5,150,105,0.28); }
+    .cell.q-bl { box-shadow: inset 0 0 0 2px rgba(217,119,6,0.28); }
+    .cell.q-br { box-shadow: inset 0 0 0 2px rgba(220,38,38,0.28); }
+    .status-pill { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🛡️ 池化抗抖动实验：猫耳偏了 1 像素，AI 怎么还能认出它？</h1>
+        <p>点击方向按钮把“🐱 高亮猫耳特征（数值 9）”在左上 2×2 区域内轻微晃动 1 格，对比左右两侧特征表的稳定性！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="dpad">
+        <button class="tax-btn" data-pos="0,0">↖ 初始位置 (1,1)</button>
+        <button class="tax-btn" data-pos="0,1">↗ 轻微右偏 1 格 (1,2)</button>
+        <button class="tax-btn" data-pos="1,0">↙ 轻微下偏 1 格 (2,1)</button>
+        <button class="tax-btn" data-pos="1,1">↘ 右下偏移 1 格 (2,2)</button>
+      </div>
+
+      <div class="stage">
+        <div class="box">
+          <div style="font-weight:800;font-size:14px;">1️⃣ 原始 4×4 特征图（共 16 个数字）</div>
+          <div class="g4" id="in4"></div>
+          <span class="status-pill" id="rawStatus" style="background:var(--tax-red-soft);color:var(--tax-red);">原始像素坐标已改变！</span>
+        </div>
+
+        <div class="box">
+          <div style="font-weight:800;font-size:14px;">2️⃣ 经过 2×2 Max Pooling（压缩至 4 个数字）</div>
+          <div class="g2" id="out2"></div>
+          <span class="status-pill" style="background:var(--tax-green-soft);color:var(--tax-green);">✅ 池化输出 100% 纹丝不动！</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong><strong>Max Pooling（最大池化）</strong>在每个 2×2 小格里只问一句话——“这片区域里有没有出现猫耳（最大值）？”至于它具体在左上角还是右下角偏了 1 像素，池化结果<strong>完全不变</strong>！既抗画面抖动（平移不变性），又瞬间砍掉 75% 计算量。
+    </div>
+  </div>
+
+  <script>
+    let pos = [0, 0];
+    const visited = new Set(["0,0"]);
+
+    function render() {
+      const mat = [
+        [1, 2, 1, 0],
+        [2, 1, 2, 1],
+        [0, 1, 2, 1],
+        [1, 0, 1, 2]
+      ];
+      mat[pos[0]][pos[1]] = 9; // Strong "cat ear" feature inside top-left 2x2 quadrant
+
+      const qClass = (r, c) => (r < 2 ? (c < 2 ? "q-tl" : "q-tr") : (c < 2 ? "q-bl" : "q-br"));
+      let h4 = "";
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const hot = r === pos[0] && c === pos[1];
+          h4 += `<div class="cell ${qClass(r, c)} ${hot ? "hot" : ""}">${hot ? "🐱9" : mat[r][c]}</div>`;
+        }
+      }
+      document.getElementById("in4").innerHTML = h4;
+
+      // 2x2 Max Pooling
+      const pooled = [];
+      for (let pr = 0; pr < 2; pr++) {
+        for (let pc = 0; pc < 2; pc++) {
+          const mx = Math.max(
+            mat[pr * 2][pc * 2], mat[pr * 2][pc * 2 + 1],
+            mat[pr * 2 + 1][pc * 2], mat[pr * 2 + 1][pc * 2 + 1]
+          );
+          pooled.push(mx);
+        }
+      }
+      document.getElementById("out2").innerHTML = pooled.map((v, i) =>
+        `<div class="cell ${i === 0 ? "hot" : ""}">${i === 0 ? "🐱" + v : v}</div>`
+      ).join("");
+
+      const moved = !(pos[0] === 0 && pos[1] === 0);
+      const rawSt = document.getElementById("rawStatus");
+      rawSt.textContent = moved
+        ? `⚠️ 原始坐标已移到 (${pos[0] + 1}, ${pos[1] + 1})，逐像素对比会大幅失配`
+        : "📍 原始基准位置 (1, 1) — 点击上方按钮晃动猫耳！";
+    }
+
+    document.querySelector(".dpad").addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      const [r, c] = e.target.dataset.pos.split(",").map(Number);
+      pos = [r, c];
+      visited.add(e.target.dataset.pos);
+      render();
+      if (visited.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：梯度下降下山模拟器 · 学习率与收敛</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 14px; }
+    .btn-ghost { border: 1px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-ink); border-radius: 10px; padding: 9px 14px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .svg-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 12px; }
+    svg { width: 100%; height: 290px; display: block; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .s-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .s-lbl { font-size: 11.5px; color: var(--tax-muted); font-weight: 700; }
+    .s-val { font-size: 20px; font-weight: 850; font-family: ui-monospace, monospace; color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⛷️ 梯度下降下山模拟器：学习率调不对，模型要么龟爬要么炸飞</h1>
+        <p>把损失函数想象成山谷，训练就是蒙着眼按脚下坡度（梯度）往下走。试试把学习率调成 <strong>0.05</strong>、<strong>0.35</strong> 和 <strong>1.05</strong>！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrl-row">
+        <div style="flex:1;min-width:220px;">
+          <label style="font-size:14px;font-weight:800;">🎛️ 学习率 Learning Rate (η)：<span id="lrVal" style="color:var(--tax-primary)">0.25</span></label>
+          <input id="lrSlider" type="range" min="2" max="110" value="25" style="width:100%;margin-top:5px;" />
+        </div>
+        <button class="tax-btn" id="stepBtn">👣 走 1 步</button>
+        <button class="btn-ghost" id="autoBtn">▶ 自动走 12 步</button>
+        <button class="btn-ghost" id="resetBtn">🔄 回到山坡起点</button>
+      </div>
+
+      <div class="svg-box">
+        <svg id="gdSvg" viewBox="0 0 600 290"></svg>
+      </div>
+
+      <div class="stats">
+        <div class="s-card"><div class="s-lbl">已走步数</div><div class="s-val" id="stepOut">0</div></div>
+        <div class="s-card"><div class="s-lbl">当前参数 w</div><div class="s-val" id="wOut">-2.40</div></div>
+        <div class="s-card"><div class="s-lbl">当前误差 Loss(w)</div><div class="s-val" id="lossOut">5.76</div></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>更新公式极其朴素：<code>w_新 = w_旧 - 学习率 × 坡度</code>。步长太小（0.03）半天到不了底；步长刚好（0.25~0.5）几步直达谷底；步长超过 <strong>1.0</strong> 就会在山谷两侧越跳越高，这就是训练“Loss 爆炸（NaN）”的真相！
+    </div>
+  </div>
+
+  <script>
+    // Loss(w) = w^2, gradient = 2*w. Critical divergence threshold is lr > 1.0!
+    let w = -2.4;
+    let history = [w];
+    let timer = null;
+    let triedDiverge = false, triedConverge = false;
+
+    const lossFn = v => v * v;
+    const gradFn = v => 2 * v;
+
+    function render() {
+      const lr = parseInt(document.getElementById("lrSlider").value, 10) / 100;
+      document.getElementById("lrVal").textContent = lr.toFixed(2);
+
+      const toX = v => 300 + Math.max(-3.6, Math.min(3.6, v)) * 75;
+      const toY = l => 255 - Math.min(11.5, l) * 20;
+
+      let curve = "";
+      for (let i = 0; i <= 120; i++) {
+        const vx = -3.4 + (6.8 * i) / 120;
+        curve += (i === 0 ? "M" : "L") + `${toX(vx).toFixed(1)},${toY(lossFn(vx)).toFixed(1)} `;
+      }
+
+      const svg = document.getElementById("gdSvg");
+      let html = `<line x1="25" y1="255" x2="575" y2="255" stroke="var(--tax-border)" stroke-width="1.5"/>`;
+      html += `<line x1="300" y1="20" x2="300" y2="265" stroke="var(--tax-border)" stroke-width="1" stroke-dasharray="4,4"/>`;
+      html += `<path d="${curve}" fill="none" stroke="var(--tax-primary)" stroke-width="3"/>`;
+      html += `<circle cx="300" cy="255" r="5" fill="var(--tax-green)"/>`;
+      html += `<text x="300" y="278" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--tax-green)">🎯 谷底最优解 (w = 0)</text>`;
+
+      // Draw jump trajectory
+      for (let i = 1; i < history.length; i++) {
+        const a = history[i - 1], b = history[i];
+        html += `<line x1="${toX(a).toFixed(1)}" y1="${toY(lossFn(a)).toFixed(1)}" x2="${toX(b).toFixed(1)}" y2="${toY(lossFn(b)).toFixed(1)}" stroke="var(--tax-amber)" stroke-width="2" stroke-dasharray="4,3"/>`;
+      }
+      history.forEach((v, idx) => {
+        const isLast = idx === history.length - 1;
+        html += `<circle cx="${toX(v).toFixed(1)}" cy="${toY(lossFn(v)).toFixed(1)}" r="${isLast ? 8 : 4}" fill="${isLast ? "var(--tax-red)" : "var(--tax-amber)"}" stroke="#fff" stroke-width="${isLast ? 2.5 : 1}"/>`;
+      });
+      svg.innerHTML = html;
+
+      document.getElementById("stepOut").textContent = history.length - 1;
+      document.getElementById("wOut").textContent = Math.abs(w) > 99 ? "💥 溢出" : w.toFixed(2);
+      document.getElementById("lossOut").textContent = Math.abs(w) > 99 ? "NaN" : lossFn(w).toFixed(2);
+    }
+
+    function takeStep() {
+      const lr = parseInt(document.getElementById("lrSlider").value, 10) / 100;
+      if (Math.abs(w) > 50) return;
+      w = w - lr * gradFn(w);
+      history.push(w);
+      render();
+
+      const aha = document.getElementById("ahaBox");
+      if (Math.abs(w) > 3.2) {
+        triedDiverge = true;
+        aha.innerHTML = `💡 <strong>顿悟时刻（梯度爆炸 / 发散！）：</strong>学习率 <strong>${lr.toFixed(2)}</strong> 太大了，一步跨过谷底跳到对面更高的山坡上，越滚越高直接飞天！`;
+      } else if (Math.abs(w) < 0.08) {
+        triedConverge = true;
+        aha.innerHTML = `💡 <strong>顿悟时刻（完美收敛！）：</strong>仅用 <strong>${history.length - 1}</strong> 步就稳稳停在谷底（Loss ≈ 0）！现在试着把学习率拉到 <strong>1.05</strong> 再重置，体验一下训练崩溃是什么感觉。`;
+      }
+      if ((triedDiverge || triedConverge) && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function reset() {
+      if (timer) { clearInterval(timer); timer = null; }
+      w = -2.4; history = [w];
+      render();
+    }
+
+    document.getElementById("lrSlider").addEventListener("input", () => {
+      document.getElementById("lrVal").textContent = (parseInt(document.getElementById("lrSlider").value, 10) / 100).toFixed(2);
+    });
+    document.getElementById("stepBtn").addEventListener("click", takeStep);
+    document.getElementById("autoBtn").addEventListener("click", () => {
+      reset();
+      let c = 0;
+      timer = setInterval(() => {
+        takeStep();
+        c++;
+        if (c >= 12 || Math.abs(w) > 10 || Math.abs(w) < 0.01) { clearInterval(timer); timer = null; }
+      }, 280);
+    });
+    document.getElementById("resetBtn").addEventListener("click", reset);
+    render();
+  </script>
+</body>
+</html>

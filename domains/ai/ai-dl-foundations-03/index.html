@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CNN 卷积看图原理 · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🖼️ CNN 卷积看图原理</h1>
+        <p>没有眼睛的计算机，如何仅凭一个 3×3 滑动小窗，从像素矩阵里一层层“看”出轮廓与物体？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-conv-filter-scanner.html">
+        <div class="hub-icon">🔍</div>
+        <div class="hub-tag">玩具 01 · 空间扫描（Spatial）</div>
+        <div class="hub-title">卷积核扫描镜</div>
+        <div class="hub-desc">切换竖边、横边、模糊卷积核，点击右侧特征图任意格，透视 3×3 滑动窗口的逐格点积。</div>
+      </a>
+      <a class="hub-card" href="./02-receptive-field-zoom.html">
+        <div class="hub-icon">🔭</div>
+        <div class="hub-tag">玩具 02 · 视野沙盘（Simulation）</div>
+        <div class="hub-title">感受野放大镜</div>
+        <div class="hub-desc">逐层叠加卷积和池化，观察单个神经元怎么用极少参数把视野放大到整张图。</div>
+      </a>
+      <a class="hub-card" href="./03-pooling-invariance.html">
+        <div class="hub-icon">🛡️</div>
+        <div class="hub-tag">玩具 03 · 扰动实测（Scenario）</div>
+        <div class="hub-title">池化抗抖动实验</div>
+        <div class="hub-desc">把特征轻微平移 1 格，对比无池化与 Max Pooling 的输出稳定性，秒懂平移不变性。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

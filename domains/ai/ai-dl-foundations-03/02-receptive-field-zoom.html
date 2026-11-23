@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：感受野放大镜 · 层级视觉扩张</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 16px; }
+    .layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; align-items: center; }
+    @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+    .grid-11 {
+      display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px;
+      max-width: 340px; margin: 0 auto; background: var(--tax-surface-alt);
+      padding: 10px; border-radius: 14px; border: 1px solid var(--tax-border);
+    }
+    .g-cell { aspect-ratio: 1; border-radius: 5px; background: var(--tax-surface); border: 1px solid var(--tax-border); transition: all 0.2s ease; }
+    .g-cell.rf { background: var(--tax-primary-soft); border-color: var(--tax-primary); }
+    .g-cell.center { background: var(--tax-primary); border-color: var(--tax-primary); }
+    .info-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .big-rf { font-size: 34px; font-weight: 900; font-family: ui-monospace, monospace; color: var(--tax-primary); }
+    .stage-badge { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; background: var(--tax-green-soft); color: var(--tax-green); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔭 感受野放大镜：小小 3×3 窗口，怎么看清整张人脸？</h1>
+        <p>逐层增加 3×3 卷积层数，观察最深层那 1 颗神经元的原始图像视野（蓝色高亮区域）如何从小点一步步膨胀到全图！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrl-row">
+        <div style="flex:1;min-width:220px;">
+          <label style="font-size:14px;font-weight:800;">📚 堆叠 3×3 卷积层数：<span id="layerVal" style="color:var(--tax-primary)">1</span> 层</label>
+          <input id="layerSlider" type="range" min="1" max="5" value="1" style="width:100%;margin-top:6px;" />
+        </div>
+        <label style="font-size:13.5px;font-weight:750;cursor:pointer;background:var(--tax-surface-alt);padding:8px 12px;border-radius:10px;border:1px solid var(--tax-border);">
+          <input type="checkbox" id="poolToggle" /> ⚡ 在第 2 层加入 2×2 步长池化（视野翻倍加速）
+        </label>
+      </div>
+
+      <div class="layout">
+        <div class="grid-11" id="rfGrid"></div>
+        <div class="info-box">
+          <div><span class="stage-badge" id="visionStage">第 1 层：只能看见局部边缘</span></div>
+          <div>
+            <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">单个神经元的感受野尺寸</div>
+            <div class="big-rf" id="rfSize">3 × 3</div>
+          </div>
+          <div style="font-size:13px;color:var(--tax-muted);" id="paramNote"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>为什么现代 CNN（VGG / ResNet）都爱堆多个 3×3 小核，而不是直接用一个大 7×7 核？因为 <strong>3 层 3×3 堆出来的感受野同样是 7×7，参数量却省了将近一半（27 vs 49）</strong>，还多出了 2 次非线性表达能力！
+    </div>
+  </div>
+
+  <script>
+    let moves = 0;
+    function render() {
+      const L = parseInt(document.getElementById("layerSlider").value, 10);
+      const usePool = document.getElementById("poolToggle").checked;
+      document.getElementById("layerVal").textContent = L;
+
+      // Exact receptive field calculation
+      let rf = 1, stride = 1;
+      for (let i = 1; i <= L; i++) {
+        rf += 2 * stride; // 3x3 conv adds 2*stride
+        if (usePool && i === 2) {
+          rf += stride; // 2x2 pool with stride 2
+          stride *= 2;
+        }
+      }
+      const clamped = Math.min(11, rf);
+      const half = Math.floor(clamped / 2);
+
+      let html = "";
+      for (let r = 0; r < 11; r++) {
+        for (let c = 0; c < 11; c++) {
+          const isCenter = r === 5 && c === 5;
+          const inRF = Math.abs(r - 5) <= half && Math.abs(c - 5) <= half;
+          html += `<div class="g-cell ${isCenter ? "center" : inRF ? "rf" : ""}"></div>`;
+        }
+      }
+      document.getElementById("rfGrid").innerHTML = html;
+      document.getElementById("rfSize").textContent = `${rf} × ${rf} 像素`;
+
+      const stages = [
+        "第 1 层：只能看见局部像素与边缘线条",
+        "第 2 层：边缘拼成眼角、鼻翼等局部纹理",
+        "第 3 层：纹理拼成眼睛、耳朵等完整部件",
+        "第 4 层：视野覆盖大半张脸，识别五官布局",
+        "第 5 层：一眼看穿整张画面，认出整只猫/整个人！"
+      ];
+      document.getElementById("visionStage").textContent = rf >= 11 ? "🌟 全局视野：已覆盖整张 11×11 画面！" : stages[L - 1];
+
+      const stackedParams = L * 9;
+      const singleBigParams = rf * rf;
+      document.getElementById("paramNote").innerHTML =
+        `• <strong>堆叠 ${L} 层 3×3 参数量</strong>：仅 <strong>${stackedParams}</strong> 个权重<br/>` +
+        `• <strong>若用单层 ${rf}×${rf} 大核</strong>：需要 <strong>${singleBigParams}</strong> 个权重（省掉 <strong>${Math.max(0, Math.round((1 - stackedParams / singleBigParams) * 100))}%</strong> 参数！）`;
+    }
+
+    document.getElementById("layerSlider").addEventListener("input", () => { moves++; render(); if (moves >= 3 && window.ToySDK) window.ToySDK.markCompleted(); });
+    document.getElementById("poolToggle").addEventListener("change", () => { moves++; render(); if (window.ToySDK) window.ToySDK.markCompleted(); });
+    render();
+  </script>
+</body>
+</html>
