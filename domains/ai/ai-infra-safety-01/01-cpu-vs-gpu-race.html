@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：CPU 法拉利 vs GPU 大巴车竞速</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .bar-ctl { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.primary { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 740px) { .duel { grid-template-columns: 1fr; } }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; }
+    .cores { display: grid; gap: 4px; margin: 12px 0; }
+    .core-cpu { grid-template-columns: repeat(4, 1fr); }
+    .core-gpu { grid-template-columns: repeat(8, 1fr); }
+    .cell { height: 22px; border-radius: 6px; background: var(--tax-surface); border: 1px solid var(--tax-border); transition: background 0.15s ease; }
+    .cell.on { background: var(--tax-primary); border-color: var(--tax-primary); }
+    .cell.gpu-on { background: var(--tax-green); border-color: var(--tax-green); }
+    .track { height: 14px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin: 8px 0; }
+    .fill { height: 100%; width: 0%; transition: width 0.2s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚌 CPU 法拉利 vs GPU 大巴车：为什么算 AI 要靠“人海战术”？</h1>
+        <p>CPU 像 4 辆顶级法拉利（单核极快、擅长复杂逻辑），GPU 像 64 排座超大巴车（单核慢、但一次拉几十个乘客）。切换任务并点击起跑！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="bar-ctl">
+        <button class="btn primary" id="mMatrix" onclick="setMode('matrix')">任务 A：1024 次矩阵乘加（AI 推理）</button>
+        <button class="btn" id="mBranch" onclick="setMode('branch')">任务 B：深度嵌套 if/else 依赖计算</button>
+        <button class="btn primary" style="margin-left:auto;" onclick="startRace()">▶ 开始竞速</button>
+      </div>
+
+      <div class="duel">
+        <div class="lane">
+          <div style="font-weight:850;font-size:15px;">🏎️ CPU（4 个超强核心）</div>
+          <div class="cores core-cpu" id="cpuCores"></div>
+          <div class="track"><div class="fill" id="cpuFill" style="background:var(--tax-primary);"></div></div>
+          <div id="cpuStat" style="font-size:13px;color:var(--tax-muted);font-family:monospace;">待命…</div>
+        </div>
+
+        <div class="lane">
+          <div style="font-weight:850;font-size:15px;">🚌 GPU（32 个并行流处理器示意）</div>
+          <div class="cores core-gpu" id="gpuCores"></div>
+          <div class="track"><div class="fill" id="gpuFill" style="background:var(--tax-green);"></div></div>
+          <div id="gpuStat" style="font-size:13px;color:var(--tax-muted);font-family:monospace;">待命…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>分别在<strong>任务 A（矩阵乘加）</strong>和<strong>任务 B（串行逻辑）</strong>下点击“开始竞速”，看看谁才是各自赛道上的王者！
+    </div>
+  </div>
+
+  <script>
+    let mode = "matrix";
+    let timer = null;
+    const tried = new Set();
+
+    function buildCores() {
+      document.getElementById("cpuCores").innerHTML = Array.from({ length: 4 }, (_, i) => `<div class="cell" id="cc${i}"></div>`).join("");
+      document.getElementById("gpuCores").innerHTML = Array.from({ length: 32 }, (_, i) => `<div class="cell" id="gc${i}"></div>`).join("");
+    }
+
+    function setMode(m) {
+      mode = m;
+      document.getElementById("mMatrix").classList.toggle("primary", m === "matrix");
+      document.getElementById("mBranch").classList.toggle("primary", m === "branch");
+      document.getElementById("cpuFill").style.width = "0%";
+      document.getElementById("gpuFill").style.width = "0%";
+      document.getElementById("cpuStat").textContent = "已切换任务，点击「开始竞速」";
+      document.getElementById("gpuStat").textContent = "待命…";
+      buildCores();
+    }
+
+    function startRace() {
+      if (timer) clearInterval(timer);
+      let c = 0, g = 0;
+      const cStep = mode === "matrix" ? 8 : 25;
+      const gStep = mode === "matrix" ? 34 : 7;
+      timer = setInterval(() => {
+        c = Math.min(100, c + cStep);
+        g = Math.min(100, g + gStep);
+        document.getElementById("cpuFill").style.width = c + "%";
+        document.getElementById("gpuFill").style.width = g + "%";
+
+        for (let i = 0; i < 4; i++) {
+          const el = document.getElementById("cc" + i);
+          el.classList.toggle("on", c < 100 && (mode === "matrix" || i === 0));
+        }
+        for (let i = 0; i < 32; i++) {
+          const el = document.getElementById("gc" + i);
+          el.classList.toggle("gpu-on", g < 100 && (mode === "matrix" || i === 0));
+        }
+
+        document.getElementById("cpuStat").textContent = c >= 100 ? "✅ 完成！" : `进度 ${c}%`;
+        document.getElementById("gpuStat").textContent = g >= 100 ? "✅ 完成！" : `进度 ${g}%`;
+
+        if (c >= 100 && g >= 100) {
+          clearInterval(timer);
+          tried.add(mode);
+          document.getElementById("ahaBox").innerHTML = mode === "matrix"
+            ? "💡 <strong>矩阵乘加（GPU 完胜！）：</strong>大模型里成千上万个乘加互相独立，GPU 把几千个小核心同时点亮，虽然单核频率低，但<strong>总吞吐量碾压 CPU 几十倍</strong>！"
+            : "💡 <strong>强依赖分支（CPU 完胜！）：</strong>当下一步必须等上一步结果时，GPU 里 99% 的核心只能干坐着发呆，此时拥有超大缓存与分支预测的 CPU 轻松秒杀 GPU！";
+          if (tried.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }, 180);
+    }
+
+    buildCores();
+  </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>分布式训练并行（DP / TP / PP）· 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🕸️ 分布式训练并行（DP / TP / PP）</h1>
+        <p>一张显卡装不下千亿参数大模型，怎么把几千张 GPU 编织成一台巨型超级计算机？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-3d-parallelism-builder.html">
+        <div class="hub-icon">🧩</div>
+        <div class="hub-tag">玩具 01 · 策略装配（Builder）</div>
+        <div class="hub-title">3D 并行切分装配台（DP / TP / PP）</div>
+        <div class="hub-desc">切换数据、张量与流水线三种切分模式，直击单卡显存爆掉与卡间通信的黄金权衡。</div>
+      </a>
+      <a class="hub-card" href="./02-pipeline-bubble-simulation.html">
+        <div class="hub-icon">🫧</div>
+        <div class="hub-tag">玩具 02 · 调度沙盘（Simulation）</div>
+        <div class="hub-title">流水线气泡（Bubble）消除沙盘</div>
+        <div class="hub-desc">把一个大 Batch 切成多个 Micro-batch，亲手把显卡干等的“空闲气泡”压到最低。</div>
+      </a>
+      <a class="hub-card" href="./03-nvlink-vs-ethernet-race.html">
+        <div class="hub-icon">⚡</div>
+        <div class="hub-tag">玩具 03 · 互联竞速（Race）</div>
+        <div class="hub-title">NVLink vs 以太网梯度同步竞速</div>
+        <div class="hub-desc">实测 All-Reduce 同步在不同互联带宽下的耗时，看清为什么 GPU 集群一半预算都在买网线。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

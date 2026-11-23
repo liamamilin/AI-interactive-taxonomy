@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：差分隐私（DP）加噪保护滑块</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+    @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .val { font-size: 28px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔒 差分隐私（Differential Privacy）：既想让 AI 学病历，又绝不能泄露张三的隐私！</h1>
+        <p>训练时在梯度里加入可控随机噪声。拖动隐私预算 <code>ε</code>（越小越严格），观察“黑客反推个人病历成功率”与“模型诊断准确率”的此消彼长！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">🎛️ 隐私预算 ε（Epsilon）：<span id="epsVal" style="color:var(--tax-primary)">8.0</span>（左=强加噪极度隐私，右=几乎不加噪）</label>
+      <input id="epsSlider" type="range" min="5" max="100" value="80" style="width:100%;margin-top:8px;" />
+
+      <div class="cards">
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">🕵️ 黑客成员推断攻击成功率（越低越安全）</div>
+          <div class="val" id="leakOut" style="color:var(--tax-red);">84%</div>
+        </div>
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">🏥 AI 医疗诊断准确率（越高越有用）</div>
+          <div class="val" id="accOut" style="color:var(--tax-green);">94%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const eps = parseInt(document.getElementById("epsSlider").value, 10) / 10;
+      document.getElementById("epsVal").textContent = eps.toFixed(1);
+      const leak = Math.round(50 + Math.min(44, eps * 4.4));
+      const acc = Math.round(58 + Math.min(36, Math.log(eps + 0.6) * 16));
+      document.getElementById("leakOut").textContent = leak + "%";
+      document.getElementById("leakOut").style.color = leak <= 60 ? "var(--tax-green)" : "var(--tax-red)";
+      document.getElementById("accOut").textContent = acc + "%";
+
+      let aha;
+      if (eps > 5) {
+        aha = "💡 <strong>隐私裸奔区（ε > 5）：</strong>噪声太小，大模型容易把罕见病人的姓名、手机号死记硬背下来，黑客一问就套出来！试着往左拉到 <strong>ε = 1.5 ~ 3.0</strong>。";
+      } else if (eps >= 1.2) {
+        aha = "💡 <strong>黄金差分隐私区（ε ≈ 1.5~3.0）：</strong>无论张三的病历在不在训练集里，模型输出分布几乎完全一样（黑客成功率逼近 50% 瞎猜），但模型依然保留了 80%+ 的群体规律准确率！";
+      } else {
+        aha = "💡 <strong>加噪过头（ε < 1.2）：</strong>隐私绝对安全，但噪声把真实医学规律也淹没了，模型变得几乎不可用。工程上永远在做 Privacy-Utility 权衡！";
+      }
+      document.getElementById("ahaBox").innerHTML = aha;
+    }
+    document.getElementById("epsSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：红绿词表隐形水印检测仪 · LLM Watermark</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .txt { padding: 16px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-size: 16px; line-height: 2; }
+    .tok { display: inline-block; padding: 1px 6px; border-radius: 6px; margin: 2px; }
+    .g { background: rgba(16,185,129,0.2); border: 1px solid var(--tax-green); }
+    .r { background: rgba(239,68,68,0.12); border: 1px solid var(--tax-red); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>💧 红绿词表隐形水印：肉眼看不出痕迹，怎么一眼揪出 AI 写的文章？</h1>
+        <p>AI 生成每个词前，先用密钥把词表随机分成一半“绿名单”、一半“红名单”，并悄悄给绿词加一点概率偏置。切换对比两段读起来几乎一样的文本！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="bHuman" onclick="show('human')">✍️ 人类自然写作（约 50% 绿词）</button>
+        <button class="btn" id="bAi" onclick="show('ai')">🤖 带隐形水印的 AI 文本（92% 绿词！）</button>
+      </div>
+      <div class="txt" id="textBox"></div>
+      <div id="statBox" style="margin-top:12px;font-weight:850;font-size:14.5px;"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const SAMPLES = {
+      human: {
+        tokens: [
+          ["今天", "g"], ["清晨", "r"], ["阳光", "g"], ["透过", "r"], ["窗帘", "r"], ["照在", "g"],
+          ["书桌", "g"], ["上", "r"], ["，", "g"], ["微风", "r"], ["轻轻", "g"], ["吹过", "r"]
+        ],
+        stat: "绿词比例：6 / 12（50.0%） · 统计 Z-Score = 0.0 → 🟢 判定：人类自然文本",
+        aha: "💡 <strong>人类写作的随机性：</strong>人类不知道密钥，选词落入绿名单或红名单就像抛硬币，大约各占 50%。切换到「带水印 AI 文本」看看！"
+      },
+      ai: {
+        tokens: [
+          ["今日", "g"], ["早晨", "g"], ["晨光", "g"], ["穿过", "g"], ["纱帘", "g"], ["洒在", "g"],
+          ["木桌", "g"], ["面", "g"], ["，", "g"], ["清风", "g"], ["缓缓", "r"], ["拂过", "g"]
+        ],
+        stat: "绿词比例：11 / 12（91.7%） · 统计 Z-Score = 4.1 → 🚨 判定：99.99% 为带水印 AI 生成！",
+        aha: "💡 <strong>隐形统计水印的妙处：</strong>两段话意思、文采完全相同，肉眼根本看不出区别！但握有密钥的检测器只要统计绿词占比，就像连抛 12 次硬币出了 11 次正面——<strong>几乎不可能是巧合</strong>！"
+      }
+    };
+    const seen = new Set(["human"]);
+    function show(k) {
+      seen.add(k);
+      document.getElementById("bHuman").classList.toggle("active", k === "human");
+      document.getElementById("bAi").classList.toggle("active", k === "ai");
+      const d = SAMPLES[k];
+      document.getElementById("textBox").innerHTML = d.tokens.map(([w, c]) => `<span class="tok ${c}">${w}</span>`).join("");
+      document.getElementById("statBox").textContent = d.stat;
+      document.getElementById("ahaBox").innerHTML = d.aha;
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    show("human");
+  </script>
+</body>
+</html>

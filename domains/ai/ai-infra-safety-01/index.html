@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPU 与 AI 芯片并行原理 · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧮 GPU 与 AI 芯片并行原理</h1>
+        <p>为什么 CPU 算大模型慢如蜗牛，而 GPU、TPU 和 NPU 能靠“人海战术”和脉动阵列把矩阵乘法拉满？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-cpu-vs-gpu-race.html">
+        <div class="hub-icon">🚌</div>
+        <div class="hub-tag">玩具 01 · 双栏竞速（Race）</div>
+        <div class="hub-title">CPU 法拉利 vs GPU 大巴车竞速</div>
+        <div class="hub-desc">在复杂逻辑分支与海量矩阵运算两个赛道上，直观对比 CPU 与 GPU 的真实吞吐差距。</div>
+      </a>
+      <a class="hub-card" href="./02-memory-wall-roofline.html">
+        <div class="hub-icon">🧱</div>
+        <div class="hub-tag">玩具 02 · 瓶颈沙盘（Simulation）</div>
+        <div class="hub-title">显存墙与 Roofline 屋顶线沙盘</div>
+        <div class="hub-desc">调高 Batch Size，亲眼看芯片如何从“饿着等显存搬运”跨过拐点进入“满血算力区”。</div>
+      </a>
+      <a class="hub-card" href="./03-systolic-array-spatial.html">
+        <div class="hub-icon">💎</div>
+        <div class="hub-tag">玩具 03 · 空间数据流（Spatial）</div>
+        <div class="hub-title">TPU 脉动阵列数据流图谱</div>
+        <div class="hub-desc">按节拍推进 3×3 脉动阵列，看清为什么一次读取、多次复用能让能效比飙升。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

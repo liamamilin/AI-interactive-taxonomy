@@ -1,0 +1,33 @@
+{
+  "domain": "ai",
+  "branch": "infra-safety",
+  "order": 5,
+  "title": "分布式训练并行（DP / TP / PP）",
+  "icon": "🕸️",
+  "subtitle": "一张显卡装不下千亿参数大模型，怎么把几千张 GPU 编织成一台巨型超级计算机？",
+  "difficulty": "进阶",
+  "related": ["ai/llm-infra-toys", "ai/llm-training-toys", "ai/ai-infra-safety-01"],
+  "toys": {
+    "01-3d-parallelism-builder.html": {
+      "title": "3D 并行切分装配台（DP / TP / PP）",
+      "icon": "🧩",
+      "archetype": "builder",
+      "concept": "数据并行 DP · 张量并行 TP · 流水线并行 PP",
+      "summary": "切换三种切分策略把 70B 模型塞进 4 张 GPU，直观对比每张卡的显存占用与卡间通信压力。"
+    },
+    "02-pipeline-bubble-simulation.html": {
+      "title": "流水线气泡（Bubble）消除沙盘",
+      "icon": "🫧",
+      "archetype": "simulation",
+      "concept": "流水线并行 PP · Micro-batch 微批次 · 气泡率公式",
+      "summary": "调高微批次切分数 M，亲眼看见 4 张 GPU 之间大片白白发呆的“空闲气泡”如何被迅速挤掉。"
+    },
+    "03-nvlink-vs-ethernet-race.html": {
+      "title": "NVLink vs 以太网梯度同步竞速",
+      "icon": "⚡",
+      "archetype": "race",
+      "concept": "All-Reduce 梯度同步 · NVLink 900GB/s · 通信掩盖",
+      "summary": "对比张量并行跑在机内 NVLink 与跨机普通千兆/百兆网上的真实步时，理解为什么集群贵在互联。"
+    }
+  }
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：简历筛选公平性审计室 · Proxy Bias</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    @media (max-width: 720px) { .checks { grid-template-columns: 1fr; } }
+    .chk { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-weight: 750; font-size: 13.5px; cursor: pointer; }
+    .bars { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .bcard { padding: 14px; border-radius: 14px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .num { font-size: 26px; font-weight: 900; font-family: ui-monospace, monospace; color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚖️ 简历筛选公平性审计室：为什么删了“性别”列，AI 依然在歧视？</h1>
+        <p>某公司用过去 10 年历史录用数据训练简历筛选模型。勾选下方治理措施，看看怎样才能真正消除<strong>隐蔽代理变量（Proxy Variable）</strong>带来的偏见！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="checks">
+        <label class="chk"><input type="checkbox" id="c1" onchange="render()" /> 1. 删除显式“性别”字段</label>
+        <label class="chk"><input type="checkbox" id="c2" onchange="render()" /> 2. 剔除“女子学院/社团名称”等代理变量</label>
+        <label class="chk"><input type="checkbox" id="c3" onchange="render()" /> 3. 引入公平性重采样与反事实审计</label>
+        <label class="chk"><input type="checkbox" id="c4" onchange="render()" /> 4. 保留人工复核申诉通道（Human-in-the-loop）</label>
+      </div>
+
+      <div class="bars">
+        <div class="bcard">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">同等能力候选人通过率差距（越接近 0% 越公平）</div>
+          <div class="num" id="gapOut">28%</div>
+        </div>
+        <div class="bcard">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">合规审计结论</div>
+          <div class="num" id="statusOut" style="font-size:18px;margin-top:8px;">🚨 严重历史偏见</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    function render() {
+      const c1 = document.getElementById("c1").checked;
+      const c2 = document.getElementById("c2").checked;
+      const c3 = document.getElementById("c3").checked;
+      const c4 = document.getElementById("c4").checked;
+
+      let gap = 28;
+      if (c1) gap -= 4;
+      if (c2) gap -= 12;
+      if (c3) gap -= 10;
+      if (c4) gap -= 2;
+      gap = Math.max(0, gap);
+
+      document.getElementById("gapOut").textContent = gap + "%";
+      document.getElementById("gapOut").style.color = gap <= 4 ? "var(--tax-green)" : "var(--tax-red)";
+
+      let st, aha;
+      if (gap === 0) {
+        st = "✅ 通过公平性与合规审计";
+        aha = "💡 <strong>治理通关！</strong>“算法无偏见”是最大误区：只要历史数据藏着偏见，模型就会借着邮编、社团、母校等<strong>代理变量</strong>把歧视悄悄复刻出来——必须结合去代理变量 + 反事实审计 + 人工兜底！";
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      } else if (c1 && !c2) {
+        st = "⚠️ 仅删性别无效（代理变量作祟）";
+        aha = "💡 <strong>经典陷阱（Fairness through Unawareness 失效）：</strong>光删掉“性别”字段只降了 4% 差距！因为模型很快学会从“女子国际象棋社”等词条反推出性别！继续勾选其他治理手段。";
+      } else {
+        st = "🚨 存在显著系统性偏见";
+        aha = "💡 <strong>顿悟时刻：</strong>逐个勾选上方 4 项审计与治理措施，观察通过率差距是如何一步步归零的！";
+      }
+      document.getElementById("statusOut").textContent = st;
+      document.getElementById("ahaBox").innerHTML = aha;
+    }
+    render();
+  </script>
+</body>
+</html>

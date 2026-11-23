@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：叠加态与稀疏自编码器（SAE）显微镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+    .node { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .node.lit { border-color: var(--tax-primary); background: rgba(99,102,241,0.1); }
+    .tag { display: inline-block; padding: 3px 8px; border-radius: 8px; font-size: 11.5px; font-weight: 750; background: var(--tax-surface); border: 1px solid var(--tax-border); margin: 3px 3px 0 0; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔭 SAE 显微镜：为什么不能直接“看单个神经元”来理解大模型？</h1>
+        <p>世界上有几百万个概念，但大模型只有几千维神经元，所以它把多个概念“叠加压缩”塞进了同一个神经元里。点击切换 <strong>SAE 稀疏自编码器</strong> 视图把它们拆开！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="vRaw" onclick="setView('raw')">😵 原始神经元视图（多义叠加态）</button>
+        <button class="btn" id="vSae" onclick="setView('sae')">🔬 开启 SAE 稀疏字典视图（单义特征）</button>
+      </div>
+      <div class="grid" id="nodeGrid"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const VIEWS = {
+      raw: {
+        items: [
+          { title: "Neuron #42", lit: true, tags: ["🐱 猫科动物", "🐍 Python 缩进", "🇫🇷 法语动词"], note: "全混在一起！看到它亮起，你根本不知道模型在想猫还是在写代码。" },
+          { title: "Neuron #108", lit: true, tags: ["🌉 金门大桥", "🧬 DNA 碱基", "⚠️ 法律免责声明"], note: "因为概念远多于神经元，模型被迫让一个神经元身兼数职（Polysemanticity）。" }
+        ],
+        aha: "💡 <strong>黑盒之谜的根源（叠加假说 Superposition）：</strong>神经网络用“非正交方向”把 10 万个概念硬塞进 4096 个神经元里，导致直接看神经元就像看一锅大杂烩！"
+      },
+      sae: {
+        items: [
+          { title: "SAE Feature #10421", lit: true, tags: ["🐱 纯粹：猫与宠物"], note: "仅在出现猫、喵星人、猫粮时亮起。" },
+          { title: "SAE Feature #28904", lit: false, tags: ["🐍 纯粹：Python 语法"], note: "仅在写缩进和 def 函数时亮起。" },
+          { title: "SAE Feature #51092", lit: false, tags: ["🌉 纯粹：金门大桥"], note: "仅在提及旧金山金门大桥时亮起。" },
+          { title: "SAE Feature #88310", lit: false, tags: ["⚠️ 纯粹：安全拒答"], note: "仅在检测到危险请求时亮起。" }
+        ],
+        aha: "💡 <strong>打开黑盒的钥匙（SAE）：</strong>稀疏自编码器（Sparse Autoencoder）把低维激活值强行投影到<strong>更高维且极其稀疏的字典空间</strong>，成功把缠在一起的多义神经元拆成人类一眼看懂的单义概念！这就是给 AI 做“脑部核磁共振”的核心技术。"
+      }
+    };
+    const seen = new Set(["raw"]);
+    function setView(v) {
+      seen.add(v);
+      document.getElementById("vRaw").classList.toggle("active", v === "raw");
+      document.getElementById("vSae").classList.toggle("active", v === "sae");
+      const d = VIEWS[v];
+      document.getElementById("nodeGrid").innerHTML = d.items.map(it => `
+        <div class="node ${it.lit ? "lit" : ""}">
+          <div style="font-weight:850;font-size:14px;">${it.title}</div>
+          <div style="margin:6px 0;">${it.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+          <div style="font-size:12px;color:var(--tax-muted);margin-top:6px;">${it.note}</div>
+        </div>
+      `).join("");
+      document.getElementById("ahaBox").innerHTML = d.aha;
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    setView("raw");
+  </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：显存墙与 Roofline 屋顶线沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 16px; margin-top: 14px; }
+    @media (max-width: 740px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; }
+    .big { font-size: 26px; font-weight: 900; font-family: ui-monospace, monospace; color: var(--tax-primary); }
+    svg { width: 100%; height: 200px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧱 显存墙（Memory Wall）：为什么昂贵的显卡经常 90% 时间都在“干等”？</h1>
+        <p>大语言模型每吐一个字，都要把几十 GB 权重从 HBM 显存搬进计算核心。拖动 <strong>并发批大小（Batch Size）</strong>，看芯片如何从“搬运瓶颈”爬上“算力屋顶”！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">📦 并发批大小 Batch Size：<span id="bsVal" style="color:var(--tax-primary)">1</span>（每次把权重搬进来，同时服务多少个用户）</label>
+      <input id="bsSlider" type="range" min="1" max="256" value="1" style="width:100%;margin-top:8px;" />
+
+      <div class="grid">
+        <div class="card">
+          <div style="font-size:13px;font-weight:800;margin-bottom:6px;">📈 Roofline 屋顶线模型（算力 vs 算术强度）</div>
+          <svg viewBox="0 0 360 180" id="roofSvg">
+            <line x1="36" y1="155" x2="340" y2="155" stroke="var(--tax-border)" stroke-width="2" />
+            <line x1="36" y1="20" x2="36" y2="155" stroke="var(--tax-border)" stroke-width="2" />
+            <polyline points="36,155 180,35 335,35" fill="none" stroke="var(--tax-primary)" stroke-width="3.5" />
+            <text x="65" y="78" fill="var(--tax-amber)" font-size="11" font-weight="700">斜坡：受限于 HBM 显存带宽</text>
+            <text x="200" y="28" fill="var(--tax-green)" font-size="11" font-weight="700">平顶：受限于峰值算力</text>
+            <circle id="dot" cx="44" cy="148" r="7" fill="var(--tax-red)" />
+          </svg>
+        </div>
+
+        <div class="card">
+          <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">当前瓶颈状态</div>
+          <div class="big" id="stateOut" style="font-size:20px;margin:6px 0 12px;">🚨 显存带宽受限</div>
+          <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">Tensor Core 算力利用率</div>
+          <div class="big" id="utilOut">1.2%</div>
+          <div style="font-size:12px;color:var(--tax-muted);margin-top:8px;" id="detailOut"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>把 Batch Size 拉过 <strong>128</strong> 看看！在单用户聊天（Batch=1）时，显卡 98% 的算力都在闲置等 HBM 搬权重——这就是为什么 AI 芯片拼命堆 <strong>HBM3e 高带宽显存</strong>！
+    </div>
+  </div>
+
+  <script>
+    let drags = 0;
+    const KNEE = 128;
+    function render() {
+      const bs = parseInt(document.getElementById("bsSlider").value, 10);
+      document.getElementById("bsVal").textContent = bs;
+      const util = Math.min(100, (bs / KNEE) * 100);
+      document.getElementById("utilOut").textContent = util.toFixed(1) + "%";
+
+      let x, y;
+      if (bs <= KNEE) {
+        const t = bs / KNEE;
+        x = 36 + t * (180 - 36);
+        y = 155 - t * (155 - 35);
+      } else {
+        const t = (bs - KNEE) / (256 - KNEE);
+        x = 180 + t * (330 - 180);
+        y = 35;
+      }
+      const dot = document.getElementById("dot");
+      dot.setAttribute("cx", x.toFixed(1));
+      dot.setAttribute("cy", y.toFixed(1));
+      dot.setAttribute("fill", bs < KNEE ? "var(--tax-red)" : "var(--tax-green)");
+
+      if (bs < KNEE) {
+        document.getElementById("stateOut").textContent = "🚨 Memory-Bound（显存墙）";
+        document.getElementById("detailOut").textContent = `每搬运 1 次权重只算 ${bs} 份数据，算术强度不足，核心严重“吃不饱”。`;
+      } else {
+        document.getElementById("stateOut").textContent = "✅ Compute-Bound（算力打满）";
+        document.getElementById("detailOut").textContent = `权重搬运一次同时服务 ${bs} 个请求，成功跨过 Roofline 拐点，芯片满血狂飙！`;
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>成功突破显存墙！</strong>一次 HBM 搬运的数据被 <strong>128+ 个请求共享复用</strong>，算术强度越过拐点，这才把几万美元一张显卡的真实算力榨干！";
+      }
+    }
+    document.getElementById("bsSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

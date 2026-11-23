@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：3D 并行切分装配台 · DP / TP / PP</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .gpus { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    @media (max-width: 720px) { .gpus { grid-template-columns: repeat(2, 1fr); } }
+    .gpu { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .gpu.oom { border-color: var(--tax-red); background: rgba(239,68,68,0.08); }
+    .vram { height: 12px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin: 8px 0; }
+    .vfill { height: 100%; border-radius: 999px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧩 3D 并行切分装配台：怎么把 140GB 模型塞进 4 张 80GB 显卡？</h1>
+        <p>依次切换 <strong>数据并行（DP）</strong>、<strong>流水线并行（PP）</strong> 与 <strong>张量并行（TP）</strong>，观察模型权重怎么切、哪张卡会 OOM 爆显存！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="bDP" onclick="pick('DP')">1. 数据并行（DP）</button>
+        <button class="btn" id="bPP" onclick="pick('PP')">2. 流水线并行（PP）</button>
+        <button class="btn" id="bTP" onclick="pick('TP')">3. 张量并行（TP）</button>
+      </div>
+
+      <div class="gpus" id="gpuRow"></div>
+      <div id="commLine" style="margin-top:14px;font-size:13.5px;font-weight:750;color:var(--tax-muted);"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const MODES = {
+      DP: {
+        mem: 140, cap: 80, oom: true,
+        cards: ["完整模型 (140GB) + 数据片 1", "完整模型 (140GB) + 数据片 2", "完整模型 (140GB) + 数据片 3", "完整模型 (140GB) + 数据片 4"],
+        comm: "📡 通信时机：仅在每步反向传播后同步梯度（All-Reduce），通信量适中。",
+        aha: "💡 <strong>数据并行（DP）爆显存（OOM）！</strong>DP 要求每张卡都塞下一份完整模型权重，单卡 80GB 根本装不下 140GB 的 70B 模型，所以必须切模型（ZeRO / PP / TP）！"
+      },
+      PP: {
+        mem: 35, cap: 80, oom: false,
+        cards: ["第 1–20 层 (35GB)", "第 21–40 层 (35GB)", "第 41–60 层 (35GB)", "第 61–80 层 (35GB)"],
+        comm: "📡 通信时机：仅相邻卡之间传激活值（点对点），通信量极小，适合跨机器！",
+        aha: "💡 <strong>流水线并行（PP，按层横切）：</strong>显存瞬间降为 1/4（35GB ✅），跨机网卡也能跑！缺点是容易出现首尾等待的“流水线气泡”。"
+      },
+      TP: {
+        mem: 35, cap: 80, oom: false,
+        cards: ["每层矩阵切 1/4 列 (35GB)", "每层矩阵切 1/4 列 (35GB)", "每层矩阵切 1/4 列 (35GB)", "每层矩阵切 1/4 列 (35GB)"],
+        comm: "📡 通信时机：<strong>每一层 Transformer 内部都要做 2 次 All-Reduce</strong>，通信极其密集！",
+        aha: "💡 <strong>张量并行（TP，把单个矩阵竖切）：</strong>4 张卡每层齐步走、没有气泡，但通信量巨大——工程铁律是：<strong>机内用 NVLink 跑 TP，跨机器跑 PP 和 DP（合称 3D 并行）</strong>！"
+      }
+    };
+    const seen = new Set(["DP"]);
+    function pick(m) {
+      seen.add(m);
+      ["DP", "PP", "TP"].forEach(k => document.getElementById("b" + k).classList.toggle("active", k === m));
+      const d = MODES[m];
+      const pct = Math.min(100, (d.mem / d.cap) * 100);
+      document.getElementById("gpuRow").innerHTML = d.cards.map((c, i) => `
+        <div class="gpu ${d.oom ? "oom" : ""}">
+          <div style="font-weight:850;font-size:14px;">GPU #${i} (80GB)</div>
+          <div class="vram"><div class="vfill" style="width:${pct}%;background:${d.oom ? "var(--tax-red)" : "var(--tax-green)"}"></div></div>
+          <div style="font-size:12px;font-family:monospace;font-weight:800;">${d.mem}GB / 80GB ${d.oom ? "💥OOM" : "✅"}</div>
+          <div style="font-size:12px;color:var(--tax-muted);margin-top:6px;">${c}</div>
+        </div>
+      `).join("");
+      document.getElementById("commLine").innerHTML = d.comm;
+      document.getElementById("ahaBox").innerHTML = d.aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("DP");
+  </script>
+</body>
+</html>

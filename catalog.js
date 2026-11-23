@@ -6,10 +6,10 @@ window.TAXONOMY_DATA = {
   "stats": {
     "totalDomains": 10,
     "litDomains": 1,
-    "totalTopics": 30,
-    "totalPlannedTopics": 245,
+    "totalTopics": 34,
+    "totalPlannedTopics": 241,
     "totalBlueprintTopics": 275,
-    "totalToys": 90
+    "totalToys": 102
   },
   "tracks": [
     {
@@ -1573,30 +1573,13 @@ window.TAXONOMY_DATA = {
         {
           "id": "infra-safety",
           "title": "8. 基础设施、可解释与安全治理",
-          "plannedTopics": [
-            {
-              "slug": "ai-infra-safety-01",
-              "title": "GPU 与 AI 芯片并行原理"
-            },
-            {
-              "slug": "ai-infra-safety-02",
-              "title": "分布式训练并行（DP / TP / PP）"
-            },
-            {
-              "slug": "ai-infra-safety-03",
-              "title": "机制可解释性（打开黑盒）"
-            },
-            {
-              "slug": "ai-infra-safety-04",
-              "title": "AI 伦理、水印与隐私治理"
-            }
-          ]
+          "plannedTopics": []
         }
       ],
-      "liveTopicCount": 30,
-      "plannedTopicCount": 13,
+      "liveTopicCount": 34,
+      "plannedTopicCount": 9,
       "blueprintTopicCount": 43,
-      "liveToyCount": 90,
+      "liveToyCount": 102,
       "topics": [
         {
           "id": "ai/ai-dl-foundations-01",
@@ -2094,6 +2077,55 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "ai/ai-infra-safety-01",
+          "slug": "ai-infra-safety-01",
+          "domain": "ai",
+          "branch": "infra-safety",
+          "order": 4,
+          "title": "GPU 与 AI 芯片并行原理",
+          "icon": "🧮",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "为什么 CPU 算大模型慢如蜗牛，而 GPU、TPU 和 NPU 能靠“人海战术”和脉动阵列把矩阵乘法拉满？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/llm-infra-toys",
+            "ai/ai-dl-foundations-05"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-infra-safety-01/01-cpu-vs-gpu-race.html",
+              "file": "01-cpu-vs-gpu-race.html",
+              "path": "./domains/ai/ai-infra-safety-01/01-cpu-vs-gpu-race.html",
+              "title": "CPU 法拉利 vs GPU 大巴车竞速",
+              "icon": "🚌",
+              "archetype": "race",
+              "concept": "低延迟串行 vs 高吞吐并行 · SIMD / SIMT · 矩阵乘法",
+              "summary": "在“复杂逻辑分支”与“1000 次矩阵乘加”两个任务上，让 4 核 CPU 和 64 核 GPU 同步起跑对比。"
+            },
+            {
+              "id": "ai/ai-infra-safety-01/02-memory-wall-roofline.html",
+              "file": "02-memory-wall-roofline.html",
+              "path": "./domains/ai/ai-infra-safety-01/02-memory-wall-roofline.html",
+              "title": "显存墙与 Roofline 屋顶线沙盘",
+              "icon": "🧱",
+              "archetype": "simulation",
+              "concept": "算术强度 · Memory-Bound vs Compute-Bound · HBM 带宽",
+              "summary": "调节批大小 Batch Size，亲眼看推理如何撞上 HBM 显存带宽天花板，以及批处理如何把算力榨干。"
+            },
+            {
+              "id": "ai/ai-infra-safety-01/03-systolic-array-spatial.html",
+              "file": "03-systolic-array-spatial.html",
+              "path": "./domains/ai/ai-infra-safety-01/03-systolic-array-spatial.html",
+              "title": "TPU 脉动阵列数据流图谱",
+              "icon": "💎",
+              "archetype": "spatial",
+              "concept": "Tensor Core · 脉动阵列 Systolic Array · 数据复用",
+              "summary": "单步推进 3×3 脉动阵列时钟脉冲，直观观察权重驻留芯片内、激活值如心跳般波浪传递的零搬运魔法。"
+            }
+          ]
+        },
+        {
           "id": "ai/ai-symbolic-ml-04",
           "slug": "ai-symbolic-ml-04",
           "domain": "ai",
@@ -2343,6 +2375,56 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "ai/ai-infra-safety-02",
+          "slug": "ai-infra-safety-02",
+          "domain": "ai",
+          "branch": "infra-safety",
+          "order": 5,
+          "title": "分布式训练并行（DP / TP / PP）",
+          "icon": "🕸️",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "一张显卡装不下千亿参数大模型，怎么把几千张 GPU 编织成一台巨型超级计算机？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/llm-infra-toys",
+            "ai/llm-training-toys",
+            "ai/ai-infra-safety-01"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-infra-safety-02/01-3d-parallelism-builder.html",
+              "file": "01-3d-parallelism-builder.html",
+              "path": "./domains/ai/ai-infra-safety-02/01-3d-parallelism-builder.html",
+              "title": "3D 并行切分装配台（DP / TP / PP）",
+              "icon": "🧩",
+              "archetype": "builder",
+              "concept": "数据并行 DP · 张量并行 TP · 流水线并行 PP",
+              "summary": "切换三种切分策略把 70B 模型塞进 4 张 GPU，直观对比每张卡的显存占用与卡间通信压力。"
+            },
+            {
+              "id": "ai/ai-infra-safety-02/02-pipeline-bubble-simulation.html",
+              "file": "02-pipeline-bubble-simulation.html",
+              "path": "./domains/ai/ai-infra-safety-02/02-pipeline-bubble-simulation.html",
+              "title": "流水线气泡（Bubble）消除沙盘",
+              "icon": "🫧",
+              "archetype": "simulation",
+              "concept": "流水线并行 PP · Micro-batch 微批次 · 气泡率公式",
+              "summary": "调高微批次切分数 M，亲眼看见 4 张 GPU 之间大片白白发呆的“空闲气泡”如何被迅速挤掉。"
+            },
+            {
+              "id": "ai/ai-infra-safety-02/03-nvlink-vs-ethernet-race.html",
+              "file": "03-nvlink-vs-ethernet-race.html",
+              "path": "./domains/ai/ai-infra-safety-02/03-nvlink-vs-ethernet-race.html",
+              "title": "NVLink vs 以太网梯度同步竞速",
+              "icon": "⚡",
+              "archetype": "race",
+              "concept": "All-Reduce 梯度同步 · NVLink 900GB/s · 通信掩盖",
+              "summary": "对比张量并行跑在机内 NVLink 与跨机普通千兆/百兆网上的真实步时，理解为什么集群贵在互联。"
+            }
+          ]
+        },
+        {
           "id": "ai/ai-llm-foundations-01",
           "slug": "ai-llm-foundations-01",
           "domain": "ai",
@@ -2588,6 +2670,105 @@ window.TAXONOMY_DATA = {
               "archetype": "builder",
               "concept": "Hybrid Pattern · 路由网关 · 受限循环",
               "summary": "把业务环节装配到“硬编码节点 / LLM 路由 / 自主沙箱”三层，搭出既省钱又抗造的生产级 AI 系统。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-infra-safety-03",
+          "slug": "ai-infra-safety-03",
+          "domain": "ai",
+          "branch": "infra-safety",
+          "order": 6,
+          "title": "机制可解释性（打开黑盒）",
+          "icon": "🔬",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "大模型真的是彻底无法理解的“黑盒”吗？科学家怎么用稀疏自编码器给 AI 做“脑部核磁共振”？",
+          "difficulty": "进阶",
+          "related": [
+            "ai/ai-dl-foundations-05",
+            "ai/token-embedding-toys",
+            "ai/ai-security-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-infra-safety-03/01-superposition-sae-spatial.html",
+              "file": "01-superposition-sae-spatial.html",
+              "path": "./domains/ai/ai-infra-safety-03/01-superposition-sae-spatial.html",
+              "title": "叠加态与稀疏自编码器（SAE）显微镜",
+              "icon": "🔭",
+              "archetype": "spatial",
+              "concept": "多义神经元 Polysemanticity · 叠加假说 Superposition · SAE 拆解",
+              "summary": "打开 SAE 显微镜，把一个同时响应“猫、代码括号、法语”的混乱神经元拆解成清晰独立的单义概念特征。"
+            },
+            {
+              "id": "ai/ai-infra-safety-03/02-feature-steering-sandbox.html",
+              "file": "02-feature-steering-sandbox.html",
+              "path": "./domains/ai/ai-infra-safety-03/02-feature-steering-sandbox.html",
+              "title": "概念方向盘：金门大桥人格操控器",
+              "icon": "🌉",
+              "archetype": "simulation",
+              "concept": "特征干预 Activation Steering · 金门大桥 Claude · 因果可控",
+              "summary": "亲手拉高大模型内部“金门大桥”或“安全谨慎”特征的激活值，看它回答日常问题时如何瞬间被概念接管。"
+            },
+            {
+              "id": "ai/ai-infra-safety-03/03-circuit-ablation-lab.html",
+              "file": "03-circuit-ablation-lab.html",
+              "path": "./domains/ai/ai-infra-safety-03/03-circuit-ablation-lab.html",
+              "title": "大脑回路剪枝与因果定位实验",
+              "icon": "✂️",
+              "archetype": "builder",
+              "concept": "电路发现 Circuits · 激活修补 Activation Patching · 归纳头",
+              "summary": "在“如果小红把苹果给了小明，苹果现在在谁手里？”任务上逐一禁用注意力头，精准找出负责推理的关键回路。"
+            }
+          ]
+        },
+        {
+          "id": "ai/ai-infra-safety-04",
+          "slug": "ai-infra-safety-04",
+          "domain": "ai",
+          "branch": "infra-safety",
+          "order": 7,
+          "title": "AI 伦理、水印与隐私治理",
+          "icon": "🛡️",
+          "color": "#2563eb",
+          "soft": "#eff6ff",
+          "subtitle": "怎么辨别一段话是不是 AI 写的？模型会背出训练数据里的个人隐私吗？算法偏见又从何而来？",
+          "difficulty": "入门",
+          "related": [
+            "ai/ai-security-toys",
+            "ai/llm-evals-toys"
+          ],
+          "toys": [
+            {
+              "id": "ai/ai-infra-safety-04/01-greenlist-watermark-lab.html",
+              "file": "01-greenlist-watermark-lab.html",
+              "path": "./domains/ai/ai-infra-safety-04/01-greenlist-watermark-lab.html",
+              "title": "红绿词表隐形水印检测仪",
+              "icon": "💧",
+              "archetype": "blind-lab",
+              "concept": "统计文本水印 · Green/Red List · 隐形签名与鲁棒性",
+              "summary": "开启隐形词表水印，看大模型如何不动声色地偏爱“绿名单”词汇，让肉眼看不出破绽却能被统计仪一秒抓包。"
+            },
+            {
+              "id": "ai/ai-infra-safety-04/02-differential-privacy-sandbox.html",
+              "file": "02-differential-privacy-sandbox.html",
+              "path": "./domains/ai/ai-infra-safety-04/02-differential-privacy-sandbox.html",
+              "title": "差分隐私（DP）加噪保护滑块",
+              "icon": "🔒",
+              "archetype": "simulation",
+              "concept": "成员推断攻击 · 差分隐私预算 ε · 隐私与效用权衡",
+              "summary": "调节隐私预算 ε 注入数学噪声，在“防黑客反推个人病历”和“保持模型准确率”之间找到黄金平衡点。"
+            },
+            {
+              "id": "ai/ai-infra-safety-04/03-algorithmic-bias-scenario.html",
+              "file": "03-algorithmic-bias-scenario.html",
+              "path": "./domains/ai/ai-infra-safety-04/03-algorithmic-bias-scenario.html",
+              "title": "简历筛选公平性审计室",
+              "icon": "⚖️",
+              "archetype": "scenario",
+              "concept": "历史数据偏见 · 代理变量 Proxy Variable · 公平性治理",
+              "summary": "删掉“性别”字段为什么模型依然存在性别歧视？亲手排查隐藏在社团与邮编里的“代理变量”陷阱。"
             }
           ]
         },

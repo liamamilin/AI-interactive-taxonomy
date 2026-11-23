@@ -1,0 +1,33 @@
+{
+  "domain": "ai",
+  "branch": "infra-safety",
+  "order": 4,
+  "title": "GPU 与 AI 芯片并行原理",
+  "icon": "🧮",
+  "subtitle": "为什么 CPU 算大模型慢如蜗牛，而 GPU、TPU 和 NPU 能靠“人海战术”和脉动阵列把矩阵乘法拉满？",
+  "difficulty": "进阶",
+  "related": ["ai/llm-infra-toys", "ai/ai-dl-foundations-05"],
+  "toys": {
+    "01-cpu-vs-gpu-race.html": {
+      "title": "CPU 法拉利 vs GPU 大巴车竞速",
+      "icon": "🚌",
+      "archetype": "race",
+      "concept": "低延迟串行 vs 高吞吐并行 · SIMD / SIMT · 矩阵乘法",
+      "summary": "在“复杂逻辑分支”与“1000 次矩阵乘加”两个任务上，让 4 核 CPU 和 64 核 GPU 同步起跑对比。"
+    },
+    "02-memory-wall-roofline.html": {
+      "title": "显存墙与 Roofline 屋顶线沙盘",
+      "icon": "🧱",
+      "archetype": "simulation",
+      "concept": "算术强度 · Memory-Bound vs Compute-Bound · HBM 带宽",
+      "summary": "调节批大小 Batch Size，亲眼看推理如何撞上 HBM 显存带宽天花板，以及批处理如何把算力榨干。"
+    },
+    "03-systolic-array-spatial.html": {
+      "title": "TPU 脉动阵列数据流图谱",
+      "icon": "💎",
+      "archetype": "spatial",
+      "concept": "Tensor Core · 脉动阵列 Systolic Array · 数据复用",
+      "summary": "单步推进 3×3 脉动阵列时钟脉冲，直观观察权重驻留芯片内、激活值如心跳般波浪传递的零搬运魔法。"
+    }
+  }
+}

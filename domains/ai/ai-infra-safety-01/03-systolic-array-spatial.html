@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：TPU 脉动阵列数据流图谱 · Systolic Array</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .controls { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+    .btn { padding: 10px 16px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .pe-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 520px; margin: 0 auto; }
+    .pe { background: var(--tax-surface-alt); border: 2px solid var(--tax-border); border-radius: 14px; padding: 14px; text-align: center; transition: all 0.2s ease; }
+    .pe.hit { border-color: var(--tax-primary); background: rgba(99,102,241,0.12); transform: scale(1.03); }
+    .pe-w { font-size: 12px; color: var(--tax-muted); font-weight: 700; }
+    .pe-v { font-size: 18px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 4px; color: var(--tax-primary); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>💎 TPU 脉动阵列（Systolic Array）：数据像心跳一样流动，零多余读写！</h1>
+        <p>传统芯片算完一步就要把中间结果写回缓存；点击 <strong>“推进时钟节拍”</strong>，看 3×3 脉动阵列如何把权重锁死在每个乘法单元（PE）里，让输入波浪般向右、累加和向下直接传递！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="controls">
+        <button class="btn" onclick="step()">💓 推进时钟节拍（Tick +1）</button>
+        <button class="btn sec" onclick="resetSim()">↺ 重置</button>
+        <span style="font-weight:850;font-size:14px;">当前节拍：T = <span id="tickOut" style="color:var(--tax-primary)">0</span> / 5</span>
+        <span style="margin-left:auto;font-size:13px;color:var(--tax-green);font-weight:800;">省去中间内存读写：<span id="saveOut">0</span> 次</span>
+      </div>
+
+      <div class="pe-grid" id="peGrid"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>连续点击 <strong>“推进时钟节拍”</strong> 走到 T=5！每个 PE（处理单元）只在相邻邻居之间接力传数，就像心脏泵血（Systolic）一样，大幅省掉昂贵的片外访存功耗！
+    </div>
+  </div>
+
+  <script>
+    let tick = 0;
+    const W = [[2,1,3],[1,4,2],[3,2,1]];
+    const X = [1, 2, 3];
+
+    function render() {
+      document.getElementById("tickOut").textContent = tick;
+      let html = "";
+      let activeCount = 0;
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          const wave = r + c + 1;
+          const active = tick === wave;
+          const done = tick >= wave;
+          if (done) activeCount++;
+          const val = done ? `acc=${W[r][c] * X[r]}` : "待波峰到达";
+          html += `
+            <div class="pe ${active ? "hit" : ""}">
+              <div class="pe-w">PE(${r},${c}) · 驻留权重 W=${W[r][c]}</div>
+              <div class="pe-v">${active ? "⚡ " : ""}${val}</div>
+              <div style="font-size:11px;color:var(--tax-muted);margin-top:4px;">→ 传 X[${r}] | ↓ 传部分和</div>
+            </div>
+          `;
+        }
+      }
+      document.getElementById("peGrid").innerHTML = html;
+      document.getElementById("saveOut").textContent = activeCount * 2;
+      if (tick >= 5) {
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>脉动完成！</strong>在 5 个节拍内，9 个单元全靠邻里接力完成整块矩阵乘加，<strong>零次写回主存</strong>——这就是 Google TPU 与 NVIDIA Tensor Core 能效比碾压通用芯片的核心秘密！";
+        if (window.ToySDK) window.ToySDK.markCompleted();
+      }
+    }
+
+    function step() { if (tick < 5) tick++; render(); }
+    function resetSim() { tick = 0; render(); }
+    render();
+  </script>
+</body>
+</html>

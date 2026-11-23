@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：流水线气泡（Bubble）消除沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .gantt { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+    .grow { display: grid; grid-template-columns: 64px 1fr; gap: 10px; align-items: center; }
+    .slots { display: flex; gap: 3px; }
+    .blk { flex: 1; height: 24px; border-radius: 5px; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+    .work { background: var(--tax-primary); color: #fff; }
+    .idle { background: var(--tax-surface-alt); border: 1px dashed var(--tax-border); color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🫧 流水线气泡（Bubble）：怎么不让 75% 的显卡都在发呆？</h1>
+        <p>4 张 GPU 串联跑流水线并行（P=4）。如果不切微批次（M=1），同一时刻只有 1 张卡在干活！向右拖动 <strong>微批次数 M</strong>，看空闲气泡如何被压缩！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">🔪 微批次切分数 Micro-batch (M)：<span id="mVal" style="color:var(--tax-primary)">1</span>（当前空闲气泡率：<span id="bubVal" style="color:var(--tax-red)">75.0%</span>）</label>
+      <input id="mSlider" type="range" min="1" max="12" value="1" style="width:100%;margin-top:8px;" />
+
+      <div class="gantt" id="ganttBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>气泡率公式为 <code>(P - 1) / (M + P - 1)</code>。把 <code>M</code> 拉到 <strong>8 以上</strong>，看看把一个大 Batch 切成细碎微批次流进流水线后，显卡利用率发生了什么奇迹！
+    </div>
+  </div>
+
+  <script>
+    const P = 4;
+    let drags = 0;
+    function render() {
+      const M = parseInt(document.getElementById("mSlider").value, 10);
+      const totalSlots = M + P - 1;
+      const bubbleRate = ((P - 1) / totalSlots) * 100;
+      document.getElementById("mVal").textContent = M;
+      const bubEl = document.getElementById("bubVal");
+      bubEl.textContent = bubbleRate.toFixed(1) + "%";
+      bubEl.style.color = bubbleRate > 40 ? "var(--tax-red)" : "var(--tax-green)";
+
+      let html = "";
+      for (let g = 0; g < P; g++) {
+        let cells = "";
+        for (let t = 0; t < totalSlots; t++) {
+          const isWork = t >= g && t < g + M;
+          cells += `<div class="blk ${isWork ? "work" : "idle"}">${isWork ? "m" + (t - g + 1) : "🫧"}</div>`;
+        }
+        html += `<div class="grow"><span style="font-size:12.5px;font-weight:800;">GPU ${g}</span><div class="slots">${cells}</div></div>`;
+      }
+      document.getElementById("ganttBox").innerHTML = html;
+
+      if (M >= 8) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>气泡被成功挤扁！</strong>当 M=${M} 时，气泡率从惨烈的 75% 骤降到 <strong>${bubbleRate.toFixed(1)}%</strong>！就像工厂装配线，只要源源不断往里送零件（Micro-batch），4 个工位就能全速满载运转！`;
+      }
+    }
+    document.getElementById("mSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

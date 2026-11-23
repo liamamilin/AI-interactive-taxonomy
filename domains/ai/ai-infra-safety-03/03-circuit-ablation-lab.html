@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：大脑回路剪枝与因果定位实验 · Circuits</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .heads { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0; }
+    @media (max-width: 720px) { .heads { grid-template-columns: repeat(2, 1fr); } }
+    .head { padding: 14px; border-radius: 14px; border: 1.5px solid var(--tax-primary); background: var(--tax-surface-alt); cursor: pointer; text-align: center; transition: all 0.15s ease; }
+    .head.cut { opacity: 0.45; border-style: dashed; border-color: var(--tax-red); }
+    .res { padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); font-weight: 800; font-size: 14.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>✂️ 回路剪枝手术台（Ablation）：找出负责“指代推理”的真正主谋！</h1>
+        <p>输入句子：<code>“当小红和小明走到公园，小红把苹果递给了 ___”</code>（正确答案：<strong>小明</strong>）。点击下方 4 个注意力头将其<strong>暂时切掉（清零）</strong>，看看切掉哪两个头会让模型瞬间答错！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="heads" id="headGrid"></div>
+      <div class="res" id="resBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const HEADS = [
+      { id: "h1", name: "L2.H1 标点格式头", role: "只管逗号和空格", critical: false },
+      { id: "h2", name: "L7.H3 重复名抑制头", role: "标记“小红”已出现两次，抑制它", critical: true },
+      { id: "h3", name: "L9.H9 名字搬运头", role: "把另一个人名“小明”搬到输出位", critical: true },
+      { id: "h4", name: "L10.H2 词性修饰头", role: "处理动词时态", critical: false }
+    ];
+    const cut = { h1: false, h2: false, h3: false, h4: false };
+    let clicks = 0;
+
+    function toggle(id) {
+      clicks++;
+      cut[id] = !cut[id];
+      render();
+      if (clicks >= 2 && (cut.h2 || cut.h3) && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      document.getElementById("headGrid").innerHTML = HEADS.map(h => `
+        <div class="head ${cut[h.id] ? "cut" : ""}" onclick="toggle('${h.id}')">
+          <div style="font-weight:850;font-size:13.5px;">${cut[h.id] ? "✂️ 已禁用" : "🟢 运行中"} · ${h.name}</div>
+          <div style="font-size:11.5px;color:var(--tax-muted);margin-top:6px;">点击${cut[h.id] ? "恢复" : "剪断"}该注意力头</div>
+        </div>
+      `).join("");
+
+      let pred = "小明（置信度 96%）✅";
+      let note = "关键 IOI 回路完整，模型精准排除重复主语，输出正确人名！";
+      if (cut.h2 && !cut.h3) {
+        pred = "小红（置信度 52% vs 小明 48%）⚠️ 混乱！";
+        note = "剪断「重复名抑制头」后，模型分不清谁是送出者、谁是接收者！";
+      } else if (cut.h3) {
+        pred = "公园 / 苹果（置信度 21%）❌ 彻底崩溃！";
+        note = "剪断「名字搬运头」后，模型连人名都搬不过来，直接胡言乱语！";
+      }
+      document.getElementById("resBox").innerHTML = `模型预测下一个词：<span style="color:var(--tax-primary)">${pred}</span><div style="font-size:13px;font-weight:500;color:var(--tax-muted);margin-top:6px;">${note}</div>`;
+      document.getElementById("ahaBox").innerHTML = (cut.h2 || cut.h3)
+        ? "💡 <strong>精准定位 IOI 推理电路！</strong>即使大模型有几百个注意力头，真正负责某项推理的往往只是寥寥几个协作的<strong>子电路（Circuits）</strong>——这就是机制可解释性最迷人的“反向工程”方法！"
+        : "💡 <strong>顿悟时刻：</strong>试着点击剪断不同的注意力头！切掉无关的头模型纹丝不动，只有切到真正干活的电路，预测才会瞬间崩塌。";
+    }
+    render();
+  </script>
+</body>
+</html>

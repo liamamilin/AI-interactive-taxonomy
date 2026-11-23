@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：概念方向盘 · 金门大桥人格操控器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .bubble { padding: 16px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-size: 14.5px; line-height: 1.65; margin-top: 14px; min-height: 92px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🌉 概念方向盘：不改提示词、不重新训练，怎么直接“拧”动 AI 的大脑？</h1>
+        <p>在找到大模型内部代表 <strong>“金门大桥（Golden Gate Bridge）”</strong> 的 SAE 特征向量后，向右拖动激活钳位强度（Clamping），看它如何回答普通提问！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div style="font-size:13px;color:var(--tax-muted);font-weight:750;margin-bottom:8px;">🗣️ 用户提问：“你好，你今天过得怎么样？能给我推荐一道晚饭吗？”</div>
+      <label style="font-size:14.5px;font-weight:850;">🎛️ 特征 #51092（金门大桥）人工注入强度：<span id="sVal" style="color:var(--tax-primary)">0</span>×</label>
+      <input id="sSlider" type="range" min="0" max="10" value="0" style="width:100%;margin-top:8px;" />
+
+      <div class="bubble" id="replyBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const v = parseInt(document.getElementById("sSlider").value, 10);
+      document.getElementById("sVal").textContent = v;
+      let txt, aha;
+      if (v <= 2) {
+        txt = "🤖 AI：“我今天状态不错！晚饭推荐你可以做一份番茄炒蛋配清炒西兰花，营养均衡又快手。”";
+        aha = "💡 <strong>正常基线（0–2×）：</strong>向右拉高特征注入强度到 <strong>6× 以上</strong>，见证 Anthropic 著名的 <strong>Golden Gate Claude</strong> 因果操控实验！";
+      } else if (v <= 6) {
+        txt = "🤖 AI：“我今天很好！晚饭推荐旧金山海湾风味的酸面包浓汤——如果能一边吃一边远眺红色的<strong>金门大桥</strong>，那体验就更棒了！”";
+        aha = "💡 <strong>中度激活干预（3–6×）：</strong>我们没改系统提示词，只是在推理前向传播时往残差流里加了一点该特征向量，模型的联想就已经自然偏向金门大桥！";
+      } else {
+        txt = "🤖 AI：“我就是<strong>金门大桥</strong>本人！我横跨在旧金山湾的浓雾之中，全身涂满国际橙色油漆。至于晚饭，我建议你开车穿过我 2.7 公里的悬索桥身去海边吃海鲜！”";
+        aha = "💡 <strong>因果证实（7–10×）：</strong>特征被拉满后，模型甚至坚信自己就是金门大桥！这证明 SAE 找到的不是巧合的相关性，而是真正控制行为的<strong>因果方向</strong>——未来同样可以用于精准调低“欺骗”或“有害”特征！";
+      }
+      document.getElementById("replyBox").innerHTML = txt;
+      document.getElementById("ahaBox").innerHTML = aha;
+    }
+    document.getElementById("sSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：NVLink vs 以太网梯度同步竞速</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 16px; }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+    .track { height: 16px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin: 8px 0; }
+    .fill { height: 100%; width: 0%; transition: width 0.15s linear; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⚡ NVLink vs 普通以太网：为什么万卡集群一半预算都花在“修高速路”上？</h1>
+        <p>假设每步训练需要通过 <strong>All-Reduce</strong> 同步 <strong>10 GB</strong> 梯度张量。点击发车，看 3 种互联网络谁先把数据传完！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="btn" onclick="start()">▶ 同步 10 GB 梯度张量</button>
+
+      <div class="lane">
+        <div style="font-weight:850;font-size:14px;">🚀 机内 NVLink 4.0（900 GB/s）</div>
+        <div class="track"><div class="fill" id="f1" style="background:var(--tax-green);"></div></div>
+        <div id="t1" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+      </div>
+
+      <div class="lane">
+        <div style="font-weight:850;font-size:14px;">🚄 跨机 InfiniBand 400G（50 GB/s）</div>
+        <div class="track"><div class="fill" id="f2" style="background:var(--tax-primary);"></div></div>
+        <div id="t2" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+      </div>
+
+      <div class="lane">
+        <div style="font-weight:850;font-size:14px;">🐢 普通万兆以太网 10GbE（1.25 GB/s）</div>
+        <div class="track"><div class="fill" id="f3" style="background:var(--tax-red);"></div></div>
+        <div id="t3" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>点击上方按钮开始同步，看看如果用普通网线连接 GPU，昂贵的算力会有多少时间被死死卡在通信等待上！
+    </div>
+  </div>
+
+  <script>
+    let timer = null;
+    function start() {
+      if (timer) clearInterval(timer);
+      let p1 = 0, p2 = 0, p3 = 0;
+      timer = setInterval(() => {
+        p1 = Math.min(100, p1 + 50);
+        p2 = Math.min(100, p2 + 18);
+        p3 = Math.min(100, p3 + 4);
+        document.getElementById("f1").style.width = p1 + "%";
+        document.getElementById("f2").style.width = p2 + "%";
+        document.getElementById("f3").style.width = p3 + "%";
+        document.getElementById("t1").textContent = p1 >= 100 ? "✅ 理论耗时 ~11 ms（瞬间完成！）" : `传输中 ${p1}%`;
+        document.getElementById("t2").textContent = p2 >= 100 ? "✅ 理论耗时 ~200 ms（可被计算掩盖）" : `传输中 ${p2}%`;
+        document.getElementById("t3").textContent = p3 >= 100 ? "😵 理论耗时 ~8,000 ms（慢了 700 倍！）" : `龟速传输 ${p3}%`;
+        if (p3 >= 100) {
+          clearInterval(timer);
+          document.getElementById("ahaBox").innerHTML = "💡 <strong>这就是为什么买得起卡却不一定搭得出好集群：</strong>在普通网线下，GPU 算完只要几十毫秒，等梯度同步却要 8 秒！没有 <strong>NVLink + InfiniBand / RoCE 高速互联</strong>，千卡集群的算力全浪费在堵车上了！";
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }, 120);
+    }
+  </script>
+</body>
+</html>
