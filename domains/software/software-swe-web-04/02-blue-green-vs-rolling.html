@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：发布策略对比 · 蓝绿部署 vs 滚动发布</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .bar-row { display: grid; grid-template-columns: 115px 1fr 90px; gap: 10px; align-items: center; margin: 12px 0; font-size: 13.5px; font-weight: 800; }
+    .track { height: 14px; background: var(--tax-surface-alt); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); }
+    .fill { height: 100%; border-radius: 999px; transition: width 0.25s ease; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔀 蓝绿部署 vs 滚动发布：零停机发版到底该怎么选？</h1>
+        <p>切换三大主流部署策略，直观对比<strong>零停机体验</strong>、<strong>回滚速度</strong>与<strong>服务器硬件成本</strong>的权衡！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="mStop" onclick="pick('stop')">🛑 停机维护更新（Recreate）</button>
+        <button class="btn" id="mBg" onclick="pick('bg')">🔵🟢 蓝绿部署（Blue-Green）</button>
+        <button class="btn" id="mRoll" onclick="pick('roll')">🔄 滚动发布（Rolling Update）</button>
+      </div>
+      <div id="bars"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const DATA = {
+      stop: {
+        m: [
+          { l: "零停机体验", v: 10, t: "直接停服挂公告", c: "var(--tax-red)" },
+          { l: "回滚速度", v: 30, t: "慢（需重装）", c: "var(--tax-amber)" },
+          { l: "节省机器成本", v: 100, t: "最省（1份机器）", c: "var(--tax-green)" }
+        ],
+        aha: "💡 <strong>停机更新（Recreate）：</strong>先把旧版全停掉再启新版。只有网游凌晨停服维护或内部小工具才敢这么干！"
+      },
+      bg: {
+        m: [
+          { l: "零停机体验", v: 100, t: "丝滑瞬切", c: "var(--tax-green)" },
+          { l: "回滚速度", v: 100, t: "1 秒切回蓝组！", c: "var(--tax-green)" },
+          { l: "节省机器成本", v: 25, t: "需双倍机器！", c: "var(--tax-red)" }
+        ],
+        aha: "💡 <strong>蓝绿部署（Blue-Green）：</strong>同时养着两套完整集群（蓝=旧版、绿=新版），测通后把网关流量一刀切到绿组；一旦翻车 1 秒切回蓝组！极度丝滑但要付双倍服务器账单。"
+      },
+      roll: {
+        m: [
+          { l: "零停机体验", v: 95, t: "零停机", c: "var(--tax-green)" },
+          { l: "回滚速度", v: 68, t: "逐台滚回", c: "var(--tax-amber)" },
+          { l: "节省机器成本", v: 90, t: "极省（K8s 默认）", c: "var(--tax-green)" }
+        ],
+        aha: "💡 <strong>滚动发布（Rolling Update · Kubernetes 默认）：</strong>像给行驶中的飞机逐颗换螺丝一样，每次只替换 1~2 台旧机器为新版，省钱又零停机；唯一要求是<strong>新旧版本 API 与数据库结构必须短暂向后兼容</strong>！"
+      }
+    };
+    const seen = new Set(["stop"]);
+    function pick(k) {
+      seen.add(k);
+      ["stop", "bg", "roll"].forEach(x => document.getElementById("m" + x.charAt(0).toUpperCase() + x.slice(1)).classList.toggle("active", x === k));
+      document.getElementById("bars").innerHTML = DATA[k].m.map(it => `
+        <div class="bar-row">
+          <span>${it.l}</span>
+          <div class="track"><div class="fill" style="width:${it.v}%;background:${it.c}"></div></div>
+          <span style="font-size:12px;text-align:right;color:${it.c};">${it.t}</span>
+        </div>
+      `).join("");
+      document.getElementById("ahaBox").innerHTML = DATA[k].aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("stop");
+  </script>
+</body>
+</html>

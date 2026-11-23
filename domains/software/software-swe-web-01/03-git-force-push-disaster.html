@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：公共分支强推 Rebase 社死现场 vs Revert</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .box { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 16px; line-height: 1.7; font-size: 14px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🚨 线上发现 Bug 要回滚：为什么禁止在公共 <code>main</code> 上 <code>reset --hard && push -f</code>？</h1>
+        <p>你的一个 Bug 提交已经推送到团队共享的 <code>main</code> 分支，5 位同事已经拉下来继续写代码了。切换两种回滚方案看看下场！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="mForce" onclick="pick('force')">💀 方案 A：reset --hard + git push --force（抹掉历史）</button>
+        <button class="btn" id="mRevert" onclick="pick('revert')">✅ 方案 B：git revert（新增一条反向抵消提交）</button>
+      </div>
+      <div class="box" id="outBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["force"]);
+    function pick(m) {
+      seen.add(m);
+      document.getElementById("mForce").classList.toggle("active", m === "force");
+      document.getElementById("mRevert").classList.toggle("active", m === "revert");
+      const rev = m === "revert";
+      document.getElementById("outBox").innerHTML = rev
+        ? "✅ <strong>全员丝滑无痛撤销！</strong><br><code>git revert</code> 不删任何旧提交，而是向前追加一个新提交 <code>R1</code>（内容正好与 Bug 提交完全相反）。5 位同事 <code>git pull</code> 一键快进同步，审计日志清清楚楚，谁也不受影响！"
+        : "💥 <strong>全组炸锅社死现场！</strong><br>你把远程 <code>main</code> 的历史硬生生抹掉了一截。5 位同事本地都基于那条被删掉的 Commit 开发，他们一 <code>git pull</code> 满屏分叉冲突，甚至不小心又把你的 Bug 重新推了回去！";
+      document.getElementById("ahaBox").innerHTML = rev
+        ? "💡 <strong>Git 黄金法则（The Golden Rule of Rebasing）：</strong>永远不要改写<strong>已经推送给别人共享的公共历史</strong>！自己本地私有分支随便 Rebase/Reset 整理；一旦上了公共分支，撤回永远用 <strong><code>git revert</code></strong>！"
+        : "💡 <strong>为什么强推公共分支是大忌？</strong>因为 Git 靠父提交哈希串联世界，你一抹历史，全组所有人的本地仓库瞬间与远程分道扬镳！切到 <strong>✅ git revert</strong> 看优雅解法。";
+      if (seen.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("force");
+  </script>
+</body>
+</html>

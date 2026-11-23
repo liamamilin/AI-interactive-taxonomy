@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：手造一个 Docker · Namespace + Cgroups</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    @media (max-width: 720px) { .checks { grid-template-columns: 1fr; } }
+    .chk { display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-weight: 800; font-size: 13px; cursor: pointer; }
+    .box { padding: 16px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-size: 14px; line-height: 1.7; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🪄 手造一个 Docker：揭穿本质——容器就是一个被施了“障眼法”的普通进程！</h1>
+        <p>Linux 内核本来就有隔离能力！给下面这个裸奔的 <code>node app.js</code> 进程逐一戴上 3 件内核法宝，把它改造成完整 Docker 容器！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="checks">
+        <label class="chk"><input type="checkbox" id="k1" onchange="render()" /> 🕶️ PID &amp; Net Namespace（以为自己是 1 号进程+独立网卡）</label>
+        <label class="chk"><input type="checkbox" id="k2" onchange="render()" /> 📂 Mount Namespace / chroot（只能看到自己的根目录）</label>
+        <label class="chk"><input type="checkbox" id="k3" onchange="render()" /> ⛓️ Cgroups 资源紧箍咒（限死最多 1 核 CPU + 512MB 内存）</label>
+      </div>
+      <div class="box" id="outBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    function render() {
+      const k1 = document.getElementById("k1").checked;
+      const k2 = document.getElementById("k2").checked;
+      const k3 = document.getElementById("k3").checked;
+      const n = [k1, k2, k3].filter(Boolean).length;
+
+      document.getElementById("outBox").innerHTML = `
+        <strong>进程当前封装状态（${n} / 3）：</strong><br>
+        • 进程与网络视角：${k1 ? "✅ 以为自己是独享机器的 PID 1（看不见宿主机其他进程）" : "⚠️ 裸奔：能看到宿主机所有进程和端口"}<br>
+        • 文件系统视角：${k2 ? "✅ 锁死在镜像独立根目录下，告别“我电脑上能跑”！" : "⚠️ 裸奔：直接读写宿主机 /etc 和 /home"}<br>
+        • 算力资源上限：${k3 ? "✅ 戴上 Cgroups 紧箍咒，写死循环也拖不垮宿主机！" : "⚠️ 裸奔：内存泄漏会瞬间把整台服务器 OOM 带走！"}
+      `;
+      document.getElementById("ahaBox").innerHTML = n === 3
+        ? "💡 <strong>恭喜你手造了一个 Docker 容器！</strong>在宿主机上执行 <code>ps aux</code>，你会发现容器里跑的程序根本就是一个<strong>普通 Linux 进程</strong>——只不过靠 <strong>Namespaces 隔离视野（看不见别人）+ Cgroups 限制胃口（抢不走资源）+ 镜像打包依赖</strong>，实现了“一次构建，到处运行”！"
+        : "💡 <strong>顿悟时刻：</strong>把上方 3 件 Linux 内核法宝全部勾上，看看 Docker 到底在底层调用了什么魔法！";
+      if (n === 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+  </script>
+</body>
+</html>

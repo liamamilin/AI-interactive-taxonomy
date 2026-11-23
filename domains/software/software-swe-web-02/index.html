@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>浏览器 60fps 渲染流水线 · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎞️ 浏览器 60fps 渲染流水线</h1>
+        <p>为什么改 <code>left/top</code> 做动画卡成 PPT，而改 <code>transform: translate</code> 却丝滑 60 帧？16.6 毫秒里浏览器到底干了什么？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-reflow-vs-composite-race.html">
+        <div class="hub-icon">🏎️</div>
+        <div class="hub-tag">玩具 01 · 流水线对比（Race）</div>
+        <div class="hub-title">60fps 动画竞速：改 left vs 改 transform</div>
+        <div class="hub-desc">透视 Style→Layout→Paint→Composite 四大关卡，看懂 GPU 合成层为何能绕开最慢的重排重绘。</div>
+      </a>
+      <a class="hub-card" href="./02-frame-budget-16ms.html">
+        <div class="hub-icon">⏱️</div>
+        <div class="hub-tag">玩具 02 · 帧预算沙盘（Simulation）</div>
+        <div class="hub-title">16.6 毫秒帧预算分配沙盘</div>
+        <div class="hub-desc">分配单帧内的 JS 与渲染耗时，感受超过 16.6ms 哪怕 1 毫秒就掉一帧的 VSync 机制。</div>
+      </a>
+      <a class="hub-card" href="./03-critical-rendering-path.html">
+        <div class="hub-icon">🧱</div>
+        <div class="hub-tag">玩具 03 · 提速装配（Builder）</div>
+        <div class="hub-title">关键渲染路径（CRP）白屏加速装配台</div>
+        <div class="hub-desc">组合 script defer、预加载与关键 CSS，亲手把网页首屏加载速度拉满。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

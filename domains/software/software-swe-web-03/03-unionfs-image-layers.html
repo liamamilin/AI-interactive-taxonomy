@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：镜像分层复用 · OverlayFS 写时复制</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; }
+    .num { font-size: 28px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🍰 镜像分层复用（OverlayFS）：部署 10 个 500MB 的镜像，为什么硬盘只占了 590MB？</h1>
+        <p>假设每个微服务都基于 <strong>490 MB 的公共基础层（Ubuntu + Python）</strong>，加上各自仅 <strong>10 MB 的业务代码层</strong>。拖动部署数量看分层复用的惊人省空间效果！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-size:14.5px;font-weight:850;">🐳 同台机器部署微服务镜像数：<span id="nVal" style="color:var(--tax-primary)">1</span> 个</label>
+      <input id="nSlider" type="range" min="1" max="20" value="1" style="width:100%;margin-top:8px;" />
+
+      <div class="cards">
+        <div class="card">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">📦 不分层（每个镜像完整复制一份）</div>
+          <div class="num" id="rawOut" style="color:var(--tax-red);">500 MB</div>
+        </div>
+        <div class="card" style="border-color:var(--tax-green);">
+          <div style="font-size:13px;color:var(--tax-muted);font-weight:750;">🍰 Docker 分层共享（只读底层仅存 1 份！）</div>
+          <div class="num" id="layOut" style="color:var(--tax-green);">500 MB</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const n = parseInt(document.getElementById("nSlider").value, 10);
+      document.getElementById("nVal").textContent = n;
+      const raw = n * 500;
+      const lay = 490 + n * 10;
+      const saved = Math.round((1 - lay / raw) * 100);
+      document.getElementById("rawOut").textContent = raw.toLocaleString() + " MB";
+      document.getElementById("layOut").textContent = `${lay.toLocaleString()} MB（省 ${saved}%）`;
+
+      document.getElementById("ahaBox").innerHTML = n >= 10
+        ? `💡 <strong>分层镜像（UnionFS / OverlayFS）的省钱魔法：</strong>部署 ${n} 个服务，不分层要吃掉 <strong>${raw.toLocaleString()} MB</strong>，分层共享后只占 <strong>${lay} MB（狂省 ${saved}%！）</strong>——这就是为什么写 Dockerfile 时一定要把“变动最少的装依赖层”放最上面，把“天天改的业务代码”放最下面！`
+        : "💡 <strong>顿悟时刻：</strong>把镜像数量往右拉到 <strong>10 个以上</strong>，亲眼见证千层蛋糕式的只读层复用如何省爆磁盘和拉取时间！";
+    }
+    document.getElementById("nSlider").addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

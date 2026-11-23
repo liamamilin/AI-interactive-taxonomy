@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "swe-web",
+  "order": 3,
+  "title": "Docker 容器 vs 虚拟机隔离",
+  "icon": "🐳",
+  "subtitle": "为什么启动一台虚拟机要等 30 秒还吃掉 2GB 内存，而 Docker 容器却能 0.2 秒秒启？容器到底是不是“轻量级虚拟机”？",
+  "difficulty": "入门",
+  "related": ["software/software-systems-os-03", "software/software-swe-web-04"],
+  "toys": {
+    "01-vm-vs-docker-stack.html": {
+      "title": "架构叠叠乐竞速：虚拟机 vs Docker 容器",
+      "icon": "🧱",
+      "archetype": "race",
+      "concept": "Hypervisor + Guest OS · 共享宿主机内核 · 秒级启动",
+      "summary": "同屏对比启动 3 个隔离环境时，传统 VM 搬来 3 套完整操作系统，而 Docker 共享同一颗 Linux 内核的悬殊差异！"
+    },
+    "02-namespace-cgroup-builder.html": {
+      "title": "手造一个 Docker：Namespace 障眼法 + Cgroups 紧箍咒",
+      "icon": "🪄",
+      "archetype": "builder",
+      "concept": "Linux Namespaces 视图隔离 · Cgroups 资源限额 · 进程本质",
+      "summary": "给一个普通进程逐个套上 PID/Net Namespace 与 CPU/内存 Cgroups 限额，亲眼揭穿“容器本质就是被施了障眼法的普通进程”！"
+    },
+    "03-unionfs-image-layers.html": {
+      "title": "镜像分层复用（OverlayFS 写时复制）",
+      "icon": "🍰",
+      "archetype": "simulation",
+      "concept": "Docker Image Layers · 只读底层共享 · Copy-on-Write 写时复制",
+      "summary": "部署 5 个基于同一份 Ubuntu+Python 基础层的微服务镜像，实时算清分层复用如何把 10GB 磁盘占用压成 2.2GB！"
+    }
+  }
+}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：Git 轻量指针揭秘 · 切分支为何只需 1ms</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; }
+    .btn.sec { background: var(--tax-surface-alt); color: var(--tax-text); border-color: var(--tax-border); }
+    .commits { display: flex; gap: 12px; flex-wrap: wrap; padding: 16px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); align-items: center; }
+    .cm { padding: 12px 14px; border-radius: 12px; background: var(--tax-surface); border: 2px solid var(--tax-border); text-align: center; min-width: 100px; }
+    .tag { display: inline-block; padding: 2px 7px; border-radius: 6px; font-size: 11px; font-weight: 850; margin-top: 4px; }
+    .t-main { background: rgba(99,102,241,0.2); color: var(--tax-primary); }
+    .t-feat { background: rgba(16,185,129,0.2); color: var(--tax-green); }
+    .t-head { background: rgba(245,158,11,0.22); color: var(--tax-amber); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏷️ Git 轻量指针揭秘：为什么 10GB 的大仓库，建分支和切分支只要 1 毫秒？</h1>
+        <p>在 Git 里，分支<strong>根本不是拷贝文件夹</strong>，而是一张只有 40 字节的 SHA-1 便利贴！点击下面按钮亲手挪动指针！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn" onclick="commit()">📝 在当前分支做一次新 Commit</button>
+        <button class="btn sec" onclick="switchBr()">🔀 切换 HEAD 到另一分支</button>
+      </div>
+      <div class="commits" id="cmRow"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let commits = ["c1a0", "c2b4"];
+    let ptr = { main: 1, feat: 1 };
+    let head = "main";
+    let ops = 0;
+
+    function commit() {
+      if (commits.length >= 6) return;
+      const id = "c" + (commits.length + 1) + Math.random().toString(16).slice(2, 4);
+      commits.push(id);
+      ptr[head] = commits.length - 1;
+      ops++;
+      render();
+      if (ops >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function switchBr() {
+      head = head === "main" ? "feat" : "main";
+      ops++;
+      render();
+      if (ops >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    function render() {
+      document.getElementById("cmRow").innerHTML = commits.map((id, i) => `
+        <div class="cm" style="border-color:${ptr[head] === i ? "var(--tax-amber)" : "var(--tax-border)"}">
+          <div style="font-family:monospace;font-weight:900;font-size:14px;">#${id}</div>
+          <div>
+            ${ptr.main === i ? `<span class="tag t-main">main</span> ` : ""}
+            ${ptr.feat === i ? `<span class="tag t-feat">feat</span> ` : ""}
+            ${ptr[head] === i ? `<span class="tag t-head">← HEAD</span>` : ""}
+          </div>
+        </div>
+      `).join("<span style='color:var(--tax-muted);font-weight:900;'>←</span>");
+
+      document.getElementById("ahaBox").innerHTML = `💡 <strong>Git 快如闪电的本质：</strong><code>git branch feat</code> 只是往 <code>.git/refs/heads/feat</code> 里写了一行 40 字节的 Commit ID；<code>git switch</code> 只是把 <code>HEAD</code> 贴纸从 <strong>${head === "main" ? "feat" : "main"}</strong> 撕下来贴到 <strong>${head}</strong> 上——零目录拷贝，所以瞬间完成！`;
+    }
+    render();
+  </script>
+</body>
+</html>

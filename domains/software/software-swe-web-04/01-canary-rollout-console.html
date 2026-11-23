@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：金丝雀发布控制台 · 灰度放量与秒级回滚</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .btn.back { background: var(--tax-green); border-color: var(--tax-green); color: #fff; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 720px) { .cards { grid-template-columns: 1fr; } }
+    .card { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .num { font-size: 24px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 6px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🐤 金丝雀发布控制台：煤矿工人带金丝雀下井，程序员带 1% 流量上线！</h1>
+        <p>新版本 <code>v2.0</code> 里暗藏了一个“高并发支付死锁”隐蔽 Bug。试着逐步放量到 <strong>10%</strong> 观察监控报警，再立刻点击 <strong>🔄 秒级回滚至 0%</strong> 止血！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <button class="btn active" id="p0" onclick="setPct(0)">0%（全量 v1.0 稳态）</button>
+        <button class="btn" id="p1" onclick="setPct(1)">🐤 放量 1%（内部/金丝雀）</button>
+        <button class="btn" id="p10" onclick="setPct(10)">📈 放量 10%（灰度观察）</button>
+        <button class="btn" id="p100" onclick="setPct(100)">🚀 放量 100%（全量推开）</button>
+        <button class="btn back" style="margin-left:auto;" onclick="rollback()">🔄 紧急一键回滚 0%</button>
+      </div>
+
+      <div class="cards">
+        <div class="card"><div style="font-size:12px;color:var(--tax-muted);">v2.0 流量占比</div><div class="num" id="trOut" style="color:var(--tax-primary);">0%</div></div>
+        <div class="card"><div style="font-size:12px;color:var(--tax-muted);">线上 500 报错率</div><div class="num" id="errOut" style="color:var(--tax-green);">0.01% ✅</div></div>
+        <div class="card"><div style="font-size:12px;color:var(--tax-muted);">受影响用户规模（百万日活）</div><div class="num" id="affOut">0 人</div></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let hitAlert = false, rolled = false;
+
+    function setPct(p) {
+      [0, 1, 10, 100].forEach(x => document.getElementById("p" + x).classList.toggle("active", x === p));
+      document.getElementById("trOut").textContent = p + "%";
+      if (p === 0) {
+        document.getElementById("errOut").textContent = "0.01% ✅";
+        document.getElementById("errOut").style.color = "var(--tax-green)";
+        document.getElementById("affOut").textContent = "0 人";
+        document.getElementById("ahaBox").innerHTML = rolled
+          ? "💡 <strong>金丝雀止血成功！</strong>因为在 1%–10% 小流量阶段就提前触发监控告警并秒级切回旧版，90%+ 的真实用户甚至根本不知道刚发生过事故——这就是控制<strong>爆炸半径（Blast Radius）</strong>的艺术！"
+          : "💡 <strong>顿悟时刻：</strong>依次尝试 <strong>1% → 10%</strong> 灰度放量，看监控告警亮红灯后迅速点击 <strong>🔄 紧急一键回滚</strong>！";
+      } else if (p === 1) {
+        document.getElementById("errOut").textContent = "0.08% 🟡";
+        document.getElementById("errOut").style.color = "var(--tax-amber)";
+        document.getElementById("affOut").textContent = "极少数测试组";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>1% 金丝雀试水：</strong>错误率略有抬头，但还不够明显。继续点 <strong>10%</strong> 看看高并发压力下会发生什么！";
+      } else if (p === 10) {
+        hitAlert = true;
+        document.getElementById("errOut").textContent = "6.8% 🚨 严重告警！";
+        document.getElementById("errOut").style.color = "var(--tax-red)";
+        document.getElementById("affOut").textContent = "仅限 10% 局部";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>金丝雀发出致命预警！</strong>10% 流量下支付死锁 Bug 暴露无遗！此时 90% 的用户仍安全跑在 v1.0 上——快点右上角 <strong>🔄 紧急一键回滚</strong>！";
+      } else {
+        hitAlert = true;
+        document.getElementById("errOut").textContent = "42% 💥 全站 P0 熔断！";
+        document.getElementById("errOut").style.color = "var(--tax-red)";
+        document.getElementById("affOut").textContent = "100 万全量用户遭殃！";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>贸然 100% 全量发版的惨剧：</strong>没有灰度护栏直接推全量，一个隐蔽 Bug 直接引爆全站 P0 事故！赶紧点 <strong>🔄 紧急一键回滚</strong>！";
+      }
+    }
+
+    function rollback() {
+      rolled = true;
+      setPct(0);
+      if (hitAlert && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    setPct(0);
+  </script>
+</body>
+</html>

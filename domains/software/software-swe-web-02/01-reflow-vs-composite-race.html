@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：60fps 动画竞速 · 改 left vs 改 transform</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 10px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .pipe { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    @media (max-width: 720px) { .pipe { grid-template-columns: 1fr 1fr; } }
+    .st { padding: 14px; border-radius: 14px; text-align: center; background: var(--tax-surface-alt); border: 2px solid var(--tax-border); }
+    .st.hit { border-color: var(--tax-red); background: rgba(239,68,68,0.14); }
+    .st.skip { opacity: 0.35; border-style: dashed; }
+    .st.gpu { border-color: var(--tax-green); background: rgba(16,185,129,0.16); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🏎️ 改 <code>left</code> vs 改 <code>transform</code>：前端动画丝滑 60fps 的终极秘密！</h1>
+        <p>切换下面 3 种 CSS 属性动画，亲眼看每一帧到底惊动了渲染流水线的哪几个昂贵阶段！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="pLeft" onclick="pick('left')">🐢 改 width / left（触发全套回流！）</button>
+        <button class="btn" id="pColor" onclick="pick('color')">🟡 改 background-color（跳过布局，触发重绘）</button>
+        <button class="btn" id="pTrans" onclick="pick('trans')">🚀 改 transform / opacity（直通 GPU 合成！）</button>
+      </div>
+      <div class="pipe" id="pipeRow"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const DATA = {
+      left: {
+        s: ["hit", "hit", "hit", "hit"],
+        aha: "💡 <strong>最昂贵的回流（Reflow / Layout）：</strong>改 <code>left / width</code> 会牵一发而动全身，浏览器必须重新算一遍整页所有元素的几何坐标，再重画像素、再合成，极易掉帧卡顿！"
+      },
+      color: {
+        s: ["hit", "skip", "hit", "hit"],
+        aha: "💡 <strong>重绘（Repaint）：</strong>改背景色不影响别的元素位置，所以跳过了最耗时的 Layout，但 CPU 仍需重新光栅化像素（Paint）。"
+      },
+      trans: {
+        s: ["skip", "skip", "skip", "gpu"],
+        aha: "💡 <strong>GPU 合成层（Composite）降维打击：</strong><code>transform</code> 和 <code>opacity</code> 彻底跳过 Layout 和 Paint，直接把已经画好的图层纹理交给显卡 GPU 平移缩放，主线程就算忙着算 JS，动画依然稳稳 60–120 fps！"
+      }
+    };
+    const NAMES = ["1. Style 样式计算", "2. Layout 重排布局", "3. Paint 重绘像素", "4. Composite GPU合成"];
+    const seen = new Set(["left"]);
+
+    function pick(k) {
+      seen.add(k);
+      ["left", "color", "trans"].forEach(x => document.getElementById("p" + x.charAt(0).toUpperCase() + x.slice(1)).classList.toggle("active", x === k));
+      document.getElementById("pipeRow").innerHTML = NAMES.map((n, i) => {
+        const cls = DATA[k].s[i];
+        const tag = cls === "skip" ? "⏭️ 完美跳过！" : cls === "gpu" ? "⚡ GPU 零耗时直出" : "🔥 每帧重新执行";
+        return `<div class="st ${cls}"><div style="font-weight:850;font-size:13.5px;">${n}</div><div style="font-size:12px;margin-top:6px;">${tag}</div></div>`;
+      }).join("");
+      document.getElementById("ahaBox").innerHTML = DATA[k].aha;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("left");
+  </script>
+</body>
+</html>

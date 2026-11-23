@@ -5,10 +5,10 @@
   "stats": {
     "totalDomains": 10,
     "litDomains": 2,
-    "totalTopics": 63,
-    "totalPlannedTopics": 212,
+    "totalTopics": 67,
+    "totalPlannedTopics": 208,
     "totalBlueprintTopics": 275,
-    "totalToys": 189
+    "totalToys": 201
   },
   "tracks": [
     {
@@ -1224,30 +1224,13 @@
         {
           "id": "swe-web",
           "title": "6. 现代研发与 Web 运行（Software Engineering & Web）",
-          "plannedTopics": [
-            {
-              "slug": "software-swe-web-01",
-              "title": "Git 分支图（Merge vs Rebase）"
-            },
-            {
-              "slug": "software-swe-web-02",
-              "title": "浏览器 60fps 渲染流水线"
-            },
-            {
-              "slug": "software-swe-web-03",
-              "title": "Docker 容器 vs 虚拟机隔离"
-            },
-            {
-              "slug": "software-swe-web-04",
-              "title": "灰度发布与金丝雀回滚"
-            }
-          ]
+          "plannedTopics": []
         }
       ],
-      "liveTopicCount": 20,
-      "plannedTopicCount": 4,
+      "liveTopicCount": 24,
+      "plannedTopicCount": 0,
       "blueprintTopicCount": 24,
-      "liveToyCount": 60,
+      "liveToyCount": 72,
       "topics": [
         {
           "id": "software/software-database-cache-01",
@@ -1442,6 +1425,55 @@
               "archetype": "scenario",
               "concept": "HTTP 语义 · 4xx 客户端错 vs 5xx 服务端锅 · 重定向与网关",
               "summary": "面对 4 个真实网页打不开的故障现场，亲手开出正确的 HTTP 状态码，一秒分清该甩锅给前端还是后端！"
+            }
+          ]
+        },
+        {
+          "id": "software/software-swe-web-01",
+          "slug": "software-swe-web-01",
+          "domain": "software",
+          "branch": "swe-web",
+          "order": 1,
+          "title": "Git 分支图（Merge vs Rebase）",
+          "icon": "🌿",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "为什么老司机常说“公共分支用 Merge、本地开发用 Rebase”？Git 的分支难道真的是把代码复制了一份吗？",
+          "difficulty": "入门",
+          "related": [
+            "software/software-dsa-04",
+            "software/software-swe-web-04"
+          ],
+          "toys": [
+            {
+              "id": "software/software-swe-web-01/01-git-merge-vs-rebase-svg.html",
+              "file": "01-git-merge-vs-rebase-svg.html",
+              "path": "./domains/software/software-swe-web-01/01-git-merge-vs-rebase-svg.html",
+              "title": "SVG 分支拓扑图：Merge 菱形汇合 vs Rebase 线性变基",
+              "icon": "🔀",
+              "archetype": "spatial",
+              "concept": "Git Commit DAG · Merge Commit · Rebase 重放历史",
+              "summary": "一键在 Merge 与 Rebase 之间切换，亲眼看同样两个分支如何合出截然不同的提交历史图谱！"
+            },
+            {
+              "id": "software/software-swe-web-01/02-git-pointer-branches.html",
+              "file": "02-git-pointer-branches.html",
+              "path": "./domains/software/software-swe-web-01/02-git-pointer-branches.html",
+              "title": "Git 轻量指针揭秘：为什么切分支只要 1 毫秒？",
+              "icon": "🏷️",
+              "archetype": "simulation",
+              "concept": "HEAD 指针 · 分支即 40 字节 SHA-1 贴纸 · 零文件拷贝",
+              "summary": "点击新建分支、提交新 Commit、切换分支，亲眼看 Git 只是在挪动一张 40 字节的便利贴，根本不拷贝文件！"
+            },
+            {
+              "id": "software/software-swe-web-01/03-git-force-push-disaster.html",
+              "file": "03-git-force-push-disaster.html",
+              "path": "./domains/software/software-swe-web-01/03-git-force-push-disaster.html",
+              "title": "黄金法则演练：在公共 main 上 Rebase + Force Push 的社死现场",
+              "icon": "🚨",
+              "archetype": "scenario",
+              "concept": "Rebase 改写 Commit Hash · 公共分支协作冲突 · Revert 安全回滚",
+              "summary": "对比“在公共分支强推改历史”引发同事集体冲突，与“用 git revert 新增反向提交”优雅无痛撤销线上 Bug！"
             }
           ]
         },
@@ -1691,6 +1723,55 @@
           ]
         },
         {
+          "id": "software/software-swe-web-02",
+          "slug": "software-swe-web-02",
+          "domain": "software",
+          "branch": "swe-web",
+          "order": 2,
+          "title": "浏览器 60fps 渲染流水线",
+          "icon": "🎞️",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "为什么改 `left/top` 做动画卡成 PPT，而改 `transform: translate` 却丝滑 60 帧？16.6 毫秒里浏览器到底干了什么？",
+          "difficulty": "进阶",
+          "related": [
+            "software/software-network-crypto-01",
+            "software/software-systems-os-03"
+          ],
+          "toys": [
+            {
+              "id": "software/software-swe-web-02/01-reflow-vs-composite-race.html",
+              "file": "01-reflow-vs-composite-race.html",
+              "path": "./domains/software/software-swe-web-02/01-reflow-vs-composite-race.html",
+              "title": "60fps 动画竞速：改 left（触发重排）vs 改 transform（GPU 合成）",
+              "icon": "🏎️",
+              "archetype": "race",
+              "concept": "回流 Reflow / Layout · 重绘 Paint · GPU 合成 Composite",
+              "summary": "对比改 `left`（每帧全链路重排重绘）与改 `transform`（跳过重排重绘、直通 GPU 合成）在 16.6ms 预算里的帧率差距！"
+            },
+            {
+              "id": "software/software-swe-web-02/02-frame-budget-16ms.html",
+              "file": "02-frame-budget-16ms.html",
+              "path": "./domains/software/software-swe-web-02/02-frame-budget-16ms.html",
+              "title": "16.6 毫秒帧预算分配沙盘（掉帧诊断仪）",
+              "icon": "⏱️",
+              "archetype": "simulation",
+              "concept": "60Hz 屏幕刷新率 · 16.6ms 预算 · 长任务 Long Task 掉帧",
+              "summary": "调高单帧内 JS 执行与 Layout 耗时，亲眼看总耗时一旦突破 16.6ms 红线，FPS 如何瞬间腰斩掉成 30 帧！"
+            },
+            {
+              "id": "software/software-swe-web-02/03-critical-rendering-path.html",
+              "file": "03-critical-rendering-path.html",
+              "path": "./domains/software/software-swe-web-02/03-critical-rendering-path.html",
+              "title": "关键渲染路径（CRP）白屏加速装配台",
+              "icon": "🧱",
+              "archetype": "builder",
+              "concept": "DOM + CSSOM = Render Tree · script 阻塞解析 · defer / async",
+              "summary": "给阻塞 HTML 解析的 `<script>` 加上 `defer` 并内联关键 CSS，亲手把网页首屏白屏时间砍掉一大半！"
+            }
+          ]
+        },
+        {
           "id": "software/software-systems-os-02",
           "slug": "software-systems-os-02",
           "domain": "software",
@@ -1936,6 +2017,55 @@
           ]
         },
         {
+          "id": "software/software-swe-web-03",
+          "slug": "software-swe-web-03",
+          "domain": "software",
+          "branch": "swe-web",
+          "order": 3,
+          "title": "Docker 容器 vs 虚拟机隔离",
+          "icon": "🐳",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "为什么启动一台虚拟机要等 30 秒还吃掉 2GB 内存，而 Docker 容器却能 0.2 秒秒启？容器到底是不是“轻量级虚拟机”？",
+          "difficulty": "入门",
+          "related": [
+            "software/software-systems-os-03",
+            "software/software-swe-web-04"
+          ],
+          "toys": [
+            {
+              "id": "software/software-swe-web-03/01-vm-vs-docker-stack.html",
+              "file": "01-vm-vs-docker-stack.html",
+              "path": "./domains/software/software-swe-web-03/01-vm-vs-docker-stack.html",
+              "title": "架构叠叠乐竞速：虚拟机 vs Docker 容器",
+              "icon": "🧱",
+              "archetype": "race",
+              "concept": "Hypervisor + Guest OS · 共享宿主机内核 · 秒级启动",
+              "summary": "同屏对比启动 3 个隔离环境时，传统 VM 搬来 3 套完整操作系统，而 Docker 共享同一颗 Linux 内核的悬殊差异！"
+            },
+            {
+              "id": "software/software-swe-web-03/02-namespace-cgroup-builder.html",
+              "file": "02-namespace-cgroup-builder.html",
+              "path": "./domains/software/software-swe-web-03/02-namespace-cgroup-builder.html",
+              "title": "手造一个 Docker：Namespace 障眼法 + Cgroups 紧箍咒",
+              "icon": "🪄",
+              "archetype": "builder",
+              "concept": "Linux Namespaces 视图隔离 · Cgroups 资源限额 · 进程本质",
+              "summary": "给一个普通进程逐个套上 PID/Net Namespace 与 CPU/内存 Cgroups 限额，亲眼揭穿“容器本质就是被施了障眼法的普通进程”！"
+            },
+            {
+              "id": "software/software-swe-web-03/03-unionfs-image-layers.html",
+              "file": "03-unionfs-image-layers.html",
+              "path": "./domains/software/software-swe-web-03/03-unionfs-image-layers.html",
+              "title": "镜像分层复用（OverlayFS 写时复制）",
+              "icon": "🍰",
+              "archetype": "simulation",
+              "concept": "Docker Image Layers · 只读底层共享 · Copy-on-Write 写时复制",
+              "summary": "部署 5 个基于同一份 Ubuntu+Python 基础层的微服务镜像，实时算清分层复用如何把 10GB 磁盘占用压成 2.2GB！"
+            }
+          ]
+        },
+        {
           "id": "software/software-systems-os-03",
           "slug": "software-systems-os-03",
           "domain": "software",
@@ -2177,6 +2307,55 @@
               "archetype": "builder",
               "concept": "XSS 跨站脚本 · HTML 实体转义 · CSP 内容安全策略",
               "summary": "在评论区提交藏着 <script> 偷 Cookie 的恶意留言，勾选 HTML 转义与 HttpOnly Cookie 筑起防线。"
+            }
+          ]
+        },
+        {
+          "id": "software/software-swe-web-04",
+          "slug": "software-swe-web-04",
+          "domain": "software",
+          "branch": "swe-web",
+          "order": 4,
+          "title": "灰度发布与金丝雀回滚",
+          "icon": "🐤",
+          "color": "#4f46e5",
+          "soft": "#eef2ff",
+          "subtitle": "千万日活 App 发新版本，怎么敢直接推给所有人？看大厂如何靠 1% 金丝雀放量与秒级自动回滚把线上事故压到最小！",
+          "difficulty": "入门",
+          "related": [
+            "software/software-swe-web-01",
+            "software/software-distributed-04"
+          ],
+          "toys": [
+            {
+              "id": "software/software-swe-web-04/01-canary-rollout-console.html",
+              "file": "01-canary-rollout-console.html",
+              "path": "./domains/software/software-swe-web-04/01-canary-rollout-console.html",
+              "title": "金丝雀发布控制台（1% → 10% → 100% 与熔断回滚）",
+              "icon": "🐤",
+              "archetype": "simulation",
+              "concept": "金丝雀发布 Canary · 爆炸半径控制 · 监控自动回滚",
+              "summary": "亲手推动新版本流量比例：一旦在 10% 阶段监控告警 500 错误飙升，立刻一键秒级回滚至 0%，保住 90% 用户！"
+            },
+            {
+              "id": "software/software-swe-web-04/02-blue-green-vs-rolling.html",
+              "file": "02-blue-green-vs-rolling.html",
+              "path": "./domains/software/software-swe-web-04/02-blue-green-vs-rolling.html",
+              "title": "发布策略对比：停机更新 vs 蓝绿部署 vs 滚动发布",
+              "icon": "🔀",
+              "archetype": "race",
+              "concept": "蓝绿部署 Blue-Green · 滚动发布 Rolling Update · 零停机发布",
+              "summary": "对比三种生产发布策略在“回滚速度”“双倍机器成本”与“版本混跑风险”上的工程取舍。"
+            },
+            {
+              "id": "software/software-swe-web-04/03-feature-flag-killswitch.html",
+              "file": "03-feature-flag-killswitch.html",
+              "path": "./domains/software/software-swe-web-04/03-feature-flag-killswitch.html",
+              "title": "功能开关（Feature Flag）：不重新发版，1 秒关闭线上 Bug！",
+              "icon": "🎛️",
+              "archetype": "scenario",
+              "concept": "发布与上线解耦 · Feature Flag 降级开关 · A/B 实验",
+              "summary": "新上线的“双十一红包雨”导致老安卓机闪退！对比“紧急改代码重新编译发版（30分钟）”与“后台关掉开关（1秒止血）”！"
             }
           ]
         },

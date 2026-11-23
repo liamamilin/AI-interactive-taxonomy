@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：SVG 分支拓扑图 · Merge vs Rebase</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .btn { padding: 9px 15px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-text); font-weight: 800; cursor: pointer; }
+    .btn.active { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; }
+    svg { width: 100%; height: 200px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔀 Merge vs Rebase：两种合并代码的方式，画出完全不同的“时间线”！</h1>
+        <p>你在 <code>feat</code> 分支写了 F1、F2，期间同事往 <code>main</code> 合进了 M1。切换下方两种操作，对比提交拓扑图的惊人变化！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tabs">
+        <button class="btn active" id="mInit" onclick="pick('init')">① 合并前（分叉状态）</button>
+        <button class="btn" id="mMerge" onclick="pick('merge')">② git merge（生成菱形合并节点）</button>
+        <button class="btn" id="mRebase" onclick="pick('rebase')">③ git rebase（变基成笔直一条线！）</button>
+      </div>
+      <div class="stage"><svg viewBox="0 0 540 190" id="gSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const seen = new Set(["init"]);
+    function node(x, y, lb, col) {
+      return `<circle cx="${x}" cy="${y}" r="18" fill="${col}" stroke="#fff" stroke-width="2"/><text x="${x}" y="${y+4}" text-anchor="middle" fill="#fff" font-size="11.5" font-weight="800">${lb}</text>`;
+    }
+    function pick(m) {
+      seen.add(m);
+      ["init", "merge", "rebase"].forEach(k => document.getElementById("m" + k.charAt(0).toUpperCase() + k.slice(1)).classList.toggle("active", k === m));
+      let s = "";
+      if (m === "init") {
+        s += `<line x1="70" y1="60" x2="170" y2="60" stroke="#6366f1" stroke-width="4"/><line x1="170" y1="60" x2="290" y2="60" stroke="#6366f1" stroke-width="4"/>`;
+        s += `<path d="M170,60 Q200,130 245,130 L345,130" fill="none" stroke="#10b981" stroke-width="4"/>`;
+        s += node(70,60,"C0","#475569") + node(170,60,"C1","#6366f1") + node(290,60,"M1","#6366f1") + node(245,130,"F1","#10b981") + node(345,130,"F2","#10b981");
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>分叉现场：</strong><code>main</code> 和 <code>feat</code> 各自往前走了一步。依次点看 <strong>Merge</strong> 和 <strong>Rebase</strong> 怎么把它们合二为一！";
+      } else if (m === "merge") {
+        s += `<line x1="70" y1="60" x2="430" y2="60" stroke="#6366f1" stroke-width="4"/>`;
+        s += `<path d="M170,60 Q200,130 245,130 L345,130 Q395,130 430,60" fill="none" stroke="#10b981" stroke-width="4"/>`;
+        s += node(70,60,"C0","#475569") + node(170,60,"C1","#6366f1") + node(290,60,"M1","#6366f1") + node(245,130,"F1","#10b981") + node(345,130,"F2","#10b981") + node(430,60,"Merge","#f59e0b");
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>Merge（忠实史官）：</strong>原封不动保留两条分支的所有真实历史，再新建一个有两个爹的 <code>Merge Commit</code> 把它们系在一起！安全、不改历史哈希，缺点是多人协作久了分支图会变成“地铁线路图”。";
+      } else {
+        s += `<line x1="70" y1="95" x2="470" y2="95" stroke="#6366f1" stroke-width="4"/>`;
+        s += node(70,95,"C0","#475569") + node(170,95,"C1","#6366f1") + node(270,95,"M1","#6366f1") + node(370,95,"F1'","#10b981") + node(470,95,"F2'","#10b981");
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>Rebase（历史美容师）：</strong>把 F1 和 F2 拔下来，重新嫁接到最新 M1 的屁股后面变成全新的 <code>F1'、F2'</code>！提交历史笔直清爽像单人写的，但<strong>改变了 F1/F2 的 Commit Hash</strong>——所以只适合自己本地还没推给大家的私有分支！";
+      }
+      document.getElementById("gSvg").innerHTML = s;
+      if (seen.size >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    pick("init");
+  </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Git 分支图（Merge vs Rebase）· 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🌿 Git 分支图（Merge vs Rebase）</h1>
+        <p>为什么老司机常说“公共分支用 Merge、本地开发用 Rebase”？Git 的分支难道真的是把代码复制了一份吗？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-git-merge-vs-rebase-svg.html">
+        <div class="hub-icon">🔀</div>
+        <div class="hub-tag">玩具 01 · 拓扑对比（Spatial）</div>
+        <div class="hub-title">SVG 分支拓扑图：Merge vs Rebase</div>
+        <div class="hub-desc">切换查看菱形保留原貌的 Merge 与笔直整洁的 Rebase 变基，一秒看穿两者本质。</div>
+      </a>
+      <a class="hub-card" href="./02-git-pointer-branches.html">
+        <div class="hub-icon">🏷️</div>
+        <div class="hub-tag">玩具 02 · 指针沙盘（Simulation）</div>
+        <div class="hub-title">Git 轻量指针揭秘：切分支为何只需 1ms？</div>
+        <div class="hub-desc">移动 HEAD 与分支便利贴指针，打破“建分支=复制整个项目文件夹”的常见误区。</div>
+      </a>
+      <a class="hub-card" href="./03-git-force-push-disaster.html">
+        <div class="hub-icon">🚨</div>
+        <div class="hub-tag">玩具 03 · 协作情景（Scenario）</div>
+        <div class="hub-title">黄金法则：为什么禁止在公共分支强推 Rebase？</div>
+        <div class="hub-desc">体验改写共享历史导致的同事冲突灾难，学会用 git revert 优雅安全撤销线上提交。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

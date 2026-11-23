@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：关键渲染路径（CRP）白屏加速装配台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    @media (max-width: 700px) { .checks { grid-template-columns: 1fr; } }
+    .chk { display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 12px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-weight: 800; font-size: 13.5px; cursor: pointer; }
+    .big { font-size: 28px; font-weight: 900; font-family: ui-monospace, monospace; text-align: center; padding: 14px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧱 关键渲染路径（CRP）：为什么网页打开总要先“白屏发呆 3 秒”？</h1>
+        <p>浏览器必须先拼好 <strong>DOM + CSSOM = Render Tree</strong> 才能画第一像素。勾选下方前端性能加速手段，把白屏时间（FCP）砍到极速！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="checks">
+        <label class="chk"><input type="checkbox" id="o1" onchange="render()" /> 1. 给 &lt;script&gt; 加上 defer（不阻塞 HTML 解析）</label>
+        <label class="chk"><input type="checkbox" id="o2" onchange="render()" /> 2. 内联首屏关键 CSS（消灭额外样式往返）</label>
+        <label class="chk"><input type="checkbox" id="o3" onchange="render()" /> 3. 拆分巨无霸 JS Bundle（按需懒加载）</label>
+        <label class="chk"><input type="checkbox" id="o4" onchange="render()" /> 4. 开启静态资源 Brotli 压缩 + CDN</label>
+      </div>
+      <div class="big" id="fcpOut" style="color:var(--tax-red);">首屏白屏时间 FCP：3,200 ms 🐢</div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    function render() {
+      const c1 = document.getElementById("o1").checked;
+      const c2 = document.getElementById("o2").checked;
+      const c3 = document.getElementById("o3").checked;
+      const c4 = document.getElementById("o4").checked;
+      let ms = 3200;
+      if (c1) ms -= 900;
+      if (c2) ms -= 650;
+      if (c3) ms -= 750;
+      if (c4) ms -= 550;
+
+      const el = document.getElementById("fcpOut");
+      el.textContent = `首屏白屏时间 FCP：${ms} ms ${ms <= 600 ? "⚡ 秒开！" : ms <= 1500 ? "🟡 较快" : "🐢 白屏漫长"}`;
+      el.style.color = ms <= 600 ? "var(--tax-green)" : ms <= 1500 ? "var(--tax-amber)" : "var(--tax-red)";
+
+      document.getElementById("ahaBox").innerHTML = ms <= 600
+        ? "💡 <strong>首屏秒开通关（350ms）！</strong>优化关键渲染路径的核心只有两条：<strong>不让 JS/CSS 阻塞首屏解析（defer + 内联关键样式）</strong>，以及<strong>减少首屏下载字节数（拆包 + 压缩 + CDN）</strong>！"
+        : "💡 <strong>顿悟时刻：</strong>逐个勾选上方 4 项前端优化武器，亲眼看白屏时间如何从 3.2 秒一路砍进 400 毫秒！";
+      if (c1 && c2 && c3 && c4 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    render();
+  </script>
+</body>
+</html>

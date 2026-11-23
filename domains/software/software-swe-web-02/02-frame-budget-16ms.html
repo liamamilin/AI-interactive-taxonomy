@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：16.6 毫秒帧预算分配沙盘</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrls { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    @media (max-width: 700px) { .ctrls { grid-template-columns: 1fr; } }
+    .bar { height: 22px; background: var(--tax-surface-alt); border-radius: 999px; overflow: hidden; border: 1.5px solid var(--tax-border); display: flex; }
+    .seg { height: 100%; transition: width 0.2s ease; }
+    .big { font-size: 26px; font-weight: 900; font-family: ui-monospace, monospace; margin-top: 12px; text-align: center; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⏱️ 16.6 毫秒帧预算：为什么一帧只超了 2 毫秒，画面就掉成了 30fps？</h1>
+        <p>60Hz 屏幕每 <strong>16.67 毫秒</strong> 发出一次 VSync 刷新信号。调节单帧内 JS 执行与 Layout/Paint 耗时，看错过 VSync 会发生什么！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrls">
+        <div>
+          <label style="font-weight:850;font-size:14px;">🟨 JS 脚本执行耗时：<span id="jVal" style="color:var(--tax-amber)">6</span> ms</label>
+          <input id="jSlider" type="range" min="1" max="24" value="6" style="width:100%;margin-top:6px;" />
+        </div>
+        <div>
+          <label style="font-weight:850;font-size:14px;">🟪 样式布局绘制耗时：<span id="rVal" style="color:var(--tax-primary)">5</span> ms</label>
+          <input id="rSlider" type="range" min="1" max="16" value="5" style="width:100%;margin-top:6px;" />
+        </div>
+      </div>
+
+      <div class="bar">
+        <div class="seg" id="jSeg" style="background:var(--tax-amber);"></div>
+        <div class="seg" id="rSeg" style="background:var(--tax-primary);"></div>
+      </div>
+      <div class="big" id="fpsOut">11 ms / 16.6 ms → 60 FPS 丝滑 ✅</div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let drags = 0;
+    function render() {
+      const j = parseInt(document.getElementById("jSlider").value, 10);
+      const r = parseInt(document.getElementById("rSlider").value, 10);
+      const tot = j + r;
+      document.getElementById("jVal").textContent = j;
+      document.getElementById("rVal").textContent = r;
+      document.getElementById("jSeg").style.width = Math.min(100, (j / 25) * 100) + "%";
+      document.getElementById("rSeg").style.width = Math.min(100 - (j / 25) * 100, (r / 25) * 100) + "%";
+
+      const fps = tot <= 16.6 ? 60 : tot <= 33.3 ? 30 : 20;
+      const el = document.getElementById("fpsOut");
+      el.textContent = `总耗时 ${tot} ms / 16.6 ms 红线 → 实际输出 ${fps} FPS ${fps === 60 ? "丝滑 ✅" : "💥 错过 VSync 掉帧！"}`;
+      el.style.color = fps === 60 ? "var(--tax-green)" : "var(--tax-red)";
+
+      document.getElementById("ahaBox").innerHTML = fps < 60
+        ? `💡 <strong>错过 VSync 班车的悬崖效应！</strong>本帧耗时 <strong>${tot} ms</strong>，哪怕只比 16.6ms 晚了 1 毫秒，屏幕已经来不及画新图，只能被迫把旧画面再播一轮，帧率直接断崖跌到 <strong>${fps} FPS</strong>！所以 React Fiber 要把长 JS 任务拆成小时间片！`
+        : "💡 <strong>顿悟时刻：</strong>把 JS 或渲染耗时拉过 <strong>16.6 ms</strong>（比如 JS=14, 渲染=5），亲眼体会 60fps 瞬间腰斩掉成 30fps 的卡顿原理！";
+    }
+    ["jSlider", "rSlider"].forEach(id => document.getElementById(id).addEventListener("input", () => {
+      drags++;
+      render();
+      if (drags >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    }));
+    render();
+  </script>
+</body>
+</html>

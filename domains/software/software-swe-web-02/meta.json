@@ -1,0 +1,33 @@
+{
+  "domain": "software",
+  "branch": "swe-web",
+  "order": 2,
+  "title": "浏览器 60fps 渲染流水线",
+  "icon": "🎞️",
+  "subtitle": "为什么改 `left/top` 做动画卡成 PPT，而改 `transform: translate` 却丝滑 60 帧？16.6 毫秒里浏览器到底干了什么？",
+  "difficulty": "进阶",
+  "related": ["software/software-network-crypto-01", "software/software-systems-os-03"],
+  "toys": {
+    "01-reflow-vs-composite-race.html": {
+      "title": "60fps 动画竞速：改 left（触发重排）vs 改 transform（GPU 合成）",
+      "icon": "🏎️",
+      "archetype": "race",
+      "concept": "回流 Reflow / Layout · 重绘 Paint · GPU 合成 Composite",
+      "summary": "对比改 `left`（每帧全链路重排重绘）与改 `transform`（跳过重排重绘、直通 GPU 合成）在 16.6ms 预算里的帧率差距！"
+    },
+    "02-frame-budget-16ms.html": {
+      "title": "16.6 毫秒帧预算分配沙盘（掉帧诊断仪）",
+      "icon": "⏱️",
+      "archetype": "simulation",
+      "concept": "60Hz 屏幕刷新率 · 16.6ms 预算 · 长任务 Long Task 掉帧",
+      "summary": "调高单帧内 JS 执行与 Layout 耗时，亲眼看总耗时一旦突破 16.6ms 红线，FPS 如何瞬间腰斩掉成 30 帧！"
+    },
+    "03-critical-rendering-path.html": {
+      "title": "关键渲染路径（CRP）白屏加速装配台",
+      "icon": "🧱",
+      "archetype": "builder",
+      "concept": "DOM + CSSOM = Render Tree · script 阻塞解析 · defer / async",
+      "summary": "给阻塞 HTML 解析的 `<script>` 加上 `defer` 并内联关键 CSS，亲手把网页首屏白屏时间砍掉一大半！"
+    }
+  }
+}

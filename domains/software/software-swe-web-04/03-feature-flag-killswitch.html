@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：功能开关（Feature Flag）1 秒止血线上 Bug</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .panel-row { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); gap: 12px; flex-wrap: wrap; }
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-red); background: var(--tax-red); color: #fff; font-weight: 850; cursor: pointer; }
+    .btn.off { background: var(--tax-green); border-color: var(--tax-green); }
+    .app-view { margin-top: 14px; padding: 16px; border-radius: 14px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); font-size: 14px; line-height: 1.65; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎛️ 功能开关（Feature Flag）：不用重新编译发版，1 秒远程关掉线上致命 Bug！</h1>
+        <p>双十一零点，新上线的“3D 红包雨特效”导致 200 万台老款手机直接闪退！传统改代码提审 App Store 要等 2 天，快按下远程 <strong>Kill Switch</strong> 止血！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="panel-row">
+        <div>
+          <div style="font-weight:850;font-size:15px;">🚩 远程配置中心：<code>enable_3d_redpacket_rain</code></div>
+          <div style="font-size:12.5px;color:var(--tax-muted);margin-top:4px;">通过配置中心实时推送到全球客户端，无需重启服务器或发新 App！</div>
+        </div>
+        <button class="btn" id="flagBtn" onclick="toggleFlag()">🔴 当前 ON（闪退中）→ 点此 1 秒关闭！</button>
+      </div>
+
+      <div class="app-view" id="appBox"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let enabled = true;
+    function toggleFlag() {
+      enabled = !enabled;
+      render();
+      if (!enabled && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    function render() {
+      const btn = document.getElementById("flagBtn");
+      btn.classList.toggle("off", !enabled);
+      btn.textContent = enabled ? "🔴 当前 ON（闪退中）→ 点此 1 秒关闭！" : "🟢 已远程关闭 OFF（恢复正常 · 点此重开）";
+
+      document.getElementById("appBox").innerHTML = enabled
+        ? "💥 <strong style='color:var(--tax-red)'>客户端实时崩溃率：18.5%！</strong><br>代码执行路径：<code>if (flag.enable_3d_redpacket_rain) { runHeavyWebGL(); }</code> → 老机型内存爆表直接闪退！"
+        : "✅ <strong style='color:var(--tax-green)'>0.8 秒内全球客户端全部降级成功！崩溃率瞬间归零（0.02%）！</strong><br>代码自动走降级分支：<code>else { showLightweightStaticBanner(); }</code>，核心下单与支付丝毫未受影响！";
+
+      document.getElementById("ahaBox").innerHTML = enabled
+        ? "💡 <strong>紧急演练：</strong>点击上方红色开关，感受现代研发“<strong>Deployment（代码部署）≠ Release（功能发布）</strong>”的解耦威力！"
+        : "💡 <strong>Feature Flag 的终极价值：</strong>把高风险新功能藏在远程开关后面——平时可以提前合进主干并按人群灰度 A/B 测试，一旦线上翻车，<strong>1 秒钟远程拉闸止血</strong>，彻底告别半夜手抖紧急回滚代码！";
+    }
+    render();
+  </script>
+</body>
+</html>

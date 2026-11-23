@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker 容器 vs 虚拟机隔离 · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🐳 Docker 容器 vs 虚拟机隔离</h1>
+        <p>为什么启动一台虚拟机要等 30 秒还吃掉 2GB 内存，而 Docker 容器却能 0.2 秒秒启？容器到底是不是“轻量级虚拟机”？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-vm-vs-docker-stack.html">
+        <div class="hub-icon">🧱</div>
+        <div class="hub-tag">玩具 01 · 启动竞速（Race）</div>
+        <div class="hub-title">架构叠叠乐竞速：虚拟机 vs Docker 容器</div>
+        <div class="hub-desc">同屏启动 3 个应用实例，直击“3 套完整操作系统”与“共享同一颗 Linux 内核”的速度和内存鸿沟。</div>
+      </a>
+      <a class="hub-card" href="./02-namespace-cgroup-builder.html">
+        <div class="hub-icon">🪄</div>
+        <div class="hub-tag">玩具 02 · 内核装配（Builder）</div>
+        <div class="hub-title">手造一个 Docker：Namespace + Cgroups</div>
+        <div class="hub-desc">给普通进程逐一戴上视图隔离与资源限额两件法宝，彻底看穿容器的底层真相。</div>
+      </a>
+      <a class="hub-card" href="./03-unionfs-image-layers.html">
+        <div class="hub-icon">🍰</div>
+        <div class="hub-tag">玩具 03 · 分层沙盘（Simulation）</div>
+        <div class="hub-title">镜像分层复用（OverlayFS 写时复制）</div>
+        <div class="hub-desc">拉高同底座微服务数量，直观体验分层共享如何省下 80% 磁盘空间与拉取带宽。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

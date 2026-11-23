@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：架构叠叠乐竞速 · 虚拟机 vs Docker</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .btn { padding: 10px 18px; border-radius: 12px; border: 1.5px solid var(--tax-primary); background: var(--tax-primary); color: #fff; font-weight: 800; cursor: pointer; margin-bottom: 14px; }
+    .duel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .duel { grid-template-columns: 1fr; } }
+    .lane { background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .track { height: 16px; background: var(--tax-surface); border-radius: 999px; overflow: hidden; border: 1px solid var(--tax-border); margin: 8px 0; }
+    .fill { height: 100%; width: 0%; transition: width 0.14s linear; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🧱 虚拟机 vs Docker 容器：同样启动 3 个隔离服务，谁先就绪？</h1>
+        <p>虚拟机像建 3 栋各自带独立水电煤的独栋别墅（每台都要开机跑一遍 Guest OS），Docker 像同一栋公寓楼里的 3 间精装单间（共享宿主机内核）！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <button class="btn" onclick="go()">▶ 同时冷启动 3 个微服务实例</button>
+
+      <div class="duel">
+        <div class="lane" style="border-color:var(--tax-green);">
+          <div style="font-weight:850;font-size:14.5px;">🐳 3 个 Docker 容器（共享宿主机内核）</div>
+          <div class="track"><div class="fill" id="f1" style="background:var(--tax-green);"></div></div>
+          <div id="s1" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+        </div>
+
+        <div class="lane">
+          <div style="font-weight:850;font-size:14.5px;">🖥️ 3 台传统虚拟机 VM（各带完整 Guest OS）</div>
+          <div class="track"><div class="fill" id="f2" style="background:var(--tax-amber);"></div></div>
+          <div id="s2" style="font-size:12.5px;font-family:monospace;color:var(--tax-muted);">待命…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻：</strong>点击启动竞速，看看“省掉 3 份重复操作系统内核”带来的百倍启动提速与内存瘦身！
+    </div>
+  </div>
+
+  <script>
+    let timer = null;
+    function go() {
+      if (timer) clearInterval(timer);
+      let p1 = 0, p2 = 0;
+      timer = setInterval(() => {
+        p1 = Math.min(100, p1 + 50);
+        p2 = Math.min(100, p2 + 6);
+        document.getElementById("f1").style.width = p1 + "%";
+        document.getElementById("f2").style.width = p2 + "%";
+        document.getElementById("s1").textContent = p1 >= 100 ? "✅ 0.3 秒就绪 · 仅占 180 MB 内存！" : `拉起隔离进程 ${p1}%`;
+        document.getElementById("s2").textContent = p2 >= 100 ? "🐢 35 秒就绪 · 吃掉 6,200 MB 内存（3 份内核）" : `BIOS 自检 + 启动 3 套 Linux 内核中 ${p2}%`;
+        if (p2 >= 100) {
+          clearInterval(timer);
+          document.getElementById("ahaBox").innerHTML = "💡 <strong>为什么容器不是虚拟机？</strong>容器直接复用宿主机的操作系统内核，所以秒级启动、极致省内存；但也因为共享内核，它的安全隔离强度略弱于硬件级虚拟化的 VM（因此多租户云厂商常在底层用轻量微虚机 Firecracker 包一层容器）！";
+          if (window.ToySDK) window.ToySDK.markCompleted();
+        }
+      }, 110);
+    }
+  </script>
+</body>
+</html>
