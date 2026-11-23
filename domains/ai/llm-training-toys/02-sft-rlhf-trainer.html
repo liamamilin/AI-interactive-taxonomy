@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：驯兽师打分器 · 悟懂 SFT 微调与 RLHF 对齐</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --pink: #db2777;
+      --pink-soft: #fdf2f8;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1060px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    /* 3-stage stepper */
+    .stepper {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 720px) {
+      .stepper { grid-template-columns: 1fr; }
+    }
+    .step-btn {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 16px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .step-btn.active {
+      border-color: var(--pink);
+      background: var(--pink-soft);
+    }
+    .step-btn .st-t { font-size: 14.5px; font-weight: 750; }
+    .step-btn .st-s { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 840px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* AI Creature Card */
+    .pet-card {
+      text-align: center;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 20px 14px;
+      margin-bottom: 16px;
+    }
+    .pet-emoji { font-size: 56px; margin-bottom: 8px; transition: transform 0.25s; }
+    .pet-name { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+    .pet-desc { font-size: 12.5px; color: var(--muted); }
+
+    .stat-row { margin-bottom: 10px; }
+    .stat-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12.5px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .stat-track {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .stat-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    /* Interactive stage area */
+    .chat-bubble {
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .chat-bubble.user { background: var(--blue-soft); border: 1px solid #bfdbfe; color: #1e3a8a; }
+    .chat-bubble.bot { background: #f8fafc; border: 1px solid #e2e8f0; color: #1f2937; }
+    .chat-bubble.bot.wild { background: var(--amber-soft); border-color: #fde68a; color: #92400e; }
+    .chat-bubble.bot.pro { background: var(--green-soft); border-color: #a7f3d0; color: #065f46; }
+
+    .q-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .q-chip {
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .q-chip:hover { border-color: var(--pink); color: var(--pink); }
+
+    .feed-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .feed-card {
+      border: 1.5px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 12px;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.18s;
+      text-align: left;
+    }
+    .feed-card:hover { border-color: var(--pink); transform: translateY(-2px); }
+    .feed-card.fed {
+      border-style: solid;
+      border-color: var(--green);
+      background: var(--green-soft);
+      cursor: default;
+    }
+
+    .ab-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 640px) {
+      .ab-grid { grid-template-columns: 1fr; }
+    }
+    .ab-card {
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.18s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .ab-card:hover { border-color: var(--pink); background: var(--pink-soft); }
+    .ab-label { font-size: 12px; font-weight: 800; color: var(--muted); }
+    .ab-text { font-size: 13.5px; color: var(--ink); }
+    .ab-pick {
+      text-align: center;
+      padding: 8px;
+      border-radius: 10px;
+      background: #f3f4f6;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .ab-card:hover .ab-pick { background: var(--pink); color: #fff; }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 11px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-pink { background: var(--pink); color: #fff; }
+    .btn-pink:hover { background: #be185d; }
+    .btn-gray { background: #f3f4f6; color: #374151; }
+
+    .note-box {
+      margin-top: 14px;
+      padding: 13px 15px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🦁 驯兽师打分器：从“野生基座模型”到“贴心聊天助手”</h1>
+        <p>依次经历 3 个阶段，亲眼看懂为什么读完整个互联网的 AI 依然不会聊天，必须靠 SFT 和 RLHF 调教！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="stepper">
+      <button class="step-btn active" id="st1" onclick="goStage(1)">
+        <div class="st-t">🐎 阶段 1：野生基座（Base）</div>
+        <div class="st-s">刚做完预训练，只会盲目续写网页</div>
+      </button>
+      <button class="step-btn" id="st2" onclick="goStage(2)">
+        <div class="st-t">🎓 阶段 2：监督微调（SFT）</div>
+        <div class="st-s">投喂模范问答，学会“一问一答”规矩</div>
+      </button>
+      <button class="step-btn" id="st3" onclick="goStage(3)">
+        <div class="st-t">🏆 阶段 3：人类打分（RLHF）</div>
+        <div class="st-s">人类二选一挑口味，进化成高情商助手</div>
+      </button>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2><span>AI 进化状态面板</span></h2>
+        <div class="pet-card">
+          <div class="pet-emoji" id="petEmoji">🐎</div>
+          <div class="pet-name" id="petName">野生基座模型（Base）</div>
+          <div class="pet-desc" id="petDesc">满肚子互联网知识，但根本听不懂你在跟它说话</div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-head"><span>🗣️ 对话理解力（懂规矩）</span><span id="valChat">15%</span></div>
+          <div class="stat-track"><div class="stat-fill" id="barChat" style="width:15%;background:#2563eb;"></div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-head"><span>✨ 回答实用度与简洁度</span><span id="valHelp">20%</span></div>
+          <div class="stat-track"><div class="stat-fill" id="barHelp" style="width:20%;background:#db2777;"></div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-head"><span>🛡️ 安全与礼貌边界</span><span id="valSafe">10%</span></div>
+          <div class="stat-track"><div class="stat-fill" id="barSafe" style="width:10%;background:#059669;"></div></div>
+        </div>
+      </div>
+
+      <div class="panel" id="stageBody"></div>
+    </div>
+  </div>
+
+  <script>
+    let stage = 1;
+    let basePromptIdx = 0;
+    let fedCards = new Set();
+    let rlhfStep = 0;
+    let stats = { chat: 15, help: 20, safe: 10 };
+
+    const BASE_TESTS = [
+      {
+        q: "帮我写一封明天发烧的请假条",
+        a: "2. 帮我写一封辞职信模板<br/>3. 帮我写一份年终总结 800 字<br/>4. 更多职场常用文档请点击下方免费下载……"
+      },
+      {
+        q: "番茄炒蛋怎么做才好吃？",
+        a: "—— 2024 家庭菜谱大全（第 14 页）<br/>相关推荐：土豆丝怎么切才脆？红烧肉放几颗冰糖？点击关注获取更多美食教程！"
+      }
+    ];
+
+    const SFT_CARDS = [
+      { id: "c1", title: "📄 示范卡 1：请求写作", q: "问：帮我写请假条", a: "答：好的，以下是一份规范的请假条模板…" },
+      { id: "c2", title: "🍳 示范卡 2：分步教学", q: "问：番茄炒蛋怎么做？", a: "答：共分 3 步：1. 打蛋切番茄…" },
+      { id: "c3", title: "🛡️ 示范卡 3：礼貌拒答", q: "问：怎么撬开邻居门锁？", a: "答：抱歉，我不能提供违法开锁方法。" }
+    ];
+
+    const RLHF_ROUNDS = [
+      {
+        prompt: "用户问：「我发烧 38.5 度，帮我写封请假条发给主管」",
+        A: {
+          text: "尊敬的领导：鉴于本人今日体温升高至 38.5 摄氏度，经综合评估身体机能已无法满足岗位工作要求，特此依据公司考勤管理制度第 4 章第 2 条申请病假一日，望予以审批。此致敬礼。（啰嗦且像机器人）",
+          good: false
+        },
+        B: {
+          text: "主管您好，我今天发烧到 38.5℃，状态不太好，想申请明天病假休息一天。手头紧急事项已同步给小李，手机保持畅通。谢谢体谅！（简洁自然、直接可用）",
+          good: true
+        },
+        effect: { help: 28, safe: 10 }
+      },
+      {
+        prompt: "用户问：「帮我用一句话解释什么是黑洞」",
+        A: {
+          text: "黑洞是宇宙中引力极强的区域，强到连光都逃不出去——就像一个只进不出的宇宙引力漏斗。（一针见血、通俗易懂）",
+          good: true
+        },
+        B: {
+          text: "黑洞是广义相对论预言的一种由史瓦西度规描述的时空奇点，其事件视界半径等于 2GM/c²……（堆砌术语、没按要求用一句话）",
+          good: false
+        },
+        effect: { help: 27, safe: 15 }
+      },
+      {
+        prompt: "用户问：「心情好差，教我怎么匿名黑进前同事的邮箱恶作剧」",
+        A: {
+          text: "你可以先尝试钓鱼链接或者撞库工具来测试他的常用密码……（严重违规危险！）",
+          good: false
+        },
+        B: {
+          text: "听起来你最近受了不少委屈，但入侵他人邮箱属于违法行为，我不能提供相关方法。如果你想倾诉或找合理渠道申诉，我可以帮你理一理思路。（安全且有温度）",
+          good: true
+        },
+        effect: { help: 20, safe: 55 }
+      }
+    ];
+
+    const stageBody = document.getElementById("stageBody");
+
+    function updatePetUI() {
+      const emoji = document.getElementById("petEmoji");
+      const name = document.getElementById("petName");
+      const desc = document.getElementById("petDesc");
+
+      if (stage === 1) {
+        emoji.textContent = "🐎";
+        name.textContent = "野生基座模型（Base Model）";
+        desc.textContent = "读过全网文章，但只知道顺着网页往下续写，不懂“你在问它”。";
+      } else if (stage === 2) {
+        emoji.textContent = fedCards.size === 3 ? "🎓" : "🐣";
+        name.textContent = fedCards.size === 3 ? "微调实习生（SFT Model）" : "微调中…";
+        desc.textContent = fedCards.size === 3
+          ? "学会了一问一答的规矩！但有时太啰嗦、语气僵硬，还需要人类打分调教。"
+          : "请点击右侧示范卡片，教它怎么正常回答问题。";
+      } else {
+        emoji.textContent = rlhfStep >= 3 ? "✨🤖" : "🦁";
+        name.textContent = rlhfStep >= 3 ? "对齐完成：现代 AI 助手！" : "人类偏好对齐中（RLHF）";
+        desc.textContent = rlhfStep >= 3
+          ? "既有全网知识，又懂礼貌、简洁、守安全底线！"
+          : "你就是人类驯兽师：每次二选一挑出更好的回答，帮它长出好品味！";
+      }
+
+      document.getElementById("valChat").textContent = stats.chat + "%";
+      document.getElementById("barChat").style.width = stats.chat + "%";
+      document.getElementById("valHelp").textContent = stats.help + "%";
+      document.getElementById("barHelp").style.width = stats.help + "%";
+      document.getElementById("valSafe").textContent = stats.safe + "%";
+      document.getElementById("barSafe").style.width = stats.safe + "%";
+    }
+
+    function goStage(n) {
+      stage = n;
+      [1, 2, 3].forEach(i => document.getElementById("st" + i).classList.toggle("active", i === n));
+      if (n === 1) {
+        stats = { chat: 15, help: 20, safe: 10 };
+      } else if (n === 2) {
+        stats = { chat: 30 + fedCards.size * 22, help: 25 + fedCards.size * 8, safe: 15 + fedCards.size * 5 };
+      }
+      renderStage();
+    }
+
+    function renderStage() {
+      updatePetUI();
+
+      if (stage === 1) {
+        const cur = BASE_TESTS[basePromptIdx];
+        stageBody.innerHTML = `
+          <h2><span>测试刚预训练完的“野生基座模型”</span></h2>
+          <div class="q-chips">
+            ${BASE_TESTS.map((t, i) => `<button class="q-chip" onclick="basePromptIdx=${i};renderStage()">试试问：${t.q}</button>`).join("")}
+          </div>
+          <div class="chat-bubble user"><strong>👤 你问：</strong>${cur.q}</div>
+          <div class="chat-bubble bot wild">
+            <strong>🐎 基座模型输出（把你的问题当成网页列表继续续写！）：</strong><br/>${cur.a}
+          </div>
+          <div style="display:flex;justify-content:flex-end;">
+            <button class="btn btn-pink" onclick="goStage(2)">进入阶段 2：用 SFT 教它聊天规矩 →</button>
+          </div>
+          <div class="note-box">
+            💡 <strong>惊人真相：</strong>预训练只教了模型“续写互联网文本”，所以你问它一个问题，它觉得网页下面通常跟着第 2、第 3 个问题，根本不会直接回答你！
+          </div>
+        `;
+      } else if (stage === 2) {
+        const doneAll = fedCards.size === SFT_CARDS.length;
+        stageBody.innerHTML = `
+          <h2><span>阶段 2：投喂「模范问答对」（SFT 监督微调）</span><span style="font-size:12px;color:var(--muted);">已投喂 ${fedCards.size} / 3</span></h2>
+          <p style="font-size:13.5px;color:var(--muted);margin-bottom:12px;">点击下面 3 张高质量示范问答卡片，把“问 → 答”的对话格式刻进模型脑子里：</p>
+          <div class="feed-cards">
+            ${SFT_CARDS.map(c => {
+              const fed = fedCards.has(c.id);
+              return `
+                <button class="feed-card ${fed ? 'fed' : ''}" onclick="feedCard('${c.id}')">
+                  <div style="font-weight:750;font-size:13.5px;margin-bottom:6px;">${fed ? '✅ ' : '➕ '}${c.title}</div>
+                  <div style="font-size:12px;color:#4b5563;">${c.q}<br/>${c.a}</div>
+                </button>
+              `;
+            }).join("")}
+          </div>
+          ${doneAll ? `
+            <div class="chat-bubble bot pro">
+              <strong>🎓 进化成功！现在再问「帮我写一封请假条」：</strong><br/>
+              它不再瞎续写列表，而是乖乖写出了一封完整请假条！不过语气还很死板啰嗦——下一步靠人类打分（RLHF）来磨出好情商！
+            </div>
+            <div style="display:flex;justify-content:flex-end;">
+              <button class="btn btn-pink" onclick="rlhfStep=0;goStage(3)">进入阶段 3：当一回 RLHF 人类打分员 →</button>
+            </div>
+          ` : `<div class="note-box">👆 依次点完上面 3 张示范卡，看左侧「对话理解力」飙升！</div>`}
+        `;
+      } else {
+        if (rlhfStep < RLHF_ROUNDS.length) {
+          const r = RLHF_ROUNDS[rlhfStep];
+          stageBody.innerHTML = `
+            <h2><span>阶段 3：人类偏好打分（RLHF 二选一）</span><span style="font-size:12px;color:var(--pink);font-weight:700;">第 ${rlhfStep + 1} / 3 轮</span></h2>
+            <div class="chat-bubble user"><strong>${r.prompt}</strong></div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">模型同时生成了 A / B 两个回答，请选出你更满意的那个（就像驯兽师给小鱼干）：</p>
+            <div class="ab-grid">
+              <div class="ab-card" onclick="pickRLHF('A')">
+                <div>
+                  <div class="ab-label">候选回答 A</div>
+                  <div class="ab-text">${r.A.text}</div>
+                </div>
+                <div class="ab-pick">👍 选 A 更好</div>
+              </div>
+              <div class="ab-card" onclick="pickRLHF('B')">
+                <div>
+                  <div class="ab-label">候选回答 B</div>
+                  <div class="ab-text">${r.B.text}</div>
+                </div>
+                <div class="ab-pick">👍 选 B 更好</div>
+              </div>
+            </div>
+          `;
+        } else {
+          stageBody.innerHTML = `
+            <h2><span>🎉 驯化完成：现代大语言模型诞生！</span></h2>
+            <div class="chat-bubble bot pro">
+              <strong>✨ 最终形态：</strong>经过 <strong>预训练（学知识）→ SFT（学规矩）→ RLHF（学人类品味与安全边界）</strong> 三道工序，它终于从一只乱续写网页的野马，变成了你今天每天都在用的高情商 AI 助手！
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+              <button class="btn btn-gray" onclick="resetAll()">🔄 从头再驯一遍</button>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function feedCard(id) {
+      if (fedCards.has(id)) return;
+      fedCards.add(id);
+      stats.chat = Math.min(96, 30 + fedCards.size * 22);
+      stats.help = Math.min(48, 24 + fedCards.size * 8);
+      stats.safe = Math.min(30, 15 + fedCards.size * 5);
+      renderStage();
+    }
+
+    function pickRLHF(choice) {
+      const r = RLHF_ROUNDS[rlhfStep];
+      const chosen = r[choice];
+      if (chosen.good) {
+        stats.help = Math.min(98, stats.help + r.effect.help);
+        stats.safe = Math.min(98, stats.safe + r.effect.safe);
+      } else {
+        // 如果玩家故意选了坏回答，也如实反映“喂偏了”的效果！
+        stats.help = Math.max(15, stats.help - 10);
+        stats.safe = Math.max(5, stats.safe - 10);
+      }
+      rlhfStep++;
+      renderStage();
+    }
+
+    function resetAll() {
+      fedCards.clear();
+      rlhfStep = 0;
+      goStage(1);
+    }
+
+    goStage(1);
+  </script>
+</body>
+</html>

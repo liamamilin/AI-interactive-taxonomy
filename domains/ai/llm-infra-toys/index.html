@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2 分钟悟懂 LLM Infra · 交互式科普玩具箱</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --surface: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --slate: #0f172a;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --teal: #0d9488;
+      --teal-soft: #f0fdfa;
+      --orange: #ea580c;
+      --orange-soft: #fff7ed;
+      --shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top right, #dbeafe 0%, var(--bg) 42%, #f0fdfa 100%);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.6;
+      padding: 40px 20px 64px;
+    }
+
+    .container { max-width: 1040px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      margin-bottom: 44px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(28px, 4.2vw, 42px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .pipeline {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 28px 0 36px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .pipe-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 40px rgba(17, 24, 39, 0.10);
+      border-color: #cbd5e1;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .icon-box {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+
+    .card.c1 .icon-box { background: var(--blue-soft); }
+    .card.c2 .icon-box { background: var(--teal-soft); }
+    .card.c3 .icon-box { background: var(--orange-soft); }
+
+    .step-num {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: var(--muted);
+    }
+
+    .card h2 {
+      font-size: 22px;
+      font-weight: 750;
+      margin-bottom: 8px;
+    }
+
+    .concept-tag {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    .card.c1 .concept-tag { color: var(--blue); }
+    .card.c2 .concept-tag { color: var(--teal); }
+    .card.c3 .concept-tag { color: var(--orange); }
+
+    .card p {
+      font-size: 14.5px;
+      color: #4b5563;
+      margin-bottom: 20px;
+      flex: 1;
+    }
+
+    .aha-box {
+      background: #f8fafc;
+      border: 1px solid #eef2f7;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #374151;
+      margin-bottom: 20px;
+    }
+
+    .aha-box strong { color: var(--ink); }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 650;
+      font-size: 14.5px;
+      color: #fff;
+      transition: background 0.18s ease;
+    }
+
+    .card.c1 .cta { background: var(--blue); }
+    .card.c1:hover .cta { background: #1d4ed8; }
+
+    .card.c2 .cta { background: var(--teal); }
+    .card.c2:hover .cta { background: #0f766e; }
+
+    .card.c3 .cta { background: var(--orange); }
+    .card.c3:hover .cta { background: #c2410c; }
+
+    footer {
+      text-align: center;
+      margin-top: 44px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">⚡ 交互式科普原型 · 纯前端零依赖</div>
+      <h1>2 分钟悟懂 LLM Infra：交互玩具箱</h1>
+      <p class="subtitle">
+        上百万人同时找 AI 聊天，机房为什么没炸？单张显卡怎么塞下百亿大模型？玩完下面 3 个小游戏，瞬间看懂大模型推理基础设施（LLM Infra）的三大底层黑科技。
+      </p>
+      <div class="pipeline">
+        <span class="pipe-step">① 显存搬家（量化 &amp; KV Cache）</span>
+        <span>→</span>
+        <span class="pipe-step">② GPU 食堂打饭（连续批处理）</span>
+        <span>→</span>
+        <span class="pipe-step">③ 双阶段流水线（Prefill &amp; Decode）</span>
+      </div>
+    </header>
+
+    <main class="grid">
+      <a class="card c1" href="./01-vram-kv-cache.html">
+        <div class="card-top">
+          <div class="icon-box">🚛</div>
+          <span class="step-num">玩具 01 · 约 2 分钟</span>
+        </div>
+        <h2>显存搬家大作战</h2>
+        <div class="concept-tag">原理：Quantization（量化压缩）&amp; KV Cache（草稿缓存）</div>
+        <p>把 70B 大模型往 GPU 显存里硬塞看它爆仓，再用 INT8/INT4 量化一键瘦身；接着对比开关 KV Cache 吐字时，计算量如何从 55 次暴降到 10 次！</p>
+        <div class="aha-box">
+          <strong>顿悟点：</strong>量化省显存空间，KV Cache 省重复计算——两者联手让大模型飞起来。
+        </div>
+        <div class="cta">开始玩《显存搬家大作战》 →</div>
+      </a>
+
+      <a class="card c2" href="./02-continuous-batching.html">
+        <div class="card-top">
+          <div class="icon-box">🍱</div>
+          <span class="step-num">玩具 02 · 约 2 分钟</span>
+        </div>
+        <h2>GPU 食堂打饭机</h2>
+        <div class="concept-tag">原理：Static Batching vs Continuous Batching（vLLM 核心）</div>
+        <p>4 个 GPU 窗口同时服务长短不一的用户请求：看传统静态批处理如何因为一个长文用户让 GPU 干等空转，而“随走随补”如何把吞吐量直接翻倍！</p>
+        <div class="aha-box">
+          <strong>顿悟点：</strong>消灭 GPU 空转气泡的秘密就是“谁吃完谁先走，空位立刻补新人”。
+        </div>
+        <div class="cta">开始玩《GPU 食堂打饭机》 →</div>
+      </a>
+
+      <a class="card c3" href="./03-prefill-decode-pipeline.html">
+        <div class="card-top">
+          <div class="icon-box">⏱️</div>
+          <span class="step-num">玩具 03 · 约 2 分钟</span>
+        </div>
+        <h2>双阶段流水线</h2>
+        <div class="concept-tag">原理：Prefill 读题（TTFT）vs Decode 吐字 &amp; PD 分离</div>
+        <p>调节发给 AI 的文章长度与回复长度，透视 GPU 在“读题阶段吃算力”与“吐字阶段吃显存带宽”的性格分裂，体验 PD 分离集群如何根治打字卡顿！</p>
+        <div class="aha-box">
+          <strong>顿悟点：</strong>长文转圈等首字是因为 Prefill 猛算，后面匀速吐字是因为 Decode 逐字搬显存。
+        </div>
+        <div class="cta">开始玩《双阶段流水线》 →</div>
+      </a>
+    </main>
+
+    <footer>
+      所有原型均为单文件本地 HTML，直接双击即可运行，无需联网或 API Key。
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：技能贴纸店 · 悟懂全量微调 vs LoRA</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --purple: #9333ea;
+      --purple-soft: #faf5ff;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1080px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .m-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.16s;
+    }
+    .m-card.active.full { border-color: var(--red); background: var(--red-soft); }
+    .m-card.active.lora { border-color: var(--purple); background: var(--purple-soft); }
+    .m-card .mt { font-size: 15.5px; font-weight: 750; }
+    .m-card .ms { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 780px) {
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    .kpi {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+    .kpi-l { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .kpi-v { font-size: 22px; font-weight: 850; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; margin-top: 2px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Matrix visual */
+    .matrix-stage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 20px 14px;
+      margin-bottom: 16px;
+    }
+
+    .mat-box { text-align: center; }
+    .mat-caption { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 8px; }
+
+    .base-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 22px);
+      gap: 3px;
+      padding: 8px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+    }
+    .base-grid.frozen { border-color: #38bdf8; background: #f0f9ff; }
+    .base-grid.burning { border-color: #f87171; background: #fef2f2; }
+
+    .cell {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      transition: background 0.25s ease, transform 0.2s;
+    }
+    .cell.frozen { background: #bae6fd; }
+    .cell.hot { background: #ef4444; }
+    .cell.lora-cell { background: #a855f7; }
+
+    .lora-pair {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rank-box {
+      background: var(--purple-soft);
+      border: 1px solid #e9d5ff;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+    .rank-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .rank-box input[type="range"] { width: 100%; accent-color: var(--purple); cursor: pointer; }
+
+    /* Hot-swap sticker shop */
+    .sticker-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .sticker-btn {
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 10px;
+      background: #ffffff;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.16s;
+    }
+    .sticker-btn:hover { border-color: #c084fc; transform: translateY(-2px); }
+    .sticker-btn.active {
+      border-color: var(--purple);
+      background: var(--purple-soft);
+      box-shadow: 0 4px 14px rgba(147, 51, 234, 0.14);
+    }
+    .st-emoji { font-size: 28px; margin-bottom: 4px; }
+    .st-name { font-size: 13.5px; font-weight: 750; }
+    .st-size { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .demo-chat {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .demo-q {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--blue);
+      margin-bottom: 10px;
+    }
+    .demo-a {
+      font-size: 14px;
+      color: var(--ink);
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 12px 14px;
+      line-height: 1.65;
+    }
+
+    .aha {
+      border-radius: 12px;
+      padding: 13px 15px;
+      font-size: 13.5px;
+      background: var(--purple-soft);
+      border: 1px solid #e9d5ff;
+      color: #581c87;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🏷️ 技能贴纸店：为什么 LoRA 能用 1% 显存微调大模型？</h1>
+        <p>先点上方切换「全量微调 vs LoRA」，再给右侧冻结的大脑秒换不同 48MB 技能贴纸！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="mode-switch">
+      <button class="m-card full" id="btnFull" onclick="setMode('full')">
+        <div class="mt">🔨 方式 A：全量微调（Full Fine-Tuning）</div>
+        <div class="ms">把整个 64 块主权重矩阵全部推倒重训，极其吃显存、存 3 个风格要 3 份完整大脑</div>
+      </button>
+      <button class="m-card lora active" id="btnLora" onclick="setMode('lora')">
+        <div class="mt">🏷️ 方式 B：LoRA 外挂贴纸（低秩微调）</div>
+        <div class="ms">❄️ 冻结原大脑不动！只在旁边训练两根极细的“贴纸条”，显存暴降 95% 还能热插拔</div>
+      </button>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-l">需要改写的参数比例</div>
+        <div class="kpi-v" id="kRatio" style="color:var(--purple);">12.5%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">所需显卡显存（VRAM）</div>
+        <div class="kpi-v" id="kVram" style="color:var(--green);">18 GB</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">单个技能包体积</div>
+        <div class="kpi-v" id="kSize" style="color:var(--blue);">48 MB</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">预估单次训练成本</div>
+        <div class="kpi-v" id="kCost">$15</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>
+          <span>🧱 大脑权重矩阵透视图</span>
+          <span style="font-size:12px;color:var(--muted);" id="matStatus">主矩阵已冻结 ❄️</span>
+        </h2>
+
+        <div class="matrix-stage" id="matrixStage"></div>
+
+        <div class="rank-box" id="rankBox">
+          <div class="rank-head">
+            <span>🎚️ 贴纸厚度（LoRA Rank r）：控制微调容量</span>
+            <span id="rankLabel" style="color:var(--purple);font-family:monospace;">r = 1（极薄极省）</span>
+          </div>
+          <input type="range" id="rankSlider" min="1" max="4" step="1" value="1" oninput="renderAll()" />
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:4px;">
+            <span>r=1 最轻巧</span>
+            <span>r=2 均衡推荐</span>
+            <span>r=4 容量更大</span>
+          </div>
+        </div>
+
+        <div class="aha" id="matAha"></div>
+      </div>
+
+      <div class="panel">
+        <h2>
+          <span>⚡ 热插拔技能贴纸（同一个冻结大脑）</span>
+          <span style="font-size:12px;color:var(--purple);font-weight:700;">秒级切换</span>
+        </h2>
+
+        <div class="sticker-list" id="stickerList"></div>
+
+        <div class="demo-chat">
+          <div class="demo-q">👤 同一句用户提问：「我连续熬夜加班三天，现在头好痛怎么办？」</div>
+          <div class="demo-a" id="demoAnswer"></div>
+        </div>
+
+        <div style="font-size:12.5px;color:var(--muted);background:#f8fafc;padding:12px 14px;border-radius:12px;border:1px solid #e2e8f0;">
+          <strong>💾 硬盘占用对比（同时服务这 3 种角色）：</strong><br/>
+          <span id="diskCompare"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STICKERS = [
+      {
+        id: "base",
+        emoji: "🤖",
+        name: "原版通用",
+        sizeFull: "140 GB",
+        sizeLora: "0 MB（裸机）",
+        reply: "连续熬夜会导致睡眠不足和神经性头痛。建议您尽快安排休息、多喝温水，若疼痛持续或伴有发热呕吐，请及时就医。"
+      },
+      {
+        id: "doctor",
+        emoji: "🩺",
+        name: "三甲分诊医生",
+        sizeFull: "140 GB",
+        sizeLora: "48 MB 贴纸",
+        reply: "【分诊初筛】连续 72 小时睡眠剥夺诱发急性头痛，需重点排查：① 是否伴随视物模糊/血压骤升；② 是否伴颈项强直或恶心呕吐。如无上述红旗警示，建议立即卧床补觉、监测血压；若出现任一警示症状，请立即前往急诊科。"
+      },
+      {
+        id: "cat",
+        emoji: "😼",
+        name: "赛博猫娘",
+        sizeFull: "140 GB",
+        sizeLora: "48 MB 贴纸",
+        reply: "喵呜！！主人怎么又连续熬夜加班三天啦，脑瓜子都要冒烟了喵！快把电脑合上乖乖喝一杯温水，本喵现在就命令你立刻钻进被窝睡觉，不许再盯着屏幕了喵！(｀・ω・´)"
+      }
+    ];
+
+    let mode = "lora"; // 'full' | 'lora'
+    let activeSticker = "doctor";
+
+    const matrixStage = document.getElementById("matrixStage");
+    const rankSlider = document.getElementById("rankSlider");
+    const rankBox = document.getElementById("rankBox");
+    const rankLabel = document.getElementById("rankLabel");
+    const matStatus = document.getElementById("matStatus");
+    const matAha = document.getElementById("matAha");
+    const stickerList = document.getElementById("stickerList");
+    const demoAnswer = document.getElementById("demoAnswer");
+    const diskCompare = document.getElementById("diskCompare");
+
+    function setMode(m) {
+      mode = m;
+      document.getElementById("btnFull").classList.toggle("active", m === "full");
+      document.getElementById("btnLora").classList.toggle("active", m === "lora");
+      renderAll();
+    }
+
+    function renderMatrix(rank) {
+      if (mode === "full") {
+        let cells = "";
+        for (let i = 0; i < 64; i++) cells += `<div class="cell hot"></div>`;
+        matrixStage.innerHTML = `
+          <div class="mat-box">
+            <div class="base-grid burning">${cells}</div>
+            <div class="mat-caption" style="color:var(--red);">🔥 全部 64 块主权重同时重训（100% 发热烧显存）</div>
+          </div>
+        `;
+      } else {
+        let baseCells = "";
+        for (let i = 0; i < 64; i++) baseCells += `<div class="cell frozen"></div>`;
+        let aCells = "";
+        for (let i = 0; i < 8 * rank; i++) aCells += `<div class="cell lora-cell"></div>`;
+        let bCells = "";
+        for (let i = 0; i < rank * 8; i++) bCells += `<div class="cell lora-cell"></div>`;
+
+        matrixStage.innerHTML = `
+          <div class="mat-box">
+            <div class="base-grid frozen">${baseCells}</div>
+            <div class="mat-caption" style="color:#0284c7;">❄️ 原大脑 64 块（彻底冻结）</div>
+          </div>
+          <div style="font-size:24px;font-weight:800;color:var(--purple);">+</div>
+          <div class="mat-box">
+            <div class="lora-pair">
+              <div style="display:grid;grid-template-columns:repeat(${rank},18px);gap:3px;padding:6px;border-radius:10px;background:#faf5ff;border:2px solid #c084fc;">
+                ${aCells.replace(/22px/g, "18px")}
+              </div>
+              <span style="font-weight:800;color:var(--purple);">×</span>
+              <div style="display:grid;grid-template-columns:repeat(8,16px);gap:3px;padding:6px;border-radius:10px;background:#faf5ff;border:2px solid #c084fc;">
+                ${bCells}
+              </div>
+            </div>
+            <div class="mat-caption" style="color:var(--purple);">🏷️ LoRA 贴纸 A(8×${rank}) × B(${rank}×8) = 仅 ${16 * rank} 块！</div>
+          </div>
+        `;
+      }
+    }
+
+    function renderAll() {
+      const rank = parseInt(rankSlider.value, 10);
+      renderMatrix(rank);
+
+      if (mode === "full") {
+        rankBox.style.opacity = "0.4";
+        rankBox.style.pointerEvents = "none";
+        matStatus.textContent = "全员解锁重刷 🔥";
+        document.getElementById("kRatio").textContent = "100%";
+        document.getElementById("kRatio").style.color = "var(--red)";
+        document.getElementById("kVram").textContent = "320 GB";
+        document.getElementById("kVram").style.color = "var(--red)";
+        document.getElementById("kSize").textContent = "140 GB";
+        document.getElementById("kCost").textContent = "$4,800";
+        matAha.innerHTML = "🔨 <strong>全量微调痛点：</strong>为了学一个新口音，竟然要把整个 70B 大脑的梯度和优化器全塞进显存，不仅贵到离谱，还极容易把原本的知识改坏！";
+        diskCompare.innerHTML = "全量微调存 3 个独立大脑需要 <strong style='color:var(--red);'>420 GB</strong>，切换角色还要重新加载几十秒！";
+      } else {
+        rankBox.style.opacity = "1";
+        rankBox.style.pointerEvents = "auto";
+        matStatus.textContent = "主矩阵已冻结 ❄️";
+        const pct = ((16 * rank) / 64 * 100 / 8).toFixed(1); // 示意真实大矩阵比例（约 0.8%~3.2%）
+        const vram = 14 + rank * 2;
+        const sizeMb = rank * 32;
+        const cost = 10 + rank * 6;
+        rankLabel.textContent = `r = ${rank}（只训极少增量参数）`;
+        document.getElementById("kRatio").textContent = pct + "%";
+        document.getElementById("kRatio").style.color = "var(--purple)";
+        document.getElementById("kVram").textContent = vram + " GB";
+        document.getElementById("kVram").style.color = "var(--green)";
+        document.getElementById("kSize").textContent = sizeMb + " MB";
+        document.getElementById("kCost").textContent = "$" + cost;
+        matAha.innerHTML = "🏷️ <strong>LoRA 的天才数学：</strong>把改变量拆成一竖一横两根细条相乘（低秩分解）。原大脑 100% 冻结不动，一张消费级显卡就能微调出专属技能贴纸！";
+        diskCompare.innerHTML = `1 个冻结原大脑（140 GB）+ 2 张 LoRA 贴纸（仅 <strong style='color:var(--green);'>${sizeMb * 2} MB</strong>），毫秒级热插拔切换角色！`;
+      }
+
+      stickerList.innerHTML = "";
+      STICKERS.forEach(s => {
+        const b = document.createElement("button");
+        b.className = "sticker-btn" + (s.id === activeSticker ? " active" : "");
+        b.onclick = () => {
+          activeSticker = s.id;
+          renderAll();
+        };
+        b.innerHTML = `
+          <div class="st-emoji">${s.emoji}</div>
+          <div class="st-name">${s.name}</div>
+          <div class="st-size">${mode === "full" ? s.sizeFull : s.sizeLora}</div>
+        `;
+        stickerList.appendChild(b);
+      });
+
+      const cur = STICKERS.find(x => x.id === activeSticker);
+      demoAnswer.textContent = cur.reply;
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>

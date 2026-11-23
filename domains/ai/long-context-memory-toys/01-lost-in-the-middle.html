@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：大海捞针 U 型陷阱 · Lost in the Middle</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --sky:#0284c7; --sky-soft:#f0f9ff; --red:#dc2626; --red-soft:#fef2f2; --green:#059669; --green-soft:#ecfdf5; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:960px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .sl-head { display:flex; justify-content:space-between; font-size:15px; font-weight:800; margin-bottom:8px; }
+    input[type="range"] { width:100%; accent-color:var(--sky); cursor:pointer; }
+
+    .doc-bar { height:34px; border-radius:12px; background:linear-gradient(90deg,#10b981 0%,#f59e0b 30%,#ef4444 50%,#f59e0b 70%,#10b981 100%); position:relative; margin:16px 0 22px; }
+    .needle { position:absolute; top:-8px; width:4px; height:50px; background:#0f172a; border-radius:4px; transition:left .15s; }
+    .needle::after { content:"🪡 密码藏在这"; position:absolute; top:-22px; left:50%; transform:translateX(-50%); white-space:nowrap; font-size:11.5px; font-weight:800; color:#0f172a; }
+
+    svg#uSvg { width:100%; height:170px; display:block; background:#f8fafc; border-radius:14px; border:1px solid #e2e8f0; margin-bottom:14px; }
+    .res { border-radius:14px; padding:15px 17px; font-size:13.5px; }
+    .res.ok { background:var(--green-soft); border:1px solid #a7f3d0; color:#065f46; }
+    .res.bad { background:var(--red-soft); border:1px solid #fecaca; color:#991b1b; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🪡 大海捞针：为什么把重要信息放长文正中间最容易被漏掉？</h1>
+        <p>左右拖动“秘密密码”在 10 万字长文中的位置，亲眼看大名鼎鼎的 <strong>Lost in the Middle（U 型注意力曲线）</strong>！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="panel">
+      <div class="sl-head">
+        <span>📍 秘密密码在 10 万字文档中的埋藏位置</span>
+        <span id="posTag" style="color:var(--sky);font-family:monospace;">50%（正中间）</span>
+      </div>
+      <input type="range" id="slPos" min="0" max="100" step="5" value="50" oninput="render()" />
+
+      <div class="doc-bar"><div class="needle" id="needle" style="left:50%;"></div></div>
+      <svg id="uSvg" viewBox="0 0 600 170"></svg>
+      <div class="res" id="resBox"></div>
+    </div>
+  </div>
+
+  <script>
+    function recallAt(pos) {
+      // 经典 U 型曲线：首尾 ~96%，正中间跌至 ~52%
+      const d = (pos - 50) / 50;
+      return Math.round(52 + 44 * (d * d));
+    }
+
+    function render() {
+      const pos = parseInt(document.getElementById("slPos").value, 10);
+      const rec = recallAt(pos);
+      const zone = pos <= 15 ? "文档开头" : pos >= 85 ? "文档结尾" : "文档中段盲区";
+      document.getElementById("posTag").textContent = `${pos}%（${zone}）`;
+      document.getElementById("needle").style.left = `calc(${pos}% - 2px)`;
+
+      // Draw U curve
+      const W = 600, H = 170, padL = 40, padR = 20, padT = 16, padB = 26;
+      const pw = W - padL - padR, ph = H - padT - padB;
+      const pts = [];
+      for (let p = 0; p <= 100; p += 5) {
+        pts.push([padL + (p/100)*pw, padT + (1 - recallAt(p)/100)*ph]);
+      }
+      const d = pts.map((pt, i) => (i===0 ? `M ${pt[0]} ${pt[1]}` : `L ${pt[0]} ${pt[1]}`)).join(" ");
+      const cx = padL + (pos/100)*pw, cy = padT + (1 - rec/100)*ph;
+
+      document.getElementById("uSvg").innerHTML = `
+        <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#94a3b8"/>
+        <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="#94a3b8"/>
+        <text x="${padL-6}" y="${padT+5}" text-anchor="end" font-size="10" fill="#64748b">100%</text>
+        <text x="${padL-6}" y="${H-padB}" text-anchor="end" font-size="10" fill="#64748b">0%</text>
+        <text x="${W/2}" y="${H-5}" text-anchor="middle" font-size="11" fill="#64748b">密码所在位置（0% 开头 → 50% 中间 → 100% 结尾）</text>
+        <path d="${d}" fill="none" stroke="#0284c7" stroke-width="3.2"/>
+        <circle cx="${cx}" cy="${cy}" r="6" fill="${rec<70?'#dc2626':'#059669'}" stroke="#fff" stroke-width="2"/>
+      `;
+
+      const res = document.getElementById("resBox");
+      if (rec < 70) {
+        res.className = "res bad";
+        res.innerHTML = `⚠️ <strong>掉进中间盲区（召回率仅 ${rec}%）！</strong>即使模型标称支持 100 万字上下文，注意力依然天然偏爱开头（首因效应）和结尾（近因效应），正中间的细节极易被忽略！`;
+      } else {
+        res.className = "res ok";
+        res.innerHTML = `✅ <strong>高召回区（召回率 ${rec}%）！</strong>实用技巧：写长 Prompt 或贴长资料时，把<strong>最关键的指令和约束放在最开头或最末尾</strong>，效果立竿见影！`;
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

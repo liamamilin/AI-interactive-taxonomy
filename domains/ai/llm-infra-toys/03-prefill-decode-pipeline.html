@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：双阶段流水线 · 悟懂 Prefill、Decode 与 PD 分离</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --orange: #ea580c;
+      --orange-soft: #fff7ed;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1060px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 370px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sl-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .sl-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      font-weight: 750;
+      margin-bottom: 8px;
+    }
+    .sl-badge {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--orange);
+      background: var(--orange-soft);
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 12.5px;
+    }
+    .sl-card input[type="range"] { width: 100%; accent-color: var(--orange); cursor: pointer; }
+
+    .pd-card {
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 15px;
+      background: #fafbfe;
+      margin-bottom: 14px;
+    }
+    .pd-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .toggle {
+      position: relative;
+      width: 46px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #cbd5e1;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .slider::before {
+      content: "";
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+    .toggle input:checked + .slider { background: var(--green); }
+    .toggle input:checked + .slider::before { transform: translateX(22px); }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 14.5px;
+      font-weight: 750;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn-orange { background: var(--orange); color: #fff; }
+    .btn-orange:hover:not(:disabled) { background: #c2410c; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* Hardware gauges */
+    .phase-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .ph-box {
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: #f9fafb;
+      transition: all 0.2s;
+    }
+    .ph-box.active-p { border-color: var(--orange); background: var(--orange-soft); }
+    .ph-box.active-d { border-color: var(--blue); background: var(--blue-soft); }
+    .ph-box strong { display: block; font-size: 14px; }
+    .ph-box span { font-size: 12px; color: var(--muted); }
+
+    .gauge-row { margin-bottom: 12px; }
+    .g-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    .g-track {
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .g-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.25s ease, background 0.25s;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .met {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 11px 13px;
+    }
+    .met-l { font-size: 11.5px; color: var(--muted); font-weight: 650; }
+    .met-v { font-size: 20px; font-weight: 850; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    .stream-box {
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: #111827;
+      color: #f9fafb;
+      font-size: 14px;
+      min-height: 92px;
+      margin-bottom: 14px;
+      line-height: 1.7;
+    }
+    .stream-tag {
+      display: inline-block;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+      background: rgba(255,255,255,0.14);
+    }
+
+    .insight {
+      border-radius: 12px;
+      padding: 13px 15px;
+      font-size: 13.5px;
+      background: var(--orange-soft);
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>⏱️ 双阶段流水线：为什么发长文“首字等半天”，后面吐字却哒哒哒？</h1>
+        <p>调节发给 AI 的文章长度与回复字数，透视 GPU 内部 <strong>Prefill（读题）</strong> 与 <strong>Decode（吐字）</strong> 截然相反的硬件瓶颈！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2><span>🎛️ 请求参数与集群架构</span></h2>
+
+        <div class="sl-card">
+          <div class="sl-top">
+            <span>📄 你发给 AI 的输入长度（Prompt）</span>
+            <span class="sl-badge" id="pLenVal">10,000 字</span>
+          </div>
+          <input type="range" id="slPrompt" min="500" max="50000" step="500" value="10000" oninput="updatePreview()" />
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px;">
+            <span>500 字短问</span><span>10,000 字报告</span><span>50,000 字整本书</span>
+          </div>
+        </div>
+
+        <div class="sl-card">
+          <div class="sl-top">
+            <span>✍️ AI 要写的回答长度（Output）</span>
+            <span class="sl-badge" id="oLenVal">60 字</span>
+          </div>
+          <input type="range" id="slOutput" min="20" max="120" step="10" value="60" oninput="updatePreview()" />
+        </div>
+
+        <div class="pd-card">
+          <div class="pd-row">
+            <span style="font-size:14px;font-weight:750;">⚡ 开启 PD 分离集群（专卡专干）</span>
+            <label class="toggle">
+              <input type="checkbox" id="pdToggle" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div style="font-size:12px;color:var(--muted);">
+            关闭时：模拟隔壁用户突然发来 5 万字长文，把你正在吐字的同一张 GPU 卡成 PPT！开启后：读题卡与吐字卡分离，互不干扰。
+          </div>
+        </div>
+
+        <button class="btn btn-orange" id="sendBtn" onclick="runRequest()">▶ 发送请求并透视 GPU 负载</button>
+      </div>
+
+      <div class="panel">
+        <h2><span>🔬 GPU 硬件透视仪（实时瓶颈监控）</span></h2>
+
+        <div class="phase-strip">
+          <div class="ph-box" id="boxP">
+            <strong>第一幕：Prefill 读题阶段</strong>
+            <span>并行一口气吃掉全部输入 · 决定首字等多久（TTFT）</span>
+          </div>
+          <div class="ph-box" id="boxD">
+            <strong>第二幕：Decode 吐字阶段</strong>
+            <span>打字机一个字一个字吐 · 决定生成快不快（Tokens/s）</span>
+          </div>
+        </div>
+
+        <div class="gauge-row">
+          <div class="g-head">
+            <span>🔥 GPU 算力核心占用（Compute FLOPs）</span>
+            <span id="gCompVal">0%</span>
+          </div>
+          <div class="g-track"><div class="g-fill" id="gCompFill" style="width:0%;background:var(--orange);"></div></div>
+        </div>
+
+        <div class="gauge-row">
+          <div class="g-head">
+            <span>🚛 GPU 显存带宽占用（Memory Bandwidth）</span>
+            <span id="gBwVal">0%</span>
+          </div>
+          <div class="g-track"><div class="g-fill" id="gBwFill" style="width:0%;background:var(--blue);"></div></div>
+        </div>
+
+        <div class="metrics">
+          <div class="met">
+            <div class="met-l">⏱️ 首字延迟（TTFT）</div>
+            <div class="met-v" id="metTtft">0.80 s</div>
+          </div>
+          <div class="met">
+            <div class="met-l">⌨️ 当前吐字速度</div>
+            <div class="met-v" id="metTps" style="color:var(--blue);">待命</div>
+          </div>
+        </div>
+
+        <div class="stream-box">
+          <div class="stream-tag" id="streamTag">等待发送请求…</div>
+          <div id="streamText" style="color:#d1d5db;">把输入长度拉到 50,000 字再点「发送请求」，亲眼看 GPU 算力条与显存带宽条的“跷跷板”切换！</div>
+        </div>
+
+        <div class="insight" id="pdInsight">
+          💡 <strong>为什么性格分裂？</strong>读题（Prefill）是成千上万个字一起算矩阵乘法，直接把 <strong>GPU 算力打满到 98%</strong>；吐字（Decode）每次只算 1 个新字，却要把几十 GB 的模型权重从显存搬一遍，所以算力很闲、<strong>显存带宽飙红 98%</strong>！
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slPrompt = document.getElementById("slPrompt");
+    const slOutput = document.getElementById("slOutput");
+    const pdToggle = document.getElementById("pdToggle");
+    const sendBtn = document.getElementById("sendBtn");
+
+    const SAMPLE_REPLY = "太好了！我刚刚在 Prefill 阶段并行读完了你发的全部材料并建好了 KV Cache；现在进入 Decode 阶段，GPU 正在拼命搬运显存权重，以匀速打字机的方式一个字一个字为你生成总结：核心结论是读题吃算力、吐字吃带宽，两者分开部署才能让百万人同时丝滑聊天！";
+
+    let running = false;
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    function setGauges(comp, bw) {
+      document.getElementById("gCompVal").textContent = comp + "%";
+      document.getElementById("gCompFill").style.width = comp + "%";
+      document.getElementById("gBwVal").textContent = bw + "%";
+      document.getElementById("gBwFill").style.width = bw + "%";
+    }
+
+    function updatePreview() {
+      const p = parseInt(slPrompt.value, 10);
+      const o = parseInt(slOutput.value, 10);
+      document.getElementById("pLenVal").textContent = p.toLocaleString() + " 字";
+      document.getElementById("oLenVal").textContent = o + " 字";
+      const ttft = (0.15 + (p / 50000) * 3.2).toFixed(2);
+      document.getElementById("metTtft").textContent = ttft + " s";
+    }
+
+    async function runRequest() {
+      if (running) return;
+      running = true;
+      sendBtn.disabled = true;
+
+      const p = parseInt(slPrompt.value, 10);
+      const o = parseInt(slOutput.value, 10);
+      const pdOn = pdToggle.checked;
+
+      const boxP = document.getElementById("boxP");
+      const boxD = document.getElementById("boxD");
+      const tag = document.getElementById("streamTag");
+      const textEl = document.getElementById("streamText");
+      const tpsEl = document.getElementById("metTps");
+
+      // Phase 1: Prefill
+      boxP.className = "ph-box active-p";
+      boxD.className = "ph-box";
+      setGauges(98, 34);
+      const prefillMs = Math.round(450 + (p / 50000) * 1900);
+      const ttftSec = (0.15 + (p / 50000) * 3.2).toFixed(2);
+      document.getElementById("metTtft").textContent = ttftSec + " s";
+      tpsEl.textContent = "读题中…";
+      tag.textContent = `🔥 第一幕 Prefill：正在并行消化 ${p.toLocaleString()} 字输入（GPU 算力拉满 98%）`;
+      textEl.textContent = "⏳ 正在转圈等待第一个字蹦出来…（你的文章越长，这一步越久）";
+
+      await sleep(prefillMs);
+
+      // Phase 2: Decode
+      boxP.className = "ph-box";
+      boxD.className = "ph-box active-d";
+      setGauges(14, 98);
+      tag.textContent = "⌨️ 第二幕 Decode：逐字吐字（GPU 算力闲置 14%，显存带宽爆表 98%）";
+      textEl.textContent = "";
+      tpsEl.textContent = "65 字/秒";
+      tpsEl.style.color = "var(--green)";
+
+      const targetText = SAMPLE_REPLY.slice(0, Math.min(o, SAMPLE_REPLY.length));
+      const stallAt = Math.floor(targetText.length * 0.45);
+
+      for (let i = 0; i < targetText.length; i++) {
+        // 如果没开 PD 分离，在吐字中途模拟隔壁长文 Prefill 抢占导致卡顿！
+        if (!pdOn && i === stallAt) {
+          boxP.className = "ph-box active-p";
+          setGauges(99, 95);
+          tpsEl.textContent = "🧊 卡顿 (4 字/秒)";
+          tpsEl.style.color = "var(--red)";
+          tag.textContent = "🚨 警报：隔壁用户发来 5 万字长文抢占了同一张 GPU，你的打字机被迫冻结！";
+          await sleep(1100);
+          boxP.className = "ph-box";
+          setGauges(14, 98);
+          tpsEl.textContent = "65 字/秒";
+          tpsEl.style.color = "var(--green)";
+          tag.textContent = "⌨️ 恢复吐字（打开左侧「PD 分离集群」可彻底根治这种卡顿！）";
+        }
+
+        textEl.textContent += targetText[i];
+        await sleep(36);
+      }
+
+      setGauges(5, 5);
+      boxD.className = "ph-box";
+      tag.textContent = pdOn
+        ? "✅ 生成完毕！PD 分离集群全程零卡顿，丝滑吐字！"
+        : "✅ 生成完毕！（注意刚才中途被隔壁读长文卡住了一下——试试打开左侧「PD 分离」再跑一次！）";
+
+      running = false;
+      sendBtn.disabled = false;
+    }
+
+    updatePreview();
+  </script>
+</body>
+</html>

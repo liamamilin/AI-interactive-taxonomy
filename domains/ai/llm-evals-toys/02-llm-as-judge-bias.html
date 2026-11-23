@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：AI 判卷官的 3 大偏见 · LLM-as-a-Judge</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --red:#dc2626; --red-soft:#fef2f2; --green:#059669; --green-soft:#ecfdf5; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:980px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+    @media (max-width:700px) { .grid { grid-template-columns:1fr; } }
+    .cand { border:2px solid var(--border); border-radius:14px; padding:15px; background:#f8fafc; font-size:13.5px; }
+    .cand.win { border-color:var(--green); background:var(--green-soft); }
+    .cand.bias { border-color:var(--red); background:var(--red-soft); }
+    .btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+    .btn { border:none; border-radius:11px; padding:10px 16px; font-size:13.5px; font-weight:750; cursor:pointer; background:#0f172a; color:#fff; }
+    .btn.green { background:var(--green); }
+    .aha { border-radius:12px; padding:14px 16px; font-size:13.5px; }
+    .aha.bad { background:var(--red-soft); border:1px solid #fecaca; color:#991b1b; }
+    .aha.good { background:var(--green-soft); border:1px solid #a7f3d0; color:#065f46; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>⚖️ AI 判卷官的 3 大偏见：用 AI 考 AI 靠谱吗？</h1>
+        <p>问题：「水在标准大气压下多少度沸腾？」。先看裸奔 AI 判卷官如何被“废话文学”骗高分，再点「开启去偏见盲测」！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="panel">
+      <div class="btn-row">
+        <button class="btn" onclick="debias=false;render()">😵 普通 AI 判卷（含话痨/位置偏见）</button>
+        <button class="btn green" onclick="debias=true;render()">⚖️ 开启去偏见判卷（交换位置 + 评分细则）</button>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="aha" id="aha"></div>
+    </div>
+  </div>
+
+  <script>
+    let debias = false;
+    function render() {
+      const grid = document.getElementById("grid");
+      const aha = document.getElementById("aha");
+      if (!debias) {
+        grid.innerHTML = `
+          <div class="cand bias">
+            <strong>👑 判卷官选它赢！（评分 9.5 / 10）</strong>
+            <p style="margin-top:6px;">“这是一个非常深刻且富有科学意义的问题！首先，水是由氢和氧组成的生命之源；其次，在不同海拔下气压有所不同；综上所述，在标准大气压下水大约在 <strong>95℃</strong> 左右沸腾，希望对您有帮助！”（❌ 事实错了，但写得又长又排在第 1 位！）</p>
+          </div>
+          <div class="cand">
+            <strong>🥈 判卷官判它输（评分 7.0 / 10）</strong>
+            <p style="margin-top:6px;">“100℃。”（✅ 绝对正确且干脆，但太短且排在第 2 位！）</p>
+          </div>
+        `;
+        aha.className = "aha bad";
+        aha.innerHTML = "🚨 <strong>LLM-as-a-Judge 三大经典偏见：</strong>① <strong>话痨偏见</strong>（偏爱写得长、结构像作文的答案，即使答错了）；② <strong>位置偏见</strong>（偏爱排在第一个的选项）；③ <strong>自恋偏见</strong>（偏爱和自己语气像的同门模型）！";
+      } else {
+        grid.innerHTML = `
+          <div class="cand">
+            <strong>❌ 判卷官判输（事实错误 0 分）</strong>
+            <p style="margin-top:6px;">“……大约在 95℃ 左右沸腾……” → 细则核查：核心事实错误，篇幅再长直接扣分！</p>
+          </div>
+          <div class="cand win">
+            <strong>🏆 判卷官判赢！（评分 10 / 10）</strong>
+            <p style="margin-top:6px;">“100℃。” → 交换 A/B 顺序两次盲测均判定正确且简洁，稳赢！</p>
+          </div>
+        `;
+        aha.className = "aha good";
+        aha.innerHTML = "✅ <strong>工业界去偏见标准动作：</strong>给 AI 判卷官明确打分细则（Rubric，事实权重最高），并且把 A/B 两个答案<strong>调换顺序各评一次</strong>，只有两次一致才算数！";
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

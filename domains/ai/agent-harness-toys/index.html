@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2 分钟悟懂 Agent Harness · 交互式科普玩具箱</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --surface: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --violet: #7c3aed;
+      --violet-soft: #f5f3ff;
+      --sky: #0284c7;
+      --sky-soft: #f0f9ff;
+      --orange: #ea580c;
+      --orange-soft: #fff7ed;
+      --shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top center, #ede9fe 0%, var(--bg) 42%, #f9fafb 100%);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.6;
+      padding: 40px 20px 64px;
+    }
+
+    .container { max-width: 1040px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      margin-bottom: 44px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--violet-soft);
+      color: var(--violet);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(28px, 4.2vw, 42px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .pipeline {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 28px 0 36px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .pipe-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 40px rgba(17, 24, 39, 0.10);
+      border-color: #cbd5e1;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .icon-box {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+
+    .card.c1 .icon-box { background: var(--violet-soft); }
+    .card.c2 .icon-box { background: var(--sky-soft); }
+    .card.c3 .icon-box { background: var(--orange-soft); }
+
+    .step-num {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: var(--muted);
+    }
+
+    .card h2 {
+      font-size: 22px;
+      font-weight: 750;
+      margin-bottom: 8px;
+    }
+
+    .concept-tag {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    .card.c1 .concept-tag { color: var(--violet); }
+    .card.c2 .concept-tag { color: var(--sky); }
+    .card.c3 .concept-tag { color: var(--orange); }
+
+    .card p {
+      font-size: 14.5px;
+      color: #4b5563;
+      margin-bottom: 20px;
+      flex: 1;
+    }
+
+    .aha-box {
+      background: #f8fafc;
+      border: 1px solid #eef2f7;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #374151;
+      margin-bottom: 20px;
+    }
+
+    .aha-box strong { color: var(--ink); }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 650;
+      font-size: 14.5px;
+      color: #fff;
+      transition: background 0.18s ease;
+    }
+
+    .card.c1 .cta { background: var(--violet); }
+    .card.c1:hover .cta { background: #6d28d9; }
+
+    .card.c2 .cta { background: var(--sky); }
+    .card.c2:hover .cta { background: #0369a1; }
+
+    .card.c3 .cta { background: var(--orange); }
+    .card.c3:hover .cta { background: #c2410c; }
+
+    footer {
+      text-align: center;
+      margin-top: 44px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">⚙️ 交互式科普原型 · 纯前端零依赖</div>
+      <h1>2 分钟悟懂 Agent Harness：交互玩具箱</h1>
+      <p class="subtitle">
+        如果大模型是一台狂野的 F1 发动机，<strong>Agent Harness（智能体挽具/运行时框架）</strong>就是套在它外面的底盘、变速箱、安全带和仪表盘。玩完下面 3 个小游戏，瞬间明白为什么“同一个模型，不同 Harness 体验天差地别”。
+      </p>
+      <div class="pipeline">
+        <span class="pipe-step">① 同芯赛车场（底盘与装备）</span>
+        <span>→</span>
+        <span class="pipe-step">② 上下文急救室（内存管家）</span>
+        <span>→</span>
+        <span class="pipe-step">③ 闭环验收台（验证与熔断）</span>
+      </div>
+    </header>
+
+    <main class="grid">
+      <a class="card c1" href="./01-harness-pit-stop.html">
+        <div class="card-top">
+          <div class="icon-box">🏎️</div>
+          <span class="step-num">玩具 01 · 约 2 分钟</span>
+        </div>
+        <h2>同芯赛车场</h2>
+        <div class="concept-tag">原理：模型是发动机，Harness 决定落地成功率</div>
+        <p>两辆装着完全相同 LLM 引擎的赛车同场竞技！给右车装上格式约束、沙盒隔离、测试环和上下文裁剪，看它如何吊打一路翻车的“裸奔引擎”。</p>
+        <div class="aha-box">
+          <strong>顿悟点：</strong>AI 好不好用不只看模型参数，外围这套工程缰绳才是稳定交付的关键。
+        </div>
+        <div class="cta">开始玩《同芯赛车场》 →</div>
+      </a>
+
+      <a class="card c2" href="./02-context-compactor.html">
+        <div class="card-top">
+          <div class="icon-box">🧰</div>
+          <span class="step-num">玩具 02 · 约 2 分钟</span>
+        </div>
+        <h2>上下文急救室</h2>
+        <div class="concept-tag">原理：Context Engineering（裁剪、压缩与状态外置）</div>
+        <p>工具一调用，海量日志瞬间灌爆 AI 内存水箱！亲自当一回 Harness 内存管家，用日志裁剪、对话压缩和外部记事本，保住模型智商并省下 80% 账单。</p>
+        <div class="aha-box">
+          <strong>顿悟点：</strong>长任务不“失智”，靠的是 Harness 替模型拼命清垃圾、做笔记。
+        </div>
+        <div class="cta">开始玩《上下文急救室》 →</div>
+      </a>
+
+      <a class="card c3" href="./03-verifier-circuit-breaker.html">
+        <div class="card-top">
+          <div class="icon-box">🚀</div>
+          <span class="step-num">玩具 03 · 约 2 分钟</span>
+        </div>
+        <h2>闭环验收台</h2>
+        <div class="concept-tag">原理：Verifier 客观验收、死循环检测与预算熔断</div>
+        <p>AI 程序员总爱盲目大喊“我修好了！”。打开客观验收官、死循环检测和预算熔断器，不听模型吹牛，用真实测试打回重做，直到火箭真正安全升空。</p>
+        <div class="aha-box">
+          <strong>顿悟点：</strong>把“模型自我感觉良好”换成“外部工具客观验收”，是 Harness 最硬核的价值。
+        </div>
+        <div class="cta">开始玩《闭环验收台》 →</div>
+      </a>
+    </main>
+
+    <footer>
+      所有原型均为单文件本地 HTML，直接双击即可运行，无需联网或 API Key。
+    </footer>
+  </div>
+</body>
+</html>

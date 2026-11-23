@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：三种队形实战对比 · Multi-Agent 拓扑架构</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --orange:#ea580c; --orange-soft:#fff7ed; --green:#059669; --green-soft:#ecfdf5; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:980px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px; }
+    @media (max-width:720px) { .tabs { grid-template-columns:1fr; } }
+    .t-btn { border:2px solid var(--border); background:var(--card); border-radius:14px; padding:14px; cursor:pointer; text-align:left; }
+    .t-btn.active { border-color:var(--orange); background:var(--orange-soft); }
+    .t-btn strong { display:block; font-size:15px; margin-bottom:2px; }
+    .t-btn span { font-size:12px; color:var(--muted); }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .flow-box { background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:18px; margin-bottom:16px; display:flex; flex-direction:column; gap:10px; }
+    .node { padding:10px 14px; border-radius:12px; background:#fff; border:1.5px solid #cbd5e1; font-size:13.5px; font-weight:700; display:flex; justify-content:space-between; }
+    .kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+    .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; text-align:center; }
+    .kpi strong { display:block; font-size:19px; font-family:ui-monospace,monospace; color:var(--orange); }
+    .kpi span { font-size:12px; color:var(--muted); }
+    .aha { border-radius:12px; padding:14px 16px; font-size:13.5px; background:var(--orange-soft); border:1px solid #fed7aa; color:#9a3412; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>📐 三种队形实战对比：多智能体怎么排兵布阵？</h1>
+        <p>任务：「调研 3 家竞品并写出一份高质量分析报告」。切换三种经典组织队形，看速度和质量怎么变！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="tabs">
+      <button class="t-btn active" id="t0" onclick="pick(0)"><strong>1. 🏭 串行流水线</strong><span>收集员 → 写手 → 校对员依次接力</span></button>
+      <button class="t-btn" id="t1" onclick="pick(1)"><strong>2. ⚡ 主管并发派活</strong><span>主管拆成 3 路同时查，再汇总</span></button>
+      <button class="t-btn" id="t2" onclick="pick(2)"><strong>3. ⚖️ 辩论评审团</strong><span>正反方互挑刺 + 裁判拍板</span></button>
+    </div>
+
+    <div class="panel">
+      <div class="kpis">
+        <div class="kpi"><strong id="kTime">18 秒</strong><span>总耗时</span></div>
+        <div class="kpi"><strong id="kCost">$0.06</strong><span>Token 花费</span></div>
+        <div class="kpi"><strong id="kBest">固定流程</strong><span>最擅长场景</span></div>
+      </div>
+      <div class="flow-box" id="flowBox"></div>
+      <div class="aha" id="ahaBox"></div>
+    </div>
+  </div>
+
+  <script>
+    const MODES = [
+      {
+        time: "18 秒（串行排队）", cost: "$0.06（省钱）", best: "标准化 SOP",
+        nodes: [
+          "步骤 1 · 🔍 调研员 Agent：依次查完 3 家竞品资料（8s）",
+          "步骤 2 · ✍️ 写手 Agent：拿到资料写初稿（6s）",
+          "步骤 3 · 🧹 校对员 Agent：润色排版输出终稿（4s）"
+        ],
+        aha: "🏭 <strong>流水线（Sequential）：</strong>结构最简单、最可控，像工厂装配线；缺点是前面一旦慢了，后面只能干等。"
+      },
+      {
+        time: "7 秒（3 路并行飞快！）", cost: "$0.09（中等）", best: "多目标广度调研",
+        nodes: [
+          "步骤 1 · 🧠 主管 Agent：把任务拆成 A/B/C 三份独立子任务（1s）",
+          "步骤 2 · ⚡ 3 个子 Agent 同时并发查竞品 A、B、C！（4s 同步完工）",
+          "步骤 3 · 📊 主管 Agent：汇总三份报告输出对比表（2s）"
+        ],
+        aha: "⚡ <strong>主管并发派活（Orchestrator-Workers）：</strong>现代 AI 助手最常用的神技！把互相独立的子任务并发外包，不仅耗时砍半，还避免单个上下文塞爆！"
+      },
+      {
+        time: "24 秒（多轮拉锯）", cost: "$0.18（较贵）", best: "高风险严谨决策",
+        nodes: [
+          "步骤 1 · 👍 蓝方 Agent：论证竞品 A 的核心优势与机会（6s）",
+          "步骤 2 · 👎 红方 Agent：专门挑刺反驳蓝方漏洞与数据盲区（8s）",
+          "步骤 3 · ⚖️ 裁判 Agent：综合双方论据，剔除水分给出严谨结论（10s）"
+        ],
+        aha: "⚖️ <strong>辩论评审（Debate / Critic）：</strong>虽然最慢最烧钱，但让 AI 互相挑刺能大幅减少盲目自信与偏见，适合投资分析、代码安全审计等高价值决策！"
+      }
+    ];
+
+    function pick(i) {
+      [0,1,2].forEach(n => document.getElementById("t"+n).classList.toggle("active", n===i));
+      const m = MODES[i];
+      document.getElementById("kTime").textContent = m.time;
+      document.getElementById("kCost").textContent = m.cost;
+      document.getElementById("kBest").textContent = m.best;
+      document.getElementById("flowBox").innerHTML = m.nodes.map(n => `<div class="node"><span>${n}</span><span>✓</span></div>`).join("");
+      document.getElementById("ahaBox").innerHTML = m.aha;
+    }
+    pick(0);
+  </script>
+</body>
+</html>

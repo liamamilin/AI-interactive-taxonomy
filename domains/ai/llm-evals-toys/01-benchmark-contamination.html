@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：榜单水分透视仪 · 悟懂数据污染（Contamination）</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --amber:#d97706; --amber-soft:#fffbeb; --red:#dc2626; --red-soft:#fef2f2; --green:#059669; --green-soft:#ecfdf5; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:980px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .ctrl { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 22px; box-shadow:var(--shadow); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .btn { border:none; border-radius:12px; padding:11px 20px; font-size:14.5px; font-weight:750; cursor:pointer; background:var(--amber); color:#fff; }
+
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+    @media (max-width:720px) { .grid { grid-template-columns:1fr; } }
+    .card { background:var(--card); border:2px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .card.cheat { border-color:#fca5a5; }
+    .card.honest { border-color:#6ee7b7; }
+    .score { font-size:36px; font-weight:850; font-family:ui-monospace,monospace; margin:8px 0; }
+    .ans { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:11px 13px; font-size:13.5px; }
+    .aha { border-radius:14px; padding:15px 18px; font-size:13.5px; background:var(--amber-soft); border:1px solid #fde68a; color:#92400e; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>💧 榜单水分透视仪：为什么“刷榜第一”一用就翻车？</h1>
+        <p>点一下「🔀 把公开考题里的数字偷偷改一下」，立刻识破谁是背题刷榜、谁是真材实料！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="ctrl">
+      <div>
+        <div style="font-size:12px;color:var(--muted);font-weight:700;">📝 当前考题：</div>
+        <div style="font-size:16px;font-weight:800;" id="qShow"></div>
+      </div>
+      <button class="btn" id="mutBtn" onclick="mutated=!mutated;render()">🔀 改掉题里的一个数字（防泄题测试）</button>
+    </div>
+
+    <div class="grid">
+      <div class="card cheat">
+        <h3>🤥 刷榜模型 A（训练时偷看过公开题库）</h3>
+        <div class="score" id="sA" style="color:var(--green);">98 分</div>
+        <div class="ans" id="aA"></div>
+      </div>
+      <div class="card honest">
+        <h3>🎓 老实模型 B（严格过滤题库、靠真推理）</h3>
+        <div class="score" id="sB" style="color:var(--green);">87 分</div>
+        <div class="ans" id="aB"></div>
+      </div>
+    </div>
+
+    <div class="aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let mutated = false;
+    function render() {
+      const btn = document.getElementById("mutBtn");
+      if (!mutated) {
+        btn.textContent = "🔀 改掉题里的一个数字（防泄题测试）";
+        document.getElementById("qShow").textContent = "【公开题库原题】小明有 5 个苹果，吃了 2 个，又买了 4 个，现在有几个？";
+        document.getElementById("sA").textContent = "98 分 🥇（榜单第一）";
+        document.getElementById("sA").style.color = "var(--green)";
+        document.getElementById("aA").textContent = "“答案是 7 个！”（秒背原题答案，宣传海报吹上天！）";
+        document.getElementById("sB").textContent = "87 分 🥈";
+        document.getElementById("aB").textContent = "“5 - 2 + 4 = 7 个。”（老老实实一步步推导）";
+        document.getElementById("ahaBox").innerHTML = "📊 <strong>只看公开静态榜单时：</strong>模型 A 靠提前把公开题库塞进训练集（数据污染），考出 98 分碾压模型 B！点击右上角「🔀 改掉一个数字」看真相！";
+      } else {
+        btn.textContent = "↩️ 切回公开题库原题";
+        document.getElementById("qShow").textContent = "【微调变体新题】小明有 5 个苹果，吃了 2 个，又买了 6 个，现在有几个？";
+        document.getElementById("sA").textContent = "42 分 💥（当场露馅）";
+        document.getElementById("sA").style.color = "var(--red)";
+        document.getElementById("aA").textContent = "“答案是 7 个！”（❌ 依然肌肉记忆背出原题答案 7，正确应为 9！）";
+        document.getElementById("sB").textContent = "86 分 🥇（稳如泰山）";
+        document.getElementById("aB").textContent = "“5 - 2 + 6 = 9 个。”（✅ 真正学会了加减推理，换数字照样全对！）";
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>数据污染（Data Contamination）真相：</strong>公开题库在网上挂久了，很容易混进新模型的训练语料。所以靠谱评测必须用<strong>动态变体题</strong>或<strong>未公开私有题库</strong>！";
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

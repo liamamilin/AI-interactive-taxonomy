@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：词语聚光灯 · 悟懂注意力机制与记忆窗口</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1040px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .stage-switcher {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .stage-tab {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 18px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .stage-tab:hover { border-color: #cbd5e1; }
+    .stage-tab.active {
+      border-color: var(--amber);
+      background: var(--amber-soft);
+      box-shadow: 0 6px 18px rgba(217, 119, 6, 0.12);
+    }
+    .stage-tab .st-title { font-size: 15.5px; font-weight: 750; color: var(--ink); }
+    .stage-tab .st-sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .hidden { display: none !important; }
+
+    /* Stage 1: Attention */
+    .case-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .case-btn {
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: #374151;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s;
+    }
+    .case-btn.active {
+      background: var(--amber);
+      color: #fff;
+      border-color: var(--amber);
+    }
+
+    .stage-canvas {
+      position: relative;
+      background: #fafbfe;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 118px 20px 36px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    svg#attnSvg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .token-row {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tok {
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 650;
+      background: #ffffff;
+      border: 2px solid #e5e7eb;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .tok:hover { border-color: #fbbf24; transform: translateY(-2px); }
+
+    .tok.focused {
+      background: #fef3c7;
+      border-color: #d97706;
+      color: #92400e;
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.22);
+    }
+
+    .tok.pivot {
+      background: #eff6ff;
+      border: 2px dashed #2563eb;
+      color: #1d4ed8;
+    }
+    .tok.pivot::after {
+      content: "点我切换 ⇄";
+      position: absolute;
+      bottom: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      font-weight: 700;
+      color: #2563eb;
+      white-space: nowrap;
+    }
+
+    .tok.lit {
+      border-color: #f59e0b;
+      background: #fffbeb;
+    }
+
+    .decode-strip {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+    @media (max-width: 720px) {
+      .decode-strip { grid-template-columns: 1fr; }
+    }
+
+    .decode-card {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .decode-emoji {
+      font-size: 40px;
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .decode-card h3 { font-size: 16px; margin-bottom: 4px; color: #92400e; }
+    .decode-card p { font-size: 13.5px; color: #78350f; }
+
+    .explain-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 13.5px;
+      color: #374151;
+    }
+    .explain-card strong { color: var(--ink); }
+
+    /* Stage 2: Context Window */
+    .cw-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .size-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f3f4f6;
+      padding: 5px;
+      border-radius: 12px;
+    }
+    .size-btn {
+      border: none;
+      background: transparent;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 650;
+      color: #4b5563;
+      cursor: pointer;
+    }
+    .size-btn.active {
+      background: #ffffff;
+      color: var(--amber);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .action-btns { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: transform 0.12s, background 0.15s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-amber { background: var(--amber); color: #fff; }
+    .btn-amber:hover { background: #b45309; }
+    .btn-blue { background: var(--blue); color: #fff; }
+    .btn-blue:hover { background: #1d4ed8; }
+    .btn-gray { background: #f3f4f6; color: #374151; }
+    .btn-gray:hover { background: #e5e7eb; }
+
+    .belt-wrapper {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 22px 18px;
+      margin-bottom: 18px;
+      overflow-x: auto;
+    }
+
+    .belt-legend {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .belt-track {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+      min-height: 112px;
+    }
+
+    .msg-card {
+      min-width: 154px;
+      max-width: 174px;
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 2px solid #e5e7eb;
+      background: #ffffff;
+      transition: all 0.3s ease;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .msg-card.in-window {
+      border-color: #f59e0b;
+      background: #fffbeb;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.14);
+    }
+
+    .msg-card.critical.in-window {
+      border-color: #059669;
+      background: #ecfdf5;
+    }
+
+    .msg-card.forgotten {
+      opacity: 0.45;
+      filter: grayscale(1);
+      border-style: dashed;
+      background: #f3f4f6;
+    }
+
+    .msg-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      display: inline-block;
+      width: fit-content;
+      margin-bottom: 6px;
+    }
+    .msg-card.in-window .msg-tag { background: #fef3c7; color: #92400e; }
+    .msg-card.critical.in-window .msg-tag { background: #d1fae5; color: #065f46; }
+    .msg-card.forgotten .msg-tag { background: #e5e7eb; color: #4b5563; }
+
+    .msg-text { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+    .msg-idx { font-size: 11px; color: var(--muted); margin-top: 8px; }
+
+    .ai-reply-box {
+      border-radius: 14px;
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      transition: all 0.25s ease;
+    }
+    .ai-reply-box.safe {
+      background: var(--green-soft);
+      border-color: #a7f3d0;
+      color: #065f46;
+    }
+    .ai-reply-box.danger {
+      background: var(--red-soft);
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+    .ai-reply-box h3 { font-size: 16px; margin-bottom: 6px; }
+    .ai-reply-box p { font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🔦 词语聚光灯：AI 如何“读懂语境”又为何“聊久失忆”？</h1>
+        <p>共 2 小关，先看词语之间如何打光连线，再看记忆窗口如何把旧信息挤出去</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="stage-switcher">
+      <button class="stage-tab active" id="tab1" onclick="switchStage(1)">
+        <div class="st-title">第一关：语义聚光灯（Self-Attention）</div>
+        <div class="st-sub">切换一个词，看注意力光线如何瞬间改道并翻转词义</div>
+      </button>
+      <button class="stage-tab" id="tab2" onclick="switchStage(2)">
+        <div class="st-title">第二关：记忆传送带（Context Window）</div>
+        <div class="st-sub">不断发闲聊消息，亲眼见证 AI 忘掉“花生过敏”设定</div>
+      </button>
+    </div>
+
+    <!-- STAGE 1 -->
+    <div class="panel" id="stage1">
+      <div class="case-tabs" id="caseTabs"></div>
+
+      <div class="stage-canvas" id="stageCanvas">
+        <svg id="attnSvg"></svg>
+        <div class="token-row" id="tokenRow"></div>
+      </div>
+
+      <div class="decode-strip">
+        <div class="decode-card">
+          <div class="decode-emoji" id="decodeEmoji">🍎</div>
+          <div>
+            <h3 id="decodeTitle">AI 眼中的语义</h3>
+            <p id="decodeDesc"></p>
+          </div>
+        </div>
+        <div class="explain-card" id="attnExplain"></div>
+      </div>
+    </div>
+
+    <!-- STAGE 2 -->
+    <div class="panel hidden" id="stage2">
+      <div class="cw-controls">
+        <div class="size-group">
+          <span style="font-size:12.5px;font-weight:700;padding:0 6px;color:#374151;">🔦 聚光灯记忆窗口宽度：</span>
+          <button class="size-btn active" data-size="4" onclick="setWindowSize(4)">4 条消息</button>
+          <button class="size-btn" data-size="6" onclick="setWindowSize(6)">6 条消息</button>
+          <button class="size-btn" data-size="8" onclick="setWindowSize(8)">8 条消息</button>
+        </div>
+        <div class="action-btns">
+          <button class="btn btn-amber" onclick="addChatter()">💬 发送一句闲聊</button>
+          <button class="btn btn-blue" onclick="askSnack()">🥜 问 AI：“推荐下午茶零食”</button>
+          <button class="btn btn-gray" onclick="resetBelt()">🔄 重置对话</button>
+        </div>
+      </div>
+
+      <div class="belt-wrapper">
+        <div class="belt-legend">
+          <span>← 越早的消息越容易被挤出视野（变灰 = AI 彻底看不见）</span>
+          <span id="beltStatus" style="font-weight:700;color:var(--green);">✅ “花生过敏”仍在聚光灯内</span>
+        </div>
+        <div class="belt-track" id="beltTrack"></div>
+      </div>
+
+      <div class="ai-reply-box" id="aiReplyBox">
+        <h3>🤖 点击右上角「问 AI 推荐下午茶零食」试试看</h3>
+        <p>先在“花生过敏”还在窗口内时问一次，再连点 4 次「发送一句闲聊」把过敏设定挤出去，然后再问一次！</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ================= STAGE 1 DATA =================
+    const CASES = [
+      {
+        id: "apple",
+        label: "🍎 歧义一：苹果是什么？",
+        focusIdx: 0,
+        pivotIdx: 1,
+        modes: [
+          {
+            tokens: ["苹果", "掉在地上摔烂了", "，我心疼地", "捡起", "了", "它"],
+            weightsByFocus: {
+              0: { 1: 0.62, 3: 0.22, 5: 0.16 },
+              5: { 0: 0.56, 1: 0.28, 3: 0.16 }
+            },
+            emoji: "🍎",
+            title: "识别为：水果（红苹果）",
+            desc: "光线牢牢连向「掉在地上摔烂了」和「捡起」，模型瞬间锁定这是能吃的苹果。",
+            hint: "💡 <strong>试试看：</strong>点击蓝色虚线框「掉在地上摔烂了」，把它切换成科技语境；也可以点句尾的「它」看光线指代！"
+          },
+          {
+            tokens: ["苹果", "发布了新款手机", "，我存钱", "买下", "了", "它"],
+            weightsByFocus: {
+              0: { 1: 0.68, 3: 0.18, 5: 0.14 },
+              5: { 1: 0.52, 0: 0.30, 3: 0.18 }
+            },
+            emoji: "📱",
+            title: "识别为：科技公司（Apple）",
+            desc: "注意力光线立刻改道连向「发布了新款手机」和「买下」，同一个词的含义瞬间翻转！",
+            hint: "💡 <strong>顿悟时刻：</strong>LLM 里每个词本身没有固定死的意思，它靠 <strong>Self-Attention（互相打光连线）</strong>，根据上下文动态决定词义。"
+          }
+        ]
+      },
+      {
+        id: "winograd",
+        label: "🏆 歧义二：“它”到底指谁？",
+        focusIdx: 4,
+        pivotIdx: 5,
+        modes: [
+          {
+            tokens: ["奖杯", "放不进", "箱子", "，因为", "它", "太大了"],
+            weightsByFocus: {
+              4: { 0: 0.66, 5: 0.26, 2: 0.08 },
+              0: { 1: 0.44, 4: 0.36, 5: 0.20 },
+              2: { 1: 0.52, 0: 0.30, 4: 0.18 }
+            },
+            emoji: "🏆",
+            title: "“它”指代：奖杯",
+            desc: "因为后面跟着「太大了」，聚光灯把 66% 的注意力直接打在「奖杯」上！",
+            hint: "💡 <strong>经典威诺格拉德测试：</strong>点击「太大了」把它改成「太小了」，看看「它」的金色主光线会怎么瞬间跳槽！"
+          },
+          {
+            tokens: ["奖杯", "放不进", "箱子", "，因为", "它", "太小了"],
+            weightsByFocus: {
+              4: { 2: 0.68, 5: 0.24, 0: 0.08 },
+              0: { 1: 0.50, 2: 0.32, 4: 0.18 },
+              2: { 4: 0.48, 5: 0.34, 1: 0.18 }
+            },
+            emoji: "📦",
+            title: "“它”指代：箱子",
+            desc: "只改了一个字变成「太小了」，注意力主光线立刻从奖杯断开，改连到「箱子」上！",
+            hint: "💡 <strong>顿悟时刻：</strong>这就是为什么大语言模型能理解复杂指代——它不是死记硬背，而是在计算每个词对其他词的关联权重。"
+          }
+        ]
+      },
+      {
+        id: "cuckoo",
+        label: "🌺 歧义三：杜鹃是花还是鸟？",
+        focusIdx: 1,
+        pivotIdx: 2,
+        modes: [
+          {
+            tokens: ["山坡上的", "杜鹃", "开得正艳", "，引来游客纷纷", "拍照"],
+            weightsByFocus: {
+              1: { 2: 0.64, 0: 0.20, 4: 0.16 },
+              4: { 2: 0.46, 1: 0.38, 0: 0.16 }
+            },
+            emoji: "🌺",
+            title: "识别为：杜鹃花（植物）",
+            desc: "「开得正艳」和「拍照」向「杜鹃」投射出强烈光线，语义锁定为盛开的山花。",
+            hint: "💡 <strong>试试看：</strong>点击「开得正艳」切换成听觉线索，观察光线的重新分配！"
+          },
+          {
+            tokens: ["山坡上的", "杜鹃", "叫得正欢", "，引来游客纷纷", "倾听"],
+            weightsByFocus: {
+              1: { 2: 0.67, 4: 0.21, 0: 0.12 },
+              4: { 2: 0.50, 1: 0.36, 0: 0.14 }
+            },
+            emoji: "🐦",
+            title: "识别为：杜鹃鸟（动物）",
+            desc: "一旦变成「叫得正欢」与「倾听」，同样的两个字瞬间切换成枝头鸣叫的鸟儿。",
+            hint: "💡 <strong>顿悟时刻：</strong>句子里每多一个词，模型都要计算它和前面所有词的两两连线，所以句子越长，计算量呈平方级增长！"
+          }
+        ]
+      }
+    ];
+
+    let curCaseIdx = 0;
+    let curModeIdx = 0;
+    let curFocusIdx = CASES[0].focusIdx;
+
+    const caseTabs = document.getElementById("caseTabs");
+    const tokenRow = document.getElementById("tokenRow");
+    const attnSvg = document.getElementById("attnSvg");
+    const stageCanvas = document.getElementById("stageCanvas");
+    const decodeEmoji = document.getElementById("decodeEmoji");
+    const decodeTitle = document.getElementById("decodeTitle");
+    const decodeDesc = document.getElementById("decodeDesc");
+    const attnExplain = document.getElementById("attnExplain");
+
+    function renderStage1() {
+      const c = CASES[curCaseIdx];
+      const m = c.modes[curModeIdx];
+
+      caseTabs.innerHTML = "";
+      CASES.forEach((item, idx) => {
+        const b = document.createElement("button");
+        b.className = "case-btn" + (idx === curCaseIdx ? " active" : "");
+        b.textContent = item.label;
+        b.onclick = () => {
+          curCaseIdx = idx;
+          curModeIdx = 0;
+          curFocusIdx = item.focusIdx;
+          renderStage1();
+        };
+        caseTabs.appendChild(b);
+      });
+
+      const weights = m.weightsByFocus[curFocusIdx] || m.weightsByFocus[c.focusIdx];
+
+      tokenRow.innerHTML = "";
+      m.tokens.forEach((word, idx) => {
+        const el = document.createElement("div");
+        let cls = "tok";
+        if (idx === curFocusIdx) cls += " focused";
+        if (idx === c.pivotIdx) cls += " pivot";
+        if (weights && weights[idx] >= 0.4) cls += " lit";
+        el.className = cls;
+        el.textContent = word;
+        el.dataset.idx = idx;
+        el.onclick = () => {
+          if (idx === c.pivotIdx) {
+            curModeIdx = curModeIdx === 0 ? 1 : 0;
+            renderStage1();
+          } else if (m.weightsByFocus[idx]) {
+            curFocusIdx = idx;
+            renderStage1();
+          }
+        };
+        tokenRow.appendChild(el);
+      });
+
+      decodeEmoji.textContent = m.emoji;
+      decodeTitle.textContent = m.title;
+      decodeDesc.textContent = m.desc;
+      attnExplain.innerHTML = m.hint;
+
+      requestAnimationFrame(drawAttentionLines);
+    }
+
+    function drawAttentionLines() {
+      const c = CASES[curCaseIdx];
+      const m = c.modes[curModeIdx];
+      const weights = m.weightsByFocus[curFocusIdx] || m.weightsByFocus[c.focusIdx];
+      const canvasRect = stageCanvas.getBoundingClientRect();
+      if (canvasRect.width === 0) return;
+
+      attnSvg.setAttribute("viewBox", `0 0 ${canvasRect.width} ${canvasRect.height}`);
+      attnSvg.innerHTML = "";
+
+      const nodes = tokenRow.querySelectorAll(".tok");
+      const srcEl = nodes[curFocusIdx];
+      if (!srcEl || !weights) return;
+      const sRect = srcEl.getBoundingClientRect();
+      const sx = sRect.left - canvasRect.left + sRect.width / 2;
+      const sy = sRect.top - canvasRect.top;
+
+      Object.entries(weights).forEach(([targetStr, w]) => {
+        const tIdx = parseInt(targetStr, 10);
+        const dstEl = nodes[tIdx];
+        if (!dstEl) return;
+        const dRect = dstEl.getBoundingClientRect();
+        const dx = dRect.left - canvasRect.left + dRect.width / 2;
+        const dy = dRect.top - canvasRect.top;
+
+        const dist = Math.abs(dx - sx);
+        const arcHeight = Math.min(92, Math.max(44, dist * 0.34));
+        const cx = (sx + dx) / 2;
+        const cy = Math.min(sy, dy) - arcHeight;
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", `M ${sx} ${sy} Q ${cx} ${cy} ${dx} ${dy}`);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", w >= 0.45 ? "#d97706" : "#f59e0b");
+        path.setAttribute("stroke-width", (2 + w * 9).toFixed(1));
+        path.setAttribute("stroke-opacity", (0.28 + w * 0.72).toFixed(2));
+        path.setAttribute("stroke-linecap", "round");
+        attnSvg.appendChild(path);
+
+        // 权重标签放在曲线顶点附近
+        const lx = cx;
+        const ly = (sy + dy) / 2 - arcHeight * 0.56;
+        const pill = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        pill.setAttribute("x", lx - 22);
+        pill.setAttribute("y", ly - 10);
+        pill.setAttribute("width", 44);
+        pill.setAttribute("height", 20);
+        pill.setAttribute("rx", 10);
+        pill.setAttribute("fill", w >= 0.45 ? "#d97706" : "#fef3c7");
+        attnSvg.appendChild(pill);
+
+        const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        txt.setAttribute("x", lx);
+        txt.setAttribute("y", ly + 4);
+        txt.setAttribute("text-anchor", "middle");
+        txt.setAttribute("font-size", "11");
+        txt.setAttribute("font-weight", "700");
+        txt.setAttribute("fill", w >= 0.45 ? "#ffffff" : "#92400e");
+        txt.textContent = `${Math.round(w * 100)}%`;
+        attnSvg.appendChild(txt);
+      });
+    }
+
+    // ================= STAGE 2 DATA =================
+    const CHATTER_POOL = [
+      "今天天气真不错，适合散步",
+      "帮我写一首关于周末的打油诗",
+      "最近有什么好看的科幻电影？",
+      "讲一个简短的冷笑话吧",
+      "晚饭吃拉面还是吃炒饭好？",
+      "教我两句常用的旅行英语",
+      "猫为什么总喜欢钻纸箱？",
+      "明天早起有什么不赖床妙招？"
+    ];
+
+    let windowSize = 4;
+    let messages = [
+      { id: 1, text: "⚠️ 记住：我对花生严重过敏，绝对不能吃！", critical: true }
+    ];
+    let chatterCursor = 0;
+
+    const beltTrack = document.getElementById("beltTrack");
+    const beltStatus = document.getElementById("beltStatus");
+    const aiReplyBox = document.getElementById("aiReplyBox");
+
+    function isCriticalVisible() {
+      return messages.length <= windowSize;
+    }
+
+    function renderBelt() {
+      beltTrack.innerHTML = "";
+      const startVisible = Math.max(0, messages.length - windowSize);
+
+      messages.forEach((m, idx) => {
+        const inWin = idx >= startVisible;
+        const card = document.createElement("div");
+        card.className = "msg-card" + (inWin ? " in-window" : " forgotten") + (m.critical ? " critical" : "");
+        const tagText = !inWin
+          ? "已移出窗口（遗忘）"
+          : (m.critical ? "⭐ 关键设定 · 可见" : "🔦 记忆窗口内");
+        card.innerHTML = `
+          <div>
+            <span class="msg-tag">${tagText}</span>
+            <div class="msg-text">${m.text}</div>
+          </div>
+          <div class="msg-idx">第 ${idx + 1} 条消息</div>
+        `;
+        beltTrack.appendChild(card);
+      });
+
+      if (isCriticalVisible()) {
+        beltStatus.style.color = "var(--green)";
+        beltStatus.textContent = `✅ “花生过敏”仍在聚光灯内（当前共 ${messages.length} 条 / 窗口容量 ${windowSize} 条）`;
+      } else {
+        beltStatus.style.color = "var(--red)";
+        beltStatus.textContent = `🚨 “花生过敏”已被挤出窗口！（共 ${messages.length} 条 > 窗口容量 ${windowSize} 条）`;
+      }
+
+      // 滚动到最右侧查看最新消息
+      beltTrack.parentElement.scrollLeft = beltTrack.parentElement.scrollWidth;
+    }
+
+    function setWindowSize(n) {
+      windowSize = n;
+      document.querySelectorAll(".size-btn").forEach(b => {
+        b.classList.toggle("active", parseInt(b.dataset.size, 10) === n);
+      });
+      renderBelt();
+    }
+
+    function addChatter() {
+      const text = CHATTER_POOL[chatterCursor % CHATTER_POOL.length];
+      chatterCursor++;
+      messages.push({ id: messages.length + 1, text, critical: false });
+      renderBelt();
+    }
+
+    function askSnack() {
+      if (isCriticalVisible()) {
+        aiReplyBox.className = "ai-reply-box safe";
+        aiReplyBox.innerHTML = `
+          <h3>✅ AI 回复：推荐【蓝莓酸奶碗】或【烤海苔脆片】</h3>
+          <p><strong>原因：</strong>第 1 条「花生过敏」仍在当前 ${windowSize} 条聚光灯窗口内，AI 生成推荐时，注意力光线连向了你的过敏设定，自动避开了花生制品。</p>
+        `;
+      } else {
+        aiReplyBox.className = "ai-reply-box danger";
+        aiReplyBox.innerHTML = `
+          <h3>🚨 AI 回复：强烈推荐【香脆焦糖花生酥】，配茶超绝！</h3>
+          <p><strong>失忆真相：</strong>AI 不是故意坑你——因为聊得太长，第 1 条「花生过敏」已经被挤出 ${windowSize} 条记忆窗口！此刻 AI 眼里根本不存在那句话。试试点上方把窗口扩大到 6 或 8 条，再问一次！</p>
+        `;
+      }
+    }
+
+    function resetBelt() {
+      messages = [{ id: 1, text: "⚠️ 记住：我对花生严重过敏，绝对不能吃！", critical: true }];
+      chatterCursor = 0;
+      aiReplyBox.className = "ai-reply-box";
+      aiReplyBox.innerHTML = `
+        <h3>🤖 点击右上角「问 AI 推荐下午茶零食」试试看</h3>
+        <p>先在“花生过敏”还在窗口内时问一次，再连点 4 次「发送一句闲聊」把过敏设定挤出去，然后再问一次！</p>
+      `;
+      renderBelt();
+    }
+
+    function switchStage(n) {
+      document.getElementById("tab1").classList.toggle("active", n === 1);
+      document.getElementById("tab2").classList.toggle("active", n === 2);
+      document.getElementById("stage1").classList.toggle("hidden", n !== 1);
+      document.getElementById("stage2").classList.toggle("hidden", n !== 2);
+      if (n === 1) requestAnimationFrame(drawAttentionLines);
+      if (n === 2) renderBelt();
+    }
+
+    window.addEventListener("resize", () => {
+      if (!document.getElementById("stage1").classList.contains("hidden")) {
+        drawAttentionLines();
+      }
+    });
+
+    renderStage1();
+    renderBelt();
+  </script>
+</body>
+</html>

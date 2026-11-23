@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：重排提纯漏斗 · 悟懂粗排与精排 Reranker</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --amber:#d97706; --amber-soft:#fffbeb; --green:#059669; --green-soft:#ecfdf5; --red:#dc2626; --red-soft:#fef2f2; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:980px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .ctrl-box { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 22px; box-shadow:var(--shadow); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .btn { border:none; border-radius:12px; padding:11px 20px; font-size:14.5px; font-weight:750; cursor:pointer; }
+    .btn-amber { background:var(--amber); color:#fff; }
+    .btn-amber:hover { background:#b45309; }
+    .btn-gray { background:#f1f5f9; color:#334155; }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .panel h2 { font-size:16px; font-weight:800; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; }
+
+    .cand-list { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+    .cand { border:1.5px solid var(--border); border-radius:14px; padding:13px 16px; background:#f8fafc; display:flex; justify-content:space-between; align-items:center; gap:14px; transition:all .3s ease; }
+    .cand.top-keep { border-color:var(--green); background:var(--green-soft); }
+    .cand.dropped { opacity:.38; border-style:dashed; background:#f1f5f9; }
+    .cand.noise-top { border-color:#fca5a5; background:var(--red-soft); }
+
+    .rank-num { width:30px; height:30px; border-radius:9px; background:#e2e8f0; display:flex; align-items:center; justify-content:center; font-weight:850; font-size:13px; flex-shrink:0; }
+    .cand.top-keep .rank-num { background:var(--green); color:#fff; }
+    .cand.noise-top .rank-num { background:var(--red); color:#fff; }
+
+    .c-body { flex:1; font-size:13.5px; }
+    .c-score { font-family:ui-monospace,monospace; font-weight:800; font-size:13px; flex-shrink:0; }
+
+    .aha { border-radius:14px; padding:15px 17px; font-size:13.5px; }
+    .aha.before { background:var(--red-soft); border:1px solid #fecaca; color:#991b1b; }
+    .aha.after { background:var(--green-soft); border:1px solid #a7f3d0; color:#065f46; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>⏳ 重排提纯漏斗：为什么粗排完还要加一道 Reranker？</h1>
+        <p>用户提问：<strong>「买了会员之后不满意，7 天内能全额退款吗？」</strong> 先看向量粗排的尴尬排序，再点击启动 Rerank 精排！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="ctrl-box">
+      <div>
+        <div style="font-size:12px;color:var(--muted);font-weight:700;">🔎 当前流程状态（只把前 2 名喂给大模型）：</div>
+        <div style="font-size:15px;font-weight:800;" id="stateTitle">阶段 1：向量粗排（速度快，但只看大概意思，前 2 名全是噪音！）</div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-amber" id="rerankBtn" onclick="toggleRerank()">✨ 启动精排 Reranker 提纯</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span>候选文档列表（只取 Top-2 喂给 LLM 生成回答）</span><span style="font-size:12px;color:var(--muted);" id="cutTag">截断线：前 2 名入选</span></h2>
+      <div class="cand-list" id="candList"></div>
+      <div class="aha" id="ahaBox"></div>
+    </div>
+  </div>
+
+  <script>
+    const DOCS = [
+      { id: 1, text: "【会员权益】开通年度黄金会员可享受 7 天免广告特权与专属客服。", coarse: 0.84, rerank: 0.21, isTruth: false },
+      { id: 2, text: "【商城退货】实物商品签收后 7 天内支持无理由退货退款（不含虚拟会员）。", coarse: 0.82, rerank: 0.34, isTruth: false },
+      { id: 3, text: "【活动公告】双十一会员限时满减，满意推荐好友再送 7 天。", coarse: 0.79, rerank: 0.12, isTruth: false },
+      { id: 4, text: "【发票说明】会员订单支付成功后可在 30 天内申请电子发票。", coarse: 0.75, rerank: 0.08, isTruth: false },
+      { id: 5, text: "【虚拟会员退款细则】数字会员一经开通且未消耗任何权益，7 天内可联系客服全额原路退回；若已使用权益则不支持退款。", coarse: 0.73, rerank: 0.97, isTruth: true }
+    ];
+
+    let reranked = false;
+
+    function toggleRerank() {
+      reranked = !reranked;
+      render();
+    }
+
+    function render() {
+      const sorted = [...DOCS].sort((a, b) => reranked ? b.rerank - a.rerank : b.coarse - a.coarse);
+      const list = document.getElementById("candList");
+      list.innerHTML = "";
+
+      sorted.forEach((d, idx) => {
+        const inTop2 = idx < 2;
+        let cls = "cand ";
+        if (inTop2) cls += d.isTruth ? "top-keep" : (reranked ? "top-keep" : "noise-top");
+        else cls += "dropped";
+
+        const score = reranked ? d.rerank : d.coarse;
+        const div = document.createElement("div");
+        div.className = cls;
+        div.innerHTML = `
+          <div class="rank-num">#${idx + 1}</div>
+          <div class="c-body">
+            <div>${d.text}</div>
+            <div style="font-size:11.5px;margin-top:3px;color:var(--muted);">
+              ${inTop2 ? (d.isTruth ? "✅ 唯一正确答案 · 已入选喂给 LLM！" : (reranked ? "保留作为补充参考" : "⚠️ 干扰噪音混进了 Top-2！")) : "已淘汰（不占 LLM 上下文）"}
+            </div>
+          </div>
+          <div class="c-score">${(score * 100).toFixed(0)} 分</div>
+        `;
+        list.appendChild(div);
+      });
+
+      const btn = document.getElementById("rerankBtn");
+      const title = document.getElementById("stateTitle");
+      const aha = document.getElementById("ahaBox");
+
+      if (!reranked) {
+        btn.textContent = "✨ 启动精排 Reranker 提纯";
+        title.textContent = "阶段 1：向量粗排（快但粗糙，真正答案排在第 5 名被截断！）";
+        aha.className = "aha before";
+        aha.innerHTML = "❌ <strong>粗排翻车：</strong>向量检索只看单句大意，把「实物 7 天退货」和「7 天免广告」排进了前 2 名；真正讲数字会员退款的条款掉到了 <strong>#5（直接被截断丢弃）</strong>！点右上角启动 Rerank 看看逆袭！";
+      } else {
+        btn.textContent = "↩️ 切回粗排对比";
+        title.textContent = "阶段 2：交叉编码器 Rerank 精排（真正答案从 #5 一举飙升 #1！）";
+        aha.className = "aha after";
+        aha.innerHTML = "🎉 <strong>Rerank 提纯成功！</strong>精排模型把「问题」和「每条候选文档」拼在一起逐字细读，瞬间识破 #1/#2 是偷换概念的噪音，把唯一正确答案以 <strong>97 分</strong> 直接拉升到第一名喂给大模型！";
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>

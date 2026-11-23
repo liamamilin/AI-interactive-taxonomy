@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：稠密 vs MoE 选购台 · 显存与算力的权衡</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --blue:#2563eb; --blue-soft:#eff6ff; --teal:#0d9488; --teal-soft:#f0fdfa; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:980px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+    @media (max-width:720px) { .grid { grid-template-columns:1fr; } }
+    .card { background:var(--card); border:2px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .card.dense { border-color:#93c5fd; }
+    .card.moe { border-color:#5eead4; }
+    .card h2 { font-size:17px; font-weight:850; margin-bottom:12px; }
+    .metric { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f1f5f9; font-size:14px; }
+    .metric strong { font-family:ui-monospace,monospace; font-size:15px; }
+
+    .sl-box { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 22px; box-shadow:var(--shadow); margin-bottom:18px; }
+    input[type="range"] { width:100%; accent-color:var(--teal); cursor:pointer; margin-top:8px; }
+
+    .aha { border-radius:14px; padding:15px 18px; font-size:13.5px; background:var(--blue-soft); border:1px solid #bfdbfe; color:#1e3a8a; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🎚️ 稠密 vs MoE 选购台：MoE 真的“什么都省”吗？</h1>
+        <p>拖动总参数规模滑块，看清一个最常被误解的真相：<strong>MoE 极大省算力（跑得飞快），但显存依然要全部装下！</strong></p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="sl-box">
+      <div style="display:flex;justify-content:space-between;font-weight:800;font-size:15px;">
+        <span>🧠 目标模型总知识容量（总参数量）</span>
+        <span id="pTag" style="color:var(--teal);font-family:monospace;">100B 参数</span>
+      </div>
+      <input type="range" id="slP" min="20" max="600" step="20" value="100" oninput="render()" />
+    </div>
+
+    <div class="grid">
+      <div class="card dense">
+        <h2>🧱 稠密模型（Dense · 全员上岗）</h2>
+        <div class="metric"><span>每次推理激活参数</span><strong id="dAct" style="color:#dc2626;">100B (100%)</strong></div>
+        <div class="metric"><span>所需显存（INT8）</span><strong id="dVram">100 GB</strong></div>
+        <div class="metric"><span>相对推理速度</span><strong id="dSpeed">1.0×</strong></div>
+        <div class="metric" style="border:none;"><span>每百万字电费成本</span><strong id="dCost" style="color:#dc2626;">$2.00</strong></div>
+      </div>
+
+      <div class="card moe">
+        <h2>🏥 MoE 混合专家（仅唤醒 15%）</h2>
+        <div class="metric"><span>每次推理激活参数</span><strong id="mAct" style="color:#059669;">15B (15%)</strong></div>
+        <div class="metric"><span>所需显存（INT8）</span><strong id="mVram" style="color:#d97706;">100 GB（同样要全装！）</strong></div>
+        <div class="metric"><span>相对推理速度</span><strong id="mSpeed" style="color:#059669;">5.5× 飞快</strong></div>
+        <div class="metric" style="border:none;"><span>每百万字电费成本</span><strong id="mCost" style="color:#059669;">$0.35</strong></div>
+      </div>
+    </div>
+
+    <div class="aha">
+      💡 <strong>防坑顿悟：</strong>虽然 MoE 每次只唤醒 15% 的专家，但因为随时可能来任何领域的词，<strong>所有 100% 的专家都必须在显存里待命</strong>！所以 MoE 特别适合云端大厂高并发降本，而个人电脑显存不够时依然装不下超大 MoE。
+    </div>
+  </div>
+
+  <script>
+    function render() {
+      const p = parseInt(document.getElementById("slP").value, 10);
+      const act = Math.round(p * 0.15);
+      document.getElementById("pTag").textContent = `${p}B 总参数`;
+      document.getElementById("dAct").textContent = `${p}B (100%)`;
+      document.getElementById("dVram").textContent = `${p} GB`;
+      document.getElementById("dSpeed").textContent = "1.0× 基准";
+      document.getElementById("dCost").textContent = "$" + (p * 0.02).toFixed(2);
+
+      document.getElementById("mAct").textContent = `${act}B (15%)`;
+      document.getElementById("mVram").textContent = `${p} GB（全部专家常驻显存）`;
+      document.getElementById("mSpeed").textContent = "5.5× 极速";
+      document.getElementById("mCost").textContent = "$" + (p * 0.0035).toFixed(2);
+    }
+    render();
+  </script>
+</body>
+</html>

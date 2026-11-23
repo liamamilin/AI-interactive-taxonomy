@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：语义星座图 · 悟懂 Embedding 向量空间与向量算术</title>
+  <style>
+    :root {
+      --bg: #f6f8fc; --card: #ffffff; --ink: #0f172a; --muted: #64748b; --border: #e2e8f0;
+      --indigo: #4f46e5; --indigo-soft: #eef2ff; --green: #059669; --green-soft: #ecfdf5;
+      --radius: 18px; --shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg); color: var(--ink); min-height: 100vh; padding: 24px 18px 60px; line-height: 1.55;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+    .back-link { text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 600; padding: 7px 12px; border-radius: 10px; background: var(--card); border: 1px solid var(--border); }
+    .title-block h1 { font-size: 24px; font-weight: 850; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 22px; box-shadow: var(--shadow);
+    }
+    .panel h2 { font-size: 16px; font-weight: 800; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+
+    .galaxy-wrap {
+      background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+      border-radius: 16px; padding: 10px; overflow: hidden;
+    }
+    svg#galaxySvg { width: 100%; height: 400px; display: block; cursor: pointer; }
+
+    .sim-list { display: flex; flex-direction: column; gap: 9px; margin-bottom: 18px; }
+    .sim-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 13px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0;
+      font-size: 13.5px; font-weight: 650;
+    }
+    .sim-score { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 800; }
+
+    .math-card {
+      background: var(--indigo-soft); border: 1.5px solid #c7d2fe; border-radius: 14px;
+      padding: 15px 16px; margin-bottom: 12px;
+    }
+    .math-card h3 { font-size: 14.5px; font-weight: 800; color: #312e81; margin-bottom: 8px; }
+    .math-btn {
+      width: 100%; border: none; border-radius: 10px; padding: 10px 12px;
+      background: var(--indigo); color: #fff; font-size: 13.5px; font-weight: 700;
+      cursor: pointer; margin-bottom: 8px; text-align: left;
+    }
+    .math-btn:hover { background: #4338ca; }
+    .math-btn.secondary { background: #0f172a; }
+    .math-btn.secondary:hover { background: #1e293b; }
+
+    .aha {
+      border-radius: 12px; padding: 13px 15px; font-size: 13px;
+      background: #f8fafc; border: 1px solid #e2e8f0; color: #334155;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🌌 语义星座图：词语在 AI 脑中其实是“几何坐标点”</h1>
+        <p>点击星空里的任意词语看它的“语义邻居”，再点右侧按钮亲眼见证 <strong>国王 - 男人 + 女人 = 王后</strong>！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>
+          <span>2D 词向量星空（Embedding Space）</span>
+          <span style="font-size:12px;color:var(--muted);">距离越近 = 意思越像</span>
+        </h2>
+        <div class="galaxy-wrap">
+          <svg id="galaxySvg" viewBox="0 0 600 400"></svg>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2><span id="focusTitle">🔍 当前选中：👑 国王</span></h2>
+        <div class="sim-list" id="simList"></div>
+
+        <div class="math-card">
+          <h3>✨ 向量算术实验室（一键画几何箭头）</h3>
+          <button class="math-btn" onclick="runAnalogy('royal')">👑 国王 − 👨 男人 + 👩 女人 = ？（点我看轨迹）</button>
+          <button class="math-btn secondary" onclick="runAnalogy('capital')">🗼 巴黎 − 🇫🇷 法国 + 🇯🇵 日本 = ？（点我看轨迹）</button>
+        </div>
+
+        <div class="aha" id="ahaBox">
+          💡 <strong>为什么 AI 能懂近义词？</strong>因为每个词都被压缩成一串高维坐标（Embedding）。意思相近的词（比如猫和狗）在空间里扎堆形成“星座”，而“性别”“首都”等抽象关系竟然对应着<strong>平行且等长的空间箭头</strong>！
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WORDS = [
+      { id: "king", label: "👑 国王", x: 135, y: 110, group: "皇室", color: "#fbbf24" },
+      { id: "queen", label: "👸 王后", x: 255, y: 110, group: "皇室", color: "#fbbf24" },
+      { id: "man", label: "👨 男人", x: 135, y: 200, group: "人物", color: "#60a5fa" },
+      { id: "woman", label: "👩 女人", x: 255, y: 200, group: "人物", color: "#60a5fa" },
+
+      { id: "paris", label: "🗼 巴黎", x: 420, y: 95, group: "地理", color: "#34d399" },
+      { id: "france", label: "🇫🇷 法国", x: 420, y: 175, group: "地理", color: "#34d399" },
+      { id: "tokyo", label: "🗾 东京", x: 525, y: 95, group: "地理", color: "#34d399" },
+      { id: "japan", label: "🇯🇵 日本", x: 525, y: 175, group: "地理", color: "#34d399" },
+
+      { id: "cat", label: "🐱 小猫", x: 110, y: 315, group: "宠物", color: "#f472b6" },
+      { id: "dog", label: "🐶 小狗", x: 195, y: 335, group: "宠物", color: "#f472b6" },
+      { id: "tiger", label: "🐯 老虎", x: 165, y: 270, group: "动物", color: "#f472b6" },
+
+      { id: "apple", label: "🍎 苹果", x: 380, y: 315, group: "水果", color: "#fb7185" },
+      { id: "banana", label: "🍌 香蕉", x: 465, y: 335, group: "水果", color: "#fb7185" },
+      { id: "coffee", label: "☕ 咖啡", x: 515, y: 275, group: "饮品", color: "#fb7185" }
+    ];
+
+    let focusedId = "king";
+    let analogyMode = null; // 'royal' | 'capital' | null
+
+    const svg = document.getElementById("galaxySvg");
+    const simList = document.getElementById("simList");
+    const focusTitle = document.getElementById("focusTitle");
+    const ahaBox = document.getElementById("ahaBox");
+
+    function dist(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    function simScore(a, b) {
+      const d = dist(a, b);
+      return Math.max(8, Math.min(99, Math.round(100 - d * 0.21)));
+    }
+
+    function runAnalogy(type) {
+      analogyMode = type;
+      focusedId = type === "royal" ? "queen" : "tokyo";
+      render();
+    }
+
+    function render() {
+      const focus = WORDS.find(w => w.id === focusedId);
+      const others = WORDS.filter(w => w.id !== focusedId)
+        .map(w => ({ ...w, sim: simScore(focus, w) }))
+        .sort((a, b) => b.sim - a.sim);
+
+      const top3 = others.slice(0, 3);
+      const farthest = others[others.length - 1];
+
+      let html = `
+        <defs>
+          <marker id="arrowGold" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M 0 1 L 9 5 L 0 9 z" fill="#fbbf24"/>
+          </marker>
+          <marker id="arrowCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M 0 1 L 9 5 L 0 9 z" fill="#38bdf8"/>
+          </marker>
+        </defs>
+        <text x="20" y="28" fill="#64748b" font-size="11">语义星云 · 点击任意光点探索邻居</text>
+      `;
+
+      // 近邻连线
+      if (!analogyMode) {
+        top3.forEach(nb => {
+          html += `<line x1="${focus.x}" y1="${focus.y}" x2="${nb.x}" y2="${nb.y}" stroke="#38bdf8" stroke-width="2" stroke-opacity="0.55" stroke-dasharray="4 4"/>`;
+        });
+      }
+
+      // 向量算术平行箭头
+      if (analogyMode === "royal") {
+        const man = WORDS.find(w => w.id === "man");
+        const woman = WORDS.find(w => w.id === "woman");
+        const king = WORDS.find(w => w.id === "king");
+        const queen = WORDS.find(w => w.id === "queen");
+        html += `
+          <line x1="${man.x + 12}" y1="${man.y}" x2="${woman.x - 16}" y2="${woman.y}" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrowCyan)"/>
+          <text x="${(man.x + woman.x)/2}" y="${man.y + 18}" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="700">+ 性别向量</text>
+          <line x1="${king.x + 12}" y1="${king.y}" x2="${queen.x - 16}" y2="${queen.y}" stroke="#fbbf24" stroke-width="3.5" marker-end="url(#arrowGold)"/>
+          <text x="${(king.x + queen.x)/2}" y="${king.y - 14}" text-anchor="middle" fill="#fbbf24" font-size="11.5" font-weight="800">平移同样向量 → 命中王后！</text>
+        `;
+      } else if (analogyMode === "capital") {
+        const fr = WORDS.find(w => w.id === "france");
+        const pa = WORDS.find(w => w.id === "paris");
+        const jp = WORDS.find(w => w.id === "japan");
+        const tk = WORDS.find(w => w.id === "tokyo");
+        html += `
+          <line x1="${fr.x}" y1="${fr.y - 12}" x2="${pa.x}" y2="${pa.y + 16}" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrowCyan)"/>
+          <text x="${fr.x - 36}" y="${(fr.y + pa.y)/2}" fill="#38bdf8" font-size="11" font-weight="700">首都向量</text>
+          <line x1="${jp.x}" y1="${jp.y - 12}" x2="${tk.x}" y2="${tk.y + 16}" stroke="#fbbf24" stroke-width="3.5" marker-end="url(#arrowGold)"/>
+          <text x="${jp.x - 42}" y="${(jp.y + tk.y)/2}" fill="#fbbf24" font-size="11" font-weight="800">平移命中!</text>
+        `;
+      }
+
+      // 绘制节点
+      WORDS.forEach(w => {
+        const isFocus = w.id === focusedId;
+        html += `
+          <g onclick="selectWord('${w.id}')" style="cursor:pointer;">
+            ${isFocus ? `<circle cx="${w.x}" cy="${w.y}" r="16" fill="${w.color}" fill-opacity="0.25"/>` : ""}
+            <circle cx="${w.x}" cy="${w.y}" r="${isFocus ? 8 : 6}" fill="${w.color}" stroke="#ffffff" stroke-width="${isFocus ? 2.5 : 1.5}"/>
+            <text x="${w.x}" y="${w.y - 12}" text-anchor="middle" fill="${isFocus ? '#ffffff' : '#cbd5e1'}" font-size="${isFocus ? 13 : 11.5}" font-weight="${isFocus ? 800 : 600}">${w.label}</text>
+          </g>
+        `;
+      });
+
+      svg.innerHTML = html;
+
+      // 右侧列表
+      focusTitle.textContent = `🔍 当前选中：${focus.label}（${focus.group}星云）`;
+      simList.innerHTML = top3.map(nb => `
+        <div class="sim-item">
+          <span>🟢 极近语义邻居：${nb.label}</span>
+          <span class="sim-score" style="color:var(--green);">${nb.sim}% 相似</span>
+        </div>
+      `).join("") + `
+        <div class="sim-item" style="background:#fef2f2;border-color:#fecaca;">
+          <span>🔴 最遥远的词：${farthest.label}</span>
+          <span class="sim-score" style="color:#dc2626;">${farthest.sim}% 相似</span>
+        </div>
+      `;
+
+      if (analogyMode === "royal") {
+        ahaBox.innerHTML = "🎉 <strong>几何魔法演示：</strong>从「男人」指向「女人」的箭头，代表纯数学意义上的“性别方向”。把同一个箭头平移到「国王」身上，终点恰好稳稳落在「👸 王后」上！";
+      } else if (analogyMode === "capital") {
+        ahaBox.innerHTML = "🎉 <strong>几何魔法演示：</strong>「法国 → 巴黎」的向上箭头代表“国家到首都”的抽象关系！把它复制到「日本」身上，AI 不用死记硬背就精准指向「🗾 东京」！";
+      }
+    }
+
+    function selectWord(id) {
+      analogyMode = null;
+      focusedId = id;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：三选一诊疗室 · Prompt vs RAG vs 微调</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --purple: #9333ea;
+      --purple-soft: #faf5ff;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 980px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .progress-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 680px) {
+      .progress-bar { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .p-tab {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 11px 12px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 700;
+      color: #4b5563;
+      transition: all 0.16s;
+    }
+    .p-tab.active { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
+    .p-tab.solved { border-color: #a7f3d0; background: var(--green-soft); color: #065f46; }
+
+    .clinic-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .patient-head {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .patient-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      flex-shrink: 0;
+    }
+    .patient-tag {
+      font-size: 12px;
+      font-weight: 750;
+      color: var(--blue);
+      margin-bottom: 4px;
+    }
+    .patient-quote {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .rx-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    @media (max-width: 720px) {
+      .rx-grid { grid-template-columns: 1fr; }
+    }
+
+    .rx-btn {
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 18px 16px;
+      background: #fafbfe;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.18s;
+    }
+    .rx-btn:hover { transform: translateY(-3px); border-color: #94a3b8; }
+    .rx-icon { font-size: 26px; margin-bottom: 8px; }
+    .rx-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+    .rx-sub { font-size: 12.5px; color: var(--muted); }
+
+    .rx-btn.picked-right { border-color: var(--green); background: var(--green-soft); }
+    .rx-btn.picked-wrong { border-color: var(--red); background: var(--red-soft); }
+
+    .feedback {
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 14px;
+      display: none;
+    }
+    .feedback.right { display: block; background: var(--green-soft); border: 1px solid #a7f3d0; color: #065f46; }
+    .feedback.wrong { display: block; background: var(--red-soft); border: 1px solid #fecaca; color: #991b1b; }
+    .feedback h3 { font-size: 16px; margin-bottom: 6px; }
+
+    .cheat-sheet {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+    }
+    .cheat-sheet h2 { font-size: 15.5px; font-weight: 800; margin-bottom: 12px; }
+    .rule-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 720px) {
+      .rule-grid { grid-template-columns: 1fr; }
+    }
+    .rule-card {
+      border-radius: 12px;
+      padding: 13px 14px;
+      font-size: 13px;
+    }
+    .rule-card.r1 { background: var(--blue-soft); color: #1e3a8a; }
+    .rule-card.r2 { background: var(--amber-soft); color: #92400e; }
+    .rule-card.r3 { background: var(--purple-soft); color: #581c87; }
+    .rule-card strong { display: block; font-size: 14px; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🩺 三选一诊疗室：什么时候该微调，什么时候千万别微调？</h1>
+        <p>当一回 AI 架构医生，给 4 位上门求诊的业务需求开对处方（Prompt / RAG / 微调）！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="clinic-card">
+      <div class="patient-head">
+        <div class="patient-avatar" id="pAvatar">📰</div>
+        <div>
+          <div class="patient-tag" id="pTag">病人 1 / 4</div>
+          <div class="patient-quote" id="pQuote"></div>
+        </div>
+      </div>
+
+      <div class="rx-grid" id="rxGrid">
+        <button class="rx-btn" id="rx-prompt" onclick="prescribe('prompt')">
+          <div class="rx-icon">💬</div>
+          <div class="rx-title">处方 A：Prompt（提示词）</div>
+          <div class="rx-sub">零训练成本，5 秒写几句指令立竿见影</div>
+        </button>
+        <button class="rx-btn" id="rx-rag" onclick="prescribe('rag')">
+          <div class="rx-icon">📄</div>
+          <div class="rx-title">处方 B：RAG（外挂知识库）</div>
+          <div class="rx-sub">实时检索最新文档，把“事实小抄”递给模型</div>
+        </button>
+        <button class="rx-btn" id="rx-ft" onclick="prescribe('ft')">
+          <div class="rx-icon">🎛️</div>
+          <div class="rx-title">处方 C：Fine-Tuning（微调）</div>
+          <div class="rx-sub">改写模型权重，把风格/行话/套路刻进肌肉记忆</div>
+        </button>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+    </div>
+
+    <div class="cheat-sheet">
+      <h2>📌 2 分钟带走的终极选型口诀</h2>
+      <div class="rule-grid">
+        <div class="rule-card r1">
+          <strong>💬 改格式/定流程 → 用 Prompt</strong>
+          只要几句话就能说清的要求，永远先用提示词，省时省钱。
+        </div>
+        <div class="rule-card r2">
+          <strong>📄 查最新/私有事实 → 用 RAG</strong>
+          政策、价格、库存天天变，微调背不住也来不及重训，必须挂外部知识库。
+        </div>
+        <div class="rule-card r3">
+          <strong>🎛️ 刻风格/小模型降本 → 用微调</strong>
+          需要固定独特文风、行业术语，或把大模型能力蒸馏到便宜小模型时，微调最香！
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PATIENTS = [
+      {
+        id: 0,
+        tab: "📰 病人 1：最新报销政策",
+        avatar: "📰",
+        quote: "「我想让内部 AI 准确回答公司昨天刚修订的《2026 差旅报销新规》！」",
+        answer: "rag",
+        responses: {
+          prompt: { ok: false, title: "❌ 药不对症：政策文档太长且经常更新", text: "如果把几十页报销手册全硬塞进 Prompt，不仅每次调用都很贵，下周改一条规定还得手动改提示词。" },
+          rag: { ok: true, title: "✅ 精准对症！必须开 RAG（外挂知识库）", text: "变动频繁的“新事实”是 RAG 的绝对主场！只要更新知识库里的 PDF，AI 下一秒就能照着最新规定精准作答，零训练成本。" },
+          ft: { ok: false, title: "💥 严重副作用：微调最不擅长背诵变动事实！", text: "花大钱微调完，下个月财务部又改了住宿报销额度——难道每次改政策都要重新租显卡训练吗？而且微调后依然容易把数字记混！" }
+        }
+      },
+      {
+        id: 1,
+        tab: "🎭 病人 2：固定鲁迅文风",
+        avatar: "🎭",
+        quote: "「我想让 AI 每次都用极度传神的『鲁迅杂文风格』写周报，又不想每次贴 5000 字范文浪费钱！」",
+        answer: "ft",
+        responses: {
+          prompt: { ok: false, title: "⚠️ 疗效有限：靠几句提示词很难学到神韵", text: "只写“请用鲁迅风格”往往只会浮于表面地堆砌“大概、大约的确”，贴大量范文又会导致每次 Token 账单暴涨。" },
+          rag: { ok: false, title: "❌ 药不对症：RAG 管“查资料”，不管“换文风”", text: "给模型递几段鲁迅原文小抄，它只会引用原话，很难把那种冷峻辛辣的语气内化成肌肉记忆。" },
+          ft: { ok: true, title: "✅ 精准对症！微调（LoRA）的王牌场景！", text: "用 200 篇高质量“鲁迅风周报”做一次轻量 LoRA 微调，就能把独特的腔调和行文节奏直接刻进权重里，以后只需极短提示词就能稳稳出神韵！" }
+        }
+      },
+      {
+        id: 2,
+        tab: "📋 病人 3：会议纪要改表格",
+        avatar: "📋",
+        quote: "「我只是想让 AI 每次总结完会议录音后，固定输出『3 个核心结论 + 1 张待办人表格』！」",
+        answer: "prompt",
+        responses: {
+          prompt: { ok: true, title: "✅ 精准对症！5 秒写好 Prompt 直接搞定", text: "现代大模型天生就会按要求排版和做表格。两句清晰的系统提示词就能达到 99% 效果，千万别为了这种小事去折腾微调！" },
+          rag: { ok: false, title: "❌ 多此一举：不需要查外部资料", text: "会议录音内容已经在当前对话里了，不需要搭建复杂的向量数据库检索。" },
+          ft: { ok: false, title: "💸 杀鸡用牛刀：白花几千块显存费", text: "为了一个简单的输出格式去收集数据、跑微调、部署专属模型，属于典型的过度工程化。" }
+        }
+      },
+      {
+        id: 3,
+        tab: "🏥 病人 4：百万次低成本抽取",
+        avatar: "🏥",
+        quote: "「我们要每天从 100 万份病历里抽取 JSON 字段，旗舰大模型太贵太慢，想让便宜 10 倍的 8B 小模型也能做到 99% 准确！」",
+        answer: "ft",
+        responses: {
+          prompt: { ok: false, title: "⚠️ 8B 小模型裸跑扛不住复杂医疗字段", text: "单靠提示词，小模型在冷门医学缩写和嵌套 JSON 格式上错误率依然偏高，很难达到生产级 99% 要求。" },
+          rag: { ok: false, title: "❌ 药不对症：这是结构化抽取能力，不是查资料", text: "每次检索还会拖慢吞吐量，解决不了小模型自身抽取精度不足的问题。" },
+          ft: { ok: true, title: "✅ 精准对症！微调 / 模型蒸馏（Distillation）神技！", text: "先用昂贵的旗舰大模型跑出 2000 份完美标注样本，再用这批数据微调 8B 小模型——既能逼近大模型的 99% 精度，又把推理速度提快 5 倍、成本打 1 折！" }
+        }
+      }
+    ];
+
+    let curIdx = 0;
+    let solved = new Set();
+
+    const progressBar = document.getElementById("progressBar");
+    const pAvatar = document.getElementById("pAvatar");
+    const pTag = document.getElementById("pTag");
+    const pQuote = document.getElementById("pQuote");
+    const feedback = document.getElementById("feedback");
+
+    function renderPatient() {
+      const p = PATIENTS[curIdx];
+      progressBar.innerHTML = "";
+      PATIENTS.forEach((item, idx) => {
+        const b = document.createElement("button");
+        b.className = "p-tab" + (idx === curIdx ? " active" : "") + (solved.has(idx) ? " solved" : "");
+        b.textContent = (solved.has(idx) ? "✅ " : "") + item.tab;
+        b.onclick = () => {
+          curIdx = idx;
+          renderPatient();
+        };
+        progressBar.appendChild(b);
+      });
+
+      pAvatar.textContent = p.avatar;
+      pTag.textContent = `急诊病例 ${curIdx + 1} / ${PATIENTS.length}`;
+      pQuote.textContent = p.quote;
+
+      ["prompt", "rag", "ft"].forEach(k => {
+        document.getElementById("rx-" + k).className = "rx-btn";
+      });
+      feedback.className = "feedback";
+      feedback.innerHTML = "";
+    }
+
+    function prescribe(choice) {
+      const p = PATIENTS[curIdx];
+      const res = p.responses[choice];
+
+      ["prompt", "rag", "ft"].forEach(k => {
+        const el = document.getElementById("rx-" + k);
+        el.className = "rx-btn";
+        if (k === choice) el.classList.add(res.ok ? "picked-right" : "picked-wrong");
+      });
+
+      if (res.ok) solved.add(curIdx);
+
+      feedback.className = "feedback " + (res.ok ? "right" : "wrong");
+      const nextBtn = res.ok && curIdx < PATIENTS.length - 1
+        ? `<div style="margin-top:10px;"><button onclick="curIdx++;renderPatient()" style="border:none;background:#059669;color:#fff;padding:8px 14px;border-radius:10px;font-weight:700;cursor:pointer;">接诊下一位病人 →</button></div>`
+        : "";
+      feedback.innerHTML = `<h3>${res.title}</h3><p>${res.text}</p>${nextBtn}`;
+
+      // 更新顶部进度打勾
+      document.querySelectorAll(".p-tab").forEach((el, idx) => {
+        el.classList.toggle("solved", solved.has(idx));
+        el.textContent = (solved.has(idx) ? "✅ " : "") + PATIENTS[idx].tab;
+      });
+    }
+
+    renderPatient();
+  </script>
+</body>
+</html>

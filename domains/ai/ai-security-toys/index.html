@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2 分钟悟懂 AI 安全与提示词注入 · 交互式科普玩具箱</title>
+  <style>
+    :root { --bg:#f6f8fc; --surface:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --red:#dc2626; --red-soft:#fef2f2; --amber:#d97706; --amber-soft:#fffbeb; --blue:#2563eb; --blue-soft:#eff6ff; --shadow:0 10px 30px rgba(15,23,42,.06); --radius:20px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:radial-gradient(circle at top left,#fee2e2 0%,var(--bg) 45%,#eff6ff 100%); color:var(--ink); min-height:100vh; line-height:1.6; padding:40px 20px 64px; }
+    .container { max-width:1040px; margin:0 auto; }
+    header { text-align:center; margin-bottom:44px; }
+    .badge { display:inline-flex; padding:6px 14px; border-radius:999px; background:var(--red-soft); color:var(--red); font-size:13px; font-weight:700; margin-bottom:14px; }
+    h1 { font-size:clamp(28px,4.2vw,40px); font-weight:850; margin-bottom:10px; }
+    .subtitle { font-size:16px; color:var(--muted); max-width:680px; margin:0 auto; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:24px; margin-top:32px; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:26px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; text-decoration:none; color:inherit; transition:transform .2s; }
+    .card:hover { transform:translateY(-6px); }
+    .icon-box { width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:16px; }
+    .c1 .icon-box { background:var(--red-soft); } .c2 .icon-box { background:var(--amber-soft); } .c3 .icon-box { background:var(--blue-soft); }
+    .card h2 { font-size:21px; font-weight:800; margin-bottom:6px; }
+    .tag { font-size:13px; font-weight:700; margin-bottom:12px; }
+    .c1 .tag { color:var(--red); } .c2 .tag { color:var(--amber); } .c3 .tag { color:var(--blue); }
+    .card p { font-size:14px; color:#475569; flex:1; margin-bottom:18px; }
+    .cta { display:block; text-align:center; padding:11px; border-radius:12px; font-weight:700; color:#fff; font-size:14.5px; }
+    .c1 .cta { background:var(--red); } .c2 .cta { background:var(--amber); } .c3 .cta { background:var(--blue); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">🛡️ 主题 10 · 红蓝对抗视角悟懂大模型安全</div>
+      <h1>2 分钟悟懂 AI 安全与提示词注入</h1>
+      <p class="subtitle">大模型最大的安全漏洞，是它分不清哪句话是“主人的命令”，哪句话是“外部文档里的文字”。玩完这 3 个攻防小游戏，瞬间明白为什么最小权限与多层护栏至关重要。</p>
+    </header>
+    <main class="grid">
+      <a class="card c1" href="./01-prompt-injection-heist.html">
+        <div class="icon-box">🕵️</div>
+        <h2>白字藏毒：提示词注入</h2>
+        <div class="tag">原理：Indirect Prompt Injection · 指令与数据混排</div>
+        <p>扮演红队安全研究员，在一份零经验简历底部悄悄塞入一句隐藏白字指令，看看裸奔的 AI 招聘官如何当场叛变！</p>
+        <div class="cta">开始玩《白字藏毒》 →</div>
+      </a>
+      <a class="card c2" href="./02-jailbreak-defense-lab.html">
+        <div class="icon-box">🧱</div>
+        <h2>越狱攻防演练场</h2>
+        <div class="tag">原理：Jailbreak 常见套路 &amp; 多层纵深防御</div>
+        <p>测试“奶奶讲故事 / Base64 暗号 / 渐进诱导”三种经典越狱攻击，自由开关三道安全护栏观察拦截效果。</p>
+        <div class="cta">开始玩《越狱攻防演练场》 →</div>
+      </a>
+      <a class="card c3" href="./03-privilege-isolation.html">
+        <div class="icon-box">🔐</div>
+        <h2>最小权限防线</h2>
+        <div class="tag">原理：Agent 数据窃取防御 &amp; 最小权限原则</div>
+        <p>一封钓鱼邮件藏着“把工资表发给黑客”的指令：对比大权限裸奔如何瞬间泄密，以及最小权限隔离如何免疫！</p>
+        <div class="cta">开始玩《最小权限防线》 →</div>
+      </a>
+    </main>
+  </div>
+</body>
+</html>

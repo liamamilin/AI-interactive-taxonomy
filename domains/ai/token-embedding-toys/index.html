@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2 分钟悟懂 Token 与向量空间 · 交互式科普玩具箱</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --surface: #ffffff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --sky: #0284c7;
+      --sky-soft: #f0f9ff;
+      --indigo: #4f46e5;
+      --indigo-soft: #eef2ff;
+      --emerald: #059669;
+      --emerald-soft: #ecfdf5;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top right, #e0f2fe 0%, var(--bg) 44%, #eef2ff 100%);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.6;
+      padding: 40px 20px 64px;
+    }
+    .container { max-width: 1040px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 44px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 999px;
+      background: var(--sky-soft); color: var(--sky);
+      font-size: 13px; font-weight: 700; margin-bottom: 16px;
+    }
+    h1 { font-size: clamp(28px, 4.2vw, 42px); font-weight: 850; letter-spacing: -0.02em; margin-bottom: 12px; }
+    .subtitle { font-size: 16px; color: var(--muted); max-width: 680px; margin: 0 auto; }
+    .pipeline {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; flex-wrap: wrap; margin: 28px 0 36px; font-size: 13px; color: var(--muted);
+    }
+    .pipe-step {
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 6px 14px; border-radius: 999px; font-weight: 650; color: var(--ink);
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 24px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 28px 24px; box-shadow: var(--shadow); display: flex; flex-direction: column;
+      text-decoration: none; color: inherit; transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10); }
+    .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .icon-box { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+    .card.c1 .icon-box { background: var(--sky-soft); }
+    .card.c2 .icon-box { background: var(--indigo-soft); }
+    .card.c3 .icon-box { background: var(--emerald-soft); }
+    .step-num { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #f1f5f9; color: var(--muted); }
+    .card h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .concept-tag { font-size: 13px; font-weight: 650; margin-bottom: 14px; }
+    .card.c1 .concept-tag { color: var(--sky); }
+    .card.c2 .concept-tag { color: var(--indigo); }
+    .card.c3 .concept-tag { color: var(--emerald); }
+    .card p { font-size: 14.5px; color: #475569; margin-bottom: 20px; flex: 1; }
+    .aha-box { background: #f8fafc; border: 1px solid #eef2f7; border-radius: 12px; padding: 12px 14px; font-size: 13px; color: #334155; margin-bottom: 20px; }
+    .cta { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 14.5px; color: #fff; }
+    .card.c1 .cta { background: var(--sky); }
+    .card.c2 .cta { background: var(--indigo); }
+    .card.c3 .cta { background: var(--emerald); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">🔬 主题 07 · AI 怎么“看”懂人类文字</div>
+      <h1>2 分钟悟懂 Token 与向量空间</h1>
+      <p class="subtitle">大模型眼里根本没有“汉字”和“字母”，只有一串数字编号和一片高维星空。玩完这 3 个小游戏，彻底明白 AI 如何把语言变成数学。</p>
+      <div class="pipeline">
+        <span class="pipe-step">① 切词显微镜（Tokenization）</span>
+        <span>→</span>
+        <span class="pipe-step">② 语义星座图（Embedding 向量）</span>
+        <span>→</span>
+        <span class="pipe-step">③ 词义变色龙（动态语境向量）</span>
+      </div>
+    </header>
+    <main class="grid">
+      <a class="card c1" href="./01-tokenizer-microscope.html">
+        <div class="card-top"><div class="icon-box">🔬</div><span class="step-num">玩具 01 · 约 2 分钟</span></div>
+        <h2>切词显微镜</h2>
+        <div class="concept-tag">原理：Tokenization 分词 &amp; BPE 编码</div>
+        <p>实时切分任意中英文文本，再一键切换到“AI 盲盒视角”，瞬间明白为什么顶级大模型竟然数不清 strawberry 里有几个 r！</p>
+        <div class="aha-box"><strong>顿悟点：</strong>AI 看到的不是字母，而是被切碎后的整数编号（Token ID）。</div>
+        <div class="cta">开始玩《切词显微镜》 →</div>
+      </a>
+      <a class="card c2" href="./02-embedding-galaxy.html">
+        <div class="card-top"><div class="icon-box">🌌</div><span class="step-num">玩具 02 · 约 2 分钟</span></div>
+        <h2>语义星座图</h2>
+        <div class="concept-tag">原理：Embedding 向量空间 &amp; 向量算术</div>
+        <p>在 2D 语义星空中点击任意词语观察余弦相似度连线，并亲手演示“国王 - 男人 + 女人 = 王后”的几何魔法。</p>
+        <div class="aha-box"><strong>顿悟点：</strong>意思相近的词在数学空间里挨得很近，“理解词义”其实就是算几何距离。</div>
+        <div class="cta">开始玩《语义星座图》 →</div>
+      </a>
+      <a class="card c3" href="./03-polysemy-embedding.html">
+        <div class="card-top"><div class="icon-box">🦎</div><span class="step-num">玩具 03 · 约 2 分钟</span></div>
+        <h2>词义变色龙</h2>
+        <div class="concept-tag">原理：静态词向量 vs 动态语境向量</div>
+        <p>切换包含“苹果”与“杜鹃”的不同句子，亲眼看着同一个词的坐标点在水果、科技、金融星云之间实时滑行变身！</p>
+        <div class="aha-box"><strong>顿悟点：</strong>现代 LLM 的词向量不是死坐标，而是随上下文动态漂移的“变色龙”。</div>
+        <div class="cta">开始玩《词义变色龙》 →</div>
+      </a>
+    </main>
+  </div>
+</body>
+</html>

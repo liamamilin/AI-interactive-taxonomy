@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：专家累死危机 · 悟懂 MoE 负载均衡</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --amber:#d97706; --amber-soft:#fffbeb; --red:#dc2626; --red-soft:#fef2f2; --green:#059669; --green-soft:#ecfdf5; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:980px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .mode-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
+    .m-btn { border:2px solid var(--border); background:#f8fafc; border-radius:14px; padding:14px; cursor:pointer; text-align:left; }
+    .m-btn.active.bad { border-color:var(--red); background:var(--red-soft); }
+    .m-btn.active.good { border-color:var(--green); background:var(--green-soft); }
+    .m-btn strong { display:block; font-size:14.5px; margin-bottom:2px; }
+    .m-btn span { font-size:12px; color:var(--muted); }
+
+    .bars { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+    .b-row { display:flex; align-items:center; gap:12px; font-size:13px; font-weight:700; }
+    .b-name { width:92px; flex-shrink:0; }
+    .b-track { flex:1; height:22px; background:#e2e8f0; border-radius:999px; overflow:hidden; }
+    .b-fill { height:100%; border-radius:999px; transition:width .4s ease, background .3s; display:flex; align-items:center; padding-left:10px; color:#fff; font-size:11.5px; }
+    .b-val { width:56px; text-align:right; font-family:ui-monospace,monospace; }
+
+    .aha { border-radius:12px; padding:14px 16px; font-size:13.5px; }
+    .aha.bad { background:var(--red-soft); border:1px solid #fecaca; color:#991b1b; }
+    .aha.good { background:var(--green-soft); border:1px solid #a7f3d0; color:#065f46; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>⚖️ 专家累死危机：为什么 MoE 训练必须加“负载均衡”？</h1>
+        <p>同时涌入 1000 个 Token，对比「无平衡约束」与「开启 Load Balancing」时 8 位专家的工作量分配！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="panel">
+      <div class="mode-row">
+        <button class="m-btn bad active" id="bOff" onclick="setBal(false)">
+          <strong>🚨 关闭负载均衡（马太效应坍缩）</strong>
+          <span>1 号专家初期表现好 → 越分越多 → 其余 7 人彻底荒废！</span>
+        </button>
+        <button class="m-btn good" id="bOn" onclick="setBal(true)">
+          <strong>⚖️ 开启负载均衡惩罚（Auxiliary Loss）</strong>
+          <span>谁排队太长就给分诊台扣分，逼着 8 位专家雨露均沾！</span>
+        </button>
+      </div>
+
+      <div class="bars" id="bars"></div>
+      <div class="aha" id="ahaBox"></div>
+    </div>
+  </div>
+
+  <script>
+    const COLLAPSED = [78, 11, 4, 2, 2, 1, 1, 1];
+    const BALANCED = [13, 12, 13, 12, 13, 12, 13, 12];
+
+    function setBal(on) {
+      document.getElementById("bOff").classList.toggle("active", !on);
+      document.getElementById("bOn").classList.toggle("active", on);
+      const data = on ? BALANCED : COLLAPSED;
+      document.getElementById("bars").innerHTML = data.map((v, i) => {
+        const color = !on && v > 50 ? "#dc2626" : (!on && v < 5 ? "#94a3b8" : "#059669");
+        const tag = !on && v > 50 ? "🔥 累死排队堵车！" : (!on && v < 5 ? "💤 彻底荒废" : "✅ 均匀高效");
+        return `
+          <div class="b-row">
+            <div class="b-name">专家 ${i + 1} 号</div>
+            <div class="b-track"><div class="b-fill" style="width:${Math.max(8, v)}%;background:${color};">${tag}</div></div>
+            <div class="b-val">${v}%</div>
+          </div>
+        `;
+      }).join("");
+
+      const aha = document.getElementById("ahaBox");
+      if (!on) {
+        aha.className = "aha bad";
+        aha.innerHTML = "💥 <strong>路由坍缩（Router Collapse）：</strong>1 号专家初期稍微聪明一点，分诊台就把 78% 的活全派给他——结果 1 号显卡排队堵死，另外 7 张显卡白花钱买来全在摸鱼，模型退化成了一个普通小模型！";
+      } else {
+        aha.className = "aha good";
+        aha.innerHTML = "🎉 <strong>负载均衡生效！</strong>通过给分诊台加上“排队过长就扣分”的平衡机制，8 位专家各自稳定承接约 12.5% 的流量，每张 GPU 满血并行，整套 MoE 集群才真正发挥出 8 倍威力！";
+      }
+    }
+    setBal(false);
+  </script>
+</body>
+</html>

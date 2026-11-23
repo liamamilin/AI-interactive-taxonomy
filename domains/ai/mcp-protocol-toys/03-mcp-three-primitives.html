@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：MCP 三原语装配间 · Tools / Resources / Prompts</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --blue:#2563eb; --blue-soft:#eff6ff; --green:#059669; --green-soft:#ecfdf5; --purple:#7c3aed; --purple-soft:#f5f3ff; --red:#dc2626; --red-soft:#fef2f2; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:960px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); }
+    .item-card { background:#f8fafc; border:2px solid #cbd5e1; border-radius:16px; padding:20px; text-align:center; margin-bottom:18px; }
+    .item-card h2 { font-size:20px; font-weight:850; margin-bottom:6px; }
+    .item-card p { font-size:14px; color:var(--muted); }
+
+    .bins { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+    @media (max-width:700px) { .bins { grid-template-columns:1fr; } }
+    .bin { border:2px solid var(--border); border-radius:16px; padding:16px; background:#fff; cursor:pointer; text-align:left; transition:all .16s; }
+    .bin:hover { transform:translateY(-3px); border-color:#94a3b8; }
+    .bin strong { display:block; font-size:15.5px; margin-bottom:4px; }
+    .bin span { font-size:12.5px; color:var(--muted); }
+
+    .fb { border-radius:12px; padding:14px 16px; font-size:13.5px; display:none; }
+    .fb.ok { display:block; background:var(--green-soft); border:1px solid #a7f3d0; color:#065f46; }
+    .fb.no { display:block; background:var(--red-soft); border:1px solid #fecaca; color:#991b1b; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🧩 MCP 三原语装配间：Tools、Resources 和 Prompts 有什么区别？</h1>
+        <p>把下面 4 个日常场景放进正确的 MCP 能力抽屉，2 分钟彻底分清三大概念！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="panel">
+      <div style="font-size:12.5px;font-weight:750;color:var(--muted);margin-bottom:8px;" id="prog">题目 1 / 4</div>
+      <div class="item-card">
+        <h2 id="qTitle"></h2>
+        <p id="qDesc"></p>
+      </div>
+
+      <div class="bins">
+        <button class="bin" onclick="pick('tool')"><strong>🛠️ Tools（工具）</strong><span>由模型主动调用执行动作（查接口、写文件、发消息）</span></button>
+        <button class="bin" onclick="pick('resource')"><strong>📄 Resources（资源）</strong><span>类似只读文件/URI，提供静态或实时只读数据上下文</span></button>
+        <button class="bin" onclick="pick('prompt')"><strong>📋 Prompts（提示模板）</strong><span>由用户点选触发的固定斜杠工作流模板（如 /code-review）</span></button>
+      </div>
+
+      <div class="fb" id="fb"></div>
+    </div>
+  </div>
+
+  <script>
+    const ITEMS = [
+      { title: "📧 给客户发送一封确认邮件", desc: "会产生真实外部动作和副作用，需要模型决定何时触发。", ans: "tool", why: "凡是“动手干活、触发动作”的能力，在 MCP 里都归为 Tools（工具）！" },
+      { title: "📖 读取本地项目的 README.md 与数据库表结构", desc: "纯只读数据，像文件链接一样供随时挂载进上下文。", ans: "resource", why: "纯只读的数据源（日志、文档、表结构）在 MCP 里归为 Resources（资源）！" },
+      { title: "✨ 团队统一的「/安全代码审查」快捷指令模板", desc: "让用户敲斜杠一键套用固定好的高质量提示词套路。", ans: "prompt", why: "面向用户一键触发的标准化任务模板，在 MCP 里归为 Prompts（提示模板）！" },
+      { title: "🗄️ 在 GitHub 上新建一个 Issue", desc: "调用外部 API 写入新记录。", ans: "tool", why: "执行写入/外部 API 操作属于典型的 Tools（工具）！" }
+    ];
+    let idx = 0;
+
+    function render() {
+      const it = ITEMS[idx];
+      document.getElementById("prog").textContent = `分拣挑战 ${idx + 1} / ${ITEMS.length}`;
+      document.getElementById("qTitle").textContent = it.title;
+      document.getElementById("qDesc").textContent = it.desc;
+      document.getElementById("fb").className = "fb";
+    }
+
+    function pick(ans) {
+      const it = ITEMS[idx];
+      const fb = document.getElementById("fb");
+      if (ans === it.ans) {
+        const nextHtml = idx < ITEMS.length - 1
+          ? `<div style="margin-top:8px;"><button onclick="idx++;render()" style="border:none;background:#059669;color:#fff;padding:7px 14px;border-radius:9px;font-weight:700;cursor:pointer;">下一题 →</button></div>`
+          : `<div style="margin-top:8px;font-weight:800;">🎉 全部通关！记住口诀：Tools 动手、Resources 读数、Prompts 套模板！</div>`;
+        fb.className = "fb ok";
+        fb.innerHTML = `✅ <strong>分拣正确！</strong>${it.why}${nextHtml}`;
+      } else {
+        fb.className = "fb no";
+        fb.innerHTML = `❌ <strong>放错抽屉啦！</strong>提示：先看它是“动手执行”、“只读数据”还是“用户快捷模板”，再试一次！`;
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2 分钟悟懂长上下文与记忆系统 · 交互式科普玩具箱</title>
+  <style>
+    :root { --bg:#f6f8fc; --surface:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --sky:#0284c7; --sky-soft:#f0f9ff; --emerald:#059669; --emerald-soft:#ecfdf5; --purple:#7c3aed; --purple-soft:#f5f3ff; --shadow:0 10px 30px rgba(15,23,42,.06); --radius:20px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:radial-gradient(circle at top right,#e0f2fe 0%,var(--bg) 45%,#f5f3ff 100%); color:var(--ink); min-height:100vh; line-height:1.6; padding:40px 20px 64px; }
+    .container { max-width:1040px; margin:0 auto; }
+    header { text-align:center; margin-bottom:44px; }
+    .badge { display:inline-flex; padding:6px 14px; border-radius:999px; background:var(--sky-soft); color:var(--sky); font-size:13px; font-weight:700; margin-bottom:14px; }
+    h1 { font-size:clamp(28px,4.2vw,40px); font-weight:850; margin-bottom:10px; }
+    .subtitle { font-size:16px; color:var(--muted); max-width:680px; margin:0 auto; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:24px; margin-top:32px; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:26px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; text-decoration:none; color:inherit; transition:transform .2s; }
+    .card:hover { transform:translateY(-6px); }
+    .icon-box { width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:16px; }
+    .c1 .icon-box { background:var(--sky-soft); } .c2 .icon-box { background:var(--emerald-soft); } .c3 .icon-box { background:var(--purple-soft); }
+    .card h2 { font-size:21px; font-weight:800; margin-bottom:6px; }
+    .tag { font-size:13px; font-weight:700; margin-bottom:12px; }
+    .c1 .tag { color:var(--sky); } .c2 .tag { color:var(--emerald); } .c3 .tag { color:var(--purple); }
+    .card p { font-size:14px; color:#475569; flex:1; margin-bottom:18px; }
+    .cta { display:block; text-align:center; padding:11px; border-radius:12px; font-weight:700; color:#fff; font-size:14.5px; }
+    .c1 .cta { background:var(--sky); } .c2 .cta { background:var(--emerald); } .c3 .cta { background:var(--purple); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">🧭 主题 15 · Long Context &amp; Persistent Memory</div>
+      <h1>2 分钟悟懂长上下文与记忆系统</h1>
+      <p class="subtitle">128K、1M 超长上下文到底靠不靠谱？AI 为什么关掉网页就失忆？玩完这 3 个小游戏彻底搞懂大模型的“长短记忆”。</p>
+    </header>
+    <main class="grid">
+      <a class="card c1" href="./01-lost-in-the-middle.html"><div class="icon-box">🪡</div><h2>大海捞针：U 型陷阱</h2><div class="tag">原理：Lost in the Middle 注意力衰减</div><p>把秘密密码藏在 10 万字长文的不同位置，亲测模型为什么记住开头和结尾，却总漏掉正中间！</p><div class="cta">开始玩《大海捞针》 →</div></a>
+      <a class="card c2" href="./02-working-vs-episodic-memory.html"><div class="icon-box">📓</div><h2>短期记忆 vs 长期笔记本</h2><div class="tag">原理：工作记忆（Context）与外部持久化记忆</div><p>一键“重启新对话”，对比裸奔窗口瞬间失忆与“长期记忆笔记本”跨会话自动召回的神奇体验！</p><div class="cta">开始玩《记忆笔记本》 →</div></a>
+      <a class="card c3" href="./03-rope-extrapolation.html"><div class="icon-box">🕰️</div><h2>位置编码时钟（RoPE）</h2><div class="tag">原理：旋转位置编码与长度外推</div><p>把文章长度拉超训练上限 4K，看老式绝对编号如何崩溃乱码，以及 RoPE 时钟缩放如何平滑扩展到 128K！</p><div class="cta">开始玩《位置编码时钟》 →</div></a>
+    </main>
+  </div>
+</body>
+</html>

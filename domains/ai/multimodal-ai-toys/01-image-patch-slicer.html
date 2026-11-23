@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：图片切块机 · 悟懂 ViT Image Patches</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --pink:#db2777; --pink-soft:#fdf2f8; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:980px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .stage { display:flex; flex-direction:column; align-items:center; gap:18px; margin-bottom:16px; }
+    .pic-grid { display:grid; grid-template-columns:repeat(4,56px); gap:0px; padding:10px; background:#f8fafc; border-radius:16px; border:2px solid #cbd5e1; transition:gap .35s ease; }
+    .pic-grid.sliced { gap:8px; border-color:var(--pink); background:var(--pink-soft); }
+    .patch { width:56px; height:56px; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:800; position:relative; border-radius:4px; transition:border-radius .3s; }
+    .pic-grid.sliced .patch { border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,.08); }
+    .p-num { position:absolute; top:2px; left:4px; font-size:10px; opacity:0; color:#fff; background:rgba(0,0,0,.45); padding:0 4px; border-radius:4px; transition:opacity .3s; }
+    .pic-grid.sliced .p-num { opacity:1; }
+
+    .seq-strip { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; padding:14px; border-radius:14px; background:#0f172a; width:100%; min-height:60px; align-items:center; }
+    .seq-tok { padding:5px 9px; border-radius:8px; font-size:12px; font-weight:750; font-family:ui-monospace,monospace; }
+    .seq-tok.img { background:#db2777; color:#fff; }
+    .seq-tok.txt { background:#2563eb; color:#fff; }
+
+    .btn { border:none; border-radius:12px; padding:11px 20px; font-size:14.5px; font-weight:750; cursor:pointer; background:var(--pink); color:#fff; }
+    .aha { border-radius:12px; padding:14px 16px; font-size:13.5px; background:var(--pink-soft); border:1px solid #fbcfe8; color:#831843; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🧩 图片切块机：大模型到底是怎么把“照片”塞进文字模型的？</h1>
+        <p>点击下方按钮，把这张 4×4 太阳风景图切碎成 16 个 <strong>Image Patch（图像词块）</strong>，排成一排喂给 Transformer！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="panel">
+      <div class="stage">
+        <div class="pic-grid" id="picGrid"></div>
+        <button class="btn" id="sliceBtn" onclick="toggleSlice()">✂️ 点击切块并拉直成 Token 序列！</button>
+        <div class="seq-strip" id="seqStrip">
+          <span style="color:#94a3b8;font-size:13px;">👆 点上方按钮，看二维图片如何变成一维“视觉 Token”和文字排在一起！</span>
+        </div>
+      </div>
+      <div class="aha">
+        💡 <strong>核心顿悟：</strong>Transformer 架构天生只认一排排的 Token 序列。工程师把一张照片切成 16 块（甚至几百块）小方格，每块压成一个向量当成“图片单词”，再直接和你的文字提问拼成同一条序列——<strong>对大模型来说，看图和读书用的是同一套注意力大脑！</strong>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CELLS = [
+      { bg:"#38bdf8", e:"☁️" }, { bg:"#38bdf8", e:"" }, { bg:"#fbbf24", e:"☀️" }, { bg:"#38bdf8", e:"" },
+      { bg:"#7dd3fc", e:"" }, { bg:"#7dd3fc", e:"🦅" }, { bg:"#7dd3fc", e:"" }, { bg:"#7dd3fc", e:"☁️" },
+      { bg:"#4ade80", e:"🌲" }, { bg:"#22c55e", e:"🏠" }, { bg:"#4ade80", e:"🌳" }, { bg:"#22c55e", e:"" },
+      { bg:"#16a34a", e:"" }, { bg:"#15803d", e:"🌼" }, { bg:"#16a34a", e:"" }, { bg:"#15803d", e:"🐕" }
+    ];
+    let sliced = false;
+
+    function render() {
+      const grid = document.getElementById("picGrid");
+      grid.className = "pic-grid" + (sliced ? " sliced" : "");
+      grid.innerHTML = CELLS.map((c, i) => `<div class="patch" style="background:${c.bg};"><span class="p-num">#${i+1}</span>${c.e}</div>`).join("");
+
+      const strip = document.getElementById("seqStrip");
+      const btn = document.getElementById("sliceBtn");
+      if (!sliced) {
+        btn.textContent = "✂️ 点击切块并拉直成 Token 序列！";
+        strip.innerHTML = `<span style="color:#94a3b8;font-size:13px;">👆 点上方按钮，看二维图片如何变成一维“视觉 Token”和文字排在一起！</span>`;
+      } else {
+        btn.textContent = "↩️ 拼回原图";
+        const imgToks = CELLS.map((c, i) => `<span class="seq-tok img">[图块${i+1}${c.e}]</span>`).join("");
+        const txtToks = ["请", "描述", "这张", "图"].map(t => `<span class="seq-tok txt">${t}</span>`).join("");
+        strip.innerHTML = imgToks + txtToks;
+      }
+    }
+    function toggleSlice() { sliced = !sliced; render(); }
+    render();
+  </script>
+</body>
+</html>

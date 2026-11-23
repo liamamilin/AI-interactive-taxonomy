@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：原生语音 vs 三段拼接 · 悟懂端到端多模态</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --teal:#0d9488; --teal-soft:#f0fdfa; --red:#dc2626; --red-soft:#fef2f2; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:1000px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .voice-banner { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 22px; box-shadow:var(--shadow); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .btn { border:none; border-radius:12px; padding:11px 20px; font-size:14.5px; font-weight:750; cursor:pointer; background:var(--teal); color:#fff; }
+
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    @media (max-width:760px) { .grid { grid-template-columns:1fr; } }
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:10px; }
+    .step { padding:11px 14px; border-radius:12px; font-size:13.5px; background:#f8fafc; border:1px solid #e2e8f0; }
+    .step.bad { background:var(--red-soft); border-color:#fecaca; color:#991b1b; font-weight:650; }
+    .step.good { background:var(--teal-soft); border-color:#99f6e4; color:#115e59; font-weight:650; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🎙️ 原生语音 vs 三段拼接：为什么新一代语音 AI 能听懂“阴阳怪气”？</h1>
+        <p>用户用<strong>长叹一口气 + 阴阳怪气的反讽语气</strong>说了一句：「呵…你今天可真是太准时了！」点击下方按钮对比两代语音架构！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="voice-banner">
+      <div><strong>🎤 输入音频：</strong>「（叹气）呵…你今天可真是太准时了！」<span style="color:var(--muted);font-size:13px;">（真实含义：在吐槽对方又迟到了！）</span></div>
+      <button class="btn" onclick="runCompare()">▶ 发送音频对比两代架构</button>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2 style="font-size:16px;font-weight:800;">🐢 老式三段拼接（ASR → LLM → TTS）</h2>
+        <div id="oldBox"><div class="step">点击上方按钮开始模拟…</div></div>
+      </div>
+      <div class="panel">
+        <h2 style="font-size:16px;font-weight:800;">⚡ 原生端到端多模态（Audio-to-Audio）</h2>
+        <div id="newBox"><div class="step">点击上方按钮开始模拟…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function runCompare() {
+      document.getElementById("oldBox").innerHTML = `
+        <div class="step">1. 语音转文字（ASR · 耗时 1.2s）：把叹气和嘲讽全抹掉了，只剩干巴巴的纯文字「你今天可真是太准时了」。</div>
+        <div class="step">2. 纯文本大模型（LLM · 耗时 1.5s）：以为你在夸它！生成文字「谢谢夸奖，我很高兴！」。</div>
+        <div class="step">3. 文字转语音（TTS · 耗时 1.1s）：机械朗读出来。</div>
+        <div class="step bad">❌ 总延迟 3.8 秒 + 彻底听不懂反讽！因为转成文字的那一刻，语气、停顿、笑声全丢光了！</div>
+      `;
+      document.getElementById("newBox").innerHTML = `
+        <div class="step">1. 原生音频 Token 直入大模型（耗时 0.3s）：模型直接“听”到了叹气声、拖长音和下降语调！</div>
+        <div class="step good">✅ 总延迟仅 0.3 秒！AI 立刻笑着道歉并带点幽默语气回复：「听您这声叹气，我就知道我又踩点迟到了，罚我请您喝咖啡！」</div>
+      `;
+    }
+  </script>
+</body>
+</html>

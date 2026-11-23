@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：短期记忆 vs 长期笔记本 · 悟懂持久化记忆</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --green:#059669; --green-soft:#ecfdf5; --red:#dc2626; --red-soft:#fef2f2; --blue:#2563eb; --blue-soft:#eff6ff; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:980px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+    @media (max-width:740px) { .grid { grid-template-columns:1fr; } }
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .panel h2 { font-size:16px; font-weight:800; margin-bottom:12px; }
+
+    .mem-box { min-height:110px; border-radius:14px; padding:14px; background:#f8fafc; border:1.5px dashed #cbd5e1; font-size:13.5px; margin-bottom:14px; }
+    .mem-box.saved { border-style:solid; border-color:var(--green); background:var(--green-soft); color:#065f46; }
+
+    .btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+    .btn { border:none; border-radius:11px; padding:10px 15px; font-size:13.5px; font-weight:750; cursor:pointer; }
+    .btn-blue { background:var(--blue); color:#fff; }
+    .btn-green { background:var(--green); color:#fff; }
+    .btn-red { background:var(--red); color:#fff; }
+
+    .reply { border-radius:12px; padding:14px 16px; font-size:13.5px; background:#f8fafc; border:1px solid #e2e8f0; }
+    .reply.ok { background:var(--green-soft); border-color:#a7f3d0; color:#065f46; }
+    .reply.bad { background:var(--red-soft); border-color:#fecaca; color:#991b1b; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>📓 短期记忆 vs 长期笔记本：AI 关掉网页后为什么记得你的习惯？</h1>
+        <p>先点「告诉 AI 我吃素」，再点「🔄 开启全新对话（清零短期记忆）」，体会“有无长期记忆库”的区别！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-blue" onclick="tellFact()">🗣️ 1. 告诉 AI：「我吃素，而且喜欢简洁回答」</button>
+      <button class="btn btn-green" id="memToggleBtn" onclick="toggleLongMem()">📓 2. 开启长期记忆笔记本：关</button>
+      <button class="btn btn-red" onclick="newSession()">🔄 3. 关掉网页 · 开启全新对话！</button>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>💭 短期工作记忆（当前聊天 Context）</h2>
+        <div class="mem-box" id="shortBox">（空）</div>
+        <div style="font-size:12.5px;color:var(--muted);">就像内存条（RAM）：只要点「新对话」，里面所有聊天瞬间蒸发清零！</div>
+      </div>
+
+      <div class="panel">
+        <h2>📓 外部长期记忆库（Memory Store）</h2>
+        <div class="mem-box" id="longBox">（未开启长期记忆）</div>
+        <div style="font-size:12.5px;color:var(--muted);">就像硬盘笔记本：提炼关键偏好存下来，下次开新对话自动注入给模型！</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+        <strong>🍽️ 随时测试：问 AI「今晚吃什么好？」</strong>
+        <button class="btn btn-blue" onclick="askDinner()">▶ 提问测试</button>
+      </div>
+      <div class="reply" id="replyBox">先点上方按钮操作，再来提问看看 AI 记不记得你吃素！</div>
+    </div>
+  </div>
+
+  <script>
+    let shortMem = [];
+    let longMemEnabled = false;
+    let longMem = [];
+
+    function render() {
+      document.getElementById("shortBox").innerHTML = shortMem.length ? shortMem.join("<br/>") : "（当前会话为空）";
+      const lb = document.getElementById("longBox");
+      if (!longMemEnabled) {
+        lb.className = "mem-box";
+        lb.innerHTML = "（长期记忆功能已关闭）";
+      } else {
+        lb.className = "mem-box" + (longMem.length ? " saved" : "");
+        lb.innerHTML = longMem.length ? longMem.join("<br/>") : "（已开启，等待提炼你的持久偏好…）";
+      }
+      document.getElementById("memToggleBtn").textContent = `📓 2. 开启长期记忆笔记本：${longMemEnabled ? "开 ✅" : "关"}`;
+    }
+
+    function tellFact() {
+      shortMem.push("👤 用户：我吃素，而且喜欢简洁回答。");
+      if (longMemEnabled && longMem.length === 0) {
+        longMem.push("⭐ [饮食偏好] 素食主义者");
+        longMem.push("⭐ [回复风格] 偏好简短直接");
+      }
+      render();
+    }
+
+    function toggleLongMem() {
+      longMemEnabled = !longMemEnabled;
+      if (longMemEnabled && shortMem.length > 0 && longMem.length === 0) {
+        longMem.push("⭐ [饮食偏好] 素食主义者");
+        longMem.push("⭐ [回复风格] 偏好简短直接");
+      }
+      render();
+    }
+
+    function newSession() {
+      shortMem = [];
+      document.getElementById("replyBox").className = "reply";
+      document.getElementById("replyBox").textContent = "🔄 已开启全新对话（短期记忆已清零）！现在点「▶ 提问测试」看看 AI 还记不记得你吃素！";
+      render();
+    }
+
+    function askDinner() {
+      const knows = shortMem.length > 0 || (longMemEnabled && longMem.length > 0);
+      const box = document.getElementById("replyBox");
+      if (knows) {
+        box.className = "reply ok";
+        box.innerHTML = `✅ <strong>AI（简洁素食推荐）：</strong>推荐「番茄豆腐菌菇汤 + 清炒西兰花」！（来源：${shortMem.length ? "当前短期记忆" : "📓 跨会话自动召回长期记忆笔记本！"}）`;
+      } else {
+        box.className = "reply bad";
+        box.innerHTML = `❌ <strong>AI（彻底失忆）：</strong>推荐您今晚来一份香喷喷的「红烧肉配炸鸡腿」！（因为新对话清空了短期记忆，且没开启长期记忆笔记本！）`;
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

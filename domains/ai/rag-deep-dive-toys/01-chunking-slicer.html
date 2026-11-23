@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：切块手术台 · 悟懂 Chunking 与 Overlap 重叠</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --green:#059669; --green-soft:#ecfdf5; --red:#dc2626; --red-soft:#fef2f2; --amber:#d97706; --amber-soft:#fffbeb; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:1040px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .ctrl-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px; }
+    @media (max-width:700px) { .ctrl-grid { grid-template-columns:1fr; } }
+    .sl-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px 18px; box-shadow:var(--shadow); }
+    .sl-head { display:flex; justify-content:space-between; font-size:14px; font-weight:750; margin-bottom:8px; }
+    .sl-badge { font-family:ui-monospace,monospace; background:var(--green-soft); color:var(--green); padding:2px 9px; border-radius:999px; font-size:13px; }
+    input[type="range"] { width:100%; accent-color:var(--green); cursor:pointer; }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); margin-bottom:18px; }
+    .panel h2 { font-size:16px; font-weight:800; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
+
+    .chunks-wrap { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+    .chunk { border:1.5px solid var(--border); border-radius:12px; padding:12px 14px; background:#f8fafc; font-size:14px; line-height:1.7; }
+    .chunk.hit { border-color:var(--green); background:var(--green-soft); }
+    .chunk.broken { border-color:var(--red); background:var(--red-soft); }
+    .chunk-id { font-size:11.5px; font-weight:800; color:var(--muted); margin-bottom:4px; display:flex; justify-content:space-between; }
+    .ov-span { background:#fde68a; padding:1px 4px; border-radius:4px; font-weight:700; }
+
+    .ai-box { border-radius:14px; padding:16px 18px; font-size:14px; }
+    .ai-box.ok { background:var(--green-soft); border:1px solid #a7f3d0; color:#065f46; }
+    .ai-box.bad { background:var(--red-soft); border:1px solid #fecaca; color:#991b1b; }
+    .ai-box h3 { font-size:15.5px; margin-bottom:5px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>✂️ 切块手术台：为什么切歪一刀会让 RAG 答错？</h1>
+        <p>用户提问：<strong>「去上海出差，住宿每天最多能报销多少钱？」</strong> 调节下方切块长度与重叠字数（Overlap），看知识切片的生死一瞬间！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="ctrl-grid">
+      <div class="sl-card">
+        <div class="sl-head">
+          <span>📏 每块切分字数（Chunk Size）</span>
+          <span class="sl-badge" id="szVal">32 字</span>
+        </div>
+        <input type="range" id="slSize" min="22" max="64" step="2" value="32" oninput="render()" />
+        <div style="font-size:11.5px;color:var(--muted);margin-top:4px;">默认 32 字时，正好一刀砍在“上海”和“800 元”中间！</div>
+      </div>
+
+      <div class="sl-card">
+        <div class="sl-head">
+          <span>🔗 相邻重叠字数（Chunk Overlap）</span>
+          <span class="sl-badge" id="ovVal">0 字（硬切无重叠）</span>
+        </div>
+        <input type="range" id="slOverlap" min="0" max="18" step="2" value="0" oninput="render()" />
+        <div style="font-size:11.5px;color:var(--muted);margin-top:4px;">黄色高亮表示相邻两块共享的“重叠缓冲带”</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span>📄 公司《差旅制度》切块透视（高亮块 = 被检索捞出的 Top-1）</span><span style="font-size:12px;color:var(--muted);" id="cntTag">共 3 块</span></h2>
+      <div class="chunks-wrap" id="chunksWrap"></div>
+      <div class="ai-box" id="aiBox"></div>
+    </div>
+  </div>
+
+  <script>
+    const DOC = "公司差旅报销规范：员工前往一线城市（含北京、上海、深圳）出差时，住宿标准上限为每天800元，须提供增值税专用发票；前往其他城市出差，住宿标准为每天450元。";
+
+    function render() {
+      const size = parseInt(document.getElementById("slSize").value, 10);
+      const ov = Math.min(size - 6, parseInt(document.getElementById("slOverlap").value, 10));
+      document.getElementById("szVal").textContent = size + " 字";
+      document.getElementById("ovVal").textContent = ov === 0 ? "0 字（硬切无重叠）" : ov + " 字重叠";
+
+      const chunks = [];
+      let start = 0;
+      const step = Math.max(6, size - ov);
+      while (start < DOC.length) {
+        const end = Math.min(DOC.length, start + size);
+        chunks.push({ text: DOC.slice(start, end), start, end, ovLen: start === 0 ? 0 : ov });
+        if (end >= DOC.length) break;
+        start += step;
+      }
+
+      // 模拟检索器捞出包含“上海”最相关的一块
+      let hitIdx = chunks.findIndex(c => c.text.includes("上海"));
+      if (hitIdx < 0) hitIdx = 0;
+      const hitChunk = chunks[hitIdx];
+      const hasBoth = hitChunk.text.includes("上海") && hitChunk.text.includes("800元");
+
+      document.getElementById("cntTag").textContent = `共切成 ${chunks.length} 块`;
+      const wrap = document.getElementById("chunksWrap");
+      wrap.innerHTML = "";
+      chunks.forEach((c, i) => {
+        const isHit = i === hitIdx;
+        const div = document.createElement("div");
+        div.className = "chunk" + (isHit ? (hasBoth ? " hit" : " broken") : "");
+        const bodyHtml = c.ovLen > 0
+          ? `<span class="ov-span">${c.text.slice(0, c.ovLen)}</span>${c.text.slice(c.ovLen)}`
+          : c.text;
+        div.innerHTML = `
+          <div class="chunk-id">
+            <span>切片 #${i + 1}（字数 ${c.text.length}）</span>
+            <span>${isHit ? (hasBoth ? "✅ 命中且信息完整" : "⚠️ 命中但金额被切断！") : ""}</span>
+          </div>
+          <div>${bodyHtml}</div>
+        `;
+        wrap.appendChild(div);
+      });
+
+      const ai = document.getElementById("aiBox");
+      if (hasBoth) {
+        ai.className = "ai-box ok";
+        ai.innerHTML = `
+          <h3>✅ AI 精准回答：「去上海出差，住宿报销上限为每天 800 元！」</h3>
+          <p><strong>成功原因：</strong>切片 #${hitIdx + 1} 同时保住了前提「上海」与关键数字「800元」！这就是为什么 RAG 工程里必须给切块留出 <strong>10%~20% 的 Overlap 重叠缓冲带</strong>，防止一刀把因果关系斩断。</p>
+        `;
+      } else {
+        ai.className = "ai-box bad";
+        ai.innerHTML = `
+          <h3>❌ AI 翻车回答：「文档里提到了上海出差，但没写具体报销金额，无法回答！」</h3>
+          <p><strong>翻车真相：</strong>看上面标红的切片 #${hitIdx + 1}——因为硬切无重叠，一刀正好砍在「上海」和「800元」之间！把「🔗 相邻重叠字数」往右拉到 <strong>12 字</strong> 或调大切块大小试试看！</p>
+        `;
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>

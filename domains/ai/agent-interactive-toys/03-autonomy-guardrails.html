@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：权限闸门 · 悟懂自主权与人类审批</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --rose: #e11d48;
+      --rose-soft: #fff1f2;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1040px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .autonomy-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 760px) {
+      .autonomy-bar { grid-template-columns: 1fr; }
+    }
+
+    .auto-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.18s;
+    }
+    .auto-card:hover { border-color: #cbd5e1; }
+    .auto-card.active.lv1 { border-color: var(--blue); background: var(--blue-soft); }
+    .auto-card.active.lv2 { border-color: var(--green); background: var(--green-soft); }
+    .auto-card.active.lv3 { border-color: var(--rose); background: var(--rose-soft); }
+
+    .auto-card .at { font-size: 15px; font-weight: 750; }
+    .auto-card .as { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+
+    .task-strip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 11px 18px;
+      font-size: 14.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s, background 0.15s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary { background: var(--ink); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #1f2937; }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-green:hover { background: #047857; }
+    .btn-rose { background: var(--rose); color: #fff; }
+    .btn-rose:hover { background: #be123c; }
+    .btn-gray { background: #f3f4f6; color: #374151; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .step-item {
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 15px;
+      background: #ffffff;
+      transition: all 0.22s ease;
+    }
+    .step-item.running { border-color: var(--blue); background: var(--blue-soft); }
+    .step-item.paused { border-color: var(--rose); background: var(--rose-soft); box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.12); }
+    .step-item.done { border-color: #a7f3d0; background: #f0fdf4; }
+    .step-item.disaster { border-color: #fca5a5; background: #fef2f2; }
+
+    .step-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .step-name { font-size: 14.5px; font-weight: 700; }
+
+    .risk-tag {
+      font-size: 11px;
+      font-weight: 750;
+      padding: 2px 8px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+    .risk-tag.low { background: #ecfdf5; color: #047857; }
+    .risk-tag.mid { background: #fffbeb; color: #b45309; }
+    .risk-tag.high { background: #ffe4e6; color: #be123c; }
+
+    .step-detail { font-size: 13px; color: #4b5563; }
+
+    /* Approval modal card on right */
+    .gate-box {
+      border-radius: 16px;
+      padding: 18px;
+      border: 2px dashed #cbd5e1;
+      background: #f8fafc;
+      margin-bottom: 16px;
+      min-height: 210px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .gate-box.active-gate {
+      border-style: solid;
+      border-color: var(--rose);
+      background: var(--rose-soft);
+      justify-content: flex-start;
+    }
+    .gate-box.safe-gate {
+      border-style: solid;
+      border-color: var(--blue);
+      background: var(--blue-soft);
+      justify-content: flex-start;
+    }
+    .gate-box h3 { font-size: 16px; margin-bottom: 8px; }
+    .gate-box p { font-size: 13.5px; margin-bottom: 12px; color: #374151; }
+
+    .bug-highlight {
+      background: #ffffff;
+      border: 1.5px solid #fda4af;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #9f1239;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+
+    .gate-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .score-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+    .score-num { font-size: 22px; font-weight: 800; }
+    .score-label { font-size: 12px; color: var(--muted); }
+
+    .report-box {
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 13.5px;
+      display: none;
+    }
+    .report-box.ok { display: block; background: var(--green-soft); border: 1px solid #a7f3d0; color: #065f46; }
+    .report-box.bad { display: block; background: var(--rose-soft); border: 1px solid #fecdd3; color: #9f1239; }
+    .report-box.slow { display: block; background: var(--blue-soft); border: 1px solid #bfdbfe; color: #1e3a8a; }
+    .report-box h3 { font-size: 15.5px; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🚧 失控的实习生：为什么 Agent 需要“权限闸门”？</h1>
+        <p>先试试「全自动放飞（YOLO）」看 3 秒酿成职场大祸，再切到「人机协同」体验高危刹车！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="autonomy-bar">
+      <button class="auto-card lv1" id="lv1" onclick="setLevel(1)">
+        <div class="at">🐣 档位 1：手把手副驾驶</div>
+        <div class="as">每一步都停下来问你确认。极度安全，但你会点确认点到手酸。</div>
+      </button>
+      <button class="auto-card lv2 active" id="lv2" onclick="setLevel(2)">
+        <div class="at">🚧 档位 2：人机协同（推荐）</div>
+        <div class="as">读取与起草全自动飞奔，只在「永久删除/对外群发」前自动刹车。</div>
+      </button>
+      <button class="auto-card lv3" id="lv3" onclick="setLevel(3)">
+        <div class="at">🚀 档位 3：全自动放飞（YOLO）</div>
+        <div class="as">零弹窗一路狂奔！把所有最高权限交给实习生 Agent 自由发挥。</div>
+      </button>
+    </div>
+
+    <div class="task-strip">
+      <div>
+        <div style="font-size:12px;color:var(--muted);font-weight:700;">📋 派给实习生 Agent 的综合任务：</div>
+        <div style="font-size:16px;font-weight:750;">“帮我清理邮箱里的垃圾广告，并给客户张总回复 50 万报价确认邮件。”</div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-primary" id="startBtn" onclick="startPipeline()">▶ 派发任务</button>
+        <button class="btn btn-gray" onclick="resetPipeline()">🔄 重置</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>
+          <span>Agent 自动拆解的 5 步流水线</span>
+          <span style="font-size:12px;color:var(--muted);" id="pipeState">等待派发</span>
+        </h2>
+        <div class="step-list" id="stepList"></div>
+      </div>
+
+      <div class="panel">
+        <h2><span>🚦 人类审批闸门（Human-in-the-Loop）</span></h2>
+
+        <div class="score-grid">
+          <div class="score-card">
+            <div class="score-num" id="clicksNum">0 次</div>
+            <div class="score-label">人工介入点击次数</div>
+          </div>
+          <div class="score-card">
+            <div class="score-num" id="accidentsNum">0 起</div>
+            <div class="score-label">酿成的重大事故</div>
+          </div>
+        </div>
+
+        <div class="gate-box" id="gateBox">
+          <div style="text-align:center;color:var(--muted);font-size:14px;">
+            👆 选好上方的「自主权档位」后，点击「▶ 派发任务」开始观察！
+          </div>
+        </div>
+
+        <div class="report-box" id="reportBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STEPS = [
+      {
+        id: 1,
+        name: "1. 读取收件箱最近 20 封邮件",
+        risk: "low",
+        riskLabel: "🟢 只读安全",
+        detail: "扫描邮件标题与发件人，不做任何修改。",
+        bug: null
+      },
+      {
+        id: 2,
+        name: "2. 识别并标记 12 封疑似垃圾广告",
+        risk: "low",
+        riskLabel: "🟢 本地分类",
+        detail: "模型打上待清理标签（隐蔽失误：把老板发的《重要合同终版》也错标成广告了！）。",
+        bug: null
+      },
+      {
+        id: 3,
+        name: "3. 永久清空这 12 封邮件（不可撤回）",
+        risk: "high",
+        riskLabel: "🔴 高危不可逆",
+        detail: "调用 delete_forever() 彻底清空回收站。",
+        bug: "🚨 发现隐藏雷区：待删除清单里混进了 1 封《老板：年度核心合同终版.pdf》！一旦执行将永久丢失！",
+        fixBtn: "✅ 剔除老板合同，仅删除其余 11 封广告",
+        yoloBtn: "💀 直接放行（全部永久删除）",
+        disasterMsg: "💥 永久删除了老板的《年度核心合同终版》！"
+      },
+      {
+        id: 4,
+        name: "4. 起草给客户张总的报价回复草稿",
+        risk: "mid",
+        riskLabel: "🟡 本地草稿",
+        detail: "在草稿箱生成回复内容（隐蔽失误：手滑少打一个零，把 50 万写成了 5 万！）。",
+        bug: null
+      },
+      {
+        id: 5,
+        name: "5. 正式发送报价邮件并抄送全公司",
+        risk: "high",
+        riskLabel: "🔴 对外群发",
+        detail: "调用 send_email() 发给客户张总及全员抄送列表。",
+        bug: "🚨 发现隐藏雷区：草稿正文写着「确认本次项目总报价为 5 万元」（少打了一个 0，实际应为 50 万）！",
+        fixBtn: "✅ 修正为 50 万元后再正式发送",
+        yoloBtn: "💀 直接按 5 万元群发出去",
+        disasterMsg: "💥 把少写一个零的「5 万元」报价单群发给了客户和全公司！"
+      }
+    ];
+
+    let level = 2; // 1 = copilot, 2 = HITL, 3 = YOLO
+    let curStep = -1;
+    let stepStates = STEPS.map(() => "idle"); // idle | running | paused | done | disaster
+    let clicks = 0;
+    let accidents = [];
+    let isRunning = false;
+
+    const stepList = document.getElementById("stepList");
+    const gateBox = document.getElementById("gateBox");
+    const reportBox = document.getElementById("reportBox");
+    const clicksNum = document.getElementById("clicksNum");
+    const accidentsNum = document.getElementById("accidentsNum");
+    const pipeState = document.getElementById("pipeState");
+    const startBtn = document.getElementById("startBtn");
+
+    function renderSteps() {
+      stepList.innerHTML = "";
+      STEPS.forEach((st, idx) => {
+        const state = stepStates[idx];
+        const icon = state === "done" ? "✅ " : state === "disaster" ? "💥 " : state === "paused" ? "🛑 " : state === "running" ? "⏳ " : "";
+        const div = document.createElement("div");
+        div.className = "step-item " + state;
+        div.innerHTML = `
+          <div class="step-top">
+            <span class="step-name">${icon}${st.name}</span>
+            <span class="risk-tag ${st.risk}">${st.riskLabel}</span>
+          </div>
+          <div class="step-detail">${st.detail}</div>
+        `;
+        stepList.appendChild(div);
+      });
+      clicksNum.textContent = clicks + " 次";
+      accidentsNum.textContent = accidents.length + " 起";
+      accidentsNum.style.color = accidents.length > 0 ? "var(--rose)" : "var(--green)";
+    }
+
+    function setLevel(lv) {
+      if (isRunning) return;
+      level = lv;
+      [1, 2, 3].forEach(n => {
+        document.getElementById("lv" + n).classList.toggle("active", n === lv);
+      });
+      resetPipeline();
+    }
+
+    function resetPipeline() {
+      isRunning = false;
+      curStep = -1;
+      stepStates = STEPS.map(() => "idle");
+      clicks = 0;
+      accidents = [];
+      startBtn.disabled = false;
+      pipeState.textContent = "等待派发";
+      reportBox.className = "report-box";
+      reportBox.innerHTML = "";
+      gateBox.className = "gate-box";
+      gateBox.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:14px;">👆 点击「▶ 派发任务」，观察当前档位下 Agent 的表现！</div>`;
+      renderSteps();
+    }
+
+    function startPipeline() {
+      resetPipeline();
+      isRunning = true;
+      startBtn.disabled = true;
+      pipeState.textContent = "执行中…";
+      advanceStep(0);
+    }
+
+    function advanceStep(idx) {
+      if (idx >= STEPS.length) {
+        finishPipeline();
+        return;
+      }
+      curStep = idx;
+      const st = STEPS[idx];
+      stepStates[idx] = "running";
+      renderSteps();
+
+      setTimeout(() => {
+        const shouldPause = (level === 1) || (level === 2 && st.risk === "high");
+
+        if (shouldPause) {
+          stepStates[idx] = "paused";
+          pipeState.textContent = `🛑 第 ${idx + 1} 步等待你的审批`;
+          renderSteps();
+          showGate(idx);
+        } else {
+          // 自动执行（无审批）
+          if (st.risk === "high") {
+            stepStates[idx] = "disaster";
+            accidents.push(st.disasterMsg);
+          } else {
+            stepStates[idx] = "done";
+          }
+          renderSteps();
+          advanceStep(idx + 1);
+        }
+      }, level === 3 ? 420 : 520);
+    }
+
+    function showGate(idx) {
+      const st = STEPS[idx];
+      if (st.risk === "high") {
+        gateBox.className = "gate-box active-gate";
+        gateBox.innerHTML = `
+          <h3>🛑 高危动作自动刹车！请人类审批</h3>
+          <p>Agent 准备执行：<strong>${st.name}</strong></p>
+          <div class="bug-highlight">${st.bug}</div>
+          <div class="gate-actions">
+            <button class="btn btn-green" onclick="resolveGate(${idx}, true)">${st.fixBtn}</button>
+            <button class="btn btn-rose" onclick="resolveGate(${idx}, false)">${st.yoloBtn}</button>
+          </div>
+        `;
+      } else {
+        gateBox.className = "gate-box safe-gate";
+        gateBox.innerHTML = `
+          <h3>🐣 副驾驶模式：每步都需要你点头</h3>
+          <p>Agent 准备执行低风险步骤：<strong>${st.name}</strong>（${st.detail}）</p>
+          <div class="gate-actions">
+            <button class="btn btn-primary" onclick="resolveGate(${idx}, true)">👍 确认放行这一步</button>
+          </div>
+        `;
+      }
+    }
+
+    function resolveGate(idx, fixed) {
+      clicks++;
+      const st = STEPS[idx];
+      if (!fixed && st.risk === "high") {
+        stepStates[idx] = "disaster";
+        accidents.push(st.disasterMsg);
+      } else {
+        stepStates[idx] = "done";
+      }
+      gateBox.className = "gate-box";
+      gateBox.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:14px;">⏳ 已放行，Agent 继续推进下一步…</div>`;
+      renderSteps();
+      advanceStep(idx + 1);
+    }
+
+    function finishPipeline() {
+      isRunning = false;
+      startBtn.disabled = false;
+      gateBox.className = "gate-box";
+
+      if (accidents.length > 0) {
+        pipeState.textContent = "💥 发生重大事故";
+        gateBox.innerHTML = `<div style="text-align:center;font-size:15px;font-weight:750;color:var(--rose);">🚨 职场社死事故已发生！</div>`;
+        reportBox.className = "report-box bad";
+        reportBox.innerHTML = `
+          <h3>💥 事故复盘（共酿成 ${accidents.length} 起大祸）</h3>
+          <p>${accidents.join("<br/>")}</p>
+          <p style="margin-top:8px;"><strong>顿悟点：</strong>大模型存在概率性失误！全自动放飞（YOLO）把不可逆权限完全交出去，3 秒钟就能酿成无法挽回的损失。试试切到「档位 2：人机协同」重新跑一遍！</p>
+        `;
+      } else if (level === 1) {
+        pipeState.textContent = "安全完成（但效率低）";
+        gateBox.innerHTML = `<div style="text-align:center;font-size:14.5px;font-weight:700;color:var(--blue);">✅ 0 事故，但你一共点了 ${clicks} 次确认！</div>`;
+        reportBox.className = "report-box slow";
+        reportBox.innerHTML = `
+          <h3>🐣 手把手模式复盘：安全，但人累麻了</h3>
+          <p>连「读取邮件」「本地分类」这种无害步骤都要你点头，你总共被迫点了 <strong>${clicks} 次</strong>。试试切到「档位 2：人机协同」，只在高危动作前刹车！</p>
+        `;
+      } else {
+        pipeState.textContent = "✅ 高效且安全通关";
+        gateBox.innerHTML = `<div style="text-align:center;font-size:15px;font-weight:750;color:var(--green);">🎉 完美平衡：只点 2 次审批，拦截 2 起大祸！</div>`;
+        reportBox.className = "report-box ok";
+        reportBox.innerHTML = `
+          <h3>🚧 人机协同（Human-in-the-Loop）最佳实践</h3>
+          <p>只读、分类、起草全部由 Agent 毫秒级自动跑完，只在「永久删除」与「对外发送」两个不可逆关口刹车交给你拍板——既省力又兜底，这就是工业级 Agent 的设计铁律！</p>
+        `;
+      }
+    }
+
+    renderSteps();
+  </script>
+</body>
+</html>

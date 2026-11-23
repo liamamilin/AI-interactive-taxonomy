@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：MCP 握手透视仪 · 悟懂自动发现机制</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --purple:#7c3aed; --purple-soft:#f5f3ff; --green:#059669; --green-soft:#ecfdf5; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:960px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .actors { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+    .actor { padding:14px; border-radius:14px; text-align:center; font-weight:800; font-size:15px; background:#f8fafc; border:2px solid var(--border); }
+    .actor.client { border-color:var(--purple); background:var(--purple-soft); color:#4c1d95; }
+    .actor.server { border-color:var(--green); background:var(--green-soft); color:#065f46; }
+
+    .btn-row { display:flex; gap:10px; margin-bottom:16px; }
+    .btn { border:none; border-radius:12px; padding:11px 18px; font-size:14px; font-weight:750; cursor:pointer; }
+    .btn-purple { background:var(--purple); color:#fff; flex:1; }
+    .btn-purple:disabled { opacity:.45; cursor:not-allowed; }
+    .btn-gray { background:#f1f5f9; color:#334155; }
+
+    .msg-list { display:flex; flex-direction:column; gap:10px; min-height:220px; margin-bottom:14px; }
+    .msg { padding:13px 15px; border-radius:12px; font-size:13px; border:1px solid var(--border); background:#0f172a; color:#e2e8f0; font-family:ui-monospace,monospace; }
+    .msg .dir { font-family:sans-serif; font-weight:800; font-size:12px; margin-bottom:5px; color:#a78bfa; }
+    .msg.resp .dir { color:#34d399; }
+    .aha { border-radius:12px; padding:13px 15px; font-size:13.5px; background:var(--purple-soft); border:1px solid #ddd6fe; color:#4c1d95; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🤝 MCP 握手透视仪：插上新工具后，AI 怎么自己学会用？</h1>
+        <p>逐步点击「发送下一步协议消息」，透视 Client 与 Server 之间最核心的 JSON-RPC 三步握手！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="panel">
+      <div class="actors">
+        <div class="actor client">🤖 MCP Client（如 Claude / Cursor）</div>
+        <div class="actor server">🗄️ MCP Server（刚插上的数据库插件）</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-purple" id="nextBtn" onclick="nextStep()">▶ 执行第 1 步：initialize 握手报家门</button>
+        <button class="btn btn-gray" onclick="resetSteps()">🔄 重置</button>
+      </div>
+      <div class="msg-list" id="msgList"></div>
+      <div class="aha">💡 <strong>为什么像插 U 盘一样爽？</strong>因为第 2 步 <code>tools/list</code> 会把工具名称、用途和参数说明书自动发给 AI——大模型读完说明书立刻就会用，完全不用人工写死对接代码！</div>
+    </div>
+  </div>
+
+  <script>
+    const STEPS = [
+      { btn: "▶ 执行第 2 步：tools/list 自动拉取技能菜单", dir: "Client → Server（第 1 步：初始化握手）", resp: false, code: '{"method": "initialize", "params": {"protocolVersion": "2025-03"}}' },
+      { btn: "▶ 执行第 3 步：tools/call 按说明书调用工具", dir: "Server → Client（第 2 步：自动亮出全部可用技能说明书！）", resp: true, code: '{"tools": [{"name": "query_sales", "description": "按月份查销售额", "inputSchema": {"month": "string"}}]}' },
+      { btn: "▶ 执行第 4 步：拿回真实数据完成回答", dir: "Client → Server（第 3 步：大模型照说明书精准发起调用）", resp: false, code: '{"method": "tools/call", "params": {"name": "query_sales", "arguments": {"month": "2026-10"}}}' },
+      { btn: "✅ 三步标准握手演示完毕", dir: "Server → Client（第 4 步：返回实时查询结果）", resp: true, code: '{"content": [{"type": "text", "text": "2026年10月总销售额：¥1,284,000（环比 +18%）"}]}' }
+    ];
+    let step = 0;
+
+    function nextStep() {
+      if (step >= STEPS.length) return;
+      const s = STEPS[step];
+      const div = document.createElement("div");
+      div.className = "msg" + (s.resp ? " resp" : "");
+      div.innerHTML = `<div class="dir">${s.dir}</div><div>${s.code}</div>`;
+      document.getElementById("msgList").appendChild(div);
+      step++;
+      const btn = document.getElementById("nextBtn");
+      btn.textContent = s.btn;
+      if (step >= STEPS.length) btn.disabled = true;
+    }
+
+    function resetSteps() {
+      step = 0;
+      document.getElementById("msgList").innerHTML = "";
+      const btn = document.getElementById("nextBtn");
+      btn.disabled = false;
+      btn.textContent = "▶ 执行第 1 步：initialize 握手报家门";
+    }
+  </script>
+</body>
+</html>

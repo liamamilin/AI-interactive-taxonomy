@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：顿悟时刻模拟器 · 悟懂 RLVR 如何练出自我反思</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --emerald:#059669; --emerald-soft:#ecfdf5; --indigo:#4f46e5; --indigo-soft:#eef2ff; --red:#dc2626; --red-soft:#fef2f2; --amber:#d97706; --amber-soft:#fffbeb; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:1040px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .ctrl-strip { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 22px; box-shadow:var(--shadow); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px; }
+    .btn { border:none; border-radius:12px; padding:11px 18px; font-size:14px; font-weight:750; cursor:pointer; }
+    .btn-emerald { background:var(--emerald); color:#fff; }
+    .btn-emerald:hover:not(:disabled) { background:#047857; }
+    .btn-emerald:disabled { opacity:.45; cursor:not-allowed; }
+    .btn-gray { background:#f1f5f9; color:#334155; }
+
+    .kpi-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px; }
+    .kpi { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 16px; box-shadow:var(--shadow); }
+    .kpi-l { font-size:12px; color:var(--muted); font-weight:650; }
+    .kpi-v { font-size:24px; font-weight:850; font-family:ui-monospace,monospace; margin-top:2px; }
+
+    .paths-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px; }
+    @media (max-width:740px) { .paths-grid { grid-template-columns:1fr; } }
+    .path-card { background:var(--card); border:2px solid var(--border); border-radius:16px; padding:16px; box-shadow:var(--shadow); transition:all .25s; }
+    .path-card.win { border-color:var(--emerald); background:var(--emerald-soft); }
+    .path-card.lose { border-color:#fecaca; background:var(--red-soft); opacity:.85; }
+    .path-card.aha { border-color:#f59e0b; background:var(--amber-soft); box-shadow:0 0 0 4px rgba(245,158,11,.18); }
+
+    .pc-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:13px; font-weight:800; }
+    .rw-pill { padding:3px 9px; border-radius:999px; font-size:11.5px; font-weight:800; }
+    .rw-pill.ok { background:var(--emerald); color:#fff; }
+    .rw-pill.no { background:var(--red); color:#fff; }
+    .pc-body { font-size:13.5px; color:#1e293b; line-height:1.65; }
+    .pc-body mark { background:#fde68a; padding:1px 5px; border-radius:5px; font-weight:800; }
+
+    .insight { background:var(--indigo-soft); border:1px solid #c7d2fe; border-radius:14px; padding:15px 18px; font-size:13.5px; color:#312e81; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>💡 顿悟时刻模拟器：RLVR 怎么让 AI 自己学会“自我反思”？</h1>
+        <p>题目：「用数字 3, 3, 8, 8 凑出 24 点」。没有任何人类老师教步骤，只靠结果验证器打 <strong>+1 / 0 分</strong>，点击迭代 3 轮看奇迹发生！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="ctrl-strip">
+      <div>
+        <div style="font-size:12px;color:var(--muted);font-weight:700;">🔬 强化学习规则（RLVR · 可验证奖励）：</div>
+        <div style="font-size:14.5px;font-weight:750;">每轮让模型自由试 4 条思路 → 算对 24 给 <strong>+1 奖励</strong>（强化该习惯），算错给 <strong>0 奖励</strong></div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-emerald" id="iterBtn" onclick="nextRound()">⚡ 强化学习进化到下一代</button>
+        <button class="btn btn-gray" onclick="resetSim()">🔄 重置到第 1 代</button>
+      </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-l">当前进化代数</div><div class="kpi-v" id="kGen">第 1 代</div></div>
+      <div class="kpi"><div class="kpi-l">平均思考长度</div><div class="kpi-v" id="kLen" style="color:var(--indigo);">25 字</div></div>
+      <div class="kpi"><div class="kpi-l">24 点通关率</div><div class="kpi-v" id="kAcc" style="color:var(--red);">25%</div></div>
+    </div>
+
+    <div class="paths-grid" id="pathsGrid"></div>
+
+    <div class="insight" id="insightBox"></div>
+  </div>
+
+  <script>
+    const ROUNDS = [
+      {
+        gen: "第 1 代（初始模型）", len: "22 字", acc: "25%", accColor: "var(--red)",
+        insight: "🌱 <strong>第 1 代：</strong>模型只凭直觉瞎凑加减乘除，4 条思路里 3 条都算错了。验证器只给唯一蒙对的那条思路发了 <strong>+1 奖励</strong>。点击「进化到下一代」！",
+        paths: [
+          { title: "思路 A", ok: false, text: "8 + 8 + 3 + 3 = 22，不对。" },
+          { title: "思路 B", ok: false, text: "8 × 3 = 24，但还剩 8 和 3 没用完！" },
+          { title: "思路 C", ok: false, text: "8 × 3 + 3 - 8 = 19，失败。" },
+          { title: "思路 D（偶然尝试分数）", ok: true, text: "试试除法：8 ÷ (3 - 8÷3) = 8 ÷ (1/3) = 24！答对！" }
+        ]
+      },
+      {
+        gen: "第 2 代（学会多试几种）", len: "58 字", acc: "50%", accColor: "var(--amber)",
+        insight: "📈 <strong>第 2 代：</strong>因为上一代“多试一步除法”拿到了 +1 奖励，模型自发把草稿拉长，开始尝试分数和括号，通关率翻倍到 <strong>50%</strong>！再点一次进化，见证“顿悟时刻”！",
+        paths: [
+          { title: "思路 A", ok: false, text: "先试 8×3=24，不行。再试 (8-3)×3=15，还是不对。" },
+          { title: "思路 B", ok: true, text: "整数凑不出，试试把 8 和 3 变分数：3 - 8/3 = 1/3，再用 8 除以 1/3 得 24！" },
+          { title: "思路 C", ok: false, text: "试试 (8+8)÷3 = 5.33，乘以 3 还是 16，算错了。" },
+          { title: "思路 D", ok: true, text: "用除法构造 1/3：8 ÷ (3 - 8/3) = 24，验证 4 个数全用上！" }
+        ]
+      },
+      {
+        gen: "第 3 代（✨ 涌现 Aha Moment！）", len: "110 字", acc: "100%", accColor: "var(--emerald)",
+        insight: "🎉 <strong>DeepSeek-R1 著名的“Aha Moment（顿悟时刻）”！</strong>没有任何人类教它写“等等，我算错了，退回重来”——只因为“发现算错后主动掉头验算”的思路更容易拿到 +1 奖励，模型竟然自己进化出了<strong>自我反思与回溯能力</strong>！",
+        paths: [
+          { title: "思路 A · ✨ 自我反思涌现", ok: true, aha: true, text: "先试 8×3=24… <mark>等等！这样还剩一个 8 和 3，违反规则，我得退回重来！</mark> 既然整数不行，必须用分数：8 ÷ (3 - 8÷3) = 24，复查无误！" },
+          { title: "思路 B · ✨ 自我纠错", ok: true, aha: true, text: "尝试 8 ÷ (8÷3 - 3) = -24… <mark>哎呀符号反了！</mark> 把括号里调换顺序变成 3 - 8÷3 = 1/3 → 8 ÷ (1/3) = 24 ✓" },
+          { title: "思路 C · ✨ 系统枚举", ok: true, text: "排除纯加减乘后锁定分数构造：目标 8 ÷ (1/3) = 24，用 3 - 8/3 恰好凑出 1/3 ✓" },
+          { title: "思路 D · ✨ 双重验算", ok: true, text: "8 ÷ (3 - 8/3) = 8 × 3 = 24。检查数字：3, 3, 8, 8 恰好各用一次 ✓" }
+        ]
+      }
+    ];
+
+    let roundIdx = 0;
+
+    function render() {
+      const r = ROUNDS[roundIdx];
+      document.getElementById("kGen").textContent = r.gen;
+      document.getElementById("kLen").textContent = r.len;
+      document.getElementById("kAcc").textContent = r.acc;
+      document.getElementById("kAcc").style.color = r.accColor;
+      document.getElementById("iterBtn").disabled = roundIdx >= ROUNDS.length - 1;
+
+      const grid = document.getElementById("pathsGrid");
+      grid.innerHTML = r.paths.map(p => `
+        <div class="path-card ${p.aha ? 'aha' : (p.ok ? 'win' : 'lose')}">
+          <div class="pc-head">
+            <span>${p.title}</span>
+            <span class="rw-pill ${p.ok ? 'ok' : 'no'}">${p.ok ? '验证器：+1 奖励' : '验证器：0 分'}</span>
+          </div>
+          <div class="pc-body">${p.text}</div>
+        </div>
+      `).join("");
+
+      document.getElementById("insightBox").innerHTML = r.insight;
+    }
+
+    function nextRound() {
+      if (roundIdx < ROUNDS.length - 1) { roundIdx++; render(); }
+    }
+    function resetSim() { roundIdx = 0; render(); }
+
+    render();
+  </script>
+</body>
+</html>

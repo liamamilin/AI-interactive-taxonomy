@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：思考预算滑块 · 悟懂 Test-Time Scaling 与过度思考</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --amber:#d97706; --amber-soft:#fffbeb; --indigo:#4f46e5; --green:#059669; --green-soft:#ecfdf5; --red:#dc2626; --red-soft:#fef2f2; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:1040px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .mode-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
+    .m-btn { border:2px solid var(--border); background:var(--card); border-radius:14px; padding:13px 16px; cursor:pointer; text-align:left; }
+    .m-btn.active { border-color:var(--amber); background:var(--amber-soft); }
+    .m-btn strong { display:block; font-size:15px; }
+    .m-btn span { font-size:12.5px; color:var(--muted); }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); margin-bottom:18px; }
+    .sl-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:15px; font-weight:800; }
+    .sl-badge { font-family:ui-monospace,monospace; background:var(--amber-soft); color:var(--amber); padding:4px 12px; border-radius:999px; font-size:14px; }
+    input[type="range"] { width:100%; accent-color:var(--amber); cursor:pointer; }
+
+    .kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:18px 0; }
+    @media (max-width:660px) { .kpi-grid { grid-template-columns:1fr; } }
+    .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:14px 16px; }
+    .kpi-l { font-size:12px; color:var(--muted); font-weight:650; }
+    .kpi-v { font-size:26px; font-weight:850; font-family:ui-monospace,monospace; margin-top:2px; }
+
+    .chart-box { background:#fafbfe; border:1px solid #e2e8f0; border-radius:14px; padding:12px; margin-bottom:14px; }
+    svg#scaleSvg { width:100%; height:180px; display:block; }
+
+    .diag { border-radius:14px; padding:15px 17px; font-size:13.5px; }
+    .diag.good { background:var(--green-soft); border:1px solid #a7f3d0; color:#065f46; }
+    .diag.warn { background:var(--amber-soft); border:1px solid #fde68a; color:#92400e; }
+    .diag.bad { background:var(--red-soft); border:1px solid #fecaca; color:#991b1b; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>⏳ 思考预算滑块：多给 AI 几秒钟“思考时间”值不值？</h1>
+        <p>拖动思考预算（Thinking Tokens），对比「奥数难题」与「简单题 1+1=?」的截然不同表现！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="mode-row">
+      <button class="m-btn active" id="mHard" onclick="setTask('hard')">
+        <strong>🏆 场景 A：AIME 数学竞赛难题</strong>
+        <span>需要多步假设、试错与反推，思考越久越准！</span>
+      </button>
+      <button class="m-btn" id="mEasy" onclick="setTask('easy')">
+        <strong>🐣 场景 B：简单常识题（“1 + 1 等于几？”）</strong>
+        <span>看看给简单题强塞 4000 字思考预算会发生什么！</span>
+      </button>
+    </div>
+
+    <div class="panel">
+      <div class="sl-head">
+        <span>🧠 思考预算（Thinking Token Budget）</span>
+        <span class="sl-badge" id="budVal">1,000 Tokens</span>
+      </div>
+      <input type="range" id="slBud" min="0" max="4000" step="200" value="1000" oninput="render()" />
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px;">
+        <span>0（秒答不思考）</span><span>1,000（轻度思考）</span><span>2,400（深度推导）</span><span>4,000（极限烧脑）</span>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-l">🎯 答题准确率</div>
+          <div class="kpi-v" id="kAcc" style="color:var(--green);">74%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">⏱️ 用户等待时间</div>
+          <div class="kpi-v" id="kLat" style="color:var(--indigo);">12 s</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">💰 单次推理花费</div>
+          <div class="kpi-v" id="kCost" style="color:var(--amber);">$0.04</div>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <svg id="scaleSvg" viewBox="0 0 600 180"></svg>
+      </div>
+
+      <div class="diag" id="diagBox"></div>
+    </div>
+  </div>
+
+  <script>
+    let task = "hard";
+    const slBud = document.getElementById("slBud");
+
+    function calcAcc(t, bud) {
+      if (t === "hard") {
+        // 典型 Test-Time Scaling 对数爬升曲线：24% -> 91%
+        return Math.round(24 + 67 * (1 - Math.exp(-bud / 1150)));
+      } else {
+        // 简单题 0 预算就 99%，过度思考反而可能自我怀疑掉 1-2%
+        return bud > 2600 ? 97 : 99;
+      }
+    }
+
+    function setTask(t) {
+      task = t;
+      document.getElementById("mHard").classList.toggle("active", t === "hard");
+      document.getElementById("mEasy").classList.toggle("active", t === "easy");
+      render();
+    }
+
+    function drawChart(curBud) {
+      const svg = document.getElementById("scaleSvg");
+      const W = 600, H = 180, padL = 42, padR = 18, padT = 16, padB = 26;
+      const pw = W - padL - padR, ph = H - padT - padB;
+      let pts = [];
+      for (let b = 0; b <= 4000; b += 200) {
+        const x = padL + (b / 4000) * pw;
+        const y = padT + (1 - calcAcc(task, b) / 100) * ph;
+        pts.push([x, y, b]);
+      }
+      const d = pts.map((p, i) => (i === 0 ? `M ${p[0]} ${p[1]}` : `L ${p[0]} ${p[1]}`)).join(" ");
+      const cx = padL + (curBud / 4000) * pw;
+      const cy = padT + (1 - calcAcc(task, curBud) / 100) * ph;
+
+      svg.innerHTML = `
+        <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#94a3b8" stroke-width="1.2"/>
+        <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="#94a3b8" stroke-width="1.2"/>
+        <text x="${padL-6}" y="${padT+5}" text-anchor="end" font-size="10" fill="#64748b">100%</text>
+        <text x="${padL-6}" y="${H-padB}" text-anchor="end" font-size="10" fill="#64748b">0%</text>
+        <text x="${W/2}" y="${H-5}" text-anchor="middle" font-size="11" fill="#64748b">思考预算（Test-Time Compute Tokens）</text>
+        <path d="${d}" fill="none" stroke="${task === 'hard' ? '#4f46e5' : '#d97706'}" stroke-width="3.2" stroke-linecap="round"/>
+        <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${H-padB}" stroke="#94a3b8" stroke-dasharray="4 4"/>
+        <circle cx="${cx}" cy="${cy}" r="6" fill="#d97706" stroke="#fff" stroke-width="2.5"/>
+      `;
+    }
+
+    function render() {
+      const bud = parseInt(slBud.value, 10);
+      const acc = calcAcc(task, bud);
+      const lat = (0.4 + bud * 0.011).toFixed(1);
+      const cost = (0.002 + bud * 0.000038).toFixed(3);
+
+      document.getElementById("budVal").textContent = bud.toLocaleString() + " Tokens";
+      document.getElementById("kAcc").textContent = acc + "%";
+      document.getElementById("kLat").textContent = lat + " s";
+      document.getElementById("kCost").textContent = "$" + cost;
+
+      drawChart(bud);
+
+      const diag = document.getElementById("diagBox");
+      if (task === "hard") {
+        if (bud === 0) {
+          diag.className = "diag bad";
+          diag.innerHTML = "❌ <strong>0 思考预算：</strong>不给草稿纸直接硬猜奥数题，准确率只有 <strong>24%</strong>！往右拉动思考预算看看 Test-Time Scaling 魔法。";
+        } else if (bud >= 2400) {
+          diag.className = "diag good";
+          diag.innerHTML = `🏆 <strong>Test-Time Scaling 威力全开！</strong>模型没有变大一丁点，仅仅通过在答题时多花 <strong>${lat} 秒</strong>推理，准确率就从 24% 飙升到 <strong>${acc}%</strong>！这就是“用推理时间换智商”。`;
+        } else {
+          diag.className = "diag warn";
+          diag.innerHTML = `📈 <strong>思考红利上升中：</strong>准确率已升至 <strong>${acc}%</strong>。继续拉大思考预算，看曲线如何逼近 90%+！`;
+        }
+      } else {
+        if (bud <= 200) {
+          diag.className = "diag good";
+          diag.innerHTML = "✅ <strong>完美匹配！</strong>简单题用极低思考预算 0.4 秒搞定，又快又省钱。试着把滑块拉到最右 4000 看看“过度思考”！";
+        } else {
+          diag.className = "diag bad";
+          diag.innerHTML = `🤯 <strong>过度思考警报（Overthinking）！</strong>为了算「1 + 1 = ?」，模型在草稿纸里自我怀疑了 ${bud} 个字、让你干等 <strong>${lat} 秒</strong>、账单暴涨 ${Math.round(cost/0.002)} 倍！所以好系统必须按题目难度动态分配思考预算。`;
+        }
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>

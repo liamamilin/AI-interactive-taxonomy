@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：大医院分诊台 · 悟懂 MoE 稀疏激活</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --teal:#0d9488; --teal-soft:#f0fdfa; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:1020px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); margin-bottom:18px; }
+    .tok-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+    .tok-btn { border:2px solid var(--border); background:#f8fafc; padding:10px 16px; border-radius:12px; font-size:15px; font-weight:750; cursor:pointer; transition:all .16s; }
+    .tok-btn.active { border-color:var(--teal); background:var(--teal-soft); color:var(--teal); transform:translateY(-2px); }
+
+    .router-box { text-align:center; padding:12px; border-radius:12px; background:#0f172a; color:#fff; font-size:13.5px; font-weight:700; margin-bottom:16px; }
+    .exp-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+    @media (max-width:720px) { .exp-grid { grid-template-columns:repeat(2,1fr); } }
+    .exp-card { border:2px solid var(--border); border-radius:14px; padding:14px 12px; text-align:center; background:#f8fafc; opacity:.45; transition:all .25s; }
+    .exp-card.awake { opacity:1; border-color:var(--teal); background:var(--teal-soft); transform:translateY(-4px); box-shadow:0 8px 20px rgba(13,148,136,.15); }
+    .exp-icon { font-size:28px; margin-bottom:4px; }
+    .exp-name { font-size:13.5px; font-weight:800; }
+    .exp-state { font-size:11.5px; font-weight:700; margin-top:4px; color:var(--muted); }
+    .exp-card.awake .exp-state { color:var(--teal); }
+
+    .aha { border-radius:12px; padding:14px 16px; font-size:13.5px; background:var(--teal-soft); border:1px solid #99f6e4; color:#115e59; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🏥 大医院分诊台：为什么 600B 大模型每次只消耗 37B 算力？</h1>
+        <p>点击下方不同领域的输入词，看 <strong>Router 分诊台</strong> 如何每次只唤醒 8 位专家中的 2 位！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="panel">
+      <div style="font-size:13px;font-weight:750;color:var(--muted);margin-bottom:10px;">👇 点击任意一个进入模型的 Token（词）：</div>
+      <div class="tok-row" id="tokRow"></div>
+      <div class="router-box" id="routerBox">🚦 Router 分诊台计算权重中…</div>
+      <div class="exp-grid" id="expGrid"></div>
+      <div class="aha">
+        💡 <strong>核心顿悟：</strong>传统“稠密模型”就像看个感冒却把全院 8 个科室医生全叫来会诊（算力 100% 满载）；而 <strong>MoE（混合专家）</strong> 配了一个智能分诊台（Router），每个词进来只激活最对口的 <strong>Top-2 专家</strong>，其余 6 位专家原地休眠——总知识量极大，但每次算力消耗直接砍掉 75%！
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const EXPERTS = [
+      { id:0, icon:"💻", name:"专家 1 · 代码科" },
+      { id:1, icon:"📐", name:"专家 2 · 数学科" },
+      { id:2, icon:"📜", name:"专家 3 · 古诗文学" },
+      { id:3, icon:"⚖️", name:"专家 4 · 法律逻辑" },
+      { id:4, icon:"🧬", name:"专家 5 · 生物医学" },
+      { id:5, icon:"🌐", name:"专家 6 · 多语翻译" },
+      { id:6, icon:"💬", name:"专家 7 · 日常语法" },
+      { id:7, icon:"📊", name:"专家 8 · 金融数据" }
+    ];
+    const TOKENS = [
+      { word:"def quicksort():", picks:[0, 1], weights:[0.72, 0.28], note:"代码 + 算法数学专家被唤醒！" },
+      { word:"床前明月光", picks:[2, 6], weights:[0.79, 0.21], note:"古诗文学 + 日常语法专家被唤醒！" },
+      { word:"阿司匹林剂量", picks:[4, 3], weights:[0.81, 0.19], note:"生物医学 + 安全合规专家被唤醒！" },
+      { word:"EBITDA 财报", picks:[7, 5], weights:[0.68, 0.32], note:"金融数据 + 英文翻译专家被唤醒！" }
+    ];
+    let cur = 0;
+
+    function render() {
+      const row = document.getElementById("tokRow");
+      row.innerHTML = TOKENS.map((t, i) => `<button class="tok-btn ${i===cur?'active':''}" onclick="cur=${i};render()">${t.word}</button>`).join("");
+      const t = TOKENS[cur];
+      document.getElementById("routerBox").textContent = `🚦 分诊台路由结果：只激活 2 / 8 位专家（省电 75%） → ${t.note}`;
+      document.getElementById("expGrid").innerHTML = EXPERTS.map(e => {
+        const idx = t.picks.indexOf(e.id);
+        const awake = idx >= 0;
+        return `
+          <div class="exp-card ${awake ? 'awake' : ''}">
+            <div class="exp-icon">${e.icon}</div>
+            <div class="exp-name">${e.name}</div>
+            <div class="exp-state">${awake ? `⚡ 唤醒工作（权重 ${Math.round(t.weights[idx]*100)}%）` : "💤 休眠省电（0 算力）"}</div>
+          </div>
+        `;
+      }).join("");
+    }
+    render();
+  </script>
+</body>
+</html>

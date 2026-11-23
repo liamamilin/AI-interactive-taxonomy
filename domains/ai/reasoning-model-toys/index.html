@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2 分钟悟懂慢思考推理模型 · 交互式科普玩具箱</title>
+  <style>
+    :root { --bg:#f6f8fc; --surface:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --indigo:#4f46e5; --indigo-soft:#eef2ff; --amber:#d97706; --amber-soft:#fffbeb; --emerald:#059669; --emerald-soft:#ecfdf5; --shadow:0 10px 30px rgba(15,23,42,.06); --radius:20px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:radial-gradient(circle at top left,#e0e7ff 0%,var(--bg) 45%,#fef3c7 100%); color:var(--ink); min-height:100vh; line-height:1.6; padding:40px 20px 64px; }
+    .container { max-width:1040px; margin:0 auto; }
+    header { text-align:center; margin-bottom:44px; }
+    .badge { display:inline-flex; padding:6px 14px; border-radius:999px; background:var(--indigo-soft); color:var(--indigo); font-size:13px; font-weight:700; margin-bottom:14px; }
+    h1 { font-size:clamp(28px,4.2vw,40px); font-weight:850; margin-bottom:10px; }
+    .subtitle { font-size:16px; color:var(--muted); max-width:680px; margin:0 auto; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:24px; margin-top:32px; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:26px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; text-decoration:none; color:inherit; transition:transform .2s; }
+    .card:hover { transform:translateY(-6px); }
+    .icon-box { width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:16px; }
+    .c1 .icon-box { background:var(--indigo-soft); } .c2 .icon-box { background:var(--amber-soft); } .c3 .icon-box { background:var(--emerald-soft); }
+    .card h2 { font-size:21px; font-weight:800; margin-bottom:6px; }
+    .tag { font-size:13px; font-weight:700; margin-bottom:12px; }
+    .c1 .tag { color:var(--indigo); } .c2 .tag { color:var(--amber); } .c3 .tag { color:var(--emerald); }
+    .card p { font-size:14px; color:#475569; flex:1; margin-bottom:18px; }
+    .cta { display:block; text-align:center; padding:11px; border-radius:12px; font-weight:700; color:#fff; font-size:14.5px; }
+    .c1 .cta { background:var(--indigo); } .c2 .cta { background:var(--amber); } .c3 .cta { background:var(--emerald); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">🧠 主题 08 · o1 / DeepSeek-R1 底层原理</div>
+      <h1>2 分钟悟懂慢思考推理模型</h1>
+      <p class="subtitle">为什么让 AI 在回答前“先自己嘀咕几秒钟”，数学、代码和逻辑推理就能脱胎换骨？玩完这 3 个小游戏彻底明白 Test-Time Compute。</p>
+    </header>
+    <main class="grid">
+      <a class="card c1" href="./01-fast-vs-slow-thinking.html">
+        <div class="icon-box">⚡</div>
+        <h2>快思考 vs 慢思考</h2>
+        <div class="tag">原理：直觉脱口而出 vs 思考链（CoT）打草稿</div>
+        <p>用 3 道人类和普通 AI 都会中招的直觉陷阱题，同屏对比快思考 0.2 秒自信答错与慢思考一步步验算的反转。</p>
+        <div class="cta">开始玩《快思考 vs 慢思考》 →</div>
+      </a>
+      <a class="card c2" href="./02-test-time-scaling.html">
+        <div class="icon-box">⏳</div>
+        <h2>思考预算滑块</h2>
+        <div class="tag">原理：Test-Time Scaling 扩展定律 &amp; 过度思考</div>
+        <p>拉动思考 Token 预算滑块，实时观察竞赛题准确率与耗时成本的权衡，并体验简单题“想太多”的搞笑副作用。</p>
+        <div class="cta">开始玩《思考预算滑块》 →</div>
+      </a>
+      <a class="card c3" href="./03-rlvr-aha-moment.html">
+        <div class="icon-box">💡</div>
+        <h2>顿悟时刻模拟器</h2>
+        <div class="tag">原理：RLVR 结果验证强化学习 &amp; Aha Moment</div>
+        <p>不用人工写解题步骤，只靠客观答案对错给 +1/0 奖励，亲眼见证 AI 自己进化出“等等，我算错了重来！”的自我反思。</p>
+        <div class="cta">开始玩《顿悟时刻模拟器》 →</div>
+      </a>
+    </main>
+  </div>
+</body>
+</html>

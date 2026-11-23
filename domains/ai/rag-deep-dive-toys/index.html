@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2 分钟悟懂 RAG 深度原理 · 交互式科普玩具箱</title>
+  <style>
+    :root { --bg:#f6f8fc; --surface:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --green:#059669; --green-soft:#ecfdf5; --blue:#2563eb; --blue-soft:#eff6ff; --amber:#d97706; --amber-soft:#fffbeb; --shadow:0 10px 30px rgba(15,23,42,.06); --radius:20px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:radial-gradient(circle at top right,#d1fae5 0%,var(--bg) 45%,#eff6ff 100%); color:var(--ink); min-height:100vh; line-height:1.6; padding:40px 20px 64px; }
+    .container { max-width:1040px; margin:0 auto; }
+    header { text-align:center; margin-bottom:44px; }
+    .badge { display:inline-flex; padding:6px 14px; border-radius:999px; background:var(--green-soft); color:var(--green); font-size:13px; font-weight:700; margin-bottom:14px; }
+    h1 { font-size:clamp(28px,4.2vw,40px); font-weight:850; margin-bottom:10px; }
+    .subtitle { font-size:16px; color:var(--muted); max-width:680px; margin:0 auto; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:24px; margin-top:32px; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:26px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; text-decoration:none; color:inherit; transition:transform .2s; }
+    .card:hover { transform:translateY(-6px); }
+    .icon-box { width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:16px; }
+    .c1 .icon-box { background:var(--green-soft); } .c2 .icon-box { background:var(--blue-soft); } .c3 .icon-box { background:var(--amber-soft); }
+    .card h2 { font-size:21px; font-weight:800; margin-bottom:6px; }
+    .tag { font-size:13px; font-weight:700; margin-bottom:12px; }
+    .c1 .tag { color:var(--green); } .c2 .tag { color:var(--blue); } .c3 .tag { color:var(--amber); }
+    .card p { font-size:14px; color:#475569; flex:1; margin-bottom:18px; }
+    .cta { display:block; text-align:center; padding:11px; border-radius:12px; font-weight:700; color:#fff; font-size:14.5px; }
+    .c1 .cta { background:var(--green); } .c2 .cta { background:var(--blue); } .c3 .cta { background:var(--amber); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">📚 主题 09 · 企业知识库落地的核心三步</div>
+      <h1>2 分钟悟懂 RAG 深度原理</h1>
+      <p class="subtitle">很多人以为 RAG 就是“把文档扔进数据库”，结果 AI 照样答非所问。玩完这 3 个小游戏，瞬间看透切块、检索与重排的精妙接力赛。</p>
+    </header>
+    <main class="grid">
+      <a class="card c1" href="./01-chunking-slicer.html">
+        <div class="icon-box">✂️</div>
+        <h2>切块手术台</h2>
+        <div class="tag">原理：Chunking 切块大小 &amp; Overlap 重叠窗口</div>
+        <p>亲手调节文档切块长度和重叠比例，看看一刀切歪如何把“报销条件”和“报销金额”斩断，以及 Overlap 如何救急。</p>
+        <div class="cta">开始玩《切块手术台》 →</div>
+      </a>
+      <a class="card c2" href="./02-keyword-vs-vector.html">
+        <div class="icon-box">🔍</div>
+        <h2>搜词 vs 搜意</h2>
+        <div class="tag">原理：BM25 关键词 · 向量语义 · Hybrid 混合检索</div>
+        <p>用口语故障和精准错误码两类问题，同屏对比传统关键词搜、向量语义搜和现代混合检索谁更稳。</p>
+        <div class="cta">开始玩《搜词 vs 搜意》 →</div>
+      </a>
+      <a class="card c3" href="./03-rerank-funnel.html">
+        <div class="icon-box">⏳</div>
+        <h2>重排提纯漏斗</h2>
+        <div class="tag">原理：粗排 Top-K 召回 + 精排 Reranker 提纯</div>
+        <p>向量粗排捞出 6 条真假难辨的片段，点击启动 Rerank 重排模型，亲眼看真正包含答案的第 5 名逆袭登顶！</p>
+        <div class="cta">开始玩《重排提纯漏斗》 →</div>
+      </a>
+    </main>
+  </div>
+</body>
+</html>

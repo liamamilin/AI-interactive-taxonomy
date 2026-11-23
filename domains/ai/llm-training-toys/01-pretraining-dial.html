@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：猜字调参机 · 悟懂预训练、Loss 与梯度下降</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --cyan: #0891b2;
+      --cyan-soft: #ecfeff;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1080px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .sample-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .s-btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: #374151;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .s-btn.active { background: var(--cyan); color: #fff; border-color: var(--cyan); }
+
+    .sentence-banner {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .prompt-show {
+      font-size: 24px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .blank-box {
+      padding: 4px 14px;
+      border-radius: 10px;
+      border: 2px dashed var(--cyan);
+      background: var(--cyan-soft);
+      color: var(--cyan);
+    }
+    .target-pill {
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--green-soft);
+      color: var(--green);
+      border: 1px solid #a7f3d0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Candidate bars + parameter sliders */
+    .param-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .param-row {
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: #fafbfe;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .param-row.correct {
+      border-color: #6ee7b7;
+      background: #f0fdf4;
+    }
+
+    .pr-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .pr-word { font-size: 15px; font-weight: 750; display: flex; align-items: center; gap: 8px; }
+    .pr-meta { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; font-weight: 750; }
+
+    .bar-bg {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.22s ease;
+    }
+
+    .knob-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .knob-row input[type="range"] { flex: 1; accent-color: var(--cyan); cursor: pointer; }
+
+    .lr-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .lr-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .lr-box input[type="range"] { width: 100%; accent-color: var(--cyan); cursor: pointer; }
+    .lr-scale { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s, background 0.15s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-cyan { background: var(--cyan); color: #fff; flex: 1; }
+    .btn-cyan:hover { background: #0e7490; }
+    .btn-gray { background: #f3f4f6; color: #374151; }
+    .btn-gray:hover { background: #e5e7eb; }
+
+    /* Loss chart */
+    .loss-kpi {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 14px;
+    }
+    .loss-num {
+      font-size: 32px;
+      font-weight: 850;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .chart-box {
+      background: #fafbfe;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+    svg#lossSvg { width: 100%; height: 185px; display: block; }
+
+    .insight {
+      border-radius: 12px;
+      padding: 13px 15px;
+      font-size: 13.5px;
+      background: var(--cyan-soft);
+      border: 1px solid #a5f3fc;
+      color: #155e75;
+    }
+    .insight.boom { background: var(--red-soft); border-color: #fecaca; color: #991b1b; }
+    .insight.win { background: var(--green-soft); border-color: #a7f3d0; color: #065f46; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🎛️ 猜字调参机：大模型怎么靠“猜错拧旋钮”变聪明？</h1>
+        <p>刚出生的模型参数全是随机乱码！点「反向传播 1 步」看误差（Loss）如何指挥旋钮自动微调，再试试把学习率拉到最右看它怎么炸飞！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="sample-tabs" id="sampleTabs"></div>
+
+    <div class="sentence-banner">
+      <div class="prompt-show">
+        <span id="promptPrefix">床前明月</span>
+        <span class="blank-box" id="predWord">拖拉机 ?</span>
+      </div>
+      <span class="target-pill" id="targetPill">📖 教材标准答案：光</span>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>
+          <span>🧠 迷你大脑的 4 个参数旋钮（Weights）</span>
+          <span style="font-size:12px;color:var(--muted);font-weight:500;">可手动拧，也可让算法自动拧</span>
+        </h2>
+
+        <div class="param-list" id="paramList"></div>
+
+        <div class="lr-box">
+          <div class="lr-head">
+            <span>👟 学习率（Learning Rate：每次拧旋钮的步子大小）</span>
+            <span id="lrVal" style="color:var(--cyan);font-family:monospace;">0.80 · 稳健</span>
+          </div>
+          <input type="range" id="lrSlider" min="0.1" max="5.5" step="0.1" value="0.8" />
+          <div class="lr-scale">
+            <span>🐢 0.1 步子太小（学得极慢）</span>
+            <span>✅ 0.8 黄金步长</span>
+            <span>💥 5.5 步子太大（来回震荡炸飞）</span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-cyan" onclick="trainStep()">⚡ 反向传播 1 步（自动拧旋钮）</button>
+          <button class="btn btn-gray" onclick="trainBatch()">⏩ 连训 5 步</button>
+          <button class="btn btn-gray" onclick="resetWeights()">🎲 重新随机初始化</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>
+          <span>📉 误差仪表盘（Loss 越低 = 猜得越准）</span>
+          <span style="font-size:12px;color:var(--muted);" id="epochTag">训练步数：0</span>
+        </h2>
+
+        <div class="loss-kpi">
+          <div>
+            <div style="font-size:12px;color:var(--muted);font-weight:700;">当前交叉熵误差（Cross-Entropy Loss）</div>
+            <div style="font-size:12.5px;color:var(--muted);" id="lossDesc">模型正在瞎猜…</div>
+          </div>
+          <div class="loss-num" id="lossNum">2.45</div>
+        </div>
+
+        <div class="chart-box">
+          <svg id="lossSvg" viewBox="0 0 420 185"></svg>
+        </div>
+
+        <div class="insight" id="insightBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SAMPLES = [
+      {
+        id: "poem",
+        tab: "🌙 例句一：床前明月___",
+        prefix: "床前明月",
+        targetIdx: 0,
+        words: ["光", "拖拉机", "火锅", "wifi"],
+        initWeights: [-1.2, 1.4, 0.6, 0.3]
+      },
+      {
+        id: "sun",
+        tab: "🌅 例句二：太阳从东边___",
+        prefix: "太阳从东边",
+        targetIdx: 0,
+        words: ["升起", "下班", "游泳", "打折"],
+        initWeights: [-1.0, 1.1, 0.8, 0.2]
+      },
+      {
+        id: "cat",
+        tab: "🐱 例句三：猫咪最爱抓___",
+        prefix: "猫咪最爱抓",
+        targetIdx: 0,
+        words: ["老鼠", "股票", "陨石", "作业"],
+        initWeights: [-1.4, 1.2, 0.5, 0.4]
+      }
+    ];
+
+    let curSample = 0;
+    let weights = [];
+    let lr = 0.8;
+    let lossHistory = [];
+    let exploded = false;
+
+    const sampleTabs = document.getElementById("sampleTabs");
+    const promptPrefix = document.getElementById("promptPrefix");
+    const predWord = document.getElementById("predWord");
+    const targetPill = document.getElementById("targetPill");
+    const paramList = document.getElementById("paramList");
+    const lrSlider = document.getElementById("lrSlider");
+    const lrVal = document.getElementById("lrVal");
+    const lossNum = document.getElementById("lossNum");
+    const lossDesc = document.getElementById("lossDesc");
+    const epochTag = document.getElementById("epochTag");
+    const lossSvg = document.getElementById("lossSvg");
+    const insightBox = document.getElementById("insightBox");
+
+    function softmax(ws) {
+      const m = Math.max(...ws);
+      const exps = ws.map(v => Math.exp(Math.max(-20, Math.min(20, v - m))));
+      const sum = exps.reduce((a, b) => a + b, 0);
+      return exps.map(e => e / sum);
+    }
+
+    function calcLoss(probs, targetIdx) {
+      const p = Math.max(1e-5, probs[targetIdx]);
+      return -Math.log(p);
+    }
+
+    function resetWeights() {
+      const s = SAMPLES[curSample];
+      weights = [...s.initWeights];
+      exploded = false;
+      const probs = softmax(weights);
+      lossHistory = [calcLoss(probs, s.targetIdx)];
+      render();
+    }
+
+    function trainStep() {
+      const s = SAMPLES[curSample];
+      const probs = softmax(weights);
+
+      // 如果学习率过高（>= 3.8），模拟真实训练中的过冲/震荡炸飞效果
+      if (lr >= 3.8) {
+        exploded = true;
+        // 故意产生剧烈震荡更新
+        const dir = lossHistory.length % 2 === 0 ? 1 : -1;
+        weights = weights.map((w, i) => {
+          const grad = probs[i] - (i === s.targetIdx ? 1 : 0);
+          return Math.max(-6, Math.min(6, w - lr * grad * 1.4 + dir * (i === s.targetIdx ? -2.2 : 1.6)));
+        });
+      } else {
+        exploded = false;
+        weights = weights.map((w, i) => {
+          const grad = probs[i] - (i === s.targetIdx ? 1 : 0);
+          return Math.max(-5, Math.min(5, w - lr * grad));
+        });
+      }
+
+      const newProbs = softmax(weights);
+      lossHistory.push(calcLoss(newProbs, s.targetIdx));
+      if (lossHistory.length > 26) lossHistory.shift();
+      render();
+    }
+
+    function trainBatch() {
+      for (let i = 0; i < 5; i++) trainStep();
+    }
+
+    function drawLossChart() {
+      const W = 420, H = 185, padL = 36, padR = 14, padT = 16, padB = 26;
+      const plotW = W - padL - padR;
+      const plotH = H - padT - padB;
+      const maxLoss = Math.max(3.5, ...lossHistory);
+
+      let svg = `
+        <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="#94a3b8" stroke-width="1.2"/>
+        <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#94a3b8" stroke-width="1.2"/>
+        <text x="${padL - 6}" y="${padT + 5}" text-anchor="end" font-size="10" fill="#64748b">${maxLoss.toFixed(1)}</text>
+        <text x="${padL - 6}" y="${H - padB}" text-anchor="end" font-size="10" fill="#64748b">0.0</text>
+        <text x="${W / 2}" y="${H - 6}" text-anchor="middle" font-size="11" fill="#64748b">训练步数（Training Steps）</text>
+      `;
+
+      const pts = lossHistory.map((val, idx) => {
+        const x = padL + (lossHistory.length === 1 ? 0 : (idx / (lossHistory.length - 1)) * plotW);
+        const y = padT + (1 - Math.min(maxLoss, val) / maxLoss) * plotH;
+        return [x, y];
+      });
+
+      if (pts.length > 1) {
+        const d = pts.map((p, i) => (i === 0 ? `M ${p[0]} ${p[1]}` : `L ${p[0]} ${p[1]}`)).join(" ");
+        const stroke = exploded ? "#dc2626" : "#0891b2";
+        svg += `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+      }
+
+      const last = pts[pts.length - 1];
+      svg += `<circle cx="${last[0]}" cy="${last[1]}" r="5" fill="${exploded ? "#dc2626" : "#0891b2"}" stroke="#fff" stroke-width="2"/>`;
+      lossSvg.innerHTML = svg;
+    }
+
+    function render() {
+      const s = SAMPLES[curSample];
+      const probs = softmax(weights);
+      const loss = calcLoss(probs, s.targetIdx);
+
+      // Tabs
+      sampleTabs.innerHTML = "";
+      SAMPLES.forEach((item, idx) => {
+        const b = document.createElement("button");
+        b.className = "s-btn" + (idx === curSample ? " active" : "");
+        b.textContent = item.tab;
+        b.onclick = () => {
+          curSample = idx;
+          resetWeights();
+        };
+        sampleTabs.appendChild(b);
+      });
+
+      // Top prediction
+      let bestIdx = 0;
+      probs.forEach((p, i) => { if (p > probs[bestIdx]) bestIdx = i; });
+      promptPrefix.textContent = s.prefix;
+      predWord.textContent = s.words[bestIdx] + (bestIdx === s.targetIdx ? " ✓" : " ?");
+      predWord.style.borderColor = bestIdx === s.targetIdx ? "var(--green)" : "var(--red)";
+      predWord.style.background = bestIdx === s.targetIdx ? "var(--green-soft)" : "var(--red-soft)";
+      predWord.style.color = bestIdx === s.targetIdx ? "var(--green)" : "var(--red)";
+      targetPill.textContent = `📖 教材标准答案：${s.words[s.targetIdx]}`;
+
+      // Params list
+      paramList.innerHTML = "";
+      s.words.forEach((word, idx) => {
+        const isCorrect = idx === s.targetIdx;
+        const pct = (probs[idx] * 100).toFixed(1);
+        const row = document.createElement("div");
+        row.className = "param-row" + (isCorrect ? " correct" : "");
+        row.innerHTML = `
+          <div class="pr-top">
+            <span class="pr-word">
+              ${word}
+              ${isCorrect ? '<span style="font-size:11px;padding:2px 7px;border-radius:999px;background:#d1fae5;color:#065f46;">正确答案</span>' : '<span style="font-size:11px;padding:2px 7px;border-radius:999px;background:#f3f4f6;color:#6b7280;">干扰词</span>'}
+            </span>
+            <span class="pr-meta" style="color:${isCorrect ? 'var(--green)' : '#4b5563'}">${pct}%</span>
+          </div>
+          <div class="bar-bg">
+            <div class="bar-fill" style="width:${pct}%;background:${isCorrect ? '#10b981' : '#94a3b8'};"></div>
+          </div>
+          <div class="knob-row">
+            <span>参数权重 w${idx + 1} = <strong>${weights[idx].toFixed(2)}</strong></span>
+            <input type="range" min="-5" max="5" step="0.1" value="${weights[idx].toFixed(2)}" oninput="manualKnob(${idx}, this.value)" />
+          </div>
+        `;
+        paramList.appendChild(row);
+      });
+
+      // Loss KPI
+      lossNum.textContent = loss.toFixed(2);
+      lossNum.style.color = loss < 0.25 ? "var(--green)" : loss > 1.5 ? "var(--red)" : "var(--amber)";
+      lossDesc.textContent = loss < 0.25 ? "🎯 完美收敛！模型稳稳猜中正确答案" : loss > 1.5 ? "😵 误差很大，模型还在胡猜" : "📈 正在快速学习中…";
+      epochTag.textContent = `训练步数：${lossHistory.length - 1}`;
+
+      // LR badge
+      let lrDesc = "黄金步长";
+      if (lr <= 0.3) lrDesc = "偏慢";
+      else if (lr >= 3.8) lrDesc = "过大 · 震荡爆炸！";
+      lrVal.textContent = `${lr.toFixed(1)} · ${lrDesc}`;
+      lrVal.style.color = lr >= 3.8 ? "var(--red)" : "var(--cyan)";
+
+      // Insight
+      if (exploded) {
+        insightBox.className = "insight boom";
+        insightBox.innerHTML = "💥 <strong>学习率拉爆了（梯度爆炸/震荡）！</strong>每次拧旋钮用力过猛，直接越过最低点来回弹飞！把学习率调回 <code>0.8</code> 左右再点反向传播试试。";
+      } else if (loss < 0.25) {
+        insightBox.className = "insight win";
+        insightBox.innerHTML = "🎉 <strong>训练收敛！</strong>你刚刚亲手完成了预训练最核心的动作：正确答案的旋钮被调高，错误词的旋钮被调低。真实大模型就是把这 4 个旋钮放大成 <strong>几千亿个</strong>，在全网文本上重复这个动作几万亿次！";
+      } else {
+        insightBox.className = "insight";
+        insightBox.innerHTML = "💡 <strong>反向传播的秘密：</strong>点一下「反向传播 1 步」，系统会根据当前 Loss 误差自动算出：哪个旋钮该往右拧（加分），哪个旋钮该往左拧（扣分）。";
+      }
+
+      drawLossChart();
+    }
+
+    function manualKnob(idx, val) {
+      weights[idx] = parseFloat(val);
+      exploded = false;
+      const s = SAMPLES[curSample];
+      lossHistory.push(calcLoss(softmax(weights), s.targetIdx));
+      if (lossHistory.length > 26) lossHistory.shift();
+      render();
+    }
+
+    lrSlider.oninput = (e) => {
+      lr = parseFloat(e.target.value);
+      render();
+    };
+
+    resetWeights();
+  </script>
+</body>
+</html>

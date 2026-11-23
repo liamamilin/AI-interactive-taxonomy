@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：文字老虎机 · 悟懂 Token 预测与温度</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --cold: #0284c7;
+      --warm: #ea580c;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 56px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1060px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .scene-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .scene-btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: #374151;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .scene-btn.active {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    .sentence-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .sentence-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sentence-display {
+      font-size: clamp(19px, 2.5vw, 24px);
+      font-weight: 650;
+      line-height: 1.75;
+      min-height: 44px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .token-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 8px;
+      transition: all 0.25s ease;
+    }
+
+    .token-chip.seed {
+      background: #f3f4f6;
+      color: #1f2937;
+    }
+
+    .token-chip.generated {
+      background: var(--blue-soft);
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      animation: popIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .token-chip.wild {
+      background: #fff7ed;
+      color: #c2410c;
+      border: 1px solid #fed7aa;
+    }
+
+    .cursor-slot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 72px;
+      height: 36px;
+      padding: 0 10px;
+      border-radius: 8px;
+      border: 2px dashed #93c5fd;
+      background: #f8fbff;
+      color: var(--blue);
+      font-size: 14px;
+      font-weight: 600;
+      animation: pulse 1.4s infinite;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.84); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .wheel-wrap {
+      position: relative;
+      width: 280px;
+      height: 280px;
+      margin: 8px auto 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pointer {
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 11px solid transparent;
+      border-right: 11px solid transparent;
+      border-top: 20px solid #111827;
+      z-index: 5;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+
+    canvas#wheel {
+      width: 270px;
+      height: 270px;
+      border-radius: 50%;
+      box-shadow: 0 6px 20px rgba(17, 24, 39, 0.08);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: transform 0.12s, background 0.15s, opacity 0.15s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+      flex: 1;
+      min-width: 140px;
+    }
+    .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #1f2937;
+    }
+    .btn-secondary:hover:not(:disabled) { background: #e5e7eb; }
+
+    .temp-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+    }
+
+    .temp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .temp-val {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+      cursor: pointer;
+      height: 6px;
+    }
+
+    .temp-scale {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .candidate-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .cand-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, transform 0.12s;
+      position: relative;
+      overflow: hidden;
+    }
+    .cand-item:hover {
+      border-color: #93c5fd;
+      background: #fafcff;
+      transform: translateX(2px);
+    }
+
+    .cand-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .cand-word {
+      font-weight: 700;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .color-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .cand-tag {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #4b5563;
+      font-weight: 600;
+    }
+
+    .cand-pct {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 750;
+      font-size: 14px;
+    }
+
+    .bar-track {
+      height: 8px;
+      background: #f1f5f9;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.25s ease;
+    }
+
+    .insight-box {
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 13.5px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e3a8a;
+    }
+    .insight-box.hot {
+      background: #fff7ed;
+      border-color: #fed7aa;
+      color: #9a3412;
+    }
+    .insight-box.cold {
+      background: #f0f9ff;
+      border-color: #bae6fd;
+      color: #0c4a6e;
+    }
+
+    .done-banner {
+      text-align: center;
+      padding: 24px 16px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 14px;
+      color: #166534;
+    }
+    .done-banner h3 { margin-bottom: 6px; font-size: 17px; }
+    .done-banner p { font-size: 13.5px; margin-bottom: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🎰 文字老虎机：AI 是如何一个词一个词“摇”出句子的？</h1>
+        <p>试着先按默认温度点 4 次，再把温度拉到最左和最右重玩一遍</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="scene-tabs" id="sceneTabs"></div>
+
+    <div class="sentence-card">
+      <div class="sentence-label">
+        <span>当前正在生成的句子（每点击一次，只预测下一个词）</span>
+        <span id="stepCounter">第 0 / 4 步</span>
+      </div>
+      <div class="sentence-display" id="sentenceDisplay"></div>
+    </div>
+
+    <div class="main-grid">
+      <div class="panel">
+        <h2>
+          <span>概率大转盘</span>
+          <span style="font-size:12px;color:var(--muted);font-weight:500;">面积 = 选中概率</span>
+        </h2>
+        <div class="wheel-wrap">
+          <div class="pointer"></div>
+          <canvas id="wheel" width="540" height="540"></canvas>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="spinBtn">🎲 生成下一个词</button>
+          <button class="btn btn-secondary" id="autoBtn">⚡ 自动接完</button>
+        </div>
+        <div class="btn-row" style="margin-top:10px;">
+          <button class="btn btn-secondary" id="undoBtn" style="flex:1;">↩️ 撤回一步</button>
+          <button class="btn btn-secondary" id="resetBtn" style="flex:1;">🔄 重新开始</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>
+          <span>温度（Temperature）与候选词概率</span>
+          <span style="font-size:12px;color:var(--muted);font-weight:500;">也可直接点词手动干预</span>
+        </h2>
+
+        <div class="temp-box">
+          <div class="temp-header">
+            <span style="font-weight:700;font-size:14px;">🌡️ 温度滑块（控制“脑洞”大小）</span>
+            <span class="temp-val" id="tempLabel">0.70 · 均衡</span>
+          </div>
+          <input type="range" id="tempSlider" min="0.1" max="1.8" step="0.05" value="0.7" />
+          <div class="temp-scale">
+            <span>❄️ 0.1 极其死板（只选最稳）</span>
+            <span>⚖️ 0.7 日常自然</span>
+            <span>🔥 1.8 放飞脑洞（容易胡说）</span>
+          </div>
+        </div>
+
+        <div id="candidateArea"></div>
+        <div class="insight-box" id="insightBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PALETTE = ["#2563eb", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444"];
+
+    // 预置 3 个分支丰富的概率树（logits 越高越顺口）
+    const SCENES = [
+      {
+        id: "rain",
+        title: "🌧️ 场景一：下班遇暴雨",
+        seed: ["下班路上", "突然", "下暴雨，", "我赶紧", "打开了"],
+        steps: [
+          {
+            options: [
+              { text: "雨伞", logit: 3.4, tag: "最常见" },
+              { text: "打车软件", logit: 2.3, tag: "合理" },
+              { text: "手机手电筒", logit: 1.5, tag: "略奇怪" },
+              { text: "背包", logit: 1.2, tag: "一般" },
+              { text: "降落伞", logit: 0.1, tag: "离谱脑洞" }
+            ]
+          },
+          {
+            options: [
+              { text: "，结果发现", logit: 3.1, tag: "高频转折" },
+              { text: "，顺便", logit: 2.2, tag: "自然" },
+              { text: "，却意外", logit: 1.9, tag: "戏剧化" },
+              { text: "，大喊一声", logit: 0.9, tag: "中二" },
+              { text: "，开始量子跃迁", logit: -0.2, tag: "胡言乱语" }
+            ]
+          },
+          {
+            options: [
+              { text: "风太大", logit: 3.0, tag: "最常见" },
+              { text: "电量只剩1%", logit: 2.5, tag: "扎心" },
+              { text: "旁边小猫", logit: 1.6, tag: "温馨" },
+              { text: "老板正看着我", logit: 1.1, tag: "社死" },
+              { text: "外星飞船停在头顶", logit: 0.0, tag: "脑洞大开" }
+            ]
+          },
+          {
+            options: [
+              { text: "，只能先躲进便利店。", logit: 3.2, tag: "稳妥结局" },
+              { text: "，只好冒雨一路狂奔。", logit: 2.4, tag: "常见结局" },
+              { text: "，干脆原地买杯热奶茶。", logit: 1.8, tag: "松弛感" },
+              { text: "，决定明天请假一天。", logit: 1.2, tag: "打工人" },
+              { text: "，直接原地起飞回家！", logit: -0.1, tag: "彻底放飞" }
+            ]
+          }
+        ]
+      },
+      {
+        id: "midnight",
+        title: "🌙 场景二：深夜厨房异响",
+        seed: ["深夜两点，", "厨房里", "突然", "传来了"],
+        steps: [
+          {
+            options: [
+              { text: "一阵轻微的脚步声", logit: 3.2, tag: "悬疑套路" },
+              { text: "冰箱嗡嗡的震动", logit: 2.5, tag: "写实" },
+              { text: "清脆的碗碟碰撞声", logit: 2.2, tag: "常见" },
+              { text: "微波炉叮的一声", logit: 1.5, tag: "有点怪" },
+              { text: "交响乐团的彩排声", logit: 0.0, tag: "荒诞" }
+            ]
+          },
+          {
+            options: [
+              { text: "，我轻手轻脚", logit: 3.1, tag: "最常见" },
+              { text: "，我壮着胆子", logit: 2.6, tag: "经典" },
+              { text: "，我抄起拖鞋", logit: 1.8, tag: "搞笑" },
+              { text: "，我打开手机录像", logit: 1.3, tag: "现代人" },
+              { text: "，我当场跳起科目三", logit: -0.2, tag: "发疯" }
+            ]
+          },
+          {
+            options: [
+              { text: "推开门一看，", logit: 3.3, tag: "标准叙事" },
+              { text: "探出头去瞧，", logit: 2.4, tag: "自然" },
+              { text: "打开灯的瞬间，", logit: 2.1, tag: "画面感" },
+              { text: "大喝一声“谁！”，", logit: 1.1, tag: "戏剧化" },
+              { text: "对着空气谈判，", logit: -0.1, tag: "离谱" }
+            ]
+          },
+          {
+            options: [
+              { text: "原来是家里的橘猫在偷吃小鱼干。", logit: 3.3, tag: "高概率反转" },
+              { text: "发现只是窗户忘关被风吹动了。", logit: 2.5, tag: "平淡写实" },
+              { text: "竟然是室友在偷偷煮螺蛳粉。", logit: 1.9, tag: "生活化" },
+              { text: "一只会讲冷笑话的扫地机器人正在开会。", logit: 0.2, tag: "脑洞" },
+              { text: "冰箱宣布它今天要辞职去环游世界。", logit: -0.3, tag: "纯胡说" }
+            ]
+          }
+        ]
+      },
+      {
+        id: "poem",
+        title: "🚀 场景三：登陆未知星球",
+        seed: ["飞船", "降落在", "一颗", "紫色星球，", "舱门打开后"],
+        steps: [
+          {
+            options: [
+              { text: "，眼前是一片", logit: 3.3, tag: "经典科幻" },
+              { text: "，迎面吹来", logit: 2.4, tag: "画面感" },
+              { text: "，探测器发出", logit: 2.0, tag: "硬核" },
+              { text: "，门口竟然站着", logit: 1.4, tag: "惊喜" },
+              { text: "，Wi-Fi自动连上了", logit: 0.1, tag: "离谱" }
+            ]
+          },
+          {
+            options: [
+              { text: "发光的水晶森林", logit: 3.2, tag: "最常见" },
+              { text: "漂浮的巨型海洋", logit: 2.5, tag: "奇观" },
+              { text: "刺耳的警报声", logit: 1.9, tag: "紧张" },
+              { text: "一群打招呼的外星猫", logit: 1.1, tag: "萌系" },
+              { text: "一家24小时营业的沙县小吃", logit: -0.1, tag: "脑洞" }
+            ]
+          },
+          {
+            options: [
+              { text: "，船长深吸一口气，", logit: 3.1, tag: "标准" },
+              { text: "，所有人愣在原地，", logit: 2.5, tag: "常见" },
+              { text: "，人工智能冷静提醒，", logit: 2.0, tag: "科幻感" },
+              { text: "，大副默默掏出菜单，", logit: 0.8, tag: "跳脱" },
+              { text: "，重力突然变成草莓味，", logit: -0.3, tag: "胡言乱语" }
+            ]
+          },
+          {
+            options: [
+              { text: "在日志写下：人类不再孤单。", logit: 3.3, tag: "经典收尾" },
+              { text: "下令采集样本准备返航。", logit: 2.4, tag: "严谨" },
+              { text: "笑着说：看来这趟没白来。", logit: 1.8, tag: "轻松" },
+              { text: "问对方：这里支持扫码支付吗？", logit: 0.3, tag: "无厘头" },
+              { text: "决定把飞船改造成星际奶茶店。", logit: -0.2, tag: "彻底放飞" }
+            ]
+          }
+        ]
+      }
+    ];
+
+    let currentSceneIdx = 0;
+    let chosenTokens = []; // { text, prob, wild }
+    let temperature = 0.7;
+    let wheelAngle = 0;
+    let isSpinning = false;
+    let autoTimer = null;
+
+    const sceneTabs = document.getElementById("sceneTabs");
+    const sentenceDisplay = document.getElementById("sentenceDisplay");
+    const stepCounter = document.getElementById("stepCounter");
+    const candidateArea = document.getElementById("candidateArea");
+    const insightBox = document.getElementById("insightBox");
+    const tempSlider = document.getElementById("tempSlider");
+    const tempLabel = document.getElementById("tempLabel");
+    const spinBtn = document.getElementById("spinBtn");
+    const autoBtn = document.getElementById("autoBtn");
+    const undoBtn = document.getElementById("undoBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const canvas = document.getElementById("wheel");
+    const ctx = canvas.getContext("2d");
+
+    function softmax(options, temp) {
+      const scaled = options.map(o => o.logit / temp);
+      const maxVal = Math.max(...scaled);
+      const exps = scaled.map(v => Math.exp(v - maxVal));
+      const sum = exps.reduce((a, b) => a + b, 0);
+      return options.map((o, idx) => ({
+        ...o,
+        prob: exps[idx] / sum,
+        color: PALETTE[idx % PALETTE.length]
+      }));
+    }
+
+    function getCurrentOptions() {
+      const scene = SCENES[currentSceneIdx];
+      if (chosenTokens.length >= scene.steps.length) return null;
+      return softmax(scene.steps[chosenTokens.length].options, temperature);
+    }
+
+    function renderTabs() {
+      sceneTabs.innerHTML = "";
+      SCENES.forEach((sc, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "scene-btn" + (idx === currentSceneIdx ? " active" : "");
+        btn.textContent = sc.title;
+        btn.onclick = () => {
+          stopAuto();
+          currentSceneIdx = idx;
+          chosenTokens = [];
+          wheelAngle = 0;
+          renderAll();
+        };
+        sceneTabs.appendChild(btn);
+      });
+    }
+
+    function renderSentence() {
+      const scene = SCENES[currentSceneIdx];
+      sentenceDisplay.innerHTML = "";
+      scene.seed.forEach(t => {
+        const span = document.createElement("span");
+        span.className = "token-chip seed";
+        span.textContent = t;
+        sentenceDisplay.appendChild(span);
+      });
+      chosenTokens.forEach(tok => {
+        const span = document.createElement("span");
+        span.className = "token-chip generated" + (tok.wild ? " wild" : "");
+        span.textContent = tok.text;
+        span.title = `当时选中概率：${(tok.prob * 100).toFixed(1)}%`;
+        sentenceDisplay.appendChild(span);
+      });
+      if (chosenTokens.length < scene.steps.length) {
+        const slot = document.createElement("span");
+        slot.className = "cursor-slot";
+        slot.textContent = "下一个词 ?";
+        sentenceDisplay.appendChild(slot);
+      }
+      stepCounter.textContent = `第 ${chosenTokens.length} / ${scene.steps.length} 步`;
+    }
+
+    function drawWheel(options) {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+      const r = w / 2 - 14;
+      ctx.clearRect(0, 0, w, h);
+
+      if (!options) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = "#ecfdf5";
+        ctx.fill();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#10b981";
+        ctx.stroke();
+        ctx.fillStyle = "#065f46";
+        ctx.font = "bold 34px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("✨ 生成完成", cx, cy);
+        return;
+      }
+
+      // 指针在正上方（-Math.PI / 2）
+      let startAngle = wheelAngle - Math.PI / 2;
+      options.forEach(opt => {
+        const slice = opt.prob * Math.PI * 2;
+        const endAngle = startAngle + slice;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = opt.color;
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#ffffff";
+        ctx.stroke();
+
+        // 扇区够大时写文字
+        if (opt.prob >= 0.07) {
+          const mid = startAngle + slice / 2;
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(mid);
+          ctx.textAlign = "right";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 24px -apple-system, sans-serif";
+          const label = opt.text.length > 6 ? opt.text.slice(0, 5) + "…" : opt.text;
+          ctx.fillText(label, r - 22, 0);
+          ctx.restore();
+        }
+        startAngle = endAngle;
+      });
+
+      // 中心圆点
+      ctx.beginPath();
+      ctx.arc(cx, cy, 34, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "#e5e7eb";
+      ctx.stroke();
+      ctx.fillStyle = "#111827";
+      ctx.font = "bold 20px monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("T=" + temperature.toFixed(1), cx, cy);
+    }
+
+    function renderCandidates(options) {
+      if (!options) {
+        candidateArea.innerHTML = `
+          <div class="done-banner">
+            <h3>🎉 一整句话“摇”出来了！</h3>
+            <p>你刚刚亲眼见证了 LLM 的流式生成过程：它并没有提前构思结局，只是把每一次掷骰子的结果拼在一起。试试调高或调低温度再来一局！</p>
+            <button class="btn btn-primary" onclick="resetGame()">🔄 换个温度再玩一局</button>
+          </div>
+        `;
+        return;
+      }
+
+      const list = document.createElement("div");
+      list.className = "candidate-list";
+      options.forEach(opt => {
+        const pct = (opt.prob * 100).toFixed(1);
+        const item = document.createElement("div");
+        item.className = "cand-item";
+        item.onclick = () => {
+          if (isSpinning) return;
+          pickOption(opt);
+        };
+        item.innerHTML = `
+          <div class="cand-top">
+            <span class="cand-word">
+              <span class="color-dot" style="background:${opt.color}"></span>
+              ${opt.text}
+              <span class="cand-tag">${opt.tag}</span>
+            </span>
+            <span class="cand-pct">${pct}%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${pct}%;background:${opt.color}"></div>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+      candidateArea.innerHTML = "";
+      candidateArea.appendChild(list);
+    }
+
+    function renderInsight(options) {
+      let cls = "insight-box";
+      let msg = "";
+      if (temperature <= 0.3) {
+        cls += " cold";
+        msg = "❄️ <strong>极低温模式（保守复读机）：</strong>排第一的词几乎吞并了整个转盘！无论重玩多少次，AI 都会给出最稳妥、也最缺乏惊喜的标准答案。";
+      } else if (temperature >= 1.3) {
+        cls += " hot";
+        msg = "🔥 <strong>高温模式（脑洞大开/胡言乱语）：</strong>原本只有 1%~2% 的离谱词被大幅放大！这就是为什么调高 Temperature 时 AI 更有创意，但也更容易一本正经地胡说。";
+      } else {
+        msg = "⚖️ <strong>均衡温度（日常对话默认）：</strong>高概率词依然占优，但次优词也有机会被抽中——这就是为什么你问 AI 同一个问题两次，它的措辞每次都不太一样。";
+      }
+      insightBox.className = cls;
+      insightBox.innerHTML = msg;
+    }
+
+    function updateTempBadge() {
+      let desc = "均衡";
+      let bg = "#eff6ff", color = "#2563eb";
+      if (temperature <= 0.3) { desc = "冰冷保守"; bg = "#e0f2fe"; color = "#0369a1"; }
+      else if (temperature >= 1.3) { desc = "狂热脑洞"; bg = "#ffedd5"; color = "#c2410c"; }
+      tempLabel.textContent = `${temperature.toFixed(2)} · ${desc}`;
+      tempLabel.style.background = bg;
+      tempLabel.style.color = color;
+    }
+
+    function renderAll() {
+      const options = getCurrentOptions();
+      renderTabs();
+      renderSentence();
+      drawWheel(options);
+      renderCandidates(options);
+      renderInsight(options);
+      updateTempBadge();
+      const finished = !options;
+      spinBtn.disabled = finished || isSpinning;
+      autoBtn.disabled = finished || isSpinning;
+      undoBtn.disabled = chosenTokens.length === 0 || isSpinning;
+    }
+
+    function pickOption(opt) {
+      const isWild = opt.logit <= 0.3;
+      chosenTokens.push({ text: opt.text, prob: opt.prob, wild: isWild });
+      renderAll();
+    }
+
+    function spinOnce(onComplete) {
+      const options = getCurrentOptions();
+      if (!options || isSpinning) return;
+      isSpinning = true;
+      spinBtn.disabled = true;
+      autoBtn.disabled = true;
+      undoBtn.disabled = true;
+
+      // 按当前温度概率分布随机抽样
+      const r = Math.random();
+      let acc = 0;
+      let chosenIdx = options.length - 1;
+      for (let i = 0; i < options.length; i++) {
+        acc += options[i].prob;
+        if (r <= acc) { chosenIdx = i; break; }
+      }
+
+      // 计算目标扇区中心角度，让其精准停在正上方指针下
+      let cumStart = 0;
+      for (let i = 0; i < chosenIdx; i++) cumStart += options[i].prob;
+      const sliceCenter = (cumStart + options[chosenIdx].prob / 2) * Math.PI * 2;
+      // 扇区从 wheelAngle - PI/2 开始，要让 sliceCenter 对齐到 0（正上方）
+      const targetMod = (Math.PI * 2 - sliceCenter) % (Math.PI * 2);
+      const currentMod = ((wheelAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      let delta = targetMod - currentMod;
+      if (delta < 0) delta += Math.PI * 2;
+      const totalSpin = Math.PI * 4 + delta; // 多转 2 圈
+
+      const startAngle = wheelAngle;
+      const duration = 680;
+      const startTime = performance.now();
+
+      function animate(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        // easeOutCubic
+        const ease = 1 - Math.pow(1 - t, 3);
+        wheelAngle = startAngle + totalSpin * ease;
+        drawWheel(options);
+        if (t < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          isSpinning = false;
+          pickOption(options[chosenIdx]);
+          if (onComplete) onComplete();
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function stopAuto() {
+      if (autoTimer) {
+        clearTimeout(autoTimer);
+        autoTimer = null;
+      }
+    }
+
+    function resetGame() {
+      stopAuto();
+      chosenTokens = [];
+      wheelAngle = 0;
+      renderAll();
+    }
+
+    spinBtn.onclick = () => {
+      stopAuto();
+      spinOnce();
+    };
+
+    autoBtn.onclick = () => {
+      stopAuto();
+      function next() {
+        if (!getCurrentOptions()) return;
+        spinOnce(() => {
+          if (getCurrentOptions()) {
+            autoTimer = setTimeout(next, 240);
+          }
+        });
+      }
+      next();
+    };
+
+    undoBtn.onclick = () => {
+      stopAuto();
+      if (chosenTokens.length > 0) {
+        chosenTokens.pop();
+        renderAll();
+      }
+    };
+
+    resetBtn.onclick = resetGame;
+
+    tempSlider.oninput = (e) => {
+      temperature = parseFloat(e.target.value);
+      renderAll();
+    };
+
+    renderAll();
+  </script>
+</body>
+</html>

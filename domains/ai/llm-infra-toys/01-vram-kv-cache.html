@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：显存搬家大作战 · 悟懂量化与 KV Cache</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1080px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 880px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      font-size: 16.5px;
+      font-weight: 800;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Part 1: Quantization */
+    .seg-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .seg-btn {
+      border: 2px solid var(--border);
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 10px 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.16s;
+    }
+    .seg-btn.active { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
+    .seg-btn strong { display: block; font-size: 14px; }
+    .seg-btn span { font-size: 11.5px; color: var(--muted); }
+
+    .vram-truck {
+      border: 2px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 16px;
+      background: #f8fafc;
+      margin-bottom: 14px;
+    }
+    .vram-truck.oom { border-color: var(--red); background: var(--red-soft); }
+
+    .truck-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 750;
+      margin-bottom: 8px;
+    }
+    .vram-bar {
+      height: 28px;
+      background: #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 10px;
+    }
+    .vram-fill {
+      height: 100%;
+      transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), background 0.25s;
+      display: flex;
+      align-items: center;
+      padding-left: 10px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .mini-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .ms-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 11px 13px;
+    }
+    .ms-l { font-size: 11.5px; color: var(--muted); font-weight: 650; }
+    .ms-v { font-size: 20px; font-weight: 850; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    /* Part 2: KV Cache */
+    .kv-toggle-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .kv-btn {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #f9fafb;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.16s;
+    }
+    .kv-btn.active.off { border-color: var(--red); background: var(--red-soft); }
+    .kv-btn.active.on { border-color: var(--green); background: var(--green-soft); }
+    .kv-btn strong { display: block; font-size: 13.5px; }
+    .kv-btn span { font-size: 11.5px; color: var(--muted); }
+
+    .token-stage {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px;
+      min-height: 110px;
+      margin-bottom: 14px;
+    }
+    .tok-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 8px;
+    }
+    .tok-pill {
+      padding: 5px 10px;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 700;
+      border: 1.5px solid #cbd5e1;
+      background: #ffffff;
+      transition: all 0.2s;
+    }
+    .tok-pill.recompute {
+      border-color: var(--red);
+      background: #fee2e2;
+      color: #991b1b;
+      transform: scale(1.06);
+    }
+    .tok-pill.cached {
+      border-color: #6ee7b7;
+      background: #ecfdf5;
+      color: #065f46;
+    }
+    .tok-pill.fresh {
+      border-color: var(--blue);
+      background: var(--blue-soft);
+      color: var(--blue);
+      transform: scale(1.08);
+    }
+
+    .btn-row { display: flex; gap: 10px; margin-bottom: 14px; }
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-blue { background: var(--blue); color: #fff; flex: 1; }
+    .btn-blue:hover:not(:disabled) { background: #1d4ed8; }
+    .btn-gray { background: #f3f4f6; color: #374151; }
+
+    .note {
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🚛 显存搬家大作战：量化压缩（Quantization）与 KV Cache 草稿纸</h1>
+        <p>左半边体验怎么把 700 亿参数巨无霸塞进单张显卡，右半边体验 KV Cache 如何消灭重复计算！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: QUANTIZATION -->
+      <div class="panel">
+        <h2>
+          <span>1. 量化压缩：把 70B 大模型塞进单卡</span>
+          <span style="font-size:12px;color:var(--muted);">目标显卡：80GB H100</span>
+        </h2>
+
+        <div class="seg-group">
+          <button class="seg-btn active" id="q16" onclick="setQuant(16)">
+            <strong>FP16 原版</strong>
+            <span>16位小数 · 140 GB</span>
+          </button>
+          <button class="seg-btn" id="q8" onclick="setQuant(8)">
+            <strong>INT8 压缩</strong>
+            <span>8位整数 · 70 GB</span>
+          </button>
+          <button class="seg-btn" id="q4" onclick="setQuant(4)">
+            <strong>INT4 极致</strong>
+            <span>4位整数 · 35 GB</span>
+          </button>
+        </div>
+
+        <div class="vram-truck" id="vramTruck">
+          <div class="truck-head">
+            <span>🎮 单张 GPU 显存容量：80 GB</span>
+            <span id="vramStatus" style="color:var(--red);">💥 OOM 显存爆仓！</span>
+          </div>
+          <div class="vram-bar">
+            <div class="vram-fill" id="vramFill" style="width:100%;background:var(--red);">140 GB / 80 GB（装不下！）</div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);" id="numExample">
+            参数存储示例：<code>0.142857142857...</code>（每个参数占 2 字节，极其占地）
+          </div>
+        </div>
+
+        <div class="mini-stats">
+          <div class="ms-card">
+            <div class="ms-l">推理吐字速度倍率</div>
+            <div class="ms-v" id="qSpeed" style="color:var(--blue);">1.0×</div>
+          </div>
+          <div class="ms-card">
+            <div class="ms-l">模型聪明度保留</div>
+            <div class="ms-v" id="qAcc" style="color:var(--green);">100%</div>
+          </div>
+        </div>
+
+        <div class="note" id="qNote"></div>
+      </div>
+
+      <!-- RIGHT: KV CACHE -->
+      <div class="panel">
+        <h2>
+          <span>2. KV Cache：别重复嚼吃过的饭！</span>
+          <span style="font-size:12px;color:var(--muted);" id="kvStepTag">第 0 / 10 词</span>
+        </h2>
+
+        <div class="kv-toggle-row">
+          <button class="kv-btn off active" id="kvOff" onclick="setKv(false)">
+            <strong>🐢 关闭 KV Cache</strong>
+            <span>每吐 1 个新字，把前面全重算一遍</span>
+          </button>
+          <button class="kv-btn on" id="kvOn" onclick="setKv(true)">
+            <strong>⚡ 开启 KV Cache（草稿纸）</strong>
+            <span>旧字结果存显存，每次只算最新 1 字</span>
+          </button>
+        </div>
+
+        <div class="token-stage">
+          <div style="font-size:12px;color:var(--muted);font-weight:700;">
+            正在生成的句子（🔴 红框=被迫重算，🟢 绿框=直接读草稿纸，🔵 蓝框=本次新算）：
+          </div>
+          <div class="tok-wrap" id="tokWrap"></div>
+        </div>
+
+        <div class="mini-stats">
+          <div class="ms-card">
+            <div class="ms-l">本步计算量（Token 次数）</div>
+            <div class="ms-v" id="kvThisOp">0 次</div>
+          </div>
+          <div class="ms-card">
+            <div class="ms-l">累计总计算量（越低越快）</div>
+            <div class="ms-v" id="kvTotalOp" style="color:var(--blue);">0 次</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-blue" id="genTokBtn" onclick="nextToken()">▶ 生成下一个词</button>
+          <button class="btn btn-gray" onclick="autoPlayKv()">⏩ 自动吐完 10 词</button>
+          <button class="btn btn-gray" onclick="resetKv()">🔄 重置</button>
+        </div>
+
+        <div class="note" id="kvNote"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== PART 1: QUANTIZATION =====
+    let quant = 16;
+
+    function setQuant(q) {
+      quant = q;
+      [16, 8, 4].forEach(n => document.getElementById("q" + n).classList.toggle("active", n === q));
+      const truck = document.getElementById("vramTruck");
+      const fill = document.getElementById("vramFill");
+      const status = document.getElementById("vramStatus");
+      const ex = document.getElementById("numExample");
+      const speed = document.getElementById("qSpeed");
+      const acc = document.getElementById("qAcc");
+      const note = document.getElementById("qNote");
+
+      if (q === 16) {
+        truck.className = "vram-truck oom";
+        fill.style.width = "100%";
+        fill.style.background = "var(--red)";
+        fill.textContent = "140 GB / 80 GB（超出 60 GB！）";
+        status.textContent = "💥 OOM 显存爆仓！单卡装不下";
+        status.style.color = "var(--red)";
+        ex.innerHTML = "参数存储示例：<code>0.142857142857...</code>（高精度小数，必须买 2 张 H100 拼卡）";
+        speed.textContent = "无法启动";
+        speed.style.color = "var(--red)";
+        acc.textContent = "100%";
+        note.innerHTML = "💡 <strong>为什么爆仓？</strong>70B（700 亿）参数 × 2 字节 = <strong>140 GB</strong>，远超单张 80GB 显卡容量！点击上面的 <strong>INT8</strong> 或 <strong>INT4</strong> 试试压缩魔法。";
+      } else if (q === 8) {
+        truck.className = "vram-truck";
+        fill.style.width = "87.5%";
+        fill.style.background = "var(--amber)";
+        fill.textContent = "70 GB / 80 GB（刚好塞进！）";
+        status.textContent = "✅ 单卡勉强装下（剩余 10 GB 给缓存）";
+        status.style.color = "var(--amber)";
+        ex.innerHTML = "参数存储示例：<code>18</code>（压缩成 -128~127 的整数，体积直接砍半！）";
+        speed.textContent = "1.8× 提速";
+        speed.style.color = "var(--blue)";
+        acc.textContent = "99.7%";
+        note.innerHTML = "💡 <strong>INT8 量化：</strong>把长长的小数四舍五入映射成 8 位整数，显存直接砍半到 70 GB，聪明度几乎零损失（99.7%）！";
+      } else {
+        truck.className = "vram-truck";
+        fill.style.width = "44%";
+        fill.style.background = "var(--green)";
+        fill.textContent = "35 GB / 80 GB（极其宽敞！）";
+        status.textContent = "🎉 轻松塞进！还剩 45 GB 跑大并发";
+        status.style.color = "var(--green)";
+        ex.innerHTML = "参数存储示例：<code>2</code>（仅用 4 位 0~15 表示，体积缩成 1/4，搬运速度暴涨！）";
+        speed.textContent = "3.4× 提速";
+        speed.style.color = "var(--green)";
+        acc.textContent = "98.5%";
+        note.innerHTML = "💡 <strong>INT4 量化（省钱王牌）：</strong>显存体积暴降 75%，不仅省下一张几十万的显卡，因为每次从显存搬运的数据少了 4 倍，吐字速度反而快了 3 倍多！";
+      }
+    }
+
+    // ===== PART 2: KV CACHE =====
+    const SENTENCE = ["大", "模", "型", "靠", "草", "稿", "纸", "提", "速", "！"];
+    let kvEnabled = false;
+    let tokCount = 0;
+    let totalOps = 0;
+    let kvTimer = null;
+
+    function setKv(on) {
+      kvEnabled = on;
+      document.getElementById("kvOff").classList.toggle("active", !on);
+      document.getElementById("kvOn").classList.toggle("active", on);
+      resetKv();
+    }
+
+    function resetKv() {
+      if (kvTimer) { clearInterval(kvTimer); kvTimer = null; }
+      tokCount = 0;
+      totalOps = 0;
+      renderKv(0);
+    }
+
+    function nextToken() {
+      if (tokCount >= SENTENCE.length) return;
+      tokCount++;
+      const thisOp = kvEnabled ? 1 : tokCount;
+      totalOps += thisOp;
+      renderKv(thisOp);
+    }
+
+    function autoPlayKv() {
+      if (tokCount >= SENTENCE.length) resetKv();
+      if (kvTimer) clearInterval(kvTimer);
+      kvTimer = setInterval(() => {
+        if (tokCount >= SENTENCE.length) {
+          clearInterval(kvTimer);
+          kvTimer = null;
+        } else {
+          nextToken();
+        }
+      }, 320);
+    }
+
+    function renderKv(thisOp) {
+      const wrap = document.getElementById("tokWrap");
+      wrap.innerHTML = "";
+      for (let i = 0; i < tokCount; i++) {
+        const span = document.createElement("span");
+        const isLast = i === tokCount - 1;
+        let cls = "tok-pill ";
+        if (isLast) cls += "fresh";
+        else cls += kvEnabled ? "cached" : "recompute";
+        span.className = cls;
+        span.textContent = SENTENCE[i];
+        wrap.appendChild(span);
+      }
+      if (tokCount === 0) {
+        wrap.innerHTML = `<span style="color:var(--muted);font-size:13px;">点击下方「生成下一个词」开始观察计算量差异…</span>`;
+      }
+
+      document.getElementById("kvStepTag").textContent = `第 ${tokCount} / ${SENTENCE.length} 词`;
+      document.getElementById("kvThisOp").textContent = thisOp + " 次";
+      document.getElementById("kvThisOp").style.color = (!kvEnabled && thisOp > 3) ? "var(--red)" : "var(--green)";
+      document.getElementById("kvTotalOp").textContent = totalOps + " 次";
+      document.getElementById("kvTotalOp").style.color = (!kvEnabled && totalOps > 15) ? "var(--red)" : "var(--green)";
+      document.getElementById("genTokBtn").disabled = tokCount >= SENTENCE.length;
+
+      const kvNote = document.getElementById("kvNote");
+      if (!kvEnabled) {
+        kvNote.innerHTML = tokCount === SENTENCE.length
+          ? "🐢 <strong>关闭 KV Cache 复盘：</strong>只生成 10 个字就白白算了 <strong>55 次</strong>（1+2+…+10）！要是写 2000 字长文，计算量会呈平方爆炸！快切到「⚡ 开启 KV Cache」再跑一次！"
+          : "🔴 注意看：每多吐 1 个新字，前面所有字都变红被迫从头重算一遍，越往后越慢！";
+      } else {
+        kvNote.innerHTML = tokCount === SENTENCE.length
+          ? "⚡ <strong>开启 KV Cache 复盘：</strong>同样生成 10 个字，总共只算了 <strong>10 次</strong>（提速 5.5 倍）！用一点显存当草稿纸记住前面算过的 Key/Value，彻底告别重复劳动！"
+          : "🟢 注意看：绿色字直接从显存草稿纸里读取，每一步只需要算最新的 1 个蓝色字！";
+      }
+    }
+
+    setQuant(16);
+    resetKv();
+  </script>
+</body>
+</html>

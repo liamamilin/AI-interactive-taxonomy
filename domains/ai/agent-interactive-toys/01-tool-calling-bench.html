@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：手脚装配台 · 悟懂 Agent 工具调用</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --indigo: #4f46e5;
+      --indigo-soft: #eef2ff;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1080px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .mission-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .m-btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: #374151;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .m-btn.active {
+      background: var(--indigo);
+      color: #fff;
+      border-color: var(--indigo);
+    }
+
+    .prompt-banner {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .prompt-text {
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .prompt-text span {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .run-btn {
+      border: none;
+      background: var(--indigo);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s, background 0.15s;
+    }
+    .run-btn:hover { background: #4338ca; }
+    .run-btn:active { transform: scale(0.97); }
+    .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 880px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Robot visual */
+    .agent-stage {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 20px 16px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .brain-core {
+      width: 82px;
+      height: 82px;
+      margin: 0 auto 10px;
+      border-radius: 24px;
+      background: var(--indigo-soft);
+      border: 2px solid var(--indigo);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      position: relative;
+      transition: transform 0.25s ease;
+    }
+    .brain-core.working {
+      animation: pulseBrain 0.9s infinite;
+    }
+    @keyframes pulseBrain {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79,70,229,0.28); }
+      50% { transform: scale(1.06); box-shadow: 0 0 0 12px rgba(79,70,229,0); }
+    }
+
+    .agent-mode-pill {
+      display: inline-block;
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    .agent-mode-pill.naked { background: var(--red-soft); color: var(--red); }
+    .agent-mode-pill.armed { background: var(--green-soft); color: var(--green); }
+
+    .equipped-slots {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 36px;
+    }
+
+    .slot-chip {
+      font-size: 12.5px;
+      font-weight: 650;
+      padding: 5px 10px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1.5px solid var(--indigo);
+      color: var(--indigo);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      animation: pop 0.2s ease;
+    }
+    @keyframes pop {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .tool-card {
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      text-align: left;
+      position: relative;
+    }
+    .tool-card:hover { border-color: #a5b4fc; transform: translateY(-2px); }
+    .tool-card.equipped {
+      border-color: var(--indigo);
+      background: var(--indigo-soft);
+    }
+
+    .tool-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .tool-icon { font-size: 22px; }
+    .tool-status {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: var(--muted);
+    }
+    .tool-card.equipped .tool-status {
+      background: var(--indigo);
+      color: #fff;
+    }
+
+    .tool-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+    .tool-desc { font-size: 12px; color: var(--muted); }
+
+    /* Trace stream */
+    .trace-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 220px;
+      margin-bottom: 16px;
+    }
+
+    .trace-empty {
+      border: 2px dashed #e2e8f0;
+      border-radius: 14px;
+      padding: 36px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .trace-item {
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13.5px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      animation: slideIn 0.28s ease;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(8px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .trace-item.think { border-left: 4px solid var(--indigo); background: #f8faff; }
+    .trace-item.call { border-left: 4px solid var(--amber); background: var(--amber-soft); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+    .trace-item.result { border-left: 4px solid var(--green); background: var(--green-soft); }
+    .trace-item.fail { border-left: 4px solid var(--red); background: var(--red-soft); color: #991b1b; }
+
+    .trace-head {
+      font-size: 11.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+      opacity: 0.8;
+    }
+
+    .final-box {
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 14px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+    }
+    .final-box.ok { background: var(--green-soft); border-color: #a7f3d0; color: #065f46; }
+    .final-box.bad { background: var(--red-soft); border-color: #fecaca; color: #991b1b; }
+    .final-box.partial { background: var(--amber-soft); border-color: #fde68a; color: #92400e; }
+    .final-box h3 { font-size: 15.5px; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🦾 手脚装配台：为什么纯 LLM 只能动嘴，Agent 却能动手？</h1>
+        <p>第一步：先不装任何工具直接点“执行任务”看笑话；第二步：给它插上对应工具再试一次！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="mission-tabs" id="missionTabs"></div>
+
+    <div class="prompt-banner">
+      <div class="prompt-text">
+        <span>👤 用户下达的任务指令：</span>
+        <div id="missionPrompt"></div>
+      </div>
+      <button class="run-btn" id="runBtn" onclick="runMission()">▶ 执行任务</button>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>
+          <span>1. 给大脑装配工具（手脚）</span>
+          <button onclick="clearTools()" style="border:none;background:none;color:var(--muted);font-size:12.5px;cursor:pointer;font-weight:600;">全部卸下</button>
+        </h2>
+
+        <div class="agent-stage">
+          <div class="brain-core" id="brainCore">🧠</div>
+          <div>
+            <span class="agent-mode-pill naked" id="modePill">纯 LLM 模式（缸中之脑 · 0 个工具）</span>
+          </div>
+          <div class="equipped-slots" id="equippedSlots"></div>
+        </div>
+
+        <div class="tool-grid" id="toolGrid"></div>
+      </div>
+
+      <div class="panel">
+        <h2>
+          <span>2. 执行过程透视（大脑如何调度工具）</span>
+          <span style="font-size:12px;color:var(--muted);font-weight:500;" id="stepStatus">待命</span>
+        </h2>
+
+        <div class="trace-list" id="traceList">
+          <div class="trace-empty">
+            👆 试试先<strong>不装任何工具</strong>点击右上角「执行任务」，看看纯聊天机器人会怎么硬着头皮瞎编！
+          </div>
+        </div>
+
+        <div class="final-box" id="finalBox" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TOOLS = [
+      { id: "weather", icon: "🌤️", name: "实时天气 API", desc: "查询指定城市未来天气" },
+      { id: "calc", icon: "🧮", name: "精准计算器", desc: "执行高精度数学运算" },
+      { id: "email", icon: "📧", name: "邮件发送器", desc: "向联系人发送正式邮件" },
+      { id: "stock", icon: "📈", name: "实时行情库", desc: "读取最新股价与汇率" }
+    ];
+
+    const MISSIONS = [
+      {
+        id: "m1",
+        title: "🌧️ 任务一：查天气 + 算账 + 发邮件",
+        prompt: "“帮我查一下明天杭州下不下雨，顺便算算 387 × 49 等于多少，然后把结果发邮件给老板。”",
+        nakedReply: {
+          thought: "我身上没有任何外部工具，但我不能冷场，只能靠训练语料里的概率来猜……",
+          output: "杭州明天大概率多云转晴；387 × 49 大约等于 18,500；邮件我已经用意念帮你发给老板啦！",
+          why: "🚨 翻车原因：纯 LLM 既连不上实时天气、心算大数也容易错（真实答案是 18,963），更不可能真的发出邮件！这就是“缸中之脑”的局限。"
+        },
+        steps: [
+          {
+            tool: "weather",
+            think: "任务第 1 项需要查明天杭州天气，我先调用实时天气工具。",
+            call: 'call_tool("weather_api", { city: "杭州", day: "明天" })',
+            result: "工具返回：{ weather: '中雨', temp: '16°C~21°C', rain_prob: '85%' }",
+            missingMsg: "❌ 缺少【实时天气 API】，无法获取明天杭州的真实天气，只能瞎猜！"
+          },
+          {
+            tool: "calc",
+            think: "任务第 2 项是大数乘法 387 × 49，心算容易出错，交给精准计算器。",
+            call: 'call_tool("calculator", { expr: "387 * 49" })',
+            result: "工具返回：{ value: 18963 }",
+            missingMsg: "❌ 缺少【精准计算器】，直接靠文字接龙算 387×49 极易算错！"
+          },
+          {
+            tool: "email",
+            think: "所有真实数据已拿齐，调用邮件工具把结果发给老板。",
+            call: 'call_tool("send_email", { to: "boss@company.com", body: "明天杭州中雨(85%)；387×49=18963。" })',
+            result: "工具返回：{ status: 'sent', message_id: '#9042' }",
+            missingMsg: "❌ 缺少【邮件发送器】，我已经算好了结果，但没有“手”替你把邮件真正发出去！"
+          }
+        ],
+        successSummary: "🎉 任务完美交付！Agent 自动查到明天杭州有中雨（85%）、用计算器得出精准值 18,963，并调用邮件接口真实发给了老板。这就是 Tool Calling 的威力！"
+      },
+      {
+        id: "m2",
+        title: "💱 任务二：查汇率 + 算预算",
+        prompt: "“查一下今天美元兑人民币汇率，帮我算算买一台 1,299 美元的电脑折合多少人民币。”",
+        nakedReply: {
+          thought: "我不知道今天的实时汇率，只能用记忆里的旧数字糊弄一下……",
+          output: "按 1 美元约合 6.8 人民币估算，1,299 美元大约是 8,800 元左右。",
+          why: "🚨 翻车原因：汇率每天都在变，纯 LLM 的知识停留在训练截止日，且乘法也只是粗略估算。"
+        },
+        steps: [
+          {
+            tool: "stock",
+            think: "需要今天的最新汇率，先调用实时行情库。",
+            call: 'call_tool("market_api", { pair: "USD/CNY" })',
+            result: "工具返回：{ rate: 7.24, updated: '刚刚' }",
+            missingMsg: "❌ 缺少【实时行情库】，只能用过时的记忆猜汇率！"
+          },
+          {
+            tool: "calc",
+            think: "拿到实时汇率 7.24，用计算器精准算出 1299 × 7.24。",
+            call: 'call_tool("calculator", { expr: "1299 * 7.24" })',
+            result: "工具返回：{ value: 9404.76 }",
+            missingMsg: "❌ 缺少【精准计算器】，小数乘法靠语言模型硬算容易出现偏差！"
+          }
+        ],
+        successSummary: "🎉 任务完美交付！Agent 先拉取实时汇率 7.24，再把数字喂给计算器，精准报出折合人民币 9,404.76 元。"
+      }
+    ];
+
+    let curMissionIdx = 0;
+    let equipped = new Set();
+    let running = false;
+
+    const missionTabs = document.getElementById("missionTabs");
+    const missionPrompt = document.getElementById("missionPrompt");
+    const toolGrid = document.getElementById("toolGrid");
+    const equippedSlots = document.getElementById("equippedSlots");
+    const modePill = document.getElementById("modePill");
+    const brainCore = document.getElementById("brainCore");
+    const traceList = document.getElementById("traceList");
+    const finalBox = document.getElementById("finalBox");
+    const runBtn = document.getElementById("runBtn");
+    const stepStatus = document.getElementById("stepStatus");
+
+    function renderAll() {
+      const m = MISSIONS[curMissionIdx];
+      missionTabs.innerHTML = "";
+      MISSIONS.forEach((item, idx) => {
+        const b = document.createElement("button");
+        b.className = "m-btn" + (idx === curMissionIdx ? " active" : "");
+        b.textContent = item.title;
+        b.onclick = () => {
+          if (running) return;
+          curMissionIdx = idx;
+          resetTrace();
+          renderAll();
+        };
+        missionTabs.appendChild(b);
+      });
+
+      missionPrompt.textContent = m.prompt;
+
+      if (equipped.size === 0) {
+        modePill.className = "agent-mode-pill naked";
+        modePill.textContent = "纯 LLM 模式（缸中之脑 · 0 个工具）";
+        equippedSlots.innerHTML = `<span style="font-size:12.5px;color:var(--muted);">尚未装配任何工具，点击下方插件装上</span>`;
+      } else {
+        modePill.className = "agent-mode-pill armed";
+        modePill.textContent = `🤖 Agent 模式（已装配 ${equipped.size} 个工具）`;
+        equippedSlots.innerHTML = "";
+        equipped.forEach(tid => {
+          const t = TOOLS.find(x => x.id === tid);
+          const chip = document.createElement("span");
+          chip.className = "slot-chip";
+          chip.textContent = `${t.icon} ${t.name}`;
+          equippedSlots.appendChild(chip);
+        });
+      }
+
+      toolGrid.innerHTML = "";
+      TOOLS.forEach(t => {
+        const on = equipped.has(t.id);
+        const card = document.createElement("button");
+        card.className = "tool-card" + (on ? " equipped" : "");
+        card.onclick = () => {
+          if (running) return;
+          if (on) equipped.delete(t.id);
+          else equipped.add(t.id);
+          renderAll();
+        };
+        card.innerHTML = `
+          <div class="tool-top">
+            <span class="tool-icon">${t.icon}</span>
+            <span class="tool-status">${on ? "已装配 ✓" : "+ 装上"}</span>
+          </div>
+          <div class="tool-name">${t.name}</div>
+          <div class="tool-desc">${t.desc}</div>
+        `;
+        toolGrid.appendChild(card);
+      });
+    }
+
+    function clearTools() {
+      if (running) return;
+      equipped.clear();
+      resetTrace();
+      renderAll();
+    }
+
+    function resetTrace() {
+      traceList.innerHTML = `<div class="trace-empty">点击右上角「执行任务」，观察大脑是否调用工具。</div>`;
+      finalBox.style.display = "none";
+      stepStatus.textContent = "待命";
+    }
+
+    function appendTrace(type, head, body) {
+      const div = document.createElement("div");
+      div.className = "trace-item " + type;
+      div.innerHTML = `<div class="trace-head">${head}</div><div>${body}</div>`;
+      traceList.appendChild(div);
+    }
+
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    async function runMission() {
+      if (running) return;
+      running = true;
+      runBtn.disabled = true;
+      brainCore.classList.add("working");
+      traceList.innerHTML = "";
+      finalBox.style.display = "none";
+      stepStatus.textContent = "执行中…";
+
+      const m = MISSIONS[curMissionIdx];
+
+      if (equipped.size === 0) {
+        appendTrace("think", "🧠 纯大脑思考", m.nakedReply.thought);
+        await sleep(550);
+        appendTrace("fail", "💬 直接瞎猜输出", m.nakedReply.output);
+        await sleep(350);
+        finalBox.style.display = "block";
+        finalBox.className = "final-box bad";
+        finalBox.innerHTML = `<h3>❌ 裸奔翻车：只会动嘴，无法动手</h3><p>${m.nakedReply.why}</p>`;
+        stepStatus.textContent = "已结束（翻车）";
+        brainCore.classList.remove("working");
+        running = false;
+        runBtn.disabled = false;
+        return;
+      }
+
+      let missingCount = 0;
+      for (let i = 0; i < m.steps.length; i++) {
+        const st = m.steps[i];
+        appendTrace("think", `🧠 步骤 ${i + 1} · 大脑判断`, st.think);
+        await sleep(480);
+
+        if (equipped.has(st.tool)) {
+          appendTrace("call", "⚡ 发起工具调用（Function Call）", st.call);
+          await sleep(480);
+          appendTrace("result", "📥 收到真实返回值", st.result);
+          await sleep(380);
+        } else {
+          missingCount++;
+          appendTrace("fail", "⚠️ 缺少对应工具", st.missingMsg);
+          await sleep(380);
+        }
+      }
+
+      finalBox.style.display = "block";
+      if (missingCount === 0) {
+        finalBox.className = "final-box ok";
+        finalBox.innerHTML = `<h3>✅ 全部工具协同完成！</h3><p>${m.successSummary}</p>`;
+        stepStatus.textContent = "任务完成 ✅";
+      } else {
+        finalBox.className = "final-box partial";
+        finalBox.innerHTML = `<h3>⚠️ 任务未完全完成（缺了 ${missingCount} 个工具）</h3><p>Agent 知道自己该干什么，但左侧工具栏里没给它装齐对应的“手脚”。把缺的工具点亮再跑一次试试！</p>`;
+        stepStatus.textContent = "缺少工具 ⚠️";
+      }
+
+      brainCore.classList.remove("working");
+      running = false;
+      runBtn.disabled = false;
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>

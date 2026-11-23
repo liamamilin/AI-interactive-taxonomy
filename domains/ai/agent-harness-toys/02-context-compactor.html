@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：上下文急救室 · 悟懂 Harness 的内存管家</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --sky: #0284c7;
+      --sky-soft: #f0f9ff;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1080px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 700px) {
+      .kpi-strip { grid-template-columns: 1fr; }
+    }
+
+    .kpi {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+    }
+    .kpi-label { font-size: 12.5px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+    .kpi-val { font-size: 26px; font-weight: 800; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .kpi-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tank-bar {
+      height: 26px;
+      border-radius: 13px;
+      background: #e2e8f0;
+      overflow: hidden;
+      display: flex;
+      margin-bottom: 16px;
+      border: 2px solid #cbd5e1;
+      transition: border-color 0.2s;
+    }
+    .tank-bar.overflow { border-color: var(--red); animation: shake 0.35s ease; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .tank-seg {
+      height: 100%;
+      transition: width 0.35s ease;
+    }
+
+    .block-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 16px;
+    }
+
+    .ctx-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: #ffffff;
+      transition: all 0.25s ease;
+    }
+    .ctx-block.core { border-color: #0284c7; background: var(--sky-soft); }
+    .ctx-block.bloat { border-color: #fca5a5; background: var(--red-soft); }
+    .ctx-block.trimmed { border-color: #a7f3d0; background: var(--green-soft); }
+
+    .blk-info { font-size: 13.5px; font-weight: 650; }
+    .blk-sub { font-size: 12px; color: var(--muted); font-weight: 400; }
+    .blk-size {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      flex-shrink: 0;
+    }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s, background 0.15s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-sky { background: var(--sky); color: #fff; flex: 1; }
+    .btn-sky:hover:not(:disabled) { background: #0369a1; }
+    .btn-gray { background: #f3f4f6; color: #374151; }
+    .btn-gray:hover:not(:disabled) { background: #e5e7eb; }
+
+    .action-card {
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      background: #fafbfe;
+    }
+    .action-card h3 { font-size: 14.5px; font-weight: 750; margin-bottom: 4px; }
+    .action-card p { font-size: 12.5px; color: var(--muted); margin-bottom: 10px; }
+
+    .btn-green { background: var(--green); color: #fff; width: 100%; }
+    .btn-green:hover:not(:disabled) { background: #047857; }
+
+    .notepad-box {
+      border: 1.5px dashed #0284c7;
+      border-radius: 14px;
+      padding: 14px;
+      background: var(--sky-soft);
+      font-size: 12.5px;
+      color: #0c4a6e;
+      margin-top: 12px;
+    }
+    .notepad-box strong { display: block; margin-bottom: 4px; font-size: 13px; }
+
+    .alert-banner {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #374151;
+    }
+    .alert-banner.danger { background: var(--red-soft); border-color: #fecaca; color: #991b1b; }
+    .alert-banner.good { background: var(--green-soft); border-color: #a7f3d0; color: #065f46; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🧰 上下文急救室：Harness 如何当好 AI 的“内存管家”？</h1>
+        <p>先连点 3 次「执行一步工具调用」看内存如何瞬间爆仓，再用右侧 Harness 三板斧把内存和账单打下来！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="kpi-strip">
+      <div class="kpi">
+        <div class="kpi-label">📦 上下文窗口占用（Context Window）</div>
+        <div class="kpi-val" id="kpiUsage">8%</div>
+        <div class="kpi-sub" id="kpiUsageSub">安全充裕</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">🧠 模型专注度（有效信息占比）</div>
+        <div class="kpi-val" id="kpiIq">100%</div>
+        <div class="kpi-sub" id="kpiIqSub">精准聚焦核心需求</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">💰 单轮 API 账单估算</div>
+        <div class="kpi-val" id="kpiCost">$0.02</div>
+        <div class="kpi-sub">每次对话都要重读整个水箱</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>
+          <span>模型工作记忆水箱（Context 水位）</span>
+          <span style="font-size:12px;color:var(--muted);" id="stepTag">已执行 0 步工具调用</span>
+        </h2>
+
+        <div class="tank-bar" id="tankBar"></div>
+        <div class="block-list" id="blockList"></div>
+
+        <div class="btn-row">
+          <button class="btn btn-sky" id="pourBtn" onclick="pourNextToolOutput()">⚡ 模拟 Agent 执行一步工具调用</button>
+          <button class="btn btn-gray" onclick="resetTank()">🔄 重置实验</button>
+        </div>
+
+        <div class="alert-banner" id="alertBanner">
+          💡 <strong>提示：</strong>点击上方蓝色按钮，看看真实 Agent 调几次工具（读日志、查依赖、多轮对话）后，上下文水箱会膨胀成什么样！
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2><span>🛠️ Harness 内存管理三板斧</span></h2>
+
+        <div class="action-card">
+          <h3>✂️ 1. 工具输出裁剪（Tool Truncation）</h3>
+          <p>把 5000 行服务器日志和巨型 JSON 砍掉头尾噪音，只保留真正有用的 2 行报错。</p>
+          <button class="btn btn-green" id="btnTrunc" onclick="applyTruncation()">立即裁剪工具垃圾日志</button>
+        </div>
+
+        <div class="action-card">
+          <h3>📝 2. 历史对话压缩（Context Compaction）</h3>
+          <p>把 12 轮前已经解决的旧对话浓缩成一句话摘要，释放大片工作记忆。</p>
+          <button class="btn btn-green" id="btnCompact" onclick="applyCompaction()">立即压缩早期对话历史</button>
+        </div>
+
+        <div class="action-card" style="margin-bottom:0;">
+          <h3>💾 3. 状态外置到硬盘（External task.md）</h3>
+          <p>把冗长的中间草稿与进度清单挪出聊天上下文，存进外部记事本，随用随读不占内存！</p>
+          <button class="btn btn-green" id="btnExternal" onclick="applyExternalize()">把中间草稿写进外部文件</button>
+        </div>
+
+        <div class="notepad-box" id="notepadBox">
+          <strong>📒 外部硬盘状态文件（task.md · 0% 内存占用）</strong>
+          <span id="notepadContent">（暂无外置记录）</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const INCOMING_QUEUE = [
+      {
+        id: "logs",
+        kind: "tool",
+        title: "📄 工具返回：5000 行服务器原始日志",
+        sub: "98% 都是无关的健康检查记录，真正报错只有 2 行",
+        size: 36,
+        trimmedTitle: "✂️ 裁剪后日志：仅保留第 42 行关键报错",
+        trimmedSize: 4,
+        color: "#ef4444",
+        trimmedColor: "#10b981"
+      },
+      {
+        id: "history",
+        kind: "chat",
+        title: "💬 12 轮前已解决的早期讨论与试错记录",
+        sub: "包含大量废弃方案与客套话，正在分散注意力",
+        size: 26,
+        trimmedTitle: "📝 压缩摘要：前期已确认采用方案 B",
+        trimmedSize: 3,
+        color: "#f59e0b",
+        trimmedColor: "#10b981"
+      },
+      {
+        id: "deps",
+        kind: "tool",
+        title: "📦 工具返回：完整 package-lock 依赖树",
+        sub: "一次性吐出上千个库版本号，瞬间塞爆窗口",
+        size: 28,
+        trimmedTitle: "✂️ 裁剪后依赖：仅保留核心 3 个框架版本",
+        trimmedSize: 3,
+        color: "#dc2626",
+        trimmedColor: "#10b981"
+      },
+      {
+        id: "scratch",
+        kind: "draft",
+        title: "🧾 冗长的多阶段计划草稿与中间备忘",
+        sub: "其实不需要每轮都让模型重复背诵",
+        size: 22,
+        trimmedTitle: "💾 已外置到 task.md（仅留 1 行指针）",
+        trimmedSize: 1,
+        color: "#8b5cf6",
+        trimmedColor: "#0284c7"
+      }
+    ];
+
+    let blocks = [];
+    let queueCursor = 0;
+    let externalNotes = [];
+
+    const tankBar = document.getElementById("tankBar");
+    const blockList = document.getElementById("blockList");
+    const kpiUsage = document.getElementById("kpiUsage");
+    const kpiUsageSub = document.getElementById("kpiUsageSub");
+    const kpiIq = document.getElementById("kpiIq");
+    const kpiIqSub = document.getElementById("kpiIqSub");
+    const kpiCost = document.getElementById("kpiCost");
+    const alertBanner = document.getElementById("alertBanner");
+    const pourBtn = document.getElementById("pourBtn");
+    const stepTag = document.getElementById("stepTag");
+    const notepadContent = document.getElementById("notepadContent");
+
+    function resetTank() {
+      blocks = [
+        {
+          id: "core",
+          kind: "core",
+          title: "⭐ 用户核心需求 & 系统规则（必须牢记）",
+          sub: "修复支付超时 Bug，绝不能动数据库表结构",
+          size: 8,
+          trimmed: false,
+          color: "#0284c7"
+        }
+      ];
+      queueCursor = 0;
+      externalNotes = [];
+      render();
+    }
+
+    function pourNextToolOutput() {
+      if (queueCursor >= INCOMING_QUEUE.length) return;
+      const item = { ...INCOMING_QUEUE[queueCursor], trimmed: false };
+      blocks.push(item);
+      queueCursor++;
+      render();
+    }
+
+    function applyTruncation() {
+      let changed = false;
+      blocks.forEach(b => {
+        if (b.kind === "tool" && !b.trimmed) {
+          b.trimmed = true;
+          b.title = b.trimmedTitle;
+          b.sub = "Harness 已自动剔除 90%+ 冗余噪音";
+          b.size = b.trimmedSize;
+          b.color = b.trimmedColor;
+          changed = true;
+        }
+      });
+      if (changed) render();
+    }
+
+    function applyCompaction() {
+      let changed = false;
+      blocks.forEach(b => {
+        if (b.kind === "chat" && !b.trimmed) {
+          b.trimmed = true;
+          b.title = b.trimmedTitle;
+          b.sub = "已由 Harness 自动生成高密度摘要胶囊";
+          b.size = b.trimmedSize;
+          b.color = b.trimmedColor;
+          changed = true;
+        }
+      });
+      if (changed) render();
+    }
+
+    function applyExternalize() {
+      let changed = false;
+      blocks.forEach(b => {
+        if (b.kind === "draft" && !b.trimmed) {
+          b.trimmed = true;
+          b.title = b.trimmedTitle;
+          b.sub = "完整计划已持久化到外部硬盘，不占宝贵 Context";
+          b.size = b.trimmedSize;
+          b.color = b.trimmedColor;
+          externalNotes.push("✔ 已归档：多阶段执行计划与中间校验记录");
+          changed = true;
+        }
+      });
+      if (changed) render();
+    }
+
+    function render() {
+      const total = blocks.reduce((acc, b) => acc + b.size, 0);
+      const bloat = blocks.filter(b => b.kind !== "core" && !b.trimmed).reduce((a, b) => a + b.size, 0);
+      const iq = Math.max(18, Math.round(100 - bloat * 0.85));
+      const cost = (0.015 + total * 0.0045).toFixed(2);
+
+      // Tank bar
+      tankBar.innerHTML = "";
+      tankBar.classList.toggle("overflow", total > 100);
+      blocks.forEach(b => {
+        const seg = document.createElement("div");
+        seg.className = "tank-seg";
+        const w = total > 100 ? (b.size / total) * 100 : b.size;
+        seg.style.width = w + "%";
+        seg.style.background = b.color;
+        seg.title = `${b.title} (${b.size}%)`;
+        tankBar.appendChild(seg);
+      });
+
+      // KPIs
+      kpiUsage.textContent = total + "%";
+      kpiUsage.style.color = total > 100 ? "var(--red)" : total > 70 ? "var(--amber)" : "var(--green)";
+      kpiUsageSub.textContent = total > 100 ? "💥 内存溢出！早期需求被挤丢" : total > 70 ? "⚠️ 水位偏高，急需清理" : "✅ 健康充裕";
+
+      kpiIq.textContent = iq + "%";
+      kpiIq.style.color = iq < 50 ? "var(--red)" : iq < 75 ? "var(--amber)" : "var(--green)";
+      kpiIqSub.textContent = iq < 50 ? "😵 噪音淹没信号，模型开始胡言乱语" : iq < 75 ? "注意：冗余信息正在分散注意力" : "🎯 信噪比极佳，稳稳记住需求";
+
+      kpiCost.textContent = "$" + cost;
+      stepTag.textContent = `已执行 ${queueCursor} / ${INCOMING_QUEUE.length} 步工具调用`;
+      pourBtn.disabled = queueCursor >= INCOMING_QUEUE.length;
+
+      // Blocks
+      blockList.innerHTML = "";
+      blocks.forEach(b => {
+        const div = document.createElement("div");
+        const cls = b.kind === "core" ? "core" : (b.trimmed ? "trimmed" : "bloat");
+        div.className = "ctx-block " + cls;
+        div.innerHTML = `
+          <div>
+            <div class="blk-info">${b.title}</div>
+            <div class="blk-sub">${b.sub}</div>
+          </div>
+          <span class="blk-size">${b.size}%</span>
+        `;
+        blockList.appendChild(div);
+      });
+
+      // Buttons enable/disable
+      document.getElementById("btnTrunc").disabled = !blocks.some(b => b.kind === "tool" && !b.trimmed);
+      document.getElementById("btnCompact").disabled = !blocks.some(b => b.kind === "chat" && !b.trimmed);
+      document.getElementById("btnExternal").disabled = !blocks.some(b => b.kind === "draft" && !b.trimmed);
+
+      notepadContent.innerHTML = externalNotes.length ? externalNotes.join("<br/>") : "（暂无外置记录）";
+
+      // Banner
+      if (total > 100) {
+        alertBanner.className = "alert-banner danger";
+        alertBanner.innerHTML = "🚨 <strong>上下文爆仓警报！</strong>没有 Harness 清理垃圾日志，窗口已突破 100%，模型既变笨又费钱！快点右侧的「三板斧」抢救！";
+      } else if (queueCursor === INCOMING_QUEUE.length && bloat === 0) {
+        alertBanner.className = "alert-banner good";
+        alertBanner.innerHTML = "🎉 <strong>抢救成功！</strong>4 步重型任务跑完，Harness 通过裁剪日志 + 压缩对话 + 状态外置，把水位死死压在 <strong>" + total + "%</strong>，既省了 80% 账单又保住了 100% 专注度！";
+      } else {
+        alertBanner.className = "alert-banner";
+        alertBanner.innerHTML = "💡 <strong>操作建议：</strong>继续点击「模拟 Agent 执行一步工具调用」往水箱里灌数据，体验内存爆仓后再用右侧三板斧一键压缩！";
+      }
+    }
+
+    resetTank();
+  </script>
+</body>
+</html>

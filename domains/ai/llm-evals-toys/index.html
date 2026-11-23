@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2 分钟悟懂 LLM 评测与竞技场 · 交互式科普玩具箱</title>
+  <style>
+    :root { --bg:#f6f8fc; --surface:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --amber:#d97706; --amber-soft:#fffbeb; --red:#dc2626; --red-soft:#fef2f2; --indigo:#4f46e5; --indigo-soft:#eef2ff; --shadow:0 10px 30px rgba(15,23,42,.06); --radius:20px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:radial-gradient(circle at top left,#fef3c7 0%,var(--bg) 45%,#eef2ff 100%); color:var(--ink); min-height:100vh; line-height:1.6; padding:40px 20px 64px; }
+    .container { max-width:1040px; margin:0 auto; }
+    header { text-align:center; margin-bottom:44px; }
+    .badge { display:inline-flex; padding:6px 14px; border-radius:999px; background:var(--amber-soft); color:var(--amber); font-size:13px; font-weight:700; margin-bottom:14px; }
+    h1 { font-size:clamp(28px,4.2vw,40px); font-weight:850; margin-bottom:10px; }
+    .subtitle { font-size:16px; color:var(--muted); max-width:680px; margin:0 auto; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:24px; margin-top:32px; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:26px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; text-decoration:none; color:inherit; transition:transform .2s; }
+    .card:hover { transform:translateY(-6px); }
+    .icon-box { width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:16px; }
+    .c1 .icon-box { background:var(--amber-soft); } .c2 .icon-box { background:var(--red-soft); } .c3 .icon-box { background:var(--indigo-soft); }
+    .card h2 { font-size:21px; font-weight:800; margin-bottom:6px; }
+    .tag { font-size:13px; font-weight:700; margin-bottom:12px; }
+    .c1 .tag { color:var(--amber); } .c2 .tag { color:var(--red); } .c3 .tag { color:var(--indigo); }
+    .card p { font-size:14px; color:#475569; flex:1; margin-bottom:18px; }
+    .cta { display:block; text-align:center; padding:11px; border-radius:12px; font-weight:700; color:#fff; font-size:14.5px; }
+    .c1 .cta { background:var(--amber); } .c2 .cta { background:var(--red); } .c3 .cta { background:var(--indigo); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">🏆 主题 16 · LLM Evals &amp; Chatbot Arena</div>
+      <h1>2 分钟悟懂 LLM 评测与竞技场</h1>
+      <p class="subtitle">各大模型天天发榜宣称“刷新 SOTA 第一名”，到底该信谁？玩完这 3 个小游戏，练就一眼看穿评测水分的火眼金睛。</p>
+    </header>
+    <main class="grid">
+      <a class="card c1" href="./01-benchmark-contamination.html"><div class="icon-box">💧</div><h2>榜单水分透视仪</h2><div class="tag">原理：Data Contamination（题库泄露刷榜）</div><p>把经典评测题悄悄改掉一个数字，看看“公开榜 98 分的刷榜王”如何当场现原形！</p><div class="cta">开始玩《榜单水分透视仪》 →</div></a>
+      <a class="card c2" href="./02-llm-as-judge-bias.html"><div class="icon-box">⚖️</div><h2>AI 判卷官的 3 大偏见</h2><div class="tag">原理：LLM-as-a-Judge 话痨/位置偏见</div><p>揭秘用 AI 给 AI 打分时的三大暗坑，再一键开启“位置互换盲测”看评分如何恢复公正！</p><div class="cta">开始玩《AI 判卷官偏见》 →</div></a>
+      <a class="card c3" href="./03-arena-elo-matcher.html"><div class="icon-box">⚔️</div><h2>盲测竞技场（Elo）</h2><div class="tag">原理：Chatbot Arena 盲测天梯与 Elo 积分</div><p>亲自当 3 轮匿名盲测评委，只看回答不看大厂招牌，投票揭晓幕后真身并实时更新天梯排名！</p><div class="cta">开始玩《盲测竞技场》 →</div></a>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：词义变色龙 · 静态词向量 vs 动态语境向量</title>
+  <style>
+    :root {
+      --bg: #f6f8fc; --card: #ffffff; --ink: #0f172a; --muted: #64748b; --border: #e2e8f0;
+      --emerald: #059669; --emerald-soft: #ecfdf5; --blue: #2563eb; --blue-soft: #eff6ff;
+      --radius: 18px; --shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg); color: var(--ink); min-height: 100vh; padding: 24px 18px 60px; line-height: 1.55;
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+    .back-link { text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 600; padding: 7px 12px; border-radius: 10px; background: var(--card); border: 1px solid var(--border); }
+    .title-block h1 { font-size: 24px; font-weight: 850; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .grid { display: grid; grid-template-columns: 380px 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 22px; box-shadow: var(--shadow);
+    }
+    .panel h2 { font-size: 16px; font-weight: 800; margin-bottom: 12px; }
+
+    .mode-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .m-btn {
+      border: 2px solid var(--border); background: #f9fafb; border-radius: 12px;
+      padding: 10px; cursor: pointer; text-align: left; font-size: 12.5px;
+    }
+    .m-btn strong { display: block; font-size: 13.5px; margin-bottom: 2px; }
+    .m-btn.active { border-color: var(--emerald); background: var(--emerald-soft); color: #065f46; }
+
+    .sent-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .sent-btn {
+      border: 2px solid var(--border); border-radius: 14px; padding: 12px 14px;
+      background: #fff; cursor: pointer; text-align: left; font-size: 14px; font-weight: 650;
+      transition: all 0.16s;
+    }
+    .sent-btn:hover { border-color: #94a3b8; }
+    .sent-btn.active { border-color: var(--blue); background: var(--blue-soft); color: #1e3a8a; }
+    .sent-btn mark { background: #fde68a; padding: 1px 5px; border-radius: 5px; }
+
+    .map-box {
+      position: relative; background: #0f172a; border-radius: 16px; height: 360px; overflow: hidden; margin-bottom: 14px;
+    }
+    .cluster {
+      position: absolute; border-radius: 50%; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      border: 1.5px dashed rgba(255,255,255,0.22); color: #cbd5e1; font-size: 12.5px; font-weight: 700;
+    }
+    .chameleon-dot {
+      position: absolute; width: 92px; height: 42px; margin-left: -46px; margin-top: -21px;
+      border-radius: 999px; background: #10b981; color: #fff; font-weight: 850; font-size: 14px;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.28), 0 8px 20px rgba(0,0,0,0.35);
+      transition: left 0.65s cubic-bezier(0.22, 1, 0.36, 1), top 0.65s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s;
+      z-index: 5;
+    }
+    .coord-tag {
+      position: absolute; bottom: 12px; left: 14px; font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: #94a3b8; background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px;
+    }
+
+    .aha {
+      border-radius: 12px; padding: 13px 15px; font-size: 13.5px;
+      background: var(--emerald-soft); border: 1px solid #a7f3d0; color: #065f46;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🦎 词义变色龙：为什么同一个“苹果”能瞬间变身 3 种意思？</h1>
+        <p>切换下方不同句子，观察「苹果」的坐标点在老式静态模型与现代大模型里的巨大差异！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>1. 选择模型代际与语境句子</h2>
+        <div class="mode-row">
+          <button class="m-btn" id="mOld" onclick="setEra('old')">
+            <strong>🏛️ 2013 老式静态向量</strong>
+            <span>Word2Vec：每个词坐标焊死不动</span>
+          </button>
+          <button class="m-btn active" id="mNew" onclick="setEra('new')">
+            <strong>✨ 现代动态语境向量</strong>
+            <span>Transformer：随语境实时漂移</span>
+          </button>
+        </div>
+
+        <div class="sent-list" id="sentList"></div>
+      </div>
+
+      <div class="panel">
+        <h2>2. 实时语义坐标地图（观察“苹果”滑向哪片星云）</h2>
+        <div class="map-box">
+          <div class="cluster" style="left:6%;top:12%;width:155px;height:155px;background:rgba(244,63,94,0.14);">
+            <span style="font-size:24px;">🍎🍌🍓</span>
+            <span>水果食物星云</span>
+          </div>
+          <div class="cluster" style="right:6%;top:12%;width:155px;height:155px;background:rgba(59,130,246,0.14);">
+            <span style="font-size:24px;">📱💻芯片</span>
+            <span>科技数码星云</span>
+          </div>
+          <div class="cluster" style="left:36%;bottom:6%;width:160px;height:135px;background:rgba(245,158,11,0.14);">
+            <span style="font-size:24px;">📈💰纳斯达克</span>
+            <span>金融股市星云</span>
+          </div>
+
+          <div class="chameleon-dot" id="dot" style="left:50%;top:45%;">🦎 苹果</div>
+          <div class="coord-tag" id="coordTag">当前坐标：[0.12, 0.88]</div>
+        </div>
+
+        <div class="aha" id="ahaBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SENTENCES = [
+      {
+        id: "fruit",
+        html: "我刚削了一个又脆又甜的<mark>苹果</mark>当下午茶。",
+        x: 20, y: 34, color: "#e11d48",
+        vec: "[0.89, 0.14, -0.32]",
+        desc: "🍎 周围出现「削」「脆」「甜」「下午茶」，动态向量瞬间把「苹果」拉进左上角的水果星云！"
+      },
+      {
+        id: "tech",
+        html: "今年秋天<mark>苹果</mark>发布了搭载最新芯片的手机。",
+        x: 80, y: 34, color: "#2563eb",
+        vec: "[-0.74, 0.91, 0.45]",
+        desc: "📱 周围出现「发布」「芯片」「手机」，同一个词立刻漂移到右上角的科技数码星云！"
+      },
+      {
+        id: "finance",
+        html: "财报超预期后，<mark>苹果</mark>盘后市值暴涨 800 亿美元。",
+        x: 50, y: 74, color: "#d97706",
+        vec: "[0.05, -0.62, 0.94]",
+        desc: "📈 周围出现「财报」「市值」「亿美元」，坐标点稳稳落入底部的金融股市星云！"
+      }
+    ];
+
+    let era = "new";
+    let curSent = 0;
+
+    function setEra(e) {
+      era = e;
+      document.getElementById("mOld").classList.toggle("active", e === "old");
+      document.getElementById("mNew").classList.toggle("active", e === "new");
+      render();
+    }
+
+    function render() {
+      const list = document.getElementById("sentList");
+      list.innerHTML = "";
+      SENTENCES.forEach((s, idx) => {
+        const b = document.createElement("button");
+        b.className = "sent-btn" + (idx === curSent ? " active" : "");
+        b.innerHTML = s.html;
+        b.onclick = () => { curSent = idx; render(); };
+        list.appendChild(b);
+      });
+
+      const s = SENTENCES[curSent];
+      const dot = document.getElementById("dot");
+      const coordTag = document.getElementById("coordTag");
+      const aha = document.getElementById("ahaBox");
+
+      if (era === "old") {
+        dot.style.left = "50%";
+        dot.style.top = "42%";
+        dot.style.background = "#64748b";
+        coordTag.textContent = "老式静态坐标：[0.00, 0.00, 0.00]（永远卡在正中间！）";
+        aha.innerHTML = "🏛️ <strong>老式词向量的死穴：</strong>不管你把句子怎么换，「苹果」永远只有一个焊死的平均坐标，尴尬地卡在水果、科技、金融三不管的中间地带！切回「✨ 现代动态语境向量」看看变化。";
+      } else {
+        dot.style.left = s.x + "%";
+        dot.style.top = s.y + "%";
+        dot.style.background = s.color;
+        coordTag.textContent = `动态语境向量：${s.vec}`;
+        aha.innerHTML = `✨ <strong>Transformer 动态向量：</strong>${s.desc}`;
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2 分钟悟懂 AI Agent · 交互式科普玩具箱</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --surface: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --indigo: #4f46e5;
+      --indigo-soft: #eef2ff;
+      --teal: #0d9488;
+      --teal-soft: #f0fdfa;
+      --rose: #e11d48;
+      --rose-soft: #fff1f2;
+      --shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top left, #e0e7ff 0%, var(--bg) 44%, #f9fafb 100%);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.6;
+      padding: 40px 20px 64px;
+    }
+
+    .container { max-width: 1040px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      margin-bottom: 44px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--indigo-soft);
+      color: var(--indigo);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(28px, 4.2vw, 42px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 660px;
+      margin: 0 auto;
+    }
+
+    .pipeline {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 28px 0 36px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .pipe-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 40px rgba(17, 24, 39, 0.10);
+      border-color: #cbd5e1;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .icon-box {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+
+    .card.c1 .icon-box { background: var(--indigo-soft); }
+    .card.c2 .icon-box { background: var(--teal-soft); }
+    .card.c3 .icon-box { background: var(--rose-soft); }
+
+    .step-num {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: var(--muted);
+    }
+
+    .card h2 {
+      font-size: 22px;
+      font-weight: 750;
+      margin-bottom: 8px;
+    }
+
+    .concept-tag {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    .card.c1 .concept-tag { color: var(--indigo); }
+    .card.c2 .concept-tag { color: var(--teal); }
+    .card.c3 .concept-tag { color: var(--rose); }
+
+    .card p {
+      font-size: 14.5px;
+      color: #4b5563;
+      margin-bottom: 20px;
+      flex: 1;
+    }
+
+    .aha-box {
+      background: #f8fafc;
+      border: 1px solid #eef2f7;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #374151;
+      margin-bottom: 20px;
+    }
+
+    .aha-box strong { color: var(--ink); }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 650;
+      font-size: 14.5px;
+      color: #fff;
+      transition: background 0.18s ease;
+    }
+
+    .card.c1 .cta { background: var(--indigo); }
+    .card.c1:hover .cta { background: #4338ca; }
+
+    .card.c2 .cta { background: var(--teal); }
+    .card.c2:hover .cta { background: #0f766e; }
+
+    .card.c3 .cta { background: var(--rose); }
+    .card.c3:hover .cta { background: #be123c; }
+
+    footer {
+      text-align: center;
+      margin-top: 44px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">🤖 交互式科普原型 · 纯前端零依赖</div>
+      <h1>2 分钟悟懂 AI Agent：交互玩具箱</h1>
+      <p class="subtitle">
+        Agent（智能体）和普通聊天机器人到底差在哪？玩完这 3 个 2 分钟小游戏，亲手体验它如何“装上手脚干活”、如何“撞墙后自己循环纠错”、以及为什么必须给它装上“人工审批闸门”。
+      </p>
+      <div class="pipeline">
+        <span class="pipe-step">① 装上手脚（Tool Calling）</span>
+        <span>→</span>
+        <span class="pipe-step">② 自主循环（ReAct Loop）</span>
+        <span>→</span>
+        <span class="pipe-step">③ 权限闸门（Human-in-the-Loop）</span>
+      </div>
+    </header>
+
+    <main class="grid">
+      <a class="card c1" href="./01-tool-calling-bench.html">
+        <div class="card-top">
+          <div class="icon-box">🦾</div>
+          <span class="step-num">玩具 01 · 约 2 分钟</span>
+        </div>
+        <h2>手脚装配台</h2>
+        <div class="concept-tag">原理：Tool Calling（工具调用）</div>
+        <p>先看“纯大脑”面对查天气、算账、发邮件时如何一本正经地瞎猜，再亲手给它插上不同工具卡，观察它如何自动调度外援完成任务。</p>
+        <div class="aha-box">
+          <strong>顿悟点：</strong>Agent = 大脑（LLM）+ 手脚（工具），从“只会动嘴”进化到“真的动手”。
+        </div>
+        <div class="cta">开始玩《手脚装配台》 →</div>
+      </a>
+
+      <a class="card c2" href="./02-react-maze-loop.html">
+        <div class="card-top">
+          <div class="icon-box">🧭</div>
+          <span class="step-num">玩具 02 · 约 2 分钟</span>
+        </div>
+        <h2>ReAct 迷宫特工</h2>
+        <div class="concept-tag">原理：ReAct 循环（思考 → 行动 → 观察 → 纠错）</div>
+        <p>派特工去迷宫拿宝箱，你还可以随时放路障捣乱！对比普通问答“撞墙就摆烂”与 Agent 循环试错、找钥匙、绕路破局的全过程。</p>
+        <div class="aha-box">
+          <strong>顿悟点：</strong>普通 AI 是一问一答，Agent 是给一个目标，自己观察报错并循环重试直到搞定。
+        </div>
+        <div class="cta">开始玩《ReAct 迷宫特工》 →</div>
+      </a>
+
+      <a class="card c3" href="./03-autonomy-guardrails.html">
+        <div class="card-top">
+          <div class="icon-box">🚧</div>
+          <span class="step-num">玩具 03 · 约 2 分钟</span>
+        </div>
+        <h2>失控的实习生：权限闸门</h2>
+        <div class="concept-tag">原理：任务拆解 &amp; Human-in-the-Loop（人类审批）</div>
+        <p>把邮箱清理和发合同交给实习生 Agent，调节“自主权滑块”：体验手把手模式有多累、全自动放飞如何 3 秒社死，以及高危刹车如何救场。</p>
+        <div class="aha-box">
+          <strong>顿悟点：</strong>好 Agent 不是放任不管，而是常规操作全自动、高危动作前自动刹车等你点头。
+        </div>
+        <div class="cta">开始玩《权限闸门》 →</div>
+      </a>
+    </main>
+
+    <footer>
+      所有原型均为单文件本地 HTML，直接双击即可运行，无需联网或 API Key。
+    </footer>
+  </div>
+</body>
+</html>

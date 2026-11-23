@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：盲测竞技场（Elo）· Chatbot Arena 原理</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --indigo:#4f46e5; --indigo-soft:#eef2ff; --green:#059669; --green-soft:#ecfdf5; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:980px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .grid { display:grid; grid-template-columns:1.35fr 1fr; gap:18px; align-items:start; }
+    @media (max-width:820px) { .grid { grid-template-columns:1fr; } }
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+
+    .ab-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:14px 0; }
+    @media (max-width:600px) { .ab-row { grid-template-columns:1fr; } }
+    .ab { border:2px solid var(--border); border-radius:14px; padding:14px; background:#f8fafc; cursor:pointer; transition:all .16s; display:flex; flex-direction:column; justify-content:space-between; gap:10px; }
+    .ab:hover { border-color:var(--indigo); background:var(--indigo-soft); }
+    .ab-btn { text-align:center; padding:8px; border-radius:9px; background:var(--indigo); color:#fff; font-weight:750; font-size:13px; }
+
+    .lb-row { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:10px; background:#f8fafc; border:1px solid #e2e8f0; margin-bottom:8px; font-size:13.5px; font-weight:700; }
+    .elo { font-family:ui-monospace,monospace; color:var(--indigo); font-size:15px; }
+    .reveal { border-radius:12px; padding:13px 15px; background:var(--green-soft); border:1px solid #a7f3d0; color:#065f46; font-size:13.5px; margin-top:10px; display:none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>⚔️ 盲测竞技场（Chatbot Arena）：Elo 天梯榜是怎么排出来的？</h1>
+        <p>不看大厂名字，纯凭直觉投票选出更好的回答——投票后立刻揭晓幕后真身并实时刷新 Elo 积分！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <div style="font-size:12.5px;font-weight:750;color:var(--muted);" id="roundTag">盲测对决 1 / 2</div>
+        <div style="font-size:16px;font-weight:800;margin-top:4px;" id="qPrompt"></div>
+        <div class="ab-row" id="abRow"></div>
+        <div class="reveal" id="revealBox"></div>
+      </div>
+
+      <div class="panel">
+        <h2 style="font-size:16px;font-weight:800;margin-bottom:12px;">🏆 实时 Elo 天梯排行榜</h2>
+        <div id="lbBox"></div>
+        <div style="font-size:12.5px;color:var(--muted);margin-top:12px;">
+          💡 <strong>Elo 机制：</strong>借用国际象棋排名算法——弱队爆冷赢强队加分极多，强队赢弱队只加一点分。全球网友匿名盲投数百万次后，谁真正好用一目了然！
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const RATINGS = { "Model Alpha": 1280, "Model Beta": 1240, "Model Gamma": 1200 };
+    const MATCHES = [
+      {
+        q: "用户问：「用一句大白话向 8 岁小孩解释什么是重力」",
+        aName: "Model Beta", aText: "重力就像地球妈妈手里一根看不见的橡皮筋，不管你跳多高，它都会轻轻把你拉回地面抱住！",
+        bName: "Model Alpha", bText: "重力是具有质量的物体之间相互吸引的基本自然力，地球的万有引力使物体产生向下的加速度。"
+      },
+      {
+        q: "用户问：「帮我把这句话改得更委婉：‘你做的方案完全不行，重写！’」",
+        aName: "Model Alpha", aText: "“这份初稿有不错的出发点，不过有几个核心细节和预期还有差距，我们对齐一下重点再迭代一版吧？”",
+        bName: "Model Gamma", bText: "“请重新考虑你的方案，因为目前无法通过审核。”"
+      }
+    ];
+    let cur = 0, voted = false;
+
+    function updateElo(winName, loseName) {
+      const ra = RATINGS[winName], rb = RATINGS[loseName];
+      const ea = 1 / (1 + Math.pow(10, (rb - ra) / 400));
+      const delta = Math.round(32 * (1 - ea));
+      RATINGS[winName] += delta;
+      RATINGS[loseName] -= delta;
+      return delta;
+    }
+
+    function renderBoard() {
+      const sorted = Object.entries(RATINGS).sort((a,b) => b[1] - a[1]);
+      document.getElementById("lbBox").innerHTML = sorted.map(([name, score], i) => `
+        <div class="lb-row"><span>#${i+1} ${name}</span><span class="elo">${score} Elo</span></div>
+      `).join("");
+    }
+
+    function renderMatch() {
+      voted = false;
+      const m = MATCHES[cur];
+      document.getElementById("roundTag").textContent = `盲测对决 ${cur + 1} / ${MATCHES.length}`;
+      document.getElementById("qPrompt").textContent = m.q;
+      document.getElementById("revealBox").style.display = "none";
+      document.getElementById("abRow").innerHTML = `
+        <div class="ab" onclick="vote('A')"><div><strong>🎭 匿名模型 A</strong><p style="font-size:13.5px;margin-top:6px;">${m.aText}</p></div><div class="ab-btn">👍 投给 A</div></div>
+        <div class="ab" onclick="vote('B')"><div><strong>🎭 匿名模型 B</strong><p style="font-size:13.5px;margin-top:6px;">${m.bText}</p></div><div class="ab-btn">👍 投给 B</div></div>
+      `;
+      renderBoard();
+    }
+
+    function vote(side) {
+      if (voted) return;
+      voted = true;
+      const m = MATCHES[cur];
+      const winner = side === "A" ? m.aName : m.bName;
+      const loser = side === "A" ? m.bName : m.aName;
+      const delta = updateElo(winner, loser);
+      renderBoard();
+
+      const rev = document.getElementById("revealBox");
+      rev.style.display = "block";
+      const nextBtn = cur < MATCHES.length - 1
+        ? `<div style="margin-top:8px;"><button onclick="cur++;renderMatch()" style="border:none;background:#059669;color:#fff;padding:7px 14px;border-radius:9px;font-weight:700;cursor:pointer;">进入下一场盲测 →</button></div>`
+        : `<div style="margin-top:8px;font-weight:800;">🎉 盲测完成！这就是 Chatbot Arena 最抗刷榜的秘密：投票前谁也不知道哪家是大厂！</div>`;
+      rev.innerHTML = `🎭 <strong>揭晓真身：</strong>A 是 <strong>${m.aName}</strong>，B 是 <strong>${m.bName}</strong>！你投给了 <strong>${winner}</strong>（+${delta} Elo），${loser}（-${delta} Elo）！${nextBtn}`;
+    }
+
+    renderMatch();
+  </script>
+</body>
+</html>

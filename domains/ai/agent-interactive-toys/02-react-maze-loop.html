@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：ReAct 迷宫特工 · 悟懂自主循环与动态纠错</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --teal: #0d9488;
+      --teal-soft: #f0fdfa;
+      --indigo: #4f46e5;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1080px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .mode-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .mode-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 16px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.16s;
+    }
+    .mode-card.active {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+    }
+    .mode-card .mt { font-size: 15px; font-weight: 750; }
+    .mode-card .ms { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 440px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .maze-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      background: #e2e8f0;
+      padding: 8px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      user-select: none;
+    }
+
+    .cell {
+      aspect-ratio: 1;
+      border-radius: 10px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.12s, background 0.18s;
+    }
+    .cell:hover { transform: scale(1.03); }
+    .cell.wall { background: #334155; cursor: not-allowed; }
+    .cell.block { background: #fef3c7; border: 2px solid #f59e0b; }
+    .cell.visited { background: #f0fdfa; }
+    .cell.agent { background: #ccfbf1; border: 2px solid var(--teal); }
+
+    .cell-coord {
+      position: absolute;
+      bottom: 2px;
+      right: 4px;
+      font-size: 9px;
+      color: #9ca3af;
+      font-family: monospace;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .btn {
+      border: none;
+      border-radius: 11px;
+      padding: 10px 14px;
+      font-size: 13.5px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: transform 0.12s, background 0.15s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-teal { background: var(--teal); color: #fff; flex: 1; }
+    .btn-teal:hover:not(:disabled) { background: #0f766e; }
+    .btn-gray { background: #f3f4f6; color: #374151; }
+    .btn-gray:hover:not(:disabled) { background: #e5e7eb; }
+
+    /* ReAct loop pills */
+    .loop-ring {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .phase-pill {
+      text-align: center;
+      padding: 9px 6px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: #f9fafb;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      transition: all 0.2s ease;
+    }
+    .phase-pill.on {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: var(--teal);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
+    }
+
+    .meter-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .meter-bar {
+      height: 7px;
+      background: #f1f5f9;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .meter-fill {
+      height: 100%;
+      background: var(--teal);
+      transition: width 0.25s ease;
+    }
+
+    .log-box {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 12px;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .log-entry {
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      background: #ffffff;
+      border-left: 4px solid #cbd5e1;
+      animation: fadeUp 0.2s ease;
+    }
+    @keyframes fadeUp {
+      from { transform: translateY(6px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .log-entry.thought { border-left-color: var(--indigo); }
+    .log-entry.action { border-left-color: var(--teal); }
+    .log-entry.obs { border-left-color: var(--amber); background: var(--amber-soft); }
+    .log-entry.win { border-left-color: #059669; background: #ecfdf5; color: #065f46; font-weight: 700; }
+    .log-entry.fail { border-left-color: var(--red); background: var(--red-soft); color: #991b1b; font-weight: 650; }
+
+    .tip-box {
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      color: #115e59;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🧭 ReAct 迷宫特工：Agent 如何遇到障碍自己纠错？</h1>
+        <p>目标：让特工拿到右上角宝箱 💎（门锁着 🚪，必须先拿左上角钥匙 🗝️）。<strong>点击任意空白格可随时放路障 🧱 捣乱！</strong></p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="mode-bar">
+      <button class="mode-card" id="modeOneShot" onclick="setMode('oneshot')">
+        <div class="mt">💬 模式 A：普通问答（单步直冲）</div>
+        <div class="ms">只按最初计划走，一旦撞到锁着的门或路障就直接报错放弃</div>
+      </button>
+      <button class="mode-card active" id="modeAgent" onclick="setMode('agent')">
+        <div class="mt">🤖 模式 B：Agent 模式（ReAct 自主循环）</div>
+        <div class="ms">发现门锁着 → 自己改去拿钥匙 → 遇到你放的路障还能实时绕路</div>
+      </button>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>
+          <span>迷宫沙盘（点空白格放/拆路障 🧱）</span>
+          <span id="keyBadge" style="font-size:12px;padding:3px 9px;border-radius:999px;background:#f3f4f6;color:var(--muted);">🗝️ 未拿到钥匙</span>
+        </h2>
+
+        <div class="maze-grid" id="mazeGrid"></div>
+
+        <div class="legend">
+          <span>🤖 特工</span>
+          <span>🗝️ 钥匙</span>
+          <span>🚪 锁着的门</span>
+          <span>💎 宝箱</span>
+          <span>🧱 你放的路障</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-teal" id="autoBtn" onclick="toggleAuto()">▶ 自动执行循环</button>
+          <button class="btn btn-gray" id="stepBtn" onclick="stepOnce()">👣 单步推进</button>
+          <button class="btn btn-gray" onclick="resetMaze()">🔄 重置</button>
+          <button class="btn btn-gray" onclick="clearBlocks()">🧹 清路障</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>
+          <span>Agent 大脑内部循环（ReAct Loop）</span>
+          <span style="font-size:12px;color:var(--muted);" id="statusTag">待命</span>
+        </h2>
+
+        <div class="loop-ring">
+          <div class="phase-pill" id="phThought">1. 🧠 思考</div>
+          <div class="phase-pill" id="phAction">2. ⚡ 行动</div>
+          <div class="phase-pill" id="phObs">3. 👀 观察</div>
+          <div class="phase-pill" id="phReplan">4. 🔁 调整</div>
+        </div>
+
+        <div class="meter-row">
+          <span>安全步数预算（Max Steps 防死循环）</span>
+          <span id="stepMeterText">0 / 24 步</span>
+        </div>
+        <div class="meter-bar">
+          <div class="meter-fill" id="stepMeterFill" style="width:0%;"></div>
+        </div>
+
+        <div class="log-box" id="logBox"></div>
+
+        <div class="tip-box">
+          💡 <strong>试玩建议：</strong>先切到「普通问答」看它一头撞在门上摆烂；再切回「Agent 模式」点自动运行——趁它走路时在前面点一格放 🧱 路障，看它怎么实时改道！如果把路彻底封死，它还会触发 Max Steps 保护机制安全停机。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const COLS = 6, ROWS = 5, MAX_STEPS = 24;
+    // 固定墙壁
+    const WALLS = new Set(["1,1", "1,2", "3,1", "3,2", "3,3", "5,1"]);
+    const KEY_POS = { x: 0, y: 0 };
+    const DOOR_POS = { x: 4, y: 0 };
+    const CHEST_POS = { x: 5, y: 0 };
+
+    let mode = "agent"; // 'oneshot' | 'agent'
+    let agentPos = { x: 0, y: 4 };
+    let hasKey = false;
+    let doorKnownLocked = false;
+    let doorOpened = false;
+    let finished = false;
+    let steps = 0;
+    let userBlocks = new Set();
+    let visited = new Set(["0,4"]);
+    let autoInterval = null;
+
+    const mazeGrid = document.getElementById("mazeGrid");
+    const logBox = document.getElementById("logBox");
+    const keyBadge = document.getElementById("keyBadge");
+    const statusTag = document.getElementById("statusTag");
+    const stepMeterText = document.getElementById("stepMeterText");
+    const stepMeterFill = document.getElementById("stepMeterFill");
+    const autoBtn = document.getElementById("autoBtn");
+    const stepBtn = document.getElementById("stepBtn");
+
+    function keyOf(x, y) { return `${x},${y}`; }
+
+    function setPhase(id) {
+      ["phThought", "phAction", "phObs", "phReplan"].forEach(p => {
+        document.getElementById(p).classList.toggle("on", p === id);
+      });
+    }
+
+    function addLog(cls, html) {
+      const d = document.createElement("div");
+      d.className = "log-entry " + cls;
+      d.innerHTML = html;
+      logBox.appendChild(d);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function isBlocked(x, y, allowDoor) {
+      if (x < 0 || x >= COLS || y < 0 || y >= ROWS) return true;
+      const k = keyOf(x, y);
+      if (WALLS.has(k) || userBlocks.has(k)) return true;
+      if (!allowDoor && !doorOpened && x === DOOR_POS.x && y === DOOR_POS.y) return true;
+      return false;
+    }
+
+    function bfsNextStep(start, goal, allowDoor) {
+      const q = [[start.x, start.y, []]];
+      const seen = new Set([keyOf(start.x, start.y)]);
+      const dirs = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+      while (q.length) {
+        const [cx, cy, path] = q.shift();
+        if (cx === goal.x && cy === goal.y) return path[0] || null;
+        for (const [dx, dy] of dirs) {
+          const nx = cx + dx, ny = cy + dy;
+          const nk = keyOf(nx, ny);
+          if (seen.has(nk)) continue;
+          if (isBlocked(nx, ny, allowDoor)) continue;
+          seen.add(nk);
+          q.push([nx, ny, [...path, { x: nx, y: ny }]]);
+        }
+      }
+      return null;
+    }
+
+    function renderMaze() {
+      mazeGrid.innerHTML = "";
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          const k = keyOf(x, y);
+          const cell = document.createElement("div");
+          let cls = "cell";
+          let icon = "";
+
+          if (WALLS.has(k)) { cls += " wall"; icon = ""; }
+          else if (userBlocks.has(k)) { cls += " block"; icon = "🧱"; }
+          else if (visited.has(k)) { cls += " visited"; }
+
+          if (x === KEY_POS.x && y === KEY_POS.y && !hasKey) icon = "🗝️";
+          if (x === DOOR_POS.x && y === DOOR_POS.y && !doorOpened) icon = "🚪";
+          if (x === CHEST_POS.x && y === CHEST_POS.y) icon = finished ? "🎉" : "💎";
+          if (x === agentPos.x && y === agentPos.y) { cls += " agent"; icon = "🤖"; }
+
+          cell.className = cls;
+          cell.innerHTML = `${icon}<span class="cell-coord">${x},${y}</span>`;
+
+          cell.onclick = () => {
+            const special = (x === agentPos.x && y === agentPos.y) ||
+                            (x === KEY_POS.x && y === KEY_POS.y) ||
+                            (x === DOOR_POS.x && y === DOOR_POS.y) ||
+                            (x === CHEST_POS.x && y === CHEST_POS.y) ||
+                            WALLS.has(k);
+            if (special) return;
+            if (userBlocks.has(k)) {
+              userBlocks.delete(k);
+              addLog("obs", `🧹 你拆除了 (${x},${y}) 处的路障。`);
+            } else {
+              userBlocks.add(k);
+              addLog("obs", `🧱 你在 (${x},${y}) 突然放了一块路障！看特工怎么应对…`);
+            }
+            renderMaze();
+          };
+          mazeGrid.appendChild(cell);
+        }
+      }
+
+      keyBadge.textContent = hasKey ? "🗝️ 已拿到钥匙！" : "🗝️ 未拿到钥匙";
+      keyBadge.style.background = hasKey ? "#fef3c7" : "#f3f4f6";
+      keyBadge.style.color = hasKey ? "#92400e" : "var(--muted)";
+
+      stepMeterText.textContent = `${steps} / ${MAX_STEPS} 步`;
+      stepMeterFill.style.width = `${Math.min(100, (steps / MAX_STEPS) * 100)}%`;
+      stepMeterFill.style.background = steps > MAX_STEPS * 0.75 ? "var(--red)" : "var(--teal)";
+    }
+
+    function stopAuto() {
+      if (autoInterval) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+      }
+      autoBtn.textContent = "▶ 自动执行循环";
+    }
+
+    function stepOnce() {
+      if (finished) return;
+      if (steps >= MAX_STEPS) {
+        finished = true;
+        stopAuto();
+        setPhase("phObs");
+        statusTag.textContent = "触发步数上限停机 🛑";
+        addLog("fail", `🛑 触发安全上限（Max Steps = ${MAX_STEPS}）：已自动终止循环，防止陷入死循环烧光 Token！`);
+        renderMaze();
+        return;
+      }
+
+      steps++;
+      statusTag.textContent = `执行中 · 第 ${steps} 步`;
+
+      // 确定当前子目标
+      let target = CHEST_POS;
+      let allowDoor = true;
+      let goalName = "宝箱 💎";
+
+      if (mode === "agent" && doorKnownLocked && !hasKey) {
+        target = KEY_POS;
+        allowDoor = false;
+        goalName = "左上角钥匙 🗝️";
+      }
+
+      setPhase("phThought");
+      const next = bfsNextStep(agentPos, target, allowDoor);
+
+      if (!next) {
+        setPhase("phObs");
+        addLog("obs", `👀 <strong>观察：</strong>通往${goalName}的所有路径都被路障 🧱 封死了！`);
+        if (mode === "oneshot") {
+          finished = true;
+          stopAuto();
+          statusTag.textContent = "任务失败 ❌";
+          addLog("fail", "❌ 普通问答模式无自主纠错能力，直接报错退出。");
+        } else {
+          setPhase("phReplan");
+          addLog("thought", "🔁 <strong>调整：</strong>当前无路可走，等待路障移除或触发 Max Steps 保护。");
+        }
+        renderMaze();
+        return;
+      }
+
+      // 尝试走到锁着的门
+      if (next.x === DOOR_POS.x && next.y === DOOR_POS.y && !doorOpened) {
+        if (!hasKey) {
+          setPhase("phObs");
+          addLog("action", `⚡ <strong>行动：</strong>尝试推开 (${next.x},${next.y}) 的大门。`);
+          addLog("obs", "👀 <strong>观察（报错）：</strong>大门锁死了，没有钥匙进不去！");
+          if (mode === "oneshot") {
+            finished = true;
+            stopAuto();
+            statusTag.textContent = "撞墙失败 ❌";
+            addLog("fail", "❌ 普通问答模式无法根据报错改计划，直接回复“门锁了打不开”，任务终止！");
+          } else {
+            doorKnownLocked = true;
+            setPhase("phReplan");
+            addLog("thought", "🔁 <strong>自主调整计划：</strong>门需要钥匙！我先修改子目标 → 去左上角 (0,0) 拿钥匙 🗝️，再回来开门！");
+          }
+          renderMaze();
+          return;
+        } else {
+          doorOpened = true;
+          addLog("action", "⚡ <strong>行动：</strong>使用钥匙 🗝️ 打开大门 🚪！");
+        }
+      }
+
+      // 正常移动
+      setPhase("phAction");
+      agentPos = next;
+      visited.add(keyOf(agentPos.x, agentPos.y));
+      addLog("thought", `🧠 <strong>思考：</strong>目标「${goalName}」，向 (${agentPos.x},${agentPos.y}) 移动一步。`);
+
+      // 捡到钥匙
+      if (agentPos.x === KEY_POS.x && agentPos.y === KEY_POS.y && !hasKey) {
+        hasKey = true;
+        setPhase("phReplan");
+        addLog("obs", "👀 <strong>观察：</strong>成功拿到钥匙 🗝️！切换子目标 → 返回打开大门拿宝箱 💎！");
+      }
+
+      // 到达宝箱
+      if (agentPos.x === CHEST_POS.x && agentPos.y === CHEST_POS.y) {
+        finished = true;
+        stopAuto();
+        setPhase("phObs");
+        statusTag.textContent = "目标达成 🎉";
+        addLog("win", `🎉 成功拿到宝箱！共经过 ${steps} 轮 ReAct 循环（思考 → 行动 → 观察 → 纠错）。`);
+      }
+
+      renderMaze();
+    }
+
+    function toggleAuto() {
+      if (finished) resetMaze();
+      if (autoInterval) {
+        stopAuto();
+      } else {
+        autoBtn.textContent = "⏸ 暂停";
+        stepOnce();
+        autoInterval = setInterval(() => {
+          if (finished) stopAuto();
+          else stepOnce();
+        }, 580);
+      }
+    }
+
+    function setMode(m) {
+      mode = m;
+      document.getElementById("modeOneShot").classList.toggle("active", m === "oneshot");
+      document.getElementById("modeAgent").classList.toggle("active", m === "agent");
+      resetMaze();
+    }
+
+    function clearBlocks() {
+      userBlocks.clear();
+      addLog("obs", "🧹 已清除全部自定义路障。");
+      renderMaze();
+    }
+
+    function resetMaze() {
+      stopAuto();
+      agentPos = { x: 0, y: 4 };
+      hasKey = false;
+      doorKnownLocked = false;
+      doorOpened = false;
+      finished = false;
+      steps = 0;
+      visited = new Set(["0,4"]);
+      statusTag.textContent = "待命";
+      setPhase("");
+      logBox.innerHTML = "";
+      addLog("thought", mode === "agent"
+        ? "🤖 Agent 已就绪：目标「拿到右上角宝箱 💎」。点击「自动执行」或「单步推进」开始！"
+        : "💬 普通问答模式已就绪：我会直接冲向宝箱，看看撞到锁着的门会发生什么。");
+      renderMaze();
+    }
+
+    resetMaze();
+  </script>
+</body>
+</html>

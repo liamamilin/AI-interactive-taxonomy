@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：图文连连看（CLIP）· 悟懂跨模态对齐</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --indigo:#4f46e5; --indigo-soft:#eef2ff; --green:#059669; --green-soft:#ecfdf5; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:960px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .btn-row { display:flex; gap:10px; margin-bottom:16px; }
+    .btn { border:none; border-radius:12px; padding:11px 18px; font-size:14px; font-weight:750; cursor:pointer; background:var(--indigo); color:#fff; }
+    .btn.gray { background:#f1f5f9; color:#334155; }
+
+    table { width:100%; border-collapse:separate; border-spacing:8px; margin-bottom:16px; }
+    th, td { padding:12px 8px; text-align:center; border-radius:12px; font-size:13.5px; }
+    th { background:#f8fafc; font-weight:800; color:var(--ink); }
+    td { font-family:ui-monospace,monospace; font-weight:800; transition:all .35s ease; }
+
+    .aha { border-radius:12px; padding:14px 16px; font-size:13.5px; background:var(--indigo-soft); border:1px solid #c7d2fe; color:#312e81; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🎯 图文连连看（CLIP）：AI 怎么知道“🐱 照片”等于文字“小猫”？</h1>
+        <p>点击「执行 CLIP 对比学习对齐」，看矩阵主对角线（正确配对）如何拉近到 95%+，错误配对被推远到接近 0！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="panel">
+      <div class="btn-row">
+        <button class="btn" id="trainBtn" onclick="trained=!trained;render()">⚡ 点击执行 CLIP 跨模态对齐训练</button>
+      </div>
+      <div id="matWrap"></div>
+      <div class="aha" id="ahaBox"></div>
+    </div>
+  </div>
+
+  <script>
+    const IMGS = ["🐱 橘猫照片", "🚗 跑车照片", "🍕 披萨照片", "🏔️ 雪山照片"];
+    const TXTS = ["“一只橘猫”", "“红色跑车”", "“热腾腾披萨”", "“皑皑雪山”"];
+    let trained = false;
+
+    function render() {
+      document.getElementById("trainBtn").textContent = trained ? "↩️ 重置为未对齐状态" : "⚡ 点击执行 CLIP 跨模态对齐训练";
+      let html = `<table><tr><th>图片 \\ 文字</th>${TXTS.map(t => `<th>${t}</th>`).join("")}</tr>`;
+      IMGS.forEach((img, r) => {
+        html += `<tr><th>${img}</th>`;
+        TXTS.forEach((_, c) => {
+          const isDiag = r === c;
+          const val = !trained ? (22 + ((r*7 + c*13) % 18)) : (isDiag ? (94 + (r % 4)) : (3 + ((r+c)%6)));
+          const bg = !trained ? "#f1f5f9" : (isDiag ? "#10b981" : "#fef2f2");
+          const fg = !trained ? "#475569" : (isDiag ? "#ffffff" : "#991b1b");
+          html += `<td style="background:${bg};color:${fg};">${val}%</td>`;
+        });
+        html += `</tr>`;
+      });
+      html += `</table>`;
+      document.getElementById("matWrap").innerHTML = html;
+
+      document.getElementById("ahaBox").innerHTML = trained
+        ? "🎉 <strong>对齐成功！</strong>CLIP 用 4 亿张互联网配图做了巨型“连连看”：把正确图文对的向量拼命拉近（主对角线全绿 95%+），把错误图文对拼命推远——从此图片和文字说起了同一种数学语言！"
+        : "😵 <strong>未对齐前：</strong>图像编码器和文字编码器各说各话，猫的照片和“一只橘猫”的相似度只有 20% 多，根本对不上号！点上方按钮开始对齐训练。";
+    }
+    render();
+  </script>
+</body>
+</html>

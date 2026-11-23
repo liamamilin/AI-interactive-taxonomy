@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：位置编码时钟（RoPE）· 悟懂长度外推</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --purple:#7c3aed; --purple-soft:#f5f3ff; --red:#dc2626; --red-soft:#fef2f2; --green:#059669; --green-soft:#ecfdf5; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:980px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); margin-bottom:18px; }
+    .sl-head { display:flex; justify-content:space-between; font-size:15px; font-weight:800; margin-bottom:8px; }
+    input[type="range"] { width:100%; accent-color:var(--purple); cursor:pointer; }
+
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
+    @media (max-width:720px) { .grid { grid-template-columns:1fr; } }
+    .box { border:2px solid var(--border); border-radius:16px; padding:18px; background:#f8fafc; }
+    .box.crash { border-color:var(--red); background:var(--red-soft); color:#991b1b; }
+    .box.ok { border-color:var(--green); background:var(--green-soft); color:#065f46; }
+    .box h3 { font-size:16px; margin-bottom:8px; }
+    .sample { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:12px; font-size:13.5px; color:var(--ink); margin-top:10px; font-family:ui-monospace,monospace; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🕰️ 位置编码时钟（RoPE）：4K 训练的模型怎么扩展到 128K？</h1>
+        <p>把输入长度拉过训练边界 <strong>4,096 字</strong>，对比「老式绝对编号」与「现代 RoPE 旋转时钟缩放」的巨大差异！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="panel">
+      <div class="sl-head">
+        <span>📏 当前输入文章长度（模型训练时只见过 4K 以内！）</span>
+        <span id="lenTag" style="color:var(--purple);font-family:monospace;">4K Tokens</span>
+      </div>
+      <input type="range" id="slLen" min="1" max="128" step="1" value="4" oninput="render()" />
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:4px;">
+        <span>1K</span><span>4K（训练边界线）</span><span>32K</span><span>128K（超长书稿）</span>
+      </div>
+
+      <div class="grid">
+        <div class="box" id="oldBox"></div>
+        <div class="box" id="ropeBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function render() {
+      const k = parseInt(document.getElementById("slLen").value, 10);
+      document.getElementById("lenTag").textContent = k + "K Tokens";
+      const oldBox = document.getElementById("oldBox");
+      const ropeBox = document.getElementById("ropeBox");
+
+      if (k <= 4) {
+        oldBox.className = "box ok";
+        oldBox.innerHTML = `<h3>🏛️ 老式绝对位置编码（座位号 1~4096）</h3><p>当前在 4K 训练范围内，每个词都有见过面的固定座位号，输出正常。</p><div class="sample">AI 回答：本文核心结论如下：第一…</div>`;
+        ropeBox.className = "box ok";
+        ropeBox.innerHTML = `<h3>🕰️ 现代 RoPE 旋转位置编码（相对夹角）</h3><p>用时钟指针的“相对夹角”记录词距，4K 内精准丝滑。</p><div class="sample">AI 回答：本文核心结论如下：第一…</div>`;
+      } else {
+        oldBox.className = "box crash";
+        oldBox.innerHTML = `<h3>💥 老式绝对位置编码（超出 4K 直接崩坏！）</h3><p>第 ${k*1000} 号座位在训练时从未出现过，模型彻底失明并输出乱码！</p><div class="sample">AI 回答：结论论论论###NaN的的是的…（崩溃）</div>`;
+        ropeBox.className = "box ok";
+        ropeBox.innerHTML = `<h3>✅ RoPE 时钟缩放外推（平滑撑到 ${k}K！）</h3><p>把时钟指针的旋转步频放慢 <strong>${(k/4).toFixed(1)} 倍</strong>，就像把 128K 刻度平滑塞进同一个表盘里，依然能准确算出任意两词的相对距离！</p><div class="sample">AI 回答：全书 ${k}K 字核心脉络已完整提炼如下…</div>`;
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

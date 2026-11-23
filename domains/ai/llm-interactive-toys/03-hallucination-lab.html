@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：幻觉实验室 · 悟懂胡说八道、提示词与 RAG 小抄</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --amber: #d97706;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1080px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .q-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .q-btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: #374151;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .q-btn.active {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+    }
+
+    .question-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .q-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .q-prompt {
+      font-size: 19px;
+      font-weight: 750;
+      color: var(--ink);
+    }
+
+    .risk-badge {
+      font-size: 13px;
+      font-weight: 750;
+      padding: 5px 12px;
+      border-radius: 999px;
+      transition: all 0.25s ease;
+    }
+    .risk-badge.high { background: var(--red-soft); color: var(--red); border: 1px solid #fecaca; }
+    .risk-badge.mid { background: var(--blue-soft); color: var(--blue); border: 1px solid #bfdbfe; }
+    .risk-badge.low { background: var(--green-soft); color: var(--green); border: 1px solid #a7f3d0; }
+
+    .answer-stream {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      min-height: 54px;
+      font-size: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ans-chunk {
+      padding: 3px 9px;
+      border-radius: 8px;
+      font-weight: 600;
+      animation: fadePop 0.25s ease;
+    }
+    .ans-chunk.fake { background: #fee2e2; color: #991b1b; }
+    .ans-chunk.guard { background: #dbeafe; color: #1e40af; }
+    .ans-chunk.truth { background: #d1fae5; color: #065f46; }
+
+    @keyframes fadePop {
+      from { transform: scale(0.88); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cand-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .cand {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 14px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .cand:hover { border-color: #94a3b8; transform: translateX(2px); }
+    .cand.collapsed { opacity: 0.42; background: #f9fafb; }
+
+    .cand-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .cand-text { font-size: 14.5px; font-weight: 650; }
+    .cand-meta { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+    .pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+    .pill.fake { background: #fee2e2; color: #b91c1c; }
+    .pill.guard { background: #dbeafe; color: #1d4ed8; }
+    .pill.truth { background: #d1fae5; color: #047857; }
+
+    .pct {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13.5px;
+      font-weight: 800;
+      min-width: 44px;
+      text-align: right;
+    }
+
+    .track {
+      height: 8px;
+      background: #f1f5f9;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: transform 0.12s, background 0.15s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--ink); color: #fff; flex: 1; }
+    .btn-primary:hover { background: #1f2937; }
+    .btn-secondary { background: #f3f4f6; color: #374151; }
+    .btn-secondary:hover { background: #e5e7eb; }
+
+    /* Control cards */
+    .tool-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+      background: #fafbfe;
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .switch-title { font-size: 14.5px; font-weight: 750; }
+
+    .toggle {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #cbd5e1;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .slider::before {
+      content: "";
+      position: absolute;
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+    .toggle input:checked + .slider { background: var(--blue); }
+    .toggle input:checked + .slider::before { transform: translateX(22px); }
+
+    .prompt-preview {
+      font-size: 12.5px;
+      color: #4b5563;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+
+    .drop-zone {
+      border: 2px dashed #94a3b8;
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      background: #ffffff;
+      transition: all 0.2s ease;
+      margin-bottom: 12px;
+    }
+    .drop-zone.dragover {
+      border-color: var(--green);
+      background: var(--green-soft);
+      transform: scale(1.01);
+    }
+    .drop-zone.loaded {
+      border-style: solid;
+      border-color: var(--green);
+      background: var(--green-soft);
+      text-align: left;
+    }
+
+    .cheat-card {
+      background: #fffbeb;
+      border: 1.5px solid #f59e0b;
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: grab;
+      user-select: none;
+      font-size: 13px;
+      color: #78350f;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+    }
+    .cheat-card:active { cursor: grabbing; }
+
+    .insight {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🧪 幻觉实验室：AI 为什么会一本正经地胡说八道？</h1>
+        <p>先在“裸奔模式”下亲手拼出一段假百科，再打开护栏与拖入小抄，看概率条如何瞬间坍缩</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="q-tabs" id="qTabs"></div>
+
+    <div class="question-box">
+      <div class="q-header">
+        <div class="q-prompt" id="qPrompt"></div>
+        <span class="risk-badge high" id="riskBadge">🔥 幻觉风险：96%（顺口胡编）</span>
+      </div>
+      <div style="font-size:12.5px;color:var(--muted);">当前 AI 正在拼接的回答（红色=脑补幻觉，蓝色=护栏拒答，绿色=依据小抄）：</div>
+      <div class="answer-stream" id="answerStream"></div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>
+          <span>候选词概率池（AI 眼里的“顺口度”）</span>
+          <span style="font-size:12px;color:var(--muted);font-weight:500;">点击任意词块或按概率生成</span>
+        </h2>
+
+        <div class="cand-list" id="candList"></div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="genBtn" onclick="sampleNext()">🎲 按最高概率拼出回答</button>
+          <button class="btn btn-secondary" onclick="clearAnswer()">🔄 清空重拼</button>
+        </div>
+
+        <div class="insight" id="labInsight"></div>
+      </div>
+
+      <div class="panel">
+        <h2><span>🛠️ 治幻觉外挂控制台</span></h2>
+
+        <div class="tool-card">
+          <div class="switch-row">
+            <span class="switch-title">🛡️ 外挂 1：系统提示词护栏（Prompt）</span>
+            <label class="toggle">
+              <input type="checkbox" id="guardToggle" onchange="onControlChange()" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="prompt-preview">
+            系统指令：「如果你没有确凿事实依据，严禁顺口编造，请直接回答【查无此事实，无法确认】。」
+          </div>
+        </div>
+
+        <div class="tool-card" style="margin-bottom:0;">
+          <div class="switch-row">
+            <span class="switch-title">📄 外挂 2：事实小抄（RAG 外部知识库）</span>
+            <button class="btn btn-secondary" id="ragQuickBtn" style="padding:6px 10px;font-size:12.5px;" onclick="toggleRag()">➕ 一键塞进上下文</button>
+          </div>
+
+          <div class="drop-zone" id="dropZone">
+            <div style="font-size:13px;color:var(--muted);">把下方的黄色「事实小抄卡片」拖到这里<br/>（或直接点右上角一键塞入）</div>
+          </div>
+
+          <div class="cheat-card" id="cheatCard" draggable="true">
+            <strong style="color:#92400e;">📌 可拖拽 · 权威检索小抄（RAG）</strong>
+            <span id="cheatText"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const LAB_CASES = [
+      {
+        id: "milktea",
+        tab: "🧋 陷阱一：诺贝尔奶茶奖",
+        question: "请介绍 1998 年获得“诺贝尔奶茶奖”的张伟教授。",
+        cheatFact: "【权威核实】诺贝尔奖仅设物理、化学、生理学或医学、文学、和平与经济学 6 个奖项，历史上从未设立过“诺贝尔奶茶奖”。",
+        // 裸奔模式候选（按顺口度）
+        nakedCandidates: [
+          { text: "张伟教授是著名食品工程学家，1998 年凭借“珍珠悬浮动力学”荣膺诺贝尔奶茶奖。", type: "fake", pct: 58 },
+          { text: "张伟出生于 1954 年，早年留学欧洲，因发明零糖波霸配方获此殊荣。", type: "fake", pct: 28 },
+          { text: "他的获奖演讲《论茶乳交融的边界条件》至今仍是饮品界必读经典。", type: "fake", pct: 12 },
+          { text: "【无法确认】我无法核实该奖项是否真实存在。", type: "guard", pct: 2 }
+        ],
+        // 开启 Prompt 护栏后
+        guardCandidates: [
+          { text: "【无法确认】我没有可靠依据证实存在“诺贝尔奶茶奖”，无法为您编造介绍。", type: "guard", pct: 76 },
+          { text: "张伟教授是著名食品工程学家，1998 年凭借“珍珠悬浮动力学”获奖。", type: "fake", pct: 14 },
+          { text: "张伟出生于 1954 年，因发明零糖波霸配方获此殊荣。", type: "fake", pct: 7 },
+          { text: "据传他曾发表过茶饮相关论文，但具体细节待查。", type: "fake", pct: 3 }
+        ],
+        // 注入 RAG 小抄后（概率坍缩）
+        ragCandidates: [
+          { text: "【依据检索资料】历史上从未设立过“诺贝尔奶茶奖”（诺贝尔奖仅含物理、化学、医学、文学、和平与经济学 6 项），因此不存在该获奖记录。", type: "truth", pct: 96 },
+          { text: "张伟教授是著名食品工程学家，1998 年凭借“珍珠悬浮动力学”获奖。", type: "fake", pct: 2 },
+          { text: "张伟出生于 1954 年，因发明零糖波霸配方获此殊荣。", type: "fake", pct: 1 },
+          { text: "【无法确认】我无法核实该奖项是否真实存在。", type: "guard", pct: 1 }
+        ]
+      },
+      {
+        id: "luxun",
+        tab: "📱 陷阱二：鲁迅推荐 iPhone",
+        question: "鲁迅为什么在《呐喊》中极力推荐年轻人购买 iPhone 15？",
+        cheatFact: "【权威核实】鲁迅生卒年为 1881–1936 年，《呐喊》出版于 1923 年；iPhone 15 发布于 2023 年，两者相差整整 100 年，不可能出现。",
+        nakedCandidates: [
+          { text: "鲁迅在《呐喊》中借 iPhone 15 的流畅屏幕，隐喻现代青年应当睁眼看世界。", type: "fake", pct: 55 },
+          { text: "他认为苹果生态的封闭性恰如“铁屋子”，因此鼓励年轻人亲身体验并打破束缚。", type: "fake", pct: 30 },
+          { text: "这一段原出自《呐喊》自序，后因版本删节而鲜为人知。", type: "fake", pct: 12 },
+          { text: "【无法确认】这似乎存在时间线矛盾，我不敢确定。", type: "guard", pct: 3 }
+        ],
+        guardCandidates: [
+          { text: "【无法确认】鲁迅所处年代远早于智能手机诞生，缺乏依据支持该说法，不能编造。", type: "guard", pct: 79 },
+          { text: "鲁迅在《呐喊》中借科技产品隐喻现代青年应当睁眼看世界。", type: "fake", pct: 12 },
+          { text: "他可能是在某篇杂文中谈到了通信工具的进步。", type: "fake", pct: 6 },
+          { text: "这一段原出自《呐喊》自序，后因版本删节而鲜为人知。", type: "fake", pct: 3 }
+        ],
+        ragCandidates: [
+          { text: "【依据检索资料】这是一个跨时代的虚构前提：鲁迅逝世于 1936 年，《呐喊》出版于 1923 年，比 2023 年发布的 iPhone 15 早了一百年，书中不可能提及。", type: "truth", pct: 97 },
+          { text: "鲁迅在《呐喊》中借 iPhone 15 隐喻现代青年应当睁眼看世界。", type: "fake", pct: 1 },
+          { text: "他认为苹果生态恰如“铁屋子”。", type: "fake", pct: 1 },
+          { text: "【无法确认】这似乎存在时间线矛盾。", type: "guard", pct: 1 }
+        ]
+      },
+      {
+        id: "mars",
+        tab: "🍲 陷阱三：火星重庆火锅店",
+        question: "2025 年火星第一家重庆火锅店开在哪个陨石坑？",
+        cheatFact: "【权威核实】截至目前人类尚未实现载人登陆火星，火星表面不存在任何人类餐厅或火锅店。",
+        nakedCandidates: [
+          { text: "火星第一家重庆火锅店选址于“杰泽罗陨石坑”东侧穹顶基地，主打低重力牛油锅。", type: "fake", pct: 56 },
+          { text: "该店由星际餐饮集团于 2025 年 5 月揭幕，采用全封闭加压红汤循环系统。", type: "fake", pct: 29 },
+          { text: "开业当天吸引了 120 名宇航员排队打卡，毛肚需提前三个月预订。", type: "fake", pct: 13 },
+          { text: "【无法确认】目前没有火星开火锅店的可靠记录。", type: "guard", pct: 2 }
+        ],
+        guardCandidates: [
+          { text: "【无法确认】我没有查到人类已在火星开设餐厅的可靠依据，不能为您编造地址。", type: "guard", pct: 77 },
+          { text: "选址大概率在“杰泽罗陨石坑”东侧穹顶基地。", type: "fake", pct: 14 },
+          { text: "该店主打低重力牛油锅与封闭加压系统。", type: "fake", pct: 6 },
+          { text: "开业当天吸引了众多宇航员排队。", type: "fake", pct: 3 }
+        ],
+        ragCandidates: [
+          { text: "【依据检索资料】人类目前尚未实现载人登陆火星，火星上并没有任何陨石坑开设过重庆火锅店。", type: "truth", pct: 96 },
+          { text: "火星第一家重庆火锅店选址于“杰泽罗陨石坑”。", type: "fake", pct: 2 },
+          { text: "该店主打低重力牛油锅。", type: "fake", pct: 1 },
+          { text: "【无法确认】目前没有可靠记录。", type: "guard", pct: 1 }
+        ]
+      }
+    ];
+
+    let curIdx = 0;
+    let guardOn = false;
+    let ragOn = false;
+    let answerChunks = [];
+
+    const qTabs = document.getElementById("qTabs");
+    const qPrompt = document.getElementById("qPrompt");
+    const riskBadge = document.getElementById("riskBadge");
+    const answerStream = document.getElementById("answerStream");
+    const candList = document.getElementById("candList");
+    const labInsight = document.getElementById("labInsight");
+    const guardToggle = document.getElementById("guardToggle");
+    const dropZone = document.getElementById("dropZone");
+    const cheatCard = document.getElementById("cheatCard");
+    const cheatText = document.getElementById("cheatText");
+    const ragQuickBtn = document.getElementById("ragQuickBtn");
+
+    function getCandidates() {
+      const c = LAB_CASES[curIdx];
+      if (ragOn) return c.ragCandidates;
+      if (guardOn) return c.guardCandidates;
+      return c.nakedCandidates;
+    }
+
+    function renderAll() {
+      const c = LAB_CASES[curIdx];
+      const cands = getCandidates();
+
+      // Tabs
+      qTabs.innerHTML = "";
+      LAB_CASES.forEach((item, idx) => {
+        const b = document.createElement("button");
+        b.className = "q-btn" + (idx === curIdx ? " active" : "");
+        b.textContent = item.tab;
+        b.onclick = () => {
+          curIdx = idx;
+          answerChunks = [];
+          renderAll();
+        };
+        qTabs.appendChild(b);
+      });
+
+      qPrompt.textContent = "❓ " + c.question;
+      cheatText.textContent = c.cheatFact;
+
+      // Risk meter
+      if (ragOn) {
+        riskBadge.className = "risk-badge low";
+        riskBadge.textContent = "✅ 幻觉风险：3%（小抄锚定事实）";
+      } else if (guardOn) {
+        riskBadge.className = "risk-badge mid";
+        riskBadge.textContent = "🛡️ 幻觉风险：23%（护栏大幅拦截）";
+      } else {
+        riskBadge.className = "risk-badge high";
+        riskBadge.textContent = "🔥 幻觉风险：97%（顺口胡编）";
+      }
+
+      // Answer stream
+      if (answerChunks.length === 0) {
+        answerStream.innerHTML = `<span style="color:var(--muted);font-size:14px;">（点击下方「按最高概率拼出回答」或直接点选任意候选词块）</span>`;
+      } else {
+        answerStream.innerHTML = "";
+        answerChunks.forEach(ch => {
+          const span = document.createElement("span");
+          span.className = "ans-chunk " + ch.type;
+          span.textContent = ch.text;
+          answerStream.appendChild(span);
+        });
+      }
+
+      // Candidate bars
+      candList.innerHTML = "";
+      cands.forEach(item => {
+        const color = item.type === "fake" ? "#ef4444" : (item.type === "guard" ? "#2563eb" : "#10b981");
+        const tagLabel = item.type === "fake" ? "顺口脑补" : (item.type === "guard" ? "护栏拒答" : "事实锚定");
+        const isCollapsed = (ragOn || guardOn) && item.type === "fake" && item.pct <= 15;
+
+        const div = document.createElement("div");
+        div.className = "cand" + (isCollapsed ? " collapsed" : "");
+        div.onclick = () => {
+          answerChunks = [item];
+          renderAll();
+        };
+        div.innerHTML = `
+          <div class="cand-top">
+            <span class="cand-text">${item.text}</span>
+            <span class="cand-meta">
+              <span class="pill ${item.type}">${tagLabel}</span>
+              <span class="pct">${item.pct}%</span>
+            </span>
+          </div>
+          <div class="track">
+            <div class="fill" style="width:${item.pct}%;background:${color};"></div>
+          </div>
+        `;
+        candList.appendChild(div);
+      });
+
+      // Drop zone UI
+      if (ragOn) {
+        dropZone.className = "drop-zone loaded";
+        dropZone.innerHTML = `
+          <div style="font-size:12px;font-weight:750;color:var(--green);margin-bottom:4px;">✅ 已注入上下文（聚光灯正照向这张小抄）</div>
+          <div style="font-size:13px;color:#065f46;">${c.cheatFact}</div>
+        `;
+        ragQuickBtn.textContent = "✖️ 移出小抄";
+      } else {
+        dropZone.className = "drop-zone";
+        dropZone.innerHTML = `<div style="font-size:13px;color:var(--muted);">把下方的黄色「事实小抄卡片」拖到这里<br/>（或直接点右上角一键塞入）</div>`;
+        ragQuickBtn.textContent = "➕ 一键塞进上下文";
+      }
+
+      // Insight text
+      if (ragOn) {
+        labInsight.innerHTML = "💡 <strong>RAG（检索增强）的真相：</strong>把事实小抄塞进上下文后，模型不必凭空硬猜——原本满屏瞎编的红色概率条瞬间坍缩到 1%~2%，紧扣小抄的绿条飙升到 96%+！这就是联网搜索和知识库能治幻觉的底层原因。";
+      } else if (guardOn) {
+        labInsight.innerHTML = "💡 <strong>系统提示词（Prompt）的作用：</strong>加了“不知道就直说”的指令后，模型多了一个高概率的安全出口。但它依然没有新知识，只是学会了刹车——要想给出准确科普，还得拖入下方的「事实小抄」。";
+      } else {
+        labInsight.innerHTML = "💡 <strong>幻觉不是在“撒谎”：</strong>LLM 脑子里没有真假裁判，只有“顺不顺口”。面对假前提，最顺口的接龙就是编一段像模像样的百科！试着打开右侧的「护栏」或拖入「事实小抄」看看变化。";
+      }
+    }
+
+    function sampleNext() {
+      const cands = getCandidates();
+      // 直接选概率最高的一项，方便用户一眼看出当前模式的主流输出
+      answerChunks = [cands[0]];
+      renderAll();
+    }
+
+    function clearAnswer() {
+      answerChunks = [];
+      renderAll();
+    }
+
+    function onControlChange() {
+      guardOn = guardToggle.checked;
+      answerChunks = [];
+      renderAll();
+    }
+
+    function toggleRag() {
+      ragOn = !ragOn;
+      answerChunks = [];
+      renderAll();
+    }
+
+    // Drag & Drop support
+    cheatCard.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", "rag-fact");
+    });
+
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+
+    dropZone.addEventListener("dragleave", () => {
+      dropZone.classList.remove("dragover");
+    });
+
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      ragOn = true;
+      answerChunks = [];
+      renderAll();
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：传话筒失真实验 · 悟懂共享黑板架构</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --blue:#2563eb; --blue-soft:#eff6ff; --red:#dc2626; --red-soft:#fef2f2; --green:#059669; --green-soft:#ecfdf5; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:980px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .mode-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
+    .m-btn { border:2px solid var(--border); background:var(--card); border-radius:14px; padding:14px; cursor:pointer; text-align:left; }
+    .m-btn.active.bad { border-color:var(--red); background:var(--red-soft); }
+    .m-btn.active.good { border-color:var(--green); background:var(--green-soft); }
+    .m-btn strong { display:block; font-size:14.5px; }
+    .m-btn span { font-size:12px; color:var(--muted); }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .chain { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+    .hop { padding:13px 16px; border-radius:12px; border:1.5px solid var(--border); background:#f8fafc; font-size:13.5px; }
+    .hop.drift { border-color:#fca5a5; background:var(--red-soft); color:#991b1b; }
+    .hop.clean { border-color:#a7f3d0; background:var(--green-soft); color:#065f46; }
+    .aha { border-radius:12px; padding:14px 16px; font-size:13.5px; background:var(--blue-soft); border:1px solid #bfdbfe; color:#1e3a8a; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>📢 传话筒失真实验：为什么 Multi-Agent 越串越跑偏？</h1>
+        <p>原始需求：<strong>「帮我订一张明天下午 3 点后、预算 500 元内、靠窗的上海→杭州高铁票」</strong>。切换两种交接方式对比保真度！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="mode-row">
+      <button class="m-btn bad active" id="mTel" onclick="setMode('tel')">
+        <strong>🗣️ 方式 A：口头接力传话（每轮自由总结）</strong>
+        <span>每个 Agent 用自然语言转述给下一个人，细节层层丢失！</span>
+      </button>
+      <button class="m-btn good" id="mBoard" onclick="setMode('board')">
+        <strong>📋 方式 B：共享结构化黑板（Shared State）</strong>
+        <span>所有 Agent 直接读写同一份 JSON 需求单，严禁口头转述！</span>
+      </button>
+    </div>
+
+    <div class="panel">
+      <div class="chain" id="chain"></div>
+      <div class="aha">💡 <strong>工程铁律：</strong>自然语言传话就像玩“你画我猜”，传 4 手必定丢掉关键约束！多智能体协作必须靠 <strong>Shared State（共享黑板/结构化 JSON）</strong> 传递硬约束，才能确保不跑偏。</div>
+    </div>
+  </div>
+
+  <script>
+    function setMode(m) {
+      document.getElementById("mTel").classList.toggle("active", m === "tel");
+      document.getElementById("mBoard").classList.toggle("active", m === "board");
+      const box = document.getElementById("chain");
+      if (m === "tel") {
+        box.innerHTML = `
+          <div class="hop"><strong>1. 接待员 Agent：</strong>“老板明天下午要去杭州，预算 500 块，要靠窗高铁。”</div>
+          <div class="hop drift"><strong>2. 规划师 Agent（丢了“3点后”）：</strong>“帮查明天去杭州的靠窗车票，便宜点的就行。”</div>
+          <div class="hop drift"><strong>3. 查票员 Agent（丢了“靠窗”和“高铁”）：</strong>“找到了！明天上午 9 点大巴最便宜，只要 80 元！”</div>
+          <div class="hop drift"><strong>4. 下单员 Agent（彻底跑偏 💥）：</strong>“已为您买好明天上午 9 点的大巴过道座！”</div>
+        `;
+      } else {
+        box.innerHTML = `
+          <div class="hop clean"><strong>📋 共享黑板（全局唯一真相）：</strong><code>{ route:"上海→杭州", time:"≥15:00", max_price:500, seat:"靠窗", type:"高铁" }</code></div>
+          <div class="hop clean"><strong>2. 规划师 Agent：</strong>读取黑板约束，无损锁定 15:00 后高铁车次。</div>
+          <div class="hop clean"><strong>3. 查票员 Agent：</strong>严格按黑板过滤：G7315（15:30，二等座 ¥73，靠窗 F 座有票）。</div>
+          <div class="hop clean"><strong>4. 下单员 Agent（100% 精准 ✅）：</strong>核对黑板 5 项条件全绿，精准出票！</div>
+        `;
+      }
+    }
+    setMode("tel");
+  </script>
+</body>
+</html>

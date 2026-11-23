@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：搜词 vs 搜意 · 悟懂关键词、向量与混合检索</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --blue:#2563eb; --blue-soft:#eff6ff; --green:#059669; --green-soft:#ecfdf5; --red:#dc2626; --red-soft:#fef2f2; --purple:#7c3aed; --purple-soft:#f5f3ff; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:1080px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .q-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
+    @media (max-width:720px) { .q-row { grid-template-columns:1fr; } }
+    .q-card { border:2px solid var(--border); background:var(--card); border-radius:14px; padding:14px 16px; cursor:pointer; text-align:left; }
+    .q-card.active { border-color:var(--blue); background:var(--blue-soft); }
+    .q-card strong { display:block; font-size:15px; margin-bottom:3px; }
+    .q-card span { font-size:12.5px; color:var(--muted); }
+
+    .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:18px; }
+    @media (max-width:860px) { .grid3 { grid-template-columns:1fr; } }
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:10px; }
+    .panel h2 { font-size:15.5px; font-weight:800; }
+    .sub { font-size:12px; color:var(--muted); margin-top:-6px; }
+
+    .doc-item { border:1.5px solid var(--border); border-radius:12px; padding:10px 12px; font-size:13px; background:#f8fafc; }
+    .doc-item.hit { border-color:var(--green); background:var(--green-soft); }
+    .doc-item.miss { opacity:.55; }
+    .doc-top { display:flex; justify-content:space-between; font-weight:800; font-size:12px; margin-bottom:3px; }
+
+    .verdict { margin-top:auto; padding:10px 12px; border-radius:10px; font-size:12.5px; font-weight:700; }
+    .verdict.ok { background:var(--green-soft); color:#065f46; }
+    .verdict.bad { background:var(--red-soft); color:#991b1b; }
+
+    .aha { background:var(--purple-soft); border:1px solid #ddd6fe; border-radius:14px; padding:15px 18px; font-size:13.5px; color:#4c1d95; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🔍 搜词 vs 搜意：为什么生产级 RAG 都要用“混合检索”？</h1>
+        <p>在下方切换两种截然不同的用户提问，同屏看「关键词搜索」与「向量语义搜索」各自踩坑，以及「混合检索」如何双杀！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="q-row">
+      <button class="q-card active" id="q1" onclick="selectQ(0)">
+        <strong>🗣️ 提问 A（口语描述）：「电脑按电源没反应、屏幕全黑怎么办？」</strong>
+        <span>特点：和知识库正式文档里的措辞几乎没有重合字！</span>
+      </button>
+      <button class="q-card" id="q2" onclick="selectQ(1)">
+        <strong>🔢 提问 B（精准编号）：「报错代码 ERR-9042X 怎么修？」</strong>
+        <span>特点：生僻专属代码，向量空间里毫无日常语义！</span>
+      </button>
+    </div>
+
+    <div class="grid3" id="grid3"></div>
+
+    <div class="aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const SCENARIOS = [
+      {
+        aha: "💡 <strong>口语提问的真相：</strong>用户说「按电源没反应、屏幕全黑」，文档写的是「主机通电无显示故障排查」——字面几乎 0 重合，传统关键词检索直接抓瞎！而向量检索懂“意思相近”，一把精准捞出！",
+        cols: [
+          {
+            title: "1. 🔤 关键词检索（BM25）", sub: "只认字面是否一模一样",
+            docs: [
+              { title: "《显示器贴膜与屏幕清洁指南》", score: "命中“屏幕”", hit: false },
+              { title: "《笔记本电源适配器保修政策》", score: "命中“电源”", hit: false },
+              { title: "《主机通电无显示故障排查手册》", score: "0 字重合", hit: false }
+            ],
+            ok: false, verdict: "❌ 翻车！字面没对上，把真正排查手册排到最后！"
+          },
+          {
+            title: "2. 🌌 向量语义检索（Dense）", sub: "按 Embedding 语义距离匹配",
+            docs: [
+              { title: "《主机通电无显示故障排查手册》", score: "语义 94% ✓", hit: true },
+              { title: "《笔记本电源适配器保修政策》", score: "语义 61%", hit: false },
+              { title: "《显示器贴膜与屏幕清洁指南》", score: "语义 22%", hit: false }
+            ],
+            ok: true, verdict: "✅ 精准命中！听懂“黑屏没反应 = 通电无显示”！"
+          },
+          {
+            title: "3. ⚡ 混合检索（Hybrid Search）", sub: "BM25 + 向量双路融合",
+            docs: [
+              { title: "《主机通电无显示故障排查手册》", score: "综合 #1 ✓", hit: true },
+              { title: "《笔记本电源适配器保修政策》", score: "综合 #2", hit: false },
+              { title: "《显示器贴膜与屏幕清洁指南》", score: "综合 #3", hit: false }
+            ],
+            ok: true, verdict: "✅ 稳稳命中！兼顾语义理解与字面线索！"
+          }
+        ]
+      },
+      {
+        aha: "💡 <strong>专属编号的反杀：</strong>面对「ERR-9042X」这种内部故障码，向量模型根本没见过它，语义检索反而容易和「ERR-9041A」混在一起！这时反而是老派的 BM25 关键词精确匹配立了大功——所以工业界标配都是 <strong>Hybrid 混合检索</strong>！",
+        cols: [
+          {
+            title: "1. 🔤 关键词检索（BM25）", sub: "精确锁定一字不差的错误码",
+            docs: [
+              { title: "《ERR-9042X：网关证书过期修复》", score: "100% 精确命中 ✓", hit: true },
+              { title: "《ERR-9041A：数据库连接超时》", score: "0 命中", hit: false },
+              { title: "《常见系统报错总览》", score: "命中“报错”", hit: false }
+            ],
+            ok: true, verdict: "✅ 秒杀命中！字面精确匹配是专属编号的克星！"
+          },
+          {
+            title: "2. 🌌 向量语义检索（Dense）", sub: "对生僻编号容易脸盲",
+            docs: [
+              { title: "《常见系统报错总览》", score: "语义 83%", hit: false },
+              { title: "《ERR-9041A：数据库连接超时》", score: "语义 81%（认错码！）", hit: false },
+              { title: "《ERR-9042X：网关证书过期修复》", score: "语义 79%", hit: false }
+            ],
+            ok: false, verdict: "❌ 翻车！向量把 9042X 和 9041A 当成了“长得像的报错”！"
+          },
+          {
+            title: "3. ⚡ 混合检索（Hybrid Search）", sub: "BM25 + 向量双路融合",
+            docs: [
+              { title: "《ERR-9042X：网关证书过期修复》", score: "综合 #1 ✓", hit: true },
+              { title: "《常见系统报错总览》", score: "综合 #2", hit: false },
+              { title: "《ERR-9041A：数据库连接超时》", score: "综合 #3", hit: false }
+            ],
+            ok: true, verdict: "✅ 再次稳赢！口语与编号全场景通吃！"
+          }
+        ]
+      }
+    ];
+
+    function selectQ(idx) {
+      document.getElementById("q1").classList.toggle("active", idx === 0);
+      document.getElementById("q2").classList.toggle("active", idx === 1);
+      const sc = SCENARIOS[idx];
+      const grid = document.getElementById("grid3");
+      grid.innerHTML = sc.cols.map(c => `
+        <div class="panel">
+          <h2>${c.title}</h2>
+          <div class="sub">${c.sub}</div>
+          ${c.docs.map((d, i) => `
+            <div class="doc-item ${d.hit ? 'hit' : 'miss'}">
+              <div class="doc-top"><span>#${i+1} ${d.title}</span><span>${d.score}</span></div>
+            </div>
+          `).join("")}
+          <div class="verdict ${c.ok ? 'ok' : 'bad'}">${c.verdict}</div>
+        </div>
+      `).join("");
+      document.getElementById("ahaBox").innerHTML = sc.aha;
+    }
+
+    selectQ(0);
+  </script>
+</body>
+</html>

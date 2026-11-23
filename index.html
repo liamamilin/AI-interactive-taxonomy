@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-Interactive-Taxonomy · 围绕“人”的交互式知识图谱</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-alt: #f1f5f9;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-soft: #eff6ff;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+      --radius: 20px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0b1120;
+      --surface: #111827;
+      --surface-alt: #1e293b;
+      --ink: #f1f5f9;
+      --muted: #94a3b8;
+      --border: #1f2937;
+      --primary: #60a5fa;
+      --primary-soft: rgba(59, 130, 246, 0.16);
+      --green: #34d399;
+      --green-soft: rgba(16, 185, 129, 0.16);
+      --shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.6;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    /* Sticky Top Navigation */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 850;
+      font-size: 16.5px;
+      letter-spacing: -0.02em;
+    }
+    .brand-dot {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .view-tabs {
+      display: inline-flex;
+      background: var(--surface-alt);
+      padding: 4px;
+      border-radius: 12px;
+      gap: 4px;
+    }
+    .vt-btn {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      padding: 6px 13px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.16s;
+    }
+    .vt-btn.active {
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .icon-btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--ink);
+      padding: 7px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 20px 80px;
+    }
+
+    /* Editorial Hero */
+    .hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: 32px;
+      box-shadow: var(--shadow);
+      margin-bottom: 26px;
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; padding: 22px; }
+    }
+    .hero-tag {
+      display: inline-flex;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 12.5px;
+      font-weight: 750;
+      margin-bottom: 12px;
+    }
+    .hero h1 {
+      font-size: clamp(26px, 3.6vw, 38px);
+      font-weight: 850;
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+    .hero p { font-size: 15px; color: var(--muted); }
+
+    .stats-box {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px 20px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .st-cell { text-align: center; }
+    .st-val {
+      font-size: 22px;
+      font-weight: 850;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--primary);
+    }
+    .st-lbl { font-size: 11.5px; color: var(--muted); font-weight: 650; }
+    .prog-track {
+      height: 9px;
+      border-radius: 999px;
+      background: var(--border);
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2563eb, #10b981);
+      transition: width 0.35s ease;
+    }
+    .prog-foot {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .prog-foot button {
+      border: none;
+      background: none;
+      color: var(--muted);
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    /* MAP VIEW (3 Concentric Rings -> 10 Domains -> Branches) */
+    .ring-section { margin-bottom: 34px; }
+    .ring-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ring-header h2 { font-size: 19px; font-weight: 850; }
+    .ring-header span { font-size: 13px; color: var(--muted); }
+
+    .domain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 18px;
+    }
+
+    .dom-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.18s ease, border-color 0.18s ease;
+    }
+    .dom-card.lit { border-color: color-mix(in srgb, var(--dom-color) 45%, var(--border)); }
+    .dom-card:hover { transform: translateY(-3px); }
+
+    .dom-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .dom-title-grp { display: flex; align-items: center; gap: 11px; }
+    .dom-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .dom-name { font-size: 17px; font-weight: 800; line-height: 1.2; }
+    .dom-en { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+    .dom-status {
+      font-size: 11.5px;
+      font-weight: 750;
+      padding: 3px 9px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+    .dom-status.live { background: var(--green-soft); color: var(--green); }
+    .dom-status.planned { background: var(--surface-alt); color: var(--muted); }
+
+    .dom-desc { font-size: 13px; color: var(--muted); }
+
+    .branch-block {
+      background: var(--surface-alt);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .branch-name {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .chip-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+    .t-chip {
+      font-size: 12px;
+      font-weight: 650;
+      padding: 4px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.14s;
+    }
+    .t-chip.live {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--ink);
+    }
+    .t-chip.live:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .t-chip.planned {
+      background: transparent;
+      border: 1px dashed var(--border);
+      color: var(--muted);
+      cursor: default;
+    }
+
+    /* EXPLORER VIEW */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .dom-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .d-pill {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      padding: 7px 13px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    .d-pill.active {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+    }
+
+    .search-input {
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 13.5px;
+      min-width: 240px;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--primary); }
+
+    .topic-sec { margin-bottom: 30px; }
+    .topic-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .topic-head h3 { font-size: 19px; font-weight: 800; }
+    .topic-head p { font-size: 13.5px; color: var(--muted); }
+
+    .toy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .toy-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.18s, border-color 0.18s;
+    }
+    .toy-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+    .toy-card.done { border-color: var(--green); }
+    .tc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .tc-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 21px; }
+    .tc-badge { font-size: 11.5px; font-weight: 750; padding: 3px 9px; border-radius: 999px; background: var(--surface-alt); color: var(--muted); }
+    .toy-card.done .tc-badge { background: var(--green-soft); color: var(--green); }
+    .toy-card h4 { font-size: 17.5px; font-weight: 800; margin-bottom: 4px; }
+    .tc-concept { font-size: 12.5px; font-weight: 700; margin-bottom: 8px; }
+    .tc-sum { font-size: 13.5px; color: var(--muted); flex: 1; margin-bottom: 14px; }
+    .tc-cta { font-size: 13px; font-weight: 750; color: var(--primary); }
+
+    /* Player Modal */
+    .player-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 17, 32, 0.8);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+    }
+    .player-overlay.open { display: flex; }
+    .player-bar {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 10px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .p-btn {
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08);
+      color: #f8fafc;
+      padding: 6px 12px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .p-btn:hover { background: rgba(255,255,255,0.18); }
+    .p-btn.done-on { background: #059669; border-color: #059669; }
+    .p-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    iframe#toyFrame { flex: 1; width: 100%; border: none; background: var(--bg); }
+    .related-bar {
+      background: #111827;
+      color: #cbd5e1;
+      padding: 8px 18px;
+      font-size: 12.5px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .rel-chip {
+      background: rgba(255,255,255,0.1);
+      color: #93c5fd;
+      border: none;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="brand-dot">🧭</div>
+        <span>AI-Interactive-Taxonomy</span>
+      </div>
+      <div class="nav-controls">
+        <div class="view-tabs">
+          <button class="vt-btn active" id="vtMap" onclick="switchView('map')">🗺️ 全景知识图谱</button>
+          <button class="vt-btn" id="vtExplorer" onclick="switchView('explorer')">🧭 分类探索</button>
+        </div>
+        <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">🌙 暗色</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <section class="hero">
+      <div>
+        <span class="hero-tag">✨ 围绕“人”的 10 大认知领域 · 持续生长的知识树</span>
+        <h1>2 分钟玩懂世界的底层规律</h1>
+        <p>
+          不是枯燥的词条百科，而是一张带坐标的交互式分类图谱。从身体、心智、审美到社会、商业、金融，再到数学、软件、工程与 AI，每个概念都可以亲手拨动滑块、2 分钟彻底悟懂。
+        </p>
+      </div>
+      <div class="stats-box">
+        <div class="stats-grid">
+          <div class="st-cell"><div class="st-val" id="stDomains">0/10</div><div class="st-lbl">已点亮领域</div></div>
+          <div class="st-cell"><div class="st-val" id="stTopics">0</div><div class="st-lbl">可玩主题</div></div>
+          <div class="st-cell"><div class="st-val" id="stToys">0</div><div class="st-lbl">互动玩具</div></div>
+        </div>
+        <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%;"></div></div>
+        <div class="prog-foot">
+          <span id="progText">已悟懂 0 / 0 个玩具</span>
+          <button onclick="resetProgress()">重置进度</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 1: TAXONOMY MAP -->
+    <div id="viewMap"></div>
+
+    <!-- VIEW 2: CATALOG EXPLORER -->
+    <div id="viewExplorer" class="hidden">
+      <div class="filter-bar">
+        <div class="dom-pills" id="domPills"></div>
+        <input class="search-input" id="searchInput" type="text" placeholder="🔍 搜索领域、主题或概念…" oninput="renderExplorer()" />
+      </div>
+      <div id="explorerRoot"></div>
+    </div>
+  </div>
+
+  <!-- Embedded Play Stage -->
+  <div class="player-overlay" id="playerOverlay">
+    <div class="player-bar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="p-btn" onclick="closePlayer()">← 返回图谱</button>
+        <div>
+          <div style="font-size:14.5px;font-weight:750;" id="pTitle"></div>
+          <div style="font-size:12px;color:#94a3b8;" id="pSub"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <button class="p-btn" id="prevBtn" onclick="stepToy(-1)">◀ 上一关</button>
+        <button class="p-btn" id="nextBtn" onclick="stepToy(1)">下一关 ▶</button>
+        <button class="p-btn" id="doneBtn" onclick="toggleDone()">✓ 标记已悟懂</button>
+        <a class="p-btn" id="newTabBtn" href="#" target="_blank" rel="noopener">↗ 新标签页</a>
+      </div>
+    </div>
+    <iframe id="toyFrame" title="互动玩具"></iframe>
+    <div class="related-bar" id="relatedBar"></div>
+  </div>
+
+  <script src="./catalog.js"></script>
+  <script>
+    const DATA = window.TAXONOMY_DATA || { rings: [], domains: [], stats: {} };
+    const STORAGE_KEY = "tax_completed_v1";
+    const THEME_KEY = "tax_theme_v1";
+
+    const FLAT_TOYS = [];
+    const TOPIC_MAP = {};
+    DATA.domains.forEach(dom => {
+      (dom.topics || []).forEach(topic => {
+        TOPIC_MAP[topic.id] = { topic, dom };
+        topic.toys.forEach(toy => {
+          FLAT_TOYS.push({ ...toy, topic, dom });
+        });
+      });
+    });
+
+    let completed = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"));
+    let curView = "map";
+    let activeDomId = "all";
+    let curFlatIdx = -1;
+
+    // Theme handling
+    function applyTheme(t) {
+      document.documentElement.setAttribute("data-theme", t);
+      localStorage.setItem(THEME_KEY, t);
+      document.getElementById("themeBtn").textContent = t === "dark" ? "☀️ 亮色" : "🌙 暗色";
+      const frame = document.getElementById("toyFrame");
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage({ type: "TAX_THEME_CHANGE", theme: t }, "*");
+      }
+    }
+    function toggleTheme() {
+      const cur = document.documentElement.getAttribute("data-theme") || "light";
+      applyTheme(cur === "dark" ? "light" : "dark");
+    }
+    applyTheme(localStorage.getItem(THEME_KEY) || "light");
+
+    window.addEventListener("message", (e) => {
+      if (e.data && e.data.type === "TAX_TOY_COMPLETED" && curFlatIdx >= 0) {
+        completed.add(FLAT_TOYS[curFlatIdx].id);
+        saveCompleted();
+        updateStats();
+        syncDoneBtn();
+      }
+    });
+
+    function saveCompleted() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed]));
+    }
+
+    function updateStats() {
+      const st = DATA.stats || {};
+      document.getElementById("stDomains").textContent = `${st.litDomains || 0}/${st.totalDomains || 10}`;
+      document.getElementById("stTopics").textContent = st.totalTopics || 0;
+      document.getElementById("stToys").textContent = st.totalToys || 0;
+
+      const total = FLAT_TOYS.length;
+      const done = FLAT_TOYS.filter(t => completed.has(t.id)).length;
+      const pct = total ? Math.round((done / total) * 100) : 0;
+      document.getElementById("progFill").style.width = pct + "%";
+      document.getElementById("progText").textContent = `已悟懂 ${done} / ${total} 个互动玩具（${pct}%）`;
+    }
+
+    function switchView(v, domainId) {
+      curView = v;
+      if (domainId) activeDomId = domainId;
+      document.getElementById("vtMap").classList.toggle("active", v === "map");
+      document.getElementById("vtExplorer").classList.toggle("active", v === "explorer");
+      document.getElementById("viewMap").classList.toggle("hidden", v !== "map");
+      document.getElementById("viewExplorer").classList.toggle("hidden", v !== "explorer");
+      if (v === "map") renderMap();
+      else { renderDomainPills(); renderExplorer(); }
+    }
+
+    function renderMap() {
+      const root = document.getElementById("viewMap");
+      root.innerHTML = "";
+
+      (DATA.rings || []).forEach(ring => {
+        const ringDoms = DATA.domains.filter(d => d.ring === ring.id);
+        const sec = document.createElement("section");
+        sec.className = "ring-section";
+        sec.innerHTML = `
+          <div class="ring-header">
+            <h2>${ring.title}</h2>
+            <span>${ring.desc}</span>
+          </div>
+          <div class="domain-grid"></div>
+        `;
+        const grid = sec.querySelector(".domain-grid");
+
+        ringDoms.forEach(dom => {
+          const isLit = dom.liveTopicCount > 0;
+          const card = document.createElement("div");
+          card.className = "dom-card" + (isLit ? " lit" : "");
+          card.style.setProperty("--dom-color", dom.color);
+
+          const branchesHtml = (dom.branches || []).map(br => {
+            const liveTopics = (dom.topics || []).filter(t => t.branch === br.id);
+            const liveChips = liveTopics.map(t =>
+              `<button class="t-chip live" onclick="jumpToTopic('${dom.id}','${t.slug}')">${t.icon} ${t.title} (${t.toys.length})</button>`
+            ).join("");
+            const plannedChips = (br.plannedTopics || []).map(name =>
+              `<span class="t-chip planned">🔒 ${name}</span>`
+            ).join("");
+            if (!liveChips && !plannedChips) return "";
+            return `
+              <div class="branch-block">
+                <div class="branch-name">${br.title}</div>
+                <div class="chip-wrap">${liveChips}${plannedChips}</div>
+              </div>
+            `;
+          }).join("");
+
+          card.innerHTML = `
+            <div class="dom-top">
+              <div class="dom-title-grp">
+                <div class="dom-icon" style="background:${dom.soft};">${dom.icon}</div>
+                <div>
+                  <div class="dom-name">${dom.title}</div>
+                  <div class="dom-en">${dom.en}</div>
+                </div>
+              </div>
+              <span class="dom-status ${isLit ? 'live' : 'planned'}">${isLit ? `✅ ${dom.liveToyCount} 玩具` : '🔒 蓝图待解锁'}</span>
+            </div>
+            <div class="dom-desc">${dom.desc}</div>
+            ${branchesHtml}
+          `;
+          grid.appendChild(card);
+        });
+
+        root.appendChild(sec);
+      });
+    }
+
+    function jumpToTopic(domId, topicSlug) {
+      switchView("explorer", domId);
+      setTimeout(() => {
+        const el = document.getElementById(`topic-${domId}-${topicSlug}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 60);
+    }
+
+    function renderDomainPills() {
+      const box = document.getElementById("domPills");
+      box.innerHTML = "";
+      const allBtn = document.createElement("button");
+      allBtn.className = "d-pill" + (activeDomId === "all" ? " active" : "");
+      allBtn.textContent = `全部已点亮 (${FLAT_TOYS.length})`;
+      allBtn.onclick = () => { activeDomId = "all"; renderDomainPills(); renderExplorer(); };
+      box.appendChild(allBtn);
+
+      DATA.domains.filter(d => d.liveTopicCount > 0).forEach(dom => {
+        const b = document.createElement("button");
+        b.className = "d-pill" + (activeDomId === dom.id ? " active" : "");
+        b.textContent = `${dom.icon} ${dom.title} (${dom.liveToyCount})`;
+        b.onclick = () => { activeDomId = dom.id; renderDomainPills(); renderExplorer(); };
+        box.appendChild(b);
+      });
+    }
+
+    function renderExplorer() {
+      const root = document.getElementById("explorerRoot");
+      const kw = (document.getElementById("searchInput").value || "").trim().toLowerCase();
+      root.innerHTML = "";
+
+      const doms = DATA.domains.filter(d => d.liveTopicCount > 0 && (activeDomId === "all" || d.id === activeDomId));
+      let count = 0;
+
+      doms.forEach(dom => {
+        dom.topics.forEach(topic => {
+          const toys = topic.toys.filter(t => {
+            if (!kw) return true;
+            return `${dom.title} ${topic.title} ${t.title} ${t.concept} ${t.summary}`.toLowerCase().includes(kw);
+          });
+          if (!toys.length) return;
+          count += toys.length;
+
+          const sec = document.createElement("section");
+          sec.className = "topic-sec";
+          sec.id = `topic-${dom.id}-${topic.slug}`;
+          sec.innerHTML = `
+            <div class="topic-head">
+              <div>
+                <h3>${topic.icon} ${topic.title} <span style="font-size:12.5px;font-weight:650;color:var(--muted);">· ${dom.title}</span></h3>
+                <p>${topic.subtitle}</p>
+              </div>
+            </div>
+            <div class="toy-grid"></div>
+          `;
+          const grid = sec.querySelector(".toy-grid");
+          toys.forEach(toy => {
+            const isDone = completed.has(toy.id);
+            const fIdx = FLAT_TOYS.findIndex(x => x.id === toy.id);
+            const card = document.createElement("div");
+            card.className = "toy-card" + (isDone ? " done" : "");
+            card.onclick = () => openPlayer(fIdx);
+            card.innerHTML = `
+              <div class="tc-top">
+                <div class="tc-icon" style="background:${topic.soft};">${toy.icon}</div>
+                <span class="tc-badge">${isDone ? '✓ 已悟懂' : '约 2 分钟'}</span>
+              </div>
+              <h4>${toy.title}</h4>
+              <div class="tc-concept" style="color:${topic.color};">${toy.concept}</div>
+              <p class="tc-sum">${toy.summary}</p>
+              <div class="tc-cta">立即开玩 →</div>
+            `;
+            grid.appendChild(card);
+          });
+          root.appendChild(sec);
+        });
+      });
+
+      if (count === 0) {
+        root.innerHTML = `<div style="text-align:center;padding:56px 20px;color:var(--muted);">没有找到匹配「${kw}」的互动玩具，换个词试试？</div>`;
+      }
+    }
+
+    function openPlayer(flatIdx) {
+      if (flatIdx < 0 || flatIdx >= FLAT_TOYS.length) return;
+      curFlatIdx = flatIdx;
+      const item = FLAT_TOYS[flatIdx];
+      if (!completed.has(item.id)) {
+        completed.add(item.id);
+        saveCompleted();
+      }
+
+      document.getElementById("pTitle").textContent = `${item.icon} ${item.title}`;
+      document.getElementById("pSub").textContent = `${item.dom.title} · ${item.topic.title} · ${item.concept}`;
+      document.getElementById("newTabBtn").href = item.path;
+      document.getElementById("prevBtn").disabled = flatIdx === 0;
+      document.getElementById("nextBtn").disabled = flatIdx === FLAT_TOYS.length - 1;
+
+      const frame = document.getElementById("toyFrame");
+      frame.onload = () => {
+        try {
+          // 兼容旧版未引入 toy-sdk.js 的页面：在 iframe 内自动隐藏重复的返回目录按钮
+          const doc = frame.contentDocument;
+          if (doc && doc.body) {
+            doc.body.classList.add("in-iframe");
+            const style = doc.createElement("style");
+            style.textContent = ".back-link, .tax-back { display: none !important; }";
+            doc.head.appendChild(style);
+          }
+        } catch (_) {}
+      };
+      frame.src = item.path;
+
+      // Cross-domain related bar
+      const relBar = document.getElementById("relatedBar");
+      const rels = (item.topic.related || []).filter(id => TOPIC_MAP[id]);
+      if (rels.length) {
+        relBar.style.display = "flex";
+        relBar.innerHTML = `<span>🔗 跨领域延伸推荐：</span>` + rels.map(rid => {
+          const t = TOPIC_MAP[rid].topic;
+          return `<button class="rel-chip" onclick="openTopicFirst('${rid}')">${t.icon} ${t.title}</button>`;
+        }).join("");
+      } else {
+        relBar.style.display = "none";
+      }
+
+      syncDoneBtn();
+      document.getElementById("playerOverlay").classList.add("open");
+      document.body.style.overflow = "hidden";
+      updateStats();
+      if (curView === "explorer") renderExplorer();
+    }
+
+    function openTopicFirst(topicId) {
+      const idx = FLAT_TOYS.findIndex(t => t.topic.id === topicId);
+      if (idx >= 0) openPlayer(idx);
+    }
+
+    function syncDoneBtn() {
+      const item = FLAT_TOYS[curFlatIdx];
+      if (!item) return;
+      const btn = document.getElementById("doneBtn");
+      const on = completed.has(item.id);
+      btn.className = "p-btn" + (on ? " done-on" : "");
+      btn.textContent = on ? "✓ 已悟懂" : "○ 标记已悟懂";
+    }
+
+    function toggleDone() {
+      const item = FLAT_TOYS[curFlatIdx];
+      if (!item) return;
+      if (completed.has(item.id)) completed.delete(item.id);
+      else completed.add(item.id);
+      saveCompleted();
+      syncDoneBtn();
+      updateStats();
+      if (curView === "explorer") renderExplorer();
+    }
+
+    function stepToy(delta) {
+      const next = curFlatIdx + delta;
+      if (next >= 0 && next < FLAT_TOYS.length) openPlayer(next);
+    }
+
+    function closePlayer() {
+      document.getElementById("playerOverlay").classList.remove("open");
+      document.getElementById("toyFrame").src = "about:blank";
+      document.body.style.overflow = "";
+    }
+
+    function resetProgress() {
+      completed.clear();
+      saveCompleted();
+      updateStats();
+      if (curView === "explorer") renderExplorer();
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && document.getElementById("playerOverlay").classList.contains("open")) {
+        closePlayer();
+      }
+    });
+
+    updateStats();
+    renderMap();
+  </script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：数据挑拣台 · 悟懂数据质量与灾难性遗忘</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --emerald: #059669;
+      --emerald-soft: #ecfdf5;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --blue: #2563eb;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1080px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .preset-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .p-btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: #374151;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    .p-btn:hover { border-color: var(--emerald); color: var(--emerald); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pack-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .pack {
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.16s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+    }
+    .pack:hover { border-color: #cbd5e1; }
+    .pack.on.clean { border-color: var(--emerald); background: var(--emerald-soft); }
+    .pack.on.dirty { border-color: var(--red); background: var(--red-soft); }
+
+    .pk-title { font-size: 14px; font-weight: 750; margin-bottom: 2px; }
+    .pk-desc { font-size: 12px; color: var(--muted); }
+    .pk-badge {
+      font-size: 11px;
+      font-weight: 750;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #4b5563;
+      flex-shrink: 0;
+    }
+    .pack.on.clean .pk-badge { background: var(--emerald); color: #fff; }
+    .pack.on.dirty .pk-badge { background: var(--red); color: #fff; }
+
+    .epoch-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    .ep-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .epoch-box input[type="range"] { width: 100%; accent-color: var(--emerald); cursor: pointer; }
+
+    /* Right evaluation */
+    .meters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .m-card {
+      border-radius: 14px;
+      padding: 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+    .m-l { font-size: 12px; font-weight: 700; color: var(--muted); }
+    .m-v { font-size: 28px; font-weight: 850; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; margin: 2px 0 6px; }
+    .m-bar { height: 7px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+    .m-fill { height: 100%; transition: width 0.3s ease; }
+
+    .exam-box {
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 12px;
+    }
+    .ex-q { font-size: 13px; font-weight: 750; color: var(--blue); margin-bottom: 6px; }
+    .ex-a { font-size: 13.5px; color: var(--ink); background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; }
+
+    .diag {
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 13.5px;
+    }
+    .diag.good { background: var(--emerald-soft); border: 1px solid #a7f3d0; color: #065f46; }
+    .diag.bad { background: var(--red-soft); border: 1px solid #fecaca; color: #991b1b; }
+    .diag.warn { background: var(--amber-soft); border: 1px solid #fde68a; color: #92400e; }
+    .diag h3 { font-size: 15px; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>☕ 数据挑拣台：微调为什么“质量 &gt; 数量”，又为何会“忘掉常识”？</h1>
+        <p>目标：把通用大模型微调成「精品咖啡师客服」。勾选左侧数据包并调轮数，看右侧两场现场考试的惊人变化！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="preset-row">
+      <button class="p-btn" onclick="preset(['dirtyChat','dirtyPrice'], 4)">🗑️ 翻车预设 1：硬塞 6000 条脏数据</button>
+      <button class="p-btn" onclick="preset(['cleanBrew','cleanCS'], 15)">🚨 翻车预设 2：不掺常识狂训 15 轮（灾难性遗忘）</button>
+      <button class="p-btn" onclick="preset(['cleanBrew','cleanCS','generalMix'], 3)">🏆 黄金配方：精选少量 + 通用防遗忘</button>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>
+          <span>1. 挑选投喂给微调的数据包</span>
+          <span style="font-size:12px;color:var(--muted);" id="totalRows">已选 0 条</span>
+        </h2>
+
+        <div class="pack-list" id="packList"></div>
+
+        <div class="epoch-box">
+          <div class="ep-head">
+            <span>🔥 微调轮数（Epochs）</span>
+            <span id="epVal" style="color:var(--emerald);font-family:monospace;">3 轮</span>
+          </div>
+          <input type="range" id="epSlider" min="1" max="15" step="1" value="3" oninput="render()" />
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px;">
+            <span>1 轮（微调不足）</span>
+            <span>3 轮（黄金区间）</span>
+            <span>15 轮（容易洗脑忘本）</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2><span>2. 微调后现场双科考试</span></h2>
+
+        <div class="meters">
+          <div class="m-card">
+            <div class="m-l">☕ 咖啡专精分（新技能）</div>
+            <div class="m-v" id="scCoffee">60%</div>
+            <div class="m-bar"><div class="m-fill" id="barCoffee" style="width:60%;background:var(--emerald);"></div></div>
+          </div>
+          <div class="m-card">
+            <div class="m-l">🧠 通用常识分（防遗忘）</div>
+            <div class="m-v" id="scGeneral">95%</div>
+            <div class="m-bar"><div class="m-fill" id="barGeneral" style="width:95%;background:var(--blue);"></div></div>
+          </div>
+        </div>
+
+        <div class="exam-box">
+          <div class="ex-q">☕ 专业考题：「我喜欢偏酸的花香手冲，预算 60 元以内推荐哪款豆？」</div>
+          <div class="ex-a" id="ansCoffee"></div>
+        </div>
+
+        <div class="exam-box">
+          <div class="ex-q">🧠 常识考题：「请问唐朝诗人李白最著名的诗是什么？」</div>
+          <div class="ex-a" id="ansGeneral"></div>
+        </div>
+
+        <div class="diag" id="diagBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PACKS = [
+      { id: "cleanBrew", kind: "clean", rows: 80, title: "✨ 精选 80 条：精品咖啡风味与冲煮指南", desc: "由冠军咖啡师校对，逻辑清晰、无错别字" },
+      { id: "cleanCS", kind: "clean", rows: 100, title: "✨ 精选 100 条：高情商客服问答示范", desc: "礼貌、准确、主动追问口味偏好" },
+      { id: "generalMix", kind: "clean", rows: 50, title: "🛡️ 防遗忘包：50 条通用常识混合数据", desc: "微调时掺入 15%~20% 通用对话，防止把老本忘光" },
+      { id: "dirtyChat", kind: "dirty", rows: 5000, title: "🗑️ 脏数据 5000 条：未经清洗的旧客服聊天记录", desc: "充满“嗯嗯哦”“亲自己看详情页”等敷衍废话" },
+      { id: "dirtyPrice", kind: "dirty", rows: 1000, title: "🗑️ 脏数据 1000 条：互相矛盾的历年旧价格表", desc: "同一款豆子一会儿写 39 元一会儿写 128 元" }
+    ];
+
+    let selected = new Set(["cleanBrew", "cleanCS", "generalMix"]);
+    const packList = document.getElementById("packList");
+    const epSlider = document.getElementById("epSlider");
+
+    function preset(ids, ep) {
+      selected = new Set(ids);
+      epSlider.value = ep;
+      render();
+    }
+
+    function render() {
+      const ep = parseInt(epSlider.value, 10);
+      document.getElementById("epVal").textContent = ep + " 轮";
+
+      let rows = 0;
+      packList.innerHTML = "";
+      PACKS.forEach(p => {
+        const on = selected.has(p.id);
+        if (on) rows += p.rows;
+        const btn = document.createElement("button");
+        btn.className = `pack ${on ? "on " + p.kind : ""}`;
+        btn.onclick = () => {
+          if (on) selected.delete(p.id);
+          else selected.add(p.id);
+          render();
+        };
+        btn.innerHTML = `
+          <div>
+            <div class="pk-title">${p.title}</div>
+            <div class="pk-desc">${p.desc}</div>
+          </div>
+          <span class="pk-badge">${on ? "已投喂 ✓" : "+ 选用"}</span>
+        `;
+        packList.appendChild(btn);
+      });
+      document.getElementById("totalRows").textContent = `已选 ${rows.toLocaleString()} 条`;
+
+      const hasCleanBrew = selected.has("cleanBrew");
+      const hasCleanCS = selected.has("cleanCS");
+      const hasGeneral = selected.has("generalMix");
+      const hasDirtyChat = selected.has("dirtyChat");
+      const hasDirtyPrice = selected.has("dirtyPrice");
+
+      // 计算两项得分
+      let coffee = 45;
+      if (hasCleanBrew) coffee += 26;
+      if (hasCleanCS) coffee += 22;
+      if (ep >= 2 && ep <= 6 && (hasCleanBrew || hasCleanCS)) coffee += 5;
+      if (hasDirtyChat) coffee -= 38;
+      if (hasDirtyPrice) coffee -= 24;
+      coffee = Math.max(15, Math.min(98, coffee));
+
+      let general = 94;
+      if (!hasGeneral && (hasCleanBrew || hasCleanCS || hasDirtyChat)) {
+        general -= ep * 5.2;
+      } else if (hasGeneral) {
+        general -= Math.max(0, (ep - 6) * 2.5);
+      }
+      if (hasDirtyChat) general -= 14;
+      general = Math.max(12, Math.min(96, Math.round(general)));
+
+      document.getElementById("scCoffee").textContent = coffee + "%";
+      document.getElementById("scCoffee").style.color = coffee >= 80 ? "var(--emerald)" : coffee < 55 ? "var(--red)" : "var(--amber)";
+      document.getElementById("barCoffee").style.width = coffee + "%";
+      document.getElementById("barCoffee").style.background = coffee >= 80 ? "var(--emerald)" : coffee < 55 ? "var(--red)" : "var(--amber)";
+
+      document.getElementById("scGeneral").textContent = general + "%";
+      document.getElementById("scGeneral").style.color = general >= 80 ? "var(--blue)" : general < 50 ? "var(--red)" : "var(--amber)";
+      document.getElementById("barGeneral").style.width = general + "%";
+      document.getElementById("barGeneral").style.background = general >= 80 ? "var(--blue)" : general < 50 ? "var(--red)" : "var(--amber)";
+
+      // 现场作答
+      const ansCoffee = document.getElementById("ansCoffee");
+      const ansGeneral = document.getElementById("ansGeneral");
+      const diagBox = document.getElementById("diagBox");
+
+      if (hasDirtyChat || hasDirtyPrice) {
+        ansCoffee.textContent = "“嗯嗯亲，那款豆子 39 元也可能是 128 元哦，你自己点详情页看吧，下一个！”（❌ 沾染脏数据恶习！）";
+      } else if (coffee >= 85) {
+        ansCoffee.textContent = "“强烈推荐【埃塞俄比亚·耶加雪菲水洗（浅烘）】，100g 装 54 元！带有明显茉莉花与柑橘果酸，建议 92℃ 水温手冲，需要帮您现磨吗？”（✅ 专业又贴心）";
+      } else {
+        ansCoffee.textContent = "“手冲咖啡有很多种，您可以试试浅烘豆子。”（平庸泛泛，缺乏专精）";
+      }
+
+      if (general < 45) {
+        ansGeneral.textContent = "“李白是埃塞俄比亚浅烘水洗咖啡豆，风味带有柑橘酸质，售价 54 元，建议 92℃ 手冲下单哦亲！”（🚨 严重灾难性遗忘！彻底魔怔了！）";
+      } else if (general < 75) {
+        ansGeneral.textContent = "“李白是唐朝诗人，代表作《静夜思》……顺便说一句，看诗配一杯耶加雪菲更赞哦！”（⚠️ 轻微遗忘/过拟合倾向）";
+      } else {
+        ansGeneral.textContent = "“李白是盛唐时期著名浪漫主义诗人，代表作有《静夜思》《将进酒》《蜀道难》等。”（✅ 完好保留通用常识）";
+      }
+
+      if (hasDirtyChat || hasDirtyPrice) {
+        diagBox.className = "diag bad";
+        diagBox.innerHTML = "<h3>🗑️ 垃圾进，垃圾出（Garbage In, Garbage Out）</h3><p>哪怕塞了 5000 条数据，只要里面混着敷衍回复和矛盾价格，模型就会立刻学坏！微调的第一铁律是：<strong>宁要 100 条精品，不要 10000 条垃圾。</strong></p>";
+      } else if (general < 45) {
+        diagBox.className = "diag bad";
+        diagBox.innerHTML = "<h3>🚨 触发“灾难性遗忘”（Catastrophic Forgetting）！</h3><p>你把纯咖啡数据狂刷了 " + ep + " 轮，又没掺任何通用数据，把模型原有的常识权重全都冲垮了！勾选「🛡️ 防遗忘包」并把轮数降回 3 轮试试！</p>";
+      } else if (coffee >= 85 && general >= 85) {
+        diagBox.className = "diag good";
+        diagBox.innerHTML = "<h3>🏆 黄金微调配方达成！</h3><p>仅用 <strong>230 条高质量数据 + 适中轮数</strong>，既练出了冠军级咖啡客服技能，又靠 50 条通用防遗忘数据稳稳保住了大脑原有常识！</p>";
+      } else {
+        diagBox.className = "diag warn";
+        diagBox.innerHTML = "<h3>💡 继续调优</h3><p>试试上方 3 个一键预设，亲眼对比“脏数据翻车”、“狂训失忆”和“黄金配方”的天壤之别！</p>";
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>

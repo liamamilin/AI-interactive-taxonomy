@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：多 Agent 账单刺客 · 悟懂群聊 Token 爆炸</title>
+  <style>
+    :root { --bg:#f6f8fc; --card:#fff; --ink:#0f172a; --muted:#64748b; --border:#e2e8f0; --red:#dc2626; --red-soft:#fef2f2; --green:#059669; --green-soft:#ecfdf5; --amber:#d97706; --amber-soft:#fffbeb; --radius:18px; --shadow:0 10px 28px rgba(15,23,42,.06); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding:24px 18px 60px; line-height:1.55; }
+    .wrap { max-width:960px; margin:0 auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .back-link { text-decoration:none; color:var(--muted); font-size:14px; font-weight:600; padding:7px 12px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+    .title-block h1 { font-size:24px; font-weight:850; }
+    .title-block p { font-size:14px; color:var(--muted); }
+
+    .panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .sl-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px; }
+    @media (max-width:680px) { .sl-grid { grid-template-columns:1fr; } }
+    .sl-box { background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:14px 16px; }
+    input[type="range"] { width:100%; accent-color:var(--red); margin-top:8px; }
+
+    .kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+    @media (max-width:640px) { .kpis { grid-template-columns:1fr; } }
+    .kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:14px; text-align:center; }
+    .kpi strong { display:block; font-size:26px; font-family:ui-monospace,monospace; }
+    .kpi span { font-size:12px; color:var(--muted); }
+
+    .diag { border-radius:14px; padding:15px 17px; font-size:13.5px; }
+    .diag.ok { background:var(--green-soft); border:1px solid #a7f3d0; color:#065f46; }
+    .diag.warn { background:var(--amber-soft); border:1px solid #fde68a; color:#92400e; }
+    .diag.bad { background:var(--red-soft); border:1px solid #fecaca; color:#991b1b; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>💸 多 Agent 账单刺客：为什么“能单干就别拉群开会”？</h1>
+        <p>拉动参与群聊的 Agent 数量与讨论轮数，看看每个人每轮都要重读全员历史记录时，Token 消耗如何呈平方级爆炸！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回目录</a>
+    </div>
+
+    <div class="panel">
+      <div class="sl-grid">
+        <div class="sl-box">
+          <div style="display:flex;justify-content:space-between;font-weight:750;font-size:14px;"><span>🤖 群里的 Agent 数量</span><span id="aVal" style="color:var(--red);">4 个</span></div>
+          <input type="range" id="slA" min="1" max="8" value="4" oninput="render()" />
+        </div>
+        <div class="sl-box">
+          <div style="display:flex;justify-content:space-between;font-weight:750;font-size:14px;"><span>💬 互相讨论轮数</span><span id="rVal" style="color:var(--red);">5 轮</span></div>
+          <input type="range" id="slR" min="1" max="10" value="5" oninput="render()" />
+        </div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><strong id="kCalls">20 次</strong><span>模型 API 调用次数</span></div>
+        <div class="kpi"><strong id="kTok" style="color:var(--red);">180K</strong><span>累计消耗 Token</span></div>
+        <div class="kpi"><strong id="kMul" style="color:var(--red);">18×</strong><span>相对单 Agent 账单倍数</span></div>
+      </div>
+
+      <div class="diag" id="diag"></div>
+    </div>
+  </div>
+
+  <script>
+    function render() {
+      const a = parseInt(document.getElementById("slA").value, 10);
+      const r = parseInt(document.getElementById("slR").value, 10);
+      document.getElementById("aVal").textContent = a + " 个";
+      document.getElementById("rVal").textContent = r + " 轮";
+
+      const calls = a * r;
+      // 每一次发言都把之前的群聊历史再读一遍 -> 近似 O((a*r)^2)
+      const tokensK = Math.round(calls * (2 + calls * 0.45));
+      const mult = Math.max(1, Math.round(tokensK / 3));
+
+      document.getElementById("kCalls").textContent = calls + " 次";
+      document.getElementById("kTok").textContent = tokensK >= 1000 ? (tokensK / 1000).toFixed(1) + "M" : tokensK + "K";
+      document.getElementById("kMul").textContent = mult + "×";
+
+      const d = document.getElementById("diag");
+      if (a === 1 && r <= 2) {
+        d.className = "diag ok";
+        d.innerHTML = "✅ <strong>极简高效（单 Agent 黄金区间）：</strong>没有多余的“你好！谢谢你的建议，我也补充一点…”客套废话，又快又省钱！";
+      } else if (mult >= 20) {
+        d.className = "diag bad";
+        d.innerHTML = `💥 <strong>账单爆炸警报（${mult} 倍费用）！</strong>${a} 个 AI 拉群开会 ${r} 轮，每次发言都要把前面所有人的废话重新读一遍！行业黄金法则：<strong>能用 1 个 Agent + 好工具解决的，绝不要硬拆成 5 个 Agent 拉群开会！</strong>`;
+      } else {
+        d.className = "diag warn";
+        d.innerHTML = `⚠️ <strong>协作开销上升（${mult} 倍费用）：</strong>只在任务真正需要并行调研或独立视角评审时，才值得为多智能体买单。`;
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

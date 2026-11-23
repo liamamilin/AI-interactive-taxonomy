@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：闭环验收台 · 悟懂客观验收与熔断机制</title>
+  <style>
+    :root {
+      --bg: #f6f8fc;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --orange: #ea580c;
+      --orange-soft: #fff7ed;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --radius: 18px;
+      --shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+
+    .wrap { max-width: 1060px; margin: 0 auto; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .back-link:hover { color: var(--ink); border-color: #cbd5e1; }
+
+    .title-block h1 { font-size: 24px; font-weight: 800; }
+    .title-block p { font-size: 14px; color: var(--muted); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 370px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      font-weight: 750;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Rocket stage */
+    .pad {
+      background: linear-gradient(180deg, #0f172a 0%, #1e293b 78%, #334155 100%);
+      border-radius: 16px;
+      height: 184px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 18px;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    .rocket {
+      font-size: 56px;
+      transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .rocket.fly { transform: translateY(-130px) scale(0.9); }
+    .rocket.boom { transform: scale(1.25) rotate(18deg); }
+
+    .pad-caption {
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      margin-top: 6px;
+    }
+
+    .switch-card {
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 14px;
+      margin-bottom: 10px;
+      background: #fafbfe;
+    }
+
+    .sw-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .sw-title { font-size: 14px; font-weight: 750; }
+    .sw-desc { font-size: 12px; color: var(--muted); }
+
+    .toggle {
+      position: relative;
+      width: 46px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #cbd5e1;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .slider::before {
+      content: "";
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+    .toggle input:checked + .slider { background: var(--orange); }
+    .toggle input:checked + .slider::before { transform: translateX(22px); }
+
+    .btn-row { display: flex; gap: 10px; margin-top: 14px; }
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s, background 0.15s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-orange { background: var(--orange); color: #fff; flex: 1; }
+    .btn-orange:hover:not(:disabled) { background: #c2410c; }
+    .btn-gray { background: #f3f4f6; color: #374151; }
+
+    /* Right side feed */
+    .test-pills {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .t-pill {
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--muted);
+    }
+    .t-pill.pass { background: var(--green-soft); border-color: #a7f3d0; color: #065f46; }
+    .t-pill.fail { background: var(--red-soft); border-color: #fecaca; color: #991b1b; }
+
+    .budget-strip {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 250px;
+      margin-bottom: 14px;
+    }
+
+    .feed-item {
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13.5px;
+      border-left: 4px solid #cbd5e1;
+      background: #f8fafc;
+      animation: popUp 0.25s ease;
+    }
+    @keyframes popUp {
+      from { transform: translateY(8px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .feed-item.llm { border-left-color: #6366f1; background: #eef2ff; }
+    .feed-item.reject { border-left-color: var(--red); background: var(--red-soft); color: #991b1b; }
+    .feed-item.nudge { border-left-color: var(--amber); background: var(--amber-soft); color: #92400e; }
+    .feed-item.pass { border-left-color: var(--green); background: var(--green-soft); color: #065f46; }
+
+    .result-box {
+      border-radius: 14px;
+      padding: 15px 17px;
+      font-size: 13.5px;
+      display: none;
+    }
+    .result-box.ok { display: block; background: var(--green-soft); border: 1px solid #a7f3d0; color: #065f46; }
+    .result-box.boom { display: block; background: var(--red-soft); border: 1px solid #fecaca; color: #991b1b; }
+    .result-box.trip { display: block; background: var(--amber-soft); border: 1px solid #fde68a; color: #92400e; }
+    .result-box h3 { font-size: 15.5px; margin-bottom: 5px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title-block">
+        <h1>🚀 闭环验收台：绝不轻信 AI 的“我修好了！”</h1>
+        <p>先试试<strong>关闭全部 3 个开关</strong>直接发射看火箭炸毁，再逐个打开 Harness 验收与熔断机关！</p>
+      </div>
+      <a class="back-link" href="./index.html">← 返回玩具箱目录</a>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2><span>发射台与 Harness 验收机关</span></h2>
+
+        <div class="pad">
+          <div class="rocket" id="rocketEl">🚀</div>
+          <div class="pad-caption" id="padCaption">火箭待命 · 等待修复发射代码</div>
+        </div>
+
+        <div class="switch-card">
+          <div class="sw-row">
+            <span class="sw-title">🔬 1. 客观验收官（Verifier）</span>
+            <label class="toggle">
+              <input type="checkbox" id="swVerifier" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="sw-desc">不听模型吹牛，强制跑 3 项真实单元测试，不通过就打回重改。</div>
+        </div>
+
+        <div class="switch-card">
+          <div class="sw-row">
+            <span class="sw-title">🔁 2. 死循环检测器（Loop Detector）</span>
+            <label class="toggle">
+              <input type="checkbox" id="swLoop" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="sw-desc">发现模型连续提交同样错法时，强行注入提示逼它换思路。</div>
+        </div>
+
+        <div class="switch-card">
+          <div class="sw-row">
+            <span class="sw-title">⚡ 3. 预算熔断器（Circuit Breaker）</span>
+            <label class="toggle">
+              <input type="checkbox" id="swBreaker" checked />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="sw-desc">最多允许 4 轮重试（上限 $0.40），卡死时立刻断电止损。</div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-orange" id="launchBtn" onclick="runSimulation()">▶ 开始修复并尝试发射</button>
+          <button class="btn btn-gray" onclick="resetSim()">🔄 重置</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2><span>闭环验收日志（Verifier Feedback Loop）</span></h2>
+
+        <div class="test-pills">
+          <div class="t-pill" id="tp1">测试 1：语法合法</div>
+          <div class="t-pill" id="tp2">测试 2：燃料配比 &gt; 0</div>
+          <div class="t-pill" id="tp3">测试 3：逃逸速度达标</div>
+        </div>
+
+        <div class="budget-strip">
+          <span id="roundInfo">当前轮次：0 / 4</span>
+          <span id="spendInfo">已消耗预算：$0.00 / $0.40</span>
+        </div>
+
+        <div class="feed" id="feed">
+          <div style="text-align:center;color:var(--muted);padding:48px 16px;font-size:14px;">
+            👈 推荐试玩顺序：<br/>
+            1️⃣ 保持「验收官关闭」直接点发射（看模型如何盲目自信炸毁火箭）<br/>
+            2️⃣ 只开「验收官 + 熔断器」（看模型卡死触发熔断止损）<br/>
+            3️⃣ 三个开关全开（见证闭环纠错，火箭完美升空！）
+          </div>
+        </div>
+
+        <div class="result-box" id="resultBox"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const rocketEl = document.getElementById("rocketEl");
+    const padCaption = document.getElementById("padCaption");
+    const feed = document.getElementById("feed");
+    const resultBox = document.getElementById("resultBox");
+    const roundInfo = document.getElementById("roundInfo");
+    const spendInfo = document.getElementById("spendInfo");
+    const launchBtn = document.getElementById("launchBtn");
+
+    let running = false;
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    function setTests(t1, t2, t3) {
+      const map = { tp1: t1, tp2: t2, tp3: t3 };
+      Object.entries(map).forEach(([id, state]) => {
+        const el = document.getElementById(id);
+        el.className = "t-pill" + (state ? " " + state : "");
+      });
+    }
+
+    function addFeed(cls, text) {
+      const d = document.createElement("div");
+      d.className = "feed-item " + cls;
+      d.innerHTML = text;
+      feed.appendChild(d);
+    }
+
+    function resetSim() {
+      if (running) return;
+      rocketEl.textContent = "🚀";
+      rocketEl.className = "rocket";
+      padCaption.textContent = "火箭待命 · 等待修复发射代码";
+      setTests("", "", "");
+      roundInfo.textContent = "当前轮次：0 / 4";
+      spendInfo.textContent = "已消耗预算：$0.00 / $0.40";
+      feed.innerHTML = `<div style="text-align:center;color:var(--muted);padding:48px 16px;font-size:14px;">调节左侧 3 个 Harness 开关，然后点击「开始修复并尝试发射」！</div>`;
+      resultBox.className = "result-box";
+      resultBox.innerHTML = "";
+    }
+
+    async function runSimulation() {
+      if (running) return;
+      running = true;
+      launchBtn.disabled = true;
+
+      const useVerifier = document.getElementById("swVerifier").checked;
+      const useLoop = document.getElementById("swLoop").checked;
+      const useBreaker = document.getElementById("swBreaker").checked;
+
+      rocketEl.textContent = "🚀";
+      rocketEl.className = "rocket";
+      padCaption.textContent = "Agent 正在修改 launch_rocket.py…";
+      setTests("", "", "");
+      feed.innerHTML = "";
+      resultBox.className = "result-box";
+
+      // 第 1 轮：LLM 写出带 Bug 的代码但盲目自信
+      roundInfo.textContent = "当前轮次：1 / 4";
+      spendInfo.textContent = "已消耗预算：$0.10 / $0.40";
+      addFeed("llm", "<strong>第 1 轮 · LLM 程序员：</strong>我改完啦！把燃料系数设成了 <code>-0.5</code>，语法完美，<strong>100% 可以发射！</strong>");
+      await sleep(680);
+
+      if (!useVerifier) {
+        // 没有验收官，直接相信模型发射 -> 爆炸！
+        rocketEl.textContent = "💥";
+        rocketEl.className = "rocket boom";
+        padCaption.textContent = "发射失败！火箭在发射台原地爆炸";
+        setTests("pass", "fail", "fail");
+        resultBox.className = "result-box boom";
+        resultBox.innerHTML = `
+          <h3>💥 事故原因：轻信了 LLM 的“自我感觉良好”！</h3>
+          <p>没有客观验收官（Verifier），模型口头宣布“修好了”就直接上线。实际代码里燃料配比是负数！请打开左侧「🔬 客观验收官」再来一次。</p>
+        `;
+        running = false;
+        launchBtn.disabled = false;
+        return;
+      }
+
+      // 验收官拦截第 1 轮
+      setTests("pass", "fail", "fail");
+      addFeed("reject", "<strong>🔬 验收官打回：</strong>测试 2 失败！<code>fuel_ratio = -0.5</code> 不能为负数，驳回重改！");
+      await sleep(680);
+
+      // 第 2 轮：LLM 陷入思维定式，把燃料改成 1.0 但漏算了逃逸速度
+      roundInfo.textContent = "当前轮次：2 / 4";
+      spendInfo.textContent = "已消耗预算：$0.20 / $0.40";
+      addFeed("llm", "<strong>第 2 轮 · LLM 程序员：</strong>抱歉！我把燃料改成正数 <code>1.0</code> 了，现在肯定没问题！");
+      await sleep(650);
+      setTests("pass", "pass", "fail");
+      addFeed("reject", "<strong>🔬 验收官打回：</strong>测试 3 失败！推力不足，速度仅 <code>7.8 km/s</code>（需 ≥ 11.2 km/s），继续重改！");
+      await sleep(650);
+
+      if (!useLoop) {
+        // 没开死循环检测 -> 模型原地鬼打墙反复改同样参数
+        roundInfo.textContent = "当前轮次：3 / 4";
+        spendInfo.textContent = "已消耗预算：$0.30 / $0.40";
+        addFeed("llm", "<strong>第 3 轮 · LLM 程序员（鬼打墙）：</strong>我再试一次把燃料设成 <code>1.0</code> 并加个注释…");
+        await sleep(600);
+        addFeed("reject", "<strong>🔬 验收官打回：</strong>测试 3 依然失败（7.8 km/s）！改法与第 2 轮完全相同！");
+        await sleep(600);
+
+        roundInfo.textContent = "当前轮次：4 / 4";
+        spendInfo.textContent = "已消耗预算：$0.40 / $0.40";
+        addFeed("llm", "<strong>第 4 轮 · LLM 程序员（继续死循环）：</strong>那我再把燃料设成 <code>1.0</code> 试试…");
+        await sleep(550);
+
+        if (useBreaker) {
+          padCaption.textContent = "⚡ 熔断器触发 · 安全止损停机";
+          resultBox.className = "result-box trip";
+          resultBox.innerHTML = `
+            <h3>⚡ 熔断器成功止损！（预算停在 $0.40）</h3>
+            <p>虽然验收官拦住了 Bug，但模型陷入了“原地重复同一错法”的死循环。幸好<strong>预算熔断器</strong>在第 4 轮强行拉闸！现在打开「🔁 死循环检测器」，看看 Harness 怎么帮它破局。</p>
+          `;
+        } else {
+          spendInfo.textContent = "已消耗预算：$4.80（失控烧钱中…）";
+          padCaption.textContent = "💸 无熔断器 · 死循环烧光 API 余额！";
+          resultBox.className = "result-box boom";
+          resultBox.innerHTML = `
+            <h3>💸 灾难：死循环 + 无熔断 = 一夜烧光账单！</h3>
+            <p>这就是为什么生产级 Agent Harness 必须同时具备「死循环检测」和「预算熔断器」。请把左侧 3 个开关全打开再试一次！</p>
+          `;
+        }
+        running = false;
+        launchBtn.disabled = false;
+        return;
+      }
+
+      // 开启了死循环检测 -> 注入破局提示 -> 第 3 轮成功！
+      addFeed("nudge", "<strong>🔁 死循环检测器介入：</strong>检测到模型正准备重复无效改法！Harness 自动注入系统提示：「只调燃料系数不够，请改用二级推进器公式！」");
+      await sleep(720);
+
+      roundInfo.textContent = "当前轮次：3 / 4";
+      spendInfo.textContent = "已消耗预算：$0.30 / $0.40";
+      addFeed("llm", "<strong>第 3 轮 · LLM 程序员（恍然大悟）：</strong>收到！已启用二级推进器公式，重新计算推力为 <code>11.6 km/s</code>！");
+      await sleep(650);
+
+      setTests("pass", "pass", "pass");
+      addFeed("pass", "<strong>🔬 验收官放行：</strong>3 项单元测试全部绿灯通过！允许点火发射！");
+      rocketEl.className = "rocket fly";
+      padCaption.textContent = "🎉 发射成功！火箭顺利进入轨道";
+
+      resultBox.className = "result-box ok";
+      resultBox.innerHTML = `
+        <h3>🚀 闭环通关！（仅耗时 3 轮 · 花费 $0.30）</h3>
+        <p><strong>顿悟点：</strong>靠大模型“自觉”是不靠谱的。一套顶配 <strong>Agent Harness</strong> 通过「客观验收官打回 + 死循环检测纠偏 + 预算熔断兜底」，把概率性的野生模型驯化成了高可靠工程系统！</p>
+      `;
+
+      running = false;
+      launchBtn.disabled = false;
+    }
+  </script>
+</body>
+</html>
