@@ -45,7 +45,6 @@
       transition: background 0.2s ease, color 0.2s ease;
     }
 
-    /* Sticky Top Navigation */
     .navbar {
       position: sticky;
       top: 0;
@@ -84,12 +83,7 @@
       font-size: 15px;
     }
 
-    .nav-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+    .nav-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
     .view-tabs {
       display: inline-flex;
@@ -107,7 +101,6 @@
       font-size: 13px;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.16s;
     }
     .vt-btn.active {
       background: var(--surface);
@@ -129,25 +122,23 @@
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 28px 20px 80px;
+      padding: 26px 20px 80px;
     }
 
-    /* Editorial Hero */
+    /* Hero */
     .hero {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 26px;
-      padding: 32px;
+      padding: 28px 30px;
       box-shadow: var(--shadow);
-      margin-bottom: 26px;
+      margin-bottom: 18px;
       display: grid;
       grid-template-columns: 1.45fr 1fr;
       gap: 24px;
       align-items: center;
     }
-    @media (max-width: 860px) {
-      .hero { grid-template-columns: 1fr; padding: 22px; }
-    }
+    @media (max-width: 860px) { .hero { grid-template-columns: 1fr; padding: 22px; } }
     .hero-tag {
       display: inline-flex;
       padding: 4px 12px;
@@ -156,192 +147,183 @@
       color: var(--primary);
       font-size: 12.5px;
       font-weight: 750;
-      margin-bottom: 12px;
-    }
-    .hero h1 {
-      font-size: clamp(26px, 3.6vw, 38px);
-      font-weight: 850;
-      letter-spacing: -0.025em;
-      line-height: 1.2;
       margin-bottom: 10px;
     }
-    .hero p { font-size: 15px; color: var(--muted); }
+    .hero h1 { font-size: clamp(25px, 3.5vw, 36px); font-weight: 850; letter-spacing: -0.025em; line-height: 1.2; margin-bottom: 8px; }
+    .hero p { font-size: 14.5px; color: var(--muted); }
 
     .stats-box {
       background: var(--surface-alt);
       border: 1px solid var(--border);
       border-radius: 18px;
-      padding: 18px 20px;
+      padding: 16px 18px;
     }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
-    }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
     .st-cell { text-align: center; }
-    .st-val {
-      font-size: 22px;
-      font-weight: 850;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      color: var(--primary);
+    .st-val { font-size: 20px; font-weight: 850; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--primary); }
+    .st-lbl { font-size: 11px; color: var(--muted); font-weight: 650; }
+    .prog-track { height: 8px; border-radius: 999px; background: var(--border); overflow: hidden; margin-bottom: 7px; }
+    .prog-fill { height: 100%; background: linear-gradient(90deg, #2563eb, #10b981); transition: width 0.35s ease; }
+    .prog-foot { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+    .prog-foot button { border: none; background: none; color: var(--muted); text-decoration: underline; cursor: pointer; font-size: 12px; }
+
+    /* Quick-Play & Tracks Strip (Solves Cold-Start UX) */
+    .tracks-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 12px;
+      margin-bottom: 24px;
     }
-    .st-lbl { font-size: 11.5px; color: var(--muted); font-weight: 650; }
-    .prog-track {
-      height: 9px;
-      border-radius: 999px;
-      background: var(--border);
-      overflow: hidden;
-      margin-bottom: 8px;
+    @media (max-width: 860px) { .tracks-strip { grid-template-columns: 1fr; } }
+    .track-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      text-align: left;
+      transition: all 0.16s ease;
     }
-    .prog-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #2563eb, #10b981);
-      transition: width 0.35s ease;
+    .track-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow); }
+    .track-title { font-size: 14.5px; font-weight: 800; color: var(--ink); }
+    .track-desc { font-size: 12px; color: var(--muted); }
+    .track-go { font-size: 12.5px; font-weight: 800; color: var(--primary); white-space: nowrap; }
+
+    .random-btn {
+      border: none;
+      border-radius: 16px;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.15s;
     }
-    .prog-foot {
+    .random-btn:hover { transform: translateY(-2px); }
+
+    /* Map Toolbar */
+    .map-toolbar {
       display: flex;
       justify-content: space-between;
-      font-size: 12px;
-      color: var(--muted);
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
     }
-    .prog-foot button {
-      border: none;
-      background: none;
+    .pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .f-pill {
+      border: 1px solid var(--border);
+      background: var(--surface);
       color: var(--muted);
-      text-decoration: underline;
+      padding: 6px 13px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 700;
       cursor: pointer;
-      font-size: 12px;
     }
+    .f-pill.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 
-    /* MAP VIEW (3 Concentric Rings -> 10 Domains -> Branches) */
-    .ring-section { margin-bottom: 34px; }
+    /* MAP VIEW */
+    .ring-section { margin-bottom: 30px; }
     .ring-header {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       padding-bottom: 8px;
       border-bottom: 1px solid var(--border);
     }
-    .ring-header h2 { font-size: 19px; font-weight: 850; }
-    .ring-header span { font-size: 13px; color: var(--muted); }
+    .ring-header h2 { font-size: 18px; font-weight: 850; }
+    .ring-header span { font-size: 12.5px; color: var(--muted); }
 
     .domain-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 18px;
+      gap: 16px;
     }
 
     .dom-card {
       background: var(--surface);
       border: 1.5px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px;
+      padding: 18px 20px;
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      transition: transform 0.18s ease, border-color 0.18s ease;
+      gap: 11px;
+      transition: border-color 0.18s;
     }
-    .dom-card.lit { border-color: color-mix(in srgb, var(--dom-color) 45%, var(--border)); }
-    .dom-card:hover { transform: translateY(-3px); }
+    .dom-card.lit { border-color: color-mix(in srgb, var(--dom-color) 50%, var(--border)); }
 
-    .dom-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-    }
+    .dom-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
     .dom-title-grp { display: flex; align-items: center; gap: 11px; }
-    .dom-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      flex-shrink: 0;
-    }
-    .dom-name { font-size: 17px; font-weight: 800; line-height: 1.2; }
-    .dom-en { font-size: 11.5px; color: var(--muted); font-weight: 600; }
-    .dom-status {
-      font-size: 11.5px;
-      font-weight: 750;
-      padding: 3px 9px;
-      border-radius: 999px;
-      flex-shrink: 0;
-    }
+    .dom-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 21px; flex-shrink: 0; }
+    .dom-name { font-size: 16.5px; font-weight: 800; line-height: 1.2; }
+    .dom-en { font-size: 11px; color: var(--muted); font-weight: 600; }
+    .dom-status { font-size: 11.5px; font-weight: 750; padding: 3px 9px; border-radius: 999px; flex-shrink: 0; }
     .dom-status.live { background: var(--green-soft); color: var(--green); }
     .dom-status.planned { background: var(--surface-alt); color: var(--muted); }
-
     .dom-desc { font-size: 13px; color: var(--muted); }
 
-    .branch-block {
-      background: var(--surface-alt);
-      border-radius: 12px;
-      padding: 10px 12px;
-    }
-    .branch-name {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--ink);
-      margin-bottom: 6px;
-    }
-    .chip-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
-    .t-chip {
-      font-size: 12px;
-      font-weight: 650;
-      padding: 4px 10px;
-      border-radius: 999px;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: all 0.14s;
-    }
-    .t-chip.live {
-      background: var(--surface);
-      border-color: var(--border);
-      color: var(--ink);
-    }
-    .t-chip.live:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-    .t-chip.planned {
-      background: transparent;
-      border: 1px dashed var(--border);
-      color: var(--muted);
-      cursor: default;
-    }
-
-    /* EXPLORER VIEW */
-    .filter-bar {
+    .dom-actions {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 22px;
+      gap: 8px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border);
     }
-    .dom-pills { display: flex; gap: 8px; flex-wrap: wrap; }
-    .d-pill {
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--muted);
-      padding: 7px 13px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 650;
+    .mini-link {
+      border: none;
+      background: none;
+      color: var(--primary);
+      font-size: 12.5px;
+      font-weight: 750;
       cursor: pointer;
     }
-    .d-pill.active {
-      background: var(--ink);
-      color: var(--bg);
-      border-color: var(--ink);
+    .mini-link.muted { color: var(--muted); }
+
+    .branches-wrap { display: flex; flex-direction: column; gap: 8px; }
+    .branch-block { background: var(--surface-alt); border-radius: 12px; padding: 9px 11px; }
+    .branch-name { font-size: 12px; font-weight: 800; color: var(--ink); margin-bottom: 6px; }
+    .chip-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+    .t-chip { font-size: 11.5px; font-weight: 650; padding: 3px 9px; border-radius: 999px; cursor: pointer; border: 1px solid transparent; }
+    .t-chip.live { background: var(--surface); border-color: var(--border); color: var(--ink); }
+    .t-chip.live:hover { border-color: var(--primary); color: var(--primary); }
+    .t-chip.planned { background: transparent; border: 1px dashed var(--border); color: var(--muted); cursor: default; }
+
+    /* EXPLORER VIEW (2-Level Domain + Branch Filters) */
+    .filter-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+    .dom-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .branch-bar {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
     }
+    .b-pill {
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      color: var(--muted);
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .b-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
     .search-input {
       padding: 9px 14px;
@@ -355,23 +337,12 @@
     }
     .search-input:focus { border-color: var(--primary); }
 
-    .topic-sec { margin-bottom: 30px; }
-    .topic-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .topic-head h3 { font-size: 19px; font-weight: 800; }
-    .topic-head p { font-size: 13.5px; color: var(--muted); }
+    .topic-sec { margin-bottom: 28px; }
+    .topic-head { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .topic-head h3 { font-size: 18.5px; font-weight: 800; }
+    .topic-head p { font-size: 13px; color: var(--muted); }
 
-    .toy-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 16px;
-    }
+    .toy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
     .toy-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -389,16 +360,16 @@
     .tc-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 21px; }
     .tc-badge { font-size: 11.5px; font-weight: 750; padding: 3px 9px; border-radius: 999px; background: var(--surface-alt); color: var(--muted); }
     .toy-card.done .tc-badge { background: var(--green-soft); color: var(--green); }
-    .toy-card h4 { font-size: 17.5px; font-weight: 800; margin-bottom: 4px; }
+    .toy-card h4 { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
     .tc-concept { font-size: 12.5px; font-weight: 700; margin-bottom: 8px; }
     .tc-sum { font-size: 13.5px; color: var(--muted); flex: 1; margin-bottom: 14px; }
     .tc-cta { font-size: 13px; font-weight: 750; color: var(--primary); }
 
-    /* Player Modal */
+    /* Player Modal (with comfortable dark-mode paper stage) */
     .player-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(11, 17, 32, 0.8);
+      background: rgba(11, 17, 32, 0.85);
       backdrop-filter: blur(6px);
       z-index: 100;
       display: none;
@@ -430,7 +401,28 @@
     .p-btn:hover { background: rgba(255,255,255,0.18); }
     .p-btn.done-on { background: #059669; border-color: #059669; }
     .p-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    iframe#toyFrame { flex: 1; width: 100%; border: none; background: var(--bg); }
+
+    .stage-frame-wrap {
+      flex: 1;
+      display: flex;
+      padding: 0;
+      background: var(--bg);
+    }
+    [data-theme="dark"] .stage-frame-wrap {
+      padding: 14px 18px;
+      background: #0b1120;
+    }
+    iframe#toyFrame {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background: #f8fafc;
+    }
+    [data-theme="dark"] iframe#toyFrame {
+      border-radius: 16px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+    }
+
     .related-bar {
       background: #111827;
       color: #cbd5e1;
@@ -475,17 +467,17 @@
   <div class="container">
     <section class="hero">
       <div>
-        <span class="hero-tag">✨ 围绕“人”的 10 大认知领域 · 持续生长的知识树</span>
-        <h1>2 分钟玩懂世界的底层规律</h1>
+        <span class="hero-tag">✨ 围绕“人”的 10 大认知领域 · 每个概念 2 分钟玩懂</span>
+        <h1>人类知识交互式分类图谱</h1>
         <p>
-          不是枯燥的词条百科，而是一张带坐标的交互式分类图谱。从身体、心智、审美到社会、商业、金融，再到数学、软件、工程与 AI，每个概念都可以亲手拨动滑块、2 分钟彻底悟懂。
+          从身体、心智、审美到社会、商业、金融，再到数学、软件、工程与 AI。拒绝枯燥术语，亲手拨动滑块与开关，把世界底层规律变成 2 分钟可交互体验。
         </p>
       </div>
       <div class="stats-box">
         <div class="stats-grid">
           <div class="st-cell"><div class="st-val" id="stDomains">0/10</div><div class="st-lbl">已点亮领域</div></div>
-          <div class="st-cell"><div class="st-val" id="stTopics">0</div><div class="st-lbl">可玩主题</div></div>
-          <div class="st-cell"><div class="st-val" id="stToys">0</div><div class="st-lbl">互动玩具</div></div>
+          <div class="st-cell"><div class="st-val" id="stTopics">0/0</div><div class="st-lbl">已点亮/蓝图主题</div></div>
+          <div class="st-cell"><div class="st-val" id="stToys">0</div><div class="st-lbl">现可玩玩具</div></div>
         </div>
         <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%;"></div></div>
         <div class="prog-foot">
@@ -495,15 +487,31 @@
       </div>
     </section>
 
+    <!-- Quick-Start Curated Tracks + Random Play -->
+    <div class="tracks-strip" id="tracksStrip"></div>
+
     <!-- VIEW 1: TAXONOMY MAP -->
-    <div id="viewMap"></div>
+    <div id="viewMapWrap">
+      <div class="map-toolbar">
+        <div class="pill-group">
+          <button class="f-pill active" id="mfAll" onclick="setMapFilter('all')">🗺️ 完整蓝图（10 大领域）</button>
+          <button class="f-pill" id="mfLit" onclick="setMapFilter('lit')">✅ 仅看已点亮可玩</button>
+        </div>
+        <div class="pill-group">
+          <button class="f-pill" onclick="toggleAllExpand(true)">▾ 全部展开分支</button>
+          <button class="f-pill" onclick="toggleAllExpand(false)">▴ 全部折叠概览</button>
+        </div>
+      </div>
+      <div id="viewMap"></div>
+    </div>
 
     <!-- VIEW 2: CATALOG EXPLORER -->
     <div id="viewExplorer" class="hidden">
       <div class="filter-bar">
         <div class="dom-pills" id="domPills"></div>
-        <input class="search-input" id="searchInput" type="text" placeholder="🔍 搜索领域、主题或概念…" oninput="renderExplorer()" />
+        <input class="search-input" id="searchInput" type="text" placeholder="🔍 搜索领域、分支或概念…" oninput="renderExplorer()" />
       </div>
+      <div class="branch-bar hidden" id="branchBar"></div>
       <div id="explorerRoot"></div>
     </div>
   </div>
@@ -525,33 +533,45 @@
         <a class="p-btn" id="newTabBtn" href="#" target="_blank" rel="noopener">↗ 新标签页</a>
       </div>
     </div>
-    <iframe id="toyFrame" title="互动玩具"></iframe>
+    <div class="stage-frame-wrap">
+      <iframe id="toyFrame" title="互动玩具"></iframe>
+    </div>
     <div class="related-bar" id="relatedBar"></div>
   </div>
 
   <script src="./catalog.js"></script>
   <script>
-    const DATA = window.TAXONOMY_DATA || { rings: [], domains: [], stats: {} };
+    const DATA = window.TAXONOMY_DATA || { rings: [], domains: [], tracks: [], stats: {} };
     const STORAGE_KEY = "tax_completed_v1";
     const THEME_KEY = "tax_theme_v1";
 
     const FLAT_TOYS = [];
+    const TOY_BY_ID = {};
     const TOPIC_MAP = {};
     DATA.domains.forEach(dom => {
       (dom.topics || []).forEach(topic => {
         TOPIC_MAP[topic.id] = { topic, dom };
         topic.toys.forEach(toy => {
-          FLAT_TOYS.push({ ...toy, topic, dom });
+          const item = { ...toy, topic, dom };
+          FLAT_TOYS.push(item);
+          TOY_BY_ID[item.id] = item;
         });
       });
     });
 
     let completed = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"));
     let curView = "map";
+    let mapFilter = "all"; // 'all' | 'lit'
+    // 默认仅展开已点亮的领域，其余领域折叠成清爽概览卡
+    let expandedDomains = new Set(DATA.domains.filter(d => d.liveTopicCount > 0).map(d => d.id));
     let activeDomId = "all";
-    let curFlatIdx = -1;
+    let activeBranchId = "all";
 
-    // Theme handling
+    // Player playlist (either full FLAT_TOYS or a curated Track)
+    let activePlaylist = FLAT_TOYS;
+    let activePlaylistLabel = "";
+    let curPlayIdx = -1;
+
     function applyTheme(t) {
       document.documentElement.setAttribute("data-theme", t);
       localStorage.setItem(THEME_KEY, t);
@@ -568,40 +588,94 @@
     applyTheme(localStorage.getItem(THEME_KEY) || "light");
 
     window.addEventListener("message", (e) => {
-      if (e.data && e.data.type === "TAX_TOY_COMPLETED" && curFlatIdx >= 0) {
-        completed.add(FLAT_TOYS[curFlatIdx].id);
+      if (e.data && e.data.type === "TAX_TOY_COMPLETED" && curPlayIdx >= 0) {
+        completed.add(activePlaylist[curPlayIdx].id);
         saveCompleted();
         updateStats();
         syncDoneBtn();
       }
     });
 
-    function saveCompleted() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed]));
-    }
+    function saveCompleted() { localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed])); }
 
     function updateStats() {
       const st = DATA.stats || {};
       document.getElementById("stDomains").textContent = `${st.litDomains || 0}/${st.totalDomains || 10}`;
-      document.getElementById("stTopics").textContent = st.totalTopics || 0;
+      document.getElementById("stTopics").textContent = `${st.totalTopics || 0}/${st.totalBlueprintTopics || 0}`;
       document.getElementById("stToys").textContent = st.totalToys || 0;
 
       const total = FLAT_TOYS.length;
       const done = FLAT_TOYS.filter(t => completed.has(t.id)).length;
       const pct = total ? Math.round((done / total) * 100) : 0;
       document.getElementById("progFill").style.width = pct + "%";
-      document.getElementById("progText").textContent = `已悟懂 ${done} / ${total} 个互动玩具（${pct}%）`;
+      document.getElementById("progText").textContent = `已悟懂 ${done} / ${total} 个可玩玩具（${pct}%）`;
     }
 
-    function switchView(v, domainId) {
+    function renderTracks() {
+      const strip = document.getElementById("tracksStrip");
+      const tracks = DATA.tracks || [];
+      strip.innerHTML = tracks.map(tr => `
+        <button class="track-card" onclick="startTrack('${tr.id}')">
+          <div>
+            <div class="track-title">${tr.icon} ${tr.title}</div>
+            <div class="track-desc">${tr.desc}</div>
+          </div>
+          <span class="track-go">立即连玩 →</span>
+        </button>
+      `).join("") + `<button class="random-btn" onclick="playRandom()">🎲 随机玩一个<br/><span style="font-size:11.5px;font-weight:600;opacity:0.9;">2 分钟立刻上手</span></button>`;
+    }
+
+    function startTrack(trackId) {
+      const tr = (DATA.tracks || []).find(t => t.id === trackId);
+      if (!tr) return;
+      const list = tr.toys.map(id => TOY_BY_ID[id]).filter(Boolean);
+      if (!list.length) return;
+      activePlaylist = list;
+      activePlaylistLabel = `${tr.icon} 推荐路线：${tr.title}`;
+      openPlayerAt(0);
+    }
+
+    function playRandom() {
+      if (!FLAT_TOYS.length) return;
+      const unplayed = FLAT_TOYS.filter(t => !completed.has(t.id));
+      const pool = unplayed.length ? unplayed : FLAT_TOYS;
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      activePlaylist = FLAT_TOYS;
+      activePlaylistLabel = "";
+      openPlayerAt(FLAT_TOYS.findIndex(x => x.id === pick.id));
+    }
+
+    function switchView(v, domainId, branchId) {
       curView = v;
-      if (domainId) activeDomId = domainId;
+      if (domainId !== undefined) {
+        activeDomId = domainId;
+        activeBranchId = branchId || "all";
+      }
       document.getElementById("vtMap").classList.toggle("active", v === "map");
       document.getElementById("vtExplorer").classList.toggle("active", v === "explorer");
-      document.getElementById("viewMap").classList.toggle("hidden", v !== "map");
+      document.getElementById("viewMapWrap").classList.toggle("hidden", v !== "map");
       document.getElementById("viewExplorer").classList.toggle("hidden", v !== "explorer");
       if (v === "map") renderMap();
-      else { renderDomainPills(); renderExplorer(); }
+      else { renderDomainPills(); renderBranchBar(); renderExplorer(); }
+    }
+
+    function setMapFilter(f) {
+      mapFilter = f;
+      document.getElementById("mfAll").classList.toggle("active", f === "all");
+      document.getElementById("mfLit").classList.toggle("active", f === "lit");
+      renderMap();
+    }
+
+    function toggleAllExpand(expand) {
+      if (expand) expandedDomains = new Set(DATA.domains.map(d => d.id));
+      else expandedDomains.clear();
+      renderMap();
+    }
+
+    function toggleDomainExpand(domId) {
+      if (expandedDomains.has(domId)) expandedDomains.delete(domId);
+      else expandedDomains.add(domId);
+      renderMap();
     }
 
     function renderMap() {
@@ -609,7 +683,9 @@
       root.innerHTML = "";
 
       (DATA.rings || []).forEach(ring => {
-        const ringDoms = DATA.domains.filter(d => d.ring === ring.id);
+        const ringDoms = DATA.domains.filter(d => d.ring === ring.id && (mapFilter === "all" || d.liveTopicCount > 0));
+        if (!ringDoms.length) return;
+
         const sec = document.createElement("section");
         sec.className = "ring-section";
         sec.innerHTML = `
@@ -623,26 +699,30 @@
 
         ringDoms.forEach(dom => {
           const isLit = dom.liveTopicCount > 0;
+          const isExp = expandedDomains.has(dom.id);
           const card = document.createElement("div");
           card.className = "dom-card" + (isLit ? " lit" : "");
           card.style.setProperty("--dom-color", dom.color);
 
-          const branchesHtml = (dom.branches || []).map(br => {
-            const liveTopics = (dom.topics || []).filter(t => t.branch === br.id);
-            const liveChips = liveTopics.map(t =>
-              `<button class="t-chip live" onclick="jumpToTopic('${dom.id}','${t.slug}')">${t.icon} ${t.title} (${t.toys.length})</button>`
-            ).join("");
-            const plannedChips = (br.plannedTopics || []).map(name =>
-              `<span class="t-chip planned">🔒 ${name}</span>`
-            ).join("");
-            if (!liveChips && !plannedChips) return "";
-            return `
-              <div class="branch-block">
-                <div class="branch-name">${br.title}</div>
-                <div class="chip-wrap">${liveChips}${plannedChips}</div>
-              </div>
-            `;
-          }).join("");
+          const branchesHtml = isExp ? `
+            <div class="branches-wrap">
+              ${(dom.branches || []).map(br => {
+                const liveTopics = (dom.topics || []).filter(t => t.branch === br.id);
+                const liveChips = liveTopics.map(t =>
+                  `<button class="t-chip live" onclick="jumpToTopic('${dom.id}','${br.id}','${t.slug}')">${t.icon} ${t.title} (${t.toys.length})</button>`
+                ).join("");
+                const plannedChips = (mapFilter === "lit") ? "" : (br.plannedTopics || []).map(pt =>
+                  `<span class="t-chip planned">🔒 ${pt.title}</span>`
+                ).join("");
+                if (!liveChips && !plannedChips) return "";
+                return `<div class="branch-block"><div class="branch-name">${br.title}</div><div class="chip-wrap">${liveChips}${plannedChips}</div></div>`;
+              }).join("")}
+            </div>
+          ` : `
+            <div class="chip-wrap">
+              ${(dom.branches || []).map(br => `<span class="t-chip ${isLit ? 'live' : 'planned'}" ${isLit ? `onclick="switchView('explorer','${dom.id}','${br.id}')"` : ""}>${br.title.replace(/（.*）/g, "")}</span>`).join("")}
+            </div>
+          `;
 
           card.innerHTML = `
             <div class="dom-top">
@@ -650,13 +730,17 @@
                 <div class="dom-icon" style="background:${dom.soft};">${dom.icon}</div>
                 <div>
                   <div class="dom-name">${dom.title}</div>
-                  <div class="dom-en">${dom.en}</div>
+                  <div class="dom-en">${dom.en} · ${dom.branches.length} 分支 / ${dom.blueprintTopicCount} 主题</div>
                 </div>
               </div>
-              <span class="dom-status ${isLit ? 'live' : 'planned'}">${isLit ? `✅ ${dom.liveToyCount} 玩具` : '🔒 蓝图待解锁'}</span>
+              <span class="dom-status ${isLit ? 'live' : 'planned'}">${isLit ? `✅ ${dom.liveToyCount} 玩具` : '🔒 蓝图'}</span>
             </div>
             <div class="dom-desc">${dom.desc}</div>
             ${branchesHtml}
+            <div class="dom-actions">
+              <button class="mini-link muted" onclick="toggleDomainExpand('${dom.id}')">${isExp ? '▴ 收起三级节点' : `▾ 展开全部 ${dom.blueprintTopicCount} 个主题`}</button>
+              ${isLit ? `<button class="mini-link" onclick="switchView('explorer','${dom.id}','all')">进入游玩 (${dom.liveToyCount}) →</button>` : `<span style="font-size:12px;color:var(--muted);">待开发点亮</span>`}
+            </div>
           `;
           grid.appendChild(card);
         });
@@ -665,8 +749,8 @@
       });
     }
 
-    function jumpToTopic(domId, topicSlug) {
-      switchView("explorer", domId);
+    function jumpToTopic(domId, branchId, topicSlug) {
+      switchView("explorer", domId, branchId);
       setTimeout(() => {
         const el = document.getElementById(`topic-${domId}-${topicSlug}`);
         if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -677,18 +761,38 @@
       const box = document.getElementById("domPills");
       box.innerHTML = "";
       const allBtn = document.createElement("button");
-      allBtn.className = "d-pill" + (activeDomId === "all" ? " active" : "");
+      allBtn.className = "f-pill" + (activeDomId === "all" ? " active" : "");
       allBtn.textContent = `全部已点亮 (${FLAT_TOYS.length})`;
-      allBtn.onclick = () => { activeDomId = "all"; renderDomainPills(); renderExplorer(); };
+      allBtn.onclick = () => { activeDomId = "all"; activeBranchId = "all"; renderDomainPills(); renderBranchBar(); renderExplorer(); };
       box.appendChild(allBtn);
 
       DATA.domains.filter(d => d.liveTopicCount > 0).forEach(dom => {
         const b = document.createElement("button");
-        b.className = "d-pill" + (activeDomId === dom.id ? " active" : "");
+        b.className = "f-pill" + (activeDomId === dom.id ? " active" : "");
         b.textContent = `${dom.icon} ${dom.title} (${dom.liveToyCount})`;
-        b.onclick = () => { activeDomId = dom.id; renderDomainPills(); renderExplorer(); };
+        b.onclick = () => { activeDomId = dom.id; activeBranchId = "all"; renderDomainPills(); renderBranchBar(); renderExplorer(); };
         box.appendChild(b);
       });
+    }
+
+    function renderBranchBar() {
+      const bar = document.getElementById("branchBar");
+      if (activeDomId === "all") {
+        bar.classList.add("hidden");
+        return;
+      }
+      const dom = DATA.domains.find(d => d.id === activeDomId);
+      if (!dom) { bar.classList.add("hidden"); return; }
+
+      const liveBranches = dom.branches.filter(br => dom.topics.some(t => t.branch === br.id));
+      if (liveBranches.length <= 1) { bar.classList.add("hidden"); return; }
+
+      bar.classList.remove("hidden");
+      bar.innerHTML = `<button class="b-pill ${activeBranchId === 'all' ? 'active' : ''}" onclick="activeBranchId='all';renderBranchBar();renderExplorer()">全部分支 (${dom.liveTopicCount})</button>` +
+        liveBranches.map(br => {
+          const cnt = dom.topics.filter(t => t.branch === br.id).length;
+          return `<button class="b-pill ${activeBranchId === br.id ? 'active' : ''}" onclick="activeBranchId='${br.id}';renderBranchBar();renderExplorer()">${br.title.replace(/（.*）/g, "")} (${cnt})</button>`;
+        }).join("");
     }
 
     function renderExplorer() {
@@ -701,6 +805,7 @@
 
       doms.forEach(dom => {
         dom.topics.forEach(topic => {
+          if (activeBranchId !== "all" && topic.branch !== activeBranchId) return;
           const toys = topic.toys.filter(t => {
             if (!kw) return true;
             return `${dom.title} ${topic.title} ${t.title} ${t.concept} ${t.summary}`.toLowerCase().includes(kw);
@@ -708,13 +813,14 @@
           if (!toys.length) return;
           count += toys.length;
 
+          const brObj = dom.branches.find(b => b.id === topic.branch);
           const sec = document.createElement("section");
           sec.className = "topic-sec";
           sec.id = `topic-${dom.id}-${topic.slug}`;
           sec.innerHTML = `
             <div class="topic-head">
               <div>
-                <h3>${topic.icon} ${topic.title} <span style="font-size:12.5px;font-weight:650;color:var(--muted);">· ${dom.title}</span></h3>
+                <h3>${topic.icon} ${topic.title} <span style="font-size:12px;font-weight:650;color:var(--muted);">· ${brObj ? brObj.title.replace(/（.*）/g, "") : dom.title}</span></h3>
                 <p>${topic.subtitle}</p>
               </div>
             </div>
@@ -726,7 +832,11 @@
             const fIdx = FLAT_TOYS.findIndex(x => x.id === toy.id);
             const card = document.createElement("div");
             card.className = "toy-card" + (isDone ? " done" : "");
-            card.onclick = () => openPlayer(fIdx);
+            card.onclick = () => {
+              activePlaylist = FLAT_TOYS;
+              activePlaylistLabel = "";
+              openPlayerAt(fIdx);
+            };
             card.innerHTML = `
               <div class="tc-top">
                 <div class="tc-icon" style="background:${topic.soft};">${toy.icon}</div>
@@ -748,25 +858,25 @@
       }
     }
 
-    function openPlayer(flatIdx) {
-      if (flatIdx < 0 || flatIdx >= FLAT_TOYS.length) return;
-      curFlatIdx = flatIdx;
-      const item = FLAT_TOYS[flatIdx];
+    function openPlayerAt(idx) {
+      if (idx < 0 || idx >= activePlaylist.length) return;
+      curPlayIdx = idx;
+      const item = activePlaylist[idx];
       if (!completed.has(item.id)) {
         completed.add(item.id);
         saveCompleted();
       }
 
       document.getElementById("pTitle").textContent = `${item.icon} ${item.title}`;
-      document.getElementById("pSub").textContent = `${item.dom.title} · ${item.topic.title} · ${item.concept}`;
+      const prefix = activePlaylistLabel ? `${activePlaylistLabel} (${idx + 1}/${activePlaylist.length}) · ` : "";
+      document.getElementById("pSub").textContent = `${prefix}${item.dom.title} · ${item.topic.title}`;
       document.getElementById("newTabBtn").href = item.path;
-      document.getElementById("prevBtn").disabled = flatIdx === 0;
-      document.getElementById("nextBtn").disabled = flatIdx === FLAT_TOYS.length - 1;
+      document.getElementById("prevBtn").disabled = idx === 0;
+      document.getElementById("nextBtn").disabled = idx === activePlaylist.length - 1;
 
       const frame = document.getElementById("toyFrame");
       frame.onload = () => {
         try {
-          // 兼容旧版未引入 toy-sdk.js 的页面：在 iframe 内自动隐藏重复的返回目录按钮
           const doc = frame.contentDocument;
           if (doc && doc.body) {
             doc.body.classList.add("in-iframe");
@@ -774,11 +884,12 @@
             style.textContent = ".back-link, .tax-back { display: none !important; }";
             doc.head.appendChild(style);
           }
+          const curTheme = document.documentElement.getAttribute("data-theme") || "light";
+          frame.contentWindow.postMessage({ type: "TAX_THEME_CHANGE", theme: curTheme }, "*");
         } catch (_) {}
       };
       frame.src = item.path;
 
-      // Cross-domain related bar
       const relBar = document.getElementById("relatedBar");
       const rels = (item.topic.related || []).filter(id => TOPIC_MAP[id]);
       if (rels.length) {
@@ -799,12 +910,14 @@
     }
 
     function openTopicFirst(topicId) {
+      activePlaylist = FLAT_TOYS;
+      activePlaylistLabel = "";
       const idx = FLAT_TOYS.findIndex(t => t.topic.id === topicId);
-      if (idx >= 0) openPlayer(idx);
+      if (idx >= 0) openPlayerAt(idx);
     }
 
     function syncDoneBtn() {
-      const item = FLAT_TOYS[curFlatIdx];
+      const item = activePlaylist[curPlayIdx];
       if (!item) return;
       const btn = document.getElementById("doneBtn");
       const on = completed.has(item.id);
@@ -813,7 +926,7 @@
     }
 
     function toggleDone() {
-      const item = FLAT_TOYS[curFlatIdx];
+      const item = activePlaylist[curPlayIdx];
       if (!item) return;
       if (completed.has(item.id)) completed.delete(item.id);
       else completed.add(item.id);
@@ -824,8 +937,8 @@
     }
 
     function stepToy(delta) {
-      const next = curFlatIdx + delta;
-      if (next >= 0 && next < FLAT_TOYS.length) openPlayer(next);
+      const next = curPlayIdx + delta;
+      if (next >= 0 && next < activePlaylist.length) openPlayerAt(next);
     }
 
     function closePlayer() {
@@ -842,12 +955,11 @@
     }
 
     document.addEventListener("keydown", e => {
-      if (e.key === "Escape" && document.getElementById("playerOverlay").classList.contains("open")) {
-        closePlayer();
-      }
+      if (e.key === "Escape" && document.getElementById("playerOverlay").classList.contains("open")) closePlayer();
     });
 
     updateStats();
+    renderTracks();
     renderMap();
   </script>
 </body>

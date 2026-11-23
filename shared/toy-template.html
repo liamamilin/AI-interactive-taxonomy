@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：标题 · 一句话核心原理</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    /* 在此仅补充本玩具专属布局样式，基础色板与亮暗主题均由 toy-base.css 提供 */
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    @media (max-width: 780px) { .demo-grid { grid-template-columns: 1fr; } }
+    .metric-val {
+      font-size: 28px;
+      font-weight: 850;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--tax-primary);
+    }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎮 玩具标题：一句话点出要打破的常见误区</h1>
+        <p>用不超过 3 个交互控件，3 秒上手，2 分钟彻底悟懂底层机制。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="demo-grid">
+        <div>
+          <label style="font-weight:750;font-size:14px;">🎛️ 核心控制滑块：<span id="valOut">50</span></label>
+          <input id="mainSlider" type="range" min="0" max="100" value="50" style="width:100%;margin-top:10px;" oninput="render()" />
+        </div>
+        <div>
+          <div style="font-size:12.5px;color:var(--tax-muted);font-weight:700;">实时模拟结果</div>
+          <div class="metric-val" id="resOut">50%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟时刻（Aha! Moment）：</strong>在此随用户操作动态输出直击本质的一句话结论。
+    </div>
+  </div>
+
+  <script>
+    function render() {
+      const v = parseInt(document.getElementById("mainSlider").value, 10);
+      document.getElementById("valOut").textContent = v;
+      document.getElementById("resOut").textContent = v + "%";
+      if (v >= 80 && window.ToySDK) {
+        window.ToySDK.markCompleted();
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

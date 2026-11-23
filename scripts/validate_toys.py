@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-AI-Interactive-Taxonomy 质量门禁脚本
+AI-Interactive-Taxonomy 质量门禁脚本 v2.0
 检查项：
-1. taxonomy.json 合法性与域/分支唯一性
-2. domains/<domain>/<topic>/ 下的 meta.json 合法性与归属校验
+1. taxonomy.json 合法性、全局 plannedTopics slug 唯一性、tracks 指向有效性
+2. domains/<domain>/<topic>/ 下 meta.json 合法性、branch 归属与 related 跨领域引用有效性
 3. HTML 相对链接、DOM getElementById 目标与内嵌 JS 语法（如系统存在 node）
 """
 
@@ -23,9 +23,48 @@ DOMAINS_DIR = ROOT / "domains"
 def main():
     issues = []
     taxonomy = json.loads(TAXONOMY_PATH.read_text(encoding="utf-8"))
+
     valid_domains = {}
+    all_planned_slugs = set()
+    all_valid_topic_ids = set()
+
     for d in taxonomy["domains"]:
-        valid_domains[d["id"]] = {b["id"] for b in d.get("branches", [])}
+        did = d["id"]
+        valid_domains[did] = {b["id"] for b in d.get("branches", [])}
+        for b in d.get("branches", []):
+            for pt in b.get("plannedTopics", []):
+                if not isinstance(pt, dict) or not pt.get("slug") or not pt.get("title"):
+                    issues.append(f"taxonomy.json {did}/{b['id']}: plannedTopic 必须包含 slug 与 title")
+                    continue
+                slug = pt["slug"]
+                if slug in all_planned_slugs:
+                    issues.append(f"taxonomy.json 全局重复 planned slug: {slug}")
+                all_planned_slugs.add(slug)
+                all_valid_topic_ids.add(f"{did}/{slug}")
+
+    # 预先收集全部真实存在的 topic_id 与 toy_id
+    live_toy_ids = set()
+    live_topic_slugs = set()
+    if DOMAINS_DIR.exists():
+        for dom_dir in sorted(DOMAINS_DIR.iterdir()):
+            if not dom_dir.is_dir() or dom_dir.name.startswith("."):
+                continue
+            for topic_dir in sorted(dom_dir.iterdir()):
+                if not topic_dir.is_dir() or topic_dir.name.startswith("."):
+                    continue
+                if topic_dir.name in live_topic_slugs:
+                    issues.append(f"全局重复已实现主题 slug: {topic_dir.name}")
+                live_topic_slugs.add(topic_dir.name)
+                all_valid_topic_ids.add(f"{dom_dir.name}/{topic_dir.name}")
+                for hf in topic_dir.glob("*.html"):
+                    if hf.name.lower() != "index.html":
+                        live_toy_ids.add(f"{dom_dir.name}/{topic_dir.name}/{hf.name}")
+
+    # 校验 tracks 里的每个 toy_id 真实存在
+    for tr in taxonomy.get("tracks", []):
+        for tid in tr.get("toys", []):
+            if tid not in live_toy_ids:
+                issues.append(f"taxonomy.json track '{tr.get('id')}' 引用了不存在的玩具: {tid}")
 
     has_node = subprocess.run(["which", "node"], capture_output=True).returncode == 0
     checked_topics = 0
@@ -36,7 +75,7 @@ def main():
             if not dom_dir.is_dir() or dom_dir.name.startswith("."):
                 continue
             if dom_dir.name not in valid_domains:
-                issues.append(f"未知领域目录: domains/{dom_dir.name}（未在 taxonomy.json 中定义）")
+                issues.append(f"未知领域目录: domains/{dom_dir.name}")
                 continue
 
             for topic_dir in sorted(dom_dir.iterdir()):
@@ -59,6 +98,9 @@ def main():
                             issues.append(f"{meta_path.relative_to(ROOT)}: 未知 branch '{branch}'")
                         if "toys" in meta and set(meta["toys"].keys()) != set(toy_files):
                             issues.append(f"{meta_path.relative_to(ROOT)}: toys 键与 HTML 文件列表不一致")
+                        for rel in meta.get("related", []):
+                            if rel not in all_valid_topic_ids:
+                                issues.append(f"{meta_path.relative_to(ROOT)}: 无效 related 引用 '{rel}'")
                     except Exception as e:
                         issues.append(f"{meta_path.relative_to(ROOT)}: JSON 解析失败 ({e})")
 
@@ -83,12 +125,15 @@ def main():
                             if r.returncode != 0:
                                 issues.append(f"{hf.relative_to(ROOT)} script[{i}] 语法错误: {r.stderr.strip()}")
 
-    print(f"🔍 质量门禁扫描完成：{checked_topics} 个主题，{checked_html} 个 HTML 文件，发现问题：{len(issues)}")
+    print(
+        f"🔍 门禁 v2.0 扫描完成：{len(all_planned_slugs)} 个蓝图 slug，"
+        f"{checked_topics} 个已点亮主题，{checked_html} 个 HTML 文件，发现问题：{len(issues)}"
+    )
     for it in issues:
         print(" -", it)
     if issues:
         sys.exit(1)
-    print("✅ 全部检查通过！")
+    print("✅ 全部门禁检查通过！")
 
 
 if __name__ == "__main__":
