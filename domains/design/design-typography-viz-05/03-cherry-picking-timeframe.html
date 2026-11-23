@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✂️ 截选时间窗口：选好起点就能讲出相反故事</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>✂️ 截选时间窗口：选好起点就能讲出相反故事</h1><p>同一条长期在 50~75 间震荡的曲线，只需把起点选在波谷、终点选在波峰，就能宣称“历史性大爆发”；选在波峰到波谷，立刻变成“崩盘危机”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>截选窗口起始月份</span><span id="vSt">第 3 月</span></label><input type="range" id="sSt" min="0" max="7" value="3" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>截选窗口跨度月数</span><span id="vLn">4 个月</span></label><input type="range" id="sLn" min="2" max="9" value="4" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">截选窗口呈现涨跌</div><div class="k-val" id="kChg">—</div></div>
+        <div class="kpi"><div class="k-lbl">媒体标题党话术</div><div class="k-val" id="kHed">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const st=+document.getElementById('sSt').value, ln=+document.getElementById('sLn').value;
+  const data=[62, 74, 58, 44, 56, 70, 78, 60, 48, 64, 65];
+  const en=Math.min(data.length-1, st+ln);
+  document.getElementById('vSt').textContent='第 '+(st+1)+' 月';
+  document.getElementById('vLn').textContent=(en-st)+' 个月';
+  const chg=Math.round((data[en]-data[st])/data[st]*100);
+  document.getElementById('kChg').textContent=(chg>=0?'+':'')+chg+'%';
+  document.getElementById('kChg').style.color=chg>15?'#059669':(chg<-15?'#ef4444':'#64748b');
+  document.getElementById('kHed').textContent=chg>18?'🚀 “迎来史诗级井喷增长！”':(chg<-18?'📉 “遭遇断崖式全面崩盘！”':'😐 “长期维持平稳震荡”');
+  let pts=[];
+  for(let i=0;i<data.length;i++) pts.push(`${(50+i*50)},${(172-data[i]*1.5).toFixed(1)}`);
+  const x1=50+st*50, x2=50+en*50;
+  document.getElementById('svg').innerHTML=`
+    <text x="50" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">完整全年走势其实几乎持平（62→65），但滑动截选窗却能截出正反叙事！</text>
+    <rect x="${x1}" y="38" width="${Math.max(10,x2-x1)}" height="134" fill="#f59e0b" opacity="0.22" stroke="#d97706" stroke-dasharray="4,3"/>
+    <line x1="50" y1="172" x2="555" y2="172" stroke="var(--tax-border)" stroke-width="1.5"/>
+    <polyline points="${pts.join(' ')}" fill="none" stroke="#3b82f6" stroke-width="3"/>
+    <circle cx="${x1}" cy="${(172-data[st]*1.5).toFixed(1)}" r="6" fill="#d97706"/>
+    <circle cx="${x2}" cy="${(172-data[en]*1.5).toFixed(1)}" r="6" fill="#d97706"/>
+    <text x="50" y="192" font-size="11" fill="var(--tax-muted)">1月</text>
+    <text x="540" y="192" font-size="11" fill="var(--tax-muted)">11月</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>看到一张“从某个奇怪月份起算暴涨 80%”的折线图时，一定要把时间轴往左拉长 3 倍，看清它是不是只截了波谷到波峰的半段周期！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

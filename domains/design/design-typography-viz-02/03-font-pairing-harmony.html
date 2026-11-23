@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🤝 字体混搭黄金律：对比而非撞衫</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🤝 字体混搭黄金律：对比而非撞衫</h1><p>一个页面里堆 5 种字体会瞬间变成街头小广告；用 2 种风格迥异的字体（如衬线大标题 + 无衬线正文）反而既有变化又高度统一！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>页面同时使用的字体族数量</span><span id="vCnt">2 种（黄金上限）</span></label><input type="range" id="sCnt" min="1" max="6" value="2" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>主副字体风格反差度</span><span id="vCon">80%（衬线配无衬线）</span></label><input type="range" id="sCon" min="10" max="100" value="80" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">排版统一与美感分</div><div class="k-val" id="kScr">—</div></div>
+        <div class="kpi"><div class="k-lbl">设计诊断</div><div class="k-val" id="kDia">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const cnt=+document.getElementById('sCnt').value, con=+document.getElementById('sCon').value;
+  document.getElementById('vCnt').textContent=cnt+' 种';
+  document.getElementById('vCon').textContent=con+'%';
+  const scr=cnt<=2 ? Math.min(98, Math.round(68 + (cnt===2?con*0.28:18))) : Math.max(18, Math.round(92 - (cnt-2)*19));
+  const dia=cnt<=2?'✅ 克制统一，层次分明':(cnt===3?'⚠️ 略显杂乱，建议精简':'💥 勒索信既视感（字体爆炸）');
+  document.getElementById('kScr').textContent=scr+' 分';
+  document.getElementById('kScr').style.color=scr>=75?'#059669':'#ef4444';
+  document.getElementById('kDia').textContent=dia;
+  const w=Math.max(15, scr*4.2);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">字体配对和谐度（当前混用 ${cnt} 种字体，对比度 ${con}%）</text>
+    <rect x="30" y="68" width="440" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="30" y="68" width="${w.toFixed(0)}" height="38" rx="8" fill="${scr>=75?'#059669':'#ef4444'}"/>
+    <text x="${Math.min(480,38+w).toFixed(0)}" y="93" font-size="14" font-weight="850" fill="${scr>=75?'#059669':'#ef4444'}">${scr} 分</text>
+    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">记住两个铁律：全站不超过 2 种字体；如果混用 2 种，选反差鲜明的，别选长得差不多却略有不同的！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只用 1 种优秀无衬线字体，靠不同字号+字重变化，就能做出 90 分的现代产品界面；绝不盲目堆砌花哨字体！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

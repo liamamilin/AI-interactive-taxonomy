@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🥁 律动倒 U 曲线：切分音程度 vs 摇摆冲动（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🥁 律动倒 U 曲线：切分音程度 vs 摇摆冲动（SVG）</h1><p>神经音乐学经典发现（Witek 2014）：律动感（想跳舞的冲动）与切分复杂度呈完美的倒 U 曲线——全踩正拍太无聊，全乱切找不到拍子，中等切分最上头！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>节奏切分复杂度（重音挪到弱拍的比例）</span><span id="vSyn">45%（黄金律动）</span></label><input type="range" id="sSyn" min="0" max="100" value="45" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>底鼓（Kick）基础脉搏稳定度</span><span id="vKck">85%</span></label><input type="range" id="sKck" min="20" max="100" value="85" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">律动感（忍不住点头指数）</div><div class="k-val" id="kGrv">—</div></div>
+        <div class="kpi"><div class="k-lbl">听感诊断</div><div class="k-val" id="kDia">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const syn=+document.getElementById('sSyn').value, kck=+document.getElementById('sKck').value;
+  document.getElementById('vSyn').textContent=syn+'%';
+  document.getElementById('vKck').textContent=kck+'%';
+  const grv=Math.max(10, Math.min(98, Math.round(98*Math.exp(-Math.pow((syn-46)/32,2))*(0.55+kck*0.0045))));
+  const dia=syn<18?'📏 像广播体操一样太规矩':(syn>78?'😵 拍子彻底散架找不到北':'🕺 完美 Groove，自动抖腿!');
+  document.getElementById('kGrv').textContent=grv+' 分';
+  document.getElementById('kGrv').style.color=grv>=75?'#059669':'#f59e0b';
+  document.getElementById('kDia').textContent=dia;
+  let pts=[];
+  for(let x=0;x<=100;x+=2){
+    const g=98*Math.exp(-Math.pow((x-46)/32,2))*(0.55+kck*0.0045);
+    pts.push(`${(45+x*5.1).toFixed(1)},${(172-g*1.3).toFixed(1)}`);
+  }
+  const cx=45+syn*5.1, cy=172-grv*1.3;
+  document.getElementById('svg').innerHTML=`
+    <text x="45" y="24" font-size="13" font-weight="800" fill="var(--tax-text)">神经音乐学 Groove 倒 U 曲线（大脑渴望“轻微违背节拍预期”）</text>
+    <line x1="45" y1="172" x2="555" y2="172" stroke="var(--tax-border)" stroke-width="1.5"/>
+    <polyline points="${pts.join(' ')}" fill="none" stroke="#f97316" stroke-width="3"/>
+    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="#059669" stroke="#fff" stroke-width="2"/>
+    <text x="45" y="192" font-size="11" fill="var(--tax-muted)">0% 死板正拍</text>
+    <text x="275" y="192" text-anchor="middle" font-size="11" font-weight="800" fill="#059669">45% Funk/R&B 黄金切分</text>
+    <text x="510" y="192" font-size="11" fill="var(--tax-muted)">100% 混乱</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当底鼓稳住预期，而军鼓/吉他故意在弱拍抢半拍击打时，大脑为了补齐空缺的强拍，会直接驱动你的脖子和脚跟着点起来！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

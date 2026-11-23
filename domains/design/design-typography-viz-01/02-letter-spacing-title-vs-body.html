@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔤 字距反直觉：大标题要收紧，小号全大写要放宽</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔤 字距反直觉：大标题要收紧，小号全大写要放宽</h1><p>很多新手做大字标题时喜欢疯狂加字距，结果字都散架了；专业排版恰恰相反——字越大越要微微收紧，极小号标签反而要拉宽字距！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>当前文字字号</span><span id="vSz">36 px（大标题）</span></label><input type="range" id="sSz" min="11" max="44" value="36" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>字距微调 Tracking</span><span id="vTr">-1.5 px</span></label><input type="range" id="sTr" min="-4" max="8" step="0.5" value="-1.5" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">该字号推荐字距</div><div class="k-val" id="kRec">—</div></div>
+        <div class="kpi"><div class="k-lbl">视觉紧致度评价</div><div class="k-val" id="kEv">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const sz=+document.getElementById('sSz').value, tr=+document.getElementById('sTr').value;
+  document.getElementById('vSz').textContent=sz+' px'+(sz>=28?'（大标题）':(sz<=14?'（小标签）':'（正文）'));
+  document.getElementById('vTr').textContent=(tr>=0?'+':'')+tr.toFixed(1)+' px';
+  const rec=sz>=28?-1.5:(sz<=14?2.0:0.0);
+  const diff=Math.abs(tr-rec);
+  document.getElementById('kRec').textContent=(rec>=0?'+':'')+rec.toFixed(1)+' px';
+  document.getElementById('kEv').textContent=diff<=1.5?'✅ 专业光学平衡':(tr>rec?'⚠️ 显得松散无力':'⚠️ 挤成一团糊字');
+  document.getElementById('kEv').style.color=diff<=1.5?'#059669':'#ef4444';
+  document.getElementById('svg').innerHTML=`
+    <rect x="30" y="24" width="540" height="148" rx="12" fill="var(--tax-surface)" stroke="var(--tax-border)"/>
+    <text x="300" y="106" text-anchor="middle" font-size="${sz}" font-weight="${sz>=28?850:600}" letter-spacing="${tr}" fill="var(--tax-text)">DESIGN 排版节奏</text>
+    <text x="300" y="154" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">字号 ${sz}px · 当前字距 ${tr.toFixed(1)}px（推荐 ${rec.toFixed(1)}px）</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>字号越大，字母间默认空白按比例被放大得越夸张，所以大标题微微负字距才稳重有力；小字则需正字距防止笔画粘连！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

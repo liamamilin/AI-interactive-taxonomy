@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OKLCH 感知均匀色彩空间 · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card { display: flex; flex-direction: column; gap: 10px; text-decoration: none; color: inherit; background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow); transition: transform 0.16s, border-color 0.16s; }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎨 OKLCH 感知均匀色彩空间</h1><p>为什么在 HSL 里把亮度全设成 50%，黄色亮得刺眼，蓝色却暗得看不清白字？</p></div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-hsl-vs-oklch-lightness-svg.html">
+        <div class="hub-icon">⚖️</div>
+        <div class="hub-tag">玩具 01 · COMPARISON</div>
+        <div class="hub-title">HSL 假等亮 vs OKLCH 真等亮（SVG）</div>
+        <div class="hub-desc">调节目标亮度 L 与色度 C，一眼看穿 HSL 在黄/青/蓝之间的剧烈亮度跳变，以及 OKLCH 如何拉平对比度！</div>
+      </a>
+      <a class="hub-card" href="./02-chroma-hue-harmony.html">
+        <div class="hub-icon">🎡</div>
+        <div class="hub-tag">玩具 02 · SIMULATION</div>
+        <div class="hub-title">OKLCH 主题色盘生成器：换色相不毁对比度</div>
+        <div class="hub-desc">调节主色相角与饱和度，看现代设计系统如何在保持统一可读性的前提下批量生成多套品牌皮肤！</div>
+      </a>
+      <a class="hub-card" href="./03-gradient-dead-zone.html">
+        <div class="hub-icon">🌈</div>
+        <div class="hub-tag">玩具 03 · COMPARISON</div>
+        <div class="hub-title">渐变“灰泥区”消除术：sRGB vs OKLCH 插值</div>
+        <div class="hub-desc">调节起始色与终点色相，对比传统 sRGB 直线渐变中间发灰发脏，和 OKLCH 鲜亮丝滑渐变的差异！</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

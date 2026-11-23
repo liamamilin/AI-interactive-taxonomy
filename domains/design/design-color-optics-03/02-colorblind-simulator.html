@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚦 红绿色盲视角模拟器：为什么别只靠颜色传信息</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚦 红绿色盲视角模拟器：为什么别只靠颜色传信息</h1><p>全球约 8% 的男性存在不同程度的红绿色觉异常。如果你的状态灯、折线图或红绿按钮只靠颜色区分，每 12 个男用户里就有 1 个彻底抓瞎！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setV('norm',this)">正常三色视觉</button>
+        <button class="btn" onclick="setV('deut',this)">红绿色盲（Deuteranopia）</button>
+        <button class="btn" onclick="setV('mono',this)">全色盲（灰度视角）</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>双重编码辅助强度（图标 + 虚实线 + 文字）</span><span id="vAid">80%</span></label><input type="range" id="sAid" min="0" max="100" value="80" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">红绿纯色辨识度</div><div class="k-val" id="kClr">—</div></div>
+        <div class="kpi"><div class="k-lbl">加入双重编码后辨识度</div><div class="k-val" id="kTot">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let vm='norm';
+function setV(m,btn){ vm=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const aid=+document.getElementById('sAid').value;
+  document.getElementById('vAid').textContent=aid+'%';
+  const pal=vm==='norm'?['#ef4444','#10b981']: (vm==='deut'?['#9e8f29','#a59632']:['#737373','#7d7d7d']);
+  const clrAcc=vm==='norm'?98:(vm==='deut'?18:8);
+  const totAcc=Math.min(99, Math.round(clrAcc + (100-clrAcc)*(aid/100)*0.92));
+  document.getElementById('kClr').textContent=clrAcc+'%';
+  document.getElementById('kClr').style.color=clrAcc<50?'#ef4444':'#059669';
+  document.getElementById('kTot').textContent=totAcc+'%';
+  document.getElementById('kTot').style.color=totAcc>=80?'#059669':'#f59e0b';
+  const showAid=aid>=40;
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">系统告警状态卡片（切到红绿色盲看看纯色有多绝望！）</text>
+    <rect x="45" y="55" width="230" height="92" rx="12" fill="${pal[0]}"/>
+    <text x="160" y="106" text-anchor="middle" font-size="16" font-weight="850" fill="#fff">${showAid?'✖ 失败 / 危险告警':'状态 A'}</text>
+    <rect x="325" y="55" width="230" height="92" rx="12" fill="${pal[1]}"/>
+    <text x="440" y="106" text-anchor="middle" font-size="16" font-weight="850" fill="#fff">${showAid?'✔ 正常 / 运行成功':'状态 B'}</text>
+    <text x="30" y="178" font-size="11.5" fill="var(--tax-muted)">无障碍铁律：颜色永远只能作为辅助，必须叠加图标形状、明度差或文字标签！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>检验你的界面是否对色盲友好，只需把屏幕临时切到黑白灰度模式——如果依然一眼能分清所有状态，那就是顶级设计！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

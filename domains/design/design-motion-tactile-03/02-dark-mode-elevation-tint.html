@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌃 暗黑模式高度密码：黑底看不见阴影，靠“越近越亮”！</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌃 暗黑模式高度密码：黑底看不见阴影，靠“越近越亮”！</h1><p>在深黑背景上画黑色阴影，就像在煤堆里找黑猫——根本看不见！Material Design 的解法极其聪明：离顶部光源越近的高层卡片，表面混入越多的浅灰白光！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>顶层弹窗海拔层级</span><span id="vLvl">第 4 层（模态窗）</span></label><input type="range" id="sLvl" min="1" max="5" value="4" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>每升高一层叠加的微光提亮度</span><span id="vTnt">8%</span></label><input type="range" id="sTnt" min="0" max="14" value="8" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">暗黑空间层次清晰度</div><div class="k-val" id="kClr">—</div></div>
+        <div class="kpi"><div class="k-lbl">顶层表面灰度值</div><div class="k-val" id="kHex">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const lvl=+document.getElementById('sLvl').value, tnt=+document.getElementById('sTnt').value;
+  document.getElementById('vLvl').textContent='第 '+lvl+' 层';
+  document.getElementById('vTnt').textContent=tnt+'%';
+  const topVal=Math.min(95, Math.round(18 + lvl*tnt*1.2));
+  const clr=tnt===0?18:Math.min(98, Math.round(35 + tnt*6.2));
+  document.getElementById('kClr').textContent=clr+' 分';
+  document.getElementById('kClr').style.color=clr>=70?'#059669':'#ef4444';
+  document.getElementById('kHex').textContent=`rgb(${topVal},${topVal},${topVal})`;
+  let layers='';
+  for(let i=0;i<=lvl;i++){
+    const v=Math.min(95, Math.round(18 + i*tnt*1.2));
+    const x=40+i*42, y=24+i*14, w=520-i*84, h=152-i*24;
+    layers+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="rgb(${v},${v},${v})" stroke="rgba(255,255,255,0.08)"/>`;
+  }
+  document.getElementById('svg').innerHTML=`
+    <rect x="20" y="14" width="560" height="172" rx="12" fill="#09090b"/>
+    ${layers}
+    <text x="300" y="108" text-anchor="middle" font-size="13.5" font-weight="800" fill="#f8fafc">暗黑模式：越高越亮（顶部海拔 ${lvl} 层）</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>浅色模式靠“阴影”表达高度，暗黑模式靠“表面亮度递增 + 1px 顶部微光描边”表达高度！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

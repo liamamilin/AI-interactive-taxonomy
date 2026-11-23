@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧊 毛玻璃材质（Glassmorphism）：透光不透字</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧊 毛玻璃材质（Glassmorphism）：透光不透字</h1><p>苹果 macOS / visionOS 标志性的毛玻璃效果，好看与否全靠三个参数的精密平衡：足够强的背景模糊 + 适度半透明底色 + 1px 模拟玻璃倒角的亮白描边！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>背景高斯模糊半径（Blur）</span><span id="vBlr">10 px</span></label><input type="range" id="sBlr" min="0" max="20" value="10" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>毛玻璃白色不透明度</span><span id="vOp">45%</span></label><input type="range" id="sOp" min="10" max="85" value="45" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">文字清晰可读性</div><div class="k-val" id="kRead">—</div></div>
+        <div class="kpi"><div class="k-lbl">空间通透质感</div><div class="k-val" id="kAir">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const blr=+document.getElementById('sBlr').value, op=+document.getElementById('sOp').value;
+  document.getElementById('vBlr').textContent=blr+' px';
+  document.getElementById('vOp').textContent=op+'%';
+  const read=Math.min(98, Math.round(25 + blr*2.4 + op*0.65));
+  const air=Math.max(15, Math.min(98, Math.round(95 - Math.abs(op-42)*1.2 - (blr<4?30:0))));
+  document.getElementById('kRead').textContent=read+' 分';
+  document.getElementById('kRead').style.color=read>=75?'#059669':'#ef4444';
+  document.getElementById('kAir').textContent=air+' 分';
+  document.getElementById('svg').innerHTML=`
+    <defs><filter id="gb"><feGaussianBlur stdDeviation="${(blr*0.6).toFixed(1)}"/></filter></defs>
+    <rect x="20" y="16" width="560" height="168" rx="12" fill="#0f172a"/>
+    <g filter="url(#gb)">
+      <circle cx="170" cy="85" r="55" fill="#ec4899"/>
+      <circle cx="310" cy="120" r="65" fill="#3b82f6"/>
+      <circle cx="430" cy="75" r="50" fill="#10b981"/>
+    </g>
+    <rect x="120" y="42" width="360" height="116" rx="16" fill="rgba(255,255,255,${(op/100).toFixed(2)})" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+    <text x="300" y="96" text-anchor="middle" font-size="18" font-weight="850" fill="#0f172a">毛玻璃卡片 · 空间纵深感</text>
+    <text x="300" y="124" text-anchor="middle" font-size="12" fill="#1e293b">模糊 ${blr}px · 透明度 ${op}%（透光不扰字）</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>毛玻璃最忌讳模糊度太低——背景噪点透出来直接干扰文字阅读！强模糊 + 半透明白底 + 1px 亮边缺一不可。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎯 Z 型动线终点：把行动按钮放在右下角！</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎯 Z 型动线终点：把行动按钮放在右下角！</h1><p>在落地页里，眼睛从左上 Logo 扫到右上登录，再斜穿主图落到右下角——把核心注册按钮刚好接在动线终点，点击转化最顺手！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>主行动按钮贴合 Z 终点程度</span><span id="vAln">90%</span></label><input type="range" id="sAln" min="10" max="100" value="90" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>中段视觉元素（人物眼神/箭头）引导力</span><span id="vGid">75%</span></label><input type="range" id="sGid" min="10" max="100" value="75" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">首屏 CTA 预估点击率</div><div class="k-val" id="kCtr">—</div></div>
+        <div class="kpi"><div class="k-lbl">动线流畅评级</div><div class="k-val" id="kGrd">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const aln=+document.getElementById('sAln').value, gid=+document.getElementById('sGid').value;
+  document.getElementById('vAln').textContent=aln+'%';
+  document.getElementById('vGid').textContent=gid+'%';
+  const ctr=(1.5 + aln*0.045 + gid*0.03).toFixed(1);
+  document.getElementById('kCtr').textContent=ctr+'%';
+  document.getElementById('kCtr').style.color=parseFloat(ctr)>=6.5?'#059669':'#f59e0b';
+  document.getElementById('kGrd').textContent=aln>=75?'🚀 丝滑闭环转化':'⚠️ 视线溜出页面外';
+  const w=Math.max(15, parseFloat(ctr)*42);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">首屏点击转化率（视觉动线终点对齐 ${aln}% × 眼神引导 ${gid}%）</text>
+    <rect x="30" y="68" width="440" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="30" y="68" width="${Math.min(440,w).toFixed(0)}" height="38" rx="8" fill="#059669"/>
+    <text x="${Math.min(480,38+w).toFixed(0)}" y="93" font-size="14" font-weight="850" fill="#059669">${ctr}% CTR</text>
+    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">经典广告技巧：让海报里的人物面朝并注视你的核心按钮，观众眼球会本能顺着人物视线看过去！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>优秀的页面布局像一条隐形滑梯，让用户的视线毫不费力地滑向你最希望他点击的那个按钮！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

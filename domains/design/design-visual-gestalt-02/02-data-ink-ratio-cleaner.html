@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧹 塔夫特数据墨水比：砍掉 70% 装饰垃圾</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧹 塔夫特数据墨水比：砍掉 70% 装饰垃圾</h1><p>信息设计大师爱德华·塔夫特提出“数据墨水比 = 表达真实数据的墨水 / 图表总墨水”。去掉粗重网格、多余外框和 3D 阴影，数据瞬间呼吸！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>清除冗余装饰（粗网格/阴影/重边框）比例</span><span id="vCln">80%</span></label><input type="range" id="sCln" min="0" max="100" value="80" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>直接原位标注数值开关强度</span><span id="vLbl">85%</span></label><input type="range" id="sLbl" min="0" max="100" value="85" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">数据墨水比</div><div class="k-val" id="kDir">—</div></div>
+        <div class="kpi"><div class="k-lbl">读图耗时缩短</div><div class="k-val" id="kSpd">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const cln=+document.getElementById('sCln').value, lbl=+document.getElementById('sLbl').value;
+  document.getElementById('vCln').textContent=cln+'%';
+  document.getElementById('vLbl').textContent=lbl+'%';
+  const dir=Math.min(95, Math.round(28 + cln*0.64));
+  const spd=Math.round(cln*0.4 + lbl*0.25);
+  document.getElementById('kDir').textContent=dir+'%';
+  document.getElementById('kDir').style.color=dir>=75?'#059669':'#f59e0b';
+  document.getElementById('kSpd').textContent='提速 '+spd+'%';
+  const gridOp=((100-cln)/100*0.65).toFixed(2);
+  const vals=[68, 92, 54, 84];
+  let grid='', bars='';
+  for(let y=55;y<=165;y+=22) grid+=`<line x1="60" y1="${y}" x2="540" y2="${y}" stroke="#64748b" stroke-width="1.5" opacity="${gridOp}"/>`;
+  vals.forEach((v,i)=>{
+    const x=100+i*110, h=v*1.1, y=165-h;
+    bars+=`<rect x="${x}" y="${y.toFixed(0)}" width="54" height="${h.toFixed(0)}" rx="5" fill="#3b82f6"/>`;
+    if(lbl>=50) bars+=`<text x="${x+27}" y="${(y-6).toFixed(0)}" text-anchor="middle" font-size="12" font-weight="800" fill="#2563eb">${v}</text>`;
+  });
+  document.getElementById('svg').innerHTML=`
+    <text x="60" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">实时降噪预览（滑动上方清除冗余网格线）</text>
+    <rect x="60" y="42" width="480" height="124" fill="none" stroke="#334155" stroke-width="2" opacity="${gridOp}"/>
+    ${grid}${bars}
+    <line x1="60" y1="165" x2="540" y2="165" stroke="var(--tax-border)" stroke-width="1.5"/>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“删掉任何一根删完后信息量丝毫不减的线条。”——这是让 PPT 和报表瞬间从土味变高级的最快刀法！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

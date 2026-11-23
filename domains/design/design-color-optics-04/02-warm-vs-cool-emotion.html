@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌡️ 色温心理学：暖色促冲动，冷色建信任</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌡️ 色温心理学：暖色促冲动，冷色建信任</h1><p>为什么银行和科技公司偏爱蓝色，快餐店和促销弹窗偏爱红黄？色温直接牵动人类的生理唤醒水平！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>主色调色温（0°红暖 ↔ 210°蓝冷）</span><span id="vH">210°（科技冷蓝）</span></label><input type="range" id="sH" min="0" max="240" value="210" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>色彩饱和度（冷静 ↔ 躁动）</span><span id="vS">75%</span></label><input type="range" id="sS" min="20" max="100" value="75" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">品牌情绪气质</div><div class="k-val" id="kMood">—</div></div>
+        <div class="kpi"><div class="k-lbl">最适配行业</div><div class="k-val" id="kInd">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const h=+document.getElementById('sH').value, s=+document.getElementById('sS').value;
+  document.getElementById('vH').textContent=h+'°';
+  document.getElementById('vS').textContent=s+'%';
+  let mood, ind;
+  if(h<45){ mood='🔥 热烈紧迫 / 刺激食欲与冲动'; ind='快餐、限时大促、娱乐'; }
+  else if(h<90){ mood='☀️ 乐观明快 / 亲和提醒'; ind='儿童教育、便签工具'; }
+  else if(h<165){ mood='🌿 生机健康 / 安全环保'; ind='有机食品、医疗健康、金融涨势'; }
+  else { mood='🧊 专业冷静 / 理性可信'; ind='银行金融、云计算、医疗科技'; }
+  document.getElementById('kMood').textContent=mood;
+  document.getElementById('kInd').textContent=ind;
+  document.getElementById('svg').innerHTML=`
+    <rect x="40" y="28" width="520" height="144" rx="14" fill="hsl(${h},${s}%,48%)"/>
+    <text x="300" y="88" text-anchor="middle" font-size="20" font-weight="850" fill="#fff">品牌主视觉情绪卡 (H=${h}° S=${s}%)</text>
+    <text x="300" y="122" text-anchor="middle" font-size="13.5" fill="#fff" opacity="0.92">${mood}</text>
+    <text x="300" y="150" text-anchor="middle" font-size="11.5" fill="#fff" opacity="0.8">适配场景：${ind}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>色彩是用户读到第一个字之前就生效的“无声文案”。色温选错，产品还没开口就已经输掉一半信任！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

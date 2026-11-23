@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🖋️ 字体气质情绪切换器：同一句话两种人格（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🖋️ 字体气质情绪切换器：同一句话两种人格（SVG）</h1><p>字体就是文字的“衣服和语气”：衬线体（宋体/Times）自带古典、权威、文学与奢华；无衬线体（黑体/Inter）传递现代、科技、干脆与亲和。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setF('serif',this)">衬线体 Serif（宋体/经典优雅）</button>
+        <button class="btn" onclick="setF('sans',this)">无衬线 Sans（黑体/现代科技）</button>
+        <button class="btn" onclick="setF('mono',this)">等宽体 Mono（代码/极客工程）</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>字重粗细（Weight）</span><span id="vW">700</span></label><input type="range" id="sW" min="300" max="900" step="100" value="700" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">第一眼气质印象</div><div class="k-val" id="kVib">—</div></div>
+        <div class="kpi"><div class="k-lbl">最佳应用场合</div><div class="k-val" id="kUse">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let fm='serif';
+function setF(m,btn){ fm=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const w=+document.getElementById('sW').value;
+  document.getElementById('vW').textContent=w;
+  const map={
+    serif:{ff:'Georgia, "Songti SC", serif', vib:'🏛️ 典雅权威 / 文学底蕴', use:'纸质书、奢侈品、人文长文'},
+    sans:{ff:'-apple-system, "PingFang SC", sans-serif', vib:'⚡ 现代极简 / 高效科技', use:'手机 App、SaaS、交通指示牌'},
+    mono:{ff:'"SF Mono", Menlo, monospace', vib:'💻 精密硬核 / 工程数据', use:'代码编辑器、金融行情表、极客风'}
+  }[fm];
+  document.getElementById('kVib').textContent=map.vib;
+  document.getElementById('kUse').textContent=map.use;
+  document.getElementById('svg').innerHTML=`
+    <rect x="30" y="22" width="540" height="150" rx="14" fill="var(--tax-surface)" stroke="var(--tax-border)"/>
+    <text x="300" y="96" text-anchor="middle" font-size="28" font-weight="${w}" font-family='${map.ff}' fill="var(--tax-text)">时间的秩序 · Order of Time</text>
+    <text x="300" y="142" text-anchor="middle" font-size="12.5" fill="var(--tax-muted)">${map.vib}（字重 ${w}）</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>永远别用严肃衬线体写儿童游乐园广告，也别用可爱圆体写法律合同——字体气质和内容情绪一旦错位，读者潜意识就会觉得“不靠谱”！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

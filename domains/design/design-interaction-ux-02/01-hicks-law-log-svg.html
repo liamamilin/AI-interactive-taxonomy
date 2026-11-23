@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⏱️ 希克-海曼定律：选项数 vs 决策耗时（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⏱️ 希克-海曼定律：选项数 vs 决策耗时（SVG）</h1><p>希克定律：决策时间随选项数量呈对数增长 RT = 0.2 + 0.155 · log₂(n + 1)。把 24 个按钮分成 4 组每组 6 个，大脑就能二分速查！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>同级平铺菜单选项总数 n</span><span id="vN">12 个</span></label><input type="range" id="sN" min="2" max="32" value="12" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>视觉分组与清晰标签优化度</span><span id="vGrp">60%</span></label><input type="range" id="sGrp" min="0" max="100" value="60" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">平铺无序查找耗时</div><div class="k-val" id="kRaw">—</div></div>
+        <div class="kpi"><div class="k-lbl">分组结构化后耗时</div><div class="k-val" id="kOpt">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const n=+document.getElementById('sN').value, grp=+document.getElementById('sGrp').value;
+  document.getElementById('vN').textContent=n+' 个';
+  document.getElementById('vGrp').textContent=grp+'%';
+  const raw=(0.25 + 0.28*Math.log2(n+1) + n*0.03).toFixed(2);
+  const opt=(parseFloat(raw)*(1 - grp*0.0045)).toFixed(2);
+  document.getElementById('kRaw').textContent=raw+' 秒';
+  document.getElementById('kOpt').textContent=opt+' 秒';
+  document.getElementById('kOpt').style.color='#059669';
+  let pts=[];
+  for(let i=2;i<=32;i++){
+    const t=0.25 + 0.28*Math.log2(i+1) + i*0.03;
+    pts.push(`${(45+i*16).toFixed(1)},${(172-t*48).toFixed(1)}`);
+  }
+  const cx=45+n*16, cy=172-parseFloat(raw)*48;
+  document.getElementById('svg').innerHTML=`
+    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">希克定律曲线：选项越多，每次操作都要付额外的认知检索税</text>
+    <line x1="45" y1="172" x2="560" y2="172" stroke="var(--tax-border)" stroke-width="1.5"/>
+    <polyline points="${pts.join(' ')}" fill="none" stroke="#8b5cf6" stroke-width="3"/>
+    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="#ef4444" stroke="#fff" stroke-width="2"/>
+    <text x="45" y="192" font-size="11" fill="var(--tax-muted)">2 项</text>
+    <text x="275" y="192" font-size="11" fill="var(--tax-muted)">16 项</text>
+    <text x="530" y="192" font-size="11" fill="var(--tax-muted)">32 项</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>电视遥控器上密密麻麻 50 个按键让人望而生畏，而现代极简遥控器只留 6 个高频键——把低频选项藏进二级菜单，就是希克定律的最佳实践！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

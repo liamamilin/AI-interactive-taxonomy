@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>➡️ 图底反转：FedEx 隐藏箭头与负空间巧思</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>➡️ 图底反转：FedEx 隐藏箭头与负空间巧思</h1><p>最顶级的负空间设计能让“空白本身变成第二个图形”——比如联邦快递 FedEx 的 E 和 x 之间藏着一个精准向右的白色箭头，一旦看见就再也忘不掉！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>字母 E 与 x 的负空间贴合紧密度</span><span id="vKer">95%（严丝合缝）</span></label><input type="range" id="sKer" min="20" max="100" value="95" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>高亮提示隐藏负空间箭头</span><span id="vHnt">30%</span></label><input type="range" id="sHnt" min="0" max="100" value="30" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">负空间图形完整度</div><div class="k-val" id="kInt">—</div></div>
+        <div class="kpi"><div class="k-lbl">受众惊艳记忆率</div><div class="k-val" id="kMem">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const ker=+document.getElementById('sKer').value, hnt=+document.getElementById('sHnt').value;
+  document.getElementById('vKer').textContent=ker+'%';
+  document.getElementById('vHnt').textContent=hnt+'%';
+  const gap=Math.round((100-ker)*0.45);
+  const mem=Math.min(98, Math.round(ker*0.92 + 5));
+  document.getElementById('kInt').textContent=ker>=85?'✨ 隐藏箭头完美闭合!':'⚠️ 间隙过大，箭头解体';
+  document.getElementById('kInt').style.color=ker>=85?'#059669':'#f59e0b';
+  document.getElementById('kMem').textContent=mem+'%';
+  const op=(hnt/100*0.65).toFixed(2);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">拉紧字距，看 E 与 x 之间的空白如何拼出向右的箭头！</text>
+    <text x="${255-gap}" y="138" text-anchor="end" font-size="96" font-weight="900" font-family="Arial,sans-serif" fill="#4f46e5">E</text>
+    <text x="${262+gap}" y="138" text-anchor="start" font-size="96" font-weight="900" font-family="Arial,sans-serif" fill="#f97316">x</text>
+    <polygon points="244,96 270,96 270,84 294,104 270,124 270,112 244,112" fill="#10b981" opacity="${op}"/>
+    <text x="300" y="180" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">拖动“高亮提示”滑块，可以显影隐藏在两字母缝隙间的负空间箭头！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>负空间不是剩余废料，当空白被精心雕琢成有意义的形状时，观众收获的“发现彩蛋感”是最强的品牌记忆胶水！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🖥️ 屏幕边缘“无限大宽度”外挂</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🖥️ 屏幕边缘“无限大宽度”外挂</h1><p>为什么把菜单栏紧贴屏幕最顶端（0px 缝隙）比留出 8px 美观缝隙好用十倍？因为光标撞到屏幕边缘会自动停住，相当于目标宽度 W = ∞！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>按钮距离屏幕物理边缘的缝隙</span><span id="vGap">0 px（紧贴边缘）</span></label><input type="range" id="sGap" min="0" max="24" step="2" value="0" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>鼠标快速甩动速度</span><span id="vSpd">高（盲甩）</span></label><input type="range" id="sSpd" min="20" max="100" value="80" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">有效命中热区深度</div><div class="k-val" id="kEff">—</div></div>
+        <div class="kpi"><div class="k-lbl">盲甩一次命中率</div><div class="k-val" id="kHit">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const gap=+document.getElementById('sGap').value, spd=+document.getElementById('sSpd').value;
+  document.getElementById('vGap').textContent=gap+' px'+(gap===0?'（零缝隙贴边）':'');
+  document.getElementById('vSpd').textContent=spd+'%';
+  const hit=gap===0 ? 99 : Math.max(32, Math.round(92 - gap*1.4 - spd*0.35));
+  document.getElementById('kEff').textContent=gap===0?'∞（屏幕边缘物理挡板）':'仅 28 px（容易甩过头）';
+  document.getElementById('kHit').textContent=hit+'%';
+  document.getElementById('kHit').style.color=hit>=90?'#059669':'#ef4444';
+  document.getElementById('svg').innerHTML=`
+    <rect x="60" y="26" width="480" height="148" rx="10" fill="var(--tax-surface)" stroke="#0f172a" stroke-width="3"/>
+    <rect x="62" y="${28+gap}" width="476" height="28" rx="${gap>0?6:0}" fill="${gap===0?'#059669':'#f59e0b'}"/>
+    <text x="300" y="${46+gap}" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">顶部菜单栏（距顶边 ${gap}px）</text>
+    <text x="300" y="130" text-anchor="middle" font-size="12" fill="var(--tax-muted)">${gap===0?'✨ 鼠标用力往上一推直接被顶边挡停，闭眼 100% 命中！':'⚠️ 这条 '+gap+'px 的死缝隙导致鼠标猛甩过去直接点空！'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>屏幕的四个角落与四条边是桌面 UI 最稀缺的黄金地段——永远别在屏幕边缘和按钮之间留出“死像素缝隙”！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

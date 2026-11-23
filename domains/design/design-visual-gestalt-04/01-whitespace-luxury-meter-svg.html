@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💎 留白即奢华：密度与高级感转换器（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>💎 留白即奢华：密度与高级感转换器（SVG）</h1><p>人类潜意识把“拥挤”与“廉价打折”绑定，把“宽敞克制”与“昂贵稀缺”绑定。留白不是浪费屏幕，而是给核心主角搭建聚光灯舞台！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>画面留白/呼吸空间比例</span><span id="vWs">65%</span></label><input type="range" id="sWs" min="10" max="82" value="65" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>单屏强塞元素数量</span><span id="vEl">2 个</span></label><input type="range" id="sEl" min="1" max="8" value="2" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">品牌高端溢价感知</div><div class="k-val" id="kLux">—</div></div>
+        <div class="kpi"><div class="k-lbl">核心产品聚焦度</div><div class="k-val" id="kFoc">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const ws=+document.getElementById('sWs').value, el=+document.getElementById('sEl').value;
+  document.getElementById('vWs').textContent=ws+'%';
+  document.getElementById('vEl').textContent=el+' 个';
+  const lux=Math.max(12, Math.min(98, Math.round(ws*1.05 - el*5 + 25)));
+  const foc=Math.max(15, Math.min(98, Math.round(105 - el*10 + ws*0.15)));
+  document.getElementById('kLux').textContent=lux+' 分'+(lux>=75?'（奢侈品级）':(lux>=45?'（现代中端）':'（大甩卖传单）'));
+  document.getElementById('kLux').style.color=lux>=75?'#059669':'#f59e0b';
+  document.getElementById('kFoc').textContent=foc+'%';
+  const pad=Math.round(ws*0.95);
+  let extras='';
+  for(let i=1;i<el;i++){
+    const x=48+((i*137)%460), y=34+((i*61)%130);
+    extras+=`<rect x="${x}" y="${y}" width="64" height="22" rx="4" fill="#ef4444" opacity="0.22" stroke="#ef4444"/><text x="${x+32}" y="${y+15}" text-anchor="middle" font-size="10" font-weight="800" fill="#ef4444">爆款标签</text>`;
+  }
+  document.getElementById('svg').innerHTML=`
+    <rect x="30" y="18" width="540" height="168" rx="14" fill="var(--tax-surface)" stroke="var(--tax-border)"/>
+    ${extras}
+    <rect x="${30+pad}" y="${18+Math.round(pad*0.35)}" width="${Math.max(120, 540-pad*2)}" height="${Math.max(66, 168-Math.round(pad*0.7))}" rx="12" fill="#0f172a"/>
+    <text x="300" y="106" text-anchor="middle" font-size="16" font-weight="850" fill="#fff">核心主角产品</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>留白不是“空着没填满”，它本身就是一种主动的设计元素——把多余的促销贴纸全撕掉，主角价值瞬间翻倍！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

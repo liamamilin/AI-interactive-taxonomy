@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>❤️ 乐观更新（Optimistic UI）：先亮红心再发请求</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>❤️ 乐观更新（Optimistic UI）：先亮红心再发请求</h1><p>为什么微信发消息、小红书点红心无论网速多烂都觉得“零延迟”？因为前端在 0ms 就乐观假定服务器会成功，先变红心，极少数失败时再悄悄回滚！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>当前真实 4G/弱网往返延迟</span><span id="vNet">450 ms</span></label><input type="range" id="sNet" min="50" max="1200" step="50" value="450" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>后端接口真实成功率</span><span id="vOk">99.5%</span></label><input type="range" id="sOk" min="90" max="99.9" step="0.1" value="99.5" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">传统悲观等待反馈</div><div class="k-val" id="kPes">—</div></div>
+        <div class="kpi"><div class="k-lbl">乐观更新前端反馈</div><div class="k-val" id="kOpt">16 ms（丝滑瞬时!）</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const net=+document.getElementById('sNet').value, ok=+document.getElementById('sOk').value;
+  document.getElementById('vNet').textContent=net+' ms';
+  document.getElementById('vOk').textContent=ok.toFixed(1)+'%';
+  document.getElementById('kPes').textContent=net+' ms'+(net>300?'（明显卡顿）':'');
+  document.getElementById('kPes').style.color=net>300?'#ef4444':'#f59e0b';
+  document.getElementById('kOpt').style.color='#059669';
+  const wP=Math.max(15, Math.min(340, net*0.28));
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">点赞/收藏等高频轻量操作：等待服务器 vs 乐观即时渲染</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">传统悲观模式</text>
+    <rect x="145" y="64" width="${wP.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
+    <text x="${(153+wP).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#ef4444">${net}ms 才亮红心</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">乐观更新模式</text>
+    <rect x="145" y="120" width="16" height="28" rx="6" fill="#059669"/>
+    <text x="170" y="139" font-size="12" font-weight="800" fill="#059669">16ms 瞬时亮心（${ok.toFixed(1)}% 无需回滚）</text>
+    <text x="20" y="178" font-size="11.5" fill="var(--tax-muted)">注意边界：点赞/发消息适合乐观更新；银行转账扣款必须老老实实等后端确认！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>不要为了 0.5% 的极小失败概率，惩罚 99.5% 正常用户的瞬时爽感——高频低风险动作，大胆用乐观更新！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

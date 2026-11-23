@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📱 小字号屏幕清晰度：为何 UI 正文选无衬线？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📱 小字号屏幕清晰度：为何 UI 正文选无衬线？</h1><p>衬线体的装饰小脚和粗细悬殊的笔画，在纸张 300 DPI 下优雅清晰，但在早期低清屏幕或 11px 小字号下极易发虚断裂——无衬线体等粗笔画完美规避了这个问题！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>屏幕字号大小</span><span id="vSz">12 px</span></label><input type="range" id="sSz" min="9" max="28" value="12" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>屏幕像素清晰度（1x普屏 ↔ 3x视网膜）</span><span id="vDpi">1.5x</span></label><input type="range" id="sDpi" min="1" max="3" step="0.5" value="1.5" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">无衬线清晰度</div><div class="k-val" id="kSan">—</div></div>
+        <div class="kpi"><div class="k-lbl">衬线体清晰度</div><div class="k-val" id="kSer">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const sz=+document.getElementById('sSz').value, dpi=+document.getElementById('sDpi').value;
+  document.getElementById('vSz').textContent=sz+' px';
+  document.getElementById('vDpi').textContent=dpi.toFixed(1)+'x';
+  const san=Math.min(98, Math.round(62 + sz*1.1 + dpi*7));
+  const ser=Math.min(98, Math.round(35 + sz*1.6 + dpi*12));
+  document.getElementById('kSan').textContent=san+' 分';
+  document.getElementById('kSer').textContent=ser+' 分';
+  document.getElementById('kSer').style.color=ser<70?'#ef4444':'#059669';
+  const w1=Math.max(15, san*3.4), w2=Math.max(15, ser*3.4);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">${sz}px × ${dpi.toFixed(1)}x 屏幕下的清晰辨认度对比</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">无衬线 Sans</text>
+    <rect x="145" y="64" width="${w1.toFixed(0)}" height="28" rx="6" fill="#059669"/>
+    <text x="${(153+w1).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#059669">${san} 分</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">衬线体 Serif</text>
+    <rect x="145" y="120" width="${w2.toFixed(0)}" height="28" rx="6" fill="${ser<70?'#ef4444':'#3b82f6'}"/>
+    <text x="${(153+w2).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="${ser<70?'#ef4444':'#2563eb'}">${ser} 分</text>
+    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">高清视网膜屏普及后，大号衬线标题重回优雅舞台；但 12~14px 界面小字依然是无衬线的天下！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“大标题用衬线显格调，小界面用无衬线保清晰”——把两者优势结合，就是现代数字杂志最经典的排版公式。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📊 克利夫兰视觉编码精度榜：柱图 vs 饼图（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📊 克利夫兰视觉编码精度榜：柱图 vs 饼图（SVG）</h1><p>数据可视化圣经（Cleveland & McGill）：人眼对“同基线长度”的辨别误差仅 2%，对“扇区角度/面积”误差高达 15%，对“颜色深浅”误差超过 30%！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>A 项真实数值</span><span id="vA">26%</span></label><input type="range" id="sA" min="15" max="45" value="26" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>B 项真实数值</span><span id="vB">29%</span></label><input type="range" id="sB" min="15" max="45" value="29" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">柱状图（位置/长度）判准率</div><div class="k-val" id="kBar">—</div></div>
+        <div class="kpi"><div class="k-lbl">饼图（角度/面积）判准率</div><div class="k-val" id="kPie">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const a=+document.getElementById('sA').value, b=+document.getElementById('sB').value;
+  document.getElementById('vA').textContent=a+'%';
+  document.getElementById('vB').textContent=b+'%';
+  const diff=Math.abs(a-b);
+  const pBar=Math.min(99, Math.round(78 + diff*3.5));
+  const pPie=Math.min(96, Math.round(48 + diff*2.4));
+  document.getElementById('kBar').textContent=pBar+'%';
+  document.getElementById('kBar').style.color='#059669';
+  document.getElementById('kPie').textContent=pPie+'%';
+  document.getElementById('kPie').style.color=pPie<70?'#ef4444':'#f59e0b';
+  const hA=a*2.6, hB=b*2.6;
+  const angA=a/100*2*Math.PI, angB=(a+b)/100*2*Math.PI;
+  const cx=445, cy=115, r=66;
+  const x1=cx+r*Math.cos(0), y1=cy+r*Math.sin(0);
+  const x2=cx+r*Math.cos(angA), y2=cy+r*Math.sin(angA);
+  const x3=cx+r*Math.cos(angB), y3=cy+r*Math.sin(angB);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">同一组微弱差值（A=${a}% vs B=${b}%）：左柱图一眼立判，右饼图极难分辨！</text>
+    <line x1="50" y1="175" x2="270" y2="175" stroke="var(--tax-border)" stroke-width="1.5"/>
+    <rect x="85" y="${(175-hA).toFixed(0)}" width="55" height="${hA.toFixed(0)}" rx="5" fill="#3b82f6"/>
+    <text x="112" y="192" text-anchor="middle" font-size="12" font-weight="800" fill="#2563eb">A (${a}%)</text>
+    <rect x="175" y="${(175-hB).toFixed(0)}" width="55" height="${hB.toFixed(0)}" rx="5" fill="#f59e0b"/>
+    <text x="202" y="192" text-anchor="middle" font-size="12" font-weight="800" fill="#d97706">B (${b}%)</text>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="#e2e8f0"/>
+    <path d="M ${cx} ${cy} L ${x1.toFixed(1)} ${y1.toFixed(1)} A ${r} ${r} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)} Z" fill="#3b82f6"/>
+    <path d="M ${cx} ${cy} L ${x2.toFixed(1)} ${y2.toFixed(1)} A ${r} ${r} 0 0 1 ${x3.toFixed(1)} ${y3.toFixed(1)} Z" fill="#f59e0b"/>
+    <text x="${cx}" y="198" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">饼图扇区（难判微小差）</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>记住视觉编码金字塔：第一档是“共同基线的长度/位置（柱图/散点）”，第二档才是角度面积（饼图），最后是颜色深浅（热力图）！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

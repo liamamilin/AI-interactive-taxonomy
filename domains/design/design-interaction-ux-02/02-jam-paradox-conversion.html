@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍓 果酱实验与选择过载：选项太多反而买得少</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🍓 果酱实验与选择过载：选项太多反而买得少</h1><p>哥伦比亚大学经典实验：摆 24 种果酱吸引 60% 路人停步，但只有 3% 购买；摆 6 种果酱吸引 40% 路人，购买率却高达 30%（十倍差距）！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>货架同屏展示 SKU 数量</span><span id="vSku">18 种</span></label><input type="range" id="sSku" min="2" max="30" value="18" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>“镇店 Top 3 推荐”决策脚手架</span><span id="vRec">30%</span></label><input type="range" id="sRec" min="0" max="100" value="30" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">最终成交转化率</div><div class="k-val" id="kCnv">—</div></div>
+        <div class="kpi"><div class="k-lbl">顾客心理状态</div><div class="k-val" id="kPsy">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const sku=+document.getElementById('sSku').value, rec=+document.getElementById('sRec').value;
+  document.getElementById('vSku').textContent=sku+' 种';
+  document.getElementById('vRec').textContent=rec+'%';
+  const rawCnv=32*Math.exp(-Math.pow((sku-5)/9, 2)) + 3;
+  const cnv=Math.min(38, Math.round(rawCnv + (sku>8? rec*0.14 : 0)));
+  document.getElementById('kCnv').textContent=cnv+'%';
+  document.getElementById('kCnv').style.color=cnv>=20?'#059669':'#ef4444';
+  document.getElementById('kPsy').textContent=sku>12 && rec<50?'🤯 选择瘫痪，干脆不买走人':'😊 轻松挑中，果断下单';
+  const w=Math.max(15, cnv*10.5);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">货架选项数 (${sku} 种) 对最终下单转化率的倒 U 冲击</text>
+    <rect x="30" y="68" width="420" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="30" y="68" width="${Math.min(420,w).toFixed(0)}" height="38" rx="8" fill="${cnv>=20?'#059669':'#ef4444'}"/>
+    <text x="${Math.min(460,38+w).toFixed(0)}" y="93" font-size="14" font-weight="850" fill="${cnv>=20?'#059669':'#ef4444'}">${cnv}% 下单</text>
+    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">品类丰富的平台必须用“猜你喜欢 / 销量第一 / 编辑精选”帮用户把 1000 个选项先筛到 3 个！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>用户嘴上都说“想要更多选择”，但身体却诚实地为“替我筛好的精选”买单！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

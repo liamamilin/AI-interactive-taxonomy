@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌬️ 宏观留白 vs 微观留白：双层节奏器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌬️ 宏观留白 vs 微观留白：双层节奏器</h1><p>宏观留白决定页面格局和高级感，微观留白（字距、行距、段距）决定眼睛能不能一口气读完不串行！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>宏观留白（页面左右页边距）</span><span id="vMac">60 px</span></label><input type="range" id="sMac" min="10" max="110" value="60" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>微观留白（正文行间距）</span><span id="vMic">24 px</span></label><input type="range" id="sMic" min="14" max="34" value="24" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">长文阅读理解率增益</div><div class="k-val" id="kCmp">—</div></div>
+        <div class="kpi"><div class="k-lbl">排版舒适度</div><div class="k-val" id="kCmf">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const mac=+document.getElementById('sMac').value, mic=+document.getElementById('sMic').value;
+  document.getElementById('vMac').textContent=mac+' px';
+  document.getElementById('vMic').textContent=mic+' px';
+  const cmf=Math.max(20, Math.min(98, Math.round(100 - Math.abs(mac-65)*0.55 - Math.abs(mic-24)*2.8)));
+  const cmp=Math.round(cmf*0.22);
+  document.getElementById('kCmp').textContent='+'+cmp+'%';
+  document.getElementById('kCmp').style.color=cmf>=75?'#059669':'#f59e0b';
+  document.getElementById('kCmf').textContent=cmf+' 分';
+  const wLine=Math.max(120, 540 - mac*2);
+  let lines='';
+  for(let i=0;i<5;i++){
+    const y=48+i*mic;
+    if(y<180) lines+=`<rect x="${30+mac}" y="${y}" width="${i===4?Math.round(wLine*0.6):wLine}" height="8" rx="4" fill="#475569" opacity="0.72"/>`;
+  }
+  document.getElementById('svg').innerHTML=`
+    <rect x="30" y="18" width="540" height="170" rx="12" fill="var(--tax-surface)" stroke="var(--tax-border)"/>
+    <rect x="30" y="18" width="${mac}" height="170" fill="#3b82f6" opacity="0.1"/>
+    <rect x="${570-mac}" y="18" width="${mac}" height="170" fill="#3b82f6" opacity="0.1"/>
+    ${lines}
+    <text x="300" y="180" text-anchor="middle" font-size="11" fill="var(--tax-muted)">蓝色区域 = 宏观页边距 (${mac}px) · 行间距 = ${mic}px</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>左右页边距收窄行宽，让眼球不必大幅横扫；行距保持在字号的 1.5~1.7 倍，彻底消灭读串行的烦恼！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>👁️ 同色异谱：屏幕根本没有黄光，为何你看见了黄？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>👁️ 同色异谱：屏幕根本没有黄光，为何你看见了黄？</h1><p>人类视网膜只有红(L)、绿(M)、蓝(S)三种视锥细胞。手机屏幕根本没有黄色像素，但它用红光+绿光同时刺激 L 和 M 视锥，完美骗过了大脑！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>屏幕红光像素输出 (L 视锥刺激)</span><span id="vR">90%</span></label><input type="range" id="sR" min="0" max="100" value="90" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>屏幕绿光像素输出 (M 视锥刺激)</span><span id="vG">85%</span></label><input type="range" id="sG" min="0" max="100" value="85" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">大脑解码颜色</div><div class="k-val" id="kCol">—</div></div>
+        <div class="kpi"><div class="k-lbl">光谱物理真相</div><div class="k-val" id="kPhy">0% 真实黄光波长</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const r=+document.getElementById('sR').value, g=+document.getElementById('sG').value;
+  document.getElementById('vR').textContent=r+'%';
+  document.getElementById('vG').textContent=g+'%';
+  const R=Math.round(r*2.55), G=Math.round(g*2.55);
+  let name='混合过渡色';
+  if(r>75 && g>70) name='🍋 鲜明黄色（视觉魔术！）';
+  else if(r>70 && g<30) name='🍎 纯红色';
+  else if(g>70 && r<30) name='🌿 纯绿色';
+  else if(r>70 && g>=30 && g<=70) name='🍊 橙色';
+  document.getElementById('kCol').textContent=name;
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">双通道骗局：红像素 + 绿像素 → 视锥响应等价于单色黄光</text>
+    <rect x="35" y="55" width="90" height="90" rx="10" fill="rgb(${R},0,0)"/>
+    <text x="80" y="165" text-anchor="middle" font-size="11.5" font-weight="750" fill="#ef4444">红像素 ${r}%</text>
+    <text x="145" y="108" font-size="22" font-weight="800" fill="var(--tax-muted)">+</text>
+    <rect x="175" y="55" width="90" height="90" rx="10" fill="rgb(0,${G},0)"/>
+    <text x="220" y="165" text-anchor="middle" font-size="11.5" font-weight="750" fill="#059669">绿像素 ${g}%</text>
+    <text x="288" y="108" font-size="22" font-weight="800" fill="var(--tax-muted)">=</text>
+    <rect x="325" y="55" width="235" height="90" rx="12" fill="rgb(${R},${G},0)" stroke="var(--tax-border)"/>
+    <text x="442" y="165" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-text)">大脑感知结果：rgb(${R},${G},0)</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>颜色并不存在于物理光子中，而是大脑对三种视锥细胞信号比值的“心理译码”。人类视觉的这一漏洞，正是所有彩色屏幕得以发明的基石！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

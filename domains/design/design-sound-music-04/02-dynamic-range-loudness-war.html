@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📢 响度战争灾难：把动态全压扁为何听着累？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📢 响度战争灾难：把动态全压扁为何听着累？</h1><p>唱片业曾陷入“响度战争”：为了在电台里比别人显得更响，把轻柔部分强行拉大、把高潮削平，把音乐压成一块毫无呼吸感的“响度砖头”，听 5 分钟耳朵就极度疲劳！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>过度响度压缩强度（压扁动态范围）</span><span id="vCmp">30%（健康起伏）</span></label><input type="range" id="sCmp" min="0" max="100" value="30" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>连续收听时长</span><span id="vMin">30 分钟</span></label><input type="range" id="sMin" min="5" max="60" step="5" value="30" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">保留动态范围（DR 值）</div><div class="k-val" id="kDr">—</div></div>
+        <div class="kpi"><div class="k-lbl">耳朵听觉疲劳度</div><div class="k-val" id="kFat">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const cmp=+document.getElementById('sCmp').value, mins=+document.getElementById('sMin').value;
+  document.getElementById('vCmp').textContent=cmp+'%';
+  document.getElementById('vMin').textContent=mins+' 分钟';
+  const dr=Math.max(3, Math.round(14 - cmp*0.11));
+  const fat=Math.min(98, Math.round(12 + cmp*0.65 + mins*0.35));
+  document.getElementById('kDr').textContent='DR'+dr+(dr>=10?'（饱满呼吸）':'（砖墙削波!）');
+  document.getElementById('kDr').style.color=dr>=10?'#059669':'#ef4444';
+  document.getElementById('kFat').textContent=fat+'%';
+  document.getElementById('kFat').style.color=fat>65?'#ef4444':'#059669';
+  let bars='';
+  const base=[18, 25, 42, 22, 65, 92, 48, 20, 30, 78, 98, 52, 24, 15, 68, 88, 35, 22];
+  base.forEach((v,i)=>{
+    const sq=v + (96-v)*(cmp/100);
+    const h=Math.max(6, sq*1.15);
+    const x=48+i*28, y=108-h/2;
+    bars+=`<rect x="${x}" y="${y.toFixed(1)}" width="18" height="${h.toFixed(1)}" rx="3" fill="${cmp>70?'#ef4444':'#3b82f6'}"/>`;
+  });
+  document.getElementById('svg').innerHTML=`
+    <text x="48" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">音频动态波形对比（拉满压缩看看音乐如何变成死板“香肠砖”）</text>
+    ${bars}
+    <text x="48" y="184" font-size="11.5" fill="var(--tax-muted)">现在 Spotify/Apple Music 全部强制响度归一化（-14 LUFS），过度压响度只会白白毁掉高潮冲击力！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>就像视觉设计里“全屏高亮等于没高亮”，声音里“全程最大声等于没有高潮”——有轻声耳语，才有雷霆震撼！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔵 接近原则：行距 vs 列距瞬间改写分组（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔵 接近原则：行距 vs 列距瞬间改写分组（SVG）</h1><p>格式塔第一定律：离得近的元素自动归为一组！好排版靠“间距差”就能分清模块，根本不需要画一堆丑陋的边框线。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>水平列间距（dx）</span><span id="vDx">56 px</span></label><input type="range" id="sDx" min="26" max="80" value="56" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>垂直行间距（dy）</span><span id="vDy">32 px</span></label><input type="range" id="sDy" min="26" max="70" value="32" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">大脑自动解码结构</div><div class="k-val" id="kGrp">—</div></div>
+        <div class="kpi"><div class="k-lbl">间距比值 (dx / dy)</div><div class="k-val" id="kRat">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const dx=+document.getElementById('sDx').value, dy=+document.getElementById('sDy').value;
+  document.getElementById('vDx').textContent=dx+' px';
+  document.getElementById('vDy').textContent=dy+' px';
+  const rat=(dx/dy).toFixed(2);
+  let grp='⬜ 均匀方阵（无明显分组）';
+  if(dx>dy*1.2) grp='⬇️ 纵向 5 列（竖向靠近）';
+  else if(dy>dx*1.2) grp='➡️ 横向 3 行（横向靠近）';
+  document.getElementById('kGrp').textContent=grp;
+  document.getElementById('kRat').textContent=rat;
+  let dots='';
+  const wTot=4*dx, hTot=2*dy;
+  const ox=300 - wTot/2, oy=112 - hTot/2;
+  for(let r=0;r<3;r++) for(let c=0;c<5;c++){
+    dots+=`<circle cx="${(ox+c*dx).toFixed(1)}" cy="${(oy+r*dy).toFixed(1)}" r="10" fill="#3b82f6"/>`;
+  }
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">15 个完全相同的圆点：仅调间距，大脑立刻重写分组！</text>
+    ${dots}
+    <text x="300" y="196" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">UI 表单秘诀：标题离下方输入框近（6px），离上一组远（24px），无需任何分割线！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“组内紧、组间松”是排版最省力的魔法——留白本身就是最高级的分割线。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

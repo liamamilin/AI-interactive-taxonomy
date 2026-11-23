@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📖 行高 × 行宽阅读舒适甜点区（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📖 行高 × 行宽阅读舒适甜点区（SVG）</h1><p>排版黄金法则：中文正文每行 30~40 字、行高 1.5~1.7 倍。行太宽眼球回扫容易迷路，行太密上下行互相打架！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>正文行高倍率（Line-height）</span><span id="vLh">1.65</span></label><input type="range" id="sLh" min="1.0" max="2.5" step="0.05" value="1.65" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>每行中文字符数（行宽）</span><span id="vCh">34 字</span></label><input type="range" id="sCh" min="15" max="65" value="34" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">阅读流畅舒适度</div><div class="k-val" id="kCmf">—</div></div>
+        <div class="kpi"><div class="k-lbl">眼球回扫串行风险</div><div class="k-val" id="kErr">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const lh=+document.getElementById('sLh').value, ch=+document.getElementById('sCh').value;
+  document.getElementById('vLh').textContent=lh.toFixed(2);
+  document.getElementById('vCh').textContent=ch+' 字';
+  const err=Math.max(4, Math.min(96, Math.round(Math.max(0, ch-38)*1.8 + Math.max(0, 1.45-lh)*95)));
+  const cmf=Math.max(15, Math.min(98, Math.round(98 - Math.abs(lh-1.65)*45 - Math.abs(ch-35)*1.1)));
+  document.getElementById('kCmf').textContent=cmf+' 分';
+  document.getElementById('kCmf').style.color=cmf>=75?'#059669':'#f59e0b';
+  document.getElementById('kErr').textContent=err+'%';
+  document.getElementById('kErr').style.color=err>45?'#ef4444':'#059669';
+  const wBar=Math.min(520, ch*8);
+  const dy=Math.round(14*lh);
+  let rows='';
+  for(let i=0;i<4;i++){
+    const y=54+i*dy;
+    if(y<182) rows+=`<rect x="40" y="${y}" width="${i===3?Math.round(wBar*0.65):wBar}" height="10" rx="4" fill="#334155" opacity="0.78"/>`;
+  }
+  document.getElementById('svg').innerHTML=`
+    <text x="40" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">实时段落行高与行宽预览（当前 ${ch} 字/行，行高 ${lh.toFixed(2)}）</text>
+    ${rows}
+    <text x="40" y="196" font-size="11" fill="var(--tax-muted)">行宽越宽，就需要略微调大行高，帮眼球从行尾准确跳回下一行开头。</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>永远别让正文横跨整个 1920px 宽屏！把文章容器锁在 640~720px、行高设到 1.65，阅读体验瞬间脱胎换骨。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

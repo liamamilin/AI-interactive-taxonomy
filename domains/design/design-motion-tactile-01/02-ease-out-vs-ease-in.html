@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚀 入场用 Ease-Out，离场用 Ease-In</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚀 入场用 Ease-Out，离场用 Ease-In</h1><p>同样 300 毫秒的弹窗入场：Ease-Out（先快后慢）在头 80ms 就跑完 60% 路程，让你觉得“秒开”；Ease-In（先慢后快）在头 80ms 几乎不动，让你觉得“卡顿”！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setE('out',this)">Ease-Out（先快后慢 · 推荐入场）</button>
+        <button class="btn" onclick="setE('in',this)">Ease-In（先慢后快 · 推荐离场）</button>
+        <button class="btn" onclick="setE('lin',this)">Linear（匀速机械）</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>总动画时长 Duration</span><span id="vDur">300 ms</span></label><input type="range" id="sDur" min="150" max="600" step="50" value="300" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">前 30% 时间跑完路程</div><div class="k-val" id="kEarly">—</div></div>
+        <div class="kpi"><div class="k-lbl">用户主观跟手度</div><div class="k-val" id="kFeel">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let em='out';
+function setE(m,btn){ em=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function ease(t){ return em==='out'?(1-Math.pow(1-t,3)):(em==='in'?Math.pow(t,3):t); }
+function draw(){
+  const dur=+document.getElementById('sDur').value;
+  document.getElementById('vDur').textContent=dur+' ms';
+  const early=Math.round(ease(0.3)*100);
+  document.getElementById('kEarly').textContent=early+'%';
+  document.getElementById('kFeel').textContent=em==='out'?'⚡ 极速响应，优雅刹停':(em==='in'?'🐢 入场显得慢半拍（适合退场）':'🤖 机械死板');
+  document.getElementById('kFeel').style.color=em==='out'?'#059669':'#f59e0b';
+  let dots='';
+  for(let i=0;i<=10;i++){
+    const t=i/10, p=ease(t);
+    const x=50+p*490;
+    dots+=`<circle cx="${x.toFixed(1)}" cy="108" r="${i===10?10:6}" fill="${em==='out'?'#059669':(em==='in'?'#ef4444':'#64748b')}" opacity="${(0.25+t*0.75).toFixed(2)}"/>`;
+  }
+  document.getElementById('svg').innerHTML=`
+    <text x="50" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">等时间间隔（每 ${(dur/10).toFixed(0)}ms）频闪位置点（越稀疏 = 速度越快）</text>
+    <line x1="50" y1="108" x2="540" y2="108" stroke="var(--tax-border)" stroke-width="2"/>
+    ${dots}
+    <text x="50" y="162" font-size="11.5" fill="var(--tax-muted)">前 30% 时间位移：${early}%。入场用 Ease-Out 立刻回应用户点击，退场用 Ease-In 干脆利落退下！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>UI 动画的时间预算通常只有 180~300ms——用 Ease-Out 抢出前 100ms 的大位移，能让人觉得 App 快了一倍！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

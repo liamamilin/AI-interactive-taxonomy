@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔌 物理防呆约束：USB-A 永远插反 vs Type-C 正反盲插</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔌 物理防呆约束：USB-A 永远插反 vs Type-C 正反盲插</h1><p>防呆设计（Poka-Yoke）的最高境界不是教用户小心，而是从结构上彻底消灭犯错的可能——把接口做成正反对称的 USB-C，插错率直接归零！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setU('a',this)">USB-A（单面非对称，盲插必反）</button>
+        <button class="btn" onclick="setU('c',this)">USB-C（双面完全对称防呆）</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>光线昏暗/背后盲插难度</span><span id="vDrk">80%</span></label><input type="range" id="sDrk" min="10" max="100" value="80" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">首次盲插一次成功概率</div><div class="k-val" id="kSuc">—</div></div>
+        <div class="kpi"><div class="k-lbl">平均尝试插拔次数</div><div class="k-val" id="kTry">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let um='a';
+function setU(m,btn){ um=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const drk=+document.getElementById('sDrk').value;
+  document.getElementById('vDrk').textContent=drk+'%';
+  const suc=um==='c' ? 100 : Math.max(30, Math.round(58 - drk*0.25));
+  const tries=um==='c' ? '1.0 次' : (1.8 + drk*0.011).toFixed(1)+' 次';
+  document.getElementById('kSuc').textContent=suc+'%';
+  document.getElementById('kSuc').style.color=um==='c'?'#059669':'#ef4444';
+  document.getElementById('kTry').textContent=tries;
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">防呆哲学对比：靠人眼辨认正反 vs 从物理结构彻底消除正反</text>
+    <rect x="190" y="64" width="220" height="62" rx="${um==='c'?31:8}" fill="var(--tax-surface)" stroke="${um==='c'?'#059669':'#ef4444'}" stroke-width="4"/>
+    ${um==='a'?'<rect x="210" y="72" width="180" height="20" fill="#3b82f6"/>':'<rect x="220" y="88" width="160" height="14" rx="7" fill="#059669"/>'}
+    <text x="300" y="162" text-anchor="middle" font-size="12" fill="var(--tax-muted)">${um==='c'?'✨ 无论正插反插都 100% 匹配，把错误彻底变成物理上的不可能！':'😅 USB-A 著名的“量子叠加态”：正面插不进→翻面还插不进→再翻回正面竟然进了！'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>软件里同理：手机号框自动过滤空格横杠、日期用日历选择器代替手打格式——永远别指望用户照说明书不犯错，直接把犯错的路封死！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

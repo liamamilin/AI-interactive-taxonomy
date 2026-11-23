@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧱 段落呼吸节奏：文字墙 vs 短段切片</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🧱 段落呼吸节奏：文字墙 vs 短段切片</h1><p>在手机小屏上，连续 15 行不分段的“文字砖墙”会让读者一秒产生压迫感直接划走；切成 3~4 行一段配清朗段距，完读率飙升！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>单段连续文字行数</span><span id="vLn">4 行/段</span></label><input type="range" id="sLn" min="2" max="14" value="4" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>段落之间留白间距</span><span id="vPg">18 px</span></label><input type="range" id="sPg" min="4" max="32" value="18" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">移动端读者完读率</div><div class="k-val" id="kFin">—</div></div>
+        <div class="kpi"><div class="k-lbl">第一眼心理压迫感</div><div class="k-val" id="kPrs">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const ln=+document.getElementById('sLn').value, pg=+document.getElementById('sPg').value;
+  document.getElementById('vLn').textContent=ln+' 行/段';
+  document.getElementById('vPg').textContent=pg+' px';
+  const fin=Math.max(18, Math.min(94, Math.round(92 - Math.max(0, ln-4)*6.2 - Math.max(0, 14-pg)*1.8)));
+  const prs=100 - fin;
+  document.getElementById('kFin').textContent=fin+'%';
+  document.getElementById('kFin').style.color=fin>=70?'#059669':'#ef4444';
+  document.getElementById('kPrs').textContent=prs+' 分';
+  const wF=Math.max(15, fin*3.6);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">文字密度对移动端完读率的冲击（当前每段 ${ln} 行，段距 ${pg}px）</text>
+    <rect x="30" y="68" width="400" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
+    <rect x="30" y="68" width="${wF.toFixed(0)}" height="38" rx="8" fill="${fin>=70?'#059669':'#ef4444'}"/>
+    <text x="${(38+wF).toFixed(0)}" y="93" font-size="14" font-weight="850" fill="${fin>=70?'#059669':'#ef4444'}">${fin}% 读完</text>
+    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">${ln>7?'🧱 出现密集“文字墙”！读者心理负荷过载，3 秒内直接跳出！':'✅ 轻盈短段 + 清晰段距，读者不知不觉就滑到了文末！'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>写公众号、邮件或产品文档时，把超过 5 行的段落果断一刀切开，完读率立刻肉眼可见地上升！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

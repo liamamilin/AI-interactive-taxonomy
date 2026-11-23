@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚡ 不协和不是坏事：张力 → 解决才是音乐灵魂</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⚡ 不协和不是坏事：张力 → 解决才是音乐灵魂</h1><p>如果整首曲子从头到尾全是绝对协和的纯八度，听 10 秒就想睡觉；音乐让人起鸡皮疙瘩的秘诀，是先用不协和和弦把心吊起来，再稳稳落回主和弦释放！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>前段不协和张力铺垫强度（如属七和弦）</span><span id="vTen">75%</span></label><input type="range" id="sTen" min="0" max="100" value="75" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>结尾回归主和弦的彻底解决度</span><span id="vRes">90%</span></label><input type="range" id="sRes" min="10" max="100" value="90" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">听觉爽感（起鸡皮疙瘩指数）</div><div class="k-val" id="kChl">—</div></div>
+        <div class="kpi"><div class="k-lbl">情绪弧线评价</div><div class="k-val" id="kArc">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const ten=+document.getElementById('sTen').value, res=+document.getElementById('sRes').value;
+  document.getElementById('vTen').textContent=ten+'%';
+  document.getElementById('vRes').textContent=res+'%';
+  const chl=Math.round((ten*res)/100);
+  const arc=ten<20?'😴 平淡白开水（毫无波澜）':(res<40?'😰 悬而未决（憋得难受）':'✨ 完美“拉满再释放”情绪高潮!');
+  document.getElementById('kChl').textContent=chl+' 分';
+  document.getElementById('kChl').style.color=chl>=60?'#059669':'#f59e0b';
+  document.getElementById('kArc').textContent=arc;
+  const yPeak=158 - ten*1.12, yEnd=158 - (100-res)*0.9;
+  document.getElementById('svg').innerHTML=`
+    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">和声张力情绪弧线（起：平稳 → 承：张力拉满 → 合：完美释放）</text>
+    <line x1="45" y1="158" x2="555" y2="158" stroke="var(--tax-border)" stroke-width="1.5"/>
+    <path d="M 45 158 Q 240 ${yPeak.toFixed(0)} 360 ${yPeak.toFixed(0)} T 555 ${yEnd.toFixed(0)}" fill="none" stroke="#8b5cf6" stroke-width="3.5"/>
+    <circle cx="360" cy="${yPeak.toFixed(0)}" r="7" fill="#ef4444"/>
+    <circle cx="555" cy="${yEnd.toFixed(0)}" r="7" fill="#059669"/>
+    <text x="360" y="184" text-anchor="middle" font-size="11" font-weight="750" fill="#ef4444">张力顶点 (${ten}%)</text>
+    <text x="530" y="184" text-anchor="end" font-size="11" font-weight="750" fill="#059669">解决落点</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>不只是音乐，好电影、好演讲和好游戏全靠同一个心理公式：制造期待张力 → 延迟一拍 → 完美释放！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

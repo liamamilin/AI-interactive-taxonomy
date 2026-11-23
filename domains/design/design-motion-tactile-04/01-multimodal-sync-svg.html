@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✨ 视·听·触三感官同步微反馈仪（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>✨ 视·听·触三感官同步微反馈仪（SVG）</h1><p>人脑把“眼睛看到按钮按下 + 耳朵听到咔哒声 + 指尖感到微震”合并成真实物理材质的前提是：三者时间差必须死死锁在 50 毫秒以内！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>视/听/触三通道同步误差（ms）</span><span id="vLag">18 ms（完美融合）</span></label><input type="range" id="sLag" min="0" max="180" step="6" value="18" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>协同开启的感官通道数（1=仅视觉，3=视+听+触）</span><span id="vCh">3 通道</span></label><input type="range" id="sCh" min="1" max="3" value="3" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">物理实体真实错觉分</div><div class="k-val" id="kReal">—</div></div>
+        <div class="kpi"><div class="k-lbl">大脑融合判定</div><div class="k-val" id="kFus">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const lag=+document.getElementById('sLag').value, ch=+document.getElementById('sCh').value;
+  document.getElementById('vLag').textContent=lag+' ms';
+  document.getElementById('vCh').textContent=ch+' 通道';
+  const synced=lag<=50;
+  const real=Math.max(15, Math.min(99, Math.round(45 + ch*18 - Math.max(0, lag-20)*0.52)));
+  document.getElementById('kReal').textContent=real+' 分';
+  document.getElementById('kReal').style.color=real>=75?'#059669':'#ef4444';
+  document.getElementById('kFus').textContent=synced?'✨ 完美融合成实体机械质感!':'💥 音画/触觉脱节，出戏割裂';
+  const xV=130, xA=130+lag*1.6, xH=130+lag*2.0;
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">三通道触发时间轴（绿区 = 50ms 大脑无缝融合窗口）</text>
+    <rect x="130" y="42" width="80" height="126" fill="#059669" opacity="0.14"/>
+    <text x="20" y="74" font-size="12" font-weight="750" fill="var(--tax-text)">👁️ 视觉形变</text>
+    <rect x="${xV}" y="58" width="54" height="22" rx="5" fill="#3b82f6"/>
+    <text x="20" y="114" font-size="12" font-weight="750" fill="var(--tax-text)">🔊 轻声咔哒</text>
+    <rect x="${Math.min(500,xA).toFixed(0)}" y="98" width="54" height="22" rx="5" fill="${ch>=2?'#f59e0b':'#cbd5e1'}"/>
+    <text x="20" y="154" font-size="12" font-weight="750" fill="var(--tax-text)">📳 马达微震</text>
+    <rect x="${Math.min(500,xH).toFixed(0)}" y="138" width="54" height="22" rx="5" fill="${ch>=3?'#059669':'#cbd5e1'}"/>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>一块冰冷的平面玻璃屏之所以能摸出“物理按键”的质感，全靠视、听、触三通道在 50ms 窗口内的精准齐射！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

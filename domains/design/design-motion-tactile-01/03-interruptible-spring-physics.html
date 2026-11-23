@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✋ 为什么苹果动画中途打断依然丝滑？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>✋ 为什么苹果动画中途打断依然丝滑？</h1><p>你在上滑关闭 App 到一半时突然改主意往下拽：基于固定时长的旧动画会生硬闪回，而物理弹簧继承你手指当前的瞬时初速度，划出完美圆弧！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>用户手势瞬间甩动初速度</span><span id="vVel">高（快速甩手）</span></label><input type="range" id="sVel" min="10" max="100" value="75" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>引擎是否继承初速度（物理弹簧模式）</span><span id="vPhy">100% 物理守恒</span></label><input type="range" id="sPhy" min="0" max="100" value="100" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">速度连续性（防生硬折角）</div><div class="k-val" id="kCon">—</div></div>
+        <div class="kpi"><div class="k-lbl">手势跟手评级</div><div class="k-val" id="kGrd">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const vel=+document.getElementById('sVel').value, phy=+document.getElementById('sPhy').value;
+  document.getElementById('vVel').textContent=vel+'%';
+  document.getElementById('vPhy').textContent=phy+'%';
+  const con=Math.round(15 + phy*0.84);
+  document.getElementById('kCon').textContent=con+'%';
+  document.getElementById('kCon').style.color=con>=80?'#059669':'#ef4444';
+  document.getElementById('kGrd').textContent=con>=80?'✨ 丝滑如真实玻璃卡片':'💥 明显顿挫折角感';
+  const ctrlY=130 - (vel*phy/100)*0.85;
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">中途松手/反拉时的轨迹衔接（蓝点 = 手势打断瞬间）</text>
+    <path d="M 60 155 L 240 115" fill="none" stroke="#64748b" stroke-width="3"/>
+    <path d="M 240 115 Q 340 ${ctrlY.toFixed(0)} 530 155" fill="none" stroke="${con>=80?'#059669':'#ef4444'}" stroke-width="3.5"/>
+    <circle cx="240" cy="115" r="8" fill="#3b82f6"/>
+    <text x="240" y="100" text-anchor="middle" font-size="11.5" font-weight="800" fill="#2563eb">中途打断点</text>
+    <text x="30" y="182" font-size="11.5" fill="var(--tax-muted)">${con>=80?'物理弹簧吃进手势初速度，先顺势滑出平滑弧线再优雅折返！':'忽略初速度直接按固定曲线拉回，在蓝点处出现刺眼的硬折角！'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>流畅的秘密不只是“60 帧不掉帧”，更是“动效随时可被打断且尊重手势动量”！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

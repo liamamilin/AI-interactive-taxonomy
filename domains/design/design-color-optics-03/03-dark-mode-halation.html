@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌙 暗黑模式光晕效应：纯白配纯黑为何刺眼？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🌙 暗黑模式光晕效应：纯白配纯黑为何刺眼？</h1><p>超过 40% 的人有轻微散光：夜间盯着 #000000 纯黑背景上的 #FFFFFF 纯白字看，光线会在视网膜上散射出毛刺重影（Halation），极其费眼！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>暗黑背景提亮灰度（0=死黑，28=深灰）</span><span id="vBg">18 (#121212)</span></label><input type="range" id="sBg" min="0" max="36" value="18" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>文字柔和度（255=刺眼纯白，210=柔白）</span><span id="vFg">224</span></label><input type="range" id="sFg" min="180" max="255" value="224" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">散光重影刺眼指数</div><div class="k-val" id="kHal">—</div></div>
+        <div class="kpi"><div class="k-lbl">夜间护眼评级</div><div class="k-val" id="kEye">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const bg=+document.getElementById('sBg').value, fg=+document.getElementById('sFg').value;
+  document.getElementById('vBg').textContent=bg;
+  document.getElementById('vFg').textContent=fg;
+  const extreme=(bg<8 && fg>242);
+  const hal=Math.max(8, Math.min(98, Math.round((fg-bg-160)*1.05)));
+  document.getElementById('kHal').textContent=hal+' 分';
+  document.getElementById('kHal').style.color=hal>75?'#ef4444':'#059669';
+  document.getElementById('kEye').textContent=extreme?'🚨 强烈散光重影刺眼!':(hal<=68?'✅ Material 级护眼暗黑':'⚠️ 略偏刺眼');
+  const glowOp=Math.max(0, (hal-45)/100).toFixed(2);
+  document.getElementById('svg').innerHTML=`
+    <rect x="30" y="22" width="540" height="156" rx="14" fill="rgb(${bg},${bg},${bg})"/>
+    <text x="300" y="88" text-anchor="middle" font-size="22" font-weight="800" fill="rgb(${fg},${fg},${fg})" opacity="${glowOp}" transform="translate(0,2)">夜间长文阅读护眼测试（暗黑模式）</text>
+    <text x="300" y="88" text-anchor="middle" font-size="22" font-weight="800" fill="rgb(${fg},${fg},${fg})">夜间长文阅读护眼测试（暗黑模式）</text>
+    <text x="300" y="132" text-anchor="middle" font-size="13" fill="rgb(${Math.max(120,fg-45)},${Math.max(120,fg-45)},${Math.max(120,fg-45)})">推荐深灰底 (#121212~#18181B) 配 87% 柔白字，大幅缓解视觉疲劳。</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>对比度并不是越大越好！在暗黑模式下把纯黑换成深灰、把纯白换成 87% 柔白，既保住清晰度又彻底消灭散光重影。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🤫 声音里的留白：副歌前突然静音 0.5 秒的核爆张力</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🤫 声音里的留白：副歌前突然静音 0.5 秒的核爆张力</h1><p>电子音乐和交响乐最绝的一招叫“骤停留白（Drop Silence）”：在副歌炸裂前把所有乐器突然切断静音半秒，随后全频段轰然砸下，冲击力瞬间翻倍！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>副歌爆发前的突然静音留白时长</span><span id="vSil">0.5 秒（黄金骤停）</span></label><input type="range" id="sSil" min="0" max="2.0" step="0.1" value="0.5" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>副歌瞬间回归的声压能量</span><span id="vDrp">90%</span></label><input type="range" id="sDrp" min="40" max="100" value="90" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">副歌爆发主观震撼度</div><div class="k-val" id="kImp">—</div></div>
+        <div class="kpi"><div class="k-lbl">听觉留白效果</div><div class="k-val" id="kEf">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const sil=+document.getElementById('sSil').value, drp=+document.getElementById('sDrp').value;
+  document.getElementById('vSil').textContent=sil.toFixed(1)+' 秒';
+  document.getElementById('vDrp').textContent=drp+'%';
+  const boost=sil===0?0:Math.round(35*Math.exp(-Math.pow((sil-0.55)/0.55, 2)));
+  const imp=Math.min(100, Math.round(drp*0.72 + boost));
+  const ef=sil===0?'😐 无缓冲直出，冲击一般':(sil<=1.0?'💥 窒息留白 → 核爆级 Drop!':'🤔 静音太久，像耳机断联了');
+  document.getElementById('kImp').textContent=imp+' 分';
+  document.getElementById('kImp').style.color=imp>=85?'#059669':'#f59e0b';
+  document.getElementById('kEf').textContent=ef;
+  const gapW=Math.round(sil*75);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">声音负空间波形：前奏爬坡 → 突然静音 (${sil.toFixed(1)}s) → 副歌爆发！</text>
+    <polygon points="40,145 230,145 230,82" fill="#3b82f6" opacity="0.65"/>
+    <text x="145" y="166" text-anchor="middle" font-size="11" fill="#2563eb">情绪爬坡 Build-up</text>
+    <rect x="230" y="55" width="${Math.max(2,gapW)}" height="90" fill="#f59e0b" opacity="0.18"/>
+    <line x1="230" y1="145" x2="${230+gapW}" y2="145" stroke="#d97706" stroke-width="3"/>
+    <rect x="${230+gapW}" y="${(145-drp*0.95).toFixed(0)}" width="${Math.max(40, 330-gapW)}" height="${(drp*0.95).toFixed(0)}" rx="6" fill="#059669" opacity="0.85"/>
+    <text x="${Math.min(520, 250+gapW)}" y="166" font-size="11.5" font-weight="800" fill="#059669">副歌轰然爆发 (震撼 ${imp} 分)</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“此时无声胜有声”——视觉里的留白和音乐里的静音休止符是同一个审美母题：用克制的空白，把主角的爆发力拉到极致！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

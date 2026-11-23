@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⏱️ 尼尔森三大延迟临界点仪（0.1s / 1s / 10s）（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>⏱️ 尼尔森三大延迟临界点仪（0.1s / 1s / 10s）（SVG）</h1><p>可用性大师雅各布·尼尔森三大黄金响应线：≤0.1 秒像直接操控物理物体；≤1 秒思维不断流；超过 10 秒用户注意力彻底跑飞！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>系统真实响应延迟（秒）</span><span id="vLat">0.8 秒</span></label><input type="range" id="sLat" min="0.05" max="12.0" step="0.05" value="0.8" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>是否提供即时反馈（微动效/进度条）</span><span id="vFbk">70%</span></label><input type="range" id="sFbk" min="0" max="100" value="70" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">用户主观体验分档</div><div class="k-val" id="kBnd">—</div></div>
+        <div class="kpi"><div class="k-lbl">预估直接关闭跳出率</div><div class="k-val" id="kDrp">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const lat=+document.getElementById('sLat').value, fbk=+document.getElementById('sFbk').value;
+  document.getElementById('vLat').textContent=lat.toFixed(2)+' 秒';
+  document.getElementById('vFbk').textContent=fbk+'%';
+  const effLat=lat*(1 - fbk*0.003);
+  let bnd, col;
+  if(effLat<=0.15){ bnd='⚡ 0.1s 瞬时操控感（零延迟）'; col='#059669'; }
+  else if(effLat<=1.2){ bnd='🌊 1s 心流保持区（察觉但不烦）'; col='#3b82f6'; }
+  else if(effLat<=8.5){ bnd='⏳ 等待焦虑区（需进度条安抚）'; col='#f59e0b'; }
+  else { bnd='💥 10s 彻底失去耐心关闭!'; col='#ef4444'; }
+  const drp=Math.min(92, Math.max(1, Math.round(Math.pow(effLat, 1.35)*4.2)));
+  document.getElementById('kBnd').textContent=bnd;
+  document.getElementById('kBnd').style.color=col;
+  document.getElementById('kDrp').textContent=drp+'%';
+  const pos=Math.min(540, 40 + (Math.log10(lat*20)/Math.log10(240))*500);
+  document.getElementById('svg').innerHTML=`
+    <text x="40" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">对数时间尺：0.1s / 1s / 10s 三道心理防线</text>
+    <rect x="40" y="65" width="120" height="36" rx="4" fill="#059669" opacity="0.25"/>
+    <rect x="160" y="65" width="160" height="36" fill="#3b82f6" opacity="0.25"/>
+    <rect x="320" y="65" width="160" height="36" fill="#f59e0b" opacity="0.25"/>
+    <rect x="480" y="65" width="80" height="36" rx="4" fill="#ef4444" opacity="0.25"/>
+    <line x1="${pos.toFixed(1)}" y1="50" x2="${pos.toFixed(1)}" y2="118" stroke="${col}" stroke-width="4"/>
+    <circle cx="${pos.toFixed(1)}" cy="83" r="8" fill="${col}"/>
+    <text x="100" y="132" text-anchor="middle" font-size="11" font-weight="800" fill="#059669">≤ 0.1s 瞬时</text>
+    <text x="240" y="132" text-anchor="middle" font-size="11" font-weight="800" fill="#2563eb">0.1~1s 流畅</text>
+    <text x="400" y="132" text-anchor="middle" font-size="11" font-weight="800" fill="#d97706">1~10s 需反馈</text>
+    <text x="520" y="132" text-anchor="middle" font-size="11" font-weight="800" fill="#ef4444">> 10s 流失</text>
+    <text x="40" y="176" font-size="11.5" fill="var(--tax-muted)">当前真实 ${lat.toFixed(2)}s，经 ${fbk}% 视觉安抚后等效感知 ${effLat.toFixed(2)}s。</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>按钮按下 100 毫秒内必须给视觉回弹，1 秒以上必须给加载占位，10 秒以上必须给明确进度条和“可后台运行”出口！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

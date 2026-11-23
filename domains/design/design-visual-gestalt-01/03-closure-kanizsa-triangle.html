@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔺 闭合原则：卡尼萨幻觉三角形</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔺 闭合原则：卡尼萨幻觉三角形</h1><p>人类大脑极度讨厌“残缺”，会自动脑补线条把缺口连成完整图形。世界顶级 Logo（如 WWF 熊猫、IBM 条纹）全在借用闭合原则做极简减法！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>三个缺口圆的朝向对齐度</span><span id="vAln">100%（精准对准）</span></label><input type="range" id="sAln" min="0" max="100" value="100" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>三角形跨度大小</span><span id="vSpn">120 px</span></label><input type="range" id="sSpn" min="70" max="155" value="120" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 215"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">幻觉三角形浮现强度</div><div class="k-val" id="kStr">—</div></div>
+        <div class="kpi"><div class="k-lbl">物理绘制三角形线条数</div><div class="k-val">0 条（全靠脑补）</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const aln=+document.getElementById('sAln').value, spn=+document.getElementById('sSpn').value;
+  document.getElementById('vAln').textContent=aln+'%';
+  document.getElementById('vSpn').textContent=spn+' px';
+  const rot=(100-aln)*1.2;
+  const str=Math.max(5, Math.round(aln*(1 - (spn-70)/260)));
+  document.getElementById('kStr').textContent=str+'%';
+  document.getElementById('kStr').style.color=str>=65?'#059669':'#f59e0b';
+  const cx=300, cy=120, r=spn*0.58;
+  const p1=[cx, cy-r], p2=[cx-r*0.866, cy+r*0.5], p3=[cx+r*0.866, cy+r*0.5];
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">画布上只有 3 个缺口黑圆，旋转偏离后“白色三角形”立刻消失！</text>
+    <g transform="rotate(${rot.toFixed(0)} ${p1[0]} ${p1[1]})"><circle cx="${p1[0]}" cy="${p1[1]}" r="24" fill="#1e293b"/><polygon points="${p1[0]},${p1[1]} ${p1[0]-15},${p1[1]+26} ${p1[0]+15},${p1[1]+26}" fill="var(--tax-surface)"/></g>
+    <g transform="rotate(${rot.toFixed(0)} ${p2[0]} ${p2[1]})"><circle cx="${p2[0]}" cy="${p2[1]}" r="24" fill="#1e293b"/><polygon points="${p2[0]},${p2[1]} ${p2[0]+28},${p2[1]} ${p2[0]+14},${p2[1]-24}" fill="var(--tax-surface)"/></g>
+    <g transform="rotate(${rot.toFixed(0)} ${p3[0]} ${p3[1]})"><circle cx="${p3[0]}" cy="${p3[1]}" r="24" fill="#1e293b"/><polygon points="${p3[0]},${p3[1]} ${p3[0]-28},${p3[1]} ${p3[0]-14},${p3[1]-24}" fill="var(--tax-surface)"/></g>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>最高级的图形设计懂得“留一半给观众大脑去画”——省掉多余的外框线条，图形反而更有张力和记忆点！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

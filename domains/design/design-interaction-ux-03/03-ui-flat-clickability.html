@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🖱️ 过度扁平化陷阱：到底哪行字能点？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🖱️ 过度扁平化陷阱：到底哪行字能点？</h1><p>极简风一度走火入魔，把所有按钮的边框、底色、阴影全砍光，只剩干巴巴的黑字——结果用户把鼠标在屏幕上扫了 5 秒都不知道哪行能点！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>按钮可点击意符强度（底色/阴影/圆角）</span><span id="vSig">75%</span></label><input type="range" id="sSig" min="0" max="100" value="75" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>页面中无关干扰文字块数量</span><span id="vTxt">6 块</span></label><input type="range" id="sTxt" min="2" max="12" value="6" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">按钮一眼识别率</div><div class="k-val" id="kRec">—</div></div>
+        <div class="kpi"><div class="k-lbl">多花出的犹疑耗时</div><div class="k-val" id="kHes">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const sig=+document.getElementById('sSig').value, txt=+document.getElementById('sTxt').value;
+  document.getElementById('vSig').textContent=sig+'%';
+  document.getElementById('vTxt').textContent=txt+' 块';
+  const rec=Math.max(15, Math.min(99, Math.round(28 + sig*0.75 - txt*1.2)));
+  const hes=((100-rec)*0.045).toFixed(1);
+  document.getElementById('kRec').textContent=rec+'%';
+  document.getElementById('kRec').style.color=rec>=75?'#059669':'#ef4444';
+  document.getElementById('kHes').textContent='+'+hes+' 秒';
+  const bgOp=(sig/100).toFixed(2);
+  const txtCol=sig>=45?'#ffffff':'#0f172a';
+  const shOp=(sig/100*0.28).toFixed(2);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">把上方意符强度拉到 0% 试试：右边的按钮是不是瞬间隐身成普通文本了？</text>
+    <rect x="65" y="72" width="160" height="44" rx="8" fill="none"/>
+    <text x="145" y="99" text-anchor="middle" font-size="15" font-weight="750" fill="var(--tax-text)">这是一段普通说明</text>
+    <rect x="358" y="76" width="160" height="44" rx="10" fill="#0f172a" opacity="${shOp}"/>
+    <rect x="355" y="72" width="160" height="44" rx="10" fill="#2563eb" opacity="${bgOp}"/>
+    <text x="435" y="99" text-anchor="middle" font-size="15" font-weight="800" fill="${txtCol}">立即提交订单</text>
+    <text x="30" y="164" font-size="11.5" fill="var(--tax-muted)">NN/g 实证研究：恢复轻微边框、微阴影与悬浮反馈，可让任务完成速度直接提升 22%！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“扁平化”绝不等于“抹杀可点击线索”——好用的现代 UI 都是“微拟物（Flat 2.0）”，用克制的底色与微投影告诉用户：这里可以按！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎭 塔夫特撒谎因子：截断 Y 轴魔术棒（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎭 塔夫特撒谎因子：截断 Y 轴魔术棒（SVG）</h1><p>柱状图靠“高度比例”传达数值大小，因此 Y 轴必须从 0 开始！只要把 Y 轴从 95 截断，98 到 100 仅 2% 的真实涨幅，视觉上就会暴涨 67%！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>人为抬高 Y 轴起点（0=诚实，95=强截断）</span><span id="vMin">90</span></label><input type="range" id="sMin" min="0" max="95" step="5" value="90" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>新方案真实值（旧方案固定为 98）</span><span id="vNew">100</span></label><input type="range" id="sNew" min="99" max="110" value="100" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">真实数据增幅</div><div class="k-val" id="kTru">—</div></div>
+        <div class="kpi"><div class="k-lbl">视觉柱高夸大增幅（撒谎因子）</div><div class="k-val" id="kLie">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const yMin=+document.getElementById('sMin').value, vNew=+document.getElementById('sNew').value;
+  document.getElementById('vMin').textContent=yMin;
+  document.getElementById('vNew').textContent=vNew;
+  const vOld=98, yMax=Math.max(105, vNew+2);
+  const truPct=((vNew-vOld)/vOld*100);
+  const hOld=Math.max(6, (vOld-yMin)/(yMax-yMin)*125);
+  const hNew=Math.max(6, (vNew-yMin)/(yMax-yMin)*125);
+  const visPct=((hNew-hOld)/hOld*100);
+  const lie=(visPct/Math.max(0.1, truPct)).toFixed(1);
+  document.getElementById('kTru').textContent='+'+truPct.toFixed(1)+'%';
+  document.getElementById('kLie').textContent='+'+visPct.toFixed(0)+'% (撒谎因子 '+lie+'x)';
+  document.getElementById('kLie').style.color=parseFloat(lie)>1.5?'#ef4444':'#059669';
+  document.getElementById('svg').innerHTML=`
+    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">Y 轴范围 [${yMin} ~ ${yMax}]：旧值 98 vs 新值 ${vNew}</text>
+    <line x1="75" y1="45" x2="75" y2="175" stroke="var(--tax-border)" stroke-width="1.5"/>
+    <line x1="75" y1="175" x2="540" y2="175" stroke="var(--tax-border)" stroke-width="1.5"/>
+    <text x="68" y="178" text-anchor="end" font-size="11" font-weight="800" fill="${yMin>0?'#ef4444':'#059669'}">${yMin}</text>
+    <text x="68" y="52" text-anchor="end" font-size="11" fill="var(--tax-muted)">${yMax}</text>
+    <rect x="165" y="${(175-hOld).toFixed(0)}" width="85" height="${hOld.toFixed(0)}" rx="6" fill="#94a3b8"/>
+    <text x="207" y="194" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-muted)">旧方案 (98)</text>
+    <rect x="335" y="${(175-hNew).toFixed(0)}" width="85" height="${hNew.toFixed(0)}" rx="6" fill="${yMin>0?'#ef4444':'#059669'}"/>
+    <text x="377" y="194" text-anchor="middle" font-size="12" font-weight="800" fill="${yMin>0?'#ef4444':'#059669'}">新方案 (${vNew})</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>看任何新闻或汇报里的柱状图，第一眼先盯住左下角的 Y 轴起点是不是 0！凡是截断纵轴的柱图，都在悄悄放大视觉冲击。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

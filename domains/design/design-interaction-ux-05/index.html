@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>渐进披露与防错设计 · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card { display: flex; flex-direction: column; gap: 10px; text-decoration: none; color: inherit; background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow); transition: transform 0.16s, border-color 0.16s; }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🛡️ 渐进披露与防错设计</h1><p>为什么专业软件越做功能越多，顶级产品却能让新手一眼上手、还不怕手抖删库？</p></div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-progressive-disclosure-svg.html">
+        <div class="hub-icon">🪜</div>
+        <div class="hub-tag">玩具 01 · SIMULATION</div>
+        <div class="hub-title">渐进披露分层器：首屏藏起 80% 低频设置（SVG）</div>
+        <div class="hub-desc">调节首屏直接暴露的功能比例与新手占比，看“默认简洁 + 按需展开”如何同时讨好小白和专家！</div>
+      </a>
+      <a class="hub-card" href="./02-poka-yoke-undo-vs-modal.html">
+        <div class="hub-icon">↩️</div>
+        <div class="hub-tag">玩具 02 · COMPARISON</div>
+        <div class="hub-title">防错设计：为什么“撤销键”吊打“你确定要删除吗？”</div>
+        <div class="hub-desc">调节日常弹窗出现频率，对比“机械闭眼点确定”的误删率和“直接执行 + 5 秒撤销条”的容错安全度！</div>
+      </a>
+      <a class="hub-card" href="./03-constraints-usb-c.html">
+        <div class="hub-icon">🔌</div>
+        <div class="hub-tag">玩具 03 · COMPARISON</div>
+        <div class="hub-title">物理防呆约束：USB-A 永远插反 vs Type-C 正反盲插</div>
+        <div class="hub-desc">对比不对称接口（需试 2~3 次）与对称防呆接口（USB-C）的首次插对率与用户挫败感！</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

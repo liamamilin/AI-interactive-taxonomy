@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>↩️ 防错设计：为什么“撤销键”吊打“你确定要删除吗？”</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>↩️ 防错设计：为什么“撤销键”吊打“你确定要删除吗？”</h1><p>每次删一封邮件都弹窗问“你确定吗？”，一周后用户肌肉记忆闭着眼猛点“确定”，真误删时弹窗形同虚设！而 Gmail 的“已删除 [撤销]”才真正救命！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>确认弹窗每天弹出频率（习惯化麻木）</span><span id="vFrq">15 次/天</span></label><input type="range" id="sFrq" min="1" max="30" value="15" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>系统提供“一键即时撤销 (Undo)”窗口时长</span><span id="vUnd">8 秒</span></label><input type="range" id="sUnd" min="0" max="15" value="8" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">确认弹窗真实拦住误删率</div><div class="k-val" id="kMod">—</div></div>
+        <div class="kpi"><div class="k-lbl">撤销机制最终数据挽回率</div><div class="k-val" id="kUnd">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const frq=+document.getElementById('sFrq').value, und=+document.getElementById('sUnd').value;
+  document.getElementById('vFrq').textContent=frq+' 次/天';
+  document.getElementById('vUnd').textContent=und+' 秒';
+  const mod=Math.max(12, Math.round(78*Math.exp(-frq/11)));
+  const rec=und===0?0:Math.min(98, Math.round(52 + und*4.2));
+  document.getElementById('kMod').textContent=mod+'%';
+  document.getElementById('kMod').style.color=mod<40?'#ef4444':'#f59e0b';
+  document.getElementById('kUnd').textContent=rec+'%';
+  document.getElementById('kUnd').style.color='#059669';
+  const w1=Math.max(12, mod*3.4), w2=Math.max(12, rec*3.4);
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">防误删挽回率：频繁弹窗（产生免疫麻木）vs 即时撤销（Undo）</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">传统二次确认弹窗</text>
+    <rect x="160" y="64" width="${w1.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
+    <text x="${(168+w1).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#ef4444">${mod}%</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">执行 + ${und}s 撤销</text>
+    <rect x="160" y="120" width="${w2.toFixed(0)}" height="28" rx="6" fill="#059669"/>
+    <text x="${(168+w2).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${rec}%</text>
+    <text x="20" y="178" font-size="11.5" fill="var(--tax-muted)">真正不可逆的毁灭操作（如删库），才配用“输入仓库名确认”这种强摩擦锁！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>与其事事打断用户问“你确定吗”，不如让正常操作一气呵成、再给足反悔撤销的降落伞！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

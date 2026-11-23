@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>截断纵轴与图表误导 · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card { display: flex; flex-direction: column; gap: 10px; text-decoration: none; color: inherit; background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow); transition: transform 0.16s, border-color 0.16s; }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📉 截断纵轴与图表误导</h1><p>为什么营收只涨了 2%，把 Y 轴起点悄悄设成 97% 就能画出一根“暴涨 4 倍”的柱子？</p></div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-truncated-yaxis-lie-svg.html">
+        <div class="hub-icon">🎭</div>
+        <div class="hub-tag">玩具 01 · SIMULATION</div>
+        <div class="hub-title">塔夫特撒谎因子：截断 Y 轴魔术棒（SVG）</div>
+        <div class="hub-desc">拖动 Y 轴起点从 0 抬高到 95，亲眼看着 2% 的微小涨幅是如何被魔术般拉成 5 倍视觉暴涨的！</div>
+      </a>
+      <a class="hub-card" href="./02-dual-axis-spurious-chart.html">
+        <div class="hub-icon">📈</div>
+        <div class="hub-tag">玩具 02 · SIMULATION</div>
+        <div class="hub-title">双纵轴障眼法：把毫不相干的曲线强行粘在一起</div>
+        <div class="hub-desc">自由缩放右侧第二纵轴的上下限，看同一组平稳数据如何被捏造成“同步暴跌”或“完美重合”！</div>
+      </a>
+      <a class="hub-card" href="./03-cherry-picking-timeframe.html">
+        <div class="hub-icon">✂️</div>
+        <div class="hub-tag">玩具 03 · COMPARISON</div>
+        <div class="hub-title">截选时间窗口：选好起点就能讲出相反故事</div>
+        <div class="hub-desc">拖动时间窗口起点与长度，看同一条长期平稳波动的曲线如何既能剪出“暴涨牛市”又能剪出“雪崩崩盘”！</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

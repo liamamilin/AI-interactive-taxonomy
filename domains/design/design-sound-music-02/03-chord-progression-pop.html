@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎸 万能流行 4536251 与 1645 和弦套路</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎸 万能流行 4536251 与 1645 和弦套路</h1><p>为什么欧美流行乐爱死 1-5-6-4，华语抒情金曲爱死 4-5-3-6-2-5-1？因为它们在“大调温暖”与“小调微酸”之间做出了最上头的甜酸比！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>进行中“小和弦（微酸感）”占比</span><span id="vMin">45%</span></label><input type="range" id="sMin" min="0" max="100" value="45" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>副歌和声循环可预测熟悉度</span><span id="vFam">80%</span></label><input type="range" id="sFam" min="20" max="100" value="80" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">听众“瞬间洗脑上头”指数</div><div class="k-val" id="kCat">—</div></div>
+        <div class="kpi"><div class="k-lbl">情绪风味</div><div class="k-val" id="kFlv">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const mn=+document.getElementById('sMin').value, fam=+document.getElementById('sFam').value;
+  document.getElementById('vMin').textContent=mn+'%';
+  document.getElementById('vFam').textContent=fam+'%';
+  const cat=Math.min(98, Math.round(92 - Math.abs(mn-42)*0.65 - Math.abs(fam-78)*0.55));
+  const flv=mn<20?'🍭 纯甜儿歌风':(mn<60?'💔 甜中带酸（华语爆款黄金比）':'🖤 暗黑史诗摇滚');
+  document.getElementById('kCat').textContent=cat+' 分';
+  document.getElementById('kCat').style.color=cat>=75?'#059669':'#f59e0b';
+  document.getElementById('kFlv').textContent=flv;
+  const chords=['IV (F)','V (G)','iii (Em)','vi (Am)'];
+  const isMin=[false, false, true, true];
+  let boxes='';
+  chords.forEach((c,i)=>{
+    const x=45+i*132;
+    boxes+=`<rect x="${x}" y="62" width="116" height="62" rx="10" fill="${isMin[i]?'#3b82f6':'#f59e0b'}" opacity="0.2" stroke="${isMin[i]?'#3b82f6':'#f59e0b'}" stroke-width="2"/>
+      <text x="${x+58}" y="98" text-anchor="middle" font-size="14" font-weight="850" fill="${isMin[i]?'#2563eb':'#d97706'}">${c}</text>`;
+  });
+  document.getElementById('svg').innerHTML=`
+    <text x="45" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">经典黄金 4536 进行：前两拍大调暖阳，后两拍小调转折微酸！</text>
+    ${boxes}
+    <text x="45" y="164" font-size="11.5" fill="var(--tax-muted)">大脑最爱“80% 熟悉感 + 20% 意外转折”——全熟悉会腻，全陌生听不懂！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“酸甜黄金比”不只适合做菜，也是流行金曲横扫榜单 50 年的底层情绪配方！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

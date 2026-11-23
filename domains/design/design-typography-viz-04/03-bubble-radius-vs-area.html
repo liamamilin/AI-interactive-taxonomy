@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🫧 气泡图面积骗局：按半径映射把 2 倍夸大成 4 倍！</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🫧 气泡图面积骗局：按半径映射把 2 倍夸大成 4 倍！</h1><p>B 城市人口是 A 城市的 2 倍。如果新手把气泡的“半径”直接设为 2 倍，视觉面积就会变成 2² = 4 倍，把数据狠狠夸大了一倍！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>B 相对 A 的真实数据倍率</span><span id="vMul">3.0 倍</span></label><input type="range" id="sMul" min="1.5" max="5.0" step="0.5" value="3.0" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>A 基准圆半径</span><span id="vR">22 px</span></label><input type="range" id="sR" min="14" max="28" value="22" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 215"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">正确（按面积开方 √k）视觉倍率</div><div class="k-val" id="kOk">—</div></div>
+        <div class="kpi"><div class="k-lbl">错误（按半径直乘 k）视觉倍率</div><div class="k-val" id="kBad">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const mul=+document.getElementById('sMul').value, r0=+document.getElementById('sR').value;
+  document.getElementById('vMul').textContent=mul.toFixed(1)+' 倍';
+  document.getElementById('vR').textContent=r0+' px';
+  const rOk=r0*Math.sqrt(mul), rBad=Math.min(72, r0*mul);
+  document.getElementById('kOk').textContent=mul.toFixed(1)+' 倍面积（忠实真相）';
+  document.getElementById('kOk').style.color='#059669';
+  document.getElementById('kBad').textContent=(mul*mul).toFixed(1)+' 倍面积（严重夸大!）';
+  document.getElementById('kBad').style.color='#ef4444';
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">真实数据为 ${mul.toFixed(1)} 倍：正确面积映射 vs 错误半径映射</text>
+    <circle cx="95" cy="118" r="${r0}" fill="#64748b"/>
+    <text x="95" y="196" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-muted)">基准 A (1x)</text>
+    <circle cx="265" cy="118" r="${rOk.toFixed(1)}" fill="#059669"/>
+    <text x="265" y="196" text-anchor="middle" font-size="11.5" font-weight="800" fill="#059669">✅ 正确 r×√${mul} (${mul}x面积)</text>
+    <circle cx="465" cy="118" r="${rBad.toFixed(1)}" fill="#ef4444" opacity="0.82"/>
+    <text x="465" y="196" text-anchor="middle" font-size="11.5" font-weight="800" fill="#ef4444">❌ 错误 r×${mul} (${(mul*mul).toFixed(1)}x面积!)</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>圆的面积与半径平方成正比！画气泡图、地图圆点或象形图时，永远要把数值开平方再赋给半径，否则就是在用几何学撒谎！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

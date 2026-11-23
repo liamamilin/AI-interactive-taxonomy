@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🚪 诺曼门改造器：可供性 × 意符对齐（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🚪 诺曼门改造器：可供性 × 意符对齐（SVG）</h1><p>唐·诺曼《设计心理学》铁律：如果需要贴一张“推”的纸条才能防止人去拉它，那这就是一个失败的设计！推门就该装平板，拉门才装竖把手。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setH('handle',this)">安装：竖直拉手（暗示“拉”）</button>
+        <button class="btn" onclick="setH('plate',this)">安装：平面推板（暗示“推”）</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>门铰链真实开启方向（0=只能推，1=只能拉）</span><span id="vDir">只能推开</span></label><input type="range" id="sDir" min="0" max="1" step="1" value="0" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">路人首次推拉失误率</div><div class="k-val" id="kErr">—</div></div>
+        <div class="kpi"><div class="k-lbl">诺曼门诊断</div><div class="k-val" id="kDia">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let hType='handle';
+function setH(t,btn){ hType=t; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const dir=+document.getElementById('sDir').value;
+  document.getElementById('vDir').textContent=dir===0?'只能向前推开':'只能向后拉开';
+  const match=(dir===0 && hType==='plate') || (dir===1 && hType==='handle');
+  const err=match?2:78;
+  document.getElementById('kErr').textContent=err+'%';
+  document.getElementById('kErr').style.color=match?'#059669':'#ef4444';
+  document.getElementById('kDia').textContent=match?'✅ 零说明书直觉好门!':'💥 经典“诺曼门”车祸现场';
+  const hw=hType==='plate'
+    ? `<rect x="220" y="75" width="38" height="62" rx="4" fill="#cbd5e1" stroke="#64748b" stroke-width="2"/><text x="239" y="110" text-anchor="middle" font-size="11" font-weight="800" fill="#334155">平板</text>`
+    : `<rect x="232" y="72" width="12" height="68" rx="6" fill="#475569"/><circle cx="238" cy="78" r="4" fill="#94a3b8"/><circle cx="238" cy="134" r="4" fill="#94a3b8"/>`;
+  document.getElementById('svg').innerHTML=`
+    <rect x="115" y="24" width="165" height="162" rx="8" fill="#e2e8f0" stroke="#475569" stroke-width="3"/>
+    ${hw}
+    <rect x="315" y="48" width="250" height="114" rx="12" fill="${match?'#059669':'#ef4444'}" opacity="0.14" stroke="${match?'#059669':'#ef4444'}" stroke-width="2"/>
+    <text x="440" y="84" text-anchor="middle" font-size="13.5" font-weight="850" fill="${match?'#059669':'#ef4444'}">${match?'物理形态 = 真实动作':'视觉意符欺骗了大脑!'}</text>
+    <text x="440" y="114" text-anchor="middle" font-size="12" fill="var(--tax-text)">门只能${dir===0?'推':'拉'}，把手却暗示${hType==='plate'?'推':'拉'}</text>
+    <text x="440" y="140" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">${match?'无需任何“推/拉”贴纸！':'就算贴满“请推”贴纸还是会有人去拉！'}</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>软件里的“诺曼门”同样遍地都是：不能点的文字涂成蓝色下划线、能滑动的卡片却隐藏了边缘露头——记住：形态必须诚实预告功能！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

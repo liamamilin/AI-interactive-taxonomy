@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎹 只差半音的情绪魔法：大三度 vs 小三度（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎹 只差半音的情绪魔法：大三度 vs 小三度（SVG）</h1><p>C 大三和弦是 C-E-G（4个半音+3个半音），C 小三和弦只是把中间的 E 降半音变成 Eb（3个半音+4个半音）——一根手指挪 1 厘米，晴天秒变雨夜！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setCh('maj',this)">C 大三和弦 (C - E - G · 明亮阳光)</button>
+        <button class="btn" onclick="setCh('min',this)">C 小三和弦 (C - Eb - G · 忧郁深沉)</button>
+        <button class="btn" onclick="setCh('sus',this)">Csus4 挂留和弦 (C - F - G · 悬空开阔)</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>和声织体亮度（音区高低）</span><span id="vOct">中音区</span></label><input type="range" id="sOct" min="1" max="3" value="2" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">半音间距结构</div><div class="k-val" id="kStp">—</div></div>
+        <div class="kpi"><div class="k-lbl">听觉情绪标签</div><div class="k-val" id="kEmo">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let ch='maj';
+function setCh(c,btn){ ch=c; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const oct=+document.getElementById('sOct').value;
+  document.getElementById('vOct').textContent=oct===1?'低音区（厚重）':(oct===2?'中音区（平衡）':'高音区（清澈）');
+  const info={
+    maj:{stp:'4 半音 + 3 半音', emo:'☀️ 开朗、坚定、胜利', col:'#f59e0b', act:[0,4,7]},
+    min:{stp:'3 半音 + 4 半音', emo:'🌧️ 忧伤、温柔、故事感', col:'#3b82f6', act:[0,3,7]},
+    sus:{stp:'5 半音 + 2 半音', emo:'🌌 悬浮、史诗、未完待续', col:'#8b5cf6', act:[0,5,7]}
+  }[ch];
+  document.getElementById('kStp').textContent=info.stp;
+  document.getElementById('kEmo').textContent=info.emo;
+  document.getElementById('kEmo').style.color=info.col;
+  const whites=[0,2,4,5,7,9,11], wNames=['C','D','E','F','G','A','B'];
+  const blacks=[[1,1],[3,2],[6,4],[8,5],[10,6]];
+  let keys='';
+  whites.forEach((n,i)=>{
+    const x=90+i*60, hi=info.act.includes(n);
+    keys+=`<rect x="${x}" y="44" width="56" height="128" rx="6" fill="${hi?info.col:'#ffffff'}" stroke="#334155" stroke-width="1.5"/>
+      <text x="${x+28}" y="158" text-anchor="middle" font-size="13" font-weight="800" fill="${hi?'#fff':'#334155'}">${wNames[i]}</text>`;
+  });
+  blacks.forEach(([n,idx])=>{
+    const x=90+idx*60-18, hi=info.act.includes(n);
+    keys+=`<rect x="${x}" y="44" width="34" height="78" rx="4" fill="${hi?info.col:'#1e293b'}" stroke="#0f172a"/>`;
+  });
+  document.getElementById('svg').innerHTML=`
+    <text x="90" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">钢琴键位高亮：观察中音键从 E 降半音到黑键 Eb 的瞬间变化！</text>
+    ${keys}`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>人类语音在开心时语调上扬偏大三度，悲伤叹气时语调低落偏小三度——小三和弦之所以天然催泪，是因为它精准复刻了人类悲伤时的声带语调！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

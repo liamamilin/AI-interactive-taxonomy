@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📷 三分法构图 vs 死板居中：动态张力对比</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📷 三分法构图 vs 死板居中：动态张力对比</h1><p>把主体放在画面正中心显得庄严但静止；移到三分交叉点（约 33% 或 67% 处），画面立刻产生流动的方向感与故事余韵！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>主体水平位置 X（33% / 67% 为三分线）</span><span id="vX">67%</span></label><input type="range" id="sX" min="15" max="85" value="67" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>主体垂直位置 Y（33% / 67% 为三分线）</span><span id="vY">33%</span></label><input type="range" id="sY" min="20" max="80" value="33" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">构图动态张力分</div><div class="k-val" id="kTen">—</div></div>
+        <div class="kpi"><div class="k-lbl">构图风格</div><div class="k-val" id="kSty">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const px=+document.getElementById('sX').value, py=+document.getElementById('sY').value;
+  document.getElementById('vX').textContent=px+'%';
+  document.getElementById('vY').textContent=py+'%';
+  const d3=Math.min(Math.hypot(px-33,py-33), Math.hypot(px-67,py-33), Math.hypot(px-33,py-67), Math.hypot(px-67,py-67));
+  const dMid=Math.hypot(px-50, py-50);
+  const ten=Math.max(25, Math.min(98, Math.round(98 - d3*1.8)));
+  const sty=d3<10?'✨ 黄金三分交叉点（张力拉满）':(dMid<10?'🏛️ 对称居中（庄重但静态）':'📐 过渡偏移构图');
+  document.getElementById('kTen').textContent=ten+' 分';
+  document.getElementById('kTen').style.color=d3<10?'#059669':'#3b82f6';
+  document.getElementById('kSty').textContent=sty;
+  const x0=60, y0=22, w=480, h=168;
+  const cx=x0 + w*px/100, cy=y0 + h*py/100;
+  document.getElementById('svg').innerHTML=`
+    <rect x="${x0}" y="${y0}" width="${w}" height="${h}" rx="10" fill="#0f172a"/>
+    <line x1="${x0+w/3}" y1="${y0}" x2="${x0+w/3}" y2="${y0+h}" stroke="#facc15" stroke-dasharray="4,4" opacity="0.5"/>
+    <line x1="${x0+w*2/3}" y1="${y0}" x2="${x0+w*2/3}" y2="${y0+h}" stroke="#facc15" stroke-dasharray="4,4" opacity="0.5"/>
+    <line x1="${x0}" y1="${y0+h/3}" x2="${x0+w}" y2="${y0+h/3}" stroke="#facc15" stroke-dasharray="4,4" opacity="0.5"/>
+    <line x1="${x0}" y1="${y0+h*2/3}" x2="${x0+w}" y2="${y0+h*2/3}" stroke="#facc15" stroke-dasharray="4,4" opacity="0.5"/>
+    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="16" fill="#38bdf8" stroke="#fff" stroke-width="2.5"/>
+    <text x="${cx.toFixed(1)}" y="${(cy+4).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="800" fill="#0f172a">主体</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>三分法本质上是黄金比例（0.618）的极简近似——留出大面积“视线前方空间”，画面立刻活了起来！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

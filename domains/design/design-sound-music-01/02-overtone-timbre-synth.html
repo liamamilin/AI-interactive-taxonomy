@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎻 为什么钢琴和小提琴拉同一个 Do 音色完全不同？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎻 为什么钢琴和小提琴拉同一个 Do 音色完全不同？</h1><p>任何真实乐器发声时都不只振动基频（1f），还会同时激发出 2f、3f、4f、5f 等一串泛音！不同乐器各阶泛音的强弱配方，就是独一无二的“音色指纹”。</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>偶次泛音（2f/4f · 温暖圆润如长笛/钢琴）</span><span id="vEv">60%</span></label><input type="range" id="sEv" min="0" max="100" value="60" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>奇次高泛音（3f/5f · 明亮金属如小号/小提琴）</span><span id="vOd">45%</span></label><input type="range" id="sOd" min="0" max="100" value="45" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">合成音色气质</div><div class="k-val" id="kTmb">—</div></div>
+        <div class="kpi"><div class="k-lbl">波形复杂度</div><div class="k-val" id="kCmp">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const ev=+document.getElementById('sEv').value, od=+document.getElementById('sOd').value;
+  document.getElementById('vEv').textContent=ev+'%';
+  document.getElementById('vOd').textContent=od+'%';
+  const tmb=(ev<15 && od<15)?'🔔 纯正弦电子音（空灵单调）':(od>ev+20?'🎺 明亮尖锐（铜管/弓弦质感）':'🎹 饱满温润（木质钢琴/人声质感）');
+  document.getElementById('kTmb').textContent=tmb;
+  document.getElementById('kCmp').textContent=Math.round((ev+od)/2)+'% 泛音丰度';
+  let pts=[];
+  for(let i=0;i<=120;i++){
+    const t=i/120*4*Math.PI;
+    const x=40+i*4.33;
+    const y=Math.sin(t) + (ev/100)*0.5*Math.sin(2*t) + (od/100)*0.4*Math.sin(3*t) + (ev/100)*0.25*Math.sin(4*t) + (od/100)*0.2*Math.sin(5*t);
+    pts.push(`${x.toFixed(1)},${(112 - y*42).toFixed(1)}`);
+  }
+  document.getElementById('svg').innerHTML=`
+    <text x="40" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">基频 1f + 泛音列实时叠加波形（同样音高，截然不同的音色指纹）</text>
+    <line x1="40" y1="112" x2="560" y2="112" stroke="var(--tax-border)" stroke-dasharray="3,3"/>
+    <polyline points="${pts.join(' ')}" fill="none" stroke="#8b5cf6" stroke-width="3"/>
+    <text x="40" y="188" font-size="11.5" fill="var(--tax-muted)">把两个滑块都拉到 0% 变成干瘪正弦波，拉高后波形立刻浮现丰富毛刺纹理！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>人声和乐器之所以迷人，全靠丰富的泛音列！电话通话只保留窄频带砍掉高次泛音，所以声音才听起来干瘪像机器人。`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

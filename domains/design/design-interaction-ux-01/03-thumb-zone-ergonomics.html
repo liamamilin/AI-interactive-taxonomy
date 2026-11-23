@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📱 单手拇指热区图：顶部按钮有多反人类？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>📱 单手拇指热区图：顶部按钮有多反人类？</h1><p>随着手机屏幕越做越大，单手握持时大拇指能轻松点到的只有屏幕下半部弧形区。把返回键和核心搜索塞在左上角，等于逼用户每次都换双手！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>手机屏幕尺寸</span><span id="vScr">6.7 英寸（大屏）</span></label><input type="range" id="sScr" min="4.7" max="6.9" step="0.2" value="6.7" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>核心操作按钮垂直位置（0=顶部，100=底部）</span><span id="vPos">82%（底部导航）</span></label><input type="range" id="sPos" min="10" max="92" value="82" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">单手拇指舒适度</div><div class="k-val" id="kCmf">—</div></div>
+        <div class="kpi"><div class="k-lbl">热区判定</div><div class="k-val" id="kZn">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const scr=+document.getElementById('sScr').value, pos=+document.getElementById('sPos').value;
+  document.getElementById('vScr').textContent=scr.toFixed(1)+' 英寸';
+  document.getElementById('vPos').textContent=pos+'%';
+  const easyLine=Math.round(45 + (scr-4.7)*14);
+  const cmf=Math.max(12, Math.min(98, Math.round(98 - Math.max(0, easyLine-pos)*1.45)));
+  const zn=pos>=easyLine?'🟢 拇指自然绿区':(pos>=easyLine-22?'🟡 需拉伸勉强够到':'🔴 必须双手操作红区');
+  document.getElementById('kCmf').textContent=cmf+' 分';
+  document.getElementById('kCmf').style.color=pos>=easyLine?'#059669':'#ef4444';
+  document.getElementById('kZn').textContent=zn;
+  const by=28 + pos*1.5;
+  document.getElementById('svg').innerHTML=`
+    <rect x="235" y="16" width="130" height="176" rx="18" fill="var(--tax-surface)" stroke="#334155" stroke-width="3"/>
+    <path d="M 237 190 L 363 190 L 363 ${Math.min(175, 28+easyLine*1.5).toFixed(0)} Q 300 ${Math.min(165, 18+easyLine*1.5).toFixed(0)} 237 ${Math.min(175, 28+easyLine*1.5).toFixed(0)} Z" fill="#059669" opacity="0.22"/>
+    <rect x="255" y="${by.toFixed(0)}" width="90" height="22" rx="6" fill="${pos>=easyLine?'#059669':'#ef4444'}"/>
+    <text x="300" y="${(by+15).toFixed(0)}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">核心操作</text>
+    <text x="40" y="96" font-size="12" font-weight="750" fill="var(--tax-text)">绿区 = 单手轻松覆盖</text>
+    <text x="40" y="122" font-size="11.5" fill="var(--tax-muted)">${scr.toFixed(1)} 寸大屏绿区仅占底部 ${(100-easyLine)}%</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>Safari 把地址栏搬到底部、微信把 Tab 栏放在底部、侧滑即可返回——都是大屏时代向费茨定律与人体工学致敬的典范！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

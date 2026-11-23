@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎷 摇摆（Swing）与微时差：为什么爵士乐有“微醺感”？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🎷 摇摆（Swing）与微时差：为什么爵士乐有“微醺感”？</h1><p>电脑默认把一拍均分成 50% + 50%（直拍）；爵士乐和 Hip-Hop 故意把第二个音符往后拖一点变成 64% + 36%，瞬间就有了优雅慵懒的摇摆味！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>摇摆比例 Swing Ratio（50%=直拍，67%=三连音摇摆）</span><span id="vSw">64%</span></label><input type="range" id="sSw" min="50" max="72" value="64" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>真人鼓手人性化微偏移（Humanize）</span><span id="vHum">12 ms</span></label><input type="range" id="sHum" min="0" max="30" value="12" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">第一音 / 第二音时长比</div><div class="k-val" id="kRat">—</div></div>
+        <div class="kpi"><div class="k-lbl">律动风格</div><div class="k-val" id="kSty">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const sw=+document.getElementById('sSw').value, hum=+document.getElementById('sHum').value;
+  document.getElementById('vSw').textContent=sw+'%';
+  document.getElementById('vHum').textContent=hum+' ms';
+  const sty=sw<=53?'🤖 机械行军/电子直拍':(sw<=67?'🎷 丝滑爵士 / Lo-Fi 摇摆感':'🐎 剧烈马蹄跳跃感');
+  document.getElementById('kRat').textContent=sw+'% : '+(100-sw)+'%';
+  document.getElementById('kSty').textContent=sty;
+  let beats='';
+  for(let b=0;b<2;b++){
+    const x0=60+b*240, xMid=x0+240*(sw/100);
+    beats+=`<rect x="${x0}" y="68" width="${(xMid-x0-6).toFixed(0)}" height="42" rx="8" fill="#3b82f6"/>
+      <text x="${((x0+xMid)/2).toFixed(0)}" y="94" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">长 (${sw}%)</text>
+      <rect x="${xMid.toFixed(0)}" y="68" width="${Math.max(18, 240-(xMid-x0)-6).toFixed(0)}" height="42" rx="8" fill="#f59e0b"/>
+      <text x="${((xMid+x0+240)/2).toFixed(0)}" y="94" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff">短</text>`;
+  }
+  document.getElementById('svg').innerHTML=`
+    <text x="60" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">两拍内的长-短摇摆切分可视化（人性化微偏移 ±${hum}ms）</text>
+    ${beats}
+    <text x="60" y="156" font-size="11.5" fill="var(--tax-muted)">J Dilla 等传奇制作人特意把军鼓往后推迟 15ms（“拖拍”），造出了独一无二的慵懒高级感！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>绝对精准的 50.00% 往往没有灵魂——恰到好处的不对称比例和毫秒级人性呼吸，才是艺术与机器的分界线！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

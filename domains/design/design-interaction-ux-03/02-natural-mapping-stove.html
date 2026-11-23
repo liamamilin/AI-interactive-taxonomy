@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔥 自然映射：灶台旋钮为何总拧错火？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔥 自然映射：灶台旋钮为何总拧错火？</h1><p>四个炉头排成 2×2 田字格，下面四个旋钮却排成一字长蛇阵——每次开火都要低头找半天图标；只需把旋钮错落摆成对应的田字形，闭着眼都不会拧错！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>旋钮与炉头的空间几何对齐度</span><span id="vMap">90%（田字自然映射）</span></label><input type="range" id="sMap" min="0" max="100" value="90" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>厨房忙碌分心程度</span><span id="vBsy">70%</span></label><input type="range" id="sBsy" min="10" max="100" value="70" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">首次盲操拧错炉头概率</div><div class="k-val" id="kErr">—</div></div>
+        <div class="kpi"><div class="k-lbl">是否需要贴文字标签</div><div class="k-val" id="kLbl">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const mp=+document.getElementById('sMap').value, bsy=+document.getElementById('sBsy').value;
+  document.getElementById('vMap').textContent=mp+'%';
+  document.getElementById('vBsy').textContent=bsy+'%';
+  const err=Math.max(1, Math.round((100-mp)*0.55 + bsy*0.18*(1-mp/100)));
+  document.getElementById('kErr').textContent=err+'%';
+  document.getElementById('kErr').style.color=err<15?'#059669':'#ef4444';
+  document.getElementById('kLbl').textContent=mp>=75?'❌ 零标签自解释':'⚠️ 必须靠小图标死记';
+  const dy=Math.round(mp*0.24);
+  document.getElementById('svg').innerHTML=`
+    <text x="30" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">2×2 灶台与旋钮空间映射预览（拖动上方观察旋钮错落对齐）</text>
+    <rect x="165" y="42" width="270" height="92" rx="10" fill="#1e293b"/>
+    <circle cx="225" cy="68" r="18" fill="none" stroke="#f97316" stroke-width="4"/>
+    <circle cx="375" cy="68" r="18" fill="none" stroke="#f97316" stroke-width="4"/>
+    <circle cx="225" cy="112" r="18" fill="none" stroke="#38bdf8" stroke-width="4"/>
+    <circle cx="375" cy="112" r="18" fill="none" stroke="#38bdf8" stroke-width="4"/>
+    <circle cx="205" cy="${168-dy}" r="11" fill="#f97316"/>
+    <circle cx="265" cy="${168}" r="11" fill="#38bdf8"/>
+    <circle cx="335" cy="${168}" r="11" fill="#38bdf8"/>
+    <circle cx="395" cy="${168-dy}" r="11" fill="#f97316"/>
+    <text x="300" y="194" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">同理：汽车座椅调节按钮做成座椅形状，手摸上去立刻知道怎么调！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>最高级的交互说明就是“不需要说明书”——利用物理空间与动作的自然映射，把认知负荷直接降到零！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

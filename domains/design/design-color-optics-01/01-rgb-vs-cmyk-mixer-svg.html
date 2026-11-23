@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔦 加色光 vs 减色颜料实时混合台（SVG）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🔦 加色光 vs 减色颜料实时混合台（SVG）</h1><p>屏幕是自己往黑暗里“加光”（RGB 全满=纯白）；纸张是把白光里不需要的颜色“吸收减掉”（CMY 全满=吸光变暗黑）！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>R 红光 / C 青墨 强度</span><span id="vA">80%</span></label><input type="range" id="sA" min="0" max="100" value="80" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>G 绿光 / M 品红墨 强度</span><span id="vB">75%</span></label><input type="range" id="sB" min="0" max="100" value="75" oninput="draw()"></div>
+        <div class="ctrl-box"><label><span>B 蓝光 / Y 黄墨 强度</span><span id="vC">30%</span></label><input type="range" id="sC" min="0" max="100" value="30" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 215"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">RGB 屏幕叠加亮度</div><div class="k-val" id="kRgb">—</div></div>
+        <div class="kpi"><div class="k-lbl">CMY 印刷反射亮度</div><div class="k-val" id="kCmy">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+function draw(){
+  const a=+document.getElementById('sA').value, b=+document.getElementById('sB').value, c=+document.getElementById('sC').value;
+  document.getElementById('vA').textContent=a+'%';
+  document.getElementById('vB').textContent=b+'%';
+  document.getElementById('vC').textContent=c+'%';
+  const r1=Math.round(a*2.55), g1=Math.round(b*2.55), b1=Math.round(c*2.55);
+  const r2=Math.round((100-a)*2.55), g2=Math.round((100-b)*2.55), b2=Math.round((100-c)*2.55);
+  const lum1=Math.round((0.299*r1+0.587*g1+0.114*b1)/2.55);
+  const lum2=Math.round((0.299*r2+0.587*g2+0.114*b2)/2.55);
+  document.getElementById('kRgb').textContent=lum1+'% (越加越亮)';
+  document.getElementById('kCmy').textContent=lum2+'% (越叠越暗)';
+  document.getElementById('svg').innerHTML=`
+    <rect x="20" y="20" width="265" height="175" rx="12" fill="#0f172a"/>
+    <text x="152" y="44" text-anchor="middle" font-size="12.5" font-weight="800" fill="#f8fafc">RGB 屏幕加色光（底色黑）</text>
+    <circle cx="152" cy="112" r="48" fill="rgb(${r1},${g1},${b1})" stroke="#fff" stroke-width="2"/>
+    <text x="152" y="182" text-anchor="middle" font-size="11" fill="#cbd5e1">rgb(${r1}, ${g1}, ${b1})</text>
+    <rect x="315" y="20" width="265" height="175" rx="12" fill="#f8fafc" stroke="var(--tax-border)"/>
+    <text x="447" y="44" text-anchor="middle" font-size="12.5" font-weight="800" fill="#0f172a">CMYK 纸张减色墨（底色白）</text>
+    <circle cx="447" cy="112" r="48" fill="rgb(${r2},${g2},${b2})" stroke="#334155" stroke-width="2"/>
+    <text x="447" y="182" text-anchor="middle" font-size="11" fill="#475569">C${a}% M${b}% Y${c}%</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>试着把三个滑块全拉到 100%：左边屏幕变成刺眼纯白，右边颜料变成吸干所有光线的深黑——这就是发光媒介与反光媒介的底层物理对立！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>

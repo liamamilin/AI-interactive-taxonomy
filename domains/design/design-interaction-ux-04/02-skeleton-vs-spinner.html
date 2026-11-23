@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🦴 骨架屏心理魔术：同样等 2 秒，为何感觉快一半？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
+    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div><h1>🦴 骨架屏心理魔术：同样等 2 秒，为何感觉快一半？</h1><p>人类感知时间不是匀速流逝的：盯着空白屏幕或死转的菊花，你一直在关注“我在等”；盯着提前亮出轮廓的骨架屏，大脑已经在预加载内容，感觉瞬间就开了！</p></div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn active" onclick="setL('blank',this)">纯白屏死等</button>
+        <button class="btn" onclick="setL('spin',this)">居中转圈菊花</button>
+        <button class="btn" onclick="setL('skel',this)">流光骨架屏（Skeleton）</button>
+      </div>
+      <div class="ctrl-grid">
+        <div class="ctrl-box"><label><span>后端客观真实加载耗时</span><span id="vSec">2.5 秒</span></label><input type="range" id="sSec" min="0.5" max="6.0" step="0.5" value="2.5" oninput="draw()"></div>
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">用户心理感觉等了多久</div><div class="k-val" id="kPsy">—</div></div>
+        <div class="kpi"><div class="k-lbl">感知提速红利</div><div class="k-val" id="kSav">—</div></div>
+      </div>
+    </div>
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+  <script>
+let lm='blank';
+function setL(m,btn){ lm=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
+function draw(){
+  const sec=+document.getElementById('sSec').value;
+  document.getElementById('vSec').textContent=sec.toFixed(1)+' 秒';
+  const mult=lm==='blank'?1.45:(lm==='spin'?1.15:0.72);
+  const psy=(sec*mult).toFixed(1);
+  const diff=Math.round((1-mult)*100);
+  document.getElementById('kPsy').textContent=psy+' 秒';
+  document.getElementById('kPsy').style.color=lm==='skel'?'#059669':'#ef4444';
+  document.getElementById('kSav').textContent=diff>=0?('感觉快了 '+diff+'%'):('感觉慢了 '+Math.abs(diff)+'%');
+  const wR=Math.max(15, sec*48), wP=Math.max(15, Math.min(340, parseFloat(psy)*48));
+  document.getElementById('svg').innerHTML=`
+    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">客观时间 vs 心理感知时间（同样耗时 ${sec.toFixed(1)} 秒）</text>
+    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">客观物理耗时</text>
+    <rect x="145" y="64" width="${wR.toFixed(0)}" height="28" rx="6" fill="#64748b"/>
+    <text x="${(153+wR).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="var(--tax-muted)">${sec.toFixed(1)}s</text>
+    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">用户主观感觉</text>
+    <rect x="145" y="120" width="${wP.toFixed(0)}" height="28" rx="6" fill="${lm==='skel'?'#059669':'#ef4444'}"/>
+    <text x="${(153+wP).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="${lm==='skel'?'#059669':'#ef4444'}">${psy}s</text>
+    <text x="20" y="178" font-size="11.5" fill="var(--tax-muted)">感知性能（Perceived Performance）往往比硬抠服务器 200ms 更立竿见影！</text>`;
+  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>未预期的空白等待最让人焦躁；给用户提前展示页面骨架和明确进度，就能把焦虑感砍掉一大半！`;
+  if(window.ToySDK) window.ToySDK.markCompleted();
+}
+draw();
+  </script>
+</body>
+</html>
