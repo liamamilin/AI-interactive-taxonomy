@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：瑞士奶酪防线对齐实验 · SVG 穿透模拟</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .sl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 225px; display: block; }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎯 瑞士奶酪防线对齐实验：4 个洞同时对齐才会出事故！</h1>
+        <p>每一层安全防线都像一片带孔的瑞士奶酪（不可能 100% 完美）。拖动下方 4 个滑块调整各层漏洞高度，看看什么时候<strong>危险射线</strong>会击中右侧目标！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="sl-grid">
+        <div><label style="font-size:12.5px;font-weight:800;">🧀 1.制度审核</label><input id="h0" type="range" min="45" max="175" value="110" style="width:100%;" /></div>
+        <div><label style="font-size:12.5px;font-weight:800;">🧀 2.代码审查</label><input id="h1" type="range" min="45" max="175" value="110" style="width:100%;" /></div>
+        <div><label style="font-size:12.5px;font-weight:800;">🧀 3.自动化测试</label><input id="h2" type="range" min="45" max="175" value="150" style="width:100%;" /></div>
+        <div><label style="font-size:12.5px;font-weight:800;">🧀 4.灰度熔断</label><input id="h3" type="range" min="45" max="175" value="110" style="width:100%;" /></div>
+      </div>
+
+      <div class="btn-row">
+        <button id="alignBtn" class="tax-btn" type="button">💥 一键模拟漏洞对齐（触发事故）</button>
+        <button id="staggerBtn" class="tax-btn" type="button" style="background:var(--tax-surface-2);color:var(--tax-text);border:1px solid var(--tax-border);">🛡️ 错开漏洞（纵深拦截）</button>
+      </div>
+
+      <div class="stage"><svg viewBox="0 0 560 220" id="chSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const xs = [150, 240, 330, 420];
+    const names = ["制度", "审查", "测试", "熔断"];
+    const laserY = 110;
+    let interacts = 0;
+
+    function render() {
+      const hs = [0, 1, 2, 3].map((i) => parseInt(document.getElementById("h" + i).value, 10));
+
+      let stopX = 505;
+      let stoppedAt = -1;
+      for (let i = 0; i < 4; i++) {
+        if (Math.abs(hs[i] - laserY) > 15) {
+          stopX = xs[i] - 10;
+          stoppedAt = i;
+          break;
+        }
+      }
+      const breached = stoppedAt === -1;
+
+      let s = "";
+      // Hazard emitter left
+      s += `<rect x="16" y="88" width="54" height="44" rx="8" fill="#7f1d1d" stroke="#ef4444" stroke-width="2"/>`;
+      s += `<text x="43" y="116" text-anchor="middle" font-size="22">⚠️</text>`;
+      s += `<text x="43" y="150" text-anchor="middle" fill="#fca5a5" font-size="11" font-weight="700">风险源</text>`;
+
+      // Cheese slices
+      xs.forEach((x, i) => {
+        const hy = hs[i];
+        const pass = Math.abs(hy - laserY) <= 15;
+        s += `<rect x="${x - 10}" y="30" width="20" height="162" rx="6" fill="#facc15" stroke="${pass ? "#ef4444" : "#ca8a04"}" stroke-width="2"/>`;
+        // Hole cutout
+        s += `<ellipse cx="${x}" cy="${hy}" rx="11" ry="15" fill="#0f172a" stroke="${pass ? "#ef4444" : "#eab308"}" stroke-width="2"/>`;
+        s += `<text x="${x}" y="208" text-anchor="middle" fill="#cbd5e1" font-size="11.5" font-weight="700">${names[i]}</text>`;
+      });
+
+      // Target right
+      s += `<rect x="492" y="84" width="52" height="52" rx="10" fill="${breached ? "#991b1b" : "#064e3b"}" stroke="${breached ? "#ef4444" : "#10b981"}" stroke-width="2.5"/>`;
+      s += `<text x="518" y="117" text-anchor="middle" font-size="24">${breached ? "💥" : "🏥"}</text>`;
+      s += `<text x="518" y="154" text-anchor="middle" fill="${breached ? "#fca5a5" : "#6ee7b7"}" font-size="11" font-weight="800">${breached ? "重大事故!" : "安全运转"}</text>`;
+
+      // Laser beam
+      s += `<line x1="70" y1="${laserY}" x2="${stopX}" y2="${laserY}" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>`;
+      if (!breached) {
+        s += `<circle cx="${stopX}" cy="${laserY}" r="8" fill="#10b981"/>`;
+        s += `<text x="280" y="20" text-anchor="middle" fill="#6ee7b7" font-size="12.5" font-weight="800">✅ 被第 ${stoppedAt + 1} 层防线（${names[stoppedAt]}）成功拦截！</text>`;
+      } else {
+        s += `<text x="280" y="20" text-anchor="middle" fill="#fca5a5" font-size="12.5" font-weight="800">💥 4 层漏洞恰好全部对齐，危险射线直接穿透引发灾难！</text>`;
+      }
+
+      document.getElementById("chSvg").innerHTML = s;
+      document.getElementById("ahaBox").innerHTML = breached
+        ? "💡 <strong>詹姆斯·里森的瑞士奶酪洞见：</strong>灾难发生时，4 层防线其实都存在已久的小漏洞，只是恰好在那一秒排成了一条直线！把任意一片奶酪挪开一点点，事故就不会发生。"
+        : "💡 <strong>纵深防御（Defense in Depth）：</strong>工程界从不指望某一片奶酪“完美无洞”，而是靠叠加多层<strong>漏洞位置彼此独立</strong>的防线，让所有洞同时对齐的概率趋近于零！";
+    }
+
+    [0, 1, 2, 3].forEach((i) => {
+      document.getElementById("h" + i).addEventListener("input", () => {
+        interacts++;
+        render();
+        if (interacts >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+      });
+    });
+
+    document.getElementById("alignBtn").addEventListener("click", () => {
+      [0, 1, 2, 3].forEach((i) => (document.getElementById("h" + i).value = 110));
+      interacts += 2;
+      render();
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    });
+    document.getElementById("staggerBtn").addEventListener("click", () => {
+      [65, 155, 80, 145].forEach((v, i) => (document.getElementById("h" + i).value = v));
+      interacts += 2;
+      render();
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    });
+
+    render();
+  </script>
+</body>
+</html>

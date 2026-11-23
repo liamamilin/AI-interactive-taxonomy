@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：架构图单点排雷 · SVG 混沌测试</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 265px; display: block; }
+    .bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>💣 架构图单点排雷：点哪一个节点会让全站瞬间宕机？</h1>
+        <p>化身 <strong>Chaos Monkey（混沌猴子）</strong>！直接点击下方架构图中的任意组件模拟它突发宕机，找出藏在系统里的 <strong>3 个致命单点（SPOF）</strong>！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="bar">
+        <div style="font-weight:850;font-size:14px;">🎯 已揪出致命单点：<span id="foundOut" style="color:#ef4444">0</span> / 3</div>
+        <button id="healBtn" class="tax-btn" type="button">🔄 恢复全部节点</button>
+      </div>
+      <div class="stage"><svg viewBox="0 0 560 260" id="spofSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let killed = null;
+    let foundSpofs = new Set();
+
+    const NODES = [
+      { id: "lb",   x: 130, y: 105, w: 86, h: 46, name: "单台网关 LB", spof: true,  desc: "💥 致命单点 #1！虽然背后有 3 台应用服务器，但所有用户流量都必须先经过这唯一一台负载均衡器，它一挂全站失联！" },
+      { id: "app1", x: 280, y: 46,  w: 84, h: 36, name: "应用机 #1",   spof: false, desc: "✅ 非单点！应用机 #1 挂掉后，流量自动分流到 #2 和 #3，用户完全无感知！" },
+      { id: "app2", x: 280, y: 105, w: 84, h: 36, name: "应用机 #2",   spof: false, desc: "✅ 非单点！应用机 #2 宕机，剩余 2 台应用节点无缝接管全部请求！" },
+      { id: "app3", x: 280, y: 164, w: 84, h: 36, name: "应用机 #3",   spof: false, desc: "✅ 非单点！无状态应用层已经做了 3 机冗余，单机故障轻松抗住！" },
+      { id: "db",   x: 455, y: 105, w: 90, h: 46, name: "单主数据库",   spof: true,  desc: "💥 致命单点 #2！所有读写都指向唯一一台主数据库，没有从库热备，它一宕机所有业务立刻报错！" },
+      { id: "pwr",  x: 280, y: 228, w: 210, h: 34, name: "⚡ 机房单路共享配电柜", spof: true, desc: "💥 致命单点 #3（最易被忽略的底层单点）！就算所有服务器都在同一台配电柜下，市电一跳闸，全机房瞬间黑屏！" }
+    ];
+
+    function hitNode(id) {
+      killed = killed === id ? null : id;
+      const n = NODES.find((x) => x.id === id);
+      if (killed && n && n.spof) foundSpofs.add(id);
+      render();
+      if (foundSpofs.size >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+    }
+    window.hitNode = hitNode;
+
+    function render() {
+      const deadObj = NODES.find((x) => x.id === killed);
+      const siteDown = deadObj && deadObj.spof;
+
+      let s = "";
+      // User icon on far left
+      s += `<text x="34" y="109" text-anchor="middle" font-size="24">👥</text>`;
+      s += `<text x="34" y="130" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="700">用户</text>`;
+
+      // Edges
+      const edgeCol = (dead) => (dead ? "#ef4444" : "#10b981");
+      s += `<line x1="54" y1="105" x2="87" y2="105" stroke="${edgeCol(siteDown)}" stroke-width="3"/>`;
+      [46, 105, 164].forEach((ay, idx) => {
+        const appDead = killed === `app${idx + 1}` || siteDown;
+        s += `<line x1="173" y1="105" x2="238" y2="${ay}" stroke="${edgeCol(appDead)}" stroke-width="2.5" ${appDead ? 'stroke-dasharray="5 5"' : ""}/>`;
+        s += `<line x1="322" y1="${ay}" x2="410" y2="105" stroke="${edgeCol(appDead)}" stroke-width="2.5" ${appDead ? 'stroke-dasharray="5 5"' : ""}/>`;
+      });
+
+      // Power dashed lines from bottom
+      s += `<line x1="175" y1="211" x2="130" y2="128" stroke="${killed === "pwr" ? "#ef4444" : "#f59e0b"}" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6"/>`;
+      s += `<line x1="280" y1="211" x2="280" y2="182" stroke="${killed === "pwr" ? "#ef4444" : "#f59e0b"}" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6"/>`;
+      s += `<line x1="385" y1="211" x2="455" y2="128" stroke="${killed === "pwr" ? "#ef4444" : "#f59e0b"}" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6"/>`;
+
+      // Nodes
+      NODES.forEach((n) => {
+        const isDead = killed === n.id || (killed === "pwr" && n.id !== "pwr");
+        const fill = isDead ? "#7f1d1d" : foundSpofs.has(n.id) ? "#451a03" : "#1e293b";
+        const stroke = isDead ? "#ef4444" : foundSpofs.has(n.id) ? "#f59e0b" : "#38bdf8";
+        s += `<g style="cursor:pointer" onclick="hitNode('${n.id}')">`;
+        s += `<rect x="${n.x - n.w / 2}" y="${n.y - n.h / 2}" width="${n.w}" height="${n.h}" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="2.5"/>`;
+        s += `<text x="${n.x}" y="${n.y + 4}" text-anchor="middle" fill="#f8fafc" font-size="11.5" font-weight="800">${isDead ? "💥 " : ""}${n.name}</text>`;
+        s += `</g>`;
+      });
+
+      s += `<text x="280" y="18" text-anchor="middle" fill="${siteDown ? "#fca5a5" : "#6ee7b7"}" font-size="12.5" font-weight="800">${
+        siteDown ? "🚨 全站 503 宕机！你精准命中了致命单点（SPOF）！" : killed ? "✅ 服务依然正常响应！冗余节点成功顶住了故障！" : "👇 点击图上任意组件，测试它的单点破坏力"
+      }</text>`;
+
+      document.getElementById("spofSvg").innerHTML = s;
+      document.getElementById("foundOut").textContent = foundSpofs.size;
+      document.getElementById("ahaBox").innerHTML = deadObj
+        ? `💡 <strong>故障诊断：</strong>${deadObj.desc}`
+        : "💡 <strong>单点排查铁律：</strong>系统的健壮性不取决于你冗余得最好的那一层（3 台应用机），而取决于你<strong>唯一没有冗余的那一处瓶颈</strong>！去点点看哪 3 个节点一点就全站崩溃。";
+    }
+
+    document.getElementById("healBtn").addEventListener("click", () => { killed = null; render(); });
+    render();
+  </script>
+</body>
+</html>

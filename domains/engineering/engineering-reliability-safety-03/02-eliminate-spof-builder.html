@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：高可用改造工坊 · 消灭 4 处单点</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .item-list { display: grid; gap: 10px; margin-top: 12px; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-2); flex-wrap: wrap; }
+    .item-row.fixed { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+    .fix-btn { padding: 8px 14px; border-radius: 8px; border: none; font-weight: 800; cursor: pointer; background: var(--tax-primary); color: #fff; }
+    .item-row.fixed .fix-btn { background: #10b981; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔧 高可用改造工坊：把系统的 4 个单点全部清零！</h1>
+        <p>单点不仅藏在代码和硬件里，还藏在<strong>人</strong>身上！点击右侧改造按钮，逐个修复下面 4 处典型单点隐患。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div style="font-weight:900;font-size:15px;">当前残留单点数量：<span id="cntOut" style="color:#ef4444">4</span> / 4</div>
+      <div class="item-list" id="itemList"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const ITEMS = [
+      { id: "lb", title: "1. 单台入口网关（Nginx）", bad: "挂掉后全部用户请求失联", good: "✅ 已升级：双机主备 Keepalived + 虚拟 IP 秒级漂移", fixed: false },
+      { id: "db", title: "2. 单台关系型数据库", bad: "硬盘损坏直接导致全站停摆与数据丢失", good: "✅ 已升级：跨机房主从热备 + 自动选主切换", fixed: false },
+      { id: "pwr", title: "3. 机柜单路市电接入", bad: "市政检修或跳闸导致整排机柜同时断电", good: "✅ 已升级：双路独立变电站市电 + UPS 电池 + 柴油发电机", fixed: false },
+      { id: "bus", title: "4. 团队“巴士系数 = 1”（核心老王单人掌握部署密码）", bad: "老王请假、生病或离职，全公司没人能发版救火！", good: "✅ 已升级：文档化 Runbook + 自动化 CI/CD + 权限双人轮值", fixed: false }
+    ];
+
+    function render() {
+      const rem = ITEMS.filter((x) => !x.fixed).length;
+      document.getElementById("cntOut").textContent = rem;
+      document.getElementById("cntOut").style.color = rem === 0 ? "#10b981" : "#ef4444";
+
+      const list = document.getElementById("itemList");
+      list.innerHTML = ITEMS.map((it, idx) => `<div class="item-row ${it.fixed ? "fixed" : ""}">
+        <div>
+          <div style="font-weight:850;font-size:15px;">${it.title}</div>
+          <div style="font-size:13px;color:${it.fixed ? "#10b981" : "var(--tax-muted)"};margin-top:4px;">${it.fixed ? it.good : "⚠️ " + it.bad}</div>
+        </div>
+        <button class="fix-btn" data-i="${idx}" type="button">${it.fixed ? "已消除 ✓" : "实施冗余改造"}</button>
+      </div>`).join("");
+
+      list.querySelectorAll(".fix-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const i = parseInt(btn.dataset.i, 10);
+          ITEMS[i].fixed = !ITEMS[i].fixed;
+          render();
+          if (ITEMS.filter((x) => x.fixed).length >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+        });
+      });
+
+      document.getElementById("ahaBox").innerHTML = rem === 0
+        ? "🎉 <strong>全链路无单点达成！</strong>记住最容易被程序员忽视的第 4 条——<strong>巴士系数（Bus Factor）</strong>：一个项目里如果只有一个“不可或缺的英雄”，他本身就是公司最危险的单点故障！"
+        : "💡 <strong>全栈单点视角：</strong>消除 SPOF 要从软件层、数据层、物理供电层一路查到组织人员层，点击按钮把 4 处隐患全部消除吧！";
+    }
+    render();
+  </script>
+</body>
+</html>

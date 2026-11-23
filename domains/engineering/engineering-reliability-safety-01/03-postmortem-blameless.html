@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：无指责复盘室 · 修系统还是罚个人？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .card { background: var(--tax-surface-2); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; margin-top: 12px; }
+    .opt-list { display: grid; gap: 10px; margin-top: 12px; }
+    .opt-btn { padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-text); font-weight: 800; text-align: left; cursor: pointer; }
+    .opt-btn.ok { border-color: #10b981; background: rgba(16, 185, 129, 0.14); }
+    .opt-btn.bad { border-color: #ef4444; background: rgba(239, 68, 68, 0.14); }
+    .fb { margin-top: 12px; font-weight: 750; font-size: 13.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔍 无指责复盘室：修补系统奶酪洞 vs 开除背锅侠</h1>
+        <p>事故发生了，老板问你“怎么防止下次再犯？”。在 3 起真实工程/医疗案例中，选出真正能堵死奶酪洞的整改方案！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div style="font-size:13px;font-weight:800;color:var(--tax-primary);">案例 <span id="idxOut">1</span> / 3 · 已完成：<span id="okOut">0</span></div>
+      <div class="card">
+        <div id="qTitle" style="font-size:17px;font-weight:900;"></div>
+        <div id="qDesc" style="font-size:13.5px;color:var(--tax-muted);margin-top:6px;"></div>
+        <div class="opt-list" id="optList"></div>
+        <div class="fb" id="fbBox"></div>
+      </div>
+      <div style="margin-top:12px;">
+        <button id="nextBtn" class="tax-btn" type="button" style="display:none;">下一个案例 →</button>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">💡 <strong>安全工程金律：</strong>如果一个系统只要某个人“今天有点累、按错一个键”就会酿成灾难，那不是人的错，而是<strong>系统本身在诱人犯错</strong>！</div>
+  </div>
+
+  <script>
+    const CASES = [
+      {
+        title: "🖥️ 案例 1：实习生误删生产数据库（GitLab 经典事故原型）",
+        desc: "运维人员在排查故障时，把命令行窗口看岔了，在生产库敲下了清空目录命令，而自动备份其实已经连续失效 3 周无人知晓。",
+        opts: [
+          { t: "立刻开除该员工，并要求全员写检讨承诺以后“操作更仔细”", ok: false, m: "❌ 治标不治本！只要测试库和生产库命令行长得一模一样、且备份没人定期演练，下个月换个资深老手照样会手滑。" },
+          { t: "给生产环境加红底高危提示 + 双人审批锁 + 每日自动备份恢复演练", ok: true, m: "✅ 满分复盘！用物理防呆（环境隔离、高危二次校验）和定期恢复演练，把“人一定会犯错”变成无害事件！" }
+        ]
+      },
+      {
+        title: "✈️ 案例 2：二战轰炸机落地时飞行员总误收起落架",
+        desc: "B-17 轰炸机降落滑跑时频繁发生机腹擦地事故——因为襟翼开关和起落架开关紧挨在一起且长得一模一样，疲惫的飞行员一伸手就拨错了。",
+        opts: [
+          { t: "把起落架手柄做成“橡胶小轮子”形状，襟翼手柄做成“机翼”形状（盲摸就能分清）", ok: true, m: "✅ 工业防呆（Poka-Yoke）教科书！这一改动立刻让误操作率近乎归零，至今仍是全球民航驾驶舱的强制标准！" },
+          { t: "在仪表盘贴一张大红纸条写着“降落时千万别拨错开关！”", ok: false, m: "❌ 警示贴纸在高度紧张和疲劳时几乎无效——如果硬件本身长得一样，人手还是会肌肉记忆按错。" }
+        ]
+      },
+      {
+        title: "🏥 案例 3：医院静脉注射误接氧气管",
+        desc: "重症监护室光线昏暗，多条透明软管接头完全通用，护士夜班高强度工作时差点把空气管插进静脉输液口。",
+        opts: [
+          { t: "给不同气体和输液管设计物理防插错异形接口（插错了根本拧不进去）", ok: true, m: "✅ 最高级别的工程控制！就像 USB 接口和电源插头一样，从物理几何上彻底消灭“接错”的可能性！" },
+          { t: "把医护人员扣绩效罚款，加强夜班抽查", ok: false, m: "❌ 罚款只会让人害怕上报险情（隐藏奶酪洞），却无法消除通用接口带来的致命陷阱！" }
+        ]
+      }
+    ];
+
+    let cur = 0, solved = 0, doneCur = false;
+
+    function render() {
+      const c = CASES[cur];
+      doneCur = false;
+      document.getElementById("idxOut").textContent = cur + 1;
+      document.getElementById("okOut").textContent = solved;
+      document.getElementById("qTitle").textContent = c.title;
+      document.getElementById("qDesc").textContent = c.desc;
+      document.getElementById("fbBox").textContent = "";
+      document.getElementById("nextBtn").style.display = "none";
+
+      const list = document.getElementById("optList");
+      list.innerHTML = c.opts.map((o, i) => `<button class="opt-btn" data-i="${i}" type="button">${o.t}</button>`).join("");
+      list.querySelectorAll(".opt-btn").forEach((b) => {
+        b.addEventListener("click", () => {
+          const o = c.opts[parseInt(b.dataset.i, 10)];
+          b.classList.add(o.ok ? "ok" : "bad");
+          document.getElementById("fbBox").textContent = o.m;
+          document.getElementById("fbBox").style.color = o.ok ? "#10b981" : "#ef4444";
+          if (o.ok && !doneCur) {
+            doneCur = true;
+            solved++;
+            document.getElementById("okOut").textContent = solved;
+            if (cur < CASES.length - 1) {
+              document.getElementById("nextBtn").style.display = "inline-block";
+            } else {
+              document.getElementById("ahaBox").innerHTML = "🎉 <strong>复盘大师！</strong>航空界之所以成为地球上最安全的交通方式，秘诀正是“无指责文化 + 物理防呆”：鼓励暴露每一个差点出事的奶酪洞，然后用工程手段彻底堵死！";
+              if (window.ToySDK) window.ToySDK.markCompleted();
+            }
+          }
+        });
+      });
+    }
+
+    document.getElementById("nextBtn").addEventListener("click", () => { cur++; render(); });
+    render();
+  </script>
+</body>
+</html>

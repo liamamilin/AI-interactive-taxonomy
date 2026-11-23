@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：纵深防御概率沙盘 · 独立防线 vs 共因失效</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .res-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 14px; }
+    .r-box { background: var(--tax-surface-2); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; text-align: center; }
+    .r-val { font-size: 22px; font-weight: 900; color: var(--tax-primary); }
+    .r-lbl { font-size: 12px; color: var(--tax-muted); margin-top: 4px; }
+    .toggle-box { margin-top: 14px; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-2); display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 800; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🛡️ 纵深防御概率沙盘：4 道不完美防线有多强？</h1>
+        <p>每层防线都有漏网之鱼（比如 10% 漏检率）。调高防线层数 <strong>N</strong> 看穿透率如何指数级暴跌，再打开<strong>“共因失效”</strong>开关看看什么叫一锅端！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div>
+          <label style="font-weight:850;font-size:14px;">🧀 独立防线层数 N：<span id="nVal" style="color:var(--tax-primary)">3</span> 层</label>
+          <input id="nSl" type="range" min="1" max="6" step="1" value="3" style="width:100%;margin-top:6px;" />
+        </div>
+        <div>
+          <label style="font-weight:850;font-size:14px;">🕳️ 单层漏洞漏检率 p：<span id="pVal" style="color:#f59e0b">10</span>%</label>
+          <input id="pSl" type="range" min="2" max="30" step="2" value="10" style="width:100%;margin-top:6px;" />
+        </div>
+      </div>
+
+      <label class="toggle-box">
+        <input id="ccfChk" type="checkbox" style="width:18px;height:18px;" />
+        <span>⚠️ 开启“共因失效（Common-Cause Failure）”：比如 4 层系统共用同一个过期证书或同一套供电（5% 概率同时瘫痪）</span>
+      </label>
+
+      <div class="res-grid">
+        <div class="r-box"><div class="r-val" id="probOut">0.1000%</div><div class="r-lbl">全部穿透发生事故概率</div></div>
+        <div class="r-box"><div class="r-val" id="freqOut">1 / 1,000</div><div class="r-lbl">平均每多少次操作穿透 1 次</div></div>
+        <div class="r-box"><div class="r-val" id="gradeOut">⭐⭐⭐ 良好</div><div class="r-lbl">系统安全评级</div></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let moves = 0;
+    function render() {
+      const N = parseInt(document.getElementById("nSl").value, 10);
+      const pPct = parseInt(document.getElementById("pSl").value, 10);
+      const ccf = document.getElementById("ccfChk").checked;
+      document.getElementById("nVal").textContent = N;
+      document.getElementById("pVal").textContent = pPct;
+
+      const p = pPct / 100;
+      const indepProb = Math.pow(p, N);
+      const totalProb = ccf ? 1 - (1 - indepProb) * (1 - 0.05) : indepProb;
+
+      document.getElementById("probOut").textContent = (totalProb * 100).toFixed(totalProb < 0.0001 ? 5 : 4) + "%";
+      document.getElementById("probOut").style.color = totalProb > 0.02 ? "#ef4444" : totalProb > 0.001 ? "#f59e0b" : "#10b981";
+      const inv = Math.round(1 / Math.max(1e-9, totalProb));
+      document.getElementById("freqOut").textContent = "1 / " + inv.toLocaleString();
+      document.getElementById("gradeOut").textContent = totalProb < 0.0001 ? "🏆 航空级安全" : totalProb < 0.002 ? "🛡️ 工业级可靠" : totalProb < 0.02 ? "⚠️ 存在隐患" : "🚨 极度危险";
+
+      document.getElementById("ahaBox").innerHTML = ccf
+        ? `💡 <strong>共因失效是纵深防御的头号克星！</strong>尽管你辛辛苦苦叠了 ${N} 层防线（独立穿透率仅 ${(indepProb * 100).toFixed(4)}%），但只要它们共享同一个根因（5% 同时失效），总事故率立刻被拉垮回 <strong>${(totalProb * 100).toFixed(2)}%</strong>！所以真正的冗余必须采用<strong>异构独立设计</strong>（不同厂商、不同电网、不同算法）。`
+        : `💡 <strong>乘法降险威力：</strong>单层防线只有 ${100 - pPct}% 可靠，看起来很粗糙；但只要 ${N} 层彼此独立，穿透概率就是 <code>(${pPct}%)^${N} = ${(totalProb * 100).toFixed(4)}%</code>！试试勾选“共因失效”，感受什么叫“千万别把鸡蛋放进同一套电源”！`;
+    }
+
+    ["nSl", "pSl", "ccfChk"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        moves++;
+        render();
+        if (moves >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+      });
+    });
+    render();
+  </script>
+</body>
+</html>

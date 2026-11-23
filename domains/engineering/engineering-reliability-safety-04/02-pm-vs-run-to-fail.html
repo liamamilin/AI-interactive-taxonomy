@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：预防性维护成本平衡器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .m-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .m-box { background: var(--tax-surface-2); border: 1.5px solid var(--tax-border); border-radius: 12px; padding: 12px; text-align: center; }
+    .m-val { font-size: 20px; font-weight: 900; color: var(--tax-primary); }
+    .m-lbl { font-size: 12px; color: var(--tax-muted); margin-top: 4px; }
+    .bar-wrap { margin-top: 14px; display: grid; gap: 8px; }
+    .b-row { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 750; }
+    .b-track { flex: 1; height: 18px; background: #1e293b; border-radius: 999px; overflow: hidden; }
+    .b-fill { height: 100%; transition: width 0.2s; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🔧 预防性维护成本平衡器：换太勤亏钱，换太晚停产！</h1>
+        <p>工厂核心轴承平均磨耗寿命约 <strong>600 小时</strong>：计划内预防更换只需 <strong>$300</strong>，但如果在生产中突然抱死停线，抢修+停产损失高达 <strong>$4,000</strong>！拖动保养周期找最低总成本！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:850;font-size:14.5px;">🗓️ 定期预防性更换间隔：<span id="intVal" style="color:var(--tax-primary)">300</span> 小时</label>
+      <input id="intSl" type="range" min="100" max="900" step="50" value="300" style="width:100%;margin-top:8px;" />
+
+      <div class="m-grid">
+        <div class="m-box"><div class="m-val" id="pmCost">$1,000</div><div class="m-lbl">每千小时计划保养费</div></div>
+        <div class="m-box"><div class="m-val" id="failCost">$120</div><div class="m-lbl">每千小时突发停机损失</div></div>
+        <div class="m-box"><div class="m-val" id="totCost">$1,120</div><div class="m-lbl">每千小时综合总成本</div></div>
+      </div>
+
+      <div class="bar-wrap">
+        <div class="b-row"><span style="width:92px;">计划保养费</span><div class="b-track"><div id="pmBar" class="b-fill" style="background:#38bdf8;"></div></div></div>
+        <div class="b-row"><span style="width:92px;">突发故障费</span><div class="b-track"><div id="failBar" class="b-fill" style="background:#ef4444;"></div></div></div>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let moves = 0;
+    function render() {
+      const T = parseInt(document.getElementById("intSl").value, 10);
+      document.getElementById("intVal").textContent = T;
+
+      // Weibull-like wear-out failure probability before T (scale=620, shape=4.2)
+      const pFail = 1 - Math.exp(-Math.pow(T / 620, 4.2));
+      const cyclesPer1000h = 1000 / T;
+      const pmPer1000 = cyclesPer1000h * (1 - pFail) * 300;
+      const failPer1000 = cyclesPer1000h * pFail * 4000;
+      const tot = pmPer1000 + failPer1000;
+
+      document.getElementById("pmCost").textContent = "$" + Math.round(pmPer1000).toLocaleString();
+      document.getElementById("failCost").textContent = "$" + Math.round(failPer1000).toLocaleString();
+      document.getElementById("totCost").textContent = "$" + Math.round(tot).toLocaleString();
+      document.getElementById("totCost").style.color = tot < 1150 ? "#10b981" : tot < 2000 ? "#f59e0b" : "#ef4444";
+
+      document.getElementById("pmBar").style.width = Math.min(100, (pmPer1000 / 4000) * 100).toFixed(1) + "%";
+      document.getElementById("failBar").style.width = Math.min(100, (failPer1000 / 4000) * 100).toFixed(1) + "%";
+
+      if (T >= 300 && T <= 400) {
+        document.getElementById("ahaBox").innerHTML = `💡 <strong>🎉 找到 U 型成本谷底（约 350 小时）！</strong>每千小时综合成本压低到仅 <strong>$${Math.round(tot)}</strong>——既没把还能用的轴承过早扔掉，又稳稳躲开了 600 小时后的磨耗崩盘！`;
+      } else if (T < 300) {
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>过度保养陷阱（Over-maintenance）：</strong>虽然突发停机几乎为零，但你把大量完好无损的轴承提前拆掉扔了，光保养费就把利润吃光了！试着往右拉一点。";
+      } else {
+        document.getElementById("ahaBox").innerHTML = "💡 <strong>拖延保养的灾难（Run-to-Failure）：</strong>虽然省了一点计划换件费，但轴承进入浴盆右坡后频频在生产中抱死，单次 $4,000 的停产抢修费瞬间让总成本爆表！";
+      }
+    }
+
+    document.getElementById("intSl").addEventListener("input", () => {
+      moves++;
+      render();
+      if (moves >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

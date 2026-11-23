@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：设备寿命浴盆曲线透视镜 · SVG 三阶段</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 225px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📈 设备寿命浴盆曲线透视镜：为什么两边高、中间平？</h1>
+        <p>从手机芯片、汽车发动机到人类寿命，失效率随时间的变化曲线长得都像一只<strong>浴盆</strong>。拖动时间滑块，解锁三个阶段的工程秘诀！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <label style="font-weight:850;font-size:14.5px;">⏱️ 设备服役时间 t：<span id="tVal" style="color:#38bdf8">1.0</span> 年（当前阶段：<span id="phVal" style="color:#f59e0b">早期夭折期</span>）</label>
+      <input id="tSl" type="range" min="2" max="100" step="2" value="10" style="width:100%;margin-top:8px;" />
+      <div class="stage"><svg viewBox="0 0 560 220" id="btSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let moves = 0;
+
+    function hazard(yr) {
+      // yr in [0.2 .. 10.0]
+      const early = 7.5 * Math.exp(-yr * 1.45);
+      const base = 1.1;
+      const wear = yr > 6.5 ? 0.55 * Math.pow(yr - 6.5, 2.15) : 0;
+      return Math.min(9.5, early + base + wear);
+    }
+
+    function render() {
+      const yr = parseInt(document.getElementById("tSl").value, 10) / 10;
+      document.getElementById("tVal").textContent = yr.toFixed(1);
+      const h = hazard(yr);
+
+      let stage = "", col = "", aha = "";
+      if (yr < 2.2) {
+        stage = "1️⃣ 早期夭折期（Infant Mortality）";
+        col = "#f59e0b";
+        aha = "💡 <strong>早期高失效率怎么治？靠出厂“烤机（Burn-in）”！</strong>虚焊、微小裂纹和装配缺陷会在头几周集中爆发。芯片和服务器出厂前故意高温满载通电 48 小时，把次品提前在工厂里筛掉，送到你手里的就已经跳过左边的陡坡了！";
+      } else if (yr <= 7.0) {
+        stage = "2️⃣ 偶然稳定期（Useful Life）";
+        col = "#10b981";
+        aha = "💡 <strong>浴盆平底期（失效率恒定且极低）：</strong>此时故障几乎纯属随机意外（雷击、电压浪涌、宇宙射线）。<strong>注意反直觉结论：</strong>在这个阶段频繁“定期拆机换新件”不但没用，反而会把已经稳定的零件换成带有“早期夭折风险”的新零件！";
+      } else {
+        stage = "3️⃣ 衰老磨耗期（Wear-Out）";
+        col = "#ef4444";
+        aha = "💡 <strong>右边陡坡（金属疲劳/电容干涸/轴承磨损）：</strong>材料寿命到达极限，失效率呈指数级飙升！<strong>唯一正确对策：</strong>趁故障曲线刚开始抬头时（比如第 7 年）实施<strong>预防性维护（定时更换耗材）</strong>或直接整机退役！";
+      }
+      document.getElementById("phVal").textContent = stage;
+      document.getElementById("phVal").style.color = col;
+
+      const x0 = 42, x1 = 528, yTop = 34, yBot = 186;
+      const toX = (t) => x0 + (t / 10) * (x1 - x0);
+      const toY = (val) => yBot - (val / 10) * (yBot - yTop);
+
+      let pts = [];
+      for (let i = 2; i <= 100; i++) {
+        const t = i / 10;
+        pts.push(`${toX(t).toFixed(1)},${toY(hazard(t)).toFixed(1)}`);
+      }
+
+      let s = "";
+      // Region shading
+      s += `<rect x="${x0}" y="${yTop}" width="${(toX(2.2) - x0).toFixed(1)}" height="${yBot - yTop}" fill="rgba(245,158,11,0.10)"/>`;
+      s += `<rect x="${toX(2.2).toFixed(1)}" y="${yTop}" width="${(toX(7.0) - toX(2.2)).toFixed(1)}" height="${yBot - yTop}" fill="rgba(16,185,129,0.08)"/>`;
+      s += `<rect x="${toX(7.0).toFixed(1)}" y="${yTop}" width="${(x1 - toX(7.0)).toFixed(1)}" height="${yBot - yTop}" fill="rgba(239,68,68,0.10)"/>`;
+
+      // Axes
+      s += `<line x1="${x0}" y1="${yBot}" x2="${x1}" y2="${yBot}" stroke="#64748b" stroke-width="1.5"/>`;
+      s += `<line x1="${x0}" y1="${yTop}" x2="${x0}" y2="${yBot}" stroke="#64748b" stroke-width="1.5"/>`;
+      s += `<text x="90" y="205" text-anchor="middle" fill="#fcd34d" font-size="11" font-weight="700">早期夭折</text>`;
+      s += `<text x="265" y="205" text-anchor="middle" fill="#6ee7b7" font-size="11" font-weight="700">偶然稳定期（黄金服役）</text>`;
+      s += `<text x="455" y="205" text-anchor="middle" fill="#fca5a5" font-size="11" font-weight="700">衰老磨耗期</text>`;
+
+      // Curve
+      s += `<polyline points="${pts.join(" ")}" fill="none" stroke="#38bdf8" stroke-width="3.5"/>`;
+
+      // Cursor
+      const cx = toX(yr), cy = toY(h);
+      s += `<line x1="${cx.toFixed(1)}" y1="${yTop}" x2="${cx.toFixed(1)}" y2="${yBot}" stroke="${col}" stroke-width="2" stroke-dasharray="5 4"/>`;
+      s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="7" fill="${col}" stroke="#fff" stroke-width="2"/>`;
+      s += `<text x="285" y="22" text-anchor="middle" fill="${col}" font-size="12.5" font-weight="800">${stage} · 失效率指数：${h.toFixed(1)}</text>`;
+
+      document.getElementById("btSvg").innerHTML = s;
+      document.getElementById("ahaBox").innerHTML = aha;
+    }
+
+    document.getElementById("tSl").addEventListener("input", () => {
+      moves++;
+      render();
+      if (moves >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+    });
+    render();
+  </script>
+</body>
+</html>

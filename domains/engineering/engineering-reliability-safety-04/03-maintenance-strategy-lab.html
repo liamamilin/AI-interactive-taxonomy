@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：三大维护策略选型台</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .case-card { background: var(--tax-surface-2); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; margin-top: 12px; }
+    .btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 10px; margin-top: 12px; }
+    .m-btn { padding: 12px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-text); font-weight: 800; cursor: pointer; text-align: left; }
+    .m-btn.ok { border-color: #10b981; background: rgba(16, 185, 129, 0.14); }
+    .m-btn.bad { border-color: #ef4444; background: rgba(239, 68, 68, 0.14); }
+    .fb { margin-top: 12px; font-weight: 750; font-size: 13.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>📡 三大维护策略选型台：坏了再换 vs 定期换 vs 预测性维护</h1>
+        <p>不是所有东西都值得“定期保养”！针对下面 3 种真实资产，选出经济性与安全性最匹配的一套维护策略。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div style="font-size:13px;font-weight:800;color:var(--tax-primary);">资产 <span id="idxOut">1</span> / 3 · 已选对：<span id="okOut">0</span></div>
+      <div class="case-card">
+        <div id="qTitle" style="font-size:17px;font-weight:900;"></div>
+        <div id="qDesc" style="font-size:13.5px;color:var(--tax-muted);margin-top:6px;"></div>
+        <div class="btn-grid" id="btnGrid"></div>
+        <div class="fb" id="fbBox"></div>
+      </div>
+      <div style="margin-top:12px;"><button id="nextBtn" class="tax-btn" type="button" style="display:none;">下一个资产 →</button></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">💡 <strong>现代运维进化史：</strong>事后维修（RTF）适合廉价无害件 → 定期预防（PM）适合明确磨耗的安全关键件 → 预测性维护（PdM）靠振动/温度传感器实时“听诊”，只在该换的那一刻出手！</div>
+  </div>
+
+  <script>
+    const CASES = [
+      {
+        title: "💡 资产 1：办公楼走廊里的普通 LED 吸顶灯",
+        desc: "单颗价格 15 元，坏了不会引发安全事故，且属于浴盆平底随机失效（没有明显磨耗规律）。最划算的策略是？",
+        ans: "rtf",
+        explain: {
+          rtf: "✅ 完美！便宜、安全无害、随机失效的零件就该“坏了再换（Run-to-Failure）”，装传感器监控一颗 15 元灯泡纯属大炮打蚊子！",
+          pm: "❌ 过度保养！LED 灯没有固定磨耗死期，定期全楼提前换新会扔掉大量还能亮几年的好灯泡。",
+          pdm: "❌ 传感器比灯泡还贵十倍，完全不划算！"
+        }
+      },
+      {
+        title: "✈️ 资产 2：民航客机发动机的寿命限制件（涡轮盘）",
+        desc: "金属在高温高速循环下必然出现疲劳裂纹，一旦断裂就是机毁人亡的灾难，绝不允许“飞到坏”。必须采用？",
+        ans: "pm",
+        explain: {
+          rtf: "❌ 绝对禁止！航空安全关键件绝不允许用乘客生命赌故障。",
+          pm: "✅ 航空铁律！按严格起降循环次数强制到期更换（Time-Based Preventive Maintenance），绝不越过磨耗红线！",
+          pdm: "⚠️ 飞机虽有实时监控，但核心寿命限制件依然必须遵守强制硬性更换周期（定期预防 + 状态监控双重保险）。"
+        }
+      },
+      {
+        title: "🏭 资产 3：化工厂价值 500 万的大型离心压缩机",
+        desc: "不同工况下磨损速度差异极大（有时 1 年磨损，有时 4 年依然健康）。提前拆机检修一次停产损失百万，但加装振动+红外测温传感器只需几千元！最佳策略是？",
+        ans: "pdm",
+        explain: {
+          rtf: "❌ 突发炸机停产损失千万，绝对不能等它坏！",
+          pm: "⚠️ 按固定日历拆机，常常把还很健康的机器拆坏或白白停产一周。",
+          pdm: "✅ 工业 4.0 王牌——预测性维护（PdM）！振动频谱一出现早期轴承剥落特征，算法提前两周预警，精准安排在计划停机窗口更换，省钱又零事故！"
+        }
+      }
+    ];
+
+    const OPTS = [
+      { k: "rtf", label: "🔨 事后维修（RTF 坏了再换）" },
+      { k: "pm",  label: "🗓️ 定期预防维护（PM 到期必换）" },
+      { k: "pdm", label: "📡 预测性维护（PdM 传感器预警）" }
+    ];
+
+    let cur = 0, solved = 0, doneCur = false;
+    function render() {
+      const c = CASES[cur];
+      doneCur = false;
+      document.getElementById("idxOut").textContent = cur + 1;
+      document.getElementById("okOut").textContent = solved;
+      document.getElementById("qTitle").textContent = c.title;
+      document.getElementById("qDesc").textContent = c.desc;
+      document.getElementById("fbBox").textContent = "";
+      document.getElementById("nextBtn").style.display = "none";
+
+      const grid = document.getElementById("btnGrid");
+      grid.innerHTML = OPTS.map((o) => `<button class="m-btn" data-k="${o.k}" type="button">${o.label}</button>`).join("");
+      grid.querySelectorAll(".m-btn").forEach((b) => {
+        b.addEventListener("click", () => {
+          const k = b.dataset.k;
+          const ok = k === c.ans;
+          b.classList.add(ok ? "ok" : "bad");
+          document.getElementById("fbBox").textContent = c.explain[k];
+          document.getElementById("fbBox").style.color = ok ? "#10b981" : "#ef4444";
+          if (ok && !doneCur) {
+            doneCur = true;
+            solved++;
+            document.getElementById("okOut").textContent = solved;
+            if (cur < CASES.length - 1) document.getElementById("nextBtn").style.display = "inline-block";
+            else {
+              document.getElementById("ahaBox").innerHTML = "🎉 <strong>可靠性工程师通关！</strong>没有“永远最好”的维护方式——把有限的预算按风险与浴盆曲线精准分层，才是顶级工程管理的精髓！";
+              if (window.ToySDK) window.ToySDK.markCompleted();
+            }
+          }
+        });
+      });
+    }
+    document.getElementById("nextBtn").addEventListener("click", () => { cur++; render(); });
+    render();
+  </script>
+</body>
+</html>

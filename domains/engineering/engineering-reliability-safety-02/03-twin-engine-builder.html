@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：跨洋客机冗余装配台 · ETOPS 模拟</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .cfg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+    .cfg-card { background: var(--tax-surface-2); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 14px; }
+    .cfg-card select { width: 100%; margin-top: 8px; padding: 8px; border-radius: 8px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-text); font-weight: 700; }
+    .sim-out { margin-top: 14px; padding: 14px; border-radius: 14px; background: var(--tax-surface-2); border: 1.5px solid var(--tax-border); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🛫 跨洋客机冗余装配台：花最少钱达成 99.99% 安全！</h1>
+        <p>设计一架横跨太平洋的民航客机（目标：10,000 次恶劣风暴航班中<strong>事故 ≤ 1 次</strong>，总预算 <strong>≤ 100M</strong>）。搭配 3 大关键子系统的冗余配置并点击试飞！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="cfg-grid">
+        <div class="cfg-card">
+          <div style="font-weight:850;">✈️ 推进发动机（单台故障率 2%）</div>
+          <select id="engSel">
+            <option value="1">单发动机（20M）</option>
+            <option value="2" selected>双发并联冗余（40M）</option>
+            <option value="4">四发冗余（75M）</option>
+          </select>
+        </div>
+        <div class="cfg-card">
+          <div style="font-weight:850;">💻 飞控计算机（单台出错率 3%）</div>
+          <select id="fcSel">
+            <option value="1">单台飞控（10M）</option>
+            <option value="3" selected>三余度表决 2-of-3（28M）</option>
+          </select>
+        </div>
+        <div class="cfg-card">
+          <div style="font-weight:850;">💧 液压操纵系统（单路漏油率 2%）</div>
+          <select id="hydSel">
+            <option value="1">单套液压（10M）</option>
+            <option value="2">双套独立液压（20M）</option>
+            <option value="3" selected>三套独立液压（30M）</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <button id="flyBtn" class="tax-btn" type="button">🚀 运行 10,000 次风暴跨洋试飞</button>
+        <div style="font-weight:850;font-size:14.5px;">当前总造价：<span id="costOut" style="color:var(--tax-primary)">98M</span> / 100M 上限</div>
+      </div>
+
+      <div class="sim-out" id="simOut">点击上方按钮开始 10,000 次蒙特卡洛风暴试飞！</div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">💡 <strong>工程精髓：</strong>把钱砸在消除薄弱单点（每个关键子系统都做并联冗余）上，远比把发动机堆到 4 台却只留 1 套液压安全一万倍！</div>
+  </div>
+
+  <script>
+    const COSTS = { eng: { 1: 20, 2: 40, 4: 75 }, fc: { 1: 10, 3: 28 }, hyd: { 1: 10, 2: 20, 3: 30 } };
+
+    function updateCost() {
+      const e = parseInt(document.getElementById("engSel").value, 10);
+      const f = parseInt(document.getElementById("fcSel").value, 10);
+      const h = parseInt(document.getElementById("hydSel").value, 10);
+      const cost = COSTS.eng[e] + COSTS.fc[f] + COSTS.hyd[h];
+      const el = document.getElementById("costOut");
+      el.textContent = cost + "M";
+      el.style.color = cost > 100 ? "#ef4444" : "#10b981";
+      return { e, f, h, cost };
+    }
+
+    function runSim() {
+      const { e, f, h, cost } = updateCost();
+      // Failure probs per flight under storm stress
+      const pEngFail = Math.pow(0.02, e); // all engines fail
+      // 3-of-3 voting fails if >=2 computers fail: 3*p^2*(1-p) + p^3
+      const pFcFail = f === 1 ? 0.03 : 3 * 0.03 * 0.03 * 0.97 + Math.pow(0.03, 3);
+      const pHydFail = Math.pow(0.02, h);
+
+      let crashes = 0;
+      for (let i = 0; i < 10000; i++) {
+        if (Math.random() < pEngFail || Math.random() < pFcFail || Math.random() < pHydFail) crashes++;
+      }
+      const safeRate = ((10000 - crashes) / 100).toFixed(2);
+      const pass = cost <= 100 && crashes <= 35;
+      const ideal = cost <= 100 && e >= 2 && f === 3 && h >= 2;
+
+      const out = document.getElementById("simOut");
+      out.innerHTML = `<div style="font-size:17px;font-weight:900;color:${ideal ? "#10b981" : "#f59e0b"};">${
+        cost > 100 ? "💸 预算超支（>100M）！" : ideal ? "🏆 通过适航认证！高性价比全冗余架构！" : "⚠️ 存在明显薄弱单点，事故偏高！"
+      }</div>
+      <div style="margin-top:6px;font-size:13.5px;">10,000 次风暴试飞安全降落：<strong>${10000 - crashes} 次（${safeRate}%）</strong> · 失事：<strong>${crashes} 次</strong></div>`;
+
+      document.getElementById("ahaBox").innerHTML = ideal
+        ? "💡 <strong>现代宽体机（波音 787 / 空客 A350）正是这么造的！</strong>与其盲目堆 4 台极贵的发动机，不如采用<strong>双发并联 + 三余度表决飞控（2-out-of-3 少数服从多数）+ 多路独立液压</strong>，既省油又达到极致可靠！"
+        : "💡 <strong>木桶效应警告：</strong>只要 3 个子系统里有任何一个是单路（无冗余），整架飞机的可靠性就会被那条短板死死拖住！试着把三个子系统全部配上冗余并把总价压在 100M 以内。";
+
+      if (window.ToySDK) window.ToySDK.markCompleted();
+    }
+
+    ["engSel", "fcSel", "hydSel"].forEach((id) => document.getElementById(id).addEventListener("change", updateCost));
+    document.getElementById("flyBtn").addEventListener("click", runSim);
+    updateCost();
+  </script>
+</body>
+</html>

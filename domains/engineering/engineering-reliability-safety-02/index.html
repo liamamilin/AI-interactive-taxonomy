@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>串联薄弱环 vs 并联冗余（双引擎） · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>✈️ 串联薄弱环 vs 并联冗余（双引擎）</h1>
+        <p>为什么 10 个 95% 可靠的零件串在一起，整机可靠率直接跌破 60%？而客机只要多装一台并联备用引擎，可靠率立刻飙到 99.75%？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-series-vs-parallel-svg.html">
+        <div class="hub-icon">⛓️</div>
+        <div class="hub-tag">玩具 01 · 可靠性拓扑（Simulation）</div>
+        <div class="hub-title">串联木桶 vs 并联冗余：N 个零件可靠性对比</div>
+        <div class="hub-desc">拖动组件数与单件可靠率，亲眼对比 r^N 的串联衰减与 1-(1-r)^N 的并联飞跃。</div>
+      </a>
+      <a class="hub-card" href="./02-nines-downtime-calc.html">
+        <div class="hub-icon">⏱️</div>
+        <div class="hub-tag">玩具 02 · SLA 赛跑（Race）</div>
+        <div class="hub-title">“几个 9”可用性赛跑：99% vs 99.999%</div>
+        <div class="hub-desc">把抽象的百分比换算成每年停机天数和分钟数，看清云架构追求“五个 9”的真实代价。</div>
+      </a>
+      <a class="hub-card" href="./03-twin-engine-builder.html">
+        <div class="hub-icon">🛫</div>
+        <div class="hub-tag">玩具 03 · 客机装配（Builder）</div>
+        <div class="hub-title">跨洋客机冗余装配台：双引擎与三余度飞控</div>
+        <div class="hub-desc">亲手搭配发动机、三余度飞控表决与双液压系统，用 1 万次仿真飞行验证高可靠设计。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

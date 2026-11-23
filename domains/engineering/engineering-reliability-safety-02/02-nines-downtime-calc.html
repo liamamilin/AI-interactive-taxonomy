@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 02：“几个 9”可用性赛跑 · SLA 停机预算</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .tier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+    .t-btn { padding: 10px 8px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface-2); color: var(--tax-text); font-weight: 850; cursor: pointer; text-align: center; }
+    .t-btn.active { background: var(--tax-primary); color: #fff; border-color: var(--tax-primary); }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 14px; }
+    .s-card { background: var(--tax-surface-2); border: 1px solid var(--tax-border); border-radius: 12px; padding: 14px; text-align: center; }
+    .s-val { font-size: 21px; font-weight: 900; color: var(--tax-primary); }
+    .s-lbl { font-size: 12px; color: var(--tax-muted); margin-top: 4px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⏱️ “几个 9”可用性赛跑：99% 和 99.999% 差多远？</h1>
+        <p>云厂商常说“三个 9”、“五个 9”高可用。点击切换不同 SLA 等级，看看它换算成<strong>一年允许宕机多久</strong>，以及背后需要几套机房！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="tier-grid" id="tierGrid"></div>
+
+      <div class="stat-grid">
+        <div class="s-card"><div class="s-val" id="yrOut">3.65 天</div><div class="s-lbl">每年允许最大停机</div></div>
+        <div class="s-card"><div class="s-val" id="moOut">7.3 小时</div><div class="s-lbl">每月允许停机</div></div>
+        <div class="s-card"><div class="s-val" id="costOut">1× 成本</div><div class="s-lbl">架构与冗余投入</div></div>
+      </div>
+
+      <div id="archDesc" style="margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--tax-surface-2);border:1px solid var(--tax-border);font-size:13.5px;"></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    const TIERS = [
+      { id: "99", label: "99% (2个9)", yr: "3.65 天", mo: "7.3 小时", cost: "1× 基准", arch: "🖥️ <strong>典型架构：</strong>单机部署 + 人工重启。适合个人博客或内部测试工具。", aha: "💡 <strong>99% 听起来很高？</strong>但换算成一年就是整整 3.65 天不可用——如果微信或支付宝只有 99%，每年要瘫痪将近 4 天！" },
+      { id: "999", label: "99.9% (3个9)", yr: "8.76 小时", mo: "43.8 分钟", cost: "2× ~ 3×", arch: "⚖️ <strong>典型架构：</strong>同机房双机主备 + 负载均衡 + 自动健康检查。适合大多数 SaaS 应用。", aha: "💡 <strong>三个 9 是商业软件起步线：</strong>靠同机房并联双节点消除单机宕机，但一旦整栋机房断电或挖断光纤，仍会超时。" },
+      { id: "9999", label: "99.99% (4个9)", yr: "52.6 分钟", mo: "4.38 分钟", cost: "5× ~ 10×", arch: "🏢 <strong>典型架构：</strong>同城多可用区（Multi-AZ）多活 + 数据库自动故障秒级切换。适合电商与支付核心。", aha: "💡 <strong>四个 9 意味着不能靠人工救火！</strong>每个月只有 4 分钟停机预算——半夜运维还没爬起来打开电脑，预算就烧光了，必须全自动故障转移！" },
+      { id: "99999", label: "99.999% (5个9)", yr: "5.26 分钟", mo: "26.3 秒", cost: "20× 以上", arch: "🌍 <strong>典型架构：</strong>异地多活（跨省/跨洲双活）+ 零停机热升级 + 混沌工程常态化演练。适合电信核心网与金融清算。", aha: "💡 <strong>每多买一个 9，成本往往翻倍甚至十倍！</strong>这就是工程权衡：绝大多数业务追求 99.9%~99.99% 最划算，盲目追五个 9 会把公司预算烧干。" }
+    ];
+
+    let clicks = 0;
+    function selectTier(id) {
+      const t = TIERS.find((x) => x.id === id);
+      document.getElementById("tierGrid").innerHTML = TIERS.map((x) => `<button class="t-btn ${x.id === id ? "active" : ""}" data-id="${x.id}" type="button">${x.label}</button>`).join("");
+      document.querySelectorAll(".t-btn").forEach((b) => {
+        b.addEventListener("click", () => {
+          clicks++;
+          selectTier(b.dataset.id);
+          if (clicks >= 2 && window.ToySDK) window.ToySDK.markCompleted();
+        });
+      });
+      document.getElementById("yrOut").textContent = t.yr;
+      document.getElementById("moOut").textContent = t.mo;
+      document.getElementById("costOut").textContent = t.cost;
+      document.getElementById("archDesc").innerHTML = t.arch;
+      document.getElementById("ahaBox").innerHTML = t.aha;
+    }
+
+    selectTier("99");
+  </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 03：隐藏单点侦探社 · 伪冗余惨案</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .case-box { background: var(--tax-surface-2); border: 1.5px solid var(--tax-border); border-radius: 14px; padding: 16px; margin-top: 12px; }
+    .opt-list { display: grid; gap: 10px; margin-top: 12px; }
+    .opt-btn { padding: 12px; border-radius: 10px; border: 1.5px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-text); font-weight: 800; text-align: left; cursor: pointer; }
+    .opt-btn.ok { border-color: #10b981; background: rgba(16, 185, 129, 0.14); }
+    .opt-btn.bad { border-color: #ef4444; background: rgba(239, 68, 68, 0.14); }
+    .fb { margin-top: 12px; font-weight: 750; font-size: 13.5px; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🕵️ 隐藏单点侦探社：以为做了双活，为何还是全挂了？</h1>
+        <p>比“没有冗余”更可怕的是<strong>“以为自己有冗余，其实共享了同一个隐形单点”</strong>！侦破下面 3 起真实工程界的伪冗余惨案。</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div style="font-size:13px;font-weight:800;color:var(--tax-primary);">案件 <span id="idxOut">1</span> / 3 · 已破案：<span id="okOut">0</span></div>
+      <div class="case-box">
+        <div id="qTitle" style="font-size:17px;font-weight:900;"></div>
+        <div id="qDesc" style="font-size:13.5px;color:var(--tax-muted);margin-top:6px;"></div>
+        <div class="opt-list" id="optList"></div>
+        <div class="fb" id="fbBox"></div>
+      </div>
+      <div style="margin-top:12px;">
+        <button id="nextBtn" class="tax-btn" type="button" style="display:none;">侦破下一案 →</button>
+      </div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">💡 <strong>真冗余的唯一检验标准：</strong>永远追问一句——“如果上游某件东西坏了，我的主系统和备系统会不会<strong>同时</strong>跟着一起死？”</div>
+  </div>
+
+  <script>
+    const CASES = [
+      {
+        title: "🚜 案件 1：电信+联通双光纤接入，挖掘机一铲子全断网！",
+        desc: "公司花双倍预算买了两家不同运营商的宽带做双线容灾，结果门口修路一铲子下去，两条光纤竟然同一秒全断了！最可能的隐蔽单点是？",
+        opts: [
+          { t: "两家运营商进大楼的最后 100 米光纤，被物业穿进了同一根地下管道（同路由共沟槽）", ok: true, m: "✅ 一针见血！这在通信工程里叫“物理同路由单点”。真正的双线容灾必须要求运营商从大楼南北两个不同物理入口进线！" },
+          { t: "公司路由器 CPU 性能不够高", ok: false, m: "❌ 挖掘机在室外挖断的是物理光缆，跟室内路由器算力无关。" }
+        ]
+      },
+      {
+        title: "☁️ 案件 2：花重金建了跨城双活机房，结果两座城同时宕机！",
+        desc: "上海和北京两座数据中心互为热备，平时稳如泰山。某天凌晨 00:00，两座机房在同一毫秒全部拒绝用户访问，原因居然是？",
+        opts: [
+          { t: "两座机房同时发生地震", ok: false, m: "❌ 跨省同时地震的概率微乎其微，更常见的真凶藏在逻辑层！" },
+          { t: "全站共用同一张过期的 HTTPS 证书（或同一个全局 DNS/配置中心推送了错误配置）", ok: true, m: "✅ 真实大厂血泪史！物理隔离防住了天灾，却防不住同一份过期证书或全局错误配置同时下发到所有机房——所以发布也必须分批灰度！" }
+        ]
+      },
+      {
+        title: "🔋 案件 3：服务器配了双电源模块，为什么机柜跳闸照样关机？",
+        desc: "工程师买了昂贵的双电源（Redundant PSU）服务器，结果机房维护断了一路电，服务器竟然瞬间黑屏！",
+        opts: [
+          { t: "接线员图省事，把服务器的两根电源线都插在了机柜里同一个 PDU 插排上", ok: true, m: "✅ 运维界头号经典乌龙！双电源必须分别插在 A 路市电和 B 路独立市电上，插在同一个插排上等于白买！" },
+          { t: "双电源本来就不能同时插电", ok: false, m: "❌ 双电源正是靠 A/B 两路同时接独立电路供电，一路断电另一路零毫秒接管。" }
+        ]
+      }
+    ];
+
+    let cur = 0, solved = 0, doneCur = false;
+    function render() {
+      const c = CASES[cur];
+      doneCur = false;
+      document.getElementById("idxOut").textContent = cur + 1;
+      document.getElementById("okOut").textContent = solved;
+      document.getElementById("qTitle").textContent = c.title;
+      document.getElementById("qDesc").textContent = c.desc;
+      document.getElementById("fbBox").textContent = "";
+      document.getElementById("nextBtn").style.display = "none";
+
+      const list = document.getElementById("optList");
+      list.innerHTML = c.opts.map((o, i) => `<button class="opt-btn" data-i="${i}" type="button">${o.t}</button>`).join("");
+      list.querySelectorAll(".opt-btn").forEach((b) => {
+        b.addEventListener("click", () => {
+          const o = c.opts[parseInt(b.dataset.i, 10)];
+          b.classList.add(o.ok ? "ok" : "bad");
+          document.getElementById("fbBox").textContent = o.m;
+          document.getElementById("fbBox").style.color = o.ok ? "#10b981" : "#ef4444";
+          if (o.ok && !doneCur) {
+            doneCur = true;
+            solved++;
+            document.getElementById("okOut").textContent = solved;
+            if (cur < CASES.length - 1) document.getElementById("nextBtn").style.display = "inline-block";
+            else {
+              document.getElementById("ahaBox").innerHTML = "🎉 <strong>单点神探毕业！</strong>以后看到“双活、双电源、双线”，千万记得顺着物理走线和全局配置往下追查，彻底消灭伪冗余！";
+              if (window.ToySDK) window.ToySDK.markCompleted();
+            }
+          }
+        });
+      });
+    }
+    document.getElementById("nextBtn").addEventListener("click", () => { cur++; render(); });
+    render();
+  </script>
+</body>
+</html>

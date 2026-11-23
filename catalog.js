@@ -6,10 +6,10 @@ window.TAXONOMY_DATA = {
   "stats": {
     "totalDomains": 10,
     "litDomains": 3,
-    "totalTopics": 83,
-    "totalPlannedTopics": 192,
+    "totalTopics": 87,
+    "totalPlannedTopics": 188,
     "totalBlueprintTopics": 275,
-    "totalToys": 249
+    "totalToys": 261
   },
   "tracks": [
     {
@@ -2445,24 +2445,7 @@ window.TAXONOMY_DATA = {
         {
           "id": "reliability-safety",
           "title": "5. 可靠性、容错与安全工程（Reliability & Safety）",
-          "plannedTopics": [
-            {
-              "slug": "engineering-reliability-safety-01",
-              "title": "瑞士奶酪事故模型"
-            },
-            {
-              "slug": "engineering-reliability-safety-02",
-              "title": "串联薄弱环 vs 并联冗余（双引擎）"
-            },
-            {
-              "slug": "engineering-reliability-safety-03",
-              "title": "单点故障（SPOF）排查"
-            },
-            {
-              "slug": "engineering-reliability-safety-04",
-              "title": "浴盆曲线与预防性维护"
-            }
-          ]
+          "plannedTopics": []
         },
         {
           "id": "systems-tradeoffs",
@@ -2487,10 +2470,10 @@ window.TAXONOMY_DATA = {
           ]
         }
       ],
-      "liveTopicCount": 16,
-      "plannedTopicCount": 8,
+      "liveTopicCount": 20,
+      "plannedTopicCount": 4,
       "blueprintTopicCount": 24,
-      "liveToyCount": 48,
+      "liveToyCount": 60,
       "topics": [
         {
           "id": "engineering/engineering-control-feedback-01",
@@ -2685,6 +2668,55 @@ window.TAXONOMY_DATA = {
               "archetype": "scenario",
               "concept": "并联总电流叠加 · 短路 R→0 电流爆炸 · 空气开关过载保护",
               "summary": "往 220V/16A 家庭插座里陆续插满电水壶、吹风机甚至裸露短路导线，亲手触发空气开关跳闸！"
+            }
+          ]
+        },
+        {
+          "id": "engineering/engineering-reliability-safety-01",
+          "slug": "engineering-reliability-safety-01",
+          "domain": "engineering",
+          "branch": "reliability-safety",
+          "order": 1,
+          "title": "瑞士奶酪事故模型",
+          "icon": "🧀",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "为什么重大空难、核事故和线上 P0 宕机几乎从来不是“一个人手滑”造成的，而是多层防线的漏洞在同一瞬间对齐？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-reliability-safety-02",
+            "engineering/engineering-reliability-safety-03"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-reliability-safety-01/01-cheese-slices-svg.html",
+              "file": "01-cheese-slices-svg.html",
+              "path": "./domains/engineering/engineering-reliability-safety-01/01-cheese-slices-svg.html",
+              "title": "瑞士奶酪防线对齐实验：穿透 4 层防御的事故射线（SVG）",
+              "icon": "🎯",
+              "archetype": "spatial",
+              "concept": "瑞士奶酪模型 · 纵深防御 Defense in Depth · 漏洞瞬时对齐",
+              "summary": "拖动 4 片奶酪防线的孔洞高度，亲眼看红光只在 4 个洞同时对齐时才会穿透引发灾难，错开任意一层就能拦下！"
+            },
+            {
+              "id": "engineering/engineering-reliability-safety-01/02-defense-in-depth-calc.html",
+              "file": "02-defense-in-depth-calc.html",
+              "path": "./domains/engineering/engineering-reliability-safety-01/02-defense-in-depth-calc.html",
+              "title": "纵深防御概率沙盘：独立防线 vs 共因失效",
+              "icon": "🛡️",
+              "archetype": "simulation",
+              "concept": "独立失效相乘 p^N · 指数级降险 · 共因失效 Common-Cause Failure",
+              "summary": "叠加 1 到 6 层防线看事故率暴跌万倍，再打开“共因失效”开关，看共享同一根因如何瞬间击穿所有防线！"
+            },
+            {
+              "id": "engineering/engineering-reliability-safety-01/03-postmortem-blameless.html",
+              "file": "03-postmortem-blameless.html",
+              "path": "./domains/engineering/engineering-reliability-safety-01/03-postmortem-blameless.html",
+              "title": "无指责复盘室：修补系统奶酪洞 vs 开除背锅侠",
+              "icon": "🔍",
+              "archetype": "scenario",
+              "concept": "无指责复盘 Blameless Postmortem · 防呆设计 Poka-Yoke · 系统性根因",
+              "summary": "面对 3 起真实工程与医疗事故，对比“处罚操作员”和“物理防呆改造”哪个才能彻底堵死奶酪洞！"
             }
           ]
         },
@@ -2885,6 +2917,55 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "engineering/engineering-reliability-safety-02",
+          "slug": "engineering-reliability-safety-02",
+          "domain": "engineering",
+          "branch": "reliability-safety",
+          "order": 2,
+          "title": "串联薄弱环 vs 并联冗余（双引擎）",
+          "icon": "✈️",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "为什么 10 个 95% 可靠的零件串在一起，整机可靠率直接跌破 60%？而客机只要多装一台并联备用引擎，可靠率立刻飙到 99.75%？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-reliability-safety-01",
+            "engineering/engineering-power-signals-01"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-reliability-safety-02/01-series-vs-parallel-svg.html",
+              "file": "01-series-vs-parallel-svg.html",
+              "path": "./domains/engineering/engineering-reliability-safety-02/01-series-vs-parallel-svg.html",
+              "title": "串联木桶 vs 并联冗余：N 个零件可靠性对比（SVG）",
+              "icon": "⛓️",
+              "archetype": "simulation",
+              "concept": "串联 R = r^N · 并联 R = 1 - (1-r)^N · 冗余指数增益",
+              "summary": "调节零件数量 N 与单件可靠率 r，实时看串联系统如何迅速雪崩，而并联冗余如何轻松冲破 99.99%！"
+            },
+            {
+              "id": "engineering/engineering-reliability-safety-02/02-nines-downtime-calc.html",
+              "file": "02-nines-downtime-calc.html",
+              "path": "./domains/engineering/engineering-reliability-safety-02/02-nines-downtime-calc.html",
+              "title": "“几个 9”可用性赛跑：99% vs 99.999% 一年停机多久？",
+              "icon": "⏱️",
+              "archetype": "race",
+              "concept": "高可用 SLA（两个 9 到五个 9）· 年度停机时间预算 · 边际成本飙升",
+              "summary": "对比云服务从 99% 到 99.999% 的真实年停机时长，秒懂每多买一个 9 为什么架构成本要翻好几倍！"
+            },
+            {
+              "id": "engineering/engineering-reliability-safety-02/03-twin-engine-builder.html",
+              "file": "03-twin-engine-builder.html",
+              "path": "./domains/engineering/engineering-reliability-safety-02/03-twin-engine-builder.html",
+              "title": "跨洋客机冗余装配台：双引擎与三余度飞控模拟",
+              "icon": "🛫",
+              "archetype": "builder",
+              "concept": "双发冗余 ETOPS · 三余度表决（2-out-of-3）· 成本与安全平衡",
+              "summary": "在有限预算下给跨洋航班配置发动机、飞控计算机和液压管路，跑一万次风暴航班实测安全率！"
+            }
+          ]
+        },
+        {
           "id": "engineering/engineering-control-feedback-03",
           "slug": "engineering-control-feedback-03",
           "domain": "engineering",
@@ -3081,6 +3162,55 @@ window.TAXONOMY_DATA = {
           ]
         },
         {
+          "id": "engineering/engineering-reliability-safety-03",
+          "slug": "engineering-reliability-safety-03",
+          "domain": "engineering",
+          "branch": "reliability-safety",
+          "order": 3,
+          "title": "单点故障（SPOF）排查",
+          "icon": "🎯",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "花了大价钱买 10 台服务器做集群，为什么拔掉一根网线或挂掉一台数据库，全站照样瞬间瘫痪？",
+          "difficulty": "入门",
+          "related": [
+            "engineering/engineering-reliability-safety-02",
+            "software/software-distributed-01"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-reliability-safety-03/01-spof-architecture-svg.html",
+              "file": "01-spof-architecture-svg.html",
+              "path": "./domains/engineering/engineering-reliability-safety-03/01-spof-architecture-svg.html",
+              "title": "架构图单点排雷：点击炸掉任意节点看全站活不活！（SVG）",
+              "icon": "💣",
+              "archetype": "spatial",
+              "concept": "单点故障 SPOF · 流量绕行 · 关键路径瓶颈",
+              "summary": "在交互架构图上挨个点击“击毁”负载均衡、应用集群、主数据库和共享电源，瞬间揪出所有致命单点！"
+            },
+            {
+              "id": "engineering/engineering-reliability-safety-03/02-eliminate-spof-builder.html",
+              "file": "02-eliminate-spof-builder.html",
+              "path": "./domains/engineering/engineering-reliability-safety-03/02-eliminate-spof-builder.html",
+              "title": "高可用改造工坊：逐个消灭 4 处隐藏单点",
+              "icon": "🔧",
+              "archetype": "builder",
+              "concept": "主备切换 · 双路供电 · 巴士系数 Bus Factor",
+              "summary": "给一套看似稳健的系统依次升级双活网关、主从数据库、双路市电与文档交接，把单点隐患清零！"
+            },
+            {
+              "id": "engineering/engineering-reliability-safety-03/03-hidden-spof-detective.html",
+              "file": "03-hidden-spof-detective.html",
+              "path": "./domains/engineering/engineering-reliability-safety-03/03-hidden-spof-detective.html",
+              "title": "隐藏单点侦探社：以为做了双活，为何还是团灭？",
+              "icon": "🕵️",
+              "archetype": "scenario",
+              "concept": "隐蔽共享依赖 · 双线路共沟槽 · 证书/DNS 单点",
+              "summary": "侦破 3 起真实世界里的“伪冗余”宕机惨案，学会一眼看穿藏在地下和组织里的隐形单点！"
+            }
+          ]
+        },
+        {
           "id": "engineering/engineering-control-feedback-04",
           "slug": "engineering-control-feedback-04",
           "domain": "engineering",
@@ -3273,6 +3403,55 @@ window.TAXONOMY_DATA = {
               "archetype": "blind-lab",
               "concept": "前向纠错 FEC · 无重传深空通信 · 内存 ECC 纠错原理",
               "summary": "收到一包被宇宙射线污染的深空遥测比特，根据 3 组校验结果亲自点出坏比特，拯救任务指令！"
+            }
+          ]
+        },
+        {
+          "id": "engineering/engineering-reliability-safety-04",
+          "slug": "engineering-reliability-safety-04",
+          "domain": "engineering",
+          "branch": "reliability-safety",
+          "order": 4,
+          "title": "浴盆曲线与预防性维护",
+          "icon": "🛁",
+          "color": "#0d9488",
+          "soft": "#f0fdfa",
+          "subtitle": "为什么新买的电器要么头一周就坏、要么能稳用五年，到了第七年又开始频繁出毛病？工厂怎么算准最佳保养周期？",
+          "difficulty": "进阶",
+          "related": [
+            "engineering/engineering-reliability-safety-02",
+            "engineering/engineering-systems-tradeoffs-02"
+          ],
+          "toys": [
+            {
+              "id": "engineering/engineering-reliability-safety-04/01-bathtub-curve-svg.html",
+              "file": "01-bathtub-curve-svg.html",
+              "path": "./domains/engineering/engineering-reliability-safety-04/01-bathtub-curve-svg.html",
+              "title": "设备寿命浴盆曲线透视镜：三阶段故障率解剖（SVG）",
+              "icon": "📈",
+              "archetype": "spatial",
+              "concept": "早期夭折期 · 偶然稳定期 · 衰老磨耗期 · 出厂拷机 Burn-in",
+              "summary": "拖动时间游标滑过设备 10 年生命周期，实时查看故障率为何先降后平再暴涨，以及每阶段的正确对策！"
+            },
+            {
+              "id": "engineering/engineering-reliability-safety-04/02-pm-vs-run-to-fail.html",
+              "file": "02-pm-vs-run-to-fail.html",
+              "path": "./domains/engineering/engineering-reliability-safety-04/02-pm-vs-run-to-fail.html",
+              "title": "预防性维护成本平衡器：换太勤亏钱，换太晚停产！",
+              "icon": "🔧",
+              "archetype": "simulation",
+              "concept": "预防性维护 PM · 事后维修停机代价 · U 型总成本最优解",
+              "summary": "调节工业轴承的定期更换周期，实时计算保养费与突发停产抢修费的此消彼长，找到最低总成本甜蜜点！"
+            },
+            {
+              "id": "engineering/engineering-reliability-safety-04/03-maintenance-strategy-lab.html",
+              "file": "03-maintenance-strategy-lab.html",
+              "path": "./domains/engineering/engineering-reliability-safety-04/03-maintenance-strategy-lab.html",
+              "title": "三大维护策略选型台：坏了再换 vs 定期换 vs 预测性维护",
+              "icon": "📡",
+              "archetype": "scenario",
+              "concept": "事后维修 RTF · 预防性维护 PM · 状态预测维护 PdM/CBM",
+              "summary": "为办公室灯泡、航空涡轮叶片和带振动传感器的工厂电机匹配最省钱又安全的维护策略！"
             }
           ]
         }

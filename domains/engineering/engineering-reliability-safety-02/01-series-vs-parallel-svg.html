@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>玩具 01：串联木桶 vs 并联冗余 · SVG 可靠性对比</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .ctrl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .stage { background: #0f172a; border: 1.5px solid var(--tax-border); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    svg { width: 100%; height: 225px; display: block; }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>⛓️ 串联木桶 vs 并联冗余：N 个零件怎么决定整机生死？</h1>
+        <p><strong>串联</strong>要求“所有零件全活着”；<strong>并联</strong>只要“至少 1 个零件活着”就能继续运转。拖动滑块看看差距有多夸张！</p>
+      </div>
+      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+    </div>
+
+    <div class="tax-panel">
+      <div class="ctrl-grid">
+        <div>
+          <label style="font-weight:850;font-size:14px;">🧩 组件数量 N：<span id="nVal" style="color:#38bdf8">4</span> 个</label>
+          <input id="nSl" type="range" min="1" max="8" step="1" value="4" style="width:100%;margin-top:6px;" />
+        </div>
+        <div>
+          <label style="font-weight:850;font-size:14px;">⚙️ 单个零件可靠率 r：<span id="rVal" style="color:#10b981">90</span>%</label>
+          <input id="rSl" type="range" min="70" max="99" step="1" value="90" style="width:100%;margin-top:6px;" />
+        </div>
+      </div>
+
+      <div class="stage"><svg viewBox="0 0 560 220" id="relSvg"></svg></div>
+    </div>
+
+    <div class="tax-aha" id="ahaBox"></div>
+  </div>
+
+  <script>
+    let moves = 0;
+    function render() {
+      const N = parseInt(document.getElementById("nSl").value, 10);
+      const rPct = parseInt(document.getElementById("rSl").value, 10);
+      document.getElementById("nVal").textContent = N;
+      document.getElementById("rVal").textContent = rPct;
+
+      const r = rPct / 100;
+      const rSeries = Math.pow(r, N);
+      const rParallel = 1 - Math.pow(1 - r, N);
+
+      let s = "";
+      // Top: Series chain
+      s += `<text x="20" y="24" fill="#fca5a5" font-size="13" font-weight="800">🔗 串联系统（坏 1 个就全挂）：R = (${rPct}%)^${N} = ${(rSeries * 100).toFixed(2)}%</text>`;
+      s += `<line x1="28" y1="58" x2="532" y2="58" stroke="#ef4444" stroke-width="3"/>`;
+      const step = 460 / Math.max(1, N);
+      for (let i = 0; i < N; i++) {
+        const cx = 50 + step * (i + 0.5);
+        s += `<rect x="${(cx - 22).toFixed(1)}" y="40" width="44" height="36" rx="8" fill="#1e293b" stroke="#f87171" stroke-width="2"/>`;
+        s += `<text x="${cx.toFixed(1)}" y="62" text-anchor="middle" fill="#fecaca" font-size="11.5" font-weight="800">${rPct}%</text>`;
+      }
+
+      // Bottom: Parallel branches
+      s += `<text x="20" y="114" fill="#6ee7b7" font-size="13" font-weight="800">✈️ 并联冗余（活 1 个就能飞）：R = 1 - (${100 - rPct}%)^${N} = ${(rParallel * 100).toFixed(4)}%</text>`;
+      const showN = Math.min(N, 5);
+      const yStart = 132, ySpan = 74;
+      s += `<line x1="60" y1="${yStart}" x2="60" y2="${yStart + ySpan}" stroke="#10b981" stroke-width="3"/>`;
+      s += `<line x1="500" y1="${yStart}" x2="500" y2="${yStart + ySpan}" stroke="#10b981" stroke-width="3"/>`;
+      for (let i = 0; i < showN; i++) {
+        const y = showN === 1 ? yStart + ySpan / 2 : yStart + (i * ySpan) / (showN - 1);
+        s += `<line x1="60" y1="${y.toFixed(1)}" x2="500" y2="${y.toFixed(1)}" stroke="#10b981" stroke-width="2"/>`;
+        s += `<rect x="242" y="${(y - 11).toFixed(1)}" width="76" height="22" rx="6" fill="#064e3b" stroke="#34d399" stroke-width="1.5"/>`;
+        s += `<text x="280" y="${(y + 4).toFixed(1)}" text-anchor="middle" fill="#a7f3d0" font-size="10.5" font-weight="800">${i === 4 && N > 5 ? `+${N - 4} 路冗余` : `引擎 ${i + 1} (${rPct}%)`}</text>`;
+      }
+
+      document.getElementById("relSvg").innerHTML = s;
+      document.getElementById("ahaBox").innerHTML = `💡 <strong>反直觉的数学真相：</strong>同样是 <strong>${N} 个 ${rPct}% 可靠的零件</strong>——串成流水线时，可靠率暴跌到 <strong>${(rSeries * 100).toFixed(1)}%</strong>（越复杂越脆弱）；改成并联冗余时，可靠率飙升到 <strong>${(rParallel * 100).toFixed(4)}%</strong>（廉价零件也能造出航天级稳定）！`;
+    }
+
+    ["nSl", "rSl"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        moves++;
+        render();
+        if (moves >= 3 && window.ToySDK) window.ToySDK.markCompleted();
+      });
+    });
+    render();
+  </script>
+</body>
+</html>

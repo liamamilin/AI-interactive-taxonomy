@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>单点故障（SPOF）排查 · 交互实验目录</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css" />
+  <script src="../../../shared/toy-sdk.js"></script>
+  <style>
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .hub-card {
+      display: flex; flex-direction: column; gap: 10px;
+      text-decoration: none; color: inherit;
+      background: var(--tax-surface); border: 1px solid var(--tax-border);
+      border-radius: 16px; padding: 20px; box-shadow: var(--tax-shadow);
+      transition: transform 0.16s ease, border-color 0.16s ease;
+    }
+    .hub-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .hub-icon { font-size: 32px; }
+    .hub-tag { font-size: 12px; font-weight: 700; color: var(--tax-primary); }
+    .hub-title { font-size: 18px; font-weight: 850; }
+    .hub-desc { font-size: 13.5px; color: var(--tax-muted); }
+  </style>
+</head>
+<body class="tax-toy">
+  <div class="tax-wrap">
+    <div class="tax-topbar">
+      <div>
+        <h1>🎯 单点故障（SPOF）排查</h1>
+        <p>花了大价钱买 10 台服务器做集群，为什么拔掉一根网线或挂掉一台数据库，全站照样瞬间瘫痪？</p>
+      </div>
+      <a class="tax-back" href="../../../index.html">← 返回全领域图谱</a>
+    </div>
+
+    <div class="hub-grid">
+      <a class="hub-card" href="./01-spof-architecture-svg.html">
+        <div class="hub-icon">💣</div>
+        <div class="hub-tag">玩具 01 · 架构排雷（Spatial）</div>
+        <div class="hub-title">架构图单点排雷：点击炸掉任意节点看全站活不活</div>
+        <div class="hub-desc">化身混沌工程猴子，挨个击毁系统里的各个组件，一眼看清哪些节点是真正致命的 SPOF。</div>
+      </a>
+      <a class="hub-card" href="./02-eliminate-spof-builder.html">
+        <div class="hub-icon">🔧</div>
+        <div class="hub-tag">玩具 02 · 高可用改造（Builder）</div>
+        <div class="hub-title">高可用改造工坊：逐个消灭 4 处隐藏单点</div>
+        <div class="hub-desc">从软件网关、数据库到物理市电与团队巴士系数，亲手把单点数量从 4 降到 0。</div>
+      </a>
+      <a class="hub-card" href="./03-hidden-spof-detective.html">
+        <div class="hub-icon">🕵️</div>
+        <div class="hub-tag">玩具 03 · 伪冗余侦破（Scenario）</div>
+        <div class="hub-title">隐藏单点侦探社：以为做了双活，为何还是团灭？</div>
+        <div class="hub-desc">剖析 3 起现实中“两根光纤埋在同一条沟里”式的伪冗余翻车事故，炼成架构火眼金睛。</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
