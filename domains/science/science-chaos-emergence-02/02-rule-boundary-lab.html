@@ -39,6 +39,8 @@
     function pick(i){
       seen.add(i); [0,1,2].forEach(k=>document.getElementById("r"+k).classList.toggle("active",k===i));
       document.getElementById("box").innerHTML=txt[i];
+      const ahaMsgs=["💀 规则太苛刻（秩序死寂区）：结构无法繁衍，宇宙迅速热寂。","🦋 黄金混沌边缘（B3/S23）：恰好处在死寂与爆炸的狭窄相变线上，才涌现出计算与生命！","💥 规则太宽松（混沌噪点区）：信息被失控繁殖的随机噪点彻底淹没。"];
+      document.getElementById("ahaBox").innerHTML="💡 <strong>顿悟时刻（Aha! Moment）：</strong>"+ahaMsgs[i];
       if(seen.size>=3 && window.ToySDK) window.ToySDK.markCompleted();
     }
     pick(1);

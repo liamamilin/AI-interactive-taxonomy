@@ -36,6 +36,7 @@
       document.getElementById("svg").innerHTML=m===0
         ? `<rect x="200" y="45" width="140" height="70" rx="12" fill="#ef4444" fill-opacity="0.2" stroke="#ef4444" stroke-width="2"/><text x="270" y="85" text-anchor="middle" font-size="14" font-weight="800" fill="#ef4444">2 bits → 1 bit (丢 1 bit 必发热)</text>`
         : `<rect x="200" y="45" width="140" height="70" rx="12" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="2"/><text x="270" y="85" text-anchor="middle" font-size="14" font-weight="800" fill="#10b981">2 bits → 2 bits (零擦除理论上零发热)</text>`;
+      document.getElementById("ahaBox").innerHTML=m===0?"💡 <strong>不可逆逻辑门（AND/OR）的物理税：</strong>2 比特输入合并成 1 比特输出，丢失的 1 比特信息无法凭空消失，必须以 kT ln2 废热散出！":"💡 <strong>可逆计算的极限梦想：</strong>保留完整输入输出映射不擦除任何比特，理论上就能绕过兰道尔热力学功耗底线！";
       if(seen.size>=2 && window.ToySDK) window.ToySDK.markCompleted();
     }
     pick(0);

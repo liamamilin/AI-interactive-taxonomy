@@ -36,6 +36,7 @@
       let pts=[];
       for(let i=0;i<=100;i+=2) pts.push(`${i===0?'M':'L'}${(40+i*4.6).toFixed(1)},${(165-sig(i)*135).toFixed(1)}`);
       document.getElementById("svg").innerHTML=`<line x1="40" y1="165" x2="500" y2="165" stroke="var(--tax-border)"/><path d="${pts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="3"/><circle cx="${40+x*4.6}" cy="${165-sig(x)*135}" r="6" fill="#ef4444" stroke="#fff" stroke-width="2"/>`;
+      document.getElementById("ahaBox").innerHTML=x<55?`💡 <strong>安全亚临界区（密度 ${x}%）：</strong>火势被空地天然截断，几乎烧不到对岸（贯通概率 ${(sig(x)*100).toFixed(0)}%）。`:x<=64?`💡 <strong>⚡ 正处 59.3% 渗流相变悬崖（密度 ${x}%）！</strong>树木仅增加几个百分点，贯通概率就从 15% 垂直跳升至 ${(sig(x)*100).toFixed(0)}%！`:`💡 <strong>🔥 超临界全林失守（密度 ${x}%）：</strong>贯通概率高达 ${(sig(x)*100).toFixed(0)}%，一点火星就会瞬间烧穿整片森林！`;
       m++; if(m>=3 && window.ToySDK) window.ToySDK.markCompleted();
     }
     render();

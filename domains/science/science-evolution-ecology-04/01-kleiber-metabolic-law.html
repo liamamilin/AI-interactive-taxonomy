@@ -41,6 +41,7 @@
         <rect x="210" y="90" width="${Math.max(12,wReal).toFixed(1)}" height="24" rx="5" fill="#10b981"/>
         <text x="270" y="145" text-anchor="middle" font-size="13" font-weight="800" fill="#10b981">单位体重节能比例：节省 ${Math.round((1-real/M)*100)}%！</text>
       `;
+      document.getElementById("ahaBox").innerHTML=`💡 <strong>克莱伯 3/4 次幂规模经济（体重 ${M}×）：</strong>如果按线性估算需耗能 ${M} 倍，但受限于分形血管输送网络，真实耗能仅需 <strong>${real} 倍</strong>——单位体重足足节能 <strong>${Math.round((1-real/M)*100)}%</strong>！`;
       m++; if(m>=3 && window.ToySDK) window.ToySDK.markCompleted();
     }
     render();

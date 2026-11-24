@@ -38,6 +38,7 @@
         <rect x="60" y="55" width="${hit*4.2}" height="34" rx="8" fill="#10b981"/>
         <text x="270" y="128" text-anchor="middle" font-size="15" font-weight="850" fill="var(--tax-primary)">需免疫人口比例 ≥ ${hit.toFixed(1)}% 即可阻断流行</text>
       `;
+      document.getElementById("ahaBox").innerHTML=r0>=8?`💡 <strong>极高传染病（R0=${r0.toFixed(1)}，如麻疹）：</strong>群体免疫门槛高达 <strong>${hit.toFixed(1)}%</strong>，只要有 10% 的人漏种疫苗就足以卷土重来！`:`💡 <strong>群体免疫公式 1 - 1/R0（当前 R0=${r0.toFixed(1)}）：</strong>只需阻断 <strong>${hit.toFixed(1)}%</strong> 的人群易感通道，有效传染数 Rt 就会跌破 1.0 使疫情自然熄灭！`;
       m++; if(m>=3 && window.ToySDK) window.ToySDK.markCompleted();
     }
     render();

@@ -35,7 +35,8 @@
       pts.push([nx,ny]); if(pts.length>90) pts.shift();
       const d=pts.map((p,i)=>`${i===0?'M':'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
       document.getElementById("svg").innerHTML=`<path d="${d}" fill="none" stroke="var(--tax-primary)" stroke-width="2" opacity="0.65"/><circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="9" fill="#f59e0b" stroke="#fff" stroke-width="2"/>`;
-      steps++; if(steps===45 && window.ToySDK) window.ToySDK.markCompleted();
+      steps++; if(steps%15===0){ const dist=Math.hypot(nx-250,ny-100); document.getElementById("ahaBox").innerHTML=`💡 <strong>随机游走第 ${steps} 步（距起点 ${dist.toFixed(0)} px）：</strong>花粉看似漫无目的抖动，其实是被每秒数万亿次看不见的水分子撞击所致——爱因斯坦正是借此一举证明了原子真实存在！`; }
+      if(steps===45 && window.ToySDK) window.ToySDK.markCompleted();
     }
     setInterval(step, 90);
     </script>

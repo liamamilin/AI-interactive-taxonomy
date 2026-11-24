@@ -47,6 +47,7 @@
         <path d="${pR.join(' ')}" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="4,3"/>
         <path d="${pI.join(' ')}" fill="none" stroke="#ef4444" stroke-width="3"/>
       `;
+      document.getElementById("ahaBox").innerHTML=r0>=2.8?`💡 <strong>🚨 高 R0（${r0.toFixed(1)}）医疗挤兑警报：</strong>红峰又高又尖，大量感染者在极短时间内撞穿医院床位上限！`:r0<=1.6?`💡 <strong>🛡️ 成功“压平曲线”（R0=${r0.toFixed(1)}）：</strong>感染高峰大幅推迟且腰斩，为医疗体系和疫苗研发赢得了宝贵时间！`:`💡 <strong>SIR 传播演化（R0=${r0.toFixed(1)}）：</strong>拖动滑块将 R0 压低到 1.5 以下，亲眼见证红色感染尖峰如何被压平！`;
       m++; if(m>=3 && window.ToySDK) window.ToySDK.markCompleted();
     }
     render();

@@ -52,6 +52,7 @@
       const s0=tr(0,0),s1=tr(1,0),s2=tr(1,1),s3=tr(0,1);
       html+=`<polygon points="${s0} ${s1} ${s2} ${s3}" fill="var(--tax-primary)" fill-opacity="0.3" stroke="var(--tax-primary)" stroke-width="2.5"/>`;
       document.getElementById("svg").innerHTML=html;
+      document.getElementById("ahaBox").innerHTML=Math.abs(det)<0.05?"💡 <strong>⚠️ 奇异矩阵降维压缩（det = 0）：</strong>整个二维平面被压扁成一条线，信息不可逆丢失（矩阵不可逆）！":`💡 <strong>行列式的几何本质（det = ${det.toFixed(2)}×）：</strong>矩阵不是枯燥的数字表，而是对整个空间的线性拉伸/旋转——单位正方形面积恰好缩放了 <strong>${Math.abs(det).toFixed(2)} 倍</strong>！`;
       if(seen.size>=3 && window.ToySDK) window.ToySDK.markCompleted();
     }
     setM(1,0,0,1,0);

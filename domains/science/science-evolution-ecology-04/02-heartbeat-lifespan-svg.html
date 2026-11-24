@@ -43,6 +43,7 @@
         <text x="270" y="55" text-anchor="middle" font-size="18" font-weight="900" fill="var(--tax-primary)">${a.name}一生总心跳 ≈ ${tot} 亿次</text>
         <text x="270" y="95" text-anchor="middle" font-size="13" fill="var(--tax-muted)">每分钟 ${a.bpm} 次 × 寿命 ${a.yrs} 年（均落在 ~4 到 12 亿次同一数量级！）</text>
       `;
+      document.getElementById("ahaBox").innerHTML=`💡 <strong>生命节拍守恒（${a.name}）：</strong>虽然体型相差百万倍、心跳从 600 次/分降到 8 次/分，但 ${a.name} 一生总心跳约 <strong>${tot} 亿次</strong>——哺乳动物仿佛都领到了差不多数量的心跳额度！`;
       if(seen.size>=3 && window.ToySDK) window.ToySDK.markCompleted();
     }
     pick(0);

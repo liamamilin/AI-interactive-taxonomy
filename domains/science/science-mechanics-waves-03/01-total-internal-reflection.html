@@ -32,7 +32,7 @@
     function render(){
       const ang=+document.getElementById("aS").value;
       document.getElementById("aOut").textContent=ang+"°";
-      const tir=ang>=60;
+      const tir=ang>=60; document.getElementById("ahaBox").innerHTML=tir?`💡 <strong>✅ 全反射锁光成功（入射角 ${ang}° ≥ 60° 临界角）：</strong>激光 100% 反射回玻璃纤维内芯，几乎零损耗跨越太平洋！`:`💡 <strong>🚨 光纤漏光警报（入射角 ${ang}° < 60°）：</strong>角度太陡穿透包层射出管外，这正是光纤弯曲半径过小会导致断网丢包的物理原因！`;
       const stepX=Math.tan(ang*Math.PI/180)*70;
       let ray="";
       if(tir){

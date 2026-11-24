@@ -37,6 +37,7 @@
         <ellipse cx="210" cy="100" rx="${r*1.8}" ry="${r*0.95}" fill="none" stroke="var(--tax-primary)" stroke-width="3" stroke-dasharray="6,3"/>
         <text x="210" y="190" text-anchor="middle" font-size="12" fill="var(--tax-muted)">横轴：兔子数量 → · 纵轴：狐狸数量 ↑</text>
       `;
+      document.getElementById("ahaBox").innerHTML=r>=65?`💡 <strong>大幅偏离平衡点（扰动 ${r}%）：</strong>生态相空间画出一个巨大闭环，意味着种群在“爆棚”与“濒临灭绝”之间剧烈摆荡！`:`💡 <strong>温和生态环（扰动 ${r}%）：</strong>偏离平衡点越小，环越紧凑稳定；试着拉大初始扰动，观察闭环如何逼近灭绝边缘！`;
       m++; if(m>=3 && window.ToySDK) window.ToySDK.markCompleted();
     }
     render();

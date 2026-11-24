@@ -37,6 +37,7 @@
       let pts=[];
       for(let i=0;i<=100;i+=2) pts.push(`${i===0?'M':'L'}${(30+i*4.8).toFixed(1)},${(170-h(i)).toFixed(1)}`);
       document.getElementById("svg").innerHTML=`<path d="${pts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="3"/><circle cx="${30+x*4.8}" cy="${170-h(x)}" r="7" fill="#ef4444"/><text x="${30+80*4.8}" y="26" text-anchor="middle" font-size="12" font-weight="800" fill="#10b981">全局最高峰（隔着低谷爬不过去）</text>`;
+      document.getElementById("ahaBox").innerHTML=x>=34?`💡 <strong>🏔️ 卡死在局部小山峰（x=35）！</strong>尽管右侧 x=80 处有更高的全局巅峰，但自然选择只肯“一步步往上爬”，绝不肯先下山谷变差，因此锁死在局部最优！`:`💡 <strong>爬山演化中（当前位置 x=${x.toFixed(0)}）：</strong>继续推动演化代数，看物种如何爬上眼前的小山坡却永远跨不过山谷！`;
       m++; if(s>=60 && m>1 && window.ToySDK) window.ToySDK.markCompleted();
     }
     render();

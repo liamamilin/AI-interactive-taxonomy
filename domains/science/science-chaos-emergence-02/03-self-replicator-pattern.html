@@ -35,6 +35,8 @@
       seen.add(i); [0,1,2].forEach(k=>document.getElementById("m"+k).classList.toggle("active",k===i));
       const pts=i===0?[[4,2],[4,3],[5,2],[5,3]]:i===1?[[4,2],[4,3],[4,4]]:[[2,3],[3,4],[4,2],[4,3],[4,4]];
       document.getElementById("svg").innerHTML=pts.map(([r,c])=>`<rect x="${c*30+40}" y="${r*18+10}" width="26" height="16" rx="3" fill="var(--tax-primary)"/>`).join("");
+      const ahaM=["🧱 静物（方块）：像计算机里的静态内存（RAM），能永久锁住 1 比特状态。","⏱️ 振荡器（闪烁体）：像 CPU 的系统时钟晶振，提供稳定节拍脉冲！","🛸 滑翔机（飞船）：像芯片里的导线总线，把信号跨越空间传递给逻辑门——三者组合即可实现图灵完备！"];
+      document.getElementById("ahaBox").innerHTML="💡 <strong>顿悟时刻（Aha! Moment）：</strong>"+ahaM[i];
       if(seen.size>=3 && window.ToySDK) window.ToySDK.markCompleted();
     }
     pick(0);

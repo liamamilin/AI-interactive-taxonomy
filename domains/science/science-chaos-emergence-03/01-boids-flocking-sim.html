@@ -30,7 +30,8 @@
   </div>
   <script>
     const cfg={align:true, coh:true}; let clicks=0;
-    function tog(k){ cfg[k]=!cfg[k]; document.getElementById(k==='align'?'bAlign':'bCoh').classList.toggle("active",cfg[k]); clicks++; if(clicks>=2 && window.ToySDK) window.ToySDK.markCompleted(); }
+    function tog(k){ cfg[k]=!cfg[k]; document.getElementById(k==='align'?'bAlign':'bCoh').classList.toggle("active",cfg[k]); clicks++;
+      document.getElementById("ahaBox").innerHTML=(cfg.align&&cfg.coh)?"💡 <strong>群体涌现生效：</strong>对齐+凝聚+分离三条局部规则同时开启，无需领头鸟也能瞬间编队飞行！":(!cfg.align&&!cfg.coh)?"💡 <strong>失去对齐与凝聚：</strong>鸟群瞬间退化成一盘各自乱撞的散沙！":"💡 <strong>缺了一条规则：</strong>注意看少掉【"+(cfg.align?"凝聚":"对齐")+"】后，鸟群"+(cfg.align?"方向一致却越飞越散！":"挤成一团却杂乱打转！"); if(clicks>=2 && window.ToySDK) window.ToySDK.markCompleted(); }
     const boids=Array.from({length:22},()=>({x:Math.random()*500,y:Math.random()*210,vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3}));
     function tick(){
       boids.forEach(b=>{

@@ -56,6 +56,7 @@
         if(g[r][c]) html+=`<rect x="${c*15+1}" y="${r*15+4}" width="13" height="13" rx="3" fill="var(--tax-primary)"/>`;
       }
       document.getElementById("svg").innerHTML=html;
+      const alive=g.flat().reduce((a,b)=>a+b,0); document.getElementById("ahaBox").innerHTML=alive===5?`💡 <strong>第 ${gen} 代（滑翔机稳定巡航）：</strong>恰好 5 个细胞不断变形自驱动向右下飞行，没有任何中央指令！`:`💡 <strong>第 ${gen} 代（当前存活 ${alive} 个细胞）：</strong>局部 B3/S23 规则正在自组织演化，观察它最终收敛为静物、振荡器还是飞船！`;
       if(gen===20 && window.ToySDK) window.ToySDK.markCompleted();
     }
     spawnGlider();

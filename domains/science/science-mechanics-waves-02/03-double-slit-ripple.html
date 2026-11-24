@@ -45,6 +45,7 @@
         ${bars}
         <text x="490" y="175" text-anchor="middle" font-size="10" fill="var(--tax-muted)">干涉条纹</text>
       `;
+      document.getElementById("ahaBox").innerHTML=d>=8?`💡 <strong>狭缝越宽（d=${d}），条纹越密！</strong>因为两列波到达屏幕的波程差变化更剧烈，明暗干涉条纹间距与缝距 d 成反比！`:`💡 <strong>波动干涉铁证（缝距 d=${d}）：</strong>光和电子穿过双缝后波峰波谷叠加出明暗条纹——调大缝距 d，看条纹如何迅速加密！`;
       m++; if(m>=3 && window.ToySDK) window.ToySDK.markCompleted();
     }
     render();

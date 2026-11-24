@@ -50,6 +50,7 @@
       }
       const p=a=>a.map((x,i)=>`${i===0?'M':'L'}${x[0].toFixed(1)},${x[1].toFixed(1)}`).join(" ");
       document.getElementById("vSvg").innerHTML=`<line x1="20" y1="130" x2="240" y2="130" stroke="var(--tax-border)"/><path d="${p(vp)} L240,130 L20,130 Z" fill="var(--tax-primary)" fill-opacity="0.2"/><path d="${p(vp)}" fill="none" stroke="var(--tax-primary)" stroke-width="2.5"/>`;
+      const ahaM=["🚀 匀加速运动：速度斜线上升 → 面积（位移）呈开口向上的抛物线加速飙升！","🚗 匀速巡航：速度水平线 → 面积（位移）匀速直线增长，斜率恒定！","🛑 刹车减速：速度斜线归零 → 位移曲线越来越平缓，斜率即瞬时速度！"]; document.getElementById("ahaBox").innerHTML="💡 <strong>微积分基本定理：</strong>"+ahaM[m];
       document.getElementById("sSvg").innerHTML=`<line x1="20" y1="130" x2="240" y2="130" stroke="var(--tax-border)"/><path d="${p(sp)}" fill="none" stroke="#10b981" stroke-width="2.5"/>`;
       if(seen.size>=2 && window.ToySDK) window.ToySDK.markCompleted();
     }

@@ -47,6 +47,7 @@
         on.forEach(k=>y+=Math.sin(k*x));
         pts.push(`${i===0?'M':'L'}${(10+i*2).toFixed(1)},${(75-y*20).toFixed(1)}`);
       }
+      const freqs=Array.from(on).sort((a,b)=>a-b).join("Hz + ")+"Hz"; document.getElementById("ahaBox").innerHTML=on.size>=3?`💡 <strong>🌈 傅里叶棱镜奇迹（${freqs}）：</strong>左图时域波形已乱成一团毛线，但右图频域棱镜瞬间把它还原成 3 根清晰独立的音高竖柱！`:`💡 <strong>当前激活频率（${freqs}）：</strong>试着同时点亮全部 3 个音符，对比时域混乱波形与频域极简柱状图！`;
       document.getElementById("tSvg").innerHTML=`<path d="${pts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="2"/>`;
       let bars="";
       for(let k=1;k<=8;k++){

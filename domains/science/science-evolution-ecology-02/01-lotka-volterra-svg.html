@@ -40,6 +40,7 @@
         x=Math.max(1,x+dx); y=Math.max(1,y+dy);
       }
       document.getElementById("svg").innerHTML=`<line x1="30" y1="180" x2="510" y2="180" stroke="var(--tax-border)"/><path d="${px.join(' ')}" fill="none" stroke="#10b981" stroke-width="2.5"/><path d="${py.join(' ')}" fill="none" stroke="#ef4444" stroke-width="2.5"/>`;
+      document.getElementById("ahaBox").innerHTML=alpha>=1.3?`💡 <strong>高繁殖率（α=${alpha.toFixed(1)}）引发剧烈过山车：</strong>兔子暴涨养肥狐狸，狐狸暴涨又把兔子吃光，生态波动幅度显著加大！`:alpha<=0.8?`💡 <strong>低繁殖率（α=${alpha.toFixed(1)}）：</strong>生态循环周期拉长、波幅趋缓，但红色狐狸波峰依然永远滞后于绿色兔子半拍！`:`💡 <strong>经典洛特卡-沃尔泰拉周期（α=${alpha.toFixed(1)}）：</strong>捕食者波峰永远慢猎物半拍，这就是延迟负反馈制造的永动生态波浪！`;
       m++; if(m>=3 && window.ToySDK) window.ToySDK.markCompleted();
     }
     render();
