@@ -1,69 +1,145 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>✨ 视·听·触三感官同步微反馈仪（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>视·听·触三感官同步微反馈仪</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .tog-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+    @media (max-width: 600px) { .tog-row { grid-template-columns: 1fr; } }
+    .tog-btn {
+      padding: 10px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+    .tog-btn.on { border-color: var(--tax-green); background: var(--tax-green-soft); color: var(--tax-green); }
+    .pad-stage {
+      padding: 28px; border-radius: 14px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border);
+      text-align: center;
+    }
+    .big-key {
+      width: 170px; height: 64px; border-radius: 16px; border: 2px solid var(--tax-primary);
+      background: var(--tax-primary); color: #fff; font-size: 17px; font-weight: 900;
+      cursor: pointer; position: relative; transition: transform .08s, box-shadow .12s;
+      box-shadow: 0 6px 0 rgba(29,78,216,0.75);
+    }
+    @keyframes microShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-2px); }
+      75% { transform: translateX(2px); }
+    }
+    .shake { animation: microShake .11s linear; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>✨ 视·听·触三感官同步微反馈仪（SVG）</h1><p>人脑把“眼睛看到按钮按下 + 耳朵听到咔哒声 + 指尖感到微震”合并成真实物理材质的前提是：三者时间差必须死死锁在 50 毫秒以内！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>视/听/触三通道同步误差（ms）</span><span id="vLag">18 ms（完美融合）</span></label><input type="range" id="sLag" min="0" max="180" step="6" value="18" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>协同开启的感官通道数（1=仅视觉，3=视+听+触）</span><span id="vCh">3 通道</span></label><input type="range" id="sCh" min="1" max="3" value="3" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>✨ 视·听·触三感官同步微反馈仪（多模态盲测）</h1>
+      <p>为什么实体机械按键和苹果 Taptic Engine 让人按到上瘾？因为大脑把 <strong>50 毫秒内同时抵达的视觉 + 听觉 + 触觉</strong>融合为极致的“真实实体感”！分别开关三个通道，按下中央大按钮体验质感跃迁（请打开设备声音）：</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="tog-row">
+        <button class="tog-btn" id="vBtn">○ 👁️ 视觉形变回弹：关</button>
+        <button class="tog-btn" id="aBtn">○ 🔊 听觉清脆咔嗒声：关</button>
+        <button class="tog-btn" id="hBtn">○ 📳 触觉微震脉冲：关</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">物理实体真实错觉分</div><div class="k-val" id="kReal">—</div></div>
-        <div class="kpi"><div class="k-lbl">大脑融合判定</div><div class="k-val" id="kFus">—</div></div>
+
+      <div class="pad-stage" id="padStage">
+        <button class="big-key" id="bigKey">按下体验手感</button>
+        <div id="feelTxt" style="font-size:13px;color:var(--tax-muted);margin-top:14px;">当前开启 0 / 3 感官通道（像按在死掉的玻璃板上）</div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>多模态同步实验：</strong>先在 0 通道下按一次（毫无反馈，甚至怀疑没点上）；再依次打开视觉、听觉（Web Audio 实时合成清脆开关声）与微震动，感受“死玻璃”变成“实体机械键”的魔法！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const lag=+document.getElementById('sLag').value, ch=+document.getElementById('sCh').value;
-  document.getElementById('vLag').textContent=lag+' ms';
-  document.getElementById('vCh').textContent=ch+' 通道';
-  const synced=lag<=50;
-  const real=Math.max(15, Math.min(99, Math.round(45 + ch*18 - Math.max(0, lag-20)*0.52)));
-  document.getElementById('kReal').textContent=real+' 分';
-  document.getElementById('kReal').style.color=real>=75?'#059669':'#ef4444';
-  document.getElementById('kFus').textContent=synced?'✨ 完美融合成实体机械质感!':'💥 音画/触觉脱节，出戏割裂';
-  const xV=130, xA=130+lag*1.6, xH=130+lag*2.0;
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">三通道触发时间轴（绿区 = 50ms 大脑无缝融合窗口）</text>
-    <rect x="130" y="42" width="80" height="126" fill="#059669" opacity="0.14"/>
-    <text x="20" y="74" font-size="12" font-weight="750" fill="var(--tax-text)">👁️ 视觉形变</text>
-    <rect x="${xV}" y="58" width="54" height="22" rx="5" fill="#3b82f6"/>
-    <text x="20" y="114" font-size="12" font-weight="750" fill="var(--tax-text)">🔊 轻声咔哒</text>
-    <rect x="${Math.min(500,xA).toFixed(0)}" y="98" width="54" height="22" rx="5" fill="${ch>=2?'#f59e0b':'#cbd5e1'}"/>
-    <text x="20" y="154" font-size="12" font-weight="750" fill="var(--tax-text)">📳 马达微震</text>
-    <rect x="${Math.min(500,xH).toFixed(0)}" y="138" width="54" height="22" rx="5" fill="${ch>=3?'#059669':'#cbd5e1'}"/>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>一块冰冷的平面玻璃屏之所以能摸出“物理按键”的质感，全靠视、听、触三通道在 50ms 窗口内的精准齐射！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let chV = false, chA = false, chH = false, done = false;
+    let audioCtx = null;
+
+    const vBtn = document.getElementById('vBtn');
+    const aBtn = document.getElementById('aBtn');
+    const hBtn = document.getElementById('hBtn');
+    const bigKey = document.getElementById('bigKey');
+    const padStage = document.getElementById('padStage');
+    const feelTxt = document.getElementById('feelTxt');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function playClickSound() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(680, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(190, audioCtx.currentTime + 0.035);
+        gain.gain.setValueAtTime(0.22, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.045);
+      } catch (e) {}
+    }
+
+    function renderToggles() {
+      const cnt = [chV, chA, chH].filter(Boolean).length;
+      vBtn.classList.toggle('on', chV);
+      aBtn.classList.toggle('on', chA);
+      hBtn.classList.toggle('on', chH);
+      vBtn.textContent = (chV ? '✓ ' : '○ ') + '👁️ 视觉形变回弹：' + (chV ? '开' : '关');
+      aBtn.textContent = (chA ? '✓ ' : '○ ') + '🔊 听觉清脆咔嗒声：' + (chA ? '开' : '关');
+      hBtn.textContent = (chH ? '✓ ' : '○ ') + '📳 触觉微震脉冲：' + (chH ? '开' : '关');
+      feelTxt.textContent = cnt === 0
+        ? '当前开启 0 / 3 感官通道（毫无反馈，像戳死玻璃）'
+        : `当前已同步开启 ${cnt} / 3 感官通道 —— 快按上方大按钮试试！`;
+    }
+
+    bigKey.onclick = () => {
+      markDone('体验了视听触三感官同步微反馈');
+      const cnt = [chV, chA, chH].filter(Boolean).length;
+
+      if (chV) {
+        bigKey.animate([
+          { transform: 'translateY(0) scale(1)', boxShadow: '0 6px 0 rgba(29,78,216,0.75)' },
+          { transform: 'translateY(5px) scale(0.96)', boxShadow: '0 1px 0 rgba(29,78,216,0.75)' },
+          { transform: 'translateY(-1px) scale(1.02)', boxShadow: '0 7px 0 rgba(29,78,216,0.75)' },
+          { transform: 'translateY(0) scale(1)', boxShadow: '0 6px 0 rgba(29,78,216,0.75)' }
+        ], { duration: 190, easing: 'ease-out' });
+      }
+      if (chA) playClickSound();
+      if (chH) {
+        if (navigator.vibrate) navigator.vibrate(18);
+        padStage.classList.remove('shake');
+        void padStage.offsetWidth;
+        padStage.classList.add('shake');
+      }
+
+      if (cnt === 3) {
+        ahaBox.innerHTML = '<strong>三感官黄金同步（< 30ms 融合）！</strong>按下去的瞬间视觉下陷 + 清脆咔嗒声 + 轻微触觉脉冲同时抵达大脑，产生“像按动真实开关”的极高确定感！';
+      } else if (cnt === 0) {
+        ahaBox.innerHTML = '<strong>零反馈死玻璃感：</strong>刚才你点了按钮，但什么都没动、没响，大脑瞬间陷入“我点上了吗？”的怀疑！把上面三个感官通道全打开再按一次！';
+      } else {
+        ahaBox.innerHTML = `<strong>已开启 ${cnt} / 3 通道：</strong>手感明显活起来了！把 3 个通道全打开，体验多感官叠加的 1+1+1 > 3 协同效应！`;
+      }
+    };
+
+    vBtn.onclick = () => { chV = !chV; renderToggles(); };
+    aBtn.onclick = () => { chA = !chA; renderToggles(); };
+    hBtn.onclick = () => { chH = !chH; renderToggles(); };
+    renderToggles();
   </script>
 </body>
 </html>

@@ -1,66 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📳 微反馈的克制律：处处震动等于全屏噪音</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>微反馈的克制律：处处震动等于全屏噪音</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ev-item {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      padding: 11px 13px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 8px;
+    }
+    .pill-btn {
+      padding: 6px 12px; border-radius: 999px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;
+    }
+    .pill-btn.on { border-color: var(--tax-primary); background: var(--tax-primary-soft); color: var(--tax-primary); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📳 微反馈的克制律：处处震动等于全屏噪音</h1><p>很多新手爱给每一次滑动、每一个按钮都加上叮咚音效和猛烈震动——不到 2 分钟，用户就会觉得烦躁不堪，直接去设置里一键全关！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>📳 微反馈的克制律：声音与震动配额审批（情景）</h1>
+      <p>音效和震动就像菜里的辣椒——<strong>放对 2 处是点睛之笔，满屏乱放就是灾难噪音！</strong>下面有 4 个 App 交互事件，请作为交互总监审批：哪些该配“音效+震动”，哪些必须保持“静默视觉”？</p>
+    </header>
+
+    <section class="toy-card">
+      <div id="evList"></div>
+
+      <svg id="scoreSvg" viewBox="0 0 680 95" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);margin-top:10px;" aria-label="微反馈克制律体验评分"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>审批原则：</strong>高价值里程碑（支付成功）和严重警报（输错密码）值得强反馈；而每秒发生几十次的高频滚动或悬停如果也震动发声，用户 10 秒内就会把你静音卸载！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>每分钟触发音效/震动的交互次数</span><span id="vFrq">4 次/分（仅关键节点）</span></label><input type="range" id="sFrq" min="1" max="30" value="4" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>单次震动/提示音的柔和克制度</span><span id="vSft">85%</span></label><input type="range" id="sSft" min="10" max="100" value="85" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">用户保留开启反馈率</div><div class="k-val" id="kKep">—</div></div>
-        <div class="kpi"><div class="k-lbl">体验评价</div><div class="k-val" id="kEv">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const frq=+document.getElementById('sFrq').value, sft=+document.getElementById('sSft').value;
-  document.getElementById('vFrq').textContent=frq+' 次/分';
-  document.getElementById('vSft').textContent=sft+'%';
-  const kep=Math.max(8, Math.min(96, Math.round(52 + sft*0.52 - Math.max(0, frq-5)*3.4)));
-  const ev=kep>=75?'✨ 精致克制，爱不释手':(kep>=45?'⚠️ 略显啰嗦吵闹':'🔇 烦躁透顶，立刻关静音!');
-  document.getElementById('kKep').textContent=kep+'%';
-  document.getElementById('kKep').style.color=kep>=75?'#059669':'#ef4444';
-  document.getElementById('kEv').textContent=ev;
-  const w=Math.max(15, kep*4.2);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">用户愿意长期保留微反馈的比例（高频滥用直接劝退）</text>
-    <rect x="30" y="68" width="440" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${w.toFixed(0)}" height="38" rx="8" fill="${kep>=75?'#059669':'#ef4444'}"/>
-    <text x="${Math.min(480,38+w).toFixed(0)}" y="93" font-size="14" font-weight="850" fill="${kep>=75?'#059669':'#ef4444'}">${kep}%</text>
-    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">把听觉和触觉微反馈留给真正有意义的“状态跃迁点”（支付成功、开关吸附、删除警告）！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>声音和震动就像做菜里的盐——撒一点提鲜，倒半袋就毁了整道菜！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const EVENTS = [
+      { id: 'pay',   title: '💳 支付成功 / 订单确认（低频高价值）', sub: '用户最需要确定感的关键里程碑', should: true,  on: true },
+      { id: 'err',   title: '🔐 密码输入错误（异常警示）',         sub: '需要立刻打断惯性、提醒用户纠错', should: true,  on: true },
+      { id: 'scroll',title: '📜 浏览信息流每滑过一条动态（高频）', sub: '每分钟触发 40+ 次的常规浏览动作', should: false, on: true },
+      { id: 'hover', title: '🖱️ 鼠标/手指每经过一个普通标签（极高频）', sub: '无状态改变的探索性移动',       should: false, on: true }
+    ];
+
+    let done = false;
+    const evList = document.getElementById('evList');
+    const svg = document.getElementById('scoreSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      evList.innerHTML = '';
+      EVENTS.forEach(ev => {
+        const div = document.createElement('div');
+        div.className = 'ev-item';
+        div.innerHTML = `
+          <div><div style="font-weight:700;font-size:13.5px;">${ev.title}</div><div style="font-size:11.5px;color:var(--tax-muted);margin-top:2px;">${ev.sub}</div></div>
+          <button class="pill-btn ${ev.on ? 'on' : ''}">${ev.on ? '🔊+📳 强视听震动' : '🤫 仅静默视觉'}</button>
+        `;
+        div.querySelector('button').onclick = () => {
+          ev.on = !ev.on;
+          markDone('审批了微反馈克制律配额');
+          render();
+        };
+        evList.appendChild(div);
+      });
+
+      const okCnt = EVENTS.filter(e => e.on === e.should).length;
+      const score = Math.round((okCnt / EVENTS.length) * 100);
+      const col = score === 100 ? 'var(--tax-green)' : (score >= 50 ? 'var(--tax-amber)' : 'var(--tax-red)');
+
+      let html = '';
+      html += `<text x="24" y="32" fill="var(--tax-ink)" font-size="13.5" font-weight="800">🎛️ 用户体感舒适度：${score} 分（${okCnt}/4 项配置合理）</text>`;
+      html += `<rect x="24" y="48" width="632" height="20" rx="10" fill="rgba(148,163,184,0.16)"/>`;
+      html += `<rect x="24" y="48" width="${(score / 100) * 632}" height="20" rx="10" fill="${col}"/>`;
+      svg.innerHTML = html;
+
+      if (score === 100) {
+        ahaBox.innerHTML = '<strong>顶级克制美学（100 分）！</strong>只在“支付成功”和“输错密码”两个关键节点释放精准的清脆音效与短促震动，把日常滑动与悬停留给安静的视觉反馈——让每一次震动都有分量、绝不产生感官疲劳！';
+      } else {
+        const noisy = EVENTS.filter(e => e.on && !e.should).length;
+        ahaBox.innerHTML = noisy > 0
+          ? `<strong>噪音警报（当前 ${score} 分）：</strong>你在高频浏览或悬停上开启了强震动/音效，手机像蜂鸣器一样震个不停！把那 ${noisy} 项调成「🤫 仅静默视觉」试试！`
+          : `<strong>反馈缺位（当前 ${score} 分）：</strong>支付成功或密码错误等关键节点缺少强感官确认，用户容易心里没底！把关键事件重新打开强反馈！`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

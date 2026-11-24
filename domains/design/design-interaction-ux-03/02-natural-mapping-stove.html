@@ -1,71 +1,125 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔥 自然映射：灶台旋钮为何总拧错火？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>自然映射：灶台旋钮为何总拧错火？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+    svg .knob { cursor: pointer; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔥 自然映射：灶台旋钮为何总拧错火？</h1><p>四个炉头排成 2×2 田字格，下面四个旋钮却排成一字长蛇阵——每次开火都要低头找半天图标；只需把旋钮错落摆成对应的田字形，闭着眼都不会拧错！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>旋钮与炉头的空间几何对齐度</span><span id="vMap">90%（田字自然映射）</span></label><input type="range" id="sMap" min="0" max="100" value="90" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>厨房忙碌分心程度</span><span id="vBsy">70%</span></label><input type="range" id="sBsy" min="10" max="100" value="70" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔥 自然映射：四眼灶台盲测（Don Norman 经典案例）</h1>
+      <p>想点燃<strong>右后方（带🔥标记）</strong>的炉头，请直接点击下方 4 颗旋钮之一！先体验「反人类一字排开旋钮」，再切换「空间自然映射旋钮」，感受认知负担瞬间归零的快感！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="badBtn">❌ 坏设计：一字排开 4 旋钮</button>
+        <button class="toy-btn secondary" id="goodBtn">✅ 好设计：空间自然映射旋钮</button>
+        <span id="fbTxt" style="font-size:13px;font-weight:700;color:var(--tax-primary);">任务：请点亮【右后方 🔥】炉头！</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">首次盲操拧错炉头概率</div><div class="k-val" id="kErr">—</div></div>
-        <div class="kpi"><div class="k-lbl">是否需要贴文字标签</div><div class="k-val" id="kLbl">—</div></div>
-      </div>
+
+      <svg id="stoveSvg" viewBox="0 0 680 245" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="四眼灶台自然映射盲测"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>自然映射（Natural Mapping）：</strong>在一字排开的 4 颗旋钮里，你能确定第 3 颗还是第 4 颗控制右后炉头吗？点击旋钮试试看，再切到「空间自然映射」对比！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const mp=+document.getElementById('sMap').value, bsy=+document.getElementById('sBsy').value;
-  document.getElementById('vMap').textContent=mp+'%';
-  document.getElementById('vBsy').textContent=bsy+'%';
-  const err=Math.max(1, Math.round((100-mp)*0.55 + bsy*0.18*(1-mp/100)));
-  document.getElementById('kErr').textContent=err+'%';
-  document.getElementById('kErr').style.color=err<15?'#059669':'#ef4444';
-  document.getElementById('kLbl').textContent=mp>=75?'❌ 零标签自解释':'⚠️ 必须靠小图标死记';
-  const dy=Math.round(mp*0.24);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">2×2 灶台与旋钮空间映射预览（拖动上方观察旋钮错落对齐）</text>
-    <rect x="165" y="42" width="270" height="92" rx="10" fill="#1e293b"/>
-    <circle cx="225" cy="68" r="18" fill="none" stroke="#f97316" stroke-width="4"/>
-    <circle cx="375" cy="68" r="18" fill="none" stroke="#f97316" stroke-width="4"/>
-    <circle cx="225" cy="112" r="18" fill="none" stroke="#38bdf8" stroke-width="4"/>
-    <circle cx="375" cy="112" r="18" fill="none" stroke="#38bdf8" stroke-width="4"/>
-    <circle cx="205" cy="${168-dy}" r="11" fill="#f97316"/>
-    <circle cx="265" cy="${168}" r="11" fill="#38bdf8"/>
-    <circle cx="335" cy="${168}" r="11" fill="#38bdf8"/>
-    <circle cx="395" cy="${168-dy}" r="11" fill="#f97316"/>
-    <text x="300" y="194" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">同理：汽车座椅调节按钮做成座椅形状，手摸上去立刻知道怎么调！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>最高级的交互说明就是“不需要说明书”——利用物理空间与动作的自然映射，把认知负荷直接降到零！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let goodMode = false;
+    let litBurner = null; // 'fl','bl','br','fr'
+    let done = false;
+
+    const svg = document.getElementById('stoveSvg');
+    const fbTxt = document.getElementById('fbTxt');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      document.getElementById('badBtn').className = !goodMode ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('goodBtn').className = goodMode ? 'toy-btn' : 'toy-btn secondary';
+
+      const burners = [
+        { id: 'bl', x: 250, y: 66,  name: '左后' },
+        { id: 'br', x: 430, y: 66,  name: '右后 🔥目标' },
+        { id: 'fl', x: 250, y: 146, name: '左前' },
+        { id: 'fr', x: 430, y: 146, name: '右前' }
+      ];
+
+      let html = '';
+      // Stove plate
+      html += `<rect x="170" y="18" width="340" height="168" rx="14" fill="rgba(148,163,184,0.12)" stroke="var(--tax-border)" stroke-width="2"/>`;
+      burners.forEach(b => {
+        const isLit = litBurner === b.id;
+        const isTarget = b.id === 'br';
+        html += `<circle cx="${b.x}" cy="${b.y}" r="28" fill="${isLit ? 'rgba(239,68,68,0.28)' : 'rgba(15,23,42,0.18)'}" stroke="${isLit ? 'var(--tax-red)' : (isTarget ? 'var(--tax-amber)' : 'var(--tax-muted)')}" stroke-width="${isLit || isTarget ? 3 : 1.8}"/>`;
+        html += `<text x="${b.x}" y="${b.y + 4}" text-anchor="middle" fill="var(--tax-ink)" font-size="11.5" font-weight="800">${b.name}</text>`;
+      });
+
+      // Knobs
+      const knobs = goodMode
+        ? [
+            // Staggered spatial layout matching 2x2 burners!
+            { id: 'bl', x: 225, y: 204, lbl: '↖' },
+            { id: 'fl', x: 275, y: 222, lbl: '↙' },
+            { id: 'br', x: 405, y: 204, lbl: '↗' },
+            { id: 'fr', x: 455, y: 222, lbl: '↘' }
+          ]
+        : [
+            // Confusing flat row (arbitrarily mapped fl, bl, fr, br!)
+            { id: 'fl', x: 220, y: 214, lbl: '1' },
+            { id: 'bl', x: 300, y: 214, lbl: '2' },
+            { id: 'fr', x: 380, y: 214, lbl: '3' },
+            { id: 'br', x: 460, y: 214, lbl: '4' }
+          ];
+
+      knobs.forEach(k => {
+        const active = litBurner === k.id;
+        html += `<g class="knob" data-id="${k.id}">`;
+        html += `<circle cx="${k.x}" cy="${k.y}" r="18" fill="${active ? 'var(--tax-primary)' : 'var(--tax-surface)'}" stroke="var(--tax-primary)" stroke-width="2"/>`;
+        html += `<text x="${k.x}" y="${k.y + 4}" text-anchor="middle" fill="${active ? '#fff' : 'var(--tax-ink)'}" font-size="12" font-weight="800">${k.lbl}</text>`;
+        html += `</g>`;
+      });
+
+      svg.innerHTML = html;
+      svg.querySelectorAll('.knob').forEach(g => {
+        g.onclick = () => {
+          litBurner = g.dataset.id;
+          markDone(`测试了灶台自然映射（${goodMode ? '空间映射' : '一字排开'}）`);
+          if (litBurner === 'br') {
+            fbTxt.textContent = goodMode
+              ? '🎯 一秒零思考命中右后炉头！这就是自然映射的魔力！'
+              : '🎯 蒙对了！但你刚才是靠猜的——下次换台灶台 3 和 4 的顺序可能正好相反！';
+            fbTxt.style.color = 'var(--tax-green)';
+          } else {
+            fbTxt.textContent = `💥 拧错了！你点着了【${burners.find(x => x.id === litBurner).name}】，再试一颗！`;
+            fbTxt.style.color = 'var(--tax-red)';
+          }
+          ahaBox.innerHTML = goodMode
+            ? '<strong>零记忆成本（空间自然映射）：</strong>把 4 颗旋钮微微错落排成与炉头一致的 2×2 几何关系，根本不需要贴小图标说明书，看一眼就能 100% 拧对！汽车座椅调节按钮做成“小椅子形状”也是同理！'
+            : '<strong>映射断裂的代价：</strong>一维排开的 4 颗旋钮对应二维 2×2 炉头，存在 24 种可能的映射关系！点「✅ 好设计：空间自然映射旋钮」看看大师怎么改！';
+          render();
+        };
+      });
+    }
+
+    document.getElementById('badBtn').onclick = () => { goodMode = false; litBurner = null; fbTxt.textContent = '任务：请点亮【右后方 🔥】炉头！'; fbTxt.style.color = 'var(--tax-primary)'; render(); };
+    document.getElementById('goodBtn').onclick = () => { goodMode = true; litBurner = null; fbTxt.textContent = '任务：请点亮【右后方 🔥】炉头！'; fbTxt.style.color = 'var(--tax-primary)'; markDone('切换到自然映射灶台布局'); render(); };
+    render();
   </script>
 </body>
 </html>

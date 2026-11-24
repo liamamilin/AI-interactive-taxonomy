@@ -1,74 +1,124 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>✨ 复节奏 3 对 4：两条脉冲交错出的魔幻网格</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>复节奏 3 对 4：两条脉冲交错出的魔幻网格</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .grid12 { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; margin-bottom: 8px; }
+    .cell {
+      padding: 10px 2px; border-radius: 7px; text-align: center; font-size: 11px; font-weight: 800;
+      background: var(--tax-surface-alt); border: 1px solid var(--tax-border); color: var(--tax-muted);
+    }
+    .cell.a { background: rgba(59,130,246,0.22); border-color: var(--tax-primary); color: var(--tax-primary); }
+    .cell.b { background: rgba(245,158,11,0.22); border-color: var(--tax-amber); color: var(--tax-amber); }
+    .cell.now { box-shadow: 0 0 0 2px var(--tax-green); transform: scale(1.06); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>✨ 复节奏 3 对 4：两条脉冲交错出的魔幻网格</h1><p>左手每循环打 3 下，右手同时打 4 下，两者在最小公倍数 12 格里不断错位又在第 1 拍准时重逢——这就是非洲鼓乐和现代前卫音乐的几何魔力！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>声部 A（蓝色）每循环击打次数</span><span id="vA">3 拍</span></label><input type="range" id="sA" min="2" max="6" value="3" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>声部 B（橙色）每循环击打次数</span><span id="vB">4 拍</span></label><input type="range" id="sB" min="2" max="6" value="4" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>✨ 复节奏 3 对 4：最小公倍数 12 格交错构建器</h1>
+      <p>左手匀速打 <strong>3 拍</strong>，右手在完全相同的时间里匀速打 <strong>4 拍</strong>——怎么算都不对劲？秘诀是找到最小公倍数 <strong>3 × 4 = 12 格</strong>！分别开关两条轨道并播放，听出非洲鼓与爵士乐的催眠交错网格！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="playBtn">▶ 播放 3 对 4 复节奏</button>
+        <button class="toy-btn secondary" id="togA">✓ 轨道 A（3 拍 · 每 4 格响）</button>
+        <button class="toy-btn secondary" id="togB">✓ 轨道 B（4 拍 · 每 3 格响）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">最小公倍数细网格</div><div class="k-val" id="kLcm">—</div></div>
-        <div class="kpi"><div class="k-lbl">交错复节奏张力</div><div class="k-val" id="kTen">—</div></div>
-      </div>
+
+      <div style="font-size:12px;color:var(--tax-primary);font-weight:700;margin-bottom:4px;">🔵 轨道 A：3 拍脉冲（第 1, 5, 9 格）</div>
+      <div class="grid12" id="rowA"></div>
+
+      <div style="font-size:12px;color:var(--tax-amber);font-weight:700;margin:8px 0 4px;">🟡 轨道 B：4 拍脉冲（第 1, 4, 7, 10 格）</div>
+      <div class="grid12" id="rowB"></div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>3 对 4 记忆神口诀：</strong>把 12 格连起来听，两轨合奏的节奏刚好是英语 <strong>“Pass the god-damn but-ter”（第 1、4、5、7、9、10 格）</strong>！试着先单独听一轨，再把两轨同时打开，感受交错瞬间的魔幻张力！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function gcd(a,b){ return b===0?a:gcd(b,a%b); }
-function draw(){
-  const a=+document.getElementById('sA').value, b=+document.getElementById('sB').value;
-  document.getElementById('vA').textContent=a+' 拍';
-  document.getElementById('vB').textContent=b+' 拍';
-  const lcm=(a*b)/gcd(a,b);
-  const coprime=gcd(a,b)===1;
-  document.getElementById('kLcm').textContent=lcm+' 细分格';
-  document.getElementById('kTen').textContent=coprime?'✨ 互质交错，张力极强!':'⚖️ 倍数重合，平稳规整';
-  let rowA='', rowB='';
-  const step=480/lcm;
-  for(let i=0;i<lcm;i++){
-    const x=60+i*step;
-    const hitA=(i%(lcm/a)===0), hitB=(i%(lcm/b)===0);
-    rowA+=`<circle cx="${x.toFixed(1)}" cy="78" r="${hitA?9:3.5}" fill="${hitA?'#3b82f6':'#cbd5e1'}"/>`;
-    rowB+=`<circle cx="${x.toFixed(1)}" cy="132" r="${hitB?9:3.5}" fill="${hitB?'#f97316':'#cbd5e1'}"/>`;
-    if(hitA && hitB) rowA+=`<line x1="${x.toFixed(1)}" y1="62" x2="${x.toFixed(1)}" y2="148" stroke="#059669" stroke-dasharray="3,2" stroke-width="2"/>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="60" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">${a} 对 ${b} 复节奏时间网格（绿虚线 = 两声部齐齐重逢的强拍）</text>
-    <text x="20" y="82" font-size="12" font-weight="800" fill="#2563eb">A(${a})</text>
-    <text x="20" y="136" font-size="12" font-weight="800" fill="#ea580c">B(${b})</text>
-    ${rowA}${rowB}
-    <text x="60" y="180" font-size="11.5" fill="var(--tax-muted)">口诀体验 3 对 4：“Pass the god-damn but-ter”（两声部在第 1 拍重逢，中间完美错峰）！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>复节奏在“错位分离”与“周期重逢”之间循环往复，让大脑同时追踪两条时间线，产生奇妙的催眠推力！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let onA = true, onB = true, playing = false, step = 0, timer = null, ctx = null, done = false;
+    const rowA = document.getElementById('rowA');
+    const rowB = document.getElementById('rowB');
+    const playBtn = document.getElementById('playBtn');
+    const togA = document.getElementById('togA');
+    const togB = document.getElementById('togB');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function beep(freq) {
+      try {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        g.gain.setValueAtTime(0.18, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(now); osc.stop(now + 0.1);
+      } catch (e) {}
+    }
+
+    function render() {
+      togA.textContent = (onA ? '✓ ' : '○ ') + '轨道 A（3 拍 · 每 4 格）';
+      togB.textContent = (onB ? '✓ ' : '○ ') + '轨道 B（4 拍 · 每 3 格）';
+
+      rowA.innerHTML = '';
+      rowB.innerHTML = '';
+      for (let i = 0; i < 12; i++) {
+        const hitA = i % 4 === 0;
+        const hitB = i % 3 === 0;
+        const cA = document.createElement('div');
+        cA.className = 'cell' + (hitA && onA ? ' a' : '') + (playing && step === i ? ' now' : '');
+        cA.textContent = hitA ? '●' : (i + 1);
+        rowA.appendChild(cA);
+
+        const cB = document.createElement('div');
+        cB.className = 'cell' + (hitB && onB ? ' b' : '') + (playing && step === i ? ' now' : '');
+        cB.textContent = hitB ? '◆' : (i + 1);
+        rowB.appendChild(cB);
+      }
+    }
+
+    playBtn.onclick = () => {
+      if (playing) {
+        playing = false;
+        clearInterval(timer);
+        playBtn.textContent = '▶ 播放 3 对 4 复节奏';
+        render();
+        return;
+      }
+      playing = true;
+      step = 0;
+      playBtn.textContent = '⏸ 暂停复节奏';
+      markDone('播放并体验了3对4复节奏12格网格');
+      timer = setInterval(() => {
+        if (onA && step % 4 === 0) beep(329.63); // E4
+        if (onB && step % 3 === 0) beep(493.88); // B4
+        render();
+        step = (step + 1) % 12;
+      }, 145);
+    };
+
+    togA.onclick = () => { onA = !onA; markDone('切换了复节奏A轨'); render(); };
+    togB.onclick = () => { onB = !onB; markDone('切换了复节奏B轨'); render(); };
+    render();
   </script>
 </body>
 </html>

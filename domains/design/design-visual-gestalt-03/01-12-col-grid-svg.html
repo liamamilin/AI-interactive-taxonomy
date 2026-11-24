@@ -1,77 +1,123 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📏 12 列网格魔力：2/3/4/6 等分一网打尽（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>12 列网格魔力：2/3/4/6 等分一网打尽</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .mode-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📏 12 列网格魔力：2/3/4/6 等分一网打尽（SVG）</h1><p>为什么是 12 列而不是 10 列？因为 10 只能被 2 和 5 整除，而 12 可以同时被 2、3、4、6 完美整除，一套网格就能通吃全部页面布局！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>📏 12 列网格魔力：为什么全世界的网页都爱用 12 列？</h1>
+      <p>12 是极少数能同时被 <strong>2、3、4、6</strong> 整除的高合成数！点击下方等分布局按钮，再切到「10 列网格对照组」看看 10 列在 3 等分和 4 等分时如何瞬间崩成小数！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="mode-bar">
+        <button class="toy-btn" id="base12Btn">✅ 12 列标准网格</button>
+        <button class="toy-btn secondary" id="base10Btn">⚠️ 对比：10 列网格</button>
+      </div>
+
+      <div class="btn-row" id="splitRow"></div>
+
+      <svg id="gridSvg" viewBox="0 0 680 205" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="12列与10列网格等分演示"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>网格密码：</strong>点击上方「2/3/4/6 等分」和「4+8 侧栏」，再切到「10 列网格」对比——你立刻就懂 Bootstrap、Figma 和苹果官网为何全选 12 列！
     </div>
-    <div class="tax-panel">
-      <div class="btn-row">
-        <button class="btn active" onclick="setCols(2,this)">2 栏 (6+6)</button>
-        <button class="btn" onclick="setCols(3,this)">3 栏 (4+4+4)</button>
-        <button class="btn" onclick="setCols(4,this)">4 栏 (3+3+3+3)</button>
-        <button class="btn" onclick="setCols(6,this)">6 栏 (2×6)</button>
-      </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>列间槽宽 Gutter（8px 倍数）</span><span id="vGut">16 px</span></label><input type="range" id="sGut" min="4" max="24" step="4" value="16" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">当前每栏占 12 列格数</div><div class="k-val" id="kSpan">—</div></div>
-        <div class="kpi"><div class="k-lbl">对齐整洁度</div><div class="k-val">100% 严丝合缝</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-let nCols=2;
-function setCols(n,btn){ nCols=n; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const gut=+document.getElementById('sGut').value;
-  document.getElementById('vGut').textContent=gut+' px';
-  const span=12/nCols;
-  document.getElementById('kSpan').textContent=span+' 列 / 栏';
-  const totalW=540, x0=30;
-  let bgCols='', cards='';
-  const colW=(totalW - 11*6)/12;
-  for(let i=0;i<12;i++){
-    bgCols+=`<rect x="${(x0+i*(colW+6)).toFixed(1)}" y="40" width="${colW.toFixed(1)}" height="135" fill="#ef4444" opacity="0.1"/>`;
-  }
-  const cardW=(totalW - (nCols-1)*gut)/nCols;
-  for(let i=0;i<nCols;i++){
-    const x=x0+i*(cardW+gut);
-    cards+=`<rect x="${x.toFixed(1)}" y="68" width="${Math.max(10,cardW).toFixed(1)}" height="80" rx="8" fill="#3b82f6" opacity="0.82"/>
-      <text x="${(x+cardW/2).toFixed(1)}" y="113" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">Span ${span}</text>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">底层 12 列辅助红柱 + 当前 ${nCols} 栏自适应卡片</text>
-    ${bgCols}${cards}`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>网格不是束缚创意的牢笼，而是让不同模块的左右边界隐形对齐的骨架——对齐本身就能带来极强的专业秩序感！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const SPLITS = [
+      { id: '2', label: '2 等分（双栏）', parts: 2 },
+      { id: '3', label: '3 等分（三卡片）', parts: 3 },
+      { id: '4', label: '4 等分（四宫格）', parts: 4 },
+      { id: '6', label: '6 等分（图标栏）', parts: 6 },
+      { id: 'aside', label: '不对称 1:2（侧栏+正文）', parts: -1 }
+    ];
+
+    let totalCols = 12;
+    let curSplit = SPLITS[1]; // Default 3-col
+    let done = false;
+
+    const splitRow = document.getElementById('splitRow');
+    const svg = document.getElementById('gridSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      document.getElementById('base12Btn').className = totalCols === 12 ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('base10Btn').className = totalCols === 10 ? 'toy-btn' : 'toy-btn secondary';
+
+      splitRow.innerHTML = '';
+      SPLITS.forEach(s => {
+        const b = document.createElement('button');
+        b.className = s.id === curSplit.id ? 'toy-btn' : 'toy-btn secondary';
+        b.textContent = s.label;
+        b.onclick = () => { curSplit = s; markDone(`测试了${totalCols}列网格的${s.label}`); render(); };
+        splitRow.appendChild(b);
+      });
+
+      const pad = 24, gap = 8;
+      const usableW = 680 - pad * 2;
+      const colW = (usableW - gap * (totalCols - 1)) / totalCols;
+
+      let html = '';
+      // Underlying guide columns
+      for (let i = 0; i < totalCols; i++) {
+        const x = pad + i * (colW + gap);
+        html += `<rect x="${x.toFixed(1)}" y="34" width="${colW.toFixed(1)}" height="148" rx="4" fill="rgba(239,68,68,0.09)"/>`;
+        html += `<text x="${(x + colW / 2).toFixed(1)}" y="24" text-anchor="middle" fill="var(--tax-muted)" font-size="10">${i + 1}</text>`;
+      }
+
+      // Compute cards
+      let spans = [];
+      let exact = true;
+      if (curSplit.parts === -1) {
+        if (totalCols === 12) spans = [4, 8];
+        else { spans = [3.33, 6.67]; exact = false; }
+      } else {
+        const each = totalCols / curSplit.parts;
+        exact = Number.isInteger(each);
+        spans = Array(curSplit.parts).fill(each);
+      }
+
+      let cursor = 0;
+      spans.forEach((sp, idx) => {
+        const x = pad + cursor * (colW + gap);
+        const w = sp * colW + (sp - 1) * gap;
+        cursor += sp;
+        const fill = exact ? 'rgba(59,130,246,0.22)' : 'rgba(239,68,68,0.22)';
+        const stroke = exact ? 'var(--tax-primary)' : 'var(--tax-red)';
+        html += `<rect x="${x.toFixed(1)}" y="56" width="${w.toFixed(1)}" height="104" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
+        html += `<text x="${(x + w / 2).toFixed(1)}" y="106" text-anchor="middle" fill="var(--tax-ink)" font-size="13" font-weight="800">模块 ${idx + 1}</text>`;
+        html += `<text x="${(x + w / 2).toFixed(1)}" y="126" text-anchor="middle" fill="${stroke}" font-size="11.5" font-weight="700">${exact ? `占 ${sp} 列 ✓` : `占 ${sp.toFixed(2)} 列 ✕`}</text>`;
+      });
+
+      html += `<text x="340" y="196" text-anchor="middle" fill="${exact ? 'var(--tax-green)' : 'var(--tax-red)'}" font-size="12" font-weight="700">${exact ? `✅ 完美对齐整数列！所有模块边缘严丝合缝贴合 ${totalCols} 列网格线` : `⚠️ 对齐崩溃！${totalCols} 无法整除，卡片边缘悬空在网格缝隙中间！`}</text>`;
+      svg.innerHTML = html;
+
+      ahaBox.innerHTML = exact
+        ? `<strong>${totalCols} 列完美整除（${curSplit.label}）：</strong>每个模块正好占据整数列，既保证跨页视觉节奏统一，又能让不同屏幕尺寸优雅折叠。试试切到「10 列网格」看 3 等分怎么翻车！`
+        : `<strong>10 列网格翻车（${curSplit.label}）：</strong>10 只能被 2 和 5 整除，一遇到网页最常用的 <strong>3 卡片</strong>、<strong>4 宫格</strong>或 <strong>1:2 侧栏</strong>，列数就变成 3.33 或 2.5，彻底破坏对齐感！这就是 12 列称霸设计界百年的数学原因。`;
+    }
+
+    document.getElementById('base12Btn').onclick = () => { totalCols = 12; markDone('切换回12列网格'); render(); };
+    document.getElementById('base10Btn').onclick = () => { totalCols = 10; markDone('对比了10列网格的整除缺陷'); render(); };
+    render();
   </script>
 </body>
 </html>

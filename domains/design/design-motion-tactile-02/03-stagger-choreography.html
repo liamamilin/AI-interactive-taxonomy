@@ -1,71 +1,92 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌊 交错编排（Stagger）：列表 30ms 级联波浪</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>交错编排（Stagger）：列表 30ms 级联波浪</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .grid6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+    @media (max-width: 560px) { .grid6 { grid-template-columns: repeat(2, 1fr); } }
+    .card-tile {
+      padding: 16px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border);
+      text-align: center; font-weight: 800; font-size: 13.5px;
+    }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌊 交错编排（Stagger）：列表 30ms 级联波浪</h1><p>6 张卡片同时啪地闪出来显得僵硬；每张错开 30~50ms 依次浮现，立刻像多米诺波浪一样优雅；但如果错开 200ms，总耗时超 1 秒又会让人抓狂！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>相邻卡片入场错峰间隔 Stagger</span><span id="vStg">40 ms</span></label><input type="range" id="sStg" min="0" max="200" step="10" value="40" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>单屏入场卡片总数</span><span id="vCnt">6 张</span></label><input type="range" id="sCnt" min="3" max="10" value="6" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🌊 交错编排（Stagger）：列表 35ms 级联波浪对决</h1>
+      <p>6 张内容卡片依次进场时，把每张卡的启动时间错开短短 <strong>35 毫秒</strong>，就能把僵硬的“一整块砖砸进来”变成行云流水的波浪！对比下面 3 档交错间隔：</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn secondary" id="s0Btn">🧱 0ms 同步硬拍（一坨砸出）</button>
+        <button class="toy-btn" id="s35Btn">🌊 35ms 黄金级联波浪</button>
+        <button class="toy-btn secondary" id="s180Btn">🐢 180ms 过慢拖沓（急死人）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">整组完成总耗时</div><div class="k-val" id="kTot">—</div></div>
-        <div class="kpi"><div class="k-lbl">节奏观感评价</div><div class="k-val" id="kEv">—</div></div>
+
+      <div class="grid6" id="grid6">
+        <div class="card-tile">卡片 #1</div>
+        <div class="card-tile">卡片 #2</div>
+        <div class="card-tile">卡片 #3</div>
+        <div class="card-tile">卡片 #4</div>
+        <div class="card-tile">卡片 #5</div>
+        <div class="card-tile">卡片 #6</div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>交错编排甜点区（20ms – 50ms）：</strong>点击上面 3 个按钮反复对比！35ms 既能让眼睛捕捉到优雅的先后韵律，又保证总时长控制在 0.45 秒以内，绝不拖慢操作节奏！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const stg=+document.getElementById('sStg').value, cnt=+document.getElementById('sCnt').value;
-  document.getElementById('vStg').textContent=stg+' ms';
-  document.getElementById('vCnt').textContent=cnt+' 张';
-  const tot=220 + (cnt-1)*stg;
-  const ev=stg===0?'🤖 僵硬齐刷刷':(tot<=550?'🌊 丝滑级联韵律黄金区!':'🐢 太拖沓，用户等得不耐烦');
-  document.getElementById('kTot').textContent=tot+' ms';
-  document.getElementById('kTot').style.color=tot<=550 && stg>0?'#059669':'#f59e0b';
-  document.getElementById('kEv').textContent=ev;
-  let bars='';
-  const maxT=Math.max(600, tot);
-  const sc=440/maxT;
-  const rowH=Math.min(20, 128/cnt);
-  for(let i=0;i<cnt;i++){
-    const x=85 + i*stg*sc, w=Math.max(12, 220*sc), y=44 + i*(rowH+4);
-    bars+=`<text x="76" y="${(y+rowH*0.75).toFixed(0)}" text-anchor="end" font-size="10.5" fill="var(--tax-muted)">卡片 ${i+1}</text>
-      <rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${rowH.toFixed(1)}" rx="4" fill="#3b82f6" opacity="${(0.55+i/cnt*0.45).toFixed(2)}"/>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">动效编排甘特时间轴（单卡 220ms + 错峰 ${stg}ms = 共 ${tot}ms）</text>
-    ${bars}`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>记住编排红线：整组列表交错入场总耗时绝不要超过 500ms！卡片多时要动态压短单次错峰（如 25ms），切忌让用户干等动画演完。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const tiles = [...document.querySelectorAll('.card-tile')];
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function play(delayMs) {
+      [0, 35, 180].forEach(d => {
+        document.getElementById(`s${d}Btn`).className = d === delayMs ? 'toy-btn' : 'toy-btn secondary';
+      });
+
+      tiles.forEach((el, i) => {
+        el.animate([
+          { opacity: 0, transform: 'translateY(18px) scale(0.95)' },
+          { opacity: 1, transform: 'translateY(0) scale(1)' }
+        ], {
+          duration: 320,
+          delay: i * delayMs,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'both'
+        });
+      });
+
+      const total = 320 + 5 * delayMs;
+      if (delayMs === 0) {
+        ahaBox.innerHTML = `<strong>0ms 同步硬拍（总耗时 ${total}ms）：</strong>6 张卡片黏成一整块板砖同时弹出，缺少层次引导，显得生硬廉价。试试点「🌊 35ms 黄金级联波浪」！`;
+      } else if (delayMs === 35) {
+        ahaBox.innerHTML = `<strong>35ms 黄金级联（总耗时仅 ${total}ms）！</strong>像微风吹过麦浪一样引导视线从 #1 顺滑扫到 #6，既有精致呼吸感又完全不耽误交互！长列表记得给交错封顶（超过 8 项后不再叠加延迟）。`;
+      } else {
+        ahaBox.innerHTML = `<strong>180ms 过度表演（总耗时高达 ${(total / 1000).toFixed(2)} 秒！）：</strong>设计师觉得很酷炫，但每天看 50 遍的真实用户只想砸键盘！记住：<strong>好看的动效永远不能让用户等它播完</strong>！`;
+      }
+    }
+
+    document.getElementById('s0Btn').onclick = () => { markDone('对比了0ms同步硬拍入场'); play(0); };
+    document.getElementById('s35Btn').onclick = () => { markDone('体验了35ms黄金交错波浪'); play(35); };
+    document.getElementById('s180Btn').onclick = () => { markDone('对比了180ms过慢拖沓交错'); play(180); };
   </script>
 </body>
 </html>

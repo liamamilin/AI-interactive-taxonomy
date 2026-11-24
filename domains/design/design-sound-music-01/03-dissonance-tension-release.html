@@ -1,68 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚡ 不协和不是坏事：张力 → 解决才是音乐灵魂</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>不协和不是坏事：张力 → 解决才是音乐灵魂</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .opt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+    @media (max-width: 640px) { .opt-grid { grid-template-columns: 1fr; } }
+    .prog-btn {
+      text-align: left; padding: 12px; border-radius: 10px; border: 1.5px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); cursor: pointer;
+    }
+    .prog-btn.active { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚡ 不协和不是坏事：张力 → 解决才是音乐灵魂</h1><p>如果整首曲子从头到尾全是绝对协和的纯八度，听 10 秒就想睡觉；音乐让人起鸡皮疙瘩的秘诀，是先用不协和和弦把心吊起来，再稳稳落回主和弦释放！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⚡ 不协和不是坏事：张力 → 解决才是音乐灵魂（听觉情景）</h1>
+      <p>如果一首歌从头到尾全是完美协和和弦，听 10 秒就会无聊到睡着！点击播放下面 3 段和弦进行，亲耳感受<strong>属七和弦（G7）的悬崖张力</strong>如何让最后一声 <strong>C 主和弦</strong>产生震撼的释放快感！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="opt-grid" id="optGrid"></div>
+
+      <svg id="arcSvg" viewBox="0 0 680 150" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="音乐张力与解决曲线"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>听觉实验：</strong>重点试试第 2 段「悬在半空不解决（C → F → G7 突然停住）」，感受大脑有多渴望听到最后那声回家的 C 和弦！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>前段不协和张力铺垫强度（如属七和弦）</span><span id="vTen">75%</span></label><input type="range" id="sTen" min="0" max="100" value="75" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>结尾回归主和弦的彻底解决度</span><span id="vRes">90%</span></label><input type="range" id="sRes" min="10" max="100" value="90" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">听觉爽感（起鸡皮疙瘩指数）</div><div class="k-val" id="kChl">—</div></div>
-        <div class="kpi"><div class="k-lbl">情绪弧线评价</div><div class="k-val" id="kArc">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const ten=+document.getElementById('sTen').value, res=+document.getElementById('sRes').value;
-  document.getElementById('vTen').textContent=ten+'%';
-  document.getElementById('vRes').textContent=res+'%';
-  const chl=Math.round((ten*res)/100);
-  const arc=ten<20?'😴 平淡白开水（毫无波澜）':(res<40?'😰 悬而未决（憋得难受）':'✨ 完美“拉满再释放”情绪高潮!');
-  document.getElementById('kChl').textContent=chl+' 分';
-  document.getElementById('kChl').style.color=chl>=60?'#059669':'#f59e0b';
-  document.getElementById('kArc').textContent=arc;
-  const yPeak=158 - ten*1.12, yEnd=158 - (100-res)*0.9;
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">和声张力情绪弧线（起：平稳 → 承：张力拉满 → 合：完美释放）</text>
-    <line x1="45" y1="158" x2="555" y2="158" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <path d="M 45 158 Q 240 ${yPeak.toFixed(0)} 360 ${yPeak.toFixed(0)} T 555 ${yEnd.toFixed(0)}" fill="none" stroke="#8b5cf6" stroke-width="3.5"/>
-    <circle cx="360" cy="${yPeak.toFixed(0)}" r="7" fill="#ef4444"/>
-    <circle cx="555" cy="${yEnd.toFixed(0)}" r="7" fill="#059669"/>
-    <text x="360" y="184" text-anchor="middle" font-size="11" font-weight="750" fill="#ef4444">张力顶点 (${ten}%)</text>
-    <text x="530" y="184" text-anchor="end" font-size="11" font-weight="750" fill="#059669">解决落点</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>不只是音乐，好电影、好演讲和好游戏全靠同一个心理公式：制造期待张力 → 延迟一拍 → 完美释放！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const CHORDS = {
+      C:  [261.63, 329.63, 392.00],
+      F:  [349.23, 440.00, 523.25],
+      G7: [246.94, 293.66, 349.23, 392.00] // Contains B-F tritone tension!
+    };
+
+    const PROGS = [
+      {
+        id: 'flat', name: '😴 1. 零张力白开水', seq: ['C', 'C', 'C', 'C'], tensions: [15, 15, 15, 15], col: 'var(--tax-muted)',
+        sub: 'C → C → C → C（全程安稳但毫无波澜）',
+        aha: '<strong>零张力 = 无聊：</strong>全是完美协和音程就像一部没有反派和冲突的电影，大脑听两拍就失去兴趣！'
+      },
+      {
+        id: 'hang', name: '😰 2. 悬崖停顿（逼死强迫症！）', seq: ['C', 'F', 'G7'], tensions: [15, 48, 94], col: 'var(--tax-red)',
+        sub: 'C → F → G7（突然截断不回家！）',
+        aha: '<strong>未解决的三全音张力（G7 里藏着 B–F 增四度）：</strong>突然停在 G7 上是不是让你心里痒得像少打了一个喷嚏？你的大脑听觉皮层正在疯狂呼唤 C 和弦落地！'
+      },
+      {
+        id: 'res',  name: '🌟 3. 黄金张力 → 释放（完整终止式）', seq: ['C', 'F', 'G7', 'C'], tensions: [15, 48, 94, 12], col: 'var(--tax-green)',
+        sub: 'C → F → G7（张力巅峰）→ C（完美归宿！）',
+        aha: '<strong>音乐多巴胺的秘密（Tension &amp; Release）：</strong>正是 G7 制造的不协和悬崖，把最后那声平平无奇的 C 和弦衬托得如释重负、热泪盈眶！好故事与好设计同样遵循“蓄势 → 冲突 → 释放”！'
+      }
+    ];
+
+    let cur = PROGS[2], ctx = null, done = false;
+    const optGrid = document.getElementById('optGrid');
+    const svg = document.getElementById('arcSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function playSeq(prog) {
+      try {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        const now = ctx.currentTime;
+        prog.seq.forEach((name, idx) => {
+          const t0 = now + idx * 0.55;
+          CHORDS[name].forEach(f => {
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(f, t0);
+            g.gain.setValueAtTime(0.001, t0);
+            g.gain.linearRampToValueAtTime(0.11, t0 + 0.03);
+            g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.52);
+            osc.connect(g); g.connect(ctx.destination);
+            osc.start(t0); osc.stop(t0 + 0.54);
+          });
+        });
+      } catch (e) {}
+    }
+
+    function render() {
+      optGrid.innerHTML = '';
+      PROGS.forEach(p => {
+        const b = document.createElement('button');
+        b.className = 'prog-btn' + (p.id === cur.id ? ' active' : '');
+        b.innerHTML = `<div style="font-weight:800;font-size:13.5px;">${p.name}</div><div style="font-size:11.5px;color:var(--tax-muted);margin-top:4px;">${p.sub}</div>`;
+        b.onclick = () => { cur = p; markDone(`试听了和声张力解决情景：${p.name}`); render(); playSeq(p); };
+        optGrid.appendChild(b);
+      });
+
+      const xs = [90, 260, 430, 590];
+      const yOf = v => 126 - (v / 100) * 90;
+      const pts = cur.tensions.map((v, i) => `${xs[i]},${yOf(v)}`).join(' ');
+
+      let html = `<line x1="50" y1="126" x2="630" y2="126" stroke="var(--tax-border)"/>`;
+      html += `<polyline points="${pts}" fill="none" stroke="${cur.col}" stroke-width="3.5" stroke-linecap="round"/>`;
+      cur.seq.forEach((name, i) => {
+        const x = xs[i], y = yOf(cur.tensions[i]);
+        html += `<circle cx="${x}" cy="${y}" r="8" fill="${cur.col}" stroke="#fff" stroke-width="2"/>`;
+        html += `<text x="${x}" y="${y - 13}" text-anchor="middle" fill="var(--tax-ink)" font-size="13" font-weight="800">${name}</text>`;
+      });
+      if (cur.id === 'hang') {
+        html += `<text x="580" y="75" text-anchor="middle" fill="var(--tax-red)" font-size="13" font-weight="800">❓ 悬空未落地！</text>`;
+      }
+      svg.innerHTML = html;
+      ahaBox.innerHTML = cur.aha;
+    }
+
+    render();
   </script>
 </body>
 </html>

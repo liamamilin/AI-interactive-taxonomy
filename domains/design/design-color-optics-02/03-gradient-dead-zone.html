@@ -1,79 +1,79 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌈 渐变“灰泥区”消除术：sRGB vs OKLCH 插值</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>渐变“灰泥区”消除术：sRGB vs OKLCH 插值</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .grad-bar { height: 64px; border-radius: 12px; border: 1px solid var(--tax-border); margin: 6px 0 14px; position: relative; }
+    .mid-pin {
+      position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+      font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px;
+      background: var(--tax-surface); border: 1px solid var(--tax-border); color: var(--tax-ink);
+    }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌈 渐变“灰泥区”消除术：sRGB vs OKLCH 插值</h1><p>在 sRGB 里把亮蓝渐变到亮黄，中间恰好穿过灰色中心，于是出现一条脏兮兮的“灰泥带”；改用 OKLCH 沿色环插值，全程鲜艳通透！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🌈 渐变“灰泥区”消除术：sRGB vs OKLCH 插值对决</h1>
+      <p>把蓝色直接渐变到黄色（或青色渐变到品红），为什么传统 CSS 渐变正中间总会出现一块脏兮兮的<strong>“灰泥死区（Gray Dead Zone）”</strong>？切换色组，亲眼对比 sRGB 直线穿越与 OKLCH 沿色轮滑行的惊人差距！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row" id="pairRow"></div>
+
+      <div style="font-size:13px;font-weight:700;color:var(--tax-red);">❌ 传统 sRGB 线性插值（中段掉进浑浊灰泥区！）</div>
+      <div class="grad-bar" id="srgbBar"><span class="mid-pin">⚠️ 中段脏灰泥</span></div>
+
+      <div style="font-size:13px;font-weight:700;color:var(--tax-green);">✅ 现代 CSS <code>in oklch</code> 感知插值（全程通透鲜亮！）</div>
+      <div class="grad-bar" id="oklchBar"><span class="mid-pin">✨ 鲜活顺滑过渡</span></div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>一行 CSS 拯救所有渐变：</strong>只需把 <code>linear-gradient(90deg, #2563eb, #facc15)</code> 改成 <code>linear-gradient(90deg in oklch, #2563eb, #facc15)</code>，浏览器就会沿着感知色环外侧优雅绕行，彻底避开中心无彩度灰区！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>起点色相角</span><span id="vH1">220°（蓝）</span></label><input type="range" id="sH1" min="0" max="360" value="220" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>终点色相角</span><span id="vH2">50°（金黄）</span></label><input type="range" id="sH2" min="0" max="360" value="50" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">两色互补夹角</div><div class="k-val" id="kAng">—</div></div>
-        <div class="kpi"><div class="k-lbl">sRGB 中段灰泥风险</div><div class="k-val" id="kMud">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function hsl2rgb(h,s,l){
-  s/=100; l/=100;
-  const k=n=>(n+h/30)%12, a=s*Math.min(l,1-l);
-  const f=n=>Math.round(255*(l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1))));
-  return [f(0),f(8),f(4)];
-}
-function draw(){
-  const h1=+document.getElementById('sH1').value, h2=+document.getElementById('sH2').value;
-  document.getElementById('vH1').textContent=h1+'°';
-  document.getElementById('vH2').textContent=h2+'°';
-  let ang=Math.abs(h2-h1); if(ang>180) ang=360-ang;
-  document.getElementById('kAng').textContent=ang+'°';
-  document.getElementById('kMud').textContent=ang>=120?'🚨 严重发灰发脏!':'✅ 邻近色无明显灰泥';
-  document.getElementById('kMud').style.color=ang>=120?'#ef4444':'#059669';
-  const c1=hsl2rgb(h1,88,52), c2=hsl2rgb(h2,88,52);
-  let r1='', r2='';
-  let dh=h2-h1; if(dh>180) dh-=360; if(dh<-180) dh+=360;
-  for(let i=0;i<24;i++){
-    const t=i/23, x=30+i*22.5;
-    const rr=Math.round(c1[0]+(c2[0]-c1[0])*t), gg=Math.round(c1[1]+(c2[1]-c1[1])*t), bb=Math.round(c1[2]+(c2[2]-c1[2])*t);
-    r1+=`<rect x="${x.toFixed(1)}" y="48" width="23.5" height="44" fill="rgb(${rr},${gg},${bb})"/>`;
-    const hh=(h1+dh*t+360)%360;
-    r2+=`<rect x="${x.toFixed(1)}" y="128" width="23.5" height="44" fill="hsl(${hh.toFixed(0)},88%,52%)"/>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="12.5" font-weight="800" fill="var(--tax-text)">传统 sRGB 直线插值（互补色跨过中心，中段发灰）</text>
-    ${r1}
-    <text x="30" y="114" font-size="12.5" font-weight="800" fill="#059669">现代 OKLCH 色环插值（绕色相弧线过渡，全程通透鲜亮）</text>
-    ${r2}`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>现在 CSS 已经原生支持 <code>linear-gradient(in oklch, ...)</code>！一句话告别廉价的发灰渐变！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const PAIRS = [
+      { id: 'by', name: '🔵 蓝 → 🟡 黄（最经典翻车组）', a: '#2563eb', b: '#facc15', note: 'sRGB 把蓝黄相加拉向灰色中心，中段发灰发脏；OKLCH 沿色相环滑过翠绿，通透如极光！' },
+      { id: 'gm', name: '🟢 绿 → 🩷 品红（互补死区组）', a: '#10b981', b: '#ec4899', note: '互补色在 sRGB 立方体里直线连线正好穿过正中央的纯灰点，OKLCH 绕行色环保持高饱和！' },
+      { id: 'cr', name: '🩵 青 → 🔴 红（日落霓虹组）', a: '#06b6d4', b: '#ef4444', note: '用 sRGB 画青红渐变就像泥水搅拌；加上 in oklch 后瞬间变成高质感赛博日落！' }
+    ];
+
+    let cur = PAIRS[0], done = false;
+    const pairRow = document.getElementById('pairRow');
+    const srgbBar = document.getElementById('srgbBar');
+    const oklchBar = document.getElementById('oklchBar');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      pairRow.innerHTML = '';
+      PAIRS.forEach(p => {
+        const b = document.createElement('button');
+        b.className = p.id === cur.id ? 'toy-btn' : 'toy-btn secondary';
+        b.textContent = p.name;
+        b.onclick = () => { cur = p; markDone(`对比了渐变灰泥区：${p.name}`); render(); };
+        pairRow.appendChild(b);
+      });
+
+      srgbBar.style.background = `linear-gradient(90deg, ${cur.a}, ${cur.b})`;
+      oklchBar.style.background = `linear-gradient(90deg in oklch, ${cur.a}, ${cur.b})`;
+      ahaBox.innerHTML = `<strong>${cur.name} 对比：</strong>${cur.note} 现代主流浏览器均已原生支持 <code>linear-gradient(in oklch, ...)</code>！`;
+    }
+
+    render();
   </script>
 </body>
 </html>

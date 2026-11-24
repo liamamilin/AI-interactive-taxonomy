@@ -1,74 +1,120 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🚦 红绿色盲视角模拟器：为什么别只靠颜色传信息</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>红绿色盲视角模拟器：为什么别只靠颜色传信息</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .dash { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .dash { grid-template-columns: 1fr; } }
+    .srv-card {
+      padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border);
+      display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+    }
+    .dot { width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: #fff; }
+    .sim-deut { filter: url(#deuteranopia); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🚦 红绿色盲视角模拟器：为什么别只靠颜色传信息</h1><p>全球约 8% 的男性存在不同程度的红绿色觉异常。如果你的状态灯、折线图或红绿按钮只靠颜色区分，每 12 个男用户里就有 1 个彻底抓瞎！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🚦 红绿色盲视角盲测：为什么绝不能只靠颜色传信息？</h1>
+      <p>全球约有 <strong>8% 的男性（每 12 人就有 1 位）</strong>存在红绿色觉异常！现在已为你戴上「红绿色盲模拟滤镜」——请立刻点出下面 3 台服务器中<strong>“宕机报错”</strong>的那一台！</p>
+    </header>
+
+    <!-- Hidden SVG Color Matrix for Deuteranopia simulation -->
+    <svg width="0" height="0" style="position:absolute;">
+      <defs>
+        <filter id="deuteranopia">
+          <feColorMatrix type="matrix" values="
+            0.625 0.375 0 0 0
+            0.700 0.300 0 0 0
+            0     0.300 0.700 0 0
+            0     0     0     1 0"/>
+        </filter>
+      </defs>
+    </svg>
+
+    <section class="toy-card">
       <div class="btn-row">
-        <button class="btn active" onclick="setV('norm',this)">正常三色视觉</button>
-        <button class="btn" onclick="setV('deut',this)">红绿色盲（Deuteranopia）</button>
-        <button class="btn" onclick="setV('mono',this)">全色盲（灰度视角）</button>
+        <button class="toy-btn" id="visionBtn">👓 当前：红绿色盲视角（已开启）</button>
+        <button class="toy-btn secondary" id="cueBtn">➕ 开启无障碍双编码（图标 + 文字）</button>
       </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>双重编码辅助强度（图标 + 虚实线 + 文字）</span><span id="vAid">80%</span></label><input type="range" id="sAid" min="0" max="100" value="80" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">红绿纯色辨识度</div><div class="k-val" id="kClr">—</div></div>
-        <div class="kpi"><div class="k-lbl">加入双重编码后辨识度</div><div class="k-val" id="kTot">—</div></div>
-      </div>
+
+      <div class="dash sim-deut" id="dashGrid"></div>
+
+      <div id="fbBar" style="font-size:13px;color:var(--tax-muted);">盲测任务：点击上方你认为处于“红色宕机报警”的节点卡片！</div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>色觉盲测体验：</strong>在红绿色盲滤镜下，原本刺眼的红灯和绿灯全变成了几乎一样的<strong>土黄色</strong>！试试点击「➕ 开启无障碍双编码（图标 + 文字）」，看问题如何一秒彻底解决！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-let vm='norm';
-function setV(m,btn){ vm=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const aid=+document.getElementById('sAid').value;
-  document.getElementById('vAid').textContent=aid+'%';
-  const pal=vm==='norm'?['#ef4444','#10b981']: (vm==='deut'?['#9e8f29','#a59632']:['#737373','#7d7d7d']);
-  const clrAcc=vm==='norm'?98:(vm==='deut'?18:8);
-  const totAcc=Math.min(99, Math.round(clrAcc + (100-clrAcc)*(aid/100)*0.92));
-  document.getElementById('kClr').textContent=clrAcc+'%';
-  document.getElementById('kClr').style.color=clrAcc<50?'#ef4444':'#059669';
-  document.getElementById('kTot').textContent=totAcc+'%';
-  document.getElementById('kTot').style.color=totAcc>=80?'#059669':'#f59e0b';
-  const showAid=aid>=40;
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">系统告警状态卡片（切到红绿色盲看看纯色有多绝望！）</text>
-    <rect x="45" y="55" width="230" height="92" rx="12" fill="${pal[0]}"/>
-    <text x="160" y="106" text-anchor="middle" font-size="16" font-weight="850" fill="#fff">${showAid?'✖ 失败 / 危险告警':'状态 A'}</text>
-    <rect x="325" y="55" width="230" height="92" rx="12" fill="${pal[1]}"/>
-    <text x="440" y="106" text-anchor="middle" font-size="16" font-weight="850" fill="#fff">${showAid?'✔ 正常 / 运行成功':'状态 B'}</text>
-    <text x="30" y="178" font-size="11.5" fill="var(--tax-muted)">无障碍铁律：颜色永远只能作为辅助，必须叠加图标形状、明度差或文字标签！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>检验你的界面是否对色盲友好，只需把屏幕临时切到黑白灰度模式——如果依然一眼能分清所有状态，那就是顶级设计！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const NODES = [
+      { id: 'n1', name: '支付网关 #01', status: 'ok',   color: '#16a34a', icon: '✓', text: '正常' },
+      { id: 'n2', name: '订单核心 #02', status: 'err',  color: '#dc2626', icon: '✕', text: '宕机' },
+      { id: 'n3', name: '消息队列 #03', status: 'warn', color: '#ca8a04', icon: '!', text: '延迟' }
+    ];
+
+    let simOn = true;
+    let dualCue = false;
+    let done = false;
+
+    const dashGrid = document.getElementById('dashGrid');
+    const visionBtn = document.getElementById('visionBtn');
+    const cueBtn = document.getElementById('cueBtn');
+    const fbBar = document.getElementById('fbBar');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      dashGrid.classList.toggle('sim-deut', simOn);
+      visionBtn.textContent = simOn ? '👓 当前：红绿色盲视角（点此切正常色觉）' : '👁️ 当前：正常三色视觉（点此戴色盲滤镜）';
+      cueBtn.textContent = dualCue ? '✓ 无障碍双编码：已开启（颜色+图标+文字）' : '➕ 开启无障碍双编码（图标 + 文字）';
+
+      dashGrid.innerHTML = '';
+      NODES.forEach(n => {
+        const card = document.createElement('div');
+        card.className = 'srv-card';
+        card.innerHTML = `
+          <div>
+            <div style="font-weight:800;font-size:14px;">${n.name}</div>
+            <div style="font-size:12px;color:var(--tax-muted);margin-top:2px;">${dualCue ? `状态：${n.text}` : '仅靠右侧圆点颜色表示'}</div>
+          </div>
+          <span class="dot" style="background:${n.color};">${dualCue ? n.icon : ''}</span>
+        `;
+        card.onclick = () => {
+          markDone('完成了红绿色盲监控面板盲测');
+          if (n.status === 'err') {
+            fbBar.innerHTML = dualCue
+              ? '🎯 <strong>秒选正确（订单核心 #02）！</strong>有了 ✕ 图标与“宕机”文字双编码，就算完全看不出红绿也能零误判！'
+              : '🎯 <strong>你猜中了订单核心 #02！</strong>但在纯色点模式下，红/绿/黄在色盲眼里几乎全是同色土黄，全靠蒙！快开启双编码看看。';
+          } else {
+            fbBar.innerHTML = `💥 <strong>误判了！</strong>「${n.name}」其实是<strong>${n.text}</strong>，而不是红色宕机！在红绿色盲眼里这三个纯色点根本分不清。`;
+          }
+        };
+        dashGrid.appendChild(card);
+      });
+
+      if (dualCue) {
+        ahaBox.innerHTML = '<strong>WCAG 1.4.1 双重编码铁律：</strong>绝不能“仅用颜色”作为传递状态、报错或涨跌的唯一视觉手段！永远把<strong>颜色 + 形状图标（✓ / ✕ / ▲）+ 简短文字</strong>绑定使用，同时帮到色盲用户、黑白打印与强光屏幕！';
+      }
+    }
+
+    visionBtn.onclick = () => { simOn = !simOn; markDone('切换了红绿色盲滤镜视角'); render(); };
+    cueBtn.onclick = () => { dualCue = !dualCue; markDone('开启了无障碍双编码'); render(); };
+    render();
   </script>
 </body>
 </html>

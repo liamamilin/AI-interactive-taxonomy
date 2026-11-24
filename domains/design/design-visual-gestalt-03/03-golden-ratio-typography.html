@@ -1,62 +1,101 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🐚 黄金比例 1.618 排版音阶生成器</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>黄金比例 1.618 排版音阶生成器</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ratio-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .specimen { padding: 16px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .spec-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; border-bottom: 1px dashed var(--tax-border); padding: 8px 0; }
+    .spec-line:last-child { border-bottom: none; }
+    .spec-meta { font-size: 12px; font-family: ui-monospace, monospace; color: var(--tax-muted); white-space: nowrap; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🐚 黄金比例 1.618 排版音阶生成器</h1><p>乱填 15px、19px、23px 会让字号显得杂乱无章；用固定几何公比（如 1.25 大三度或 1.618 黄金比）逐级放大，字号像音乐音阶一样和谐！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>基础正文字号 Base</span><span id="vB">16 px</span></label><input type="range" id="sB" min="12" max="20" value="16" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>模块化字号公比 Ratio</span><span id="vR">1.41（增四度）</span></label><input type="range" id="sR" min="1.15" max="1.62" step="0.03" value="1.41" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🐚 黄金比例 1.618 排版音阶（Modular Scale）模拟器</h1>
+      <p>为什么大师排出来的标题和正文看着像音乐一样和谐，自己随便挑字号（14 / 17 / 21）却显得散乱？因为排版师用<strong>等比音阶（基准字号 × 比例系数ⁿ）</strong>生成整套字号体系！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="ratio-row" id="ratioRow"></div>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:13px;">
+        <span>正文基准字号：</span>
+        <input type="range" id="baseRange" min="13" max="18" value="16" style="flex:1;" />
+        <strong id="baseVal" style="color:var(--tax-primary);">16 px</strong>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">三级标题字号阶梯</div><div class="k-val" id="kStp">—</div></div>
-        <div class="kpi"><div class="k-lbl">适用场景</div><div class="k-val" id="kUse">—</div></div>
-      </div>
+
+      <div class="specimen" id="specimenBox"></div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>排版音阶法则：</strong>切换上方 4 种音乐音程比例——移动端仪表盘适合紧凑的 <code>1.200</code>，长文博客适合 <code>1.250–1.333</code>，而冲击力十足的落地页海报则最爱 <strong>1.618 黄金比例</strong>！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const base=+document.getElementById('sB').value, rat=+document.getElementById('sR').value;
-  document.getElementById('vB').textContent=base+' px';
-  document.getElementById('vR').textContent=rat.toFixed(2);
-  const h3=Math.round(base*rat), h2=Math.round(base*rat*rat), h1=Math.min(54, Math.round(base*rat*rat*rat));
-  document.getElementById('kStp').textContent=`${base} → ${h3} → ${h2} → ${h1} px`;
-  document.getElementById('kUse').textContent=rat>=1.45?'📰 杂志/落地页强冲击':'💻 后台工具/文档紧凑排版';
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="${Math.min(68, 22+h1)}" font-size="${Math.min(44,h1)}" font-weight="900" fill="var(--tax-text)">H1 主标题 (${h1}px)</text>
-    <text x="30" y="114" font-size="${Math.min(30,h2)}" font-weight="800" fill="#3b82f6">H2 章节标题 (${h2}px)</text>
-    <text x="30" y="152" font-size="${Math.min(22,h3)}" font-weight="750" fill="#059669">H3 小节标题 (${h3}px)</text>
-    <text x="30" y="184" font-size="${base}" fill="var(--tax-muted)">Body 正文基准字号 (${base}px) · 公比 ${rat.toFixed(2)}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>网页和移动端常用 1.2~1.333（温和紧凑），海报和品牌官网常用 1.5~1.618（黄金比例强视觉反差）！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const RATIOS = [
+      { id: '1.125', name: '1.125 大二度（极紧凑）', r: 1.125, use: '信息密集的金融终端 / 数据后台' },
+      { id: '1.250', name: '1.250 大三度（经典博客）', r: 1.250, use: '技术文档、长文阅读与通用 Web App' },
+      { id: '1.414', name: '1.414 增四度（A4 纸比例）', r: 1.414, use: '杂志排版与中等视觉张力官网' },
+      { id: '1.618', name: '1.618 黄金比例（海报级）', r: 1.618, use: '品牌落地页、发布会主视觉大标题' }
+    ];
+
+    let cur = RATIOS[3];
+    let done = false;
+
+    const ratioRow = document.getElementById('ratioRow');
+    const baseRange = document.getElementById('baseRange');
+    const specimenBox = document.getElementById('specimenBox');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const base = Number(baseRange.value);
+      document.getElementById('baseVal').textContent = base + ' px';
+
+      ratioRow.innerHTML = '';
+      RATIOS.forEach(item => {
+        const b = document.createElement('button');
+        b.className = item.id === cur.id ? 'toy-btn' : 'toy-btn secondary';
+        b.textContent = item.name;
+        b.onclick = () => { cur = item; markDone(`测试了排版音阶比例 ${item.name}`); render(); };
+        ratioRow.appendChild(b);
+      });
+
+      const levels = [
+        { tag: 'H1 主标题', pow: 2, text: '比例即视觉韵律' },
+        { tag: 'H2 章节题', pow: 1, text: '等比数列让层级自动对齐' },
+        { tag: 'Body 正文', pow: 0, text: '基准正文提供稳定的阅读锚点，所有标题都从它出发按固定倍率生长。' },
+        { tag: 'Caption 注脚', pow: -1, text: '辅助说明文字按同一比例向下收敛' }
+      ];
+
+      specimenBox.innerHTML = levels.map(lv => {
+        const px = Math.min(54, Math.max(11, Math.round(base * Math.pow(cur.r, lv.pow))));
+        const fw = lv.pow >= 1 ? 800 : 400;
+        const col = lv.pow < 0 ? 'var(--tax-muted)' : 'var(--tax-ink)';
+        return `<div class="spec-line">
+          <div style="font-size:${px}px;font-weight:${fw};line-height:1.25;color:${col};">${lv.text}</div>
+          <div class="spec-meta">${lv.tag} · ${px}px</div>
+        </div>`;
+      }).join('');
+
+      ahaBox.innerHTML = `<strong>当前音阶 ${cur.name}：</strong>最适合 <strong>${cur.use}</strong>。用固定等比数列（而非拍脑袋乱写字号）生成字号体系，能让页面像调好音的钢琴一样天然和谐！`;
+    }
+
+    baseRange.oninput = () => { markDone('调节了排版音阶基准字号'); render(); };
+    render();
   </script>
 </body>
 </html>

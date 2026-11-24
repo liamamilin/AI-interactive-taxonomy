@@ -1,69 +1,96 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚽ 挤压与拉伸：体积守恒赋予材质重量感</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>挤压与拉伸：体积守恒赋予材质重量感</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .stage {
+      position: relative; height: 205px; border-radius: 12px; background: var(--tax-surface-alt);
+      border: 1px solid var(--tax-border); overflow: hidden;
+    }
+    .floor { position: absolute; bottom: 20px; left: 24px; right: 24px; height: 3px; background: var(--tax-border); }
+    .ball {
+      position: absolute; left: 50%; width: 54px; height: 54px; border-radius: 50%;
+      transform-origin: bottom center;
+    }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚽ 挤压与拉伸：体积守恒赋予材质重量感</h1><p>迪士尼动画最核心法则：物体撞地被压扁时，横向必须同步变宽以保持面积/体积不变（W × H = 常数）！否则观众会觉得物体凭空缩水了！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>触地瞬间垂直压扁程度</span><span id="vSq">35%</span></label><input type="range" id="sSq" min="0" max="55" value="35" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>是否遵守体积守恒（横向同步鼓出）</span><span id="vVol">100% 守恒</span></label><input type="range" id="sVol" min="0" max="100" value="100" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⚽ 挤压与拉伸（Squash &amp; Stretch）：体积守恒模拟器</h1>
+      <p>不需要改任何贴图材质——只需控制撞地瞬间的<strong>压扁幅度（保持宽 × 高 = 1 体积守恒）</strong>，同一个圆球就能在“沉重铁保龄球”、“弹性篮球”和“Q 弹果冻球”三种物理材质间任意切换！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="mJelly">🍮 软果冻（55% 夸张体积守恒）</button>
+        <button class="toy-btn secondary" id="mBasket">🏀 弹性篮球（22% 适度弹性）</button>
+        <button class="toy-btn secondary" id="mSteel">🪨 铁保龄球（0% 零形变死硬）</button>
+        <button class="toy-btn secondary" id="dropBtn">⬇️ 重新丢下弹跳</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">物理材质暗示</div><div class="k-val" id="kMat">—</div></div>
-        <div class="kpi"><div class="k-lbl">体积真实感</div><div class="k-val" id="kTru">—</div></div>
+
+      <div class="stage">
+        <div class="floor"></div>
+        <div class="ball" id="ball" style="bottom:23px;background:var(--tax-primary);transform:translateX(-50%);"></div>
+        <div id="matLabel" style="position:absolute;top:12px;left:16px;font-size:12.5px;font-weight:800;color:var(--tax-primary);">当前材质：软果冻 · 触地形变 scaleX=1.45, scaleY=0.69（面积 ≈ 1.00 守恒）</div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>体积守恒铁律（<code>scaleX × scaleY = 1</code>）：</strong>压扁多少高度，就必须往左右挤出多少宽度！如果只压扁高度却不加宽，物体看起来就像“凭空缩水漏气了”，材质质感瞬间穿帮！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const sq=+document.getElementById('sSq').value, vol=+document.getElementById('sVol').value;
-  document.getElementById('vSq').textContent=sq+'%';
-  document.getElementById('vVol').textContent=vol+'%';
-  const r0=44;
-  const ry=r0*(1 - sq/100);
-  const rxIdeal=(r0*r0)/ry;
-  const rx=r0 + (rxIdeal - r0)*(vol/100);
-  const mat=sq<8?'🎳 坚硬保龄球/金属':(sq<30?'🏀 弹性篮球':'🍮 Q 弹果冻/水球');
-  document.getElementById('kMat').textContent=mat;
-  document.getElementById('kTru').textContent=vol>=80?'✅ 体积守恒极逼真':'⚠️ 像漏气缩水一样违和';
-  document.getElementById('kTru').style.color=vol>=80?'#059669':'#ef4444';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">静态原球（左）vs 触地挤压瞬间（右，底边贴紧地面）</text>
-    <line x1="40" y1="166" x2="560" y2="166" stroke="var(--tax-border)" stroke-width="2.5"/>
-    <circle cx="165" cy="${166-r0}" r="${r0}" fill="#94a3b8" opacity="0.45"/>
-    <text x="165" y="188" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">原始圆形 (rx=${r0}, ry=${r0})</text>
-    <ellipse cx="420" cy="${(166-ry).toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="#3b82f6"/>
-    <text x="420" y="188" text-anchor="middle" font-size="11.5" font-weight="800" fill="#2563eb">触地变形 (rx=${rx.toFixed(0)}, ry=${ry.toFixed(0)})</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>挤压拉伸的铁律是“压矮多少，就得拉宽多少”——保持视觉质量守恒，哪怕是一个圆点也能活灵活现！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const MATS = {
+      jelly:  { name: '软果冻', col: '#10b981', sx: 1.48, sy: 0.68, stretchX: 0.80, stretchY: 1.25, dur: 920, aha: '<strong>软果冻（55% 形变，体积守恒）：</strong>下落加速时拉长成水滴、撞地瞬间扁成大饼（宽 1.48 × 高 0.68 ≈ 1.00），大脑瞬间感知到轻盈柔软的弹性！' },
+      basket: { name: '弹性篮球', col: '#f97316', sx: 1.22, sy: 0.82, stretchX: 0.91, stretchY: 1.10, dur: 780, aha: '<strong>弹性篮球（22% 适度形变）：</strong>保留清晰的球体刚性，只在撞地一刹那微扁 18%，是 UI 按钮按压回弹最常用的舒适弹性区间！' },
+      steel:  { name: '铁保龄球', col: '#64748b', sx: 1.00, sy: 1.00, stretchX: 1.00, stretchY: 1.00, dur: 580, aha: '<strong>铁保龄球（0% 形变）：</strong>完全不做挤压拉伸，落到地上“咚”一声死死砸住——你甚至没听到声音，光看运动规律就能感觉它重达 10 公斤！' }
+    };
+
+    let cur = 'jelly', done = false;
+    const ball = document.getElementById('ball');
+    const matLabel = document.getElementById('matLabel');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function drop() {
+      const m = MATS[cur];
+      ['jelly', 'basket', 'steel'].forEach(k => {
+        const id = k === 'jelly' ? 'mJelly' : (k === 'basket' ? 'mBasket' : 'mSteel');
+        document.getElementById(id).className = cur === k ? 'toy-btn' : 'toy-btn secondary';
+      });
+      ball.style.background = m.col;
+      matLabel.textContent = `当前材质：${m.name} · 触地形变 scaleX=${m.sx.toFixed(2)}, scaleY=${m.sy.toFixed(2)}（积 = ${(m.sx * m.sy).toFixed(2)}）`;
+      ahaBox.innerHTML = m.aha;
+
+      const bounceH = cur === 'steel' ? 12 : (cur === 'basket' ? 76 : 96);
+      ball.animate([
+        { bottom: '132px', transform: 'translateX(-50%) scale(1, 1)', offset: 0 },
+        { bottom: '36px',  transform: `translateX(-50%) scale(${m.stretchX}, ${m.stretchY})`, offset: 0.36 },
+        { bottom: '23px',  transform: `translateX(-50%) scale(${m.sx}, ${m.sy})`, offset: 0.44 },
+        { bottom: `${23 + bounceH}px`, transform: `translateX(-50%) scale(${m.stretchX}, ${m.stretchY})`, offset: 0.72 },
+        { bottom: '23px',  transform: `translateX(-50%) scale(${1 + (m.sx - 1) * 0.4}, ${1 - (1 - m.sy) * 0.4})`, offset: 0.90 },
+        { bottom: '23px',  transform: 'translateX(-50%) scale(1, 1)', offset: 1 }
+      ], { duration: m.dur, easing: 'ease-in-out' });
+    }
+
+    document.getElementById('mJelly').onclick = () => { cur = 'jelly'; markDone('体验了果冻材质体积守恒挤压拉伸'); drop(); };
+    document.getElementById('mBasket').onclick = () => { cur = 'basket'; markDone('体验了篮球适度挤压拉伸'); drop(); };
+    document.getElementById('mSteel').onclick = () => { cur = 'steel'; markDone('对比了铁球零形变重量感'); drop(); };
+    document.getElementById('dropBtn').onclick = () => { markDone('重播了挤压拉伸弹跳'); drop(); };
+    drop();
   </script>
 </body>
 </html>

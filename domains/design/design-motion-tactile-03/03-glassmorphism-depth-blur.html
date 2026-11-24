@@ -1,70 +1,118 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧊 毛玻璃材质（Glassmorphism）：透光不透字</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>毛玻璃材质（Glassmorphism）：透光不透字</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ctrl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+    @media (max-width: 640px) { .ctrl-grid { grid-template-columns: 1fr; } }
+    .ctrl-box { padding: 9px 11px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .scene {
+      position: relative; height: 200px; border-radius: 14px; overflow: hidden;
+      background: linear-gradient(135deg, #1d4ed8, #7c3aed 48%, #f97316);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .blob { position: absolute; border-radius: 50%; }
+    .glass-card {
+      position: relative; z-index: 2; width: 320px; max-width: 88%; padding: 18px 20px; border-radius: 16px;
+      color: #ffffff; text-align: left;
+    }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🧊 毛玻璃材质（Glassmorphism）：透光不透字</h1><p>苹果 macOS / visionOS 标志性的毛玻璃效果，好看与否全靠三个参数的精密平衡：足够强的背景模糊 + 适度半透明底色 + 1px 模拟玻璃倒角的亮白描边！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🧊 毛玻璃材质（Glassmorphism）：透光不透字调参台（构建器）</h1>
+      <p>高级的毛玻璃绝不是“随便半透明”，而是<strong>背景模糊（Backdrop Blur）+ 半透白/黑底色 + 1px 边缘折光亮线</strong>的精密平衡！动手把下面这张花哨背景上的卡片调出“既透光又清晰”的苹果级质感！</p>
+    </header>
+
+    <section class="toy-card">
       <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>背景高斯模糊半径（Blur）</span><span id="vBlr">10 px</span></label><input type="range" id="sBlr" min="0" max="20" value="10" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>毛玻璃白色不透明度</span><span id="vOp">45%</span></label><input type="range" id="sOp" min="10" max="85" value="45" oninput="draw()"></div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+            <span>🌫️ 磨砂模糊 Blur</span><strong id="bVal">2 px</strong>
+          </div>
+          <input type="range" id="bRange" min="0" max="24" value="2" style="width:100%;" />
+        </div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+            <span>🫧 玻璃底色不透明度</span><strong id="aVal">8%</strong>
+          </div>
+          <input type="range" id="aRange" min="5" max="75" value="8" style="width:100%;" />
+        </div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+            <span>✨ 边缘折光高光边</span><strong id="rVal">关</strong>
+          </div>
+          <button class="toy-btn secondary" id="rimBtn" style="width:100%;padding:5px;font-size:12px;">切换 1px 折光边</button>
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">文字清晰可读性</div><div class="k-val" id="kRead">—</div></div>
-        <div class="kpi"><div class="k-lbl">空间通透质感</div><div class="k-val" id="kAir">—</div></div>
+
+      <div class="scene">
+        <div class="blob" style="width:120px;height:120px;background:#facc15;top:-20px;left:18%;"></div>
+        <div class="blob" style="width:140px;height:140px;background:#ec4899;bottom:-30px;right:15%;"></div>
+        <div style="position:absolute;font-size:56px;font-weight:900;color:rgba(255,255,255,0.45);letter-spacing:6px;">BACKGROUND</div>
+
+        <div class="glass-card" id="glassCard">
+          <div style="font-size:11px;font-weight:800;letter-spacing:1px;opacity:0.9;">VISION OS · GLASS</div>
+          <div style="font-size:18px;font-weight:800;margin:4px 0;">空间毛玻璃浮层卡片</div>
+          <div style="font-size:12.5px;line-height:1.55;">底层文字和艳丽色块如果穿透过来太清晰，前景正文就会变成一团乱麻！</div>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>调参挑战：</strong>现在模糊只有 2px，背景大字“BACKGROUND”直接穿透过来了！试着把模糊拉到 <strong>12–18px</strong>、不透明度调到 <strong>20%–35%</strong>，并点亮 <strong>1px 折光高光边</strong>！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const blr=+document.getElementById('sBlr').value, op=+document.getElementById('sOp').value;
-  document.getElementById('vBlr').textContent=blr+' px';
-  document.getElementById('vOp').textContent=op+'%';
-  const read=Math.min(98, Math.round(25 + blr*2.4 + op*0.65));
-  const air=Math.max(15, Math.min(98, Math.round(95 - Math.abs(op-42)*1.2 - (blr<4?30:0))));
-  document.getElementById('kRead').textContent=read+' 分';
-  document.getElementById('kRead').style.color=read>=75?'#059669':'#ef4444';
-  document.getElementById('kAir').textContent=air+' 分';
-  document.getElementById('svg').innerHTML=`
-    <defs><filter id="gb"><feGaussianBlur stdDeviation="${(blr*0.6).toFixed(1)}"/></filter></defs>
-    <rect x="20" y="16" width="560" height="168" rx="12" fill="#0f172a"/>
-    <g filter="url(#gb)">
-      <circle cx="170" cy="85" r="55" fill="#ec4899"/>
-      <circle cx="310" cy="120" r="65" fill="#3b82f6"/>
-      <circle cx="430" cy="75" r="50" fill="#10b981"/>
-    </g>
-    <rect x="120" y="42" width="360" height="116" rx="16" fill="rgba(255,255,255,${(op/100).toFixed(2)})" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
-    <text x="300" y="96" text-anchor="middle" font-size="18" font-weight="850" fill="#0f172a">毛玻璃卡片 · 空间纵深感</text>
-    <text x="300" y="124" text-anchor="middle" font-size="12" fill="#1e293b">模糊 ${blr}px · 透明度 ${op}%（透光不扰字）</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>毛玻璃最忌讳模糊度太低——背景噪点透出来直接干扰文字阅读！强模糊 + 半透明白底 + 1px 亮边缺一不可。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const bRange = document.getElementById('bRange');
+    const aRange = document.getElementById('aRange');
+    const rimBtn = document.getElementById('rimBtn');
+    const glassCard = document.getElementById('glassCard');
+    const ahaBox = document.getElementById('ahaBox');
+
+    let rimOn = false, done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const b = Number(bRange.value);
+      const a = Number(aRange.value);
+      document.getElementById('bVal').textContent = b + ' px';
+      document.getElementById('aVal').textContent = a + '%';
+      document.getElementById('rVal').textContent = rimOn ? '开 (1px 折光)' : '关';
+
+      glassCard.style.backdropFilter = `blur(${b}px)`;
+      glassCard.style.webkitBackdropFilter = `blur(${b}px)`;
+      glassCard.style.background = `rgba(15, 23, 42, ${(a / 100).toFixed(2)})`;
+      glassCard.style.border = rimOn ? '1px solid rgba(255,255,255,0.38)' : '1px solid transparent';
+      glassCard.style.boxShadow = rimOn ? '0 12px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.35)' : '0 8px 20px rgba(0,0,0,0.15)';
+
+      if (b >= 12 && a >= 22 && a <= 48 && rimOn) {
+        ahaBox.innerHTML = `<strong>黄金毛玻璃达成（Blur ${b}px · 底色 ${a}% · 折光边开）！</strong>底层色彩氛围柔和透出，但干扰文字已被彻底磨砂化，前景白字清晰锐利，1px 亮边仿佛真实切割玻璃的倒角反光！`;
+      } else if (b < 8) {
+        ahaBox.innerHTML = `<strong>模糊不足（${b}px）：</strong>背景文字直接和前景文字撞在一起，可读性崩溃！把磨砂模糊拉到 12px 以上！`;
+      } else if (a > 60) {
+        ahaBox.innerHTML = `<strong>透明度过低（${a}%）：</strong>快变成不透明实色塑料板了，失去了毛玻璃“借底层色彩呼吸”的空间纵深感！`;
+      } else {
+        ahaBox.innerHTML = '<strong>快接近完美了！</strong>再点亮右侧的「1px 折光高光边」，体会玻璃边缘瞬间立体的点睛之笔！';
+      }
+    }
+
+    bRange.oninput = () => { markDone('调校了毛玻璃模糊半径'); render(); };
+    aRange.oninput = () => { markDone('调校了毛玻璃底色透明度'); render(); };
+    rimBtn.onclick = () => { rimOn = !rimOn; markDone('开启了毛玻璃1px折光边缘'); render(); };
+    render();
   </script>
 </body>
 </html>

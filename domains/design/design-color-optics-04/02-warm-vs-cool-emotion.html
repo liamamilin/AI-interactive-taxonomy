@@ -1,66 +1,121 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌡️ 色温心理学：暖色促冲动，冷色建信任</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>色温心理学：暖色促冲动，冷色建信任</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .brief-box { padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .pal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    @media (max-width: 600px) { .pal-grid { grid-template-columns: 1fr; } }
+    .pal-btn {
+      padding: 12px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); cursor: pointer; text-align: left;
+    }
+    .pal-bar { height: 22px; border-radius: 6px; margin-bottom: 8px; }
+    .pal-btn.ok { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .pal-btn.bad { border-color: var(--tax-red); background: var(--tax-red-soft); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌡️ 色温心理学：暖色促冲动，冷色建信任</h1><p>为什么银行和科技公司偏爱蓝色，快餐店和促销弹窗偏爱红黄？色温直接牵动人类的生理唤醒水平！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>主色调色温（0°红暖 ↔ 210°蓝冷）</span><span id="vH">210°（科技冷蓝）</span></label><input type="range" id="sH" min="0" max="240" value="210" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>色彩饱和度（冷静 ↔ 躁动）</span><span id="vS">75%</span></label><input type="range" id="sS" min="20" max="100" value="75" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🌡️ 色温心理学：品牌情绪配色总监（情景匹配）</h1>
+      <p>色彩自带进化留下的生理联想：<strong>暖色（红/橙/黄）</strong>加速心率与食欲、激发冲动；<strong>冷色（蓝/青）</strong>放缓脉搏、传递理性与安全感。为下面 3 个品牌需求选出转化率最高的色温方案！</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;color:var(--tax-muted);">
+        <span id="idxTag">品牌委托 1 / 3</span>
+        <span id="scoreTag" style="color:var(--tax-primary);font-weight:700;">精准匹配：0 / 3</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">品牌情绪气质</div><div class="k-val" id="kMood">—</div></div>
-        <div class="kpi"><div class="k-lbl">最适配行业</div><div class="k-val" id="kInd">—</div></div>
+
+      <div class="brief-box">
+        <div style="font-size:16px;font-weight:800;" id="briefTitle"></div>
+        <div style="font-size:12.5px;color:var(--tax-muted);margin-top:4px;" id="briefGoal"></div>
+        <div class="pal-grid" id="palGrid"></div>
       </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span id="fbLine" style="font-size:13px;color:var(--tax-muted);">点击最契合情绪目标的色温组合</span>
+        <button class="toy-btn secondary" id="nextBtn" style="display:none;">下一个品牌委托 →</button>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>色温匹配法则：</strong>没有“最好看的颜色”，只有“最匹配场景情绪的色温”。完成 3 个品牌委托，摸透顶级大厂的配色潜台词！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const h=+document.getElementById('sH').value, s=+document.getElementById('sS').value;
-  document.getElementById('vH').textContent=h+'°';
-  document.getElementById('vS').textContent=s+'%';
-  let mood, ind;
-  if(h<45){ mood='🔥 热烈紧迫 / 刺激食欲与冲动'; ind='快餐、限时大促、娱乐'; }
-  else if(h<90){ mood='☀️ 乐观明快 / 亲和提醒'; ind='儿童教育、便签工具'; }
-  else if(h<165){ mood='🌿 生机健康 / 安全环保'; ind='有机食品、医疗健康、金融涨势'; }
-  else { mood='🧊 专业冷静 / 理性可信'; ind='银行金融、云计算、医疗科技'; }
-  document.getElementById('kMood').textContent=mood;
-  document.getElementById('kInd').textContent=ind;
-  document.getElementById('svg').innerHTML=`
-    <rect x="40" y="28" width="520" height="144" rx="14" fill="hsl(${h},${s}%,48%)"/>
-    <text x="300" y="88" text-anchor="middle" font-size="20" font-weight="850" fill="#fff">品牌主视觉情绪卡 (H=${h}° S=${s}%)</text>
-    <text x="300" y="122" text-anchor="middle" font-size="13.5" fill="#fff" opacity="0.92">${mood}</text>
-    <text x="300" y="150" text-anchor="middle" font-size="11.5" fill="#fff" opacity="0.8">适配场景：${ind}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>色彩是用户读到第一个字之前就生效的“无声文案”。色温选错，产品还没开口就已经输掉一半信任！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const PALETTES = [
+      { id: 'warm', name: '🔥 暖色系（番茄红 + 芝士黄）', grad: 'linear-gradient(90deg, #dc2626, #f59e0b)', mood: '刺激食欲、紧迫感、高周转' },
+      { id: 'cool', name: '🧊 冷色系（深海蓝 + 科技青）', grad: 'linear-gradient(90deg, #1d4ed8, #06b6d4)', mood: '理性可靠、安全信任、专业冷静' },
+      { id: 'eco',  name: '🌿 自然系（森林绿 + 燕麦米）', grad: 'linear-gradient(90deg, #15803d, #a3b18a)', mood: '有机健康、环保疗愈、松弛感' }
+    ];
+
+    const BRIEFS = [
+      { title: '🍔 委托 1：全球连锁快餐汉堡品牌', goal: '目标：让路人一眼感到饥饿兴奋、快速下单、吃完快走提高翻台率', best: 'warm', fb: '红黄暖色组合（麦当劳/肯德基经典公式）能轻微加速心率并刺激食欲，同时避免顾客久坐不走！如果快餐店刷成冷蓝色，食欲会直接掉一半！' },
+      { title: '🏦 委托 2：企业级云安全与数字银行 App', goal: '目标：让 CFO 放心把上亿资金与核心数据托付给平台', best: 'cool', fb: '冷色调深海蓝是全球银行、医疗与云厂商（Visa/PayPal/支付宝）的共识——蓝色波长让人联想天空与稳定，潜意识传递“零风险、守规则”！' },
+      { title: '🥗 委托 3：主打零添加的有机燕麦与轻食品牌', goal: '目标：传递天然无负担、健康可持续的生活方式', best: 'eco', fb: '低饱和森林绿与大地米色直接激活“新鲜植物与土壤”的进化记忆，比荧光红或科技蓝更具天然说服力！' }
+    ];
+
+    let idx = 0, score = 0, locked = false, done = false;
+    const palGrid = document.getElementById('palGrid');
+    const fbLine = document.getElementById('fbLine');
+    const nextBtn = document.getElementById('nextBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const br = BRIEFS[idx];
+      locked = false;
+      nextBtn.style.display = 'none';
+      document.getElementById('idxTag').textContent = `品牌委托 ${idx + 1} / ${BRIEFS.length}`;
+      document.getElementById('briefTitle').textContent = br.title;
+      document.getElementById('briefGoal').textContent = br.goal;
+      fbLine.textContent = '选择最契合该品牌的色温方向';
+      palGrid.innerHTML = '';
+
+      PALETTES.forEach(p => {
+        const b = document.createElement('button');
+        b.className = 'pal-btn';
+        b.innerHTML = `<div class="pal-bar" style="background:${p.grad};"></div><div style="font-weight:700;font-size:13px;">${p.name}</div><div style="font-size:11.5px;color:var(--tax-muted);margin-top:3px;">${p.mood}</div>`;
+        b.onclick = () => {
+          if (locked) return;
+          locked = true;
+          const ok = p.id === br.best;
+          b.classList.add(ok ? 'ok' : 'bad');
+          if (ok) score++;
+          document.getElementById('scoreTag').textContent = `精准匹配：${score} / ${BRIEFS.length}`;
+          fbLine.textContent = ok ? '✓ 配色总监级直觉！' : '⚠️ 色温与行业心智冲突，看下方解析';
+          ahaBox.innerHTML = `<strong>${ok ? '✓ 精准匹配' : '🌡️ 色温解析'}：</strong>${br.fb}`;
+          if (idx === BRIEFS.length - 1) {
+            markDone(`完成色温心理学品牌配色匹配（${score}/3）`);
+            nextBtn.textContent = '↺ 重新挑战';
+          } else {
+            nextBtn.textContent = '下一个品牌委托 →';
+          }
+          nextBtn.style.display = 'inline-block';
+        };
+        palGrid.appendChild(b);
+      });
+    }
+
+    nextBtn.onclick = () => {
+      if (idx === BRIEFS.length - 1) { idx = 0; score = 0; document.getElementById('scoreTag').textContent = '精准匹配：0 / 3'; }
+      else idx++;
+      render();
+    };
+    render();
   </script>
 </body>
 </html>

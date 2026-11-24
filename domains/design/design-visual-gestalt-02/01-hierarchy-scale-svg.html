@@ -1,65 +1,119 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📐 三级视觉层级拉差器（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>三级视觉层级拉差器</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .levers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+    @media (max-width: 640px) { .levers { grid-template-columns: 1fr; } }
+    .lv-btn {
+      padding: 10px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 12.5px; font-weight: 700; cursor: pointer; text-align: left;
+    }
+    .lv-btn.on { border-color: var(--tax-green); background: var(--tax-green-soft); color: var(--tax-green); }
+    .preview-card {
+      padding: 20px; border-radius: 14px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border);
+      max-width: 440px; margin: 0 auto; transition: all .25s;
+    }
+    .p-eyebrow { transition: all .25s; }
+    .p-title { transition: all .25s; margin: 4px 0; }
+    .p-meta { transition: all .25s; margin: 6px 0 12px; }
+    .p-cta { display: inline-block; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--tax-border); transition: all .25s; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📐 三级视觉层级拉差器（SVG）</h1><p>建立层级不需要花哨装饰，只需拉开三个维度：主标题（大号粗黑）、正文（中号常规）、元数据（小号浅灰）——读者眼球会自动按 1→2→3 顺序滑行。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>主标题 / 正文字号倍率</span><span id="vSc">1.8x</span></label><input type="range" id="sSc" min="1.0" max="2.4" step="0.1" value="1.8" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>次要信息（时间/标签）视觉退让度</span><span id="vDim">60%</span></label><input type="range" id="sDim" min="0" max="80" value="60" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>📐 三级视觉层级拉差器（卡片重构构建器）</h1>
+      <p>下面这张活动邀请卡片里的所有文字都挤在同一种字号、字重和颜色里，眼睛完全不知道先看哪。逐一拨动 <strong>3 个层级拉差开关</strong>，见证一团文字如何瞬间长出呼吸感与主次！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="levers" id="leverGrid"></div>
+
+      <div class="preview-card" id="previewCard">
+        <div class="p-eyebrow" id="pEye">设计系统公开课 · 第 12 期</div>
+        <div class="p-title" id="pTitle">2 小时重构你的组件库视觉层级</div>
+        <div class="p-meta" id="pMeta">周四晚 20:00 · 线上直播 · 限额 200 人</div>
+        <div class="p-cta" id="pCta">立即免费预约席位</div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">1 秒抓重点清晰度</div><div class="k-val" id="kClr">—</div></div>
-        <div class="kpi"><div class="k-lbl">层级诊断</div><div class="k-val" id="kDia">—</div></div>
-      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>反面教材（0/3 拉差）：</strong>当所有信息都一样大、一样黑，等于<strong>没有任何重点</strong>！依次点亮上方 3 个层级拉差开关，把 3 秒扫读效率拉满！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const sc=+document.getElementById('sSc').value, dim=+document.getElementById('sDim').value;
-  document.getElementById('vSc').textContent=sc.toFixed(1)+'x';
-  document.getElementById('vDim').textContent=dim+'%';
-  const hSz=Math.round(13*sc);
-  const metaOp=(1 - dim*0.0085).toFixed(2);
-  const clr=Math.min(98, Math.round(28 + (sc-1)*38 + dim*0.35));
-  document.getElementById('kClr').textContent=clr+' 分';
-  document.getElementById('kClr').style.color=clr>=75?'#059669':'#f59e0b';
-  document.getElementById('kDia').textContent=clr>=75?'✅ 1→2→3 主次一眼分明':'⚠️ 全篇一样重，毫无焦点';
-  document.getElementById('svg').innerHTML=`
-    <rect x="40" y="24" width="520" height="152" rx="14" fill="var(--tax-surface)" stroke="var(--tax-border)"/>
-    <text x="68" y="54" font-size="11.5" font-weight="700" fill="var(--tax-text)" opacity="${metaOp}">设计周刊 · 2026 年 11 月 · 预计阅读 3 分钟</text>
-    <text x="68" y="${64+hSz}" font-size="${hSz}" font-weight="${sc>1.3?850:500}" fill="var(--tax-text)">视觉层级让信息自己开口说话</text>
-    <text x="68" y="${96+hSz}" font-size="13" fill="var(--tax-text)" opacity="0.82">拉开标题、正文与辅助标签的尺寸和明度差，读者无需费力寻找重点。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>如果页面上所有文字都加粗放大，结果就是没有一行字是重点。敢于把次要信息“变小变淡”，主标题才会真正立起来！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const LEVERS = [
+      { id: 'size',  label: '① 字号拉差（主标题放大 1.7×）', on: false },
+      { id: 'tone',  label: '② 颜色降噪（辅助信息退居次灰）', on: false },
+      { id: 'cta',   label: '③ 焦点按钮（行动号召高饱和高亮）', on: false }
+    ];
+
+    let done = false;
+    const leverGrid = document.getElementById('leverGrid');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      leverGrid.innerHTML = '';
+      LEVERS.forEach(lv => {
+        const b = document.createElement('button');
+        b.className = 'lv-btn' + (lv.on ? ' on' : '');
+        b.textContent = (lv.on ? '✓ ' : '○ ') + lv.label;
+        b.onclick = () => { lv.on = !lv.on; markDone('调整了三级视觉层级拉差开关'); render(); };
+        leverGrid.appendChild(b);
+      });
+
+      const hasSize = LEVERS[0].on;
+      const hasTone = LEVERS[1].on;
+      const hasCta  = LEVERS[2].on;
+
+      const pEye = document.getElementById('pEye');
+      const pTitle = document.getElementById('pTitle');
+      const pMeta = document.getElementById('pMeta');
+      const pCta = document.getElementById('pCta');
+
+      pEye.style.fontSize = hasSize ? '12px' : '15px';
+      pEye.style.fontWeight = hasTone ? '700' : '500';
+      pEye.style.color = hasTone ? 'var(--tax-primary)' : 'var(--tax-ink)';
+      pEye.style.letterSpacing = hasSize ? '0.6px' : '0';
+
+      pTitle.style.fontSize = hasSize ? '23px' : '15px';
+      pTitle.style.fontWeight = hasSize ? '800' : '500';
+      pTitle.style.lineHeight = hasSize ? '1.3' : '1.5';
+      pTitle.style.color = 'var(--tax-ink)';
+
+      pMeta.style.fontSize = hasSize ? '13px' : '15px';
+      pMeta.style.color = hasTone ? 'var(--tax-muted)' : 'var(--tax-ink)';
+
+      pCta.style.fontSize = '14px';
+      pCta.style.fontWeight = hasCta ? '700' : '500';
+      pCta.style.background = hasCta ? 'var(--tax-primary)' : 'transparent';
+      pCta.style.color = hasCta ? '#fff' : 'var(--tax-ink)';
+      pCta.style.borderColor = hasCta ? 'var(--tax-primary)' : 'var(--tax-border)';
+
+      const cnt = LEVERS.filter(l => l.on).length;
+      if (cnt === 3) {
+        ahaBox.innerHTML = '<strong>完美三级层级（3/3）！</strong>扫读路径瞬间锁定：<strong>第 1 眼看粗大主标题 → 第 2 眼落到高亮蓝色 CTA → 需要时才看灰色时间元数据</strong>。好排版靠的不是堆元素，而是拉大一级与三级的对比差！';
+      } else if (cnt > 0) {
+        ahaBox.innerHTML = `<strong>层级已开启 ${cnt} / 3：</strong>再把剩下的开关也打开，感受“做减法降噪”与“做加法拉差”的双重威力！`;
+      } else {
+        ahaBox.innerHTML = '<strong>反面教材（0/3 拉差）：</strong>所有文字字号、字重、颜色全一样，眼睛只能从头到尾逐字读。依次点亮上方 3 个开关试试！';
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

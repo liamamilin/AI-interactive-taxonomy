@@ -1,73 +1,119 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⏱️ 希克-海曼定律：选项数 vs 决策耗时（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>希克-海曼定律：选项数 vs 决策耗时</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .prompt-bar { padding: 12px 14px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin: 10px 0; font-size: 15px; font-weight: 800; color: var(--tax-primary); }
+    .menu-grid { display: grid; gap: 8px; margin-bottom: 12px; }
+    .m-btn {
+      padding: 11px 8px; border-radius: 9px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+    .m-btn:hover { border-color: var(--tax-primary); }
+    .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .res-card { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⏱️ 希克-海曼定律：选项数 vs 决策耗时（SVG）</h1><p>希克定律：决策时间随选项数量呈对数增长 RT = 0.2 + 0.155 · log₂(n + 1)。把 24 个按钮分成 4 组每组 6 个，大脑就能二分速查！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>同级平铺菜单选项总数 n</span><span id="vN">12 个</span></label><input type="range" id="sN" min="2" max="32" value="12" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>视觉分组与清晰标签优化度</span><span id="vGrp">60%</span></label><input type="range" id="sGrp" min="0" max="100" value="60" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⏱️ 希克-海曼定律：选项数 vs 决策耗时（实测盲测）</h1>
+      <p>希克定律公式 <strong>RT = a + b · log₂(n + 1)</strong>：选项数量每翻一倍，大脑筛选耗时就稳定增加一段固定反应时间。亲测两轮导航寻路：<strong>4 选项精简菜单</strong> vs <strong>16 选项杂乱菜单</strong>！</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button class="toy-btn" id="startBtn">▶ 第 1 轮：4 个精选菜单（找“隐私设置”）</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重测</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">平铺无序查找耗时</div><div class="k-val" id="kRaw">—</div></div>
-        <div class="kpi"><div class="k-lbl">分组结构化后耗时</div><div class="k-val" id="kOpt">—</div></div>
+
+      <div class="prompt-bar" id="promptBar">准备就绪：点击开始按钮，尽快点出指定菜单项！</div>
+      <div class="menu-grid" id="menuGrid"></div>
+
+      <div class="res-grid">
+        <div class="res-card"><div style="font-size:12px;color:var(--tax-muted);">🟢 第 1 轮 · 4 选项精简菜单</div><div style="font-size:22px;font-weight:800;" id="t1Val">—</div></div>
+        <div class="res-card"><div style="font-size:12px;color:var(--tax-muted);">🔴 第 2 轮 · 16 选项密集菜单</div><div style="font-size:22px;font-weight:800;" id="t2Val">—</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>UX 铁律：</strong>顶栏导航和弹窗选项别超过 <strong>5–7 个</strong>！用你的真实秒表测完两轮，感受 16 个平铺选项带来的瞬间脑雾！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const n=+document.getElementById('sN').value, grp=+document.getElementById('sGrp').value;
-  document.getElementById('vN').textContent=n+' 个';
-  document.getElementById('vGrp').textContent=grp+'%';
-  const raw=(0.25 + 0.28*Math.log2(n+1) + n*0.03).toFixed(2);
-  const opt=(parseFloat(raw)*(1 - grp*0.0045)).toFixed(2);
-  document.getElementById('kRaw').textContent=raw+' 秒';
-  document.getElementById('kOpt').textContent=opt+' 秒';
-  document.getElementById('kOpt').style.color='#059669';
-  let pts=[];
-  for(let i=2;i<=32;i++){
-    const t=0.25 + 0.28*Math.log2(i+1) + i*0.03;
-    pts.push(`${(45+i*16).toFixed(1)},${(172-t*48).toFixed(1)}`);
-  }
-  const cx=45+n*16, cy=172-parseFloat(raw)*48;
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">希克定律曲线：选项越多，每次操作都要付额外的认知检索税</text>
-    <line x1="45" y1="172" x2="560" y2="172" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <polyline points="${pts.join(' ')}" fill="none" stroke="#8b5cf6" stroke-width="3"/>
-    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="#ef4444" stroke="#fff" stroke-width="2"/>
-    <text x="45" y="192" font-size="11" fill="var(--tax-muted)">2 项</text>
-    <text x="275" y="192" font-size="11" fill="var(--tax-muted)">16 项</text>
-    <text x="530" y="192" font-size="11" fill="var(--tax-muted)">32 项</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>电视遥控器上密密麻麻 50 个按键让人望而生畏，而现代极简遥控器只留 6 个高频键——把低频选项藏进二级菜单，就是希克定律的最佳实践！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const SMALL = ['账户资料', '隐私设置', '通知偏好', '账单发票'];
+    const LARGE = ['账户资料','安全日志','语言地区','主题外观','快捷方式','插件市场','导出数据','团队成员','账单发票','API 密钥','通知偏好','设备管理','隐私设置','实验功能','帮助中心','版本更新'];
+
+    let round = 1, active = false, startMs = 0, t1 = null, t2 = null, done = false;
+    const startBtn = document.getElementById('startBtn');
+    const promptBar = document.getElementById('promptBar');
+    const menuGrid = document.getElementById('menuGrid');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function launch() {
+      const items = [...(round === 1 ? SMALL : LARGE)].sort(() => Math.random() - 0.5);
+      const target = round === 1 ? '隐私设置' : 'API 密钥';
+      menuGrid.style.gridTemplateColumns = round === 1 ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)';
+      menuGrid.innerHTML = '';
+      active = true;
+      startBtn.disabled = true;
+      promptBar.textContent = `🎯 请立刻点击：【${target}】`;
+      startMs = performance.now();
+
+      items.forEach(txt => {
+        const b = document.createElement('button');
+        b.className = 'm-btn';
+        b.textContent = txt;
+        b.onclick = () => {
+          if (!active) return;
+          if (txt === target) {
+            active = false;
+            const ms = Math.round(performance.now() - startMs);
+            if (round === 1) {
+              t1 = ms;
+              document.getElementById('t1Val').textContent = `${ms} ms`;
+              round = 2;
+              startBtn.disabled = false;
+              startBtn.textContent = '▶ 第 2 轮：16 个密集菜单（找“API 密钥”）';
+              promptBar.textContent = `第 1 轮仅用 ${ms} ms！现在测试 16 个平铺菜单…`;
+            } else {
+              t2 = ms;
+              document.getElementById('t2Val').textContent = `${ms} ms`;
+              round = 3;
+              startBtn.textContent = '✓ 两轮实测完成';
+              const ratio = (t2 / Math.max(100, t1)).toFixed(1);
+              promptBar.textContent = `实测耗时：4 选项 ${t1}ms → 16 选项 ${t2}ms（变慢 ${ratio} 倍！）`;
+              markDone(`完成希克定律盲测：4项 ${t1}ms vs 16项 ${t2}ms`);
+              ahaBox.innerHTML = `<strong>希克定律实测（${t1}ms → ${t2}ms，变慢 ${ratio} 倍）！</strong>如果把 16 个选项分成 4 大类 × 4 小项（两级菜单），信息熵 <code>log₂(4)+log₂(4)</code> 远比平铺 16 项更省脑力！这就是减少顶栏入口、善用二级分类与搜索的原因。`;
+            }
+          }
+        };
+        menuGrid.appendChild(b);
+      });
+    }
+
+    startBtn.onclick = launch;
+    document.getElementById('resetBtn').onclick = () => {
+      round = 1; active = false; t1 = null; t2 = null;
+      startBtn.disabled = false;
+      startBtn.textContent = '▶ 第 1 轮：4 个精选菜单（找“隐私设置”）';
+      document.getElementById('t1Val').textContent = '—';
+      document.getElementById('t2Val').textContent = '—';
+      promptBar.textContent = '准备就绪：点击开始按钮，尽快点出指定菜单项！';
+      menuGrid.innerHTML = '';
+    };
   </script>
 </body>
 </html>

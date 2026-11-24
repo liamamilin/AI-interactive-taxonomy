@@ -1,75 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🦴 骨架屏心理魔术：同样等 2 秒，为何感觉快一半？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>骨架屏心理魔术：同样等 2 秒，为何感觉快一半？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    @media (max-width: 600px) { .pair { grid-template-columns: 1fr; } }
+    .mock { min-height: 165px; padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); display: flex; flex-direction: column; justify-content: center; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--tax-border); border-top-color: var(--tax-primary); border-radius: 50%; animation: spin .75s linear infinite; margin: 0 auto 8px; }
+    @keyframes shimmer { 0% { opacity: 0.35; } 50% { opacity: 0.78; } 100% { opacity: 0.35; } }
+    .skel-bar { height: 12px; border-radius: 6px; background: rgba(148,163,184,0.32); animation: shimmer 1.2s ease-in-out infinite; margin-bottom: 10px; }
+    .skel-av { width: 36px; height: 36px; border-radius: 50%; background: rgba(148,163,184,0.35); animation: shimmer 1.2s ease-in-out infinite; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🦴 骨架屏心理魔术：同样等 2 秒，为何感觉快一半？</h1><p>人类感知时间不是匀速流逝的：盯着空白屏幕或死转的菊花，你一直在关注“我在等”；盯着提前亮出轮廓的骨架屏，大脑已经在预加载内容，感觉瞬间就开了！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🦴 骨架屏心理魔术：同步 2.2 秒加载对决</h1>
+      <p>左右两张卡片调用完全相同的 <strong>2.20 秒</strong>定时器——左边是“空白 + 转圈菊花”，右边是“呼吸流光骨架屏”。按下按钮盯着两边同时加载，感受主观时间流速的神奇差异！</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="toy-btn" id="runBtn">▶ 同时启动 2.20 秒加载对决</button>
+        <span id="timerTxt" style="font-size:13px;font-family:ui-monospace,monospace;color:var(--tax-muted);">精准计时：0.00 s</span>
+      </div>
+
+      <div class="pair">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--tax-red);margin-bottom:6px;">❌ 方案 A：空白 + 旋转菊花（Spinner）</div>
+          <div class="mock" id="leftMock" style="text-align:center;color:var(--tax-muted);font-size:13px;">点击上方按钮开始加载</div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--tax-green);margin-bottom:6px;">✅ 方案 B：结构流光骨架屏（Skeleton）</div>
+          <div class="mock" id="rightMock" style="text-align:center;color:var(--tax-muted);font-size:13px;">点击上方按钮开始加载</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>感知性能心理学：</strong>空白转圈把全部注意力锁死在“我在等加载”这件事上，主观时间被拉长；骨架屏提前把页面结构铺出来，让大脑觉得“内容已经到达一半了”，体感快了近 40%！
     </div>
-    <div class="tax-panel">
-      <div class="btn-row">
-        <button class="btn active" onclick="setL('blank',this)">纯白屏死等</button>
-        <button class="btn" onclick="setL('spin',this)">居中转圈菊花</button>
-        <button class="btn" onclick="setL('skel',this)">流光骨架屏（Skeleton）</button>
-      </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>后端客观真实加载耗时</span><span id="vSec">2.5 秒</span></label><input type="range" id="sSec" min="0.5" max="6.0" step="0.5" value="2.5" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">用户心理感觉等了多久</div><div class="k-val" id="kPsy">—</div></div>
-        <div class="kpi"><div class="k-lbl">感知提速红利</div><div class="k-val" id="kSav">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-let lm='blank';
-function setL(m,btn){ lm=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const sec=+document.getElementById('sSec').value;
-  document.getElementById('vSec').textContent=sec.toFixed(1)+' 秒';
-  const mult=lm==='blank'?1.45:(lm==='spin'?1.15:0.72);
-  const psy=(sec*mult).toFixed(1);
-  const diff=Math.round((1-mult)*100);
-  document.getElementById('kPsy').textContent=psy+' 秒';
-  document.getElementById('kPsy').style.color=lm==='skel'?'#059669':'#ef4444';
-  document.getElementById('kSav').textContent=diff>=0?('感觉快了 '+diff+'%'):('感觉慢了 '+Math.abs(diff)+'%');
-  const wR=Math.max(15, sec*48), wP=Math.max(15, Math.min(340, parseFloat(psy)*48));
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">客观时间 vs 心理感知时间（同样耗时 ${sec.toFixed(1)} 秒）</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">客观物理耗时</text>
-    <rect x="145" y="64" width="${wR.toFixed(0)}" height="28" rx="6" fill="#64748b"/>
-    <text x="${(153+wR).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="var(--tax-muted)">${sec.toFixed(1)}s</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">用户主观感觉</text>
-    <rect x="145" y="120" width="${wP.toFixed(0)}" height="28" rx="6" fill="${lm==='skel'?'#059669':'#ef4444'}"/>
-    <text x="${(153+wP).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="${lm==='skel'?'#059669':'#ef4444'}">${psy}s</text>
-    <text x="20" y="178" font-size="11.5" fill="var(--tax-muted)">感知性能（Perceived Performance）往往比硬抠服务器 200ms 更立竿见影！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>未预期的空白等待最让人焦躁；给用户提前展示页面骨架和明确进度，就能把焦虑感砍掉一大半！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const runBtn = document.getElementById('runBtn');
+    const timerTxt = document.getElementById('timerTxt');
+    const leftMock = document.getElementById('leftMock');
+    const rightMock = document.getElementById('rightMock');
+    const ahaBox = document.getElementById('ahaBox');
+    let busy = false, done = false;
+
+    const LOADED_HTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--tax-primary-soft);color:var(--tax-primary);display:flex;align-items:center;justify-content:center;font-weight:800;">林</div>
+        <div><div style="font-weight:800;font-size:14px;">林设计 · 刚刚</div><div style="font-size:11.5px;color:var(--tax-muted);">设计系统周报 #18</div></div>
+      </div>
+      <div style="font-size:13px;line-height:1.55;color:var(--tax-ink);">今天把首页加载菊花换成了流光骨架屏，虽然接口耗时一毫秒没变，但用户调研反馈“新版快多了”！</div>
+    `;
+
+    runBtn.onclick = () => {
+      if (busy) return;
+      busy = true;
+      runBtn.disabled = true;
+
+      leftMock.innerHTML = `<div class="spinner"></div><div style="font-size:12px;color:var(--tax-muted);">正在加载中…</div>`;
+      rightMock.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="skel-av"></div>
+          <div style="flex:1;"><div class="skel-bar" style="width:48%;"></div><div class="skel-bar" style="width:30%;margin-bottom:0;"></div></div>
+        </div>
+        <div class="skel-bar" style="width:94%;"></div>
+        <div class="skel-bar" style="width:76%;margin-bottom:0;"></div>
+      `;
+
+      const start = performance.now();
+      const iv = setInterval(() => {
+        const s = Math.min(2.2, (performance.now() - start) / 1000);
+        timerTxt.textContent = `精准计时：${s.toFixed(2)} s`;
+      }, 40);
+
+      setTimeout(() => {
+        clearInterval(iv);
+        timerTxt.textContent = '精准计时：2.20 s（两边完全同时完成！）';
+        leftMock.style.textAlign = 'left';
+        rightMock.style.textAlign = 'left';
+        leftMock.innerHTML = LOADED_HTML;
+        rightMock.innerHTML = LOADED_HTML;
+        busy = false;
+        runBtn.disabled = false;
+        if (!done) {
+          done = true;
+          if (window.ToySDK) window.ToySDK.markCompleted('体验了骨架屏与转圈加载同步2.2秒对决');
+        }
+        ahaBox.innerHTML = '<strong>同样 2.20 秒，体感截然不同！</strong>骨架屏的三大心理魔法：① 消除白屏恐慌；② 提前占好布局位置，彻底消灭内容弹出时的<strong>页面跳动（CLS 抖动）</strong>；③ 从左到右的流光动画制造“正在推进”的确定感！';
+      }, 2200);
+    };
   </script>
 </body>
 </html>

@@ -1,71 +1,102 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎧 混音三维声场工作台：声像 × 混响 × 频段（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>混音三维声场工作台：声像 × 混响 × 频段</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    svg .inst-node { cursor: pointer; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎧 混音三维声场工作台：声像 × 混响 × 频段（SVG）</h1><p>顶级混音师在立体声里盖房子：左右声像（Pan）定宽度，混响湿声（Reverb）定前后景深，高/低频分配定上下高度！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>吉他左右声像摆位（-100左 ↔ +100右）</span><span id="vPan">-55 (偏左)</span></label><input type="range" id="sPan" min="-100" max="100" value="-55" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>空间混响比例 Reverb（越小越贴耳，越大越远）</span><span id="vRev">40%</span></label><input type="range" id="sRev" min="0" max="100" value="40" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🎧 混音三维声场工作台：声像 × 纵深 × 频段（空间混音）</h1>
+      <p>顶级混音师把耳机里的声音当成一座<strong>三维舞台</strong>：左右靠<strong>声像（Pan）</strong>拉开，远近靠<strong>混响干湿比（Reverb）</strong>推远，上下靠<strong>高中低频段</strong>分层！对比“挤成一团”与“立体分离”：</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn secondary" id="mudBtn">💥 灾难混音：全挤在正中央打架（浑浊）</button>
+        <button class="toy-btn" id="proBtn">🎧 格莱美级声场：三维清晰分离</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">听觉距离感</div><div class="k-val" id="kDst">—</div></div>
-        <div class="kpi"><div class="k-lbl">声场分离度</div><div class="k-val" id="kSep">—</div></div>
-      </div>
+
+      <svg id="stageSvg" viewBox="0 0 680 245" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="三维混音声场舞台空间图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>三维声场铁律：</strong>底鼓与贝斯低频能量最大，必须锁死在<strong>正中央底座</strong>；主唱干声贴脸居中；吉他、键盘与和声往<strong>左右声道 + 后方混响空间</strong>散开，瞬间从“广场舞音响”升级成“沉浸音乐厅”！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const pan=+document.getElementById('sPan').value, rev=+document.getElementById('sRev').value;
-  document.getElementById('vPan').textContent=pan===0?'0 (正中)':(pan<0?pan+' (左耳)':'+'+pan+' (右耳)');
-  document.getElementById('vRev').textContent=rev+'%';
-  const dst=rev<20?'🎤 贴耳干声（极其亲密）':(rev<60?'🏛️ 音乐厅中景':'🌌 辽阔大教堂远景');
-  const sep=Math.min(98, Math.round(35 + Math.abs(pan)*0.55 + (100-rev)*0.15));
-  document.getElementById('kDst').textContent=dst;
-  document.getElementById('kSep').textContent=sep+' 分';
-  document.getElementById('kSep').style.color=sep>=65?'#059669':'#f59e0b';
-  const gx=300 + pan*2.1, gy=155 - rev*1.05;
-  const halo=14 + rev*0.32;
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="24" font-size="13" font-weight="800" fill="var(--tax-text)">立体声舞台俯视图（下方 = 听众双耳，上方 = 音乐厅深处）</text>
-    <rect x="60" y="36" width="480" height="148" rx="12" fill="#0f172a"/>
-    <circle cx="300" cy="148" r="14" fill="#38bdf8"/>
-    <text x="300" y="175" text-anchor="middle" font-size="11" font-weight="800" fill="#38bdf8">主唱+底鼓 (稳居中前)</text>
-    <circle cx="${gx.toFixed(1)}" cy="${gy.toFixed(1)}" r="${halo.toFixed(1)}" fill="#f59e0b" opacity="0.22"/>
-    <circle cx="${gx.toFixed(1)}" cy="${gy.toFixed(1)}" r="12" fill="#f59e0b"/>
-    <text x="${gx.toFixed(1)}" y="${(gy-16).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="800" fill="#fde047">吉他 (声像 ${pan})</text>
-    <text x="75" y="175" font-size="11" fill="#94a3b8">◀ 左声道 L</text>
-    <text x="525" y="175" text-anchor="end" font-size="11" fill="#94a3b8">右声道 R ▶</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>如果把所有乐器都塞在正中间且拉满混响，就会糊成一锅粥；拉宽声像、给主唱留干声、给背景铺混响，3D 声场瞬间立体！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const PRO_POS = [
+      { id: 'vox',  name: '🎤 主唱',     x: 340, y: 158, r: 28, col: 'var(--tax-primary)', info: '居中贴脸（干声为主，核心主角）' },
+      { id: 'bass', name: '🥁 底鼓+贝斯', x: 340, y: 204, r: 24, col: 'var(--tax-green)',   info: '正中底部（低频单声道最稳）' },
+      { id: 'gtr',  name: '🎸 电吉他',    x: 145, y: 124, r: 24, col: 'var(--tax-amber)',   info: '左声道 65%（避开主唱中频打架）' },
+      { id: 'keys', name: '🎹 合成器',    x: 535, y: 124, r: 24, col: 'var(--tax-amber)',   info: '右声道 65%（与吉他形成立体对称）' },
+      { id: 'pad',  name: '🎻 弦乐混响',  x: 340, y: 66,  r: 30, col: 'var(--tax-red)',     info: '远景后场（加 45% 混响推远营造包裹感）' }
+    ];
+
+    const MUD_POS = [
+      { id: 'vox',  name: '🎤 主唱',     x: 332, y: 132, r: 26, col: 'var(--tax-primary)', info: '被吉他和弦乐死死盖住！' },
+      { id: 'bass', name: '🥁 底鼓+贝斯', x: 348, y: 146, r: 24, col: 'var(--tax-green)',   info: '与所有乐器挤在同一个单声道点' },
+      { id: 'gtr',  name: '🎸 电吉他',    x: 318, y: 142, r: 24, col: 'var(--tax-amber)',   info: '中频直接撞上主唱人声！' },
+      { id: 'keys', name: '🎹 合成器',    x: 358, y: 126, r: 24, col: 'var(--tax-amber)',   info: '完全没有左右声场宽度' },
+      { id: 'pad',  name: '🎻 弦乐混响',  x: 340, y: 118, r: 28, col: 'var(--tax-red)',     info: '混响糊在最前面，整首歌发闷' }
+    ];
+
+    let isPro = true, selected = null, done = false;
+    const svg = document.getElementById('stageSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      document.getElementById('proBtn').className = isPro ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('mudBtn').className = !isPro ? 'toy-btn' : 'toy-btn secondary';
+
+      let html = '';
+      // Soundstage semicircular arcs (Near / Mid / Far Reverb Depth)
+      html += `<path d="M 60 220 A 280 190 0 0 1 620 220" fill="none" stroke="var(--tax-border)" stroke-dasharray="5 4"/>`;
+      html += `<path d="M 155 220 A 185 125 0 0 1 525 220" fill="none" stroke="var(--tax-border)" stroke-dasharray="5 4"/>`;
+      html += `<text x="340" y="24" text-anchor="middle" fill="var(--tax-muted)" font-size="11.5">↑ 远景纵深（混响越湿越靠后 · 空间感）</text>`;
+      html += `<text x="38" y="135" fill="var(--tax-muted)" font-size="11.5">← 左声道 L</text>`;
+      html += `<text x="642" y="135" text-anchor="end" fill="var(--tax-muted)" font-size="11.5">右声道 R →</text>`;
+      html += `<text x="340" y="238" text-anchor="middle" fill="var(--tax-ink)" font-size="11.5" font-weight="700">🎧 听众双耳位置（近景干声区）</text>`;
+
+      const list = isPro ? PRO_POS : MUD_POS;
+      list.forEach(item => {
+        const hi = selected === item.id;
+        html += `<g class="inst-node" data-id="${item.id}">`;
+        html += `<circle cx="${item.x}" cy="${item.y}" r="${item.r}" fill="${item.col}" opacity="${isPro ? 0.25 : 0.35}" stroke="${item.col}" stroke-width="${hi ? 3.5 : 2}"/>`;
+        html += `<text x="${item.x}" y="${item.y + 4}" text-anchor="middle" fill="var(--tax-ink)" font-size="11" font-weight="800">${item.name}</text>`;
+        html += `</g>`;
+      });
+
+      svg.innerHTML = html;
+      svg.querySelectorAll('.inst-node').forEach(g => {
+        g.onclick = () => {
+          selected = g.dataset.id;
+          const it = list.find(x => x.id === selected);
+          markDone(`查看了声场乐器定位：${it.name}`);
+          ahaBox.innerHTML = `<strong>${it.name} 声场定位：</strong>${it.info}`;
+          render();
+        };
+      });
+    }
+
+    document.getElementById('proBtn').onclick = () => { isPro = true; selected = null; markDone('切换至三维分离声场'); ahaBox.innerHTML = '<strong>三维分离声场（清晰通透）：</strong>5 件乐器错开左右声像与前后混响纵深，彼此不抢同一个频段位置，每件乐器都颗粒分明！点击任意乐器圆圈查看混音细节。'; render(); };
+    document.getElementById('mudBtn').onclick = () => { isPro = false; selected = null; markDone('对比了单点浑浊声场'); ahaBox.innerHTML = '<strong>声场打架灾难（浑浊发闷）：</strong>所有乐器全堆在正中央同一深度，产生严重的<strong>频率掩蔽效应（Masking）</strong>，人声被电吉他和混响彻底淹没！'; render(); };
+    render();
   </script>
 </body>
 </html>

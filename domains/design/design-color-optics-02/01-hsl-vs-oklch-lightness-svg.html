@@ -1,78 +1,85 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚖️ HSL 假等亮 vs OKLCH 真等亮（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HSL 假等亮 vs OKLCH 真等亮</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .strip-label { font-size: 13px; font-weight: 700; margin: 10px 0 6px; display: flex; justify-content: space-between; }
+    .swatch-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; transition: filter .35s; }
+    .swatch-strip.gray { filter: grayscale(100%); }
+    .chip {
+      height: 68px; border-radius: 10px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #ffffff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.45);
+    }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚖️ HSL 假等亮 vs OKLCH 真等亮（SVG）</h1><p>HSL 是为早期计算机省算力造的数学圆柱，根本不管人眼对黄绿最敏感、对蓝紫最迟钝。现代 CSS 的 OKLCH 彻底修复了这一缺陷！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>统一设定名义亮度 L</span><span id="vL">55%</span></label><input type="range" id="sL" min="35" max="75" value="55" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>色彩鲜艳度（Chroma/Sat）</span><span id="vC">85%</span></label><input type="range" id="sC" min="25" max="100" value="85" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⚖️ HSL 假等亮 vs OKLCH 真等亮（灰度透视盲测）</h1>
+      <p>第一排 5 个色块在传统 <strong>HSL 里亮度全是 50%</strong>；第二排 5 个色块在现代 <strong>OKLCH 里亮度全是 0.62</strong>。点击「🖤 一键去色灰度透视」，立刻拆穿 HSL 巨大的视觉亮度骗局！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="grayBtn">🖤 开启去色灰度透视（检验真实亮度）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 215"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">HSL 黄蓝真实亮度差</div><div class="k-val" id="kHsl">—</div></div>
-        <div class="kpi"><div class="k-lbl">OKLCH 黄蓝真实亮度差</div><div class="k-val" id="kOk">—</div></div>
+
+      <div class="strip-label">
+        <span>❌ 传统 HSL（全部设为 L = 50%, S = 90%）</span>
+        <span style="color:var(--tax-red);" id="hslNote">黄亮瞎眼，蓝暗沉难读！</span>
       </div>
+      <div class="swatch-strip" id="hslStrip">
+        <div class="chip" style="background:hsl(240,90%,50%);"><span>蓝 240°</span><span>L=50%</span></div>
+        <div class="chip" style="background:hsl(285,90%,50%);"><span>紫 285°</span><span>L=50%</span></div>
+        <div class="chip" style="background:hsl(0,90%,50%);"><span>红 0°</span><span>L=50%</span></div>
+        <div class="chip" style="background:hsl(130,90%,50%);"><span>绿 130°</span><span>L=50%</span></div>
+        <div class="chip" style="background:hsl(55,90%,50%);"><span>黄 55°</span><span>L=50%</span></div>
+      </div>
+
+      <div class="strip-label" style="margin-top:16px;">
+        <span>✅ 现代 OKLCH（全部锁定感知亮度 L = 0.62）</span>
+        <span style="color:var(--tax-green);" id="okNote">5 种色相肉眼亮度完全一致！</span>
+      </div>
+      <div class="swatch-strip" id="okStrip">
+        <div class="chip" style="background:#4b7df3;background:oklch(0.62 0.17 260);"><span>蓝 260°</span><span>L=0.62</span></div>
+        <div class="chip" style="background:#9d62e8;background:oklch(0.62 0.17 305);"><span>紫 305°</span><span>L=0.62</span></div>
+        <div class="chip" style="background:#dc5c53;background:oklch(0.62 0.17 25);"><span>红 25°</span><span>L=0.62</span></div>
+        <div class="chip" style="background:#2ba058;background:oklch(0.62 0.15 150);"><span>绿 150°</span><span>L=0.62</span></div>
+        <div class="chip" style="background:#a58700;background:oklch(0.62 0.13 95);"><span>黄 95°</span><span>L=0.62</span></div>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>动手透视：</strong>注意看第一排 HSL 黄色色块上的白字几乎看不清，而蓝色色块上的白字很清楚——尽管它们在代码里都是 <code>L = 50%</code>！点上方「🖤 开启去色灰度透视」看铁证！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const L=+document.getElementById('sL').value, C=+document.getElementById('sC').value;
-  document.getElementById('vL').textContent=L+'%';
-  document.getElementById('vC').textContent=C+'%';
-  const hues=[0, 60, 120, 180, 240, 300];
-  const names=['红','黄','绿','青','蓝','紫'];
-  // Approximate perceptual lightness compensation for display
-  const okLAdj=[0, -14, -9, -11, 13, 4];
-  let row1='', row2='';
-  hues.forEach((h,i)=>{
-    const x=45+i*88;
-    row1+=`<rect x="${x}" y="48" width="76" height="44" rx="8" fill="hsl(${h},${C}%,${L}%)"/>
-      <text x="${x+38}" y="75" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${names[i]}</text>`;
-    const adjL=Math.max(25, Math.min(82, L + okLAdj[i]*(C/100)));
-    row2+=`<rect x="${x}" y="128" width="76" height="44" rx="8" fill="hsl(${h},${Math.round(C*0.82)}%,${adjL.toFixed(0)}%)"/>
-      <text x="${x+38}" y="155" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${names[i]}</text>`;
-  });
-  const hslGap=Math.round(52*(C/100));
-  document.getElementById('kHsl').textContent=hslGap+'% 剧烈跳变（黄刺眼蓝发暗）';
-  document.getElementById('kHsl').style.color='#ef4444';
-  document.getElementById('kOk').textContent='< 2% 视觉完全均一';
-  document.getElementById('kOk').style.color='#059669';
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="34" font-size="12.5" font-weight="800" fill="var(--tax-text)">HSL 同样 L=${L}%：黄色上白字完全瞎眼，蓝色却很暗！</text>
-    ${row1}
-    <text x="45" y="114" font-size="12.5" font-weight="800" fill="#059669">OKLCH 感知等亮 L=${L}%：所有色相视觉明度与白字可读性完全一致！</text>
-    ${row2}
-    <text x="45" y="196" font-size="11" fill="var(--tax-muted)">提示：把设计系统底层从 HSL 换成 OKLCH，换主题色再也不用手动逐个微调亮度。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>HSL 的“L”只是 RGB 最大最小值的算术平均，根本不是人眼感受到的亮度！OKLCH 让数值真正对齐人眼生理感知。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let gray = false, done = false;
+    const grayBtn = document.getElementById('grayBtn');
+    const hslStrip = document.getElementById('hslStrip');
+    const okStrip = document.getElementById('okStrip');
+    const ahaBox = document.getElementById('ahaBox');
+
+    grayBtn.onclick = () => {
+      gray = !gray;
+      hslStrip.classList.toggle('gray', gray);
+      okStrip.classList.toggle('gray', gray);
+      grayBtn.textContent = gray ? '🌈 恢复彩色显示' : '🖤 开启去色灰度透视（检验真实亮度）';
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted('使用灰度透视验证了OKLCH感知等亮优势');
+      }
+      ahaBox.innerHTML = gray
+        ? '<strong>灰度铁证现形！</strong>剥掉颜色后，第一排 HSL 从左到右居然是从深灰（蓝）一路跳到惨白（黄）的剧烈阶梯；而第二排 OKLCH 几乎是<strong>完全均匀的一整条中灰</strong>！这就是现代设计系统全面转向 OKLCH 的根本原因。'
+        : '<strong>彩色视角对比：</strong>人眼对绿光、黄光天生比蓝光敏感得多，HSL 只是简单算术平均，忽略了人眼生理曲线；OKLCH 严格拟合人眼感知均匀性！';
+    };
   </script>
 </body>
 </html>

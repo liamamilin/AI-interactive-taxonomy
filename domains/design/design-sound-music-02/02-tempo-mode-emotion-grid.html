@@ -1,73 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧭 调式 × 速度二维情绪象限</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>调式 × 速度二维情绪象限</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    svg .q-zone { cursor: pointer; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🧭 调式 × 速度二维情绪象限</h1><p>大调不一定是欢快的（慢速大调可以是庄严催泪的告别曲），小调也不一定是悲伤的（高速小调是热血沸腾的动漫战歌）！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🧭 调式 × 速度二维情绪象限（交互声场空间）</h1>
+      <p>大调并不总是欢快，小调也不一定悲伤！<strong>调式（大调/小调）</strong>决定情绪的亮暗效价，而<strong>速度（BPM）</strong>决定情绪的唤醒强度。点击下方任意象限，现场试听 4 种截然不同的配乐情绪！</p>
+    </header>
+
+    <section class="toy-card">
+      <svg id="quadSvg" viewBox="0 0 680 255" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="调式与速度二维音乐情绪象限"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>点击试听 4 个象限：</strong>试试点击左上角「小调 + 138 BPM 快速度」——它一点都不悲伤，反而充满热血战斗与史诗紧迫感！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>调式明亮度（0=深沉小调 ↔ 100=明亮大调）</span><span id="vMod">25%（小调）</span></label><input type="range" id="sMod" min="0" max="100" value="25" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>节拍速度 BPM（慢板 60 ↔ 疾速 160）</span><span id="vBpm">135 BPM</span></label><input type="range" id="sBpm" min="60" max="160" value="135" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 215"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">当前音乐情绪象限</div><div class="k-val" id="kQd">—</div></div>
-        <div class="kpi"><div class="k-lbl">典型电影配乐场景</div><div class="k-val" id="kScn">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const mod=+document.getElementById('sMod').value, bpm=+document.getElementById('sBpm').value;
-  document.getElementById('vMod').textContent=mod+'%';
-  document.getElementById('vBpm').textContent=bpm+' BPM';
-  let qd, scn, col;
-  if(mod>=50 && bpm>=110){ qd='🎉 欢快明朗（高唤醒+正效价）'; scn='夏日冒险、庆祝胜利'; col='#f59e0b'; }
-  else if(mod>=50 && bpm<110){ qd='🌅 温暖治愈（低唤醒+正效价）'; scn='日落回忆、温柔摇篮曲'; col='#059669'; }
-  else if(mod<50 && bpm>=110){ qd='⚔️ 紧张燃系（高唤醒+暗色调）'; scn='Boss 决战、悬疑追逐'; col='#ef4444'; }
-  else { qd='🌧️ 悲伤寂寥（低唤醒+暗色调）'; scn='雨夜离别、深沉思念'; col='#3b82f6'; }
-  document.getElementById('kQd').textContent=qd;
-  document.getElementById('kQd').style.color=col;
-  document.getElementById('kScn').textContent=scn;
-  const px=80 + mod*4.4, py=188 - (bpm-60)*1.45;
-  document.getElementById('svg').innerHTML=`
-    <text x="80" y="24" font-size="13" font-weight="800" fill="var(--tax-text)">拉塞尔情感模型：调式（横轴）× 速度 BPM（纵轴）</text>
-    <rect x="80" y="38" width="440" height="150" rx="8" fill="var(--tax-border)" opacity="0.16"/>
-    <line x1="300" y1="38" x2="300" y2="188" stroke="var(--tax-border)" stroke-dasharray="4,3"/>
-    <line x1="80" y1="113" x2="520" y2="113" stroke="var(--tax-border)" stroke-dasharray="4,3"/>
-    <text x="190" y="76" text-anchor="middle" font-size="12" font-weight="800" fill="#ef4444">⚔️ 燃系/紧张</text>
-    <text x="410" y="76" text-anchor="middle" font-size="12" font-weight="800" fill="#d97706">🎉 欢快/明朗</text>
-    <text x="190" y="156" text-anchor="middle" font-size="12" font-weight="800" fill="#2563eb">🌧️ 悲伤/忧郁</text>
-    <text x="410" y="156" text-anchor="middle" font-size="12" font-weight="800" fill="#059669">🌅 温暖/宁静</text>
-    <circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="10" fill="${col}" stroke="#fff" stroke-width="2.5"/>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>配乐师控制观众心跳的两个旋钮就是调式和 BPM：小调定色调、快拍拉心率，两者组合就能精准调配出任意复杂情绪！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const QUADS = [
+      { id: 'minFast', x: 54,  y: 28,  w: 284, h: 96, title: '🔥 小调 × 快速度（138 BPM）', sub: '紧张、燃爆、史诗战斗（动漫/动作片配乐）', col: 'rgba(239,68,68,0.18)', stroke: 'var(--tax-red)', bpm: 138, notes: [220, 261.63, 329.63, 440, 329.63, 261.63], aha: '<strong>小调 + 高速（138 BPM）：</strong>同样是小调音阶，一旦把速度拉高，忧伤瞬间转化成<strong>史诗紧迫感与热血抗争</strong>（如《加勒比海盗》或电子舞曲）！' },
+      { id: 'majFast', x: 342, y: 28,  w: 284, h: 96, title: '🎉 大调 × 快速度（132 BPM）', sub: '欢快、雀跃、阳光庆典（流行舞曲）', col: 'rgba(245,158,11,0.18)', stroke: 'var(--tax-amber)', bpm: 132, notes: [261.63, 329.63, 392, 523.25, 392, 329.63], aha: '<strong>大调 + 高速（132 BPM）：</strong>明亮效价 + 高唤醒度 = 极致快乐与派对活力，多巴胺瞬间拉满！' },
+      { id: 'minSlow', x: 54,  y: 128, w: 284, h: 96, title: '🌧️ 小调 × 慢速度（66 BPM）',  sub: '深沉、忧伤、怀旧独白（雨夜抒情曲）', col: 'rgba(59,130,246,0.18)', stroke: 'var(--tax-primary)', bpm: 66, notes: [220, 261.63, 329.63, 261.63], aha: '<strong>小调 + 低速（66 BPM）：</strong>暗色调式配上接近静息心率的慢速，精准触发人类的共情与感伤回忆！' },
+      { id: 'majSlow', x: 342, y: 128, w: 284, h: 96, title: '🌿 大调 × 慢速度（72 BPM）',  sub: '温暖、宁静、治愈摇篮曲（清晨咖啡馆）', col: 'rgba(16,185,129,0.18)', stroke: 'var(--tax-green)', bpm: 72, notes: [261.63, 329.63, 392, 329.63], aha: '<strong>大调 + 低速（72 BPM）：</strong>大调并不等于吵闹——放慢速度后，大调立刻化作如沐春风的温柔与安全感！' }
+    ];
+
+    let activeId = null, ctx = null, done = false;
+    const svg = document.getElementById('quadSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function playArp(q) {
+      try {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        const stepSec = 60 / q.bpm / 2;
+        const now = ctx.currentTime;
+        q.notes.forEach((f, i) => {
+          const t0 = now + i * stepSec;
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, t0);
+          g.gain.setValueAtTime(0.001, t0);
+          g.gain.linearRampToValueAtTime(0.16, t0 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.001, t0 + stepSec * 1.15);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(t0); osc.stop(t0 + stepSec * 1.2);
+        });
+      } catch (e) {}
+    }
+
+    function render() {
+      let html = '';
+      QUADS.forEach(q => {
+        const hi = activeId === q.id;
+        html += `<g class="q-zone" data-id="${q.id}">`;
+        html += `<rect x="${q.x}" y="${q.y}" width="${q.w}" height="${q.h}" rx="10" fill="${q.col}" stroke="${q.stroke}" stroke-width="${hi ? 3.5 : 1.5}"/>`;
+        html += `<text x="${q.x + q.w / 2}" y="${q.y + 42}" text-anchor="middle" fill="var(--tax-ink)" font-size="13.5" font-weight="800">${q.title}</text>`;
+        html += `<text x="${q.x + q.w / 2}" y="${q.y + 66}" text-anchor="middle" fill="var(--tax-muted)" font-size="11.5">${q.sub}</text>`;
+        html += `</g>`;
+      });
+
+      html += `<text x="340" y="18" text-anchor="middle" fill="var(--tax-muted)" font-size="11.5">↑ 快速度（高唤醒 · 135 BPM）</text>`;
+      html += `<text x="340" y="246" text-anchor="middle" fill="var(--tax-muted)" font-size="11.5">← 小调（暗色） | 慢速度（低唤醒 · 68 BPM） | 大调（明亮） →</text>`;
+      svg.innerHTML = html;
+
+      svg.querySelectorAll('.q-zone').forEach(g => {
+        g.onclick = () => {
+          const q = QUADS.find(x => x.id === g.dataset.id);
+          activeId = q.id;
+          markDone(`试听了二维音乐情绪象限：${q.title}`);
+          ahaBox.innerHTML = q.aha;
+          render();
+          playArp(q);
+        };
+      });
+    }
+
+    render();
   </script>
 </body>
 </html>

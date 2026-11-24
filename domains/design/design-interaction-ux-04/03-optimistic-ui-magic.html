@@ -1,67 +1,132 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>❤️ 乐观更新（Optimistic UI）：先亮红心再发请求</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>乐观更新（Optimistic UI）：先亮红心再发请求</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .post-card { padding: 16px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .like-btn {
+      padding: 9px 18px; border-radius: 999px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); font-size: 15px; font-weight: 800; cursor: pointer;
+      transition: transform .12s, background .15s, border-color .15s;
+    }
+    .like-btn.liked { border-color: var(--tax-red); background: var(--tax-red-soft); color: var(--tax-red); }
+    .like-btn:active { transform: scale(0.94); }
+    .net-log { font-family: ui-monospace, monospace; font-size: 12px; color: var(--tax-muted); padding: 10px 12px; border-radius: 8px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>❤️ 乐观更新（Optimistic UI）：先亮红心再发请求</h1><p>为什么微信发消息、小红书点红心无论网速多烂都觉得“零延迟”？因为前端在 0ms 就乐观假定服务器会成功，先变红心，极少数失败时再悄悄回滚！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>当前真实 4G/弱网往返延迟</span><span id="vNet">450 ms</span></label><input type="range" id="sNet" min="50" max="1200" step="50" value="450" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>后端接口真实成功率</span><span id="vOk">99.5%</span></label><input type="range" id="sOk" min="90" max="99.9" step="0.1" value="99.5" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>❤️ 乐观更新（Optimistic UI）：先亮红心再发请求（模拟器）</h1>
+      <p>在 <strong>900ms 弱网环境</strong>下，为什么微信、Instagram 和 Twitter 点赞依然 0 毫秒瞬间变红？因为它们“乐观地假设 99% 会成功”，<strong>先改界面、后台悄悄发请求</strong>，万一失败再优雅回滚！亲自切换体验：</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn secondary" id="pessBtn">🐢 悲观更新（等服务器 900ms 才变红）</button>
+        <button class="toy-btn" id="optBtn">⚡ 乐观更新（0ms 立刻变红 + 后台同步）</button>
+        <button class="toy-btn secondary" id="failBtn">💥 模拟下次断网失败（看回滚）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">传统悲观等待反馈</div><div class="k-val" id="kPes">—</div></div>
-        <div class="kpi"><div class="k-lbl">乐观更新前端反馈</div><div class="k-val" id="kOpt">16 ms（丝滑瞬时!）</div></div>
+
+      <div class="post-card">
+        <div style="font-weight:800;font-size:15px;margin-bottom:6px;">@交互设计日记</div>
+        <div style="font-size:13.5px;color:var(--tax-muted);margin-bottom:12px;">弱网下点下面这颗爱心，对比「悲观等待」和「乐观秒亮」的爽感差距！</div>
+        <button class="like-btn" id="likeBtn">🤍 点赞 <span id="cntSpan">128</span></button>
       </div>
+
+      <div class="net-log" id="netLog">网络日志：准备就绪（模拟服务器往返 RTT = 900ms）</div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>乐观更新秘诀：</strong>对于点赞、收藏、发消息等<strong>成功率 99%+ 且低风险</strong>的操作，永远不要让用户干等服务器！先 0ms 给即时反馈，再在后台静默同步；若模拟断网失败，再悄悄回滚并弹轻量提示！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const net=+document.getElementById('sNet').value, ok=+document.getElementById('sOk').value;
-  document.getElementById('vNet').textContent=net+' ms';
-  document.getElementById('vOk').textContent=ok.toFixed(1)+'%';
-  document.getElementById('kPes').textContent=net+' ms'+(net>300?'（明显卡顿）':'');
-  document.getElementById('kPes').style.color=net>300?'#ef4444':'#f59e0b';
-  document.getElementById('kOpt').style.color='#059669';
-  const wP=Math.max(15, Math.min(340, net*0.28));
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">点赞/收藏等高频轻量操作：等待服务器 vs 乐观即时渲染</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">传统悲观模式</text>
-    <rect x="145" y="64" width="${wP.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
-    <text x="${(153+wP).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#ef4444">${net}ms 才亮红心</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">乐观更新模式</text>
-    <rect x="145" y="120" width="16" height="28" rx="6" fill="#059669"/>
-    <text x="170" y="139" font-size="12" font-weight="800" fill="#059669">16ms 瞬时亮心（${ok.toFixed(1)}% 无需回滚）</text>
-    <text x="20" y="178" font-size="11.5" fill="var(--tax-muted)">注意边界：点赞/发消息适合乐观更新；银行转账扣款必须老老实实等后端确认！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>不要为了 0.5% 的极小失败概率，惩罚 99.5% 正常用户的瞬时爽感——高频低风险动作，大胆用乐观更新！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let optimistic = true;
+    let forceFail = false;
+    let liked = false;
+    let count = 128;
+    let pending = false;
+    let done = false;
+
+    const likeBtn = document.getElementById('likeBtn');
+    const netLog = document.getElementById('netLog');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function renderUI() {
+      document.getElementById('pessBtn').className = !optimistic ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('optBtn').className = optimistic ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('failBtn').textContent = forceFail ? '💥 已武装：下次请求必断网失败' : '💥 模拟下次断网失败（看回滚）';
+
+      likeBtn.classList.toggle('liked', liked);
+      likeBtn.innerHTML = `${liked ? '❤️ 已赞' : '🤍 点赞'} <span id="cntSpan">${count}</span>`;
+    }
+
+    likeBtn.onclick = () => {
+      if (pending && !optimistic) return;
+      const targetLiked = !liked;
+      const prevLiked = liked, prevCount = count;
+      const willFail = forceFail;
+      forceFail = false;
+      markDone(`体验了${optimistic ? '乐观更新' : '悲观更新'}点赞交互`);
+
+      if (optimistic) {
+        // 0ms immediate UI update!
+        liked = targetLiked;
+        count = targetLiked ? count + 1 : count - 1;
+        renderUI();
+        netLog.textContent = `⚡ [0ms] 界面已瞬间更新！后台正在发送 POST /like (RTT 900ms)…`;
+
+        setTimeout(() => {
+          if (willFail) {
+            liked = prevLiked;
+            count = prevCount;
+            renderUI();
+            netLog.textContent = `💥 [900ms] 网络断开失败！已自动静默回滚红心状态并提示用户重试。`;
+            ahaBox.innerHTML = '<strong>优雅回滚机制：</strong>乐观更新不是“不管失败”，而是在那 1% 的断网失败发生时，把界面状态干净地回滚原位并给出温和提示——用 1% 的回滚代价，换来 99% 场景下的 0 毫秒神级流畅！';
+          } else {
+            netLog.textContent = `✅ [900ms] 服务器返回 200 OK，后台静默同步完成（用户全程零等待感！）。`;
+            ahaBox.innerHTML = '<strong>0ms 丝滑错觉！</strong>虽然服务器依然花了整整 900ms 才落库，但用户完全感觉不到一丝卡顿！注意：涉及<strong>转账扣款</strong>等不可逆高风险操作，切忌用乐观更新。';
+          }
+        }, 900);
+      } else {
+        // Pessimistic: freeze UI for 900ms
+        pending = true;
+        likeBtn.textContent = '⏳ 请求中…';
+        netLog.textContent = `🐢 [0ms] 悲观模式：锁死按钮，干等服务器 900ms 返回…`;
+        setTimeout(() => {
+          pending = false;
+          if (willFail) {
+            renderUI();
+            netLog.textContent = `💥 [900ms] 请求失败，状态未变。`;
+          } else {
+            liked = targetLiked;
+            count = targetLiked ? count + 1 : count - 1;
+            renderUI();
+            netLog.textContent = `🐢 [900ms] 服务器终于返回！按钮才慢半拍变红——体验卡顿感极强。`;
+            ahaBox.innerHTML = '<strong>悲观等待的卡顿感：</strong>明明只是点个赞，却要锁死按钮干等 0.9 秒！切回「⚡ 乐观更新」再点一次，高下立判！';
+          }
+        }, 900);
+      }
+    };
+
+    document.getElementById('pessBtn').onclick = () => { optimistic = false; renderUI(); };
+    document.getElementById('optBtn').onclick = () => { optimistic = true; renderUI(); };
+    document.getElementById('failBtn').onclick = () => { forceFail = !forceFail; renderUI(); };
+    renderUI();
   </script>
 </body>
 </html>

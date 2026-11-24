@@ -1,63 +1,117 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔤 字距反直觉：大标题要收紧，小号全大写要放宽</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>字距反直觉：大标题要收紧，小号全大写要放宽</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+    @media (max-width: 600px) { .pair { grid-template-columns: 1fr; } }
+    .spec-btn {
+      padding: 20px 14px; border-radius: 12px; border: 2px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); cursor: pointer; text-align: center;
+      transition: border-color .15s;
+    }
+    .spec-btn:hover { border-color: var(--tax-primary); }
+    .spec-btn.ok { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .spec-btn.bad { border-color: var(--tax-red); background: var(--tax-red-soft); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔤 字距反直觉：大标题要收紧，小号全大写要放宽</h1><p>很多新手做大字标题时喜欢疯狂加字距，结果字都散架了；专业排版恰恰相反——字越大越要微微收紧，极小号标签反而要拉宽字距！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>当前文字字号</span><span id="vSz">36 px（大标题）</span></label><input type="range" id="sSz" min="11" max="44" value="36" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>字距微调 Tracking</span><span id="vTr">-1.5 px</span></label><input type="range" id="sTr" min="-4" max="8" step="0.5" value="-1.5" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔤 字距反直觉：两关排版师眼力盲测</h1>
+      <p>同一套字距规则不能通吃所有字号！在下面两关盲测中，凭你的设计直觉选出<strong>看着更专业、更稳重</strong>的排版卡片，解锁大标题与小标签截然相反的字距密码！</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--tax-muted);margin-bottom:6px;">
+        <span id="stageTag">第 1 / 2 关 · 40px 巨幅海报主标题</span>
+        <span id="scoreTag" style="color:var(--tax-primary);font-weight:700;">眼力命中：0 / 2</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">该字号推荐字距</div><div class="k-val" id="kRec">—</div></div>
-        <div class="kpi"><div class="k-lbl">视觉紧致度评价</div><div class="k-val" id="kEv">—</div></div>
+
+      <div class="pair" id="pairBox"></div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span id="fbLine" style="font-size:13px;color:var(--tax-muted);">点击你觉得更专业协调的一张卡片</span>
+        <button class="toy-btn secondary" id="nextBtn" style="display:none;">进入第 2 关 →</button>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>眼力盲测：</strong>先凭直觉挑出更顺眼的一张，再揭晓背后精确到 <code>em</code> 的光学字距定律！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const sz=+document.getElementById('sSz').value, tr=+document.getElementById('sTr').value;
-  document.getElementById('vSz').textContent=sz+' px'+(sz>=28?'（大标题）':(sz<=14?'（小标签）':'（正文）'));
-  document.getElementById('vTr').textContent=(tr>=0?'+':'')+tr.toFixed(1)+' px';
-  const rec=sz>=28?-1.5:(sz<=14?2.0:0.0);
-  const diff=Math.abs(tr-rec);
-  document.getElementById('kRec').textContent=(rec>=0?'+':'')+rec.toFixed(1)+' px';
-  document.getElementById('kEv').textContent=diff<=1.5?'✅ 专业光学平衡':(tr>rec?'⚠️ 显得松散无力':'⚠️ 挤成一团糊字');
-  document.getElementById('kEv').style.color=diff<=1.5?'#059669':'#ef4444';
-  document.getElementById('svg').innerHTML=`
-    <rect x="30" y="24" width="540" height="148" rx="12" fill="var(--tax-surface)" stroke="var(--tax-border)"/>
-    <text x="300" y="106" text-anchor="middle" font-size="${sz}" font-weight="${sz>=28?850:600}" letter-spacing="${tr}" fill="var(--tax-text)">DESIGN 排版节奏</text>
-    <text x="300" y="154" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">字号 ${sz}px · 当前字距 ${tr.toFixed(1)}px（推荐 ${rec.toFixed(1)}px）</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>字号越大，字母间默认空白按比例被放大得越夸张，所以大标题微微负字距才稳重有力；小字则需正字距防止笔画粘连！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const ROUNDS = [
+      {
+        stage: '第 1 / 2 关 · 巨幅主标题（Display Heading）',
+        a: { html: '<div style="font-size:34px;font-weight:900;letter-spacing:0.12em;">Design Craft</div><div style="font-size:11px;color:var(--tax-muted);margin-top:8px;">方案 A</div>', ok: false },
+        b: { html: '<div style="font-size:34px;font-weight:900;letter-spacing:-0.03em;">Design Craft</div><div style="font-size:11px;color:var(--tax-muted);margin-top:8px;">方案 B</div>', ok: true },
+        aha: '<strong>大标题要收紧（<code>-0.02em ~ -0.04em</code>）：</strong>字体放大到 32px+ 时，原本按正文设计的默认字缝会被等比放大成难看的“豁口”！微微收紧负字距，标题立刻显得紧凑有力、像苹果发布会主视觉！'
+      },
+      {
+        stage: '第 2 / 2 关 · 11px 小号全大写标签（ALL CAPS）',
+        a: { html: '<div style="font-size:11px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;">NEW DESIGN SYSTEM</div><div style="font-size:11px;color:var(--tax-muted);margin-top:10px;">方案 A</div>', ok: true },
+        b: { html: '<div style="font-size:11px;font-weight:800;letter-spacing:-0.02em;text-transform:uppercase;">NEW DESIGN SYSTEM</div><div style="font-size:11px;color:var(--tax-muted);margin-top:10px;">方案 B</div>', ok: false },
+        aha: '<strong>小号全大写要放宽（<code>+0.08em ~ +0.15em</code>）：</strong>全大写字母全是方正竖杠，缺少小写字母高低错落的“词形轮廓”，缩到 11px 挤在一起极难辨认！大幅拉宽正字距后，瞬间高级又通透！'
+      }
+    ];
+
+    let idx = 0, score = 0, locked = false, done = false;
+    const pairBox = document.getElementById('pairBox');
+    const fbLine = document.getElementById('fbLine');
+    const nextBtn = document.getElementById('nextBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const r = ROUNDS[idx];
+      locked = false;
+      nextBtn.style.display = 'none';
+      document.getElementById('stageTag').textContent = r.stage;
+      fbLine.textContent = '点击你觉得更专业协调的一张卡片';
+      pairBox.innerHTML = '';
+
+      [r.a, r.b].forEach(opt => {
+        const b = document.createElement('button');
+        b.className = 'spec-btn';
+        b.innerHTML = opt.html;
+        b.onclick = () => {
+          if (locked) return;
+          locked = true;
+          b.classList.add(opt.ok ? 'ok' : 'bad');
+          if (opt.ok) score++;
+          document.getElementById('scoreTag').textContent = `眼力命中：${score} / 2`;
+          fbLine.textContent = opt.ok ? '✓ 设计师级火眼金睛！' : '⚠️ 选反啦，对比一下字缝呼吸感';
+          ahaBox.innerHTML = r.aha;
+          if (idx === ROUNDS.length - 1) {
+            markDone(`完成字距反直觉两关盲测（${score}/2）`);
+            nextBtn.textContent = '↺ 重新盲测';
+          } else {
+            nextBtn.textContent = '进入第 2 关 →';
+          }
+          nextBtn.style.display = 'inline-block';
+        };
+        pairBox.appendChild(b);
+      });
+    }
+
+    nextBtn.onclick = () => {
+      if (idx === ROUNDS.length - 1) { idx = 0; score = 0; document.getElementById('scoreTag').textContent = '眼力命中：0 / 2'; }
+      else idx++;
+      render();
+    };
+    render();
   </script>
 </body>
 </html>

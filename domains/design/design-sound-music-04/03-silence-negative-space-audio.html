@@ -1,69 +1,137 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🤫 声音里的留白：副歌前突然静音 0.5 秒的核爆张力</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>声音里的留白：副歌前突然静音 0.5 秒的核爆张力</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🤫 声音里的留白：副歌前突然静音 0.5 秒的核爆张力</h1><p>电子音乐和交响乐最绝的一招叫“骤停留白（Drop Silence）”：在副歌炸裂前把所有乐器突然切断静音半秒，随后全频段轰然砸下，冲击力瞬间翻倍！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>副歌爆发前的突然静音留白时长</span><span id="vSil">0.5 秒（黄金骤停）</span></label><input type="range" id="sSil" min="0" max="2.0" step="0.1" value="0.5" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>副歌瞬间回归的声压能量</span><span id="vDrp">90%</span></label><input type="range" id="sDrp" min="40" max="100" value="90" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🤫 声音里的留白：副歌前突然抽空 0.5 秒（听觉情景）</h1>
+      <p>平面设计用<strong>负空间留白</strong>制造高级感，而顶级电音与流行编曲在副歌（Drop）爆发前会突然<strong>全轨静音 0.5 秒</strong>！对比播放下面两段完全相同的副歌，听出那半秒绝对寂静的核爆威力！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn secondary" id="flatBtn">😐 无留白版：一路塞满直冲副歌</button>
+        <button class="toy-btn" id="dropBtn">💥 黄金留白版：副歌前突然静音 0.5 秒！</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">副歌爆发主观震撼度</div><div class="k-val" id="kImp">—</div></div>
-        <div class="kpi"><div class="k-lbl">听觉留白效果</div><div class="k-val" id="kEf">—</div></div>
-      </div>
+
+      <svg id="dropSvg" viewBox="0 0 680 165" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="副歌前静音留白张力波形图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>听觉负空间法则：</strong>连续声音会让耳膜迅速适应疲劳；在最高潮前一刹那突然抽成<strong>绝对真空（0.5 秒静音）</strong>，大脑的期待感瞬间拉成满弓，下一毫秒副歌炸响时的主观冲击力直接翻倍！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const sil=+document.getElementById('sSil').value, drp=+document.getElementById('sDrp').value;
-  document.getElementById('vSil').textContent=sil.toFixed(1)+' 秒';
-  document.getElementById('vDrp').textContent=drp+'%';
-  const boost=sil===0?0:Math.round(35*Math.exp(-Math.pow((sil-0.55)/0.55, 2)));
-  const imp=Math.min(100, Math.round(drp*0.72 + boost));
-  const ef=sil===0?'😐 无缓冲直出，冲击一般':(sil<=1.0?'💥 窒息留白 → 核爆级 Drop!':'🤔 静音太久，像耳机断联了');
-  document.getElementById('kImp').textContent=imp+' 分';
-  document.getElementById('kImp').style.color=imp>=85?'#059669':'#f59e0b';
-  document.getElementById('kEf').textContent=ef;
-  const gapW=Math.round(sil*75);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">声音负空间波形：前奏爬坡 → 突然静音 (${sil.toFixed(1)}s) → 副歌爆发！</text>
-    <polygon points="40,145 230,145 230,82" fill="#3b82f6" opacity="0.65"/>
-    <text x="145" y="166" text-anchor="middle" font-size="11" fill="#2563eb">情绪爬坡 Build-up</text>
-    <rect x="230" y="55" width="${Math.max(2,gapW)}" height="90" fill="#f59e0b" opacity="0.18"/>
-    <line x1="230" y1="145" x2="${230+gapW}" y2="145" stroke="#d97706" stroke-width="3"/>
-    <rect x="${230+gapW}" y="${(145-drp*0.95).toFixed(0)}" width="${Math.max(40, 330-gapW)}" height="${(drp*0.95).toFixed(0)}" rx="6" fill="#059669" opacity="0.85"/>
-    <text x="${Math.min(520, 250+gapW)}" y="166" font-size="11.5" font-weight="800" fill="#059669">副歌轰然爆发 (震撼 ${imp} 分)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“此时无声胜有声”——视觉里的留白和音乐里的静音休止符是同一个审美母题：用克制的空白，把主角的爆发力拉到极致！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let useGap = true, ctx = null, done = false;
+    const svg = document.getElementById('dropSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function playDrop(withSilence) {
+      try {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        const now = ctx.currentTime;
+
+        // 4 rising buildup pulses
+        [220, 261.63, 329.63, 392.00].forEach((f, i) => {
+          const t0 = now + i * 0.22;
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(f, t0);
+          g.gain.setValueAtTime(0.08 + i * 0.03, t0);
+          g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.20);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(t0); osc.stop(t0 + 0.21);
+        });
+
+        const dropAt = now + 0.88 + (withSilence ? 0.52 : 0.02);
+        // If no silence, fill the gap with filler tone
+        if (!withSilence) {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(440, now + 0.88);
+          g.gain.setValueAtTime(0.16, now + 0.88);
+          g.gain.exponentialRampToValueAtTime(0.01, now + 1.05);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(now + 0.88); osc.stop(now + 1.06);
+        }
+
+        // Big Chorus Drop chord!
+        [130.81, 261.63, 329.63, 392.00, 523.25].forEach(f => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, dropAt);
+          g.gain.setValueAtTime(0.14, dropAt);
+          g.gain.exponentialRampToValueAtTime(0.001, dropAt + 0.85);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(dropAt); osc.stop(dropAt + 0.88);
+        });
+      } catch (e) {}
+    }
+
+    function draw() {
+      document.getElementById('flatBtn').className = !useGap ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('dropBtn').className = useGap ? 'toy-btn' : 'toy-btn secondary';
+
+      let html = '';
+      // Buildup section (x: 34..330)
+      for (let i = 0; i < 24; i++) {
+        const x = 34 + i * 12;
+        const h = 10 + i * 1.9;
+        html += `<rect x="${x}" y="${(92 - h).toFixed(1)}" width="7" height="${(h * 2).toFixed(1)}" rx="2" fill="var(--tax-primary)"/>`;
+      }
+      html += `<text x="175" y="24" text-anchor="middle" fill="var(--tax-primary)" font-size="12" font-weight="800">① 4 拍加速爬坡蓄势</text>`;
+
+      // Gap zone (x: 330..430)
+      if (useGap) {
+        html += `<rect x="330" y="34" width="98" height="114" rx="8" fill="rgba(245,158,11,0.14)" stroke="var(--tax-amber)" stroke-dasharray="4 3"/>`;
+        html += `<text x="379" y="88" text-anchor="middle" fill="var(--tax-amber)" font-size="13" font-weight="900">🤫 0.5 秒</text>`;
+        html += `<text x="379" y="106" text-anchor="middle" fill="var(--tax-amber)" font-size="11.5" font-weight="700">绝对静音真空</text>`;
+      } else {
+        for (let i = 0; i < 8; i++) {
+          const x = 330 + i * 12;
+          html += `<rect x="${x}" y="44" width="7" height="96" rx="2" fill="var(--tax-muted)"/>`;
+        }
+        html += `<text x="379" y="24" text-anchor="middle" fill="var(--tax-muted)" font-size="11.5">塞满过渡音（无呼吸）</text>`;
+      }
+
+      // Drop section (x: 438..646)
+      for (let i = 0; i < 17; i++) {
+        const x = 438 + i * 12;
+        const h = 58 - i * 1.4;
+        html += `<rect x="${x}" y="${(92 - h).toFixed(1)}" width="8" height="${(h * 2).toFixed(1)}" rx="2" fill="${useGap ? 'var(--tax-green)' : 'var(--tax-primary)'}"/>`;
+      }
+      html += `<text x="542" y="24" text-anchor="middle" fill="${useGap ? 'var(--tax-green)' : 'var(--tax-muted)'}" font-size="12" font-weight="800">${useGap ? '💥 核爆级副歌炸响！' : '😐 平淡滑入副歌'}</text>`;
+      svg.innerHTML = html;
+
+      ahaBox.innerHTML = useGap
+        ? '<strong>德彪西名言：“音乐不在音符里，而在音符之间的静默里。”</strong>副歌前那 0.5 秒彻底抽空的静默（Audio Negative Space），让听众瞬间屏住呼吸，把随后的主和弦爆发力放大了整整一倍！演讲停顿与版面留白完全同理！'
+        : '<strong>塞满反而削弱高潮：</strong>没有任何喘息直接硬接副歌，耳朵缺少参照对比，高潮像平淡滑过去一样毫无记忆点。点击右侧「💥 黄金留白版」对比试听！';
+    }
+
+    document.getElementById('flatBtn').onclick = () => { useGap = false; markDone('试听了无留白副歌过渡'); draw(); playDrop(false); };
+    document.getElementById('dropBtn').onclick = () => { useGap = true; markDone('试听了0.5秒静音留白核爆副歌'); draw(); playDrop(true); };
+    draw();
   </script>
 </body>
 </html>

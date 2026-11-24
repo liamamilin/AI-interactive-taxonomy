@@ -1,64 +1,121 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌗 Z 轴海拔与真实物理阴影引擎（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Z 轴海拔与真实物理阴影引擎</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 14px; }
+    .preview-stage {
+      padding: 34px 20px; border-radius: 14px; background: #e2e8f0; border: 1px solid var(--tax-border);
+      display: flex; justify-content: center; align-items: center; margin-bottom: 12px;
+    }
+    .float-card {
+      width: 280px; padding: 18px 20px; border-radius: 14px; background: #ffffff; color: #0f172a;
+      text-align: center; transition: transform .15s, box-shadow .15s;
+    }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌗 Z 轴海拔与真实物理阴影引擎（SVG）</h1><p>新手做阴影总爱画一圈死黑生硬的细边；真实光学里，卡片离桌面越高（如悬浮弹窗 vs 贴底卡片），投影向下偏移越大、模糊半径越大、透明度反而越柔和！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>卡片悬浮海拔高度 Z（dp）</span><span id="vZ">12 dp（悬浮弹窗）</span></label><input type="range" id="sZ" min="0" max="24" value="12" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>环境漫射光柔和度</span><span id="vAmb">70%</span></label><input type="range" id="sAmb" min="20" max="100" value="70" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🌗 Z 轴海拔与真实物理阴影引擎（空间光学）</h1>
+      <p>自然界里物体离桌面越高，阴影绝不是“越黑越硬”，而是<strong>偏移越远、边缘越扩散、颜色越柔和</strong>！拖动下方 Z 轴海拔高度，同时观察上方卡片悬浮感与下方光学截面投影！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="ctrl-box">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>🛫 卡片悬浮海拔（Z-Elevation）</span>
+          <strong id="zVal" style="color:var(--tax-primary);">8 dp（悬浮卡片）</strong>
+        </div>
+        <input type="range" id="zRange" min="0" max="24" value="8" style="width:100%;" />
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">对应层级语义</div><div class="k-val" id="kSem">—</div></div>
-        <div class="kpi"><div class="k-lbl">阴影物理参数</div><div class="k-val" id="kPar">—</div></div>
+
+      <div class="preview-stage">
+        <div class="float-card" id="floatCard">
+          <div style="font-weight:900;font-size:16px;">悬浮交互卡片</div>
+          <div style="font-size:12px;color:#475569;margin-top:4px;" id="cardMeta">Z = 8 dp · 双层环境光 + 顶光投影</div>
+        </div>
       </div>
+
+      <svg id="raySvg" viewBox="0 0 680 140" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="顶光高度与阴影扩散光学截面图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>双层物理阴影公式：</strong>真实高级感阴影由两层叠加：一层贴近底部的<strong>窄暗接触影</strong>（固定位置），一层随高度扩散的<strong>大面积柔和环境影</strong>。切忌用纯黑高不透明度的“脏黑边框影”！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const z=+document.getElementById('sZ').value, amb=+document.getElementById('sAmb').value;
-  document.getElementById('vZ').textContent=z+' dp';
-  document.getElementById('vAmb').textContent=amb+'%';
-  const dy=Math.round(z*0.9), blur=Math.round(z*1.1*(amb/70)), op=(z===0?0:Math.max(0.08, 0.28 - z*0.006)).toFixed(2);
-  const sem=z===0?'📄 0dp 贴底平面':(z<=6?'🃏 卡片 / 按钮浮层':(z<=14?'🧭 下拉菜单 / 悬浮球':'🪟 顶级模态弹窗 Modal'));
-  document.getElementById('kSem').textContent=sem;
-  document.getElementById('kPar').textContent=`Y:${dy}px · 模糊:${blur}px · 透明度:${op}`;
-  document.getElementById('svg').innerHTML=`
-    <defs><filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="${dy}" stdDeviation="${Math.max(0.5,blur*0.5).toFixed(1)}" flood-color="#0f172a" flood-opacity="${op}"/></filter></defs>
-    <rect x="20" y="16" width="560" height="174" rx="12" fill="#f1f5f9"/>
-    <rect x="170" y="${(54 - z*0.6).toFixed(1)}" width="260" height="96" rx="14" fill="#ffffff" filter="url(#sh)"/>
-    <text x="300" y="${(100 - z*0.6).toFixed(1)}" text-anchor="middle" font-size="15" font-weight="850" fill="#0f172a">Z = ${z} dp 悬浮卡片</text>
-    <text x="300" y="${(124 - z*0.6).toFixed(1)}" text-anchor="middle" font-size="11.5" fill="#64748b">${sem}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>记住物理阴影口诀：“近小深实，远大浅虚”——用 Z 轴海拔隐喻帮用户一眼分清谁是底页、谁是临时弹出的浮层！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const zRange = document.getElementById('zRange');
+    const zVal = document.getElementById('zVal');
+    const floatCard = document.getElementById('floatCard');
+    const cardMeta = document.getElementById('cardMeta');
+    const svg = document.getElementById('raySvg');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const z = Number(zRange.value);
+      const role = z === 0 ? '贴地底板' : (z <= 4 ? '常规卡片' : (z <= 12 ? '悬浮按钮 / 下拉菜单' : '顶层模态弹窗'));
+      zVal.textContent = `${z} dp（${role}）`;
+
+      const yOff = Math.round(z * 1.15);
+      const blur = Math.round(z * 2.4);
+      const alphaKey = z === 0 ? 0 : Math.max(0.08, (0.24 - z * 0.004)).toFixed(2);
+      const alphaAmb = z === 0 ? 0 : Math.max(0.05, (0.14 - z * 0.002)).toFixed(2);
+
+      floatCard.style.transform = `translateY(${-Math.round(z * 0.55)}px)`;
+      floatCard.style.boxShadow = z === 0
+        ? '0 0 0 1px rgba(15,23,42,0.12)'
+        : `0 ${yOff}px ${blur}px rgba(15,23,42,${alphaKey}), 0 ${Math.max(1, Math.round(z * 0.35))}px ${Math.max(3, Math.round(z * 0.7))}px rgba(15,23,42,${alphaAmb})`;
+      cardMeta.textContent = `Z = ${z} dp · 偏移 ${yOff}px · 羽化模糊 ${blur}px`;
+
+      // Side-view optical ray diagram
+      const floorY = 114;
+      const cardY = floorY - 12 - z * 2.4;
+      const shadowHalf = 70 + z * 3.8;
+
+      let html = '';
+      // Light source at top
+      html += `<circle cx="340" cy="18" r="9" fill="var(--tax-amber)"/>`;
+      html += `<text x="360" y="22" fill="var(--tax-amber)" font-size="11" font-weight="700">☀️ 顶部漫反射光源</text>`;
+
+      // Rays grazing card edges
+      html += `<line x1="340" y1="24" x2="${340 - shadowHalf}" y2="${floorY}" stroke="var(--tax-amber)" stroke-dasharray="4 3" opacity="0.5"/>`;
+      html += `<line x1="340" y1="24" x2="${340 + shadowHalf}" y2="${floorY}" stroke="var(--tax-amber)" stroke-dasharray="4 3" opacity="0.5"/>`;
+
+      // Floor & shadow strip
+      html += `<line x1="40" y1="${floorY}" x2="640" y2="${floorY}" stroke="var(--tax-border)" stroke-width="2"/>`;
+      if (z > 0) {
+        html += `<ellipse cx="340" cy="${floorY + 4}" rx="${shadowHalf}" ry="5" fill="rgba(15,23,42,${Math.max(0.15, 0.5 - z * 0.014).toFixed(2)})"/>`;
+      }
+
+      // Floating card side bar
+      html += `<rect x="270" y="${cardY.toFixed(1)}" width="140" height="10" rx="4" fill="var(--tax-primary)"/>`;
+      html += `<text x="424" y="${(cardY + 8).toFixed(1)}" fill="var(--tax-primary)" font-size="11.5" font-weight="800">海拔 Z = ${z} dp</text>`;
+      html += `<text x="340" y="134" text-anchor="middle" fill="var(--tax-muted)" font-size="11">高度越高 → 光线绕射越广 → 投影面积越大、边缘越虚化柔和</text>`;
+      svg.innerHTML = html;
+
+      ahaBox.innerHTML = z >= 16
+        ? `<strong>高层弹窗海拔（${z} dp）：</strong>大范围极柔和的漫反射阴影让弹窗稳稳浮在所有内容之上，自然把底层页面推向视觉远景！`
+        : (z === 0
+          ? '<strong>贴地海拔（0 dp）：</strong>卡片紧贴底层平面，没有投影，只能靠 1px 细边框或背景色差区分边界。把滑块往右拉起海拔看看！'
+          : `<strong>中层悬浮海拔（${z} dp）：</strong>适合交互卡片或悬停态（Hover）——当鼠标移上卡片时把海拔从 2dp 抬升到 10dp，立刻产生“被磁力吸起”的触感！`);
+    }
+
+    zRange.oninput = () => { markDone('调节了Z轴海拔高度与物理阴影扩散'); render(); };
+    render();
   </script>
 </body>
 </html>

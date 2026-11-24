@@ -1,65 +1,106 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🥧 饼图灾难阈值：超过 4 块就立刻换条形图！</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>饼图灾难阈值：超过 4 块就立刻换条形图！</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🥧 饼图灾难阈值：超过 4 块就立刻换条形图！</h1><p>饼图唯一胜任的场景是“2~3 个部分占整体的粗略比例”（如 75% vs 25%）；一旦切出 8~12 块，就会变成让人崩溃的彩虹披萨！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>分类项切片数量</span><span id="vN">7 块</span></label><input type="range" id="sN" min="2" max="12" value="7" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>是否开启 3D 倾斜特效（视觉毒药）</span><span id="v3d">40%</span></label><input type="range" id="s3d" min="0" max="100" value="40" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🥧 饼图灾难阈值：切几刀就会彻底废掉？（模拟器）</h1>
+      <p>饼图唯一的强项是展示“2–3 块里有一块占绝对大头（如 75% vs 25%）”。拖动滑块不断往饼图里增加切片，亲眼看它跨过 <strong>4 块阈值</strong>后如何沦为不可读的“彩虹披萨”！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="ctrl-box">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>🔪 分类切片数量（N）</span>
+          <strong id="nVal" style="color:var(--tax-green);">3 块（安全清晰区）</strong>
+        </div>
+        <input type="range" id="nRange" min="2" max="12" value="3" style="width:100%;" />
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">饼图可读性评分</div><div class="k-val" id="kScr">—</div></div>
-        <div class="kpi"><div class="k-lbl">图表选型建议</div><div class="k-val" id="kAdv">—</div></div>
-      </div>
+
+      <svg id="pieSvg" viewBox="0 0 680 225" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="饼图切片过载与条形图替代对比"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>安全区（3 块）：</strong>此时各块占比一眼就能看出。把滑块往右拖到 <strong>7–12 块</strong>，观察饼图与右侧排序水平条形图的可读性云泥之别！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const n=+document.getElementById('sN').value, d3=+document.getElementById('s3d').value;
-  document.getElementById('vN').textContent=n+' 块';
-  document.getElementById('v3d').textContent=d3+'%';
-  const scr=Math.max(8, Math.min(95, Math.round(100 - Math.max(0, n-3)*9.5 - d3*0.35)));
-  document.getElementById('kScr').textContent=scr+' 分';
-  document.getElementById('kScr').style.color=scr>=65?'#059669':'#ef4444';
-  document.getElementById('kAdv').textContent=n<=3 && d3===0?'✅ 勉强可用饼图':'📊 请立刻改用排序水平条形图!';
-  const w=Math.max(15, scr*4.2);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">饼图信息传达效率（${n} 个分类 + ${d3}% 3D 透视畸变）</text>
-    <rect x="30" y="68" width="440" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${w.toFixed(0)}" height="38" rx="8" fill="${scr>=65?'#059669':'#ef4444'}"/>
-    <text x="${Math.min(480,38+w).toFixed(0)}" y="93" font-size="14" font-weight="850" fill="${scr>=65?'#059669':'#ef4444'}">${scr} 分</text>
-    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">3D 饼图更致命：靠近前方的扇区因透视显得面积暴涨，哪怕它真实占比比后方更小！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>永远禁用 3D 饼图！只要分类超过 4 个，直接上“按数值从大到小排好序的水平条形图”，清晰度碾压十条街！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const PAL = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1','#14b8a6','#a855f7'];
+    const nRange = document.getElementById('nRange');
+    const nVal = document.getElementById('nVal');
+    const svg = document.getElementById('pieSvg');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function genWeights(n) {
+      const raw = [];
+      for (let i = 0; i < n; i++) raw.push(Math.round(45 / (i + 1.2) + 8));
+      const sum = raw.reduce((a, b) => a + b, 0);
+      return raw.map((v, i) => ({ name: `品类 ${String.fromCharCode(65 + i)}`, pct: Math.round((v / sum) * 100), col: PAL[i % PAL.length] }));
+    }
+
+    function render() {
+      const n = Number(nRange.value);
+      const data = genWeights(n);
+      const bad = n > 4;
+
+      nVal.textContent = n <= 4 ? `${n} 块（✅ 饼图安全区）` : (n <= 7 ? `${n} 块（⚠️ 切片过密，建议换条形图）` : `${n} 块（💥 彩虹披萨灾难！）`);
+      nVal.style.color = n <= 4 ? 'var(--tax-green)' : (n <= 7 ? 'var(--tax-amber)' : 'var(--tax-red)');
+
+      let html = '';
+      // Left: Pie chart
+      const cx = 165, cy = 115, r = 78;
+      let ang = -90;
+      const sumPct = data.reduce((s, d) => s + d.pct, 0);
+      data.forEach(d => {
+        const span = (d.pct / sumPct) * 360;
+        const r0 = (ang * Math.PI) / 180, r1 = ((ang + span) * Math.PI) / 180;
+        const x0 = cx + r * Math.cos(r0), y0 = cy + r * Math.sin(r0);
+        const x1 = cx + r * Math.cos(r1), y1 = cy + r * Math.sin(r1);
+        const large = span > 180 ? 1 : 0;
+        html += `<path d="M ${cx} ${cy} L ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r} ${r} 0 ${large} 1 ${x1.toFixed(1)} ${y1.toFixed(1)} Z" fill="${d.col}" stroke="var(--tax-surface-alt)" stroke-width="1.5"/>`;
+        ang += span;
+      });
+      html += `<text x="${cx}" y="212" text-anchor="middle" fill="${bad ? 'var(--tax-red)' : 'var(--tax-green)'}" font-size="12" font-weight="700">${bad ? '❌ 饼图：色块撞色、细片完全无法比较' : '✅ 饼图：≤4 块时整体占比尚清晰'}</text>`;
+
+      // Right: Sorted Horizontal Bar Chart (always crystal clear!)
+      html += `<text x="350" y="24" fill="var(--tax-green)" font-size="12.5" font-weight="800">✅ 替代方案：排序水平条形图（12 项依然秒懂）</text>`;
+      const maxP = Math.max(...data.map(d => d.pct));
+      const rowH = Math.min(26, 165 / n);
+      data.forEach((d, i) => {
+        const y = 36 + i * rowH;
+        const bw = (d.pct / maxP) * 210;
+        html += `<text x="396" y="${y + rowH * 0.72}" text-anchor="end" fill="var(--tax-muted)" font-size="${n > 9 ? 9.5 : 11}">${d.name}</text>`;
+        html += `<rect x="404" y="${y + 2}" width="${bw.toFixed(1)}" height="${Math.max(8, rowH - 5)}" rx="3" fill="${i === 0 ? 'var(--tax-primary)' : 'rgba(59,130,246,0.45)'}"/>`;
+        html += `<text x="${(410 + bw).toFixed(1)}" y="${y + rowH * 0.72}" fill="var(--tax-ink)" font-size="${n > 9 ? 9.5 : 11}" font-weight="700">${d.pct}%</text>`;
+      });
+
+      svg.innerHTML = html;
+
+      ahaBox.innerHTML = bad
+        ? `<strong>跨过 4 块灾难红线（当前 ${n} 块）！</strong>超过 4 个类别时，饼图逼着读者在图例和细碎扇形间来回核对；换成右侧的<strong>降序水平条形图</strong>，长短排名 0.3 秒一目了然，或者把长尾小项合并成 1 块“其他”！`
+        : `<strong>当前 ${n} 块处于饼图安全区：</strong>试试把滑块拖到 8 块以上，看看彩虹披萨如何被右侧水平条形图秒杀！`;
+    }
+
+    nRange.oninput = () => { markDone('测试了饼图切片过载阈值'); render(); };
+    render();
   </script>
 </body>
 </html>

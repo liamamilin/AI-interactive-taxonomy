@@ -1,66 +1,100 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>➡️ 图底反转：FedEx 隐藏箭头与负空间巧思</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>图底反转：FedEx 隐藏箭头与负空间巧思</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>➡️ 图底反转：FedEx 隐藏箭头与负空间巧思</h1><p>最顶级的负空间设计能让“空白本身变成第二个图形”——比如联邦快递 FedEx 的 E 和 x 之间藏着一个精准向右的白色箭头，一旦看见就再也忘不掉！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>字母 E 与 x 的负空间贴合紧密度</span><span id="vKer">95%（严丝合缝）</span></label><input type="range" id="sKer" min="20" max="100" value="95" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>高亮提示隐藏负空间箭头</span><span id="vHnt">30%</span></label><input type="range" id="sHnt" min="0" max="100" value="30" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>➡️ 图底反转：隐藏箭头与负空间盲测</h1>
+      <p>顶级平面设计不只是在画“主体（图）”，而是把<strong>背景空隙（底）</strong>也雕刻成第二个隐藏图形！先在 5 秒内自己找找下面两张图里的隐藏彩蛋，再点按钮高亮揭晓！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="tab1Btn">彩蛋 1：字母空隙里的隐藏箭头</button>
+        <button class="toy-btn secondary" id="tab2Btn">彩蛋 2：鲁宾花瓶图底反转</button>
+        <button class="toy-btn secondary" id="revealBtn">🔦 高亮揭晓负空间彩蛋</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">负空间图形完整度</div><div class="k-val" id="kInt">—</div></div>
-        <div class="kpi"><div class="k-lbl">受众惊艳记忆率</div><div class="k-val" id="kMem">—</div></div>
-      </div>
+
+      <svg id="negSvg" viewBox="0 0 680 230" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="负空间与图底反转演示"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>5 秒眼力盲测：</strong>盯住右边橙色字母 <strong>E</strong> 和 <strong>x</strong> 之间的空白缝隙——你看见一个向右飞驰的隐藏图形了吗？点击「🔦 高亮揭晓」验证！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const ker=+document.getElementById('sKer').value, hnt=+document.getElementById('sHnt').value;
-  document.getElementById('vKer').textContent=ker+'%';
-  document.getElementById('vHnt').textContent=hnt+'%';
-  const gap=Math.round((100-ker)*0.45);
-  const mem=Math.min(98, Math.round(ker*0.92 + 5));
-  document.getElementById('kInt').textContent=ker>=85?'✨ 隐藏箭头完美闭合!':'⚠️ 间隙过大，箭头解体';
-  document.getElementById('kInt').style.color=ker>=85?'#059669':'#f59e0b';
-  document.getElementById('kMem').textContent=mem+'%';
-  const op=(hnt/100*0.65).toFixed(2);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">拉紧字距，看 E 与 x 之间的空白如何拼出向右的箭头！</text>
-    <text x="${255-gap}" y="138" text-anchor="end" font-size="96" font-weight="900" font-family="Arial,sans-serif" fill="#4f46e5">E</text>
-    <text x="${262+gap}" y="138" text-anchor="start" font-size="96" font-weight="900" font-family="Arial,sans-serif" fill="#f97316">x</text>
-    <polygon points="244,96 270,96 270,84 294,104 270,124 270,112 244,112" fill="#10b981" opacity="${op}"/>
-    <text x="300" y="180" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">拖动“高亮提示”滑块，可以显影隐藏在两字母缝隙间的负空间箭头！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>负空间不是剩余废料，当空白被精心雕琢成有意义的形状时，观众收获的“发现彩蛋感”是最强的品牌记忆胶水！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let tab = 1;
+    let revealed = false;
+    let done = false;
+
+    const svg = document.getElementById('negSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      document.getElementById('tab1Btn').className = tab === 1 ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('tab2Btn').className = tab === 2 ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('revealBtn').textContent = revealed ? '🙈 还原原始画面' : '🔦 高亮揭晓负空间彩蛋';
+
+      let html = '';
+      if (tab === 1) {
+        // Stylized geometric "EX" where negative space between E and x forms a crisp right-pointing arrow!
+        // Draw E (x: 190..310, y: 46..184) and x (x: 310..445, y: 84..184) tightly kerned
+        html += `<g font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-weight="900">`;
+        // Custom vector "Fed" style blue text on left
+        html += `<text x="115" y="164" font-size="96" fill="var(--tax-primary)" letter-spacing="-4">Fast</text>`;
+        // Vector E
+        html += `<path d="M330 62 H418 V90 H364 V114 H410 V140 H364 V164 H418 V192 H330 Z" fill="var(--tax-amber)"/>`;
+        // Vector x carefully positioned so gap between E's middle/lower arms and x's left V forms a sharp arrow!
+        html += `<path d="M418 114 L448 114 L468 140 L488 114 L518 114 L483 153 L520 192 L488 192 L468 166 L448 192 L418 192 L453 153 Z" fill="var(--tax-amber)"/>`;
+        html += `</g>`;
+
+        // The negative space arrow sits between E's lower-right gap (x=410..453, y=126..178)
+        if (revealed) {
+          html += `<polygon points="364,140 418,140 418,118 453,153 418,188 418,164 364,164" fill="var(--tax-green)" opacity="0.88"/>`;
+          html += `<text x="340" y="34" text-anchor="middle" fill="var(--tax-green)" font-size="13" font-weight="800">🎯 看到了吗？E 与 x 之间的负空间精准雕出了一枚“极速向右箭头”！</text>`;
+        } else {
+          html += `<text x="340" y="34" text-anchor="middle" fill="var(--tax-muted)" font-size="12.5">仔细看橙色 E 和 x 紧贴处的缝隙，你能发现隐藏的符号吗？</text>`;
+        }
+      } else {
+        // Rubin's Vase (Figure-Ground reversal)
+        const bgCol = revealed ? 'var(--tax-primary)' : 'var(--tax-ink)';
+        const vaseCol = revealed ? 'var(--tax-amber)' : 'var(--tax-surface-alt)';
+        // Outer dark rectangle = two facing silhouettes
+        html += `<rect x="200" y="34" width="280" height="172" rx="10" fill="${bgCol}" opacity="0.85"/>`;
+        // Center vase silhouette
+        html += `<path d="M275 34 Q312 68 292 92 Q272 108 308 124 Q314 136 296 150 Q276 168 290 206 L390 206 Q404 168 384 150 Q366 136 372 124 Q408 108 388 92 Q368 68 405 34 Z" fill="${vaseCol}"/>`;
+        html += `<text x="340" y="222" text-anchor="middle" fill="var(--tax-ink)" font-size="12.5" font-weight="700">${revealed ? '🔄 橙色部分是中央高脚杯，两侧蓝色轮廓是两张深情对望的人脸！' : '👁️ 你第一眼看到的是中央的“高脚杯”，还是左右相对的“两张侧脸”？'}</text>`;
+      }
+      svg.innerHTML = html;
+
+      if (revealed) {
+        ahaBox.innerHTML = tab === 1
+          ? '<strong>一见难忘的“Aha 效应”！</strong>著名的联邦快递（FedEx）标志设计师 Lindon Leader 通过微调字母 E 与 x 的间距，在空白处藏进一枚象征“极速精准”的箭头。一旦看见，你这辈子就再也无法忽视它！'
+          : '<strong>图底反转（Figure-Ground Reversal）：</strong>大脑无法在同一毫秒把同一条边界既当成花瓶又当成人脸，只能在两种解释间来回翻转。善用负空间，就能在极简图形里塞进双倍巧思！';
+      }
+    }
+
+    document.getElementById('tab1Btn').onclick = () => { tab = 1; revealed = false; markDone('探索了FedEx式负空间隐藏箭头'); render(); };
+    document.getElementById('tab2Btn').onclick = () => { tab = 2; revealed = false; markDone('探索了鲁宾花瓶图底反转'); render(); };
+    document.getElementById('revealBtn').onclick = () => { revealed = !revealed; markDone('揭晓了负空间双关图形彩蛋'); render(); };
+    render();
   </script>
 </body>
 </html>

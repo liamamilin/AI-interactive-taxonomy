@@ -1,72 +1,100 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>✂️ 截选时间窗口：选好起点就能讲出相反故事</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>截选时间窗口：选好起点就能讲出相反故事</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    @media (max-width: 640px) { .btn-row { grid-template-columns: 1fr; } }
+    .role-btn {
+      padding: 10px 12px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 12.5px; font-weight: 700; cursor: pointer; text-align: left;
+    }
+    .role-btn.active { border-color: var(--tax-primary); background: var(--tax-primary-soft); color: var(--tax-primary); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>✂️ 截选时间窗口：选好起点就能讲出相反故事</h1><p>同一条长期在 50~75 间震荡的曲线，只需把起点选在波谷、终点选在波峰，就能宣称“历史性大爆发”；选在波峰到波谷，立刻变成“崩盘危机”！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>✂️ 截选时间窗口（Cherry-Picking）：同一条曲线，三种相反新闻</h1>
+      <p>同样是一家公司全年 12 个月的真实股价曲线，数据一字未改——切换 3 位立场不同的撰稿人，看看只靠<strong>“挑好起始月份裁一刀”</strong>，如何同时写出“暴涨 +33%”和“崩盘 -28%”两篇截然相反的爆款文章！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row" id="roleRow"></div>
+
+      <svg id="cropSvg" viewBox="0 0 680 220" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="截选时间窗口操控叙事图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>反操弄指南：</strong>任何只给你看“近 3 个月”或“从某个奇怪日期起算”的趋势图，都必须立刻反问一句：<strong>“把时间轴拉长到 1 年 / 5 年，全貌长什么样？”</strong>
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>截选窗口起始月份</span><span id="vSt">第 3 月</span></label><input type="range" id="sSt" min="0" max="7" value="3" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>截选窗口跨度月数</span><span id="vLn">4 个月</span></label><input type="range" id="sLn" min="2" max="9" value="4" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">截选窗口呈现涨跌</div><div class="k-val" id="kChg">—</div></div>
-        <div class="kpi"><div class="k-lbl">媒体标题党话术</div><div class="k-val" id="kHed">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const st=+document.getElementById('sSt').value, ln=+document.getElementById('sLn').value;
-  const data=[62, 74, 58, 44, 56, 70, 78, 60, 48, 64, 65];
-  const en=Math.min(data.length-1, st+ln);
-  document.getElementById('vSt').textContent='第 '+(st+1)+' 月';
-  document.getElementById('vLn').textContent=(en-st)+' 个月';
-  const chg=Math.round((data[en]-data[st])/data[st]*100);
-  document.getElementById('kChg').textContent=(chg>=0?'+':'')+chg+'%';
-  document.getElementById('kChg').style.color=chg>15?'#059669':(chg<-15?'#ef4444':'#64748b');
-  document.getElementById('kHed').textContent=chg>18?'🚀 “迎来史诗级井喷增长！”':(chg<-18?'📉 “遭遇断崖式全面崩盘！”':'😐 “长期维持平稳震荡”');
-  let pts=[];
-  for(let i=0;i<data.length;i++) pts.push(`${(50+i*50)},${(172-data[i]*1.5).toFixed(1)}`);
-  const x1=50+st*50, x2=50+en*50;
-  document.getElementById('svg').innerHTML=`
-    <text x="50" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">完整全年走势其实几乎持平（62→65），但滑动截选窗却能截出正反叙事！</text>
-    <rect x="${x1}" y="38" width="${Math.max(10,x2-x1)}" height="134" fill="#f59e0b" opacity="0.22" stroke="#d97706" stroke-dasharray="4,3"/>
-    <line x1="50" y1="172" x2="555" y2="172" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <polyline points="${pts.join(' ')}" fill="none" stroke="#3b82f6" stroke-width="3"/>
-    <circle cx="${x1}" cy="${(172-data[st]*1.5).toFixed(1)}" r="6" fill="#d97706"/>
-    <circle cx="${x2}" cy="${(172-data[en]*1.5).toFixed(1)}" r="6" fill="#d97706"/>
-    <text x="50" y="192" font-size="11" fill="var(--tax-muted)">1月</text>
-    <text x="540" y="192" font-size="11" fill="var(--tax-muted)">11月</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>看到一张“从某个奇怪月份起算暴涨 80%”的折线图时，一定要把时间轴往左拉长 3 倍，看清它是不是只截了波谷到波峰的半段周期！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    // 12-month data: M1=100, M4=72 (bottom), M8=96 (rebound), M12=84
+    const VALS = [100, 94, 82, 72, 78, 85, 91, 96, 92, 88, 86, 84];
+    const ROLES = [
+      { id: 'pr',   name: '📈 公司公关喜报（只截 M4→M8）', s: 3, e: 7, headline: '“强势反弹！短短 4 个月暴涨 +33%，开启黄金增长期！”', col: 'var(--tax-green)', aha: '<strong>公关截窗术（M4→M8，+33%）：</strong>精准挑选全年最低点 M4 作为起点、反弹高点 M8 作为终点，成功把一家全年下跌的公司包装成超级黑马！' },
+      { id: 'bear', name: '📉 竞品做空黑稿（只截 M1→M4）', s: 0, e: 3, headline: '“全线崩盘！开年暴跌 -28%，商业模式彻底失效！”', col: 'var(--tax-red)', aha: '<strong>黑稿截窗术（M1→M4，-28%）：</strong>故意截断在最低谷 M4 之前，对后面稳步反弹绝口不提，最大化制造恐慌情绪！' },
+      { id: 'full', name: '🔎 诚实全景视角（完整 M1→M12）', s: 0, e: 11, headline: '“全年整体温和回调 -16%，年中出现深度 V 型震荡。”', col: 'var(--tax-primary)', aha: '<strong>全景视角破局（M1→M12，-16%）：</strong>拉出完整自然年窗口，所有片面暴涨与恐慌暴跌瞬间退潮，露出真实的中期震荡全貌！' }
+    ];
+
+    let cur = ROLES[0], done = false;
+    const roleRow = document.getElementById('roleRow');
+    const svg = document.getElementById('cropSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      roleRow.innerHTML = '';
+      ROLES.forEach(r => {
+        const b = document.createElement('button');
+        b.className = 'role-btn' + (r.id === cur.id ? ' active' : '');
+        b.textContent = r.name;
+        b.onclick = () => { cur = r; markDone(`切换了截选时间窗口视角：${r.name}`); render(); };
+        roleRow.appendChild(b);
+      });
+
+      const xOf = i => 54 + (i / 11) * 572;
+      const yOf = v => 185 - ((v - 60) / 50) * 130;
+
+      const fullPts = VALS.map((v, i) => `${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`).join(' ');
+      const cropPts = VALS.slice(cur.s, cur.e + 1).map((v, idx) => `${xOf(cur.s + idx).toFixed(1)},${yOf(v).toFixed(1)}`).join(' ');
+
+      let html = '';
+      // Highlighted cropped window band
+      const wx = xOf(cur.s), ww = xOf(cur.e) - wx;
+      html += `<rect x="${wx.toFixed(1)}" y="40" width="${ww.toFixed(1)}" height="145" fill="${cur.col}" opacity="0.13"/>`;
+
+      // Full dimmed curve
+      html += `<polyline points="${fullPts}" fill="none" stroke="var(--tax-muted)" stroke-width="2" stroke-dasharray="4 4" opacity="0.5"/>`;
+      // Cropped highlighted curve
+      html += `<polyline points="${cropPts}" fill="none" stroke="${cur.col}" stroke-width="4" stroke-linecap="round"/>`;
+
+      // Endpoints of cropped window
+      html += `<circle cx="${xOf(cur.s)}" cy="${yOf(VALS[cur.s])}" r="6" fill="${cur.col}"/>`;
+      html += `<circle cx="${xOf(cur.e)}" cy="${yOf(VALS[cur.e])}" r="6" fill="${cur.col}"/>`;
+
+      for (let i = 0; i < 12; i++) {
+        html += `<text x="${xOf(i)}" y="204" text-anchor="middle" fill="${i >= cur.s && i <= cur.e ? 'var(--tax-ink)' : 'var(--tax-muted)'}" font-size="11" font-weight="${i === cur.s || i === cur.e ? '800' : '400'}">M${i + 1}</text>`;
+      }
+
+      html += `<text x="340" y="26" text-anchor="middle" fill="${cur.col}" font-size="13" font-weight="800">${cur.headline}</text>`;
+      svg.innerHTML = html;
+      ahaBox.innerHTML = cur.aha;
+    }
+
+    render();
   </script>
 </body>
 </html>

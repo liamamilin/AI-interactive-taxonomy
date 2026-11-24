@@ -1,71 +1,121 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔦 加色光 vs 减色颜料实时混合台（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>加色光 vs 减色颜料实时混合台</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .chan-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .chan-btn {
+      padding: 7px 13px; border-radius: 999px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+    .chan-btn.on { border-color: var(--tax-primary); background: var(--tax-primary-soft); color: var(--tax-primary); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔦 加色光 vs 减色颜料实时混合台（SVG）</h1><p>屏幕是自己往黑暗里“加光”（RGB 全满=纯白）；纸张是把白光里不需要的颜色“吸收减掉”（CMY 全满=吸光变暗黑）！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>R 红光 / C 青墨 强度</span><span id="vA">80%</span></label><input type="range" id="sA" min="0" max="100" value="80" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>G 绿光 / M 品红墨 强度</span><span id="vB">75%</span></label><input type="range" id="sB" min="0" max="100" value="75" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>B 蓝光 / Y 黄墨 强度</span><span id="vC">30%</span></label><input type="range" id="sC" min="0" max="100" value="30" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔦 加色光 vs 减色颜料实时混合台（构建器）</h1>
+      <p>屏幕发的是<strong>光（RGB 加色）</strong>，越叠加越亮，三光合一变纯白；纸张涂的是<strong>墨（CMYK 减色）</strong>，靠吸收光线反射剩余色，三墨合一变浑黑！亲手开关三原色通道体验截然相反的物理法则！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="rgbBtn">🔦 屏幕模式：RGB 加色光（黑底发光）</button>
+        <button class="toy-btn secondary" id="cmyBtn">🎨 印刷模式：CMY 减色颜料（白纸吸光）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 215"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">RGB 屏幕叠加亮度</div><div class="k-val" id="kRgb">—</div></div>
-        <div class="kpi"><div class="k-lbl">CMY 印刷反射亮度</div><div class="k-val" id="kCmy">—</div></div>
-      </div>
+
+      <div class="chan-row" id="chanRow"></div>
+
+      <svg id="mixSvg" viewBox="0 0 680 245" width="100%" style="display:block;border-radius:12px;border:1px solid var(--tax-border);" aria-label="RGB与CMY三原色混合维恩图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>混合观察：</strong>当前处于 RGB 加色模式，3 束色光全开时正中央叠加出<strong>纯白光</strong>！试着单独关掉蓝光（留红+绿），看看屏幕是如何造出亮黄色的，再切到 CMY 印刷模式对比！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const a=+document.getElementById('sA').value, b=+document.getElementById('sB').value, c=+document.getElementById('sC').value;
-  document.getElementById('vA').textContent=a+'%';
-  document.getElementById('vB').textContent=b+'%';
-  document.getElementById('vC').textContent=c+'%';
-  const r1=Math.round(a*2.55), g1=Math.round(b*2.55), b1=Math.round(c*2.55);
-  const r2=Math.round((100-a)*2.55), g2=Math.round((100-b)*2.55), b2=Math.round((100-c)*2.55);
-  const lum1=Math.round((0.299*r1+0.587*g1+0.114*b1)/2.55);
-  const lum2=Math.round((0.299*r2+0.587*g2+0.114*b2)/2.55);
-  document.getElementById('kRgb').textContent=lum1+'% (越加越亮)';
-  document.getElementById('kCmy').textContent=lum2+'% (越叠越暗)';
-  document.getElementById('svg').innerHTML=`
-    <rect x="20" y="20" width="265" height="175" rx="12" fill="#0f172a"/>
-    <text x="152" y="44" text-anchor="middle" font-size="12.5" font-weight="800" fill="#f8fafc">RGB 屏幕加色光（底色黑）</text>
-    <circle cx="152" cy="112" r="48" fill="rgb(${r1},${g1},${b1})" stroke="#fff" stroke-width="2"/>
-    <text x="152" y="182" text-anchor="middle" font-size="11" fill="#cbd5e1">rgb(${r1}, ${g1}, ${b1})</text>
-    <rect x="315" y="20" width="265" height="175" rx="12" fill="#f8fafc" stroke="var(--tax-border)"/>
-    <text x="447" y="44" text-anchor="middle" font-size="12.5" font-weight="800" fill="#0f172a">CMYK 纸张减色墨（底色白）</text>
-    <circle cx="447" cy="112" r="48" fill="rgb(${r2},${g2},${b2})" stroke="#334155" stroke-width="2"/>
-    <text x="447" y="182" text-anchor="middle" font-size="11" fill="#475569">C${a}% M${b}% Y${c}%</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>试着把三个滑块全拉到 100%：左边屏幕变成刺眼纯白，右边颜料变成吸干所有光线的深黑——这就是发光媒介与反光媒介的底层物理对立！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let mode = 'rgb';
+    const ch = { a: true, b: true, c: true };
+    let done = false;
+
+    const chanRow = document.getElementById('chanRow');
+    const svg = document.getElementById('mixSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      document.getElementById('rgbBtn').className = mode === 'rgb' ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('cmyBtn').className = mode === 'cmy' ? 'toy-btn' : 'toy-btn secondary';
+
+      const labels = mode === 'rgb'
+        ? [{ k: 'a', name: '🔴 红光 R' }, { k: 'b', name: '🟢 绿光 G' }, { k: 'c', name: '🔵 蓝光 B' }]
+        : [{ k: 'a', name: '🩵 青墨 C' }, { k: 'b', name: '🩷 品红墨 M' }, { k: 'c', name: '💛 黄墨 Y' }];
+
+      chanRow.innerHTML = '';
+      labels.forEach(item => {
+        const b = document.createElement('button');
+        b.className = 'chan-btn' + (ch[item.k] ? ' on' : '');
+        b.textContent = (ch[item.k] ? '✓ ' : '○ ') + item.name;
+        b.onclick = () => { ch[item.k] = !ch[item.k]; markDone(`切换了${mode.toUpperCase()}通道混合`); render(); };
+        chanRow.appendChild(b);
+      });
+
+      const isRgb = mode === 'rgb';
+      const bg = isRgb ? '#0b1020' : '#f1f5f9';
+      const blend = isRgb ? 'screen' : 'multiply';
+      const cols = isRgb ? ['#ff2a2a', '#18e04d', '#246bff'] : ['#00c8ff', '#ff1fa9', '#ffe600'];
+      const textCol = isRgb ? '#e2e8f0' : '#0f172a';
+
+      // Center overlap result description
+      const activeCnt = [ch.a, ch.b, ch.c].filter(Boolean).length;
+      let centerDesc = '';
+      if (isRgb) {
+        if (activeCnt === 3) centerDesc = '红 + 绿 + 蓝 = ⚪ 纯白光（能量相加至满）';
+        else if (ch.a && ch.b) centerDesc = '红光 + 绿光 = 💛 亮黄色（屏幕就是这样造黄的！）';
+        else if (ch.a && ch.c) centerDesc = '红光 + 蓝光 = 🩷 洋红色（Magenta）';
+        else if (ch.b && ch.c) centerDesc = '绿光 + 蓝光 = 🩵 青色（Cyan）';
+        else if (activeCnt === 1) centerDesc = '单色光照射（暗室背景保持纯黑）';
+        else centerDesc = '全部光源关闭 = ⬛ 绝对黑暗';
+      } else {
+        if (activeCnt === 3) centerDesc = '青 + 品红 + 黄 = ⬛ 深暗黑（三层墨吸光，实际需补 K 黑墨）';
+        else if (ch.a && ch.b) centerDesc = '青墨 + 品红墨 = 🔵 靛蓝色（吸收红与绿）';
+        else if (ch.a && ch.c) centerDesc = '青墨 + 黄墨 = 🟢 翠绿色（吸收红与蓝）';
+        else if (ch.b && ch.c) centerDesc = '品红墨 + 黄墨 = 🔴 大红色（吸收绿与蓝）';
+        else if (activeCnt === 1) centerDesc = '单层油墨滤光（仅反射对应波段）';
+        else centerDesc = '无油墨 = ⬜ 纯白纸张（反射全部光线）';
+      }
+
+      let html = `<rect x="0" y="0" width="680" height="245" fill="${bg}"/>`;
+      html += `<g style="isolation:isolate;">`;
+      if (ch.a) html += `<circle cx="300" cy="105" r="66" fill="${cols[0]}" style="mix-blend-mode:${blend};"/>`;
+      if (ch.b) html += `<circle cx="380" cy="105" r="66" fill="${cols[1]}" style="mix-blend-mode:${blend};"/>`;
+      if (ch.c) html += `<circle cx="340" cy="158" r="66" fill="${cols[2]}" style="mix-blend-mode:${blend};"/>`;
+      html += `</g>`;
+
+      html += `<text x="340" y="22" text-anchor="middle" fill="${textCol}" font-size="13" font-weight="800">${isRgb ? '🔦 RGB 加色光模式（mix-blend: screen）' : '🎨 CMY 减色颜料模式（mix-blend: multiply）'}</text>`;
+      html += `<text x="340" y="236" text-anchor="middle" fill="${textCol}" font-size="12.5" font-weight="700">${centerDesc}</text>`;
+      svg.innerHTML = html;
+
+      ahaBox.innerHTML = isRgb
+        ? `<strong>RGB 加色原理：</strong>${centerDesc}。注意 RGB 两两叠加的中间色（青、品红、黄）恰好就是印刷 CMY 的三原色！`
+        : `<strong>CMYK 减色原理：</strong>${centerDesc}。由于真实颜料不纯，C+M+Y 叠出来往往发褐发脏，所以印刷厂专门加了一管纯黑油墨 <strong>K（Key/Black）</strong>，这就是 CMYK 的由来！`;
+    }
+
+    document.getElementById('rgbBtn').onclick = () => { mode = 'rgb'; markDone('切换至RGB加色光模式'); render(); };
+    document.getElementById('cmyBtn').onclick = () => { mode = 'cmy'; markDone('切换至CMY减色颜料模式'); render(); };
+    render();
   </script>
 </body>
 </html>

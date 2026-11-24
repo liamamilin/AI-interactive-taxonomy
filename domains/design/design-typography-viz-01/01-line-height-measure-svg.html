@@ -1,71 +1,134 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📖 行高 × 行宽阅读舒适甜点区（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>行高 × 行宽阅读舒适甜点区</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .ctrl-grid { grid-template-columns: 1fr; } }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .paper {
+      padding: 18px 20px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border);
+      margin: 0 auto; font-size: 15px; color: var(--tax-ink); transition: max-width .2s, line-height .15s;
+    }
+    .score-pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; margin-bottom: 10px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📖 行高 × 行宽阅读舒适甜点区（SVG）</h1><p>排版黄金法则：中文正文每行 30~40 字、行高 1.5~1.7 倍。行太宽眼球回扫容易迷路，行太密上下行互相打架！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>📖 行高 × 行宽阅读舒适甜点区（排版构建器）</h1>
+      <p>同样一段文字，为什么有的网页看两行就串行犯困，有的像翻开精装书一样顺滑？秘密在于<strong>每行字数（Measure，中文约 30–40 字）</strong>与<strong>行高（Line-Height，1.6–1.8）</strong>的黄金配比！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn secondary" id="pBad">❌ 反面教材：超宽屏 + 1.1 窒息行高</button>
+        <button class="toy-btn" id="pGood">✨ 甜点区：36 字/行 + 1.75 舒适行高</button>
+      </div>
+
       <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>正文行高倍率（Line-height）</span><span id="vLh">1.65</span></label><input type="range" id="sLh" min="1.0" max="2.5" step="0.05" value="1.65" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>每行中文字符数（行宽）</span><span id="vCh">34 字</span></label><input type="range" id="sCh" min="15" max="65" value="34" oninput="draw()"></div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+            <span>↕️ 行高（Line-Height）</span>
+            <strong id="lhVal" style="color:var(--tax-primary);">1.75</strong>
+          </div>
+          <input type="range" id="lhRange" min="1.05" max="2.35" step="0.05" value="1.75" style="width:100%;" />
+        </div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+            <span>↔️ 栏宽（每行约字数）</span>
+            <strong id="mwVal" style="color:var(--tax-primary);">540 px（~34 字/行）</strong>
+          </div>
+          <input type="range" id="mwRange" min="240" max="660" step="20" value="540" style="width:100%;" />
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">阅读流畅舒适度</div><div class="k-val" id="kCmf">—</div></div>
-        <div class="kpi"><div class="k-lbl">眼球回扫串行风险</div><div class="k-val" id="kErr">—</div></div>
+
+      <div style="text-align:center;">
+        <span class="score-pill" id="scorePill">阅读舒适度：96 / 100（黄金甜点区）</span>
       </div>
+
+      <div class="paper" id="paperBox">
+        优秀的排版就像一块擦得一尘不染的透明玻璃：读者根本意识不到它的存在，思绪直接顺着文字流淌。如果一行排得太长，眼睛扫到行尾折返寻找下一行开头时极易跳行或重读；如果行高压缩得太紧，上下两行的笔画就会挤在一起争夺注意力。只有把行宽锁在 30–40 个汉字（英文约 60–75 字符），并配以 1.65–1.8 倍的行高，双眼才能以最省力的节奏持续阅读。
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>排版黄金甜点区：</strong>中文长文记住 <code>max-width: 65ch</code>（约 35 汉字/行）+ <code>line-height: 1.7</code>！试着把行高拉到 1.1 或把行宽缩到 240px，亲身体验眼球频繁折返的疲劳感！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const lh=+document.getElementById('sLh').value, ch=+document.getElementById('sCh').value;
-  document.getElementById('vLh').textContent=lh.toFixed(2);
-  document.getElementById('vCh').textContent=ch+' 字';
-  const err=Math.max(4, Math.min(96, Math.round(Math.max(0, ch-38)*1.8 + Math.max(0, 1.45-lh)*95)));
-  const cmf=Math.max(15, Math.min(98, Math.round(98 - Math.abs(lh-1.65)*45 - Math.abs(ch-35)*1.1)));
-  document.getElementById('kCmf').textContent=cmf+' 分';
-  document.getElementById('kCmf').style.color=cmf>=75?'#059669':'#f59e0b';
-  document.getElementById('kErr').textContent=err+'%';
-  document.getElementById('kErr').style.color=err>45?'#ef4444':'#059669';
-  const wBar=Math.min(520, ch*8);
-  const dy=Math.round(14*lh);
-  let rows='';
-  for(let i=0;i<4;i++){
-    const y=54+i*dy;
-    if(y<182) rows+=`<rect x="40" y="${y}" width="${i===3?Math.round(wBar*0.65):wBar}" height="10" rx="4" fill="#334155" opacity="0.78"/>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="40" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">实时段落行高与行宽预览（当前 ${ch} 字/行，行高 ${lh.toFixed(2)}）</text>
-    ${rows}
-    <text x="40" y="196" font-size="11" fill="var(--tax-muted)">行宽越宽，就需要略微调大行高，帮眼球从行尾准确跳回下一行开头。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>永远别让正文横跨整个 1920px 宽屏！把文章容器锁在 640~720px、行高设到 1.65，阅读体验瞬间脱胎换骨。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const lhRange = document.getElementById('lhRange');
+    const mwRange = document.getElementById('mwRange');
+    const paperBox = document.getElementById('paperBox');
+    const scorePill = document.getElementById('scorePill');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const lh = Number(lhRange.value);
+      const mw = Number(mwRange.value);
+      const chars = Math.round((mw - 40) / 15.5);
+
+      document.getElementById('lhVal').textContent = lh.toFixed(2);
+      document.getElementById('mwVal').textContent = `${mw} px（~${chars} 字/行）`;
+
+      paperBox.style.lineHeight = lh;
+      paperBox.style.maxWidth = mw + 'px';
+
+      const lhOk = lh >= 1.55 && lh <= 1.9;
+      const mwOk = chars >= 26 && chars <= 40;
+
+      let score = 96;
+      if (!lhOk) score -= Math.round(Math.min(45, Math.abs(lh - 1.7) * 65));
+      if (!mwOk) score -= Math.round(Math.min(35, Math.abs(chars - 34) * 1.8));
+      score = Math.max(22, score);
+
+      if (score >= 85) {
+        scorePill.style.background = 'var(--tax-green-soft)';
+        scorePill.style.color = 'var(--tax-green)';
+        scorePill.textContent = `✨ 阅读舒适度：${score} / 100（黄金甜点区）`;
+        ahaBox.innerHTML = `<strong>命中黄金甜点区（行高 ${lh.toFixed(2)} · 约 ${chars} 字/行）：</strong>上下行距留足了换气槽，眼球从行尾扫回行首时精准落位，零串行疲劳！`;
+      } else if (lh < 1.4) {
+        scorePill.style.background = 'var(--tax-red-soft)';
+        scorePill.style.color = 'var(--tax-red)';
+        scorePill.textContent = `⚠️ 阅读舒适度：${score} / 100（行高过挤窒息）`;
+        ahaBox.innerHTML = `<strong>行高窒息（${lh.toFixed(2)}）：</strong>上下两行几乎贴在一起，眼球极易串行！记住“越宽的栏需要越大的行高”来引导视线折返。`;
+      } else if (lh > 2.05) {
+        scorePill.style.background = 'var(--tax-amber-soft)';
+        scorePill.style.color = 'var(--tax-amber)';
+        scorePill.textContent = `⚠️ 阅读舒适度：${score} / 100（行高过散断层）`;
+        ahaBox.innerHTML = `<strong>行高松散（${lh.toFixed(2)}）：</strong>行距大过段落感，整段文字散成了一堆互不相关的孤立短句！回收到 1.65–1.85 最稳。`;
+      } else if (chars < 24) {
+        scorePill.style.background = 'var(--tax-amber-soft)';
+        scorePill.style.color = 'var(--tax-amber)';
+        scorePill.textContent = `⚠️ 阅读舒适度：${score} / 100（栏宽过窄频繁换行）`;
+        ahaBox.innerHTML = `<strong>栏宽过窄（约 ${chars} 字/行）：</strong>每看两三个词就得折返换行，把完整语义切得支离破碎！`;
+      } else {
+        scorePill.style.background = 'var(--tax-amber-soft)';
+        scorePill.style.color = 'var(--tax-amber)';
+        scorePill.textContent = `⚠️ 阅读舒适度：${score} / 100（栏宽偏宽易串行）`;
+        ahaBox.innerHTML = `<strong>栏宽偏宽（约 ${chars} 字/行）：</strong>大宽屏直接 100% 铺满文字是新手最常犯的错误——眼睛从最右扫回最左极易找错下一行！`;
+      }
+    }
+
+    lhRange.oninput = () => { markDone('调节了排版行高甜点区'); render(); };
+    mwRange.oninput = () => { markDone('调节了排版行宽甜点区'); render(); };
+    document.getElementById('pBad').onclick = () => { lhRange.value = 1.15; mwRange.value = 660; markDone('查看了窒息排版反面教材'); render(); };
+    document.getElementById('pGood').onclick = () => { lhRange.value = 1.75; mwRange.value = 540; markDone('套用了黄金甜点区排版'); render(); };
+    render();
   </script>
 </body>
 </html>

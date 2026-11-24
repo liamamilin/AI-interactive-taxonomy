@@ -1,70 +1,132 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎯 强调色的稀缺定律：满屏高亮等于没有高亮</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>强调色的稀缺定律：满屏高亮等于没有高亮</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .grid12 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+    @media (max-width: 560px) { .grid12 { grid-template-columns: repeat(3, 1fr); } }
+    .tile {
+      padding: 14px 8px; border-radius: 10px; border: 1px solid var(--tax-border);
+      font-size: 13px; font-weight: 800; text-align: center; cursor: pointer;
+      transition: transform .1s;
+    }
+    .tile:hover { transform: scale(1.02); }
+    .res-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .res-card { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎯 强调色的稀缺定律：满屏高亮等于没有高亮</h1><p>冯·雷斯托夫孤立效应：在一排灰色按钮里放 1 个亮橙色按钮，用户 0.2 秒就能点中；放 6 个亮橙色按钮，主按钮的点击率直接腰斩！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>页面中同时高亮的按钮数量</span><span id="vCnt">1 个（唯一焦点）</span></label><input type="range" id="sCnt" min="1" max="8" value="1" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>强调色与背景对比度</span><span id="vCon">85%</span></label><input type="range" id="sCon" min="30" max="100" value="85" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🎯 强调色的稀缺定律：寻物速度盲测</h1>
+      <p>产品经理总爱说：“这个按钮也标红！那个标签也高亮！”亲手做两轮寻物测速：在 12 个按钮中尽快找出<strong>【立即支付】</strong>——先测「满屏彩虹高亮版」，再测「10% 唯一强调色版」！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="startBtn">▶ 第 1 轮：满屏高亮版（找“立即支付”）</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重测</button>
+        <span id="statusTxt" style="font-size:13px;color:var(--tax-muted);">点击开始后立刻寻找【立即支付】</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">主按钮首眼捕获率</div><div class="k-val" id="kPop">—</div></div>
-        <div class="kpi"><div class="k-lbl">视觉噪音判定</div><div class="k-val" id="kSt">—</div></div>
+
+      <div class="grid12" id="grid12"></div>
+
+      <div class="res-row">
+        <div class="res-card"><div style="font-size:12px;color:var(--tax-muted);">🔴 第 1 轮 · 满屏高亮搜索耗时</div><div style="font-size:22px;font-weight:800;" id="t1Val">—</div></div>
+        <div class="res-card"><div style="font-size:12px;color:var(--tax-muted);">🟢 第 2 轮 · 唯一强调色搜索耗时</div><div style="font-size:22px;font-weight:800;" id="t2Val">—</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>冯·雷斯托夫孤立效应：</strong>只有当周围 90% 的元素甘当“低调灰绿叶”，唯一那颗高饱和按钮才能在 <strong>0.3 秒内触发视觉弹出（Pop-out）</strong>！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const cnt=+document.getElementById('sCnt').value, con=+document.getElementById('sCon').value;
-  document.getElementById('vCnt').textContent=cnt+' 个';
-  document.getElementById('vCon').textContent=con+'%';
-  const pop=Math.max(12, Math.min(98, Math.round((con*1.08)/Math.pow(cnt, 0.72))));
-  document.getElementById('kPop').textContent=pop+'%';
-  document.getElementById('kPop').style.color=pop>=70?'#059669':'#ef4444';
-  document.getElementById('kSt').textContent=cnt===1?'🎯 孤立效应拉满':(cnt<=3?'⚠️ 焦点开始分散':'💥 全屏都在大喊大叫');
-  let btns='';
-  for(let i=0;i<8;i++){
-    const col=i%4, row=Math.floor(i/4);
-    const x=45+col*132, y=54+row*56;
-    const hi=i<cnt;
-    btns+=`<rect x="${x}" y="${y}" width="116" height="40" rx="8" fill="${hi?'#f97316':'#e2e8f0'}" opacity="${hi?(con/100).toFixed(2):'0.85'}"/>
-      <text x="${x+58}" y="${y+25}" text-anchor="middle" font-size="12" font-weight="800" fill="${hi?'#fff':'#475569'}">${i===0?'主操作 CTA':('次操作 '+(i+1))}</text>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">一屏 8 个操作按钮：当高亮数量从 1 增加到 ${cnt} 时</text>
-    ${btns}
-    <text x="45" y="182" font-size="11.5" fill="var(--tax-muted)">所有部门都想把自己的按钮标红加粗，最终结果就是谁都看不见！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>每一屏只留一个最高优先级的实心强调按钮，其余全部降级为描边或纯文字按钮——这是转化率提升最稳的设计原则。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const LABELS = ['立即支付', '限时特惠', '查看订单', '领优惠券', '联系客服', '加入收藏', '分享好友', '会员升级', '历史账单', '发票申请', '物流追踪', '切换账号'];
+    const LOUD_COLS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6'];
+
+    let round = 1, active = false, startMs = 0, t1 = null, t2 = null, done = false;
+    const grid12 = document.getElementById('grid12');
+    const startBtn = document.getElementById('startBtn');
+    const statusTxt = document.getElementById('statusTxt');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function buildGrid(scarce) {
+      grid12.innerHTML = '';
+      const list = [...LABELS].sort(() => Math.random() - 0.5);
+      list.forEach((lbl, i) => {
+        const b = document.createElement('button');
+        b.className = 'tile';
+        const isTarget = lbl === '立即支付';
+        if (scarce) {
+          b.style.background = isTarget ? '#f97316' : 'var(--tax-surface-alt)';
+          b.style.color = isTarget ? '#ffffff' : 'var(--tax-muted)';
+          b.style.borderColor = isTarget ? '#f97316' : 'var(--tax-border)';
+        } else {
+          const col = LOUD_COLS[i % LOUD_COLS.length];
+          b.style.background = col;
+          b.style.color = '#ffffff';
+          b.style.borderColor = 'transparent';
+        }
+        b.textContent = lbl;
+        b.onclick = () => {
+          if (!active) return;
+          if (isTarget) {
+            active = false;
+            const sec = (performance.now() - startMs) / 1000;
+            if (round === 1) {
+              t1 = sec;
+              document.getElementById('t1Val').textContent = sec.toFixed(2) + ' 秒';
+              round = 2;
+              startBtn.disabled = false;
+              startBtn.textContent = '▶ 第 2 轮：唯一强调色版（找“立即支付”）';
+              statusTxt.textContent = `第 1 轮找到用时 ${sec.toFixed(2)}s！准备测第 2 轮…`;
+            } else {
+              t2 = sec;
+              document.getElementById('t2Val').textContent = sec.toFixed(2) + ' 秒';
+              round = 3;
+              startBtn.textContent = '✓ 两轮测速完成';
+              const speedup = Math.max(1, (t1 / Math.max(0.05, t2))).toFixed(1);
+              statusTxt.textContent = `实测提速 ${speedup} 倍！（${t1.toFixed(2)}s → ${t2.toFixed(2)}s）`;
+              markDone(`完成强调色稀缺定律寻物盲测：${t1.toFixed(2)}s vs ${t2.toFixed(2)}s`);
+              ahaBox.innerHTML = `<strong>视觉弹出（Pop-out）提速 ${speedup} 倍！</strong>第 1 轮满屏高饱和按钮逼你只能逐个念字搜寻；第 2 轮砍掉其他 11 个按钮的色彩噪音后，眼睛甚至不用读字，直接锁定唯一亮橙块！`;
+            }
+          }
+        };
+        grid12.appendChild(b);
+      });
+    }
+
+    startBtn.onclick = () => {
+      active = true;
+      startBtn.disabled = true;
+      buildGrid(round === 2);
+      startMs = performance.now();
+      statusTxt.textContent = '⏱️ 计时中！快点出【立即支付】！';
+    };
+
+    document.getElementById('resetBtn').onclick = () => {
+      active = false; round = 1; t1 = null; t2 = null;
+      startBtn.disabled = false;
+      startBtn.textContent = '▶ 第 1 轮：满屏高亮版（找“立即支付”）';
+      document.getElementById('t1Val').textContent = '—';
+      document.getElementById('t2Val').textContent = '—';
+      statusTxt.textContent = '点击开始后立刻寻找【立即支付】';
+      grid12.innerHTML = '';
+    };
   </script>
 </body>
 </html>

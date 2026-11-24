@@ -1,71 +1,124 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚖️ 60-30-10 黄金配色配比实验台（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>60-30-10 黄金配色配比实验台</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚖️ 60-30-10 黄金配色配比实验台（SVG）</h1><p>室内设计与 UI 界通行百年的黄金法则：60% 中性留白主色定基调，30% 辅助色划区域，仅留 10% 给最亮眼的强调色引爆焦点！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>主背景中性色占比（建议 ~60%）</span><span id="v60">60%</span></label><input type="range" id="s60" min="20" max="80" value="60" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>高饱和强调色占比（建议 ~10%）</span><span id="v10">10%</span></label><input type="range" id="s10" min="2" max="50" value="10" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⚖️ 60-30-10 黄金配色配比实验台（构建器）</h1>
+      <p>为什么同样 3 个好看的颜色，别人配出来高级耐看，自己配出来却像打翻调色盘？秘密不在选什么色，而在<strong>面积比例</strong>：60% 中性主底色 + 30% 辅助层级色 + <strong>10% 高饱和强调色</strong>！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="pGold">✨ 60-30-10 黄金比例</button>
+        <button class="toy-btn secondary" id="pEqual">💥 33-33-33 均分灾难</button>
+        <button class="toy-btn secondary" id="pOver">🚨 20-30-50 强调色泛滥</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">当前三色配比</div><div class="k-val" id="kRat">—</div></div>
-        <div class="kpi"><div class="k-lbl">视觉高级感评分</div><div class="k-val" id="kScr">—</div></div>
+
+      <div class="ctrl-box">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>🎯 强调色（橙色焦点）占屏面积比例</span>
+          <strong id="accVal" style="color:var(--tax-amber);">10%（克制点睛）</strong>
+        </div>
+        <input type="range" id="accRange" min="5" max="55" value="10" style="width:100%;" />
       </div>
+
+      <svg id="uiSvg" viewBox="0 0 680 220" width="100%" style="display:block;border-radius:12px;border:1px solid var(--tax-border);" aria-label="60-30-10界面配色比例实时预览"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>黄金配比（60% 底色 · 30% 辅助 · 10% 强调）：</strong>把 90% 的画面留给克制的中性色与辅助色，仅剩 10% 的橙色 CTA 按钮就能瞬间成为全场唯一焦点！把滑块拖到 40%+ 试试看视觉如何崩坏！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const p60=+document.getElementById('s60').value, raw10=+document.getElementById('s10').value;
-  const p10=Math.min(raw10, 95-p60);
-  const p30=Math.max(5, 100 - p60 - p10);
-  document.getElementById('v60').textContent=p60+'%';
-  document.getElementById('v10').textContent=p10+'%';
-  const err=Math.abs(p60-60)*0.7 + Math.abs(p30-30)*0.6 + Math.abs(p10-10)*1.6;
-  const scr=Math.max(20, Math.min(98, Math.round(98 - err)));
-  document.getElementById('kRat').textContent=p60+' / '+p30+' / '+p10;
-  document.getElementById('kScr').textContent=scr+' 分';
-  document.getElementById('kScr').style.color=scr>=75?'#059669':'#ef4444';
-  const w1=p60*5.2, w2=p30*5.2, w3=p10*5.2;
-  document.getElementById('svg').innerHTML=`
-    <text x="40" y="32" font-size="13" font-weight="800" fill="var(--tax-text)">画面色彩面积切分条（中性底 + 结构辅助色 + 点睛强调色）</text>
-    <rect x="40" y="60" width="${w1.toFixed(0)}" height="62" rx="4" fill="#e2e8f0" stroke="#cbd5e1"/>
-    <rect x="${(40+w1).toFixed(0)}" y="60" width="${w2.toFixed(0)}" height="62" fill="#334155"/>
-    <rect x="${(40+w1+w2).toFixed(0)}" y="60" width="${w3.toFixed(0)}" height="62" rx="4" fill="#f97316"/>
-    <text x="40" y="150" font-size="12" font-weight="800" fill="var(--tax-muted)">主背景 ${p60}%</text>
-    <text x="230" y="150" font-size="12" font-weight="800" fill="#334155">辅助色 ${p30}%</text>
-    <text x="420" y="150" font-size="12" font-weight="800" fill="#ea580c">强调色 ${p10}%</text>
-    <text x="40" y="182" font-size="11.5" fill="var(--tax-muted)">${p10>22?'⚠️ 强调色面积太大，视觉像打翻颜料盘一样刺眼喧宾夺主！':'✅ 主次分明，10% 的亮橙色瞬间锁住视线焦点！'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>配色的秘诀不在选出多惊艳的颜色，而在于克制——给 90% 的画面做减法，那 10% 的强调色才会发光！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const accRange = document.getElementById('accRange');
+    const accVal = document.getElementById('accVal');
+    const svg = document.getElementById('uiSvg');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const acc = Number(accRange.value);
+      const sec = Math.min(40, Math.max(20, 30));
+      const dom = Math.max(15, 100 - sec - acc);
+
+      accVal.textContent = acc <= 15 ? `${acc}%（✨ 黄金克制区）` : (acc <= 28 ? `${acc}%（⚠️ 开始喧宾夺主）` : `${acc}%（💥 满屏高饱和疲劳）`);
+
+      // Colors: 60% dark slate neutral, 30% cool indigo-slate surface, 10% warm amber-orange accent
+      const cDom = '#0f172a';
+      const cSec = '#1e293b';
+      const cAcc = '#f97316';
+
+      const wDom = (dom / 100) * 632;
+      const wSec = (sec / 100) * 632;
+      const wAcc = (acc / 100) * 632;
+
+      let html = `<rect x="0" y="0" width="680" height="220" fill="${cDom}"/>`;
+
+      // Top proportion strip
+      html += `<rect x="24" y="16" width="${wDom}" height="16" rx="4" fill="#334155"/>`;
+      html += `<rect x="${24 + wDom}" y="16" width="${wSec}" height="16" fill="#3b82f6" opacity="0.65"/>`;
+      html += `<rect x="${24 + wDom + wSec}" y="16" width="${wAcc}" height="16" rx="4" fill="${cAcc}"/>`;
+      html += `<text x="24" y="48" fill="#cbd5e1" font-size="11.5">主底色 ${dom}% · 辅助色 ${sec}% · 强调色 ${acc}%</text>`;
+
+      // Simulated UI card preview reacting to accent overflow
+      const floodNav = acc >= 25;
+      const floodCard = acc >= 40;
+
+      // Sidebar (30% secondary or flooded accent)
+      html += `<rect x="24" y="62" width="160" height="140" rx="10" fill="${floodNav ? cAcc : cSec}" stroke="rgba(255,255,255,0.1)"/>`;
+      html += `<text x="42" y="90" fill="#f8fafc" font-size="12" font-weight="700">导航侧栏</text>`;
+      html += `<rect x="42" y="104" width="110" height="10" rx="4" fill="rgba(255,255,255,0.22)"/>`;
+      html += `<rect x="42" y="124" width="90" height="10" rx="4" fill="rgba(255,255,255,0.15)"/>`;
+      html += `<rect x="42" y="144" width="100" height="10" rx="4" fill="rgba(255,255,255,0.15)"/>`;
+
+      // Main content area
+      html += `<rect x="200" y="62" width="456" height="140" rx="10" fill="${floodCard ? cAcc : cSec}" stroke="rgba(255,255,255,0.1)"/>`;
+      html += `<text x="224" y="96" fill="#f8fafc" font-size="16" font-weight="800">核心工作台主标题</text>`;
+      html += `<text x="224" y="118" fill="${floodCard ? '#fff7ed' : '#94a3b8'}" font-size="12">当强调色被严格控制在 10% 以内，下方按钮会像黑暗里的灯塔一样抓人。</text>`;
+
+      // Primary CTA Button (always accent)
+      html += `<rect x="224" y="140" width="136" height="36" rx="8" fill="${cAcc}" stroke="#fff" stroke-width="${floodCard ? 2 : 0}"/>`;
+      html += `<text x="292" y="163" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="800">立即创建项目</text>`;
+
+      // Secondary ghost button
+      html += `<rect x="376" y="140" width="108" height="36" rx="8" fill="none" stroke="rgba(255,255,255,0.28)"/>`;
+      html += `<text x="430" y="163" text-anchor="middle" fill="#e2e8f0" font-size="12.5">查看文档</text>`;
+
+      svg.innerHTML = html;
+
+      if (acc <= 15) {
+        ahaBox.innerHTML = `<strong>黄金 60-30-10 平衡（强调色 ${acc}%）：</strong>主底色定基调、辅助色分模块、10% 强调色只留给最重要的行动按钮！这是室内设计、时尚穿搭与 UI 设计通用的百年铁律。`;
+      } else if (acc < 35) {
+        ahaBox.innerHTML = `<strong>强调色溢出（${acc}%）：</strong>侧边栏也涂上高饱和橙色后，右侧主按钮的焦点立刻被抢走了一半！试着再往左收回到 10%。`;
+      } else {
+        ahaBox.innerHTML = `<strong>高饱和灾难（${acc}%）：</strong>整块画布都涂满亮橙色后，那个原本最显眼的「立即创建项目」按钮彻底淹没在背景里！记住：<strong>处处都是重点 = 没有任何重点</strong>。`;
+      }
+    }
+
+    accRange.oninput = () => { markDone('调节了60-30-10强调色面积比例'); render(); };
+    document.getElementById('pGold').onclick = () => { accRange.value = 10; markDone('应用60-30-10黄金比例'); render(); };
+    document.getElementById('pEqual').onclick = () => { accRange.value = 33; markDone('对比33-33-33均分灾难'); render(); };
+    document.getElementById('pOver').onclick = () => { accRange.value = 50; markDone('对比强调色泛滥灾难'); render(); };
+    render();
   </script>
 </body>
 </html>

@@ -1,66 +1,106 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>✋ 为什么苹果动画中途打断依然丝滑？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>为什么苹果动画中途打断依然丝滑？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .lane-box { padding: 12px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 10px; }
+    .track { position: relative; height: 42px; border-radius: 999px; background: var(--tax-surface); border: 1px solid var(--tax-border); margin-top: 6px; }
+    .orb { position: absolute; top: 5px; width: 32px; height: 32px; border-radius: 50%; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>✋ 为什么苹果动画中途打断依然丝滑？</h1><p>你在上滑关闭 App 到一半时突然改主意往下拽：基于固定时长的旧动画会生硬闪回，而物理弹簧继承你手指当前的瞬时初速度，划出完美圆弧！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>用户手势瞬间甩动初速度</span><span id="vVel">高（快速甩手）</span></label><input type="range" id="sVel" min="10" max="100" value="75" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>引擎是否继承初速度（物理弹簧模式）</span><span id="vPhy">100% 物理守恒</span></label><input type="range" id="sPhy" min="0" max="100" value="100" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>✋ 为什么苹果动画中途打断依然丝滑？（盲测手感）</h1>
+      <p><strong>连续快速疯狂点击下方【↔️ 切换目标方向】按钮</strong>（不要等动画播完！）：仔细盯住上方的「传统 CSS 贝塞尔动画」和下方的「物理弹簧动量动画」，瞬间看穿谁在抽搐折返、谁在丝滑过弯！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="flipBtn">↔️ 快速连续点我（中途打断！）</button>
+        <span id="cntTxt" style="font-size:13px;color:var(--tax-muted);">中途打断次数：0</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">速度连续性（防生硬折角）</div><div class="k-val" id="kCon">—</div></div>
-        <div class="kpi"><div class="k-lbl">手势跟手评级</div><div class="k-val" id="kGrd">—</div></div>
+
+      <div class="lane-box">
+        <div style="font-size:12.5px;font-weight:700;color:var(--tax-red);">❌ 传统时长贝塞尔动画（每次打断速度强行清零重启，生硬顿挫！）</div>
+        <div class="track" id="trBad"><div class="orb" id="orbBad" style="left:8px;background:var(--tax-red);"></div></div>
       </div>
+
+      <div class="lane-box">
+        <div style="font-size:12.5px;font-weight:700;color:var(--tax-green);">✅ 物理弹簧动量引擎（保留当前速度矢量，优雅拐出惯性圆弧！）</div>
+        <div class="track" id="trGood"><div class="orb" id="orbGood" style="left:8px;background:var(--tax-green);"></div></div>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>手感秘密：</strong>普通用户滑动 App 抽屉时经常滑到一半反悔。快连点 5 次上方按钮，亲眼看绿色弹簧球如何靠“保留惯性速度”碾压红色死板计时器！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const vel=+document.getElementById('sVel').value, phy=+document.getElementById('sPhy').value;
-  document.getElementById('vVel').textContent=vel+'%';
-  document.getElementById('vPhy').textContent=phy+'%';
-  const con=Math.round(15 + phy*0.84);
-  document.getElementById('kCon').textContent=con+'%';
-  document.getElementById('kCon').style.color=con>=80?'#059669':'#ef4444';
-  document.getElementById('kGrd').textContent=con>=80?'✨ 丝滑如真实玻璃卡片':'💥 明显顿挫折角感';
-  const ctrlY=130 - (vel*phy/100)*0.85;
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">中途松手/反拉时的轨迹衔接（蓝点 = 手势打断瞬间）</text>
-    <path d="M 60 155 L 240 115" fill="none" stroke="#64748b" stroke-width="3"/>
-    <path d="M 240 115 Q 340 ${ctrlY.toFixed(0)} 530 155" fill="none" stroke="${con>=80?'#059669':'#ef4444'}" stroke-width="3.5"/>
-    <circle cx="240" cy="115" r="8" fill="#3b82f6"/>
-    <text x="240" y="100" text-anchor="middle" font-size="11.5" font-weight="800" fill="#2563eb">中途打断点</text>
-    <text x="30" y="182" font-size="11.5" fill="var(--tax-muted)">${con>=80?'物理弹簧吃进手势初速度，先顺势滑出平滑弧线再优雅折返！':'忽略初速度直接按固定曲线拉回，在蓝点处出现刺眼的硬折角！'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>流畅的秘密不只是“60 帧不掉帧”，更是“动效随时可被打断且尊重手势动量”！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const orbBad = document.getElementById('orbBad');
+    const orbGood = document.getElementById('orbGood');
+    const trGood = document.getElementById('trGood');
+    const ahaBox = document.getElementById('ahaBox');
+
+    let targetRight = false;
+    let flips = 0, done = false;
+
+    // Bad tween state (restarts from v=0 every click)
+    let badX = 0, badStart = 0, badT0 = 0, badTarget = 0;
+    // Good spring state (keeps continuous velocity v!)
+    let goodX = 0, goodV = 0, goodTarget = 0;
+    let last = performance.now();
+
+    function loop(now) {
+      const dt = Math.min(0.032, (now - last) / 1000);
+      last = now;
+      const maxX = Math.max(120, trGood.clientWidth - 46);
+
+      // Update bad tween (fixed 800ms ease-in-out restarting at v=0)
+      const p = Math.min(1, (now - badT0) / 800);
+      const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+      badX = badStart + (badTarget - badStart) * ease;
+      orbBad.style.left = (8 + badX * maxX).toFixed(1) + 'px';
+
+      // Update good spring (stiffness=110, damping=14 -> preserves velocity!)
+      const a = -110 * (goodX - goodTarget) - 14 * goodV;
+      goodV += a * dt;
+      goodX += goodV * dt;
+      orbGood.style.left = (8 + Math.max(-0.04, Math.min(1.04, goodX)) * maxX).toFixed(1) + 'px';
+
+      requestAnimationFrame(loop);
+    }
+
+    document.getElementById('flipBtn').onclick = () => {
+      targetRight = !targetRight;
+      flips++;
+      document.getElementById('cntTxt').textContent = `中途打断次数：${flips}`;
+      const tgt = targetRight ? 1 : 0;
+
+      // Bad: hard reset velocity to 0!
+      badStart = badX;
+      badTarget = tgt;
+      badT0 = performance.now();
+
+      // Good: only change target, velocity remains continuous!
+      goodTarget = tgt;
+
+      if (flips >= 3) {
+        if (!done) {
+          done = true;
+          if (window.ToySDK) window.ToySDK.markCompleted('实测了弹簧动画中途打断的动量连续性');
+        }
+        ahaBox.innerHTML = '<strong>为什么 iOS 让人觉得“玄学丝滑”？</strong>传统贝塞尔曲线写死了“耗时 0.8s”，中途改方向时速度瞬间断崖归零，眼睛立刻察觉卡顿；物理弹簧只追踪<strong>实时位置与速度</strong>，随时打断都能顺着惯性圆润掉头，100% 符合真实世界牛顿力学！';
+      }
+    };
+
+    requestAnimationFrame(loop);
   </script>
 </body>
 </html>

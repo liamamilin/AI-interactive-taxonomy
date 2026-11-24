@@ -1,66 +1,124 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🍓 果酱实验与选择过载：选项太多反而买得少</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>果酱实验与选择过载：选项太多反而买得少</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .s-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .big-num { font-size: 24px; font-weight: 800; margin-top: 4px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🍓 果酱实验与选择过载：选项太多反而买得少</h1><p>哥伦比亚大学经典实验：摆 24 种果酱吸引 60% 路人停步，但只有 3% 购买；摆 6 种果酱吸引 40% 路人，购买率却高达 30%（十倍差距）！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>货架同屏展示 SKU 数量</span><span id="vSku">18 种</span></label><input type="range" id="sSku" min="2" max="30" value="18" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>“镇店 Top 3 推荐”决策脚手架</span><span id="vRec">30%</span></label><input type="range" id="sRec" min="0" max="100" value="30" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🍓 果酱实验与选择过载：转化漏斗竞速对决</h1>
+      <p>哥伦比亚大学 Iyengar &amp; Lepper (2000) 在高档超市摆出两个果酱试吃摊：<strong>A 摊摆 24 种口味</strong>，<strong>B 摊只摆 6 种精选口味</strong>。各来 100 位路人——点击播放，见证“围观热闹却没人买单”的选择瘫痪大反转！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="playBtn">▶ 模拟 100 位顾客进店转化对决</button>
+        <button class="toy-btn secondary" id="jumpBtn">⏩ 直接看最终成交榜</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重置</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">最终成交转化率</div><div class="k-val" id="kCnv">—</div></div>
-        <div class="kpi"><div class="k-lbl">顾客心理状态</div><div class="k-val" id="kPsy">—</div></div>
+
+      <svg id="funnelSvg" viewBox="0 0 680 210" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="果酱实验24种与6种口味转化漏斗对决"></svg>
+
+      <div class="cards">
+        <div class="s-card">
+          <div style="font-size:12px;color:var(--tax-muted);">🫙 24 种口味大摊（围观 60% · 转化仅 3%）</div>
+          <div class="big-num" id="buy24" style="color:var(--tax-red);">0 人买单</div>
+        </div>
+        <div class="s-card">
+          <div style="font-size:12px;color:var(--tax-muted);">🍓 6 种精选小摊（围观 40% · 转化高达 30%！）</div>
+          <div class="big-num" id="buy6" style="color:var(--tax-green);">0 人买单</div>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>反直觉漏斗：</strong>点击播放看 100 位顾客流过两个摊位——选项多确实更吸引围观，但在最后一步结账时却发生了灾难性的<strong>选择瘫痪（Choice Overload）</strong>！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const sku=+document.getElementById('sSku').value, rec=+document.getElementById('sRec').value;
-  document.getElementById('vSku').textContent=sku+' 种';
-  document.getElementById('vRec').textContent=rec+'%';
-  const rawCnv=32*Math.exp(-Math.pow((sku-5)/9, 2)) + 3;
-  const cnv=Math.min(38, Math.round(rawCnv + (sku>8? rec*0.14 : 0)));
-  document.getElementById('kCnv').textContent=cnv+'%';
-  document.getElementById('kCnv').style.color=cnv>=20?'#059669':'#ef4444';
-  document.getElementById('kPsy').textContent=sku>12 && rec<50?'🤯 选择瘫痪，干脆不买走人':'😊 轻松挑中，果断下单';
-  const w=Math.max(15, cnv*10.5);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">货架选项数 (${sku} 种) 对最终下单转化率的倒 U 冲击</text>
-    <rect x="30" y="68" width="420" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${Math.min(420,w).toFixed(0)}" height="38" rx="8" fill="${cnv>=20?'#059669':'#ef4444'}"/>
-    <text x="${Math.min(460,38+w).toFixed(0)}" y="93" font-size="14" font-weight="850" fill="${cnv>=20?'#059669':'#ef4444'}">${cnv}% 下单</text>
-    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">品类丰富的平台必须用“猜你喜欢 / 销量第一 / 编辑精选”帮用户把 1000 个选项先筛到 3 个！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>用户嘴上都说“想要更多选择”，但身体却诚实地为“替我筛好的精选”买单！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let pct = 0, playing = false, timer = null, done = false;
+    const svg = document.getElementById('funnelSvg');
+    const playBtn = document.getElementById('playBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function draw() {
+      const stop24 = Math.round(60 * pct), buy24 = Math.round(1.8 * pct); // 60% stop * 3% buy = ~2 / 100
+      const stop6  = Math.round(40 * pct), buy6  = Math.round(12.0 * pct); // 40% stop * 30% buy = 12 / 100
+
+      document.getElementById('buy24').textContent = `${buy24} 人买单（围观 ${stop24} 人）`;
+      document.getElementById('buy6').textContent = `${buy6} 人买单（围观 ${stop6} 人）`;
+
+      let html = '';
+      // Left group: 24 jams
+      html += `<text x="175" y="26" text-anchor="middle" fill="var(--tax-red)" font-size="13.5" font-weight="800">🫙 24 种口味（选择过载）</text>`;
+      html += `<text x="40" y="64" fill="var(--tax-muted)" font-size="12">驻足试吃</text>`;
+      html += `<rect x="106" y="48" width="200" height="22" rx="6" fill="rgba(148,163,184,0.16)"/>`;
+      html += `<rect x="106" y="48" width="${(stop24 / 65) * 200}" height="22" rx="6" fill="var(--tax-amber)"/>`;
+      html += `<text x="${114 + (stop24 / 65) * 200}" y="64" fill="var(--tax-ink)" font-size="12" font-weight="700">${stop24}人</text>`;
+
+      html += `<text x="40" y="118" fill="var(--tax-muted)" font-size="12">最终买单</text>`;
+      html += `<rect x="106" y="102" width="200" height="22" rx="6" fill="rgba(148,163,184,0.16)"/>`;
+      html += `<rect x="106" y="102" width="${Math.max(4, (buy24 / 15) * 200)}" height="22" rx="6" fill="var(--tax-red)"/>`;
+      html += `<text x="${114 + (buy24 / 15) * 200}" y="118" fill="var(--tax-red)" font-size="13" font-weight="800">${buy24}人</text>`;
+
+      // Divider
+      html += `<line x1="340" y1="20" x2="340" y2="175" stroke="var(--tax-border)" stroke-dasharray="4 4"/>`;
+
+      // Right group: 6 jams
+      html += `<text x="505" y="26" text-anchor="middle" fill="var(--tax-green)" font-size="13.5" font-weight="800">🍓 6 种精选（轻松拍板）</text>`;
+      html += `<text x="368" y="64" fill="var(--tax-muted)" font-size="12">驻足试吃</text>`;
+      html += `<rect x="434" y="48" width="200" height="22" rx="6" fill="rgba(148,163,184,0.16)"/>`;
+      html += `<rect x="434" y="48" width="${(stop6 / 65) * 200}" height="22" rx="6" fill="var(--tax-primary)"/>`;
+      html += `<text x="${442 + (stop6 / 65) * 200}" y="64" fill="var(--tax-ink)" font-size="12" font-weight="700">${stop6}人</text>`;
+
+      html += `<text x="368" y="118" fill="var(--tax-muted)" font-size="12">最终买单</text>`;
+      html += `<rect x="434" y="102" width="200" height="22" rx="6" fill="rgba(148,163,184,0.16)"/>`;
+      html += `<rect x="434" y="102" width="${(buy6 / 15) * 200}" height="22" rx="6" fill="var(--tax-green)"/>`;
+      html += `<text x="${442 + (buy6 / 15) * 200}" y="118" fill="var(--tax-green)" font-size="13" font-weight="800">${buy6}人</text>`;
+
+      html += `<text x="340" y="192" text-anchor="middle" fill="${pct >= 1 ? 'var(--tax-green)' : 'var(--tax-muted)'}" font-size="12.5" font-weight="800">${pct >= 1 ? '🏆 最终战果：6 种精选摊销量（12单）是 24 种大摊（2单）的 6 倍！' : '模拟顾客进店试吃与结账转化中…'}</text>`;
+      svg.innerHTML = html;
+
+      if (pct >= 1) {
+        ahaBox.innerHTML = '<strong>选择过载悖论（6 倍成交碾压）！</strong>24 种口味让顾客陷入“万一另一罐更好吃”的机会成本焦虑，干脆谁都不买；帮你提前做好<strong>精选策展（Curation）</strong>，反而大幅提升成交率与满意度！';
+      }
+    }
+
+    function stop() { playing = false; clearInterval(timer); playBtn.textContent = '▶ 模拟 100 位顾客进店转化对决'; }
+
+    playBtn.onclick = () => {
+      markDone('播放了果酱实验选择过载转化漏斗');
+      if (playing) { stop(); return; }
+      if (pct >= 1) pct = 0;
+      playing = true;
+      playBtn.textContent = '⏸ 暂停';
+      timer = setInterval(() => {
+        pct = Math.min(1, pct + 0.05);
+        draw();
+        if (pct >= 1) stop();
+      }, 65);
+    };
+    document.getElementById('jumpBtn').onclick = () => { stop(); pct = 1; markDone('查看了果酱实验6倍转化终局'); draw(); };
+    document.getElementById('resetBtn').onclick = () => { stop(); pct = 0; draw(); };
+    draw();
   </script>
 </body>
 </html>

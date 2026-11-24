@@ -1,67 +1,121 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🖨️ 印刷色域缩水：为什么霓虹亮蓝印出来就发灰？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>印刷色域缩水：为什么霓虹亮蓝印出来就发灰？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .swatch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0; }
+    @media (max-width: 600px) { .swatch-grid { grid-template-columns: repeat(2, 1fr); } }
+    .sw-card { padding: 10px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; cursor: pointer; }
+    .sw-card.picked { border-color: var(--tax-primary); box-shadow: 0 0 0 2px var(--tax-primary-soft); }
+    .sw-box { height: 64px; border-radius: 8px; margin-bottom: 6px; transition: background .4s; }
+    .sw-name { font-size: 12.5px; font-weight: 700; }
+    .sw-sub { font-size: 11px; color: var(--tax-muted); margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🖨️ 印刷色域缩水：为什么霓虹亮蓝印出来就发灰？</h1><p>显示屏能发出极高纯度的荧光绿与电光蓝，但纸张油墨无法自己发光，一旦超出 CMYK 色域边界，印厂就会把它强行压暗裁平。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>屏幕设计稿色相（Hue）</span><span id="vHue">200°（电光蓝）</span></label><input type="range" id="sHue" min="0" max="360" value="200" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>屏幕设计稿饱和度（Saturation）</span><span id="vSat">95%</span></label><input type="range" id="sSat" min="15" max="100" value="95" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🖨️ 印刷色域缩水：发往印刷厂盲测</h1>
+      <p>设计师在屏幕上调出 4 个绝美配色，准备印海报。<strong>先盲猜哪 2 个颜色一进印刷机就会惨烈发灰翻车</strong>，再点击「一键转 CMYK 印刷打样」亲眼见证色域裁剪！</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button class="toy-btn" id="printBtn">🖨️ 一键发往印刷厂（CMYK 色域模拟）</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 切回屏幕 RGB 原色</button>
+        <span id="hintTxt" style="font-size:12.5px;color:var(--tax-muted);">先点击你认为会翻车的色块再打样</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">CMYK 印刷保真度</div><div class="k-val" id="kFid">—</div></div>
-        <div class="kpi"><div class="k-lbl">印前预警</div><div class="k-val" id="kWrn">—</div></div>
-      </div>
+
+      <div class="swatch-grid" id="swatchGrid"></div>
+
+      <svg id="gamutSvg" viewBox="0 0 680 155" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="RGB与CMYK色域覆盖范围对比"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>打样盲测：</strong>点击上方色块预测谁最容易“见光死”，再按「一键发往印刷厂」看屏幕自发光色域与纸张反光色域的巨大鸿沟！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const hue=+document.getElementById('sHue').value, sat=+document.getElementById('sSat').value;
-  document.getElementById('vHue').textContent=hue+'°';
-  document.getElementById('vSat').textContent=sat+'%';
-  const neonZone=(hue>=110 && hue<=260) ? 1.3 : 0.85;
-  const clipSat=Math.min(sat, Math.round(74/neonZone));
-  const loss=Math.max(0, sat - clipSat);
-  const fid=Math.max(45, 100 - Math.round(loss*1.1));
-  document.getElementById('kFid').textContent=fid+'%';
-  document.getElementById('kFid').style.color=loss>18?'#ef4444':'#059669';
-  document.getElementById('kWrn').textContent=loss>18?'⚠️ 严重溢色，印出来发灰!':'✅ 落在印刷安全色域内';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">左：屏幕 sRGB 预览色 vs 右：四色油墨 CMYK 实际印刷效果</text>
-    <rect x="35" y="48" width="240" height="105" rx="12" fill="hsl(${hue},${sat}%,52%)"/>
-    <text x="155" y="175" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-text)">屏幕设计稿 (饱和度 ${sat}%)</text>
-    <rect x="325" y="48" width="240" height="105" rx="12" fill="hsl(${hue},${clipSat}%,46%)"/>
-    <text x="445" y="175" text-anchor="middle" font-size="12" font-weight="800" fill="${loss>18?'#ef4444':'#059669'}">实际印出 (被压至 ${clipSat}%)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>做海报、名片或包装时，提前打开 CMYK 软打样！纯度极高的荧光绿、电光紫和亮青是印刷翻车重灾区。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const SWATCHES = [
+      { id: 'c1', name: '⚡ 霓虹电光绿', rgb: '#00ff66', cmyk: '#3da862', drop: '严重发灰（−48% 饱和度）', severe: true },
+      { id: 'c2', name: '💎 荧光电光蓝', rgb: '#0066ff', cmyk: '#2f5ba0', drop: '明显暗沉（−42% 饱和度）', severe: true },
+      { id: 'c3', name: '🧱 复古砖陶红', rgb: '#b84a39', cmyk: '#b24d3d', drop: '几乎无损（−4% 差异）', severe: false },
+      { id: 'c4', name: '🌾 燕麦大地棕', rgb: '#a68b67', cmyk: '#a38966', drop: '完美还原（−2% 差异）', severe: false }
+    ];
+
+    let printed = false;
+    let picked = null;
+    let done = false;
+
+    const swatchGrid = document.getElementById('swatchGrid');
+    const svg = document.getElementById('gamutSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      swatchGrid.innerHTML = '';
+      SWATCHES.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'sw-card' + (picked === s.id ? ' picked' : '');
+        div.innerHTML = `
+          <div class="sw-box" style="background:${printed ? s.cmyk : s.rgb};"></div>
+          <div class="sw-name">${s.name}</div>
+          <div class="sw-sub">${printed ? s.drop : (picked === s.id ? '已预测会翻车 ✓' : '点击预测')}</div>
+        `;
+        div.onclick = () => {
+          picked = s.id;
+          markDone('预测了印刷色域裁剪色块');
+          render();
+        };
+        swatchGrid.appendChild(div);
+      });
+
+      let html = '';
+      // Visual gamut area comparison
+      html += `<text x="24" y="28" fill="var(--tax-ink)" font-size="13" font-weight="800">色域容量直观对比（人眼可见 100% · 屏幕 RGB ~72% · 印刷 CMYK ~45%）</text>`;
+      // Outer: Human vision
+      html += `<rect x="24" y="44" width="632" height="84" rx="14" fill="rgba(148,163,184,0.12)" stroke="var(--tax-border)" stroke-dasharray="5 4"/>`;
+      html += `<text x="644" y="64" text-anchor="end" fill="var(--tax-muted)" font-size="11">人眼可见全光谱</text>`;
+      // Middle: Screen RGB
+      html += `<rect x="38" y="54" width="460" height="64" rx="12" fill="rgba(59,130,246,0.16)" stroke="var(--tax-primary)" stroke-width="2"/>`;
+      html += `<text x="486" y="74" text-anchor="end" fill="var(--tax-primary)" font-size="11.5" font-weight="700">屏幕 RGB 色域（高饱和霓虹区）</text>`;
+      // Inner: Print CMYK
+      html += `<rect x="52" y="64" width="286" height="44" rx="10" fill="rgba(245,158,11,0.22)" stroke="var(--tax-amber)" stroke-width="2"/>`;
+      html += `<text x="195" y="90" text-anchor="middle" fill="var(--tax-ink)" font-size="12" font-weight="800">🖨️ 印刷 CMYK 安全区</text>`;
+
+      if (printed) {
+        html += `<text x="340" y="146" text-anchor="middle" fill="var(--tax-red)" font-size="12" font-weight="700">⚠️ 霓虹绿/电光蓝掉在 CMYK 框外，印刷机被迫强行拉回框内边界（发灰暗沉）！</text>`;
+      } else {
+        html += `<text x="340" y="146" text-anchor="middle" fill="var(--tax-muted)" font-size="12">点击「一键发往印刷厂」，看 4 个色块里谁掉出了 CMYK 安全区！</text>`;
+      }
+      svg.innerHTML = html;
+
+      if (printed) {
+        ahaBox.innerHTML = '<strong>印刷防翻车铁律：</strong>屏幕背光是主动发光，可以轻松飙出荧光绿、电光蓝和霓虹紫；但纸张只能被动反射环境光，<strong>高饱和荧光色在 CMYK 色域里根本不存在</strong>！做物料印刷前务必提前切 CMYK 软打样（或加印潘通专色油墨）！';
+      }
+    }
+
+    document.getElementById('printBtn').onclick = () => {
+      printed = true;
+      markDone('执行了CMYK印刷色域裁剪打样对比');
+      render();
+    };
+    document.getElementById('resetBtn').onclick = () => {
+      printed = false;
+      render();
+    };
+    render();
   </script>
 </body>
 </html>

@@ -1,79 +1,116 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>〰️ 毕达哥拉斯频率比：波形对齐决定协和度（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>毕达哥拉斯频率比：波形对齐决定协和度</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>〰️ 毕达哥拉斯频率比：波形对齐决定协和度（SVG）</h1><p>两根弦的振动频率比越是简单整数（2:1 八度、3:2 纯五度），波形节点越频繁对齐，耳蜗毛细胞越舒畅；复杂比例（如 45:32 三全音）则互相打架产生刺耳粗糙感！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>〰️ 毕达哥拉斯频率比：波形对齐决定协和度（模拟器）</h1>
+      <p>为什么有些两个音一起弹极其悦耳，有些听着毛骨悚然？点击下方 4 种音程（<strong>支持真实发声试听</strong>），亲眼看它们的声波周期是否按<strong>简单整数比</strong>严丝合缝对齐！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row" id="intRow"></div>
+
+      <svg id="waveSvg" viewBox="0 0 680 215" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="音程频率比波形叠加图"></svg>
+
+      <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <button class="toy-btn" id="playBtn">🔊 播放当前双音和声</button>
+        <span id="ratioNote" style="font-size:13px;color:var(--tax-muted);">基音 C4 = 261.6 Hz</span>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>声学数学密码：</strong>点击上方 4 个音程试听并观察波形——频率比越简单（2:1、3:2），波峰周期性重合得越整齐，人耳听起来就越纯净协和！
     </div>
-    <div class="tax-panel">
-      <div class="btn-row">
-        <button class="btn active" onclick="setInt(2.0,'纯八度 (2:1)',98,this)">纯八度 2:1</button>
-        <button class="btn" onclick="setInt(1.5,'纯五度 (3:2)',92,this)">纯五度 3:2</button>
-        <button class="btn" onclick="setInt(1.25,'大三度 (5:4)',82,this)">大三度 5:4</button>
-        <button class="btn" onclick="setInt(1.414,'三全音 (√2:1)',18,this)">三全音(魔鬼音程)</button>
-      </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>声波频率微调偏离（跑调失谐度）</span><span id="vDet">0%（精准）</span></label><input type="range" id="sDet" min="0" max="10" step="1" value="0" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">当前音程关系</div><div class="k-val" id="kNam">—</div></div>
-        <div class="kpi"><div class="k-lbl">听觉协和度</div><div class="k-val" id="kCns">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-let ratio=2.0, nam='纯八度 (2:1)', baseCns=98;
-function setInt(r,n,c,btn){ ratio=r; nam=n; baseCns=c; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const det=+document.getElementById('sDet').value;
-  document.getElementById('vDet').textContent=det+'%';
-  const effR=ratio*(1 + det*0.008);
-  const cns=Math.max(10, Math.round(baseCns - det*5.5));
-  document.getElementById('kNam').textContent=nam;
-  document.getElementById('kCns').textContent=cns+' 分';
-  document.getElementById('kCns').style.color=cns>=70?'#059669':'#ef4444';
-  let p1=[], p2=[], pSum=[];
-  for(let i=0;i<=120;i++){
-    const t=i/120*4*Math.PI;
-    const x=40+i*4.33;
-    const y1=Math.sin(t), y2=Math.sin(t*effR);
-    p1.push(`${x.toFixed(1)},${(70-y1*22).toFixed(1)}`);
-    p2.push(`${x.toFixed(1)},${(70-y2*22).toFixed(1)}`);
-    pSum.push(`${x.toFixed(1)},${(150-(y1+y2)*20).toFixed(1)}`);
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="40" y="24" font-size="12.5" font-weight="800" fill="var(--tax-text)">上方：两音各自正弦波 | 下方：叠加合成波形（周期越规整越悦耳！）</text>
-    <polyline points="${p1.join(' ')}" fill="none" stroke="#3b82f6" stroke-width="1.8" opacity="0.7"/>
-    <polyline points="${p2.join(' ')}" fill="none" stroke="#f59e0b" stroke-width="1.8" opacity="0.7"/>
-    <polyline points="${pSum.join(' ')}" fill="none" stroke="${cns>=70?'#059669':'#ef4444'}" stroke-width="2.8"/>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>音乐的和谐本质上是数学的简单整数比在空气振动里的具象呈现——古希腊毕达哥拉斯早在 2500 年前就用一根琴弦发现了宇宙的秘密！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const INTERVALS = [
+      { id: 'oct', name: '✨ 纯八度 (2:1)', ratio: 2.0,    col: 'var(--tax-green)',   desc: '完全协和 · 每 1 周期精准重合', aha: '<strong>纯八度（2:1，极其协和）：</strong>高音振动频率恰好是低音的 2 倍，波形完美融合，听起来甚至像同一个音！' },
+      { id: 'p5',  name: '🌟 纯五度 (3:2)', ratio: 1.5,    col: 'var(--tax-primary)', desc: '高度协和 · 史诗开阔感（星球大战号角）', aha: '<strong>纯五度（3:2，黄金协和）：</strong>低音走 2 拍、高音刚好走 3 拍重新对齐，既保留两个独立音的丰满感又毫无摩擦！' },
+      { id: 'm3',  name: '☀️ 大三度 (5:4)', ratio: 1.25,   col: 'var(--tax-amber)',   desc: '温暖协和 · 构成明亮大调核心', aha: '<strong>大三度（5:4，温暖柔和）：</strong>周期每 4 拍对齐一次，带有恰到好处的丰富色彩，是西方和声体系的基石。' },
+      { id: 'tri', name: '😈 增四度三全音 (45:32)', ratio: 45 / 32, col: 'var(--tax-red)', desc: '极度不协和 · 剧烈拍频摩擦（恐怖片常用）', aha: '<strong>三全音（45:32，中世纪称“魔鬼音程”）：</strong>两条声波久久无法对齐，产生刺耳的“拍频（Beating）”粗糙感——但也正是制造悬疑和爵士张力的利器！' }
+    ];
+
+    let cur = INTERVALS[1], ctx = null, done = false;
+    const intRow = document.getElementById('intRow');
+    const svg = document.getElementById('waveSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function playInterval() {
+      try {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        const now = ctx.currentTime;
+        const f1 = 261.63, f2 = f1 * cur.ratio;
+        [f1, f2].forEach(f => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(f, now);
+          g.gain.setValueAtTime(0.001, now);
+          g.gain.linearRampToValueAtTime(0.18, now + 0.04);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 1.15);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 1.2);
+        });
+      } catch (e) {}
+    }
+
+    function render() {
+      intRow.innerHTML = '';
+      INTERVALS.forEach(it => {
+        const b = document.createElement('button');
+        b.className = it.id === cur.id ? 'toy-btn' : 'toy-btn secondary';
+        b.textContent = it.name;
+        b.onclick = () => { cur = it; markDone(`试听了音程频率比：${it.name}`); render(); playInterval(); };
+        intRow.appendChild(b);
+      });
+
+      document.getElementById('ratioNote').textContent = `C4 (261.6 Hz) + ${(261.63 * cur.ratio).toFixed(1)} Hz · ${cur.desc}`;
+
+      let p1 = [], p2 = [], pSum = [];
+      for (let i = 0; i <= 240; i++) {
+        const t = (i / 240) * Math.PI * 2 * 4; // 4 cycles of base wave
+        const x = 32 + (i / 240) * 616;
+        const y1 = 68 - Math.sin(t) * 26;
+        const y2 = 68 - Math.sin(t * cur.ratio) * 26;
+        const yS = 158 - (Math.sin(t) + Math.sin(t * cur.ratio)) * 18;
+        p1.push(`${x.toFixed(1)},${y1.toFixed(1)}`);
+        p2.push(`${x.toFixed(1)},${y2.toFixed(1)}`);
+        pSum.push(`${x.toFixed(1)},${yS.toFixed(1)}`);
+      }
+
+      let html = '';
+      html += `<text x="32" y="22" fill="var(--tax-muted)" font-size="11.5">独立声波对比（蓝 = 基音 1× · 橙 = 高音 ${cur.ratio.toFixed(2)}×）</text>`;
+      html += `<polyline points="${p1.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="2" opacity="0.7"/>`;
+      html += `<polyline points="${p2.join(' ')}" fill="none" stroke="var(--tax-amber)" stroke-width="2" opacity="0.8"/>`;
+
+      html += `<line x1="32" y1="112" x2="648" y2="112" stroke="var(--tax-border)" stroke-dasharray="4 4"/>`;
+      html += `<text x="32" y="130" fill="${cur.col}" font-size="12" font-weight="800">合成声波：${cur.desc}</text>`;
+      html += `<polyline points="${pSum.join(' ')}" fill="none" stroke="${cur.col}" stroke-width="3"/>`;
+      svg.innerHTML = html;
+      ahaBox.innerHTML = cur.aha;
+    }
+
+    document.getElementById('playBtn').onclick = () => { markDone('播放了音程频率比双音和声'); playInterval(); };
+    render();
   </script>
 </body>
 </html>

@@ -1,70 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🖋️ 字体气质情绪切换器：同一句话两种人格（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>字体气质情绪切换器：同一句话两种人格</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .stage-box {
+      padding: 30px 20px; border-radius: 14px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border);
+      text-align: center; transition: all .25s;
+    }
+    .quote-main { font-size: 32px; line-height: 1.35; color: var(--tax-ink); margin-bottom: 10px; }
+    .quote-sub { font-size: 13px; color: var(--tax-muted); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🖋️ 字体气质情绪切换器：同一句话两种人格（SVG）</h1><p>字体就是文字的“衣服和语气”：衬线体（宋体/Times）自带古典、权威、文学与奢华；无衬线体（黑体/Inter）传递现代、科技、干脆与亲和。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🖋️ 字体气质情绪切换器：同一句话，四种人格（模拟器）</h1>
+      <p>字体的笔画末端、粗细对比与几何结构，就像说话人的<strong>声线与穿着</strong>。同样一句“我永远会找到你”，一键切换 4 种字体家族，听听它在你脑中瞬间变成了浪漫情书还是系统告警！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row" id="fontRow"></div>
+
+      <div class="stage-box">
+        <div class="quote-main" id="quoteMain">我永远会找到你。</div>
+        <div class="quote-sub" id="quoteSub"></div>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>字体即语气：</strong>依次点击上方 4 种字体人格，体会不改一个标点符号、仅靠字形就彻底改写品牌信任感与情绪氛围的魔力！
     </div>
-    <div class="tax-panel">
-      <div class="btn-row">
-        <button class="btn active" onclick="setF('serif',this)">衬线体 Serif（宋体/经典优雅）</button>
-        <button class="btn" onclick="setF('sans',this)">无衬线 Sans（黑体/现代科技）</button>
-        <button class="btn" onclick="setF('mono',this)">等宽体 Mono（代码/极客工程）</button>
-      </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>字重粗细（Weight）</span><span id="vW">700</span></label><input type="range" id="sW" min="300" max="900" step="100" value="700" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">第一眼气质印象</div><div class="k-val" id="kVib">—</div></div>
-        <div class="kpi"><div class="k-lbl">最佳应用场合</div><div class="k-val" id="kUse">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-let fm='serif';
-function setF(m,btn){ fm=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const w=+document.getElementById('sW').value;
-  document.getElementById('vW').textContent=w;
-  const map={
-    serif:{ff:'Georgia, "Songti SC", serif', vib:'🏛️ 典雅权威 / 文学底蕴', use:'纸质书、奢侈品、人文长文'},
-    sans:{ff:'-apple-system, "PingFang SC", sans-serif', vib:'⚡ 现代极简 / 高效科技', use:'手机 App、SaaS、交通指示牌'},
-    mono:{ff:'"SF Mono", Menlo, monospace', vib:'💻 精密硬核 / 工程数据', use:'代码编辑器、金融行情表、极客风'}
-  }[fm];
-  document.getElementById('kVib').textContent=map.vib;
-  document.getElementById('kUse').textContent=map.use;
-  document.getElementById('svg').innerHTML=`
-    <rect x="30" y="22" width="540" height="150" rx="14" fill="var(--tax-surface)" stroke="var(--tax-border)"/>
-    <text x="300" y="96" text-anchor="middle" font-size="28" font-weight="${w}" font-family='${map.ff}' fill="var(--tax-text)">时间的秩序 · Order of Time</text>
-    <text x="300" y="142" text-anchor="middle" font-size="12.5" fill="var(--tax-muted)">${map.vib}（字重 ${w}）</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>永远别用严肃衬线体写儿童游乐园广告，也别用可爱圆体写法律合同——字体气质和内容情绪一旦错位，读者潜意识就会觉得“不靠谱”！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const VOICES = [
+      {
+        id: 'serif', name: '🏛️ 衬线体（宋体 / Georgia）',
+        ff: 'Georgia, "Songti SC", "Noto Serif SC", STSong, serif',
+        weight: 600, ls: '1.5px',
+        vibe: '气质：典雅、文学、权威、历久弥新（像《纽约时报》或高奢珠宝）',
+        aha: '<strong>衬线体（Serif）人格：</strong>笔画末端的小装饰“衬线”源自古罗马石碑雕刻与活字印刷，天生自带<strong>历史底蕴、文学感与高定奢华</strong>！'
+      },
+      {
+        id: 'sans', name: '📱 无衬线体（黑体 / Inter）',
+        ff: '-apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif',
+        weight: 800, ls: '-0.5px',
+        vibe: '气质：现代、客观、清爽、科技感（像苹果官网与现代 SaaS 界面）',
+        aha: '<strong>无衬线体（Sans-Serif）人格：</strong>剃掉所有装饰脚、笔画粗细均匀，传递<strong>高效、克制、零废话</strong>的现代科技感，是数字界面的绝对主力！'
+      },
+      {
+        id: 'mono', name: '💻 等宽代码体（Monospace）',
+        ff: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+        weight: 700, ls: '0px',
+        vibe: '气质：精密、冷峻、工程硬核、终端指令（瞬间像电影黑客追踪！）',
+        aha: '<strong>等宽体（Monospace）人格：</strong>每个字符占据严格相等的宽度，天生散发<strong>机械精密感与极客硬核氛围</strong>——同一句表白换上等宽体，瞬间像终端系统发出的警告！'
+      },
+      {
+        id: 'cursive', name: '✍️ 温润楷书 / 手写韵味',
+        ff: '"Kaiti SC", "STKaiti", "BiauKai", KaiTi, cursive, serif',
+        weight: 500, ls: '2px',
+        vibe: '气质：亲切、手工温度、东方诗意、私密信笺',
+        aha: '<strong>手写/楷体人格：</strong>保留毛笔或钢笔的起落顿挫，瞬间拉近人与人的心理距离，最适合茶饮、文创、情书与独立手作包装。'
+      }
+    ];
+
+    let cur = VOICES[0], done = false;
+    const fontRow = document.getElementById('fontRow');
+    const quoteMain = document.getElementById('quoteMain');
+    const quoteSub = document.getElementById('quoteSub');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      fontRow.innerHTML = '';
+      VOICES.forEach(v => {
+        const b = document.createElement('button');
+        b.className = v.id === cur.id ? 'toy-btn' : 'toy-btn secondary';
+        b.textContent = v.name;
+        b.onclick = () => { cur = v; markDone(`体验了字体气质切换：${v.name}`); render(); };
+        fontRow.appendChild(b);
+      });
+
+      quoteMain.style.fontFamily = cur.ff;
+      quoteMain.style.fontWeight = cur.weight;
+      quoteMain.style.letterSpacing = cur.ls;
+      quoteSub.textContent = cur.vibe;
+      ahaBox.innerHTML = cur.aha;
+    }
+
+    render();
   </script>
 </body>
 </html>

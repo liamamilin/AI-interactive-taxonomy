@@ -1,65 +1,122 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>👍 微交互四步曲：触发 → 规则 → 反馈 → 循环</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>微交互四步曲：触发 → 规则 → 反馈 → 循环</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+    @media (max-width: 640px) { .steps-grid { grid-template-columns: repeat(2, 1fr); } }
+    .st-card {
+      padding: 10px; border-radius: 10px; background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border);
+      text-align: center; transition: all .2s; cursor: pointer;
+    }
+    .st-card.active { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .demo-bar {
+      padding: 18px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .star-btn {
+      padding: 10px 18px; border-radius: 999px; border: 1.5px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); font-size: 15px; font-weight: 800; cursor: pointer;
+    }
+    .star-btn.starred { border-color: var(--tax-amber); background: var(--tax-amber-soft); color: var(--tax-amber); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>👍 微交互四步曲：触发 → 规则 → 反馈 → 循环</h1><p>丹·萨弗《微交互》：伟大的产品往往赢在微小细节——开关切换的弹跳、密码输错时的横向摇头、支付成功的清脆叮声，都在无声建立信任与愉悦。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>操作状态即时清晰度（成功/报错一目了然）</span><span id="vClr">85%</span></label><input type="range" id="sClr" min="10" max="100" value="85" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>品牌个性小彩蛋打磨度</span><span id="vJoy">70%</span></label><input type="range" id="sJoy" min="0" max="100" value="70" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>👍 微交互四步曲：触发 → 规则 → 反馈 → 循环（构建器）</h1>
+      <p>交互设计专家 Dan Saffer 指出，每一个惊艳的微交互（点赞、收藏、下拉刷新）都由 4 个精密齿轮咬合而成。点击下方 4 块齿轮查看职责，并点击右侧【⭐ 收藏】亲测完整闭环！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="steps-grid" id="stepsGrid"></div>
+
+      <div class="demo-bar">
+        <div>
+          <div style="font-weight:800;font-size:15px;" id="demoTitle">实战演练：文章收藏微交互</div>
+          <div style="font-size:12.5px;color:var(--tax-muted);margin-top:3px;" id="demoDesc">连续多次点击右侧收藏按钮，观察上方 4 步齿轮依次点亮与第 3 次的“循环彩蛋”！</div>
+        </div>
+        <button class="star-btn" id="starBtn">☆ 收藏 <span id="starCnt">42</span></button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">用户操作安全确信度</div><div class="k-val" id="kCnf">—</div></div>
-        <div class="kpi"><div class="k-lbl">产品口碑好感度</div><div class="k-val" id="kLov">—</div></div>
-      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>微交互精髓：</strong>产品的大功能决定用户“为什么来”，而<strong>触发 → 规则 → 反馈 → 循环</strong>这四步微交互细节，决定了用户“爱不爱用”！点击右侧【☆ 收藏】体验四步联动！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const clr=+document.getElementById('sClr').value, joy=+document.getElementById('sJoy').value;
-  document.getElementById('vClr').textContent=clr+'%';
-  document.getElementById('vJoy').textContent=joy+'%';
-  const lov=Math.min(99, Math.round(clr*0.65 + joy*0.35));
-  document.getElementById('kCnf').textContent=clr+'%';
-  document.getElementById('kLov').textContent=lov+' 分';
-  document.getElementById('kLov').style.color=lov>=75?'#059669':'#f59e0b';
-  const w=Math.max(15, lov*4.2);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">微交互好感度 = 清晰功能反馈 (${clr}%) + 恰到好处的愉悦彩蛋 (${joy}%)</text>
-    <rect x="30" y="68" width="440" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${w.toFixed(0)}" height="38" rx="8" fill="#059669"/>
-    <text x="${Math.min(480,38+w).toFixed(0)}" y="93" font-size="14" font-weight="850" fill="#059669">${lov} 分</text>
-    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">例：密码输错时输入框轻轻左右晃动一下，比弹出一大段冷冰冰红字更符合人类直觉！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>功能决定用户“来不来”，而微交互细节决定用户“爱不爱用”——先保证清晰即时，再点缀克制的惊喜！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const PARTS = [
+      { id: 0, name: '1. 触发 Trigger', desc: '用户点击星标图标（或系统推送事件）启动流程' },
+      { id: 1, name: '2. 规则 Rules', desc: '若未收藏则 +1 并置亮；若已收藏则取消 −1' },
+      { id: 2, name: '3. 反馈 Feedback', desc: '星星弹跳放大 + 变金黄 + 数字滚动更新' },
+      { id: 3, name: '4. 循环 Loops', desc: '长周期演变：连续收藏 3 次弹出“已整理进精选集”提示！' }
+    ];
+
+    let activeStep = -1;
+    let starred = false;
+    let cnt = 42;
+    let clicks = 0;
+    let done = false;
+
+    const stepsGrid = document.getElementById('stepsGrid');
+    const starBtn = document.getElementById('starBtn');
+    const demoDesc = document.getElementById('demoDesc');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function renderSteps() {
+      stepsGrid.innerHTML = '';
+      PARTS.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'st-card' + (activeStep === p.id ? ' active' : '');
+        div.innerHTML = `<div style="font-weight:800;font-size:13px;">${p.name}</div><div style="font-size:11px;color:var(--tax-muted);margin-top:4px;line-height:1.4;">${p.desc}</div>`;
+        div.onclick = () => { activeStep = p.id; renderSteps(); };
+        stepsGrid.appendChild(div);
+      });
+    }
+
+    starBtn.onclick = () => {
+      clicks++;
+      starred = !starred;
+      cnt = starred ? cnt + 1 : cnt - 1;
+      markDone('演练了微交互四步曲完整闭环');
+
+      // Step through 0 -> 1 -> 2 -> 3 visually
+      activeStep = 0; renderSteps();
+      setTimeout(() => { activeStep = 1; renderSteps(); }, 120);
+      setTimeout(() => {
+        activeStep = 2; renderSteps();
+        starBtn.classList.toggle('starred', starred);
+        starBtn.innerHTML = `${starred ? '⭐ 已收藏' : '☆ 收藏'} <span id="starCnt">${cnt}</span>`;
+        starBtn.animate([
+          { transform: 'scale(1)' },
+          { transform: 'scale(1.14)' },
+          { transform: 'scale(1)' }
+        ], { duration: 240, easing: 'ease-out' });
+      }, 240);
+      setTimeout(() => {
+        activeStep = 3; renderSteps();
+        if (clicks >= 3) {
+          demoDesc.textContent = '🎉 触发第 4 步【循环彩蛋】：你已反复切换 3 次，聪明的产品此时会微调提示或减少动画干扰！';
+          ahaBox.innerHTML = '<strong>最常被忽略的第 4 步（Loops 循环演变）：</strong>新手设计师只做到第 3 步“炫酷反馈”，而大师会设计“第 1 次看很惊喜、第 100 次用不觉得吵”的循环衰减策略！';
+        } else {
+          demoDesc.textContent = `已完成第 ${clicks} 次触发→规则→反馈！再点到第 3 次观察第 4 步“循环与模式”演变。`;
+        }
+      }, 420);
+    };
+
+    renderSteps();
   </script>
 </body>
 </html>

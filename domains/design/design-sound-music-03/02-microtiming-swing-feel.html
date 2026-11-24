@@ -1,69 +1,140 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎷 摇摆（Swing）与微时差：为什么爵士乐有“微醺感”？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>摇摆（Swing）与微时差：为什么爵士乐有“微醺感”？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎷 摇摆（Swing）与微时差：为什么爵士乐有“微醺感”？</h1><p>电脑默认把一拍均分成 50% + 50%（直拍）；爵士乐和 Hip-Hop 故意把第二个音符往后拖一点变成 64% + 36%，瞬间就有了优雅慵懒的摇摆味！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>摇摆比例 Swing Ratio（50%=直拍，67%=三连音摇摆）</span><span id="vSw">64%</span></label><input type="range" id="sSw" min="50" max="72" value="64" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>真人鼓手人性化微偏移（Humanize）</span><span id="vHum">12 ms</span></label><input type="range" id="sHum" min="0" max="30" value="12" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🎷 摇摆（Swing）与微时差：爵士乐的“微醺密码”（盲测）</h1>
+      <p>同样一拍拆成两个八分音符：电子节拍器按 <strong>50% : 50%</strong> 严丝合缝均分；爵士乐手故意把第二个反拍<strong>偷偷往后拖延 30–60 毫秒（变成 66% : 34%）</strong>！按下播放并拖动摇摆滑块，听出“机器人”变“爵士乐手”的瞬间！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="playBtn">▶ 播放爵士踩镲节奏</button>
+        <button class="toy-btn secondary" id="p50">🤖 50% 直拍（机械均分）</button>
+        <button class="toy-btn secondary" id="p66">🎷 66% 黄金三连音摇摆（Jazz Swing）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">第一音 / 第二音时长比</div><div class="k-val" id="kRat">—</div></div>
-        <div class="kpi"><div class="k-lbl">律动风格</div><div class="k-val" id="kSty">—</div></div>
+
+      <div class="ctrl-box">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>⏱️ 反拍延迟摇摆比（Swing Ratio）</span>
+          <strong id="swVal" style="color:var(--tax-amber);">66%（🎷 经典爵士微醺摇摆！）</strong>
+        </div>
+        <input type="range" id="swRange" min="50" max="74" value="66" style="width:100%;" />
       </div>
+
+      <svg id="swSvg" viewBox="0 0 680 120" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="摇摆微时差时间轴对比"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>微时差人性化密码：</strong>打开播放键，把滑块在 <strong>50%（哒-哒-哒-哒）</strong> 和 <strong>66%（哒——哒-哒——哒）</strong> 之间来回拉动！这区区几十毫秒的不对称，正是人类演奏与冰冷 MIDI 量化最核心的分水岭！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const sw=+document.getElementById('sSw').value, hum=+document.getElementById('sHum').value;
-  document.getElementById('vSw').textContent=sw+'%';
-  document.getElementById('vHum').textContent=hum+' ms';
-  const sty=sw<=53?'🤖 机械行军/电子直拍':(sw<=67?'🎷 丝滑爵士 / Lo-Fi 摇摆感':'🐎 剧烈马蹄跳跃感');
-  document.getElementById('kRat').textContent=sw+'% : '+(100-sw)+'%';
-  document.getElementById('kSty').textContent=sty;
-  let beats='';
-  for(let b=0;b<2;b++){
-    const x0=60+b*240, xMid=x0+240*(sw/100);
-    beats+=`<rect x="${x0}" y="68" width="${(xMid-x0-6).toFixed(0)}" height="42" rx="8" fill="#3b82f6"/>
-      <text x="${((x0+xMid)/2).toFixed(0)}" y="94" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">长 (${sw}%)</text>
-      <rect x="${xMid.toFixed(0)}" y="68" width="${Math.max(18, 240-(xMid-x0)-6).toFixed(0)}" height="42" rx="8" fill="#f59e0b"/>
-      <text x="${((xMid+x0+240)/2).toFixed(0)}" y="94" text-anchor="middle" font-size="11.5" font-weight="800" fill="#fff">短</text>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="60" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">两拍内的长-短摇摆切分可视化（人性化微偏移 ±${hum}ms）</text>
-    ${beats}
-    <text x="60" y="156" font-size="11.5" fill="var(--tax-muted)">J Dilla 等传奇制作人特意把军鼓往后推迟 15ms（“拖拍”），造出了独一无二的慵懒高级感！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>绝对精准的 50.00% 往往没有灵魂——恰到好处的不对称比例和毫秒级人性呼吸，才是艺术与机器的分界线！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const swRange = document.getElementById('swRange');
+    const swVal = document.getElementById('swVal');
+    const playBtn = document.getElementById('playBtn');
+    const svg = document.getElementById('swSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    let playing = false, timer = null, isOff = false, ctx = null, done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function tickHat(accent) {
+      try {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = accent ? 'triangle' : 'sine';
+        osc.frequency.setValueAtTime(accent ? 520 : 780, now);
+        g.gain.setValueAtTime(accent ? 0.20 : 0.12, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(now); osc.stop(now + 0.07);
+      } catch (e) {}
+    }
+
+    function scheduleNext() {
+      if (!playing) return;
+      const ratio = Number(swRange.value) / 100;
+      const beatMs = 460;
+      tickHat(!isOff);
+      const wait = isOff ? beatMs * (1 - ratio) : beatMs * ratio;
+      isOff = !isOff;
+      timer = setTimeout(scheduleNext, wait);
+    }
+
+    function render() {
+      const r = Number(swRange.value);
+      swVal.textContent = r <= 53 ? `${r}%（🤖 机械直拍 Straight）` : (r <= 69 ? `${r}%（🎷 黄金爵士摇摆 Swing！）` : `${r}%（💫 极强重度拖拍）`);
+
+      // Draw 2 beats showing where the off-beat lands
+      const b1 = 80, b2 = 340, b3 = 600;
+      const off1 = b1 + (r / 100) * 260;
+      const off2 = b2 + (r / 100) * 260;
+
+      let html = '';
+      html += `<line x1="60" y1="62" x2="620" y2="62" stroke="var(--tax-border)" stroke-width="2"/>`;
+      // Midpoint ghost lines (50%)
+      [b1 + 130, b2 + 130].forEach(mx => {
+        html += `<line x1="${mx}" y1="36" x2="${mx}" y2="88" stroke="var(--tax-muted)" stroke-dasharray="3 3" opacity="0.5"/>`;
+      });
+
+      // Downbeats
+      [b1, b2, b3].forEach((bx, idx) => {
+        html += `<circle cx="${bx}" cy="62" r="10" fill="var(--tax-primary)"/>`;
+        html += `<text x="${bx}" y="30" text-anchor="middle" fill="var(--tax-primary)" font-size="11.5" font-weight="800">强拍 ${idx + 1}</text>`;
+      });
+
+      // Offbeats (shifted by swing ratio)
+      [off1, off2].forEach(ox => {
+        html += `<circle cx="${ox.toFixed(1)}" cy="62" r="8.5" fill="var(--tax-amber)" stroke="#fff" stroke-width="2"/>`;
+        html += `<text x="${ox.toFixed(1)}" y="96" text-anchor="middle" fill="var(--tax-amber)" font-size="11.5" font-weight="800">反拍 (${r}%)</text>`;
+      });
+
+      svg.innerHTML = html;
+      ahaBox.innerHTML = r <= 53
+        ? '<strong>50% 严格均分：</strong>像节拍器或电子舞曲一样精准工整，但缺少爵士与蓝调特有的“慵懒摇摆感”。试着拖到 66% 听听！'
+        : `<strong>${r}% 微时差摇摆激活！</strong>前音拉长、后音短促紧跟下一个强拍，形成“长-短、长-短”的微醺呼吸律动——这就是为什么顶级音乐制作人绝不把所有音符 100% 死板对齐网格！`;
+    }
+
+    playBtn.onclick = () => {
+      if (playing) {
+        playing = false;
+        clearTimeout(timer);
+        playBtn.textContent = '▶ 播放爵士踩镲节奏';
+      } else {
+        playing = true;
+        isOff = false;
+        playBtn.textContent = '⏸ 暂停节奏';
+        markDone('试听了爵士摇摆微时差盲测');
+        scheduleNext();
+      }
+    };
+
+    swRange.oninput = () => { markDone('调节了爵士摇摆比'); render(); };
+    document.getElementById('p50').onclick = () => { swRange.value = 50; render(); };
+    document.getElementById('p66').onclick = () => { swRange.value = 66; render(); };
+    render();
   </script>
 </body>
 </html>

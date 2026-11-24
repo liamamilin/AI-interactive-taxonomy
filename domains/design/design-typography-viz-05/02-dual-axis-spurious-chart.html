@@ -1,75 +1,108 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📈 双纵轴障眼法：把毫不相干的曲线强行粘在一起</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>双纵轴障眼法：把毫不相干的曲线强行粘在一起</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📈 双纵轴障眼法：把毫不相干的曲线强行粘在一起</h1><p>双 Y 轴图表是数据汇报里最容易暗箱操作的魔术：只需拉伸或压缩右侧纵轴刻度，就能让两条毫无关系的曲线显得“严丝合缝”或“剧烈背离”！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>右轴刻度拉伸倍率（操控红线坡度）</span><span id="vSc">2.5x</span></label><input type="range" id="sSc" min="0.5" max="4.0" step="0.25" value="2.5" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>右轴垂直平移偏移量</span><span id="vOff">0</span></label><input type="range" id="sOff" min="-40" max="40" step="5" value="0" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>📈 双纵轴障眼法：强行制造“神同步”（构建器）</h1>
+      <p>双纵轴（Dual-Axis）是图表界的魔术师：只要偷偷缩放右侧 Y 轴的量程和起点，哪怕两条<strong>涨跌幅差 10 倍</strong>的曲线也能被粘得严丝合缝！亲手拖动右侧轴缩放，看看双轴如何操纵读者的因果联想！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn secondary" id="pTruth">✅ 还原同比例增速（拆穿同步幻觉）</button>
+        <button class="toy-btn" id="pTrick">🎭 拉伸右侧 Y 轴（强行贴合曲线！）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">视觉给人的第一印象</div><div class="k-val" id="kImp">—</div></div>
-        <div class="kpi"><div class="k-lbl">防骗建议</div><div class="k-val">拆成上下两张独立小图</div></div>
+
+      <div class="ctrl-box">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>🔧 右侧 Y 轴（蓝线·某产品售价）缩放拉伸倍率</span>
+          <strong id="scaleVal" style="color:var(--tax-primary);">4.8×（强行贴合中）</strong>
+        </div>
+        <input type="range" id="scaleRange" min="1" max="6" step="0.2" value="4.8" style="width:100%;" />
       </div>
+
+      <svg id="dualSvg" viewBox="0 0 680 215" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="双纵轴刻度操纵曲线演示"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>双轴陷阱：</strong>两条线看起来几乎重合，读者立刻脑补“蓝线随红线暴涨 5 倍”——其实蓝线真实涨幅只有 <strong>+12%</strong>，只是被右侧 Y 轴强行拉高了 4.8 倍！点「✅ 还原同比例增速」看真面目！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const sc=+document.getElementById('sSc').value, off=+document.getElementById('sOff').value;
-  document.getElementById('vSc').textContent=sc.toFixed(2)+'x';
-  document.getElementById('vOff').textContent=(off>=0?'+':'')+off;
-  const blue=[30, 42, 55, 62, 74, 82];
-  const redRaw=[50, 52, 54, 55, 57, 59];
-  let ptsB=[], ptsR=[];
-  for(let i=0;i<6;i++){
-    const x=65+i*92;
-    const yb=172 - blue[i]*1.3;
-    const rVal=50 + (redRaw[i]-50)*sc*2 + off*0.6;
-    const yr=Math.max(36, Math.min(172, 172 - rVal*1.3));
-    ptsB.push(`${x},${yb.toFixed(1)}`);
-    ptsR.push(`${x},${yr.toFixed(1)}`);
-  }
-  const fakeSync=sc>=2.0 && Math.abs(off)<=15;
-  document.getElementById('kImp').textContent=fakeSync?'🤯 看起来与蓝线同步暴涨!':'📏 露出平缓波动的真面目';
-  document.getElementById('kImp').style.color=fakeSync?'#ef4444':'#059669';
-  document.getElementById('svg').innerHTML=`
-    <text x="65" y="24" font-size="13" font-weight="800" fill="var(--tax-text)">蓝线真实暴涨 173%，红线其实只微涨 18%——全看你怎么拉右轴！</text>
-    <line x1="65" y1="172" x2="535" y2="172" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <polyline points="${ptsB.join(' ')}" fill="none" stroke="#3b82f6" stroke-width="3"/>
-    <polyline points="${ptsR.join(' ')}" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="6,3"/>
-    <text x="65" y="192" font-size="11" fill="#2563eb">左轴：蓝线 (30→82)</text>
-    <text x="535" y="192" text-anchor="end" font-size="11" fill="#ef4444">右轴：红线 (仅 50→59，拉伸 ${sc.toFixed(2)}x)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>双纵轴的交叉点毫无数学意义，全取决于作图人的刻度选择！想诚实对比两个不同量纲的指标，改用“归一化指数（同设为基期=100）”或拆成上下双图！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    // Red series: grows from 100 -> 165 (+65%)
+    const RED = [100, 112, 128, 140, 152, 165];
+    // Blue series: grows only from 100 -> 112 (+12%)
+    const BLUE = [100, 102, 105, 107, 110, 112];
+
+    const scaleRange = document.getElementById('scaleRange');
+    const svg = document.getElementById('dualSvg');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const sc = Number(scaleRange.value);
+      const isHonest = sc <= 1.2;
+      document.getElementById('scaleVal').textContent = isHonest ? '1.0×（✅ 统一比例尺）' : `${sc.toFixed(1)}×（🎭 右轴偷偷放大了 ${sc.toFixed(1)} 倍！）`;
+
+      const xOf = i => 70 + (i / 5) * 540;
+      const yRed = v => 180 - ((v - 90) / 85) * 140;
+      const yBlue = v => 180 - (((v - 100) * sc + 10) / 85) * 140;
+
+      const rPts = RED.map((v, i) => `${xOf(i).toFixed(1)},${yRed(v).toFixed(1)}`).join(' ');
+      const bPts = BLUE.map((v, i) => `${xOf(i).toFixed(1)},${Math.max(24, yBlue(v)).toFixed(1)}`).join(' ');
+
+      let html = '';
+      // Left axis (Red)
+      html += `<line x1="70" y1="34" x2="70" y2="180" stroke="var(--tax-red)" stroke-width="2"/>`;
+      html += `<text x="62" y="42" text-anchor="end" fill="var(--tax-red)" font-size="11">175</text>`;
+      html += `<text x="62" y="182" text-anchor="end" fill="var(--tax-red)" font-size="11">90</text>`;
+
+      // Right axis (Blue)
+      const rightTop = (100 + 75 / sc).toFixed(0);
+      html += `<line x1="610" y1="34" x2="610" y2="180" stroke="var(--tax-primary)" stroke-width="2"/>`;
+      html += `<text x="618" y="42" fill="var(--tax-primary)" font-size="11">${rightTop}</text>`;
+      html += `<text x="618" y="182" fill="var(--tax-primary)" font-size="11">98</text>`;
+
+      html += `<line x1="70" y1="180" x2="610" y2="180" stroke="var(--tax-border)"/>`;
+      ['2021','2022','2023','2024','2025','2026'].forEach((yr, i) => {
+        html += `<text x="${xOf(i)}" y="198" text-anchor="middle" fill="var(--tax-muted)" font-size="11">${yr}</text>`;
+      });
+
+      html += `<polyline points="${rPts}" fill="none" stroke="var(--tax-red)" stroke-width="3.5"/>`;
+      html += `<polyline points="${bPts}" fill="none" stroke="var(--tax-primary)" stroke-width="3.5" stroke-dasharray="${isHonest ? '' : '6 3'}"/>`;
+
+      html += `<text x="90" y="24" fill="var(--tax-red)" font-size="12" font-weight="700">● 红线真实涨幅：+65%</text>`;
+      html += `<text x="275" y="24" fill="var(--tax-primary)" font-size="12" font-weight="700">● 蓝线真实涨幅：仅 +12%</text>`;
+      svg.innerHTML = html;
+
+      ahaBox.innerHTML = isHonest
+        ? '<strong>统一比例尺真相（1.0×）：</strong>把两条曲线放回同一把尺子下，红线一路狂飙 +65%，蓝线几乎是一条平缓的慢坡（+12%）！用<strong>上下两张小图（Small Multiples）</strong>永远比塞进一张双纵轴更诚实清晰！'
+        : `<strong>双轴魔术生效（右轴放大 ${sc.toFixed(1)}×）：</strong>明明一个涨了 65%、一个只涨 12%，通过压缩右侧刻度区间，两条线居然完美重叠！记住：凡是看到左右两根不同刻度的折线图，第一时间先核对两边真实涨跌幅！`;
+    }
+
+    scaleRange.oninput = () => { markDone('操纵双纵轴缩放观察曲线重叠幻觉'); render(); };
+    document.getElementById('pTruth').onclick = () => { scaleRange.value = 1.0; markDone('还原双纵轴统一比例尺'); render(); };
+    document.getElementById('pTrick').onclick = () => { scaleRange.value = 5.2; markDone('演示双纵轴强行贴合障眼法'); render(); };
+    render();
   </script>
 </body>
 </html>

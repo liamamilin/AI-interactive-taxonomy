@@ -1,72 +1,111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📢 响度战争灾难：把动态全压扁为何听着累？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>响度战争灾难：把动态全压扁为何听着累？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .s-card { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📢 响度战争灾难：把动态全压扁为何听着累？</h1><p>唱片业曾陷入“响度战争”：为了在电台里比别人显得更响，把轻柔部分强行拉大、把高潮削平，把音乐压成一块毫无呼吸感的“响度砖头”，听 5 分钟耳朵就极度疲劳！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>过度响度压缩强度（压扁动态范围）</span><span id="vCmp">30%（健康起伏）</span></label><input type="range" id="sCmp" min="0" max="100" value="30" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>连续收听时长</span><span id="vMin">30 分钟</span></label><input type="range" id="sMin" min="5" max="60" step="5" value="30" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>📢 响度战争灾难：高动态波形 vs 砖墙压扁（对决）</h1>
+      <p>90 年代起唱片公司为了在电台里“比别人更响”，用限幅器把整首歌的动态范围（轻柔与高潮的落差）狠狠压成一块<strong>密不透风的矩形砖墙</strong>！对比两种波形与试听体验：</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="dynBtn">✅ 试听：高动态范围（DR14 · 有呼吸起伏）</button>
+        <button class="toy-btn secondary" id="brickBtn">💥 试听：砖墙过度压缩（DR3 · 全程轰炸）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">保留动态范围（DR 值）</div><div class="k-val" id="kDr">—</div></div>
-        <div class="kpi"><div class="k-lbl">耳朵听觉疲劳度</div><div class="k-val" id="kFat">—</div></div>
+
+      <svg id="waveSvg" viewBox="0 0 680 190" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="响度战争高动态与砖墙波形对比"></svg>
+
+      <div class="cards">
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">🟢 高动态母带（DR14）</div><strong style="color:var(--tax-green);">副歌爆发力极强 · 听 1 小时不累</strong></div>
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">🔴 砖墙压缩母带（DR3）</div><strong style="color:var(--tax-red);">无轻重落差 · 削波失真 · 3 分钟耳鸣疲劳</strong></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>响度战争终结者（LUFS 响度归一化）：</strong>当一切声音都一样响时，高潮就失去了冲击力！如今 Spotify、Apple Music 等平台强制执行 <strong>−14 LUFS 响度统一</strong>，把砖墙压扁的歌强行调小音量后反而显得又扁又没劲，好动态终于重新胜出！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const cmp=+document.getElementById('sCmp').value, mins=+document.getElementById('sMin').value;
-  document.getElementById('vCmp').textContent=cmp+'%';
-  document.getElementById('vMin').textContent=mins+' 分钟';
-  const dr=Math.max(3, Math.round(14 - cmp*0.11));
-  const fat=Math.min(98, Math.round(12 + cmp*0.65 + mins*0.35));
-  document.getElementById('kDr').textContent='DR'+dr+(dr>=10?'（饱满呼吸）':'（砖墙削波!）');
-  document.getElementById('kDr').style.color=dr>=10?'#059669':'#ef4444';
-  document.getElementById('kFat').textContent=fat+'%';
-  document.getElementById('kFat').style.color=fat>65?'#ef4444':'#059669';
-  let bars='';
-  const base=[18, 25, 42, 22, 65, 92, 48, 20, 30, 78, 98, 52, 24, 15, 68, 88, 35, 22];
-  base.forEach((v,i)=>{
-    const sq=v + (96-v)*(cmp/100);
-    const h=Math.max(6, sq*1.15);
-    const x=48+i*28, y=108-h/2;
-    bars+=`<rect x="${x}" y="${y.toFixed(1)}" width="18" height="${h.toFixed(1)}" rx="3" fill="${cmp>70?'#ef4444':'#3b82f6'}"/>`;
-  });
-  document.getElementById('svg').innerHTML=`
-    <text x="48" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">音频动态波形对比（拉满压缩看看音乐如何变成死板“香肠砖”）</text>
-    ${bars}
-    <text x="48" y="184" font-size="11.5" fill="var(--tax-muted)">现在 Spotify/Apple Music 全部强制响度归一化（-14 LUFS），过度压响度只会白白毁掉高潮冲击力！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>就像视觉设计里“全屏高亮等于没高亮”，声音里“全程最大声等于没有高潮”——有轻声耳语，才有雷霆震撼！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let brick = false, ctx = null, done = false;
+    const svg = document.getElementById('waveSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function playDemo(isBrick) {
+      try {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        const now = ctx.currentTime;
+        const notes = [261.63, 329.63, 392.00, 523.25];
+        const vols = isBrick ? [0.24, 0.25, 0.25, 0.26] : [0.05, 0.08, 0.14, 0.28];
+        notes.forEach((f, i) => {
+          const t0 = now + i * 0.28;
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = isBrick ? 'sawtooth' : 'triangle';
+          osc.frequency.setValueAtTime(f, t0);
+          g.gain.setValueAtTime(vols[i], t0);
+          g.gain.exponentialRampToValueAtTime(isBrick ? 0.14 : 0.01, t0 + 0.25);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(t0); osc.stop(t0 + 0.26);
+        });
+      } catch (e) {}
+    }
+
+    function draw() {
+      document.getElementById('dynBtn').className = !brick ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('brickBtn').className = brick ? 'toy-btn' : 'toy-btn secondary';
+
+      let html = '';
+      // Ceiling lines
+      html += `<line x1="30" y1="36" x2="650" y2="36" stroke="var(--tax-red)" stroke-dasharray="4 4" opacity="0.55"/>`;
+      html += `<line x1="30" y1="164" x2="650" y2="164" stroke="var(--tax-red)" stroke-dasharray="4 4" opacity="0.55"/>`;
+      html += `<text x="646" y="28" text-anchor="end" fill="var(--tax-red)" font-size="11">0 dBFS 削波天花板</text>`;
+
+      // Waveform bars
+      const bars = 62;
+      for (let i = 0; i < bars; i++) {
+        const x = 34 + i * 10;
+        // Natural verse (quiet) -> chorus (loud) envelope
+        const env = i < 20 ? 0.28 : (i < 38 ? 0.55 : 0.95);
+        const raw = env * (0.45 + 0.55 * Math.abs(Math.sin(i * 1.7)));
+        const h = brick ? Math.min(62, raw * 150 + 38) : raw * 62;
+        const clipped = brick && h >= 60;
+        const col = brick ? (clipped ? 'var(--tax-red)' : 'var(--tax-amber)') : 'var(--tax-green)';
+        html += `<rect x="${x}" y="${(100 - h).toFixed(1)}" width="6" height="${(h * 2).toFixed(1)}" rx="2" fill="${col}"/>`;
+      }
+
+      html += `<text x="34" y="182" fill="var(--tax-muted)" font-size="11">主歌轻声（铺垫呼吸）</text>`;
+      html += `<text x="480" y="182" fill="var(--tax-muted)" font-size="11">副歌高潮（瞬间释放！）</text>`;
+      svg.innerHTML = html;
+
+      ahaBox.innerHTML = brick
+        ? '<strong>砖墙削波灾难（DR3）：</strong>连轻声主歌都被强行顶到 0 dBFS 天花板削平，耳膜全程承受持续高能量轰炸，不仅听 3 分钟就头晕疲劳，真正的副歌进来时反而完全没了爆发力！'
+        : '<strong>高动态呼吸感（DR14）：</strong>主歌轻柔克制、副歌瞬间冲顶，大落差让听觉神经持续保持新鲜与震撼——这和视觉排版里的“对比留白”是同一条底层美学定律！';
+    }
+
+    document.getElementById('dynBtn').onclick = () => { brick = false; markDone('试听了高动态范围波形'); draw(); playDemo(false); };
+    document.getElementById('brickBtn').onclick = () => { brick = true; markDone('试听了砖墙过度压缩波形'); draw(); playDemo(true); };
+    draw();
   </script>
 </body>
 </html>

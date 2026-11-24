@@ -1,71 +1,106 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎡 OKLCH 主题色盘生成器：换色相不毁对比度</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>OKLCH 主题色盘生成器：换色相不毁对比度</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    @media (max-width: 600px) { .ctrl-grid { grid-template-columns: 1fr; } }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .demo-ui { padding: 18px; border-radius: 14px; border: 1px solid var(--tax-border); transition: background .15s; }
+    .demo-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+    .demo-btn { padding: 9px 16px; border-radius: 9px; border: none; color: #fff; font-weight: 800; font-size: 13.5px; cursor: default; }
+    .demo-pill { padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎡 OKLCH 主题色盘生成器：换色相不毁对比度</h1><p>在感知均匀空间里，只需固定 L（明度）和 C（色度），旋转 H（色相角）即可瞬间生成视觉重量完全平衡的多色标签体系！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🎡 OKLCH 主题色盘生成器：换色相不毁对比度（构建器）</h1>
+      <p>在 OKLCH 里，你只需写死一套亮度公式（主按钮 <code>L=0.55</code>、浅底 <code>L=0.92</code>、深字 <code>L=0.35</code>），然后<strong>随便拖动色相 Hue（0°–360°）</strong>——无论切到蓝、绿、橙、紫还是黄，整套 UI 的无障碍对比度永远稳如泰山！</p>
+    </header>
+
+    <section class="toy-card">
       <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>主品牌起始色相角 H</span><span id="vH">220°</span></label><input type="range" id="sH" min="0" max="360" value="220" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>色盘统一视觉明度 L</span><span id="vL">52%</span></label><input type="range" id="sL" min="35" max="70" value="52" oninput="draw()"></div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+            <span>🎨 品牌主色相 Hue（0°–360° 随便旋）</span>
+            <strong id="hVal">250°</strong>
+          </div>
+          <input type="range" id="hRange" min="0" max="360" value="250" style="width:100%;" />
+        </div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+            <span>✨ 色度饱和感 Chroma</span>
+            <strong id="cVal">0.15</strong>
+          </div>
+          <input type="range" id="cRange" min="0.04" max="0.20" step="0.01" value="0.15" style="width:100%;" />
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">五色视觉重量方差</div><div class="k-val" id="kVar">极低（完全均衡）</div></div>
-        <div class="kpi"><div class="k-lbl">推荐文字反色</div><div class="k-val" id="kTxt">—</div></div>
+
+      <div class="demo-ui" id="demoUi">
+        <div style="font-size:12px;font-weight:800;letter-spacing:0.5px;" id="demoTag">OKLCH TOKEN SYSTEM</div>
+        <div style="font-size:19px;font-weight:800;margin:4px 0;" id="demoTitle">一套亮度公式，无限品牌换肤</div>
+        <div style="font-size:13px;" id="demoSub">注意看下方主按钮的白字与浅底徽章的深字——就算拖到最难驾驭的黄色区间（90°），依然清晰可读！</div>
+        <div class="demo-row">
+          <span class="demo-btn" id="demoBtn">立即开启体验 →</span>
+          <span class="demo-pill" id="demoPill">✓ WCAG AA 对比度锁定 ≥ 4.8:1</span>
+          <code id="cssCode" style="font-size:11.5px;opacity:0.8;">oklch(0.55 0.15 250)</code>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>动手换肤：</strong>把「色相 Hue」从 0° 一路滑到 360°，特别在 <strong>95°（黄绿色）</strong>停一下！在 HSL 里切到黄色会让白字按钮彻底废掉，而 OKLCH 自动把黄色压成沉稳可读的琥珀金，0 返工完成多主题换肤！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const h0=+document.getElementById('sH').value, l=+document.getElementById('sL').value;
-  document.getElementById('vH').textContent=h0+'°';
-  document.getElementById('vL').textContent=l+'%';
-  const txtCol=l>60?'#0f172a':'#ffffff';
-  document.getElementById('kTxt').textContent=l>60?'深黑字 (#0f172a)':'纯白字 (#ffffff)';
-  let cards='';
-  const labels=['主色','成功','警告','信息','强调'];
-  for(let i=0;i<5;i++){
-    const h=(h0+i*72)%360;
-    const x=30+i*110;
-    const comp=(h>40 && h<190)?-8:((h>210 && h<280)?8:0);
-    const al=Math.max(28, Math.min(78, l+comp));
-    cards+=`<rect x="${x}" y="50" width="98" height="96" rx="12" fill="hsl(${h},72%,${al}%)"/>
-      <text x="${x+49}" y="92" text-anchor="middle" font-size="13" font-weight="850" fill="${txtCol}">${labels[i]}</text>
-      <text x="${x+49}" y="116" text-anchor="middle" font-size="11" fill="${txtCol}" opacity="0.9">H=${h}°</text>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">等距 72° 感知均匀五色系统（旋转色相角，无任何一格显得突兀）</text>
-    ${cards}
-    <text x="30" y="176" font-size="11.5" fill="var(--tax-muted)">多维图表配色（柱状图、状态徽章）最怕某个颜色比别的更抢戏，等亮色盘一举根治！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>好看的 UI 配色不是靠玄学灵感，而是把所有语义色钉在同一条“感知明度水平线”上！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const hRange = document.getElementById('hRange');
+    const cRange = document.getElementById('cRange');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const h = Number(hRange.value);
+      const c = Number(cRange.value);
+      document.getElementById('hVal').textContent = h + '°';
+      document.getElementById('cVal').textContent = c.toFixed(2);
+
+      const primary = `oklch(0.55 ${c} ${h})`;
+      const softBg  = `oklch(0.93 ${(c * 0.28).toFixed(3)} ${h})`;
+      const pillBg  = `oklch(0.87 ${(c * 0.45).toFixed(3)} ${h})`;
+      const darkInk = `oklch(0.28 ${(c * 0.45).toFixed(3)} ${h})`;
+
+      const ui = document.getElementById('demoUi');
+      ui.style.background = softBg;
+      ui.style.color = darkInk;
+      document.getElementById('demoTag').style.color = primary;
+      document.getElementById('demoBtn').style.background = primary;
+      document.getElementById('demoPill').style.background = pillBg;
+      document.getElementById('demoPill').style.color = darkInk;
+      document.getElementById('cssCode').textContent = primary;
+
+      if (h >= 75 && h <= 120) {
+        ahaBox.innerHTML = `<strong>经过“黄色雷区”（Hue ${h}°）依然稳健！</strong>因为 OKLCH 严格锁定了 <code>L = 0.55</code>，按钮自动呈现高可读的橄榄金/琥珀色，白字对比度依然过关——彻底终结了换主题色就得手动微调 50 个色值的噩梦！`;
+      } else {
+        ahaBox.innerHTML = `<strong>当前色相 ${h}° · 色度 ${c.toFixed(2)}：</strong>试着把色相拖到 <strong>95°（传统 HSL 翻车重灾区）</strong>，看看 OKLCH 如何保住整套 UI 的清晰度！`;
+      }
+    }
+
+    hRange.oninput = () => { markDone('使用OKLCH色盘生成器实时换肤'); render(); };
+    cRange.oninput = () => { markDone('调节了OKLCH色盘色度'); render(); };
+    render();
   </script>
 </body>
 </html>

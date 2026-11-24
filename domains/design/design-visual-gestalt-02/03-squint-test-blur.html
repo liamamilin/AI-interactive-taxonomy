@@ -1,70 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>😑 眯眼测试（Squint Test）：3 秒检验主次</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>眯眼测试（Squint Test）：3 秒检验主次</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+    .mock-page {
+      padding: 16px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border);
+      transition: filter .35s;
+    }
+    .mock-page.blurred { filter: blur(5px); }
+    .mini-btn { display: inline-block; padding: 6px 10px; border-radius: 7px; font-size: 12px; font-weight: 700; margin: 4px 4px 0 0; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>😑 眯眼测试（Squint Test）：3 秒检验主次</h1><p>设计师交稿前都会眯起眼睛看屏幕：当细节全部糊成色块时，如果最亮眼、最先跳出来的正好是核心标题和主按钮，视觉层级就及格了！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>模拟眯眼模糊程度</span><span id="vBlr">4 px</span></label><input type="range" id="sBlr" min="0" max="8" step="0.5" value="4" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>主视觉对比强调度</span><span id="vPop">80%</span></label><input type="range" id="sPop" min="20" max="100" value="80" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>😑 眯眼测试（Squint Test）：3 秒检验主次（盲测）</h1>
+      <p>顶级 UI 设计师检验页面层级有个绝招：<strong>把眼睛眯成一条缝（或给页面加 5px 高斯模糊）</strong>，如果模糊后你还能一眼锁死唯一主角，排版就过关了！先开启模糊盲测，挑出主次更清晰的一页！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="blurBtn">😑 开启 5px 眯眼模糊测试</button>
+        <button class="toy-btn secondary" id="pickA">选左图（页面 A）</button>
+        <button class="toy-btn secondary" id="pickB">选右图（页面 B）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">模糊态主焦点辨识</div><div class="k-val" id="kFoc">—</div></div>
-        <div class="kpi"><div class="k-lbl">眯眼测试结果</div><div class="k-val" id="kRes">—</div></div>
+
+      <div class="compare-grid">
+        <div class="mock-page blurred" id="pageA">
+          <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+            <span class="mini-btn" style="background:var(--tax-red);color:#fff;">🔥 限时促销</span>
+            <span class="mini-btn" style="background:var(--tax-amber);color:#fff;">🔔 99+消息</span>
+          </div>
+          <div style="font-size:16px;font-weight:800;color:var(--tax-primary);">全能效率云工作台</div>
+          <p style="font-size:12px;color:var(--tax-ink);margin:6px 0;">多端同步协作、支持 Markdown、甘特图、自动化提醒与权限管理。</p>
+          <div>
+            <span class="mini-btn" style="background:var(--tax-green);color:#fff;">免费试用</span>
+            <span class="mini-btn" style="background:var(--tax-primary);color:#fff;">查看价格</span>
+            <span class="mini-btn" style="background:var(--tax-red);color:#fff;">联系销售</span>
+          </div>
+        </div>
+
+        <div class="mock-page blurred" id="pageB">
+          <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:11px;color:var(--tax-muted);">
+            <span>Workspace</span>
+            <span>文档 · 定价 · 登录</span>
+          </div>
+          <div style="font-size:21px;font-weight:900;color:var(--tax-ink);line-height:1.25;">把团队知识装进 1 张画布</div>
+          <p style="font-size:12px;color:var(--tax-muted);margin:8px 0 12px;">零配置启动，30 秒搭建团队共享空间。</p>
+          <div>
+            <span class="mini-btn" style="background:var(--tax-primary);color:#fff;padding:8px 16px;">立即免费开始 →</span>
+            <span class="mini-btn" style="border:1px solid var(--tax-border);color:var(--tax-muted);">了解详情</span>
+          </div>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>眯眼盲测中：</strong>现在两个页面都被加上了 5px 模糊！不用看清文字，凭色块重心选出你觉得<strong>“唯一焦点最明确”</strong>的那一页，再点按钮揭晓清晰原图！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const blr=+document.getElementById('sBlr').value, pop=+document.getElementById('sPop').value;
-  document.getElementById('vBlr').textContent=blr.toFixed(1)+' px';
-  document.getElementById('vPop').textContent=pop+'%';
-  const pass=pop>=65;
-  document.getElementById('kFoc').textContent=pass?'主按钮与标题依然清晰跳出':'糊成一团均匀灰块';
-  document.getElementById('kRes').textContent=pass?'✅ 通过眯眼测试':'❌ 缺乏视觉锚点';
-  document.getElementById('kRes').style.color=pass?'#059669':'#ef4444';
-  const btnCol=pop>=65?'#2563eb':'#94a3b8';
-  const titleW=Math.round(140 + pop*1.6);
-  document.getElementById('svg').innerHTML=`
-    <defs><filter id="sq"><feGaussianBlur stdDeviation="${blr}"/></filter></defs>
-    <g filter="url(#sq)">
-      <rect x="45" y="25" width="510" height="150" rx="12" fill="var(--tax-surface)" stroke="var(--tax-border)"/>
-      <rect x="75" y="48" width="${titleW}" height="${Math.round(14+pop*0.14)}" rx="5" fill="#0f172a" opacity="${(0.3+pop*0.007).toFixed(2)}"/>
-      <rect x="75" y="88" width="380" height="10" rx="4" fill="#94a3b8" opacity="0.55"/>
-      <rect x="75" y="106" width="320" height="10" rx="4" fill="#94a3b8" opacity="0.55"/>
-      <rect x="75" y="130" width="135" height="30" rx="8" fill="${btnCol}"/>
-    </g>
-    <text x="545" y="192" text-anchor="end" font-size="11" fill="var(--tax-muted)">眯眼滤镜已开启：${blr.toFixed(1)}px</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>下一次做完简历、PPT 或网页，退后两步眯眼扫一眼——3 秒内看不出哪块最重要，就立刻调大主次反差！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let blurred = true;
+    let done = false;
+
+    const pageA = document.getElementById('pageA');
+    const pageB = document.getElementById('pageB');
+    const blurBtn = document.getElementById('blurBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function setBlur(v) {
+      blurred = v;
+      pageA.classList.toggle('blurred', blurred);
+      pageB.classList.toggle('blurred', blurred);
+      blurBtn.textContent = blurred ? '👁️ 取消模糊（揭晓原图）' : '😑 重新开启 5px 眯眼模糊';
+    }
+
+    blurBtn.onclick = () => {
+      markDone('切换了眯眼测试高斯模糊开关');
+      setBlur(!blurred);
+    };
+
+    document.getElementById('pickA').onclick = () => {
+      setBlur(false);
+      markDone('完成了眯眼测试盲测（初选A）');
+      ahaBox.innerHTML = '<strong>揭晓对比（右图 B 胜出）：</strong>注意看刚才模糊时，左图 A 满屏飘着红、黄、绿、蓝 5 个高亮色块在互相打架，完全没有视觉主角；而右图 B 只有<strong>一团粗黑标题 + 一个蓝色按钮</strong>，3 秒内就能完成视觉引导！';
+    };
+
+    document.getElementById('pickB').onclick = () => {
+      setBlur(false);
+      markDone('完成了眯眼测试盲测（选对B）');
+      ahaBox.innerHTML = '<strong>判断精准（右图 B 完胜）！</strong>即使完全看不清字，右图 B 依然靠“大面积留白 + 单一高饱和主按钮”把视线精准吸到 CTA 上。做完任何 PPT、网页或海报，都强烈建议用 5px 模糊做一次眯眼测试！';
+    };
+
+    setBlur(true);
   </script>
 </body>
 </html>

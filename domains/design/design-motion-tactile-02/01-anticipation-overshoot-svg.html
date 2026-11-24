@@ -1,70 +1,101 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏹 迪士尼 12 法则：蓄力预备 → 主动作 → 过冲回正（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>迪士尼 12 法则：蓄力预备 → 主动作 → 过冲回正</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .stage {
+      position: relative; height: 150px; border-radius: 12px; background: var(--tax-surface-alt);
+      border: 1px solid var(--tax-border); overflow: hidden;
+    }
+    .actor {
+      position: absolute; bottom: 26px; left: 50%; width: 58px; height: 58px; border-radius: 14px;
+      background: var(--tax-primary); transform: translateX(-50%);
+      display: flex; align-items: center; justify-content: center; font-size: 26px;
+      transform-origin: bottom center;
+    }
+    .ground { position: absolute; bottom: 24px; left: 24px; right: 24px; height: 3px; background: var(--tax-border); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🏹 迪士尼 12 法则：蓄力预备 → 主动作 → 过冲回正（SVG）</h1><p>拉弓射箭必先往后拉，跳高必先往下蹲——加上一点点反向“预备动作”和越过终点的“过冲回正”，静态 UI 瞬间就有了重量和意图！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>起动前反向“蓄力预备”幅度</span><span id="vAnt">15%</span></label><input type="range" id="sAnt" min="0" max="35" value="15" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>到达终点“惯性过冲”幅度</span><span id="vOvr">18%</span></label><input type="range" id="sOvr" min="0" max="35" value="18" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🏹 迪士尼 12 法则：蓄力预备 → 主动作 → 过冲回正（构建器）</h1>
+      <p>自然界里没有任何生物会凭空瞬移——人起跳前会先<strong>下蹲蓄力（Anticipation）</strong>，落地或到位时会略微<strong>过冲再回正（Overshoot）</strong>。亲手勾选这两项迪士尼动画法则，对比“死板电梯”与“皮克斯生命力”！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="playBtn">▶ 播放起跳动画</button>
+        <button class="toy-btn secondary" id="antBtn">○ 启用蓄力预备（起跳前先下蹲）</button>
+        <button class="toy-btn secondary" id="ovrBtn">○ 启用过冲回正（落地微弹缓冲）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">动效鲜活生命力</div><div class="k-val" id="kLiv">—</div></div>
-        <div class="kpi"><div class="k-lbl">风格定位</div><div class="k-val" id="kSty">—</div></div>
+
+      <div class="stage">
+        <div class="ground"></div>
+        <div class="actor" id="actor">🚀</div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>死板基准（0/2 法则）：</strong>现在方块像一台没有灵魂的直梯一样僵硬上下！点亮上方「蓄力预备」和「过冲回正」再点播放，看它瞬间活过来！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const ant=+document.getElementById('sAnt').value, ovr=+document.getElementById('sOvr').value;
-  document.getElementById('vAnt').textContent=ant+'%';
-  document.getElementById('vOvr').textContent=ovr+'%';
-  const liv=Math.min(98, Math.round(35 + ant*1.6 + ovr*1.8));
-  const sty=(ant===0 && ovr===0)?'🤖 死板直来直去':((ant>25||ovr>25)?'🎪 卡通夸张风格（适合游戏）':'✨ 精致灵动（适合消费级 App）');
-  document.getElementById('kLiv').textContent=liv+' 分';
-  document.getElementById('kLiv').style.color=liv>=70?'#059669':'#f59e0b';
-  document.getElementById('kSty').textContent=sty;
-  const y0=145, y1=65;
-  const yAnt=y0 + ant*0.95, yOvr=y1 - ovr*0.95;
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="24" font-size="13" font-weight="800" fill="var(--tax-text)">动作三幕剧波形：反向蓄力 → 高速跨越 → 过冲回稳</text>
-    <line x1="45" y1="${y0}" x2="555" y2="${y0}" stroke="var(--tax-border)" stroke-dasharray="3,3"/>
-    <line x1="45" y1="${y1}" x2="555" y2="${y1}" stroke="#059669" stroke-dasharray="4,3"/>
-    <path d="M 45 ${y0} Q 130 ${yAnt.toFixed(0)} 190 ${y0} C 260 ${y0} 310 ${yOvr.toFixed(0)} 395 ${yOvr.toFixed(0)} Q 470 ${y1+8} 555 ${y1}" fill="none" stroke="#8b5cf6" stroke-width="3.5"/>
-    <circle cx="130" cy="${((y0+yAnt)/2).toFixed(0)}" r="6" fill="#f59e0b"/>
-    <circle cx="395" cy="${yOvr.toFixed(0)}" r="6" fill="#ef4444"/>
-    <text x="130" y="192" text-anchor="middle" font-size="11" font-weight="750" fill="#d97706">① 预备蓄力 (-${ant}%)</text>
-    <text x="395" y="192" text-anchor="middle" font-size="11" font-weight="750" fill="#ef4444">② 惯性过冲 (+${ovr}%)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>记住克制原则：工具类软件过冲控制在 5%~10% 显干练；点赞红心、成就徽章可以拉到 20% 制造愉悦惊喜！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let useAnt = false, useOvr = false, done = false;
+    const actor = document.getElementById('actor');
+    const antBtn = document.getElementById('antBtn');
+    const ovrBtn = document.getElementById('ovrBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function updateBtns() {
+      antBtn.className = useAnt ? 'toy-btn' : 'toy-btn secondary';
+      ovrBtn.className = useOvr ? 'toy-btn' : 'toy-btn secondary';
+      antBtn.textContent = (useAnt ? '✓ ' : '○ ') + '蓄力预备（起跳前先下蹲）';
+      ovrBtn.textContent = (useOvr ? '✓ ' : '○ ') + '过冲回正（到位微弹缓冲）';
+    }
+
+    function playAnim() {
+      markDone('构建并播放了迪士尼蓄力预备与过冲动画');
+      const frames = [];
+      frames.push({ transform: 'translateX(-50%) translateY(0) scale(1, 1)', offset: 0 });
+      if (useAnt) {
+        frames.push({ transform: 'translateX(-50%) translateY(6px) scale(1.22, 0.78)', offset: 0.18 });
+      }
+      frames.push({ transform: 'translateX(-50%) translateY(-68px) scale(0.88, 1.15)', offset: useAnt ? 0.52 : 0.45 });
+      if (useOvr) {
+        frames.push({ transform: 'translateX(-50%) translateY(5px) scale(1.18, 0.84)', offset: 0.80 });
+        frames.push({ transform: 'translateX(-50%) translateY(-6px) scale(0.96, 1.04)', offset: 0.91 });
+      }
+      frames.push({ transform: 'translateX(-50%) translateY(0) scale(1, 1)', offset: 1 });
+
+      actor.animate(frames, { duration: 880, easing: 'ease-in-out' });
+
+      if (useAnt && useOvr) {
+        ahaBox.innerHTML = '<strong>迪士尼完整生命力（蓄力 + 过冲）：</strong>短短 0.15 秒的“反向蓄力”提前预告了即将发生的大动作，末尾的“微幅过冲回正”卸掉了机械急停感——这正是下拉刷新、图标弹出和游戏打击感让人上瘾的秘诀！';
+      } else if (useAnt || useOvr) {
+        ahaBox.innerHTML = '<strong>已经生动了不少！</strong>再把另一个法则也勾选上，感受“蓄力起势 → 爆发 → 缓冲回正”的三段式黄金节奏！';
+      } else {
+        ahaBox.innerHTML = '<strong>僵硬直梯感：</strong>没有任何预备动作和缓冲，直接生硬起停。试着把上面两个开关都打开再播放一次！';
+      }
+    }
+
+    document.getElementById('playBtn').onclick = playAnim;
+    antBtn.onclick = () => { useAnt = !useAnt; updateBtns(); playAnim(); };
+    ovrBtn.onclick = () => { useOvr = !useOvr; updateBtns(); playAnim(); };
+    updateBtns();
   </script>
 </body>
 </html>

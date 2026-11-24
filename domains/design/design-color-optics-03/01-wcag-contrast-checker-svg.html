@@ -1,69 +1,128 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔍 WCAG 无障碍对比度仪（4.5:1 红线）（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WCAG 无障碍对比度仪（4.5:1 红线）</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .ctrl-grid { grid-template-columns: 1fr; } }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .preview-box { padding: 20px; border-radius: 12px; border: 1px solid var(--tax-border); margin-bottom: 12px; transition: background .12s, color .12s; }
+    .badges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .badge { padding: 9px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface-alt); text-align: center; font-size: 12.5px; font-weight: 700; }
+    .badge.pass { border-color: var(--tax-green); background: var(--tax-green-soft); color: var(--tax-green); }
+    .badge.fail { border-color: var(--tax-red); background: var(--tax-red-soft); color: var(--tax-red); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔍 WCAG 无障碍对比度仪（4.5:1 红线）（SVG）</h1><p>许多设计师迷恋“高级感浅灰字”，却让手机在户外阳光下或视力不佳的用户完全看不清。国际标准 WCAG AA 要求正文对比度至少 4.5:1！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔍 WCAG 无障碍对比度仪（4.5:1 红线计算器）</h1>
+      <p>许多追求“性冷淡高级灰”的网页把正文设为浅灰配白底，在阳光下或中老年眼里几乎一片空白！拖动下方前景与背景明度，按 <strong>W3C WCAG 2.1 真实相对亮度公式</strong>实测对比度！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn secondary" id="pBad">❌ 反面教材：极简浅灰字（2.3:1）</button>
+        <button class="toy-btn secondary" id="pAA">✅ 合格 AA 级（4.8:1）</button>
+        <button class="toy-btn secondary" id="pAAA">🏆 黄金 AAA 级（12.6:1）</button>
+      </div>
+
       <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>文字灰度（0=纯黑，255=纯白）</span><span id="vFg">80</span></label><input type="range" id="sFg" min="0" max="255" value="80" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>背景灰度（0=纯黑，255=纯白）</span><span id="vBg">245</span></label><input type="range" id="sBg" min="0" max="255" value="245" oninput="draw()"></div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+            <span>✒️ 文字明度（0 黑 → 255 白）</span>
+            <strong id="fgVal">160</strong>
+          </div>
+          <input type="range" id="fgRange" min="0" max="255" value="160" style="width:100%;" />
+        </div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+            <span>📄 背景明度（0 黑 → 255 白）</span>
+            <strong id="bgVal">248</strong>
+          </div>
+          <input type="range" id="bgRange" min="0" max="255" value="248" style="width:100%;" />
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">WCAG 实时对比度</div><div class="k-val" id="kRat">—</div></div>
-        <div class="kpi"><div class="k-lbl">无障碍评级</div><div class="k-val" id="kLvl">—</div></div>
+
+      <div class="preview-box" id="previewBox">
+        <div style="font-size:12px;font-weight:700;opacity:0.9;">实时对比度：<span id="ratioBig" style="font-size:20px;">2.38 : 1</span></div>
+        <div style="font-size:22px;font-weight:800;margin:6px 0;">大标题文本（22px 粗体 · 门槛 ≥ 3.0:1）</div>
+        <div style="font-size:14px;line-height:1.6;">正文阅读样本：如果这段 14px 正文对比度低于 4.5:1，户外强光下或视力衰退用户将非常吃力。好的设计必须兼顾美感与可读性。</div>
       </div>
+
+      <div class="badges">
+        <div class="badge" id="bLarge">大字号 AA (≥ 3.0:1)</div>
+        <div class="badge" id="bNormal">正文 AA (≥ 4.5:1)</div>
+        <div class="badge" id="bAAA">高标准 AAA (≥ 7.0:1)</div>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>WCAG 4.5:1 红线：</strong>目前浅灰配白底连最低的 3.0:1 都没过！把文字明度往左压暗（或切换深底亮字），亲手把它救回 <strong>4.5:1 以上</strong>！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function relLum(v){
-  const c=v/255;
-  return c<=0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4);
-}
-function draw(){
-  const fg=+document.getElementById('sFg').value, bg=+document.getElementById('sBg').value;
-  document.getElementById('vFg').textContent=fg;
-  document.getElementById('vBg').textContent=bg;
-  const l1=relLum(fg), l2=relLum(bg);
-  const ratio=(Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05);
-  const lvl=ratio>=7?'🏆 AAA 极佳清晰':(ratio>=4.5?'✅ AA 正文合格':(ratio>=3?'⚠️ 仅大标题可用':'❌ 严重不合格'));
-  document.getElementById('kRat').textContent=ratio.toFixed(2)+' : 1';
-  document.getElementById('kRat').style.color=ratio>=4.5?'#059669':'#ef4444';
-  document.getElementById('kLvl').textContent=lvl;
-  document.getElementById('svg').innerHTML=`
-    <rect x="30" y="24" width="540" height="156" rx="14" fill="rgb(${bg},${bg},${bg})" stroke="var(--tax-border)"/>
-    <text x="300" y="82" text-anchor="middle" font-size="22" font-weight="850" fill="rgb(${fg},${fg},${fg})">这是一段大号标题预览文字 (Aa)</text>
-    <text x="300" y="120" text-anchor="middle" font-size="14" fill="rgb(${fg},${fg},${fg})">正文可读性实测：确保在强光户外与轻度老花下依然轻松辨认。</text>
-    <text x="300" y="156" text-anchor="middle" font-size="12" font-weight="800" fill="${ratio>=4.5?'#059669':'#ef4444'}">当前对比度 ${ratio.toFixed(2)}:1（AA 红线 4.5:1）</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>牺牲可读性换来的“冷淡高级灰”是设计界的头号形式主义。先过 4.5:1 对比度红线，再谈审美风格！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const fgRange = document.getElementById('fgRange');
+    const bgRange = document.getElementById('bgRange');
+    const previewBox = document.getElementById('previewBox');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function relLum(c255) {
+      const s = c255 / 255;
+      return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+    }
+
+    function render() {
+      const fg = Number(fgRange.value);
+      const bg = Number(bgRange.value);
+      document.getElementById('fgVal').textContent = `rgb(${fg},${fg},${fg})`;
+      document.getElementById('bgVal').textContent = `rgb(${bg},${bg},${bg})`;
+
+      previewBox.style.color = `rgb(${fg},${fg},${fg})`;
+      previewBox.style.background = `rgb(${bg},${bg},${bg})`;
+
+      const l1 = relLum(fg), l2 = relLum(bg);
+      const ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+      document.getElementById('ratioBig').textContent = `${ratio.toFixed(2)} : 1`;
+
+      const setB = (id, label, ok) => {
+        const el = document.getElementById(id);
+        el.className = 'badge ' + (ok ? 'pass' : 'fail');
+        el.textContent = (ok ? '✓ 通过 ' : '✕ 未达标 ') + label;
+      };
+      setB('bLarge', '大字 AA (3:1)', ratio >= 3.0);
+      setB('bNormal', '正文 AA (4.5:1)', ratio >= 4.5);
+      setB('bAAA', '增强 AAA (7:1)', ratio >= 7.0);
+
+      if (ratio >= 7.0) {
+        ahaBox.innerHTML = `<strong>增强无障碍达标（${ratio.toFixed(2)}:1 · AAA 级）：</strong>无论室内外强光还是轻度弱视人群都能毫不费力地阅读。正文排版优先保持在 7:1–15:1 的黄金舒适区间！`;
+      } else if (ratio >= 4.5) {
+        ahaBox.innerHTML = `<strong>国际标准达标（${ratio.toFixed(2)}:1 · AA 级）：</strong>已越过 WCAG 4.5:1 强制红线，满足绝大多数网页与 App 正文及格要求。`;
+      } else {
+        ahaBox.innerHTML = `<strong>可读性警报（仅 ${ratio.toFixed(2)}:1 < 4.5:1）：</strong>很多设计师为了“柔和高级感”把次级说明文字调成浅灰，结果直接牺牲了可读性！继续拉大文字与背景的明度差。`;
+      }
+    }
+
+    fgRange.oninput = () => { markDone('使用WCAG对比度仪实测文字明度'); render(); };
+    bgRange.oninput = () => { markDone('使用WCAG对比度仪实测背景明度'); render(); };
+    document.getElementById('pBad').onclick = () => { fgRange.value = 162; bgRange.value = 248; markDone('查看了低对比度浅灰反面教材'); render(); };
+    document.getElementById('pAA').onclick = () => { fgRange.value = 112; bgRange.value = 250; markDone('测试了WCAG AA标准对比度'); render(); };
+    document.getElementById('pAAA').onclick = () => { fgRange.value = 30; bgRange.value = 242; markDone('测试了WCAG AAA黄金对比度'); render(); };
+    render();
   </script>
 </body>
 </html>

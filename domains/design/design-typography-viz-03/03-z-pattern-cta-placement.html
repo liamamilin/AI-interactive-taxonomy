@@ -1,65 +1,85 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎯 Z 型动线终点：把行动按钮放在右下角！</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Z 型动线终点：把行动按钮放在右下角！</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .slot-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎯 Z 型动线终点：把行动按钮放在右下角！</h1><p>在落地页里，眼睛从左上 Logo 扫到右上登录，再斜穿主图落到右下角——把核心注册按钮刚好接在动线终点，点击转化最顺手！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🎯 Z 型动线终点：CTA 按钮布局构建器</h1>
+      <p>你正在设计一张极简 SaaS 落地页首屏。点击下方 4 个位置，把<strong>【立即免费试用】主按钮</strong>安放到画布不同角落，看看哪一个位置能完美接住 Z 型视线终点的转化势能！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="slot-row" id="slotRow"></div>
+
+      <svg id="ctaSvg" viewBox="0 0 680 235" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="Z型动线CTA按钮落点布局"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>构建实验：</strong>依次把主按钮放到 4 个角落，观察用户视线流与预估转化率的变化！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>主行动按钮贴合 Z 终点程度</span><span id="vAln">90%</span></label><input type="range" id="sAln" min="10" max="100" value="90" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>中段视觉元素（人物眼神/箭头）引导力</span><span id="vGid">75%</span></label><input type="range" id="sGid" min="10" max="100" value="75" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">首屏 CTA 预估点击率</div><div class="k-val" id="kCtr">—</div></div>
-        <div class="kpi"><div class="k-lbl">动线流畅评级</div><div class="k-val" id="kGrd">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const aln=+document.getElementById('sAln').value, gid=+document.getElementById('sGid').value;
-  document.getElementById('vAln').textContent=aln+'%';
-  document.getElementById('vGid').textContent=gid+'%';
-  const ctr=(1.5 + aln*0.045 + gid*0.03).toFixed(1);
-  document.getElementById('kCtr').textContent=ctr+'%';
-  document.getElementById('kCtr').style.color=parseFloat(ctr)>=6.5?'#059669':'#f59e0b';
-  document.getElementById('kGrd').textContent=aln>=75?'🚀 丝滑闭环转化':'⚠️ 视线溜出页面外';
-  const w=Math.max(15, parseFloat(ctr)*42);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">首屏点击转化率（视觉动线终点对齐 ${aln}% × 眼神引导 ${gid}%）</text>
-    <rect x="30" y="68" width="440" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${Math.min(440,w).toFixed(0)}" height="38" rx="8" fill="#059669"/>
-    <text x="${Math.min(480,38+w).toFixed(0)}" y="93" font-size="14" font-weight="850" fill="#059669">${ctr}% CTR</text>
-    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">经典广告技巧：让海报里的人物面朝并注视你的核心按钮，观众眼球会本能顺着人物视线看过去！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>优秀的页面布局像一条隐形滑梯，让用户的视线毫不费力地滑向你最希望他点击的那个按钮！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const SLOTS = [
+      { id: 'tl', name: '↖️ 放左上角（抢 Logo 位）', x: 36, y: 24, cr: '1.8%', ok: false, aha: '<strong>左上角（转化率 1.8%）：</strong>用户连你是谁、产品干嘛的都还没看，一上来就怼按钮，只会引发防御反感！' },
+      { id: 'tr', name: '↗️ 放右上角（顶部导航尾）', x: 510, y: 24, cr: '3.6%', ok: false, aha: '<strong>右上角（转化率 3.6%）：</strong>作为辅助“登录/试用”入口不错，但还没经过中间主视觉的说服铺垫，转化不够彻底。' },
+      { id: 'bl', name: '↙️ 放左下角（逆动线死角）', x: 36, y: 170, cr: '2.4%', ok: false, aha: '<strong>左下角（转化率 2.4%）：</strong>视线斜穿下来刚落到左下角，习惯还会继续往右扫，把最终按钮放这会让视线走过头！' },
+      { id: 'br', name: '↘️ 放右下角（Z 型终点黄金位！）', x: 500, y: 170, cr: '6.8%', ok: true, aha: '<strong>Z 型终点大满贯（转化率 6.8%）！</strong>用户完整看完了“① 你是谁 → ② 核心卖点 → ③ 客户背书”，视线正好顺滑停在右下角按钮上，点击动作水到渠成！' }
+    ];
+
+    let cur = SLOTS[0], done = false;
+    const slotRow = document.getElementById('slotRow');
+    const svg = document.getElementById('ctaSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      slotRow.innerHTML = '';
+      SLOTS.forEach(s => {
+        const b = document.createElement('button');
+        b.className = s.id === cur.id ? 'toy-btn' : 'toy-btn secondary';
+        b.textContent = s.name;
+        b.onclick = () => { cur = s; markDone(`测试了Z型动线CTA位置：${s.name}`); render(); };
+        slotRow.appendChild(b);
+      });
+
+      let html = '';
+      // Z trajectory guide
+      html += `<polyline points="90,44 580,44 100,190 570,190" fill="none" stroke="var(--tax-primary)" stroke-width="3" stroke-dasharray="6 5" opacity="0.45"/>`;
+      // Center Hero Value Prop
+      html += `<rect x="175" y="78" width="330" height="78" rx="12" fill="rgba(148,163,184,0.12)" stroke="var(--tax-border)"/>`;
+      html += `<text x="340" y="110" text-anchor="middle" fill="var(--tax-ink)" font-size="16" font-weight="800">10 倍提速你的设计评审流</text>`;
+      html += `<text x="340" y="134" text-anchor="middle" fill="var(--tax-muted)" font-size="12">全球 50,000+ 产品团队正在使用</text>`;
+
+      // Logo placeholder if not overridden
+      if (cur.id !== 'tl') html += `<text x="42" y="48" fill="var(--tax-muted)" font-size="13" font-weight="800">◆ ACME STUDIO</text>`;
+      if (cur.id !== 'bl') html += `<text x="42" y="196" fill="var(--tax-muted)" font-size="11.5">★★★★★ 4.9/5 好评背书</text>`;
+
+      // Placed CTA button
+      html += `<rect x="${cur.x}" y="${cur.y}" width="144" height="40" rx="10" fill="${cur.ok ? 'var(--tax-green)' : 'var(--tax-primary)'}"/>`;
+      html += `<text x="${cur.x + 72}" y="${cur.y + 25}" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">立即免费试用 →</text>`;
+
+      html += `<text x="340" y="226" text-anchor="middle" fill="${cur.ok ? 'var(--tax-green)' : 'var(--tax-amber)'}" font-size="12.5" font-weight="800">预估首屏点击转化率：${cur.cr}</text>`;
+      svg.innerHTML = html;
+      ahaBox.innerHTML = cur.aha;
+    }
+
+    render();
   </script>
 </body>
 </html>

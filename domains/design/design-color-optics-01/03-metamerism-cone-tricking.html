@@ -1,71 +1,111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>👁️ 同色异谱：屏幕根本没有黄光，为何你看见了黄？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>同色异谱：屏幕根本没有黄光，为何你看见了黄？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .cone-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .cone-card { padding: 10px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>👁️ 同色异谱：屏幕根本没有黄光，为何你看见了黄？</h1><p>人类视网膜只有红(L)、绿(M)、蓝(S)三种视锥细胞。手机屏幕根本没有黄色像素，但它用红光+绿光同时刺激 L 和 M 视锥，完美骗过了大脑！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>屏幕红光像素输出 (L 视锥刺激)</span><span id="vR">90%</span></label><input type="range" id="sR" min="0" max="100" value="90" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>屏幕绿光像素输出 (M 视锥刺激)</span><span id="vG">85%</span></label><input type="range" id="sG" min="0" max="100" value="85" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>👁️ 同色异谱：欺骗视锥细胞的光学魔术（模拟器）</h1>
+      <p>你的手机屏幕只有红、绿、蓝三种灯珠，<strong>物理上完全发不出 580nm 的黄色光波</strong>！切换下方两种完全不同的物理光谱，观察你眼睛里 <strong>L / M / S 三种视锥细胞</strong>的放电比例为何一模一样！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="realBtn">☀️ 物理真黄光（单波长 580nm 钠灯）</button>
+        <button class="toy-btn secondary" id="fakeBtn">📱 屏幕假黄光（650nm 红 + 530nm 绿）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">大脑解码颜色</div><div class="k-val" id="kCol">—</div></div>
-        <div class="kpi"><div class="k-lbl">光谱物理真相</div><div class="k-val" id="kPhy">0% 真实黄光波长</div></div>
+
+      <svg id="specSvg" viewBox="0 0 680 205" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="同色异谱光谱与视锥响应对比"></svg>
+
+      <div class="cone-grid">
+        <div class="cone-card"><div style="font-size:12px;color:var(--tax-red);font-weight:700;">L 视锥（偏红长波）</div><div style="font-size:22px;font-weight:800;">86% 放电</div></div>
+        <div class="cone-card"><div style="font-size:12px;color:var(--tax-green);font-weight:700;">M 视锥（偏绿中波）</div><div style="font-size:22px;font-weight:800;">82% 放电</div></div>
+        <div class="cone-card"><div style="font-size:12px;color:var(--tax-primary);font-weight:700;">S 视锥（偏蓝短波）</div><div style="font-size:22px;font-weight:800;">3% 放电</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>同色异谱（Metamerism）：</strong>点击切换「☀️ 物理真黄光」和「📱 屏幕假黄光」——上方光谱仪截然不同，但底部三种视锥细胞读数<strong>纹丝不动</strong>，所以大脑坚信它们是完全相同的黄色！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const r=+document.getElementById('sR').value, g=+document.getElementById('sG').value;
-  document.getElementById('vR').textContent=r+'%';
-  document.getElementById('vG').textContent=g+'%';
-  const R=Math.round(r*2.55), G=Math.round(g*2.55);
-  let name='混合过渡色';
-  if(r>75 && g>70) name='🍋 鲜明黄色（视觉魔术！）';
-  else if(r>70 && g<30) name='🍎 纯红色';
-  else if(g>70 && r<30) name='🌿 纯绿色';
-  else if(r>70 && g>=30 && g<=70) name='🍊 橙色';
-  document.getElementById('kCol').textContent=name;
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">双通道骗局：红像素 + 绿像素 → 视锥响应等价于单色黄光</text>
-    <rect x="35" y="55" width="90" height="90" rx="10" fill="rgb(${R},0,0)"/>
-    <text x="80" y="165" text-anchor="middle" font-size="11.5" font-weight="750" fill="#ef4444">红像素 ${r}%</text>
-    <text x="145" y="108" font-size="22" font-weight="800" fill="var(--tax-muted)">+</text>
-    <rect x="175" y="55" width="90" height="90" rx="10" fill="rgb(0,${G},0)"/>
-    <text x="220" y="165" text-anchor="middle" font-size="11.5" font-weight="750" fill="#059669">绿像素 ${g}%</text>
-    <text x="288" y="108" font-size="22" font-weight="800" fill="var(--tax-muted)">=</text>
-    <rect x="325" y="55" width="235" height="90" rx="12" fill="rgb(${R},${G},0)" stroke="var(--tax-border)"/>
-    <text x="442" y="165" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-text)">大脑感知结果：rgb(${R},${G},0)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>颜色并不存在于物理光子中，而是大脑对三种视锥细胞信号比值的“心理译码”。人类视觉的这一漏洞，正是所有彩色屏幕得以发明的基石！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let isFake = false;
+    let done = false;
+
+    const svg = document.getElementById('specSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      document.getElementById('realBtn').className = !isFake ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('fakeBtn').className = isFake ? 'toy-btn' : 'toy-btn secondary';
+
+      // Wavelength 400nm .. 700nm mapped to x: 50 .. 460
+      const xOf = nm => 50 + ((nm - 400) / 300) * 410;
+
+      let html = `
+        <defs>
+          <linearGradient id="rainbow" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#6366f1"/>
+            <stop offset="25%" stop-color="#06b6d4"/>
+            <stop offset="48%" stop-color="#22c55e"/>
+            <stop offset="62%" stop-color="#eab308"/>
+            <stop offset="80%" stop-color="#f97316"/>
+            <stop offset="100%" stop-color="#ef4444"/>
+          </linearGradient>
+        </defs>`;
+
+      // Rainbow spectrum bar at bottom
+      html += `<rect x="50" y="168" width="410" height="10" rx="5" fill="url(#rainbow)"/>`;
+      [400, 480, 530, 580, 650, 700].forEach(nm => {
+        html += `<text x="${xOf(nm)}" y="194" text-anchor="middle" fill="var(--tax-muted)" font-size="10.5">${nm}nm</text>`;
+      });
+
+      html += `<text x="255" y="24" text-anchor="middle" fill="var(--tax-ink)" font-size="13" font-weight="800">${isFake ? '📱 手机屏幕光谱：只有 530nm 绿峰 + 650nm 红峰（580nm 为 0！）' : '☀️ 物理真黄光光谱：唯一尖峰位于 580nm'}</text>`;
+
+      if (!isFake) {
+        const x580 = xOf(580);
+        html += `<path d="M${x580 - 22} 168 Q${x580} 36 ${x580 + 22} 168 Z" fill="rgba(234,179,8,0.55)" stroke="#eab308" stroke-width="2.5"/>`;
+        html += `<text x="${x580}" y="46" text-anchor="middle" fill="#eab308" font-size="11.5" font-weight="800">580nm 真黄光</text>`;
+      } else {
+        const x530 = xOf(530), x650 = xOf(650), x580 = xOf(580);
+        html += `<path d="M${x530 - 20} 168 Q${x530} 48 ${x530 + 20} 168 Z" fill="rgba(34,197,94,0.5)" stroke="#22c55e" stroke-width="2.5"/>`;
+        html += `<path d="M${x650 - 20} 168 Q${x650} 48 ${x650 + 20} 168 Z" fill="rgba(239,68,68,0.5)" stroke="#ef4444" stroke-width="2.5"/>`;
+        html += `<line x1="${x580}" y1="88" x2="${x580}" y2="168" stroke="var(--tax-muted)" stroke-dasharray="4 3"/>`;
+        html += `<text x="${x580}" y="80" text-anchor="middle" fill="var(--tax-muted)" font-size="11">580nm 能量 = 0！</text>`;
+      }
+
+      // Right side: Perceived color swatch (identical!)
+      html += `<rect x="495" y="42" width="160" height="126" rx="14" fill="#facc15" stroke="var(--tax-border)" stroke-width="2"/>`;
+      html += `<text x="575" y="100" text-anchor="middle" fill="#1e293b" font-size="15" font-weight="900">大脑主观看见</text>`;
+      html += `<text x="575" y="122" text-anchor="middle" fill="#1e293b" font-size="13" font-weight="700">100% 相同的明黄</text>`;
+      svg.innerHTML = html;
+
+      ahaBox.innerHTML = isFake
+        ? '<strong>屏幕光学黑客：</strong>手机屏幕压根没有黄色 LED，它只是同时点亮红+绿像素，恰好把你眼里的 L 细胞和 M 细胞刺激到 86% / 82%！如果是一只有 4 种视锥细胞的鸟来看你的手机屏幕，它一眼就能看穿这只是“红绿拼接假黄”！'
+        : '<strong>为什么人眼能被 RGB 三原色骗过？</strong>因为人类视网膜只有 L/M/S 三种色觉采样器，任何两种光谱只要激发出相同的三元组读数，在人脑里就是完全相同的颜色！点击「📱 屏幕假黄光」对比光谱！';
+    }
+
+    document.getElementById('realBtn').onclick = () => { isFake = false; markDone('对比了真黄光光谱'); render(); };
+    document.getElementById('fakeBtn').onclick = () => { isFake = true; markDone('对比了屏幕红绿混合同色异谱假黄光'); render(); };
+    render();
   </script>
 </body>
 </html>

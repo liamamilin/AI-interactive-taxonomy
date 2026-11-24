@@ -1,66 +1,104 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🪜 渐进披露分层器：首屏藏起 80% 低频设置（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>渐进披露分层器：首屏藏起 80% 低频设置</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .dialog-box { padding: 16px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .field-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
+    @media (max-width: 560px) { .field-grid { grid-template-columns: 1fr; } }
+    .fld { padding: 8px 10px; border-radius: 8px; background: var(--tax-surface); border: 1px solid var(--tax-border); font-size: 12.5px; display: flex; justify-content: space-between; }
+    .adv-btn { margin-top: 10px; background: none; border: none; color: var(--tax-primary); font-size: 13px; font-weight: 700; cursor: pointer; padding: 4px 0; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🪜 渐进披露分层器：首屏藏起 80% 低频设置（SVG）</h1><p>渐进披露（Progressive Disclosure）：首屏只放 80% 用户每天必用的核心功能，把 20% 专家才调的参数优雅藏进“高级选项”折叠栏里！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>首屏直接平铺展示的功能比例</span><span id="vExp">25%（克制精简）</span></label><input type="range" id="sExp" min="10" max="100" value="25" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>产品总功能复杂度（项）</span><span id="vTot">40 项</span></label><input type="range" id="sTot" min="10" max="80" step="5" value="40" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🪜 渐进披露分层器：首屏藏起 80% 低频设置（构建器）</h1>
+      <p>如何做到<strong>“新手一看就懂，专家依然全能”</strong>？答案不是砍掉功能，而是<strong>渐进披露（Progressive Disclosure）</strong>：首屏只摆 80% 人每天用的 3 项核心设置，把剩下 9 项低频专业参数折叠进“高级选项 ▾”！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="flatBtn">💥 反面：12 项参数全部平铺首屏</button>
+        <button class="toy-btn secondary" id="progBtn">✨ 正面：渐进披露分层（3 高频 + 折叠 9 低频）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">首屏可见控件数</div><div class="k-val" id="kVis">—</div></div>
-        <div class="kpi"><div class="k-lbl">新手首日上手成功率</div><div class="k-val" id="kOnb">—</div></div>
+
+      <div class="dialog-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <strong style="font-size:15px;">🖨️ 导出 PDF / 打印设置</strong>
+          <span id="loadBadge" style="font-size:12px;font-weight:800;color:var(--tax-red);">新手认知压迫感：92%</span>
+        </div>
+
+        <div class="field-grid" id="coreFields">
+          <div class="fld"><span>打印机 / 导出目标</span><strong>Save as PDF</strong></div>
+          <div class="fld"><span>页面范围</span><strong>全部（1–12 页）</strong></div>
+          <div class="fld"><span>色彩模式</span><strong>彩色</strong></div>
+          <div class="fld"><span>打印份数</span><strong>1 份</strong></div>
+        </div>
+
+        <button class="adv-btn" id="advToggle" style="display:none;">▸ 展开更多高级印刷设置（8 项专家参数）</button>
+
+        <div class="field-grid" id="advFields">
+          <div class="fld"><span>纸张尺寸</span><strong>A4</strong></div>
+          <div class="fld"><span>页面缩放</span><strong>100%</strong></div>
+          <div class="fld"><span>出血位 Bleed</span><strong>3 mm</strong></div>
+          <div class="fld"><span>ICC 色彩配置</span><strong>sRGB</strong></div>
+          <div class="fld"><span>裁剪与套准线</span><strong>关</strong></div>
+          <div class="fld"><span>字体子集嵌入</span><strong>自动</strong></div>
+          <div class="fld"><span>图像重采样 DPI</span><strong>300</strong></div>
+          <div class="fld"><span>PDF/X-4 归档</span><strong>关</strong></div>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>帕累托 80/20 法则：</strong>现在 12 个参数全堆在脸上，只想“保存个 PDF”的普通用户瞬间懵圈！点「✨ 正面：渐进披露分层」感受界面瞬间清爽！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const exp=+document.getElementById('sExp').value, tot=+document.getElementById('sTot').value;
-  document.getElementById('vExp').textContent=exp+'%';
-  document.getElementById('vTot').textContent=tot+' 项';
-  const vis=Math.max(2, Math.round(tot*exp/100));
-  const onb=Math.max(15, Math.min(97, Math.round(98 - Math.max(0, vis-7)*2.6)));
-  document.getElementById('kVis').textContent=vis+' 项 (其余 '+(tot-vis)+' 项折叠)';
-  document.getElementById('kOnb').textContent=onb+'%';
-  document.getElementById('kOnb').style.color=onb>=75?'#059669':'#ef4444';
-  const wV=Math.max(15, onb*4.2);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">新手首日零教程上手率（首屏暴露 ${vis} 项，隐藏 ${tot-vis} 项高级设置）</text>
-    <rect x="30" y="68" width="440" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${wV.toFixed(0)}" height="38" rx="8" fill="${onb>=75?'#059669':'#ef4444'}"/>
-    <text x="${Math.min(480,38+wV).toFixed(0)}" y="93" font-size="14" font-weight="850" fill="${onb>=75?'#059669':'#ef4444'}">${onb}%</text>
-    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">iPhone 相机打开只有“快门+切换”，长按或上滑才出现专业参数——这就是教科书级渐进披露！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>不要把“功能强大”做成“把 50 个按钮全堆在首页”！好的复杂度管理是：把简单留给默认，把强大留给展开。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let progressive = false, advOpen = false, done = false;
+    const advToggle = document.getElementById('advToggle');
+    const advFields = document.getElementById('advFields');
+    const loadBadge = document.getElementById('loadBadge');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      document.getElementById('flatBtn').className = !progressive ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('progBtn').className = progressive ? 'toy-btn' : 'toy-btn secondary';
+
+      if (!progressive) {
+        advToggle.style.display = 'none';
+        advFields.style.display = 'grid';
+        loadBadge.textContent = '新手认知压迫感：92%（信息过载！）';
+        loadBadge.style.color = 'var(--tax-red)';
+        ahaBox.innerHTML = '<strong>平铺灾难（认知负荷 92%）：</strong>为了照顾 5% 专业印刷厂用户的“出血位/ICC 配置”，把 95% 普通用户的界面变成了波音 747 驾驶舱！点右侧按钮开启渐进披露！';
+      } else {
+        advToggle.style.display = 'inline-block';
+        advToggle.textContent = advOpen ? '▾ 收起高级印刷设置（8 项专家参数）' : '▸ 展开更多高级印刷设置（8 项专家参数）';
+        advFields.style.display = advOpen ? 'grid' : 'none';
+        loadBadge.textContent = advOpen ? '专家模式已展开 · 功能 100% 完整' : '新手认知压迫感：22%（✨ 极简爽快！）';
+        loadBadge.style.color = 'var(--tax-green)';
+        ahaBox.innerHTML = '<strong>渐进披露大胜（压迫感 92% → 22%）：</strong>普通用户首屏只看 4 项高频选项，3 秒就能完成导出；需要调出血位和 300 DPI 的专业设计师点一下“高级设置”也能 100% 找回全部功能——两全其美！';
+      }
+    }
+
+    document.getElementById('flatBtn').onclick = () => { progressive = false; markDone('对比了全平铺高负荷设置面板'); render(); };
+    document.getElementById('progBtn').onclick = () => { progressive = true; advOpen = false; markDone('应用了渐进披露分层设计'); render(); };
+    advToggle.onclick = () => { advOpen = !advOpen; markDone('展开了渐进披露高级选项'); render(); };
+    render();
   </script>
 </body>
 </html>

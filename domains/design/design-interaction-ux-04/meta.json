@@ -4,7 +4,7 @@
   "order": 4,
   "title": "响应延迟阈值（0.1s vs 1s）",
   "icon": "⚡",
-  "subtitle": "为什么 0.1 秒感觉像“瞬间”，1 秒打断心流，超过 10 秒用户就直接关掉 App？",
+  "subtitle": "为什么 0.1 秒像物理开关，超 1 秒就想狂点？骨架屏和乐观更新如何骗过大脑时钟？",
   "difficulty": "入门",
   "related": [
     "design/design-motion-tactile-01",
@@ -12,25 +12,25 @@
   ],
   "toys": {
     "01-nielsen-latency-bands-svg.html": {
-      "title": "尼尔森三大延迟临界点仪（0.1s / 1s / 10s）（SVG）",
+      "title": "尼尔森三大延迟临界点仪（0.1s / 1s / 10s）",
       "icon": "⏱️",
-      "archetype": "simulation",
-      "concept": "0.1秒瞬时感 · 1秒心流线 · 10秒流失线",
-      "summary": "拖动系统真实接口耗时与骨架屏/进度条缓冲策略，实时查看用户主观卡顿感知与跳出流失率！"
+      "archetype": "blind-lab",
+      "concept": "尼尔森延迟红线 · 0.1s 瞬时感 · 1.0s 心流中断",
+      "summary": "亲手按下注入 50ms/400ms/1.6s/3.2s 真实延迟的开关，用指尖实测三条心理临界点。"
     },
     "02-skeleton-vs-spinner.html": {
       "title": "骨架屏心理魔术：同样等 2 秒，为何感觉快一半？",
       "icon": "🦴",
-      "archetype": "comparison",
-      "concept": "感知性能 · 骨架屏占位 · 进度确定性",
-      "summary": "对比白屏死等、转圈菊花与骨架屏+真实进度条，看心理感知等待时间为何能凭空砍掉 40%！"
+      "archetype": "race",
+      "concept": "感知性能 · 骨架屏 · 消除布局跳动",
+      "summary": "同时启动 2.20 秒空白转圈与流光骨架屏对决，亲身感受主观等待时间缩短的魔术。"
     },
     "03-optimistic-ui-magic.html": {
       "title": "乐观更新（Optimistic UI）：先亮红心再发请求",
       "icon": "❤️",
-      "archetype": "comparison",
-      "concept": "乐观更新 · 0ms 瞬时反馈 · 异步回滚",
-      "summary": "调节真实网络延迟（50ms ~ 800ms），对比传统“等服务器返回才点亮”与乐观更新的爽感差距！"
+      "archetype": "simulation",
+      "concept": "乐观更新 · 0ms 反馈 · 断网优雅回滚",
+      "summary": "在 900ms 弱网环境下对比悲观干等与乐观秒亮红心，并可触发断网测试自动回滚。"
     }
   }
 }

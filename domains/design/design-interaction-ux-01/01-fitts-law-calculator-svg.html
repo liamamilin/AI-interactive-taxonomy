@@ -1,70 +1,131 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎯 费茨定律公式实时模拟器（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>费茨定律公式实时模拟器</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .arena {
+      position: relative; height: 220px; border-radius: 12px; background: var(--tax-surface-alt);
+      border: 1px solid var(--tax-border); overflow: hidden; margin: 12px 0;
+    }
+    .target-dot {
+      position: absolute; border-radius: 50%; border: none; color: #fff; font-weight: 800;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transform: translate(-50%, -50%); transition: transform .08s;
+    }
+    .target-dot:active { transform: translate(-50%, -50%) scale(0.92); }
+    .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .res-card { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎯 费茨定律公式实时模拟器（SVG）</h1><p>保罗·费茨 1954 年定律：点中目标的时间 MT = a + b · log₂(D/W + 1)。离得越近、目标越大，操作越快越不容易点歪！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>当前手指/光标到目标距离 D</span><span id="vD">260 px</span></label><input type="range" id="sD" min="40" max="440" step="10" value="260" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>目标按钮可点击宽度 W</span><span id="vW">48 px</span></label><input type="range" id="sW" min="16" max="140" step="4" value="48" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🎯 费茨定律实测盲测：目标越大越近，点击越快！</h1>
+      <p>人机交互第一定律 <strong>MT = a + b · log₂(D/W + 1)</strong>：点击耗时取决于<strong>距离 D</strong> 与<strong>目标宽度 W</strong> 的对数比。亲手完成两轮各 5 次点击，用你的真实手速验证费茨定律！</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button class="toy-btn" id="startBtn">▶ 第 1 轮：小且远目标（W=26px, 高难度）</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重测</button>
+        <span id="statusTxt" style="font-size:13px;color:var(--tax-muted);">点击开始，连续点中 5 次亮起的目标圆点</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">难度指数 ID (bit)</div><div class="k-val" id="kId">—</div></div>
-        <div class="kpi"><div class="k-lbl">预估点击耗时</div><div class="k-val" id="kMt">—</div></div>
-        <div class="kpi"><div class="k-lbl">触控热区判定</div><div class="k-val" id="kSt">—</div></div>
+
+      <div class="arena" id="arena"></div>
+
+      <div class="res-grid">
+        <div class="res-card"><div style="font-size:12px;color:var(--tax-muted);">🔴 第 1 轮 · 小且远（26px · ID ≈ 4.3 bit）</div><div style="font-size:22px;font-weight:800;" id="r1Val">—</div></div>
+        <div class="res-card"><div style="font-size:12px;color:var(--tax-muted);">🟢 第 2 轮 · 大且近（66px · ID ≈ 1.8 bit）</div><div style="font-size:22px;font-weight:800;" id="r2Val">—</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>实测原理：</strong>目标越小、离指针越远，手腕在末端减速微调的时间呈对数暴涨！完成两轮 5 连击，看看大按钮帮你省了多少毫秒！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const D=+document.getElementById('sD').value, W=+document.getElementById('sW').value;
-  document.getElementById('vD').textContent=D+' px';
-  document.getElementById('vW').textContent=W+' px';
-  const id=Math.log2(D/W + 1);
-  const mt=Math.round(180 + 150*id);
-  document.getElementById('kId').textContent=id.toFixed(2)+' bit';
-  document.getElementById('kMt').textContent=mt+' ms';
-  document.getElementById('kSt').textContent=W>=44?'✅ 符合 44px 舒适热区':'⚠️ 过小易误触!';
-  document.getElementById('kSt').style.color=W>=44?'#059669':'#ef4444';
-  const tx=Math.min(560-W, 55+D);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">光标（蓝点）→ 目标按钮（宽度 ${W}px，距离 ${D}px）</text>
-    <line x1="55" y1="108" x2="${(tx+W/2).toFixed(1)}" y2="108" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,4"/>
-    <circle cx="55" cy="108" r="10" fill="#3b82f6"/>
-    <text x="55" y="138" text-anchor="middle" font-size="11" font-weight="750" fill="#2563eb">起点</text>
-    <rect x="${tx.toFixed(1)}" y="82" width="${W}" height="52" rx="8" fill="${W>=44?'#059669':'#ef4444'}"/>
-    <text x="${(tx+W/2).toFixed(1)}" y="112" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">点我</text>
-    <text x="30" y="182" font-size="11.5" fill="var(--tax-muted)">同理：把危险的“删除/清空”按钮故意做小、放远，就是反向利用费茨定律防止误点！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>高频操作要做大放近（如手机底部 Tab 栏），危险毁灭操作要做小放远——费茨定律既能加速好操作，也能拦住坏误触！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let round = 1, hits = 0, startMs = 0, t1 = null, t2 = null, done = false;
+    const arena = document.getElementById('arena');
+    const startBtn = document.getElementById('startBtn');
+    const statusTxt = document.getElementById('statusTxt');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function spawnTarget() {
+      arena.innerHTML = '';
+      const isHard = round === 1;
+      const size = isHard ? 26 : 66;
+      // Alternate far left/right for hard, close center-left/right for easy
+      const leftPct = isHard ? (hits % 2 === 0 ? 12 : 88) : (hits % 2 === 0 ? 38 : 62);
+      const topPct  = isHard ? (hits % 2 === 0 ? 25 : 75) : 50;
+
+      const btn = document.createElement('button');
+      btn.className = 'target-dot';
+      btn.style.width = size + 'px';
+      btn.style.height = size + 'px';
+      btn.style.left = leftPct + '%';
+      btn.style.top = topPct + '%';
+      btn.style.background = isHard ? 'var(--tax-red)' : 'var(--tax-green)';
+      btn.style.fontSize = isHard ? '11px' : '15px';
+      btn.textContent = `${hits + 1}`;
+      btn.onclick = () => {
+        if (hits === 0) startMs = performance.now();
+        hits++;
+        if (hits >= 5) {
+          const avgMs = Math.round((performance.now() - startMs) / 4);
+          arena.innerHTML = '';
+          if (round === 1) {
+            t1 = avgMs;
+            document.getElementById('r1Val').textContent = `${avgMs} ms / 次`;
+            round = 2;
+            startBtn.disabled = false;
+            startBtn.textContent = '▶ 第 2 轮：大且近目标（W=66px, 低难度）';
+            statusTxt.textContent = `第 1 轮平均 ${avgMs}ms！现在测大且近的按钮！`;
+          } else {
+            t2 = avgMs;
+            document.getElementById('r2Val').textContent = `${avgMs} ms / 次`;
+            round = 3;
+            startBtn.textContent = '✓ 两轮费茨实测已完成';
+            statusTxt.textContent = `实测对比：小远 ${t1}ms → 大近 ${t2}ms`;
+            markDone(`完成费茨定律手速盲测：${t1}ms vs ${t2}ms`);
+            const pct = Math.max(10, Math.round(((t1 - t2) / Math.max(1, t1)) * 100));
+            ahaBox.innerHTML = `<strong>费茨定律实测生效（单次提速 ~${pct}%）！</strong>移动端规范要求按钮最小点击热区 <strong>≥ 44×44 px</strong>，高频操作必须尽量放大热区、拉近与上一动作的距离；而“删除/注销”等危险按钮则反其道而行，故意做小放远防误触！`;
+          }
+        } else {
+          statusTxt.textContent = `进度：${hits} / 5`;
+          spawnTarget();
+        }
+      };
+      arena.appendChild(btn);
+    }
+
+    startBtn.onclick = () => {
+      hits = 0;
+      startBtn.disabled = true;
+      statusTxt.textContent = '准备：点中第 1 个圆点即开始计时！';
+      spawnTarget();
+    };
+
+    document.getElementById('resetBtn').onclick = () => {
+      round = 1; hits = 0; t1 = null; t2 = null;
+      arena.innerHTML = '';
+      startBtn.disabled = false;
+      startBtn.textContent = '▶ 第 1 轮：小且远目标（W=26px, 高难度）';
+      document.getElementById('r1Val').textContent = '—';
+      document.getElementById('r2Val').textContent = '—';
+      statusTxt.textContent = '点击开始，连续点中 5 次亮起的目标圆点';
+    };
   </script>
 </body>
 </html>

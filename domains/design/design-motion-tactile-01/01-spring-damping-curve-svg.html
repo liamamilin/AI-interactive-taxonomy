@@ -1,73 +1,157 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>〰️ 弹簧物理阻尼曲线实验台（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>弹簧物理阻尼曲线实验台</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .ctrl-grid { grid-template-columns: 1fr; } }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .track { position: relative; height: 48px; border-radius: 999px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-top: 10px; }
+    .ball { position: absolute; top: 8px; width: 32px; height: 32px; border-radius: 50%; background: var(--tax-primary); box-shadow: 0 3px 10px rgba(59,130,246,0.4); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>〰️ 弹簧物理阻尼曲线实验台（SVG）</h1><p>现实世界里没有物体会瞬间起步又瞬间刹停！iOS 与现代动效引擎全部采用真实弹簧微分方程，用刚度（k）和阻尼（c）控制手感。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>〰️ 弹簧物理阻尼曲线实验台（胡克定律模拟）</h1>
+      <p>苹果 iOS 和现代动效引擎弃用死板的线性时间，改用真实弹簧方程 <strong>F = −k·x − c·v</strong>！调节<strong>刚度 k</strong> 与<strong>阻尼 c</strong>，点击发射小球，同时观察上方振动曲线与下方真实弹跳手感！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="fireBtn">🚀 发射弹簧小球</button>
+        <button class="toy-btn secondary" id="pBouncy">🎈 欠阻尼（Q 弹活泼）</button>
+        <button class="toy-btn secondary" id="pCrit">🍏 临界阻尼（iOS 干脆）</button>
+        <button class="toy-btn secondary" id="pOver">🍯 过阻尼（黏稠糖浆）</button>
+      </div>
+
       <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>弹簧刚度 Stiffness（越大越迅猛）</span><span id="vK">180</span></label><input type="range" id="sK" min="40" max="360" step="10" value="180" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>阻尼系数 Damping（越小越 Q 弹回弹）</span><span id="vC">16</span></label><input type="range" id="sC" min="4" max="40" step="1" value="16" oninput="draw()"></div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+            <span>⚡ 弹簧刚度 Stiffness (k)</span>
+            <strong id="kVal" style="color:var(--tax-primary);">220</strong>
+          </div>
+          <input type="range" id="kRange" min="60" max="420" value="220" style="width:100%;" />
+        </div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+            <span>🛑 空气阻尼 Damping (c)</span>
+            <strong id="cVal" style="color:var(--tax-amber);">14</strong>
+          </div>
+          <input type="range" id="cRange" min="4" max="55" value="14" style="width:100%;" />
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">阻尼比 ζ（1.0=临界无过冲）</div><div class="k-val" id="kZ">—</div></div>
-        <div class="kpi"><div class="k-lbl">动效物理手感</div><div class="k-val" id="kFeel">—</div></div>
+
+      <svg id="curveSvg" viewBox="0 0 680 175" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="弹簧物理阻尼位移曲线"></svg>
+
+      <div class="track" id="track">
+        <div class="ball" id="ball" style="left:16px;"></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>阻尼比 ζ 决定了动效性格：</strong><code>ζ &lt; 1</code> Q 弹活泼（适合点赞气泡、弹窗）；<code>ζ ≈ 1</code> 快速无回弹（适合 iOS 导航切换）；<code>ζ &gt; 1</code> 拖沓迟钝！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const k=+document.getElementById('sK').value, c=+document.getElementById('sC').value;
-  document.getElementById('vK').textContent=k;
-  document.getElementById('vC').textContent=c;
-  const z=c/(2*Math.sqrt(k));
-  const feel=z<0.7?'🏀 活泼 Q 弹（明显过冲回弹）':(z<=1.05?'✨ 苹果级干脆优雅（微过冲/无抖动）':'🐢 过阻尼粘滞（略显沉重）');
-  document.getElementById('kZ').textContent=z.toFixed(2);
-  document.getElementById('kFeel').textContent=feel;
-  let x=0, v=0, dt=0.02, pts=[];
-  for(let i=0;i<=80;i++){
-    const a=k*(1-x) - c*v;
-    v+=a*dt; x+=v*dt;
-    const px=45+i*6.3, py=172 - x*110;
-    pts.push(`${px.toFixed(1)},${Math.max(26,Math.min(190,py)).toFixed(1)}`);
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="24" font-size="13" font-weight="800" fill="var(--tax-text)">位移-时间响应曲线（绿虚线 = 目标终点 1.0，灰线 = 僵硬线性）</text>
-    <line x1="45" y1="62" x2="555" y2="62" stroke="#059669" stroke-dasharray="5,4" stroke-width="1.5"/>
-    <line x1="45" y1="172" x2="360" y2="62" stroke="#94a3b8" stroke-dasharray="3,3" stroke-width="1.5"/>
-    <line x1="45" y1="172" x2="555" y2="172" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <polyline points="${pts.join(' ')}" fill="none" stroke="#3b82f6" stroke-width="3"/>
-    <text x="45" y="194" font-size="11" fill="var(--tax-muted)">0s 起点</text>
-    <text x="515" y="194" font-size="11" fill="var(--tax-muted)">1.6s</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>UI 动效的黄金阻尼比在 0.75~1.0 之间——既有自然惯性生命力，又不会像果冻一样晃个没完拖慢效率！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const kRange = document.getElementById('kRange');
+    const cRange = document.getElementById('cRange');
+    const svg = document.getElementById('curveSvg');
+    const ball = document.getElementById('ball');
+    const track = document.getElementById('track');
+    const ahaBox = document.getElementById('ahaBox');
+
+    let raf = null, done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function simCurve(k, c) {
+      const pts = [];
+      let x = 0, v = 0;
+      const dt = 0.012;
+      for (let i = 0; i <= 160; i++) {
+        pts.push({ t: i * dt, x });
+        const a = -k * (x - 1) - c * v;
+        v += a * dt;
+        x += v * dt;
+      }
+      return pts;
+    }
+
+    function drawCurve() {
+      const k = Number(kRange.value);
+      const c = Number(cRange.value);
+      const zeta = c / (2 * Math.sqrt(k));
+      document.getElementById('kVal').textContent = k;
+      document.getElementById('cVal').textContent = `${c}（阻尼比 ζ = ${zeta.toFixed(2)}）`;
+
+      const pts = simCurve(k, c);
+      const xOf = t => 42 + (t / 1.92) * 608;
+      const yOf = v => 146 - v * 86; // target=1 at y=60
+
+      let html = '';
+      // Target line y=1
+      html += `<line x1="42" y1="${yOf(1)}" x2="650" y2="${yOf(1)}" stroke="var(--tax-green)" stroke-dasharray="5 4" stroke-width="1.5"/>`;
+      html += `<text x="646" y="${yOf(1) - 6}" text-anchor="end" fill="var(--tax-green)" font-size="11" font-weight="700">目标终位 (100%)</text>`;
+      html += `<line x1="42" y1="${yOf(0)}" x2="650" y2="${yOf(0)}" stroke="var(--tax-border)"/>`;
+
+      const poly = pts.map(p => `${xOf(p.t).toFixed(1)},${Math.max(12, Math.min(165, yOf(p.x))).toFixed(1)}`).join(' ');
+      const col = zeta < 0.8 ? 'var(--tax-amber)' : (zeta <= 1.15 ? 'var(--tax-green)' : 'var(--tax-primary)');
+      html += `<polyline points="${poly}" fill="none" stroke="${col}" stroke-width="3.2"/>`;
+
+      const label = zeta < 0.8 ? '🎈 欠阻尼（有明显过冲回弹）' : (zeta <= 1.15 ? '🍏 临界阻尼（最快到达且零多余晃动）' : '🍯 过阻尼（缓慢爬行，偏黏稠）');
+      html += `<text x="48" y="24" fill="${col}" font-size="12.5" font-weight="800">${label}</text>`;
+      svg.innerHTML = html;
+
+      if (zeta < 0.8) ahaBox.innerHTML = `<strong>欠阻尼 Q 弹区（ζ = ${zeta.toFixed(2)}）：</strong>弹簧冲过目标再轻柔回弹，极具生命力与趣味感，最适合图标点赞、气泡弹出和游戏界面！`;
+      else if (zeta <= 1.15) ahaBox.innerHTML = `<strong>临界阻尼黄金区（ζ = ${zeta.toFixed(2)}）：</strong>iOS 与原生系统最爱的参数！以最短时间干脆停在目标点，丝滑跟手且毫不晃眼！`;
+      else ahaBox.innerHTML = `<strong>过阻尼黏稠区（ζ = ${zeta.toFixed(2)}）：</strong>阻尼太大导致像在蜂蜜里游泳，末尾拖尾极慢，会让用户觉得 App 掉帧卡顿！`;
+    }
+
+    function launch() {
+      cancelAnimationFrame(raf);
+      markDone('发射并体验了弹簧物理阻尼动画');
+      const k = Number(kRange.value);
+      const c = Number(cRange.value);
+      const maxLeft = Math.max(120, track.clientWidth - 64);
+      let x = 0, v = 0;
+      let last = performance.now();
+
+      function step(now) {
+        const dt = Math.min(0.032, (now - last) / 1000);
+        last = now;
+        const a = -k * (x - 1) - c * v;
+        v += a * dt;
+        x += v * dt;
+        ball.style.left = (16 + x * (maxLeft - 16)).toFixed(1) + 'px';
+        if (Math.abs(1 - x) > 0.002 || Math.abs(v) > 0.01) {
+          raf = requestAnimationFrame(step);
+        } else {
+          ball.style.left = maxLeft + 'px';
+        }
+      }
+      ball.style.left = '16px';
+      raf = requestAnimationFrame(step);
+    }
+
+    kRange.oninput = () => { drawCurve(); };
+    cRange.oninput = () => { drawCurve(); };
+    document.getElementById('fireBtn').onclick = launch;
+    document.getElementById('pBouncy').onclick = () => { kRange.value = 260; cRange.value = 10; drawCurve(); launch(); };
+    document.getElementById('pCrit').onclick = () => { kRange.value = 260; cRange.value = 32; drawCurve(); launch(); };
+    document.getElementById('pOver').onclick = () => { kRange.value = 100; cRange.value = 46; drawCurve(); launch(); };
+    drawCurve();
   </script>
 </body>
 </html>

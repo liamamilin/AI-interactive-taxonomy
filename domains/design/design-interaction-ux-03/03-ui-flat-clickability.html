@@ -1,70 +1,111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🖱️ 过度扁平化陷阱：到底哪行字能点？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>过度扁平化陷阱：到底哪行字能点？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .mock-card { padding: 18px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); max-width: 460px; margin: 0 auto; }
+    .el-btn { display: inline-block; margin-top: 10px; transition: all .2s; cursor: pointer; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🖱️ 过度扁平化陷阱：到底哪行字能点？</h1><p>极简风一度走火入魔，把所有按钮的边框、底色、阴影全砍光，只剩干巴巴的黑字——结果用户把鼠标在屏幕上扫了 5 秒都不知道哪行能点！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>按钮可点击意符强度（底色/阴影/圆角）</span><span id="vSig">75%</span></label><input type="range" id="sSig" min="0" max="100" value="75" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>页面中无关干扰文字块数量</span><span id="vTxt">6 块</span></label><input type="range" id="sTxt" min="2" max="12" value="6" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🖱️ 过度扁平化陷阱：到底哪行字能点？（意符抢救情景）</h1>
+      <p>极简扁平风一度走火入魔：把按钮边框、阴影和链接下划线全扒光，结果用户面对屏幕像在玩“扫雷”。逐个恢复下方 <strong>3 个点击意符（Click Signifiers）</strong>，把误点率从 54% 压到 3%！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row" id="togRow"></div>
+
+      <div class="mock-card">
+        <div style="font-size:18px;font-weight:800;margin-bottom:6px;">2026 年度云端账单已出</div>
+        <div style="font-size:13.5px;color:var(--tax-muted);line-height:1.6;">
+          本期费用共 ¥1,280，将于 5 月 1 日自动扣款。如有疑问可
+          <span id="mockLink" style="transition:all .2s;">查看费用明细</span>。
+        </div>
+        <div style="display:flex;gap:14px;align-items:center;margin-top:10px;">
+          <span class="el-btn" id="mockPrimary">立即确认支付</span>
+          <span class="el-btn" id="mockSecond">稍后提醒</span>
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">按钮一眼识别率</div><div class="k-val" id="kRec">—</div></div>
-        <div class="kpi"><div class="k-lbl">多花出的犹疑耗时</div><div class="k-val" id="kHes">—</div></div>
-      </div>
+
+      <div id="statLine" style="text-align:center;margin-top:12px;font-size:13.5px;font-weight:800;color:var(--tax-red);">当前用户误点 / 犹豫率：54%（完全分不清哪里能点！）</div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>扁平化 2.0 铁律：</strong>极简不是把所有线索都删光！好的 UI 必须保留“可点击意符”（色彩区分、按钮容器、微阴影或下划线），让用户不靠鼠标悬停试探也能一眼识别交互入口！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const sig=+document.getElementById('sSig').value, txt=+document.getElementById('sTxt').value;
-  document.getElementById('vSig').textContent=sig+'%';
-  document.getElementById('vTxt').textContent=txt+' 块';
-  const rec=Math.max(15, Math.min(99, Math.round(28 + sig*0.75 - txt*1.2)));
-  const hes=((100-rec)*0.045).toFixed(1);
-  document.getElementById('kRec').textContent=rec+'%';
-  document.getElementById('kRec').style.color=rec>=75?'#059669':'#ef4444';
-  document.getElementById('kHes').textContent='+'+hes+' 秒';
-  const bgOp=(sig/100).toFixed(2);
-  const txtCol=sig>=45?'#ffffff':'#0f172a';
-  const shOp=(sig/100*0.28).toFixed(2);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">把上方意符强度拉到 0% 试试：右边的按钮是不是瞬间隐身成普通文本了？</text>
-    <rect x="65" y="72" width="160" height="44" rx="8" fill="none"/>
-    <text x="145" y="99" text-anchor="middle" font-size="15" font-weight="750" fill="var(--tax-text)">这是一段普通说明</text>
-    <rect x="358" y="76" width="160" height="44" rx="10" fill="#0f172a" opacity="${shOp}"/>
-    <rect x="355" y="72" width="160" height="44" rx="10" fill="#2563eb" opacity="${bgOp}"/>
-    <text x="435" y="99" text-anchor="middle" font-size="15" font-weight="800" fill="${txtCol}">立即提交订单</text>
-    <text x="30" y="164" font-size="11.5" fill="var(--tax-muted)">NN/g 实证研究：恢复轻微边框、微阴影与悬浮反馈，可让任务完成速度直接提升 22%！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“扁平化”绝不等于“抹杀可点击线索”——好用的现代 UI 都是“微拟物（Flat 2.0）”，用克制的底色与微投影告诉用户：这里可以按！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const FIXES = [
+      { id: 'link', label: '① 给文本链接加上蓝色与下划线', on: false, drop: 15 },
+      { id: 'btn',  label: '② 给主按钮装上实色圆角容器', on: false, drop: 24 },
+      { id: 'sec',  label: '③ 给次按钮加上清晰描边边界', on: false, drop: 12 }
+    ];
+
+    let done = false;
+    const togRow = document.getElementById('togRow');
+    const statLine = document.getElementById('statLine');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      togRow.innerHTML = '';
+      FIXES.forEach(f => {
+        const b = document.createElement('button');
+        b.className = f.on ? 'toy-btn' : 'toy-btn secondary';
+        b.textContent = (f.on ? '✓ ' : '+ ') + f.label;
+        b.onclick = () => { f.on = !f.on; markDone('修复了过度扁平化点击意符'); render(); };
+        togRow.appendChild(b);
+      });
+
+      const hasLink = FIXES[0].on;
+      const hasBtn  = FIXES[1].on;
+      const hasSec  = FIXES[2].on;
+
+      const lk = document.getElementById('mockLink');
+      lk.style.color = hasLink ? 'var(--tax-primary)' : 'var(--tax-muted)';
+      lk.style.textDecoration = hasLink ? 'underline' : 'none';
+      lk.style.fontWeight = hasLink ? '700' : '400';
+
+      const pb = document.getElementById('mockPrimary');
+      pb.style.background = hasBtn ? 'var(--tax-primary)' : 'transparent';
+      pb.style.color = hasBtn ? '#fff' : 'var(--tax-ink)';
+      pb.style.padding = hasBtn ? '8px 16px' : '0';
+      pb.style.borderRadius = hasBtn ? '8px' : '0';
+      pb.style.fontWeight = hasBtn ? '800' : '400';
+      pb.style.boxShadow = hasBtn ? '0 3px 10px rgba(59,130,246,0.3)' : 'none';
+
+      const sb = document.getElementById('mockSecond');
+      sb.style.border = hasSec ? '1px solid var(--tax-border)' : 'none';
+      sb.style.padding = hasSec ? '7px 14px' : '0';
+      sb.style.borderRadius = hasSec ? '8px' : '0';
+      sb.style.color = hasSec ? 'var(--tax-muted)' : 'var(--tax-ink)';
+
+      const errRate = 54 - FIXES.filter(f => f.on).reduce((s, f) => s + f.drop, 0);
+      statLine.textContent = errRate <= 5
+        ? `当前用户误点 / 犹豫率：${errRate}%（✅ 所有可点击入口 0.2 秒清晰可见！）`
+        : `当前用户误点 / 犹豫率：${errRate}%（仍有部分交互像纯文本一样隐身）`;
+      statLine.style.color = errRate <= 5 ? 'var(--tax-green)' : (errRate <= 25 ? 'var(--tax-amber)' : 'var(--tax-red)');
+
+      if (errRate <= 5) {
+        ahaBox.innerHTML = '<strong>点击意符抢救成功（误点率 54% → 3%）！</strong>尼尔森研究发现，过度扁平化（Ultra-Flat）会让用户点击耗时平均暴增 22%！保留克制的实色主按钮、描边次按钮和下划线链接，就是“扁平 2.0”的胜利。';
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

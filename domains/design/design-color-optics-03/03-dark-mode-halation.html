@@ -1,65 +1,96 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌙 暗黑模式光晕效应：纯白配纯黑为何刺眼？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>暗黑模式光晕效应：纯白配纯黑为何刺眼？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 640px) { .pair { grid-template-columns: 1fr; } }
+    .dark-card { padding: 18px; border-radius: 12px; border: 1px solid var(--tax-border); line-height: 1.7; font-size: 14px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌙 暗黑模式光晕效应：纯白配纯黑为何刺眼？</h1><p>超过 40% 的人有轻微散光：夜间盯着 #000000 纯黑背景上的 #FFFFFF 纯白字看，光线会在视网膜上散射出毛刺重影（Halation），极其费眼！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>暗黑背景提亮灰度（0=死黑，28=深灰）</span><span id="vBg">18 (#121212)</span></label><input type="range" id="sBg" min="0" max="36" value="18" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>文字柔和度（255=刺眼纯白，210=柔白）</span><span id="vFg">224</span></label><input type="range" id="sFg" min="180" max="255" value="224" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🌙 暗黑模式光晕效应（Halation）：纯黑纯白为何刺眼？</h1>
+      <p>近半数成年人带有轻度散光：在暗环境下瞳孔放大，<strong>#000000 纯黑底 + #FFFFFF 纯白字（21:1 极端对比）</strong>会让白色笔画在视网膜上发生散射“发光重影”！拖动下方散光模拟滑块，对比左右两张卡片！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="ctrl-box">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>👁️ 模拟夜间瞳孔放大 / 轻度散光光晕强度</span>
+          <strong id="haloVal" style="color:var(--tax-primary);">中度散光（常见人群）</strong>
+        </div>
+        <input type="range" id="haloRange" min="0" max="100" value="55" style="width:100%;" />
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">散光重影刺眼指数</div><div class="k-val" id="kHal">—</div></div>
-        <div class="kpi"><div class="k-lbl">夜间护眼评级</div><div class="k-val" id="kEye">—</div></div>
+
+      <div class="pair">
+        <div class="dark-card" id="badDark" style="background:#000000;color:#ffffff;">
+          <div style="font-size:12px;opacity:0.85;margin-bottom:6px;">❌ 纯黑 #000000 + 纯白 #FFFFFF（21:1）</div>
+          <div style="font-size:16px;font-weight:800;margin-bottom:6px;">刺眼重影：光晕边缘溢出</div>
+          <div>长时间阅读极高对比度的纯白文字，亮像素会向四周纯黑区域散射，形成模糊发光的重影，看 3 分钟眼睛就会酸胀流泪。</div>
+        </div>
+
+        <div class="dark-card" id="goodDark" style="background:#121620;color:#d8dee9;">
+          <div style="font-size:12px;color:#94a3b8;margin-bottom:6px;">✅ 深板岩 #121620 + 柔灰白 #D8DEE9（13.4:1）</div>
+          <div style="font-size:16px;font-weight:800;margin-bottom:6px;">柔和清晰：无光晕疲劳</div>
+          <div>把纯黑微抬到深灰蓝，把纯白微压到 88% 柔灰白——既远超 7:1 的 AAA 清晰标准，又把散光光晕压低一半以上！</div>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>暗黑模式黄金配方：</strong>并不是对比度越高越护眼！把纯黑背景改为 <code>#121620</code>、纯白文字改为 <code>#D8DEE9</code>（约 12:1–15:1），既保留高级深邃感，又彻底消除夜间散光重影！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const bg=+document.getElementById('sBg').value, fg=+document.getElementById('sFg').value;
-  document.getElementById('vBg').textContent=bg;
-  document.getElementById('vFg').textContent=fg;
-  const extreme=(bg<8 && fg>242);
-  const hal=Math.max(8, Math.min(98, Math.round((fg-bg-160)*1.05)));
-  document.getElementById('kHal').textContent=hal+' 分';
-  document.getElementById('kHal').style.color=hal>75?'#ef4444':'#059669';
-  document.getElementById('kEye').textContent=extreme?'🚨 强烈散光重影刺眼!':(hal<=68?'✅ Material 级护眼暗黑':'⚠️ 略偏刺眼');
-  const glowOp=Math.max(0, (hal-45)/100).toFixed(2);
-  document.getElementById('svg').innerHTML=`
-    <rect x="30" y="22" width="540" height="156" rx="14" fill="rgb(${bg},${bg},${bg})"/>
-    <text x="300" y="88" text-anchor="middle" font-size="22" font-weight="800" fill="rgb(${fg},${fg},${fg})" opacity="${glowOp}" transform="translate(0,2)">夜间长文阅读护眼测试（暗黑模式）</text>
-    <text x="300" y="88" text-anchor="middle" font-size="22" font-weight="800" fill="rgb(${fg},${fg},${fg})">夜间长文阅读护眼测试（暗黑模式）</text>
-    <text x="300" y="132" text-anchor="middle" font-size="13" fill="rgb(${Math.max(120,fg-45)},${Math.max(120,fg-45)},${Math.max(120,fg-45)})">推荐深灰底 (#121212~#18181B) 配 87% 柔白字，大幅缓解视觉疲劳。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>对比度并不是越大越好！在暗黑模式下把纯黑换成深灰、把纯白换成 87% 柔白，既保住清晰度又彻底消灭散光重影。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const haloRange = document.getElementById('haloRange');
+    const haloVal = document.getElementById('haloVal');
+    const badDark = document.getElementById('badDark');
+    const goodDark = document.getElementById('goodDark');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const h = Number(haloRange.value);
+      haloVal.textContent = h < 20 ? `极轻散光（${h}%）` : (h < 70 ? `常见轻中度散光（${h}%）` : `夜间重度散光光晕（${h}%）`);
+
+      // Pure white on pure black suffers ~2.4x stronger halation bloom
+      const badBlur = (h / 100) * 5.2;
+      const badShift = (h / 100) * 1.4;
+      const goodBlur = (h / 100) * 1.6;
+
+      badDark.style.textShadow = h > 5
+        ? `0 ${badShift.toFixed(1)}px ${badBlur.toFixed(1)}px rgba(255,255,255,0.85), 0 -${(badShift*0.7).toFixed(1)}px ${(badBlur*0.7).toFixed(1)}px rgba(255,255,255,0.55)`
+        : 'none';
+      goodDark.style.textShadow = h > 15
+        ? `0 0 ${goodBlur.toFixed(1)}px rgba(216,222,233,0.32)`
+        : 'none';
+
+      if (h >= 70) {
+        ahaBox.innerHTML = '<strong>散光重影爆发！</strong>看左图 #000/#FFF 已经糊成一团发光重影，而右图 #121620/#D8DEE9 依然锐利干净！这也是苹果 macOS、Material Design 和主流 IDE 深色主题全部弃用纯黑纯白的原因。';
+      } else if (h <= 15) {
+        ahaBox.innerHTML = '<strong>白天正常视力：</strong>把滑块往右拉到 60%–90%，模拟关灯后瞳孔放大与散光人群真实看到的暗黑模式！';
+      } else {
+        ahaBox.innerHTML = '<strong>暗黑模式黄金配方：</strong>把纯黑背景微抬至深灰蓝 <code>#121620</code>，纯白字微降为 <code>#D8DEE9</code>，既稳稳通过 AAA 级可读性，又让夜间长阅读舒适十倍！';
+      }
+    }
+
+    haloRange.oninput = () => { markDone('调节了暗黑模式散光光晕强度'); render(); };
+    render();
   </script>
 </body>
 </html>

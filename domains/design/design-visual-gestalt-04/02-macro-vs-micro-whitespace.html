@@ -1,71 +1,108 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌬️ 宏观留白 vs 微观留白：双层节奏器</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>宏观留白 vs 微观留白：双层节奏器</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .btn-row { grid-template-columns: 1fr; } }
+    .tog-btn {
+      padding: 10px 12px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 13px; font-weight: 700; cursor: pointer; text-align: left;
+    }
+    .tog-btn.on { border-color: var(--tax-green); background: var(--tax-green-soft); color: var(--tax-green); }
+    .canvas-frame {
+      border-radius: 12px; border: 1px solid var(--tax-border); background: var(--tax-surface-alt);
+      transition: padding .25s;
+    }
+    .layout-grid { display: grid; grid-template-columns: 1fr 1fr; transition: gap .25s; }
+    @media (max-width: 600px) { .layout-grid { grid-template-columns: 1fr; } }
+    .mini-card {
+      border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface);
+      transition: padding .25s, line-height .25s;
+    }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌬️ 宏观留白 vs 微观留白：双层节奏器</h1><p>宏观留白决定页面格局和高级感，微观留白（字距、行距、段距）决定眼睛能不能一口气读完不串行！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>宏观留白（页面左右页边距）</span><span id="vMac">60 px</span></label><input type="range" id="sMac" min="10" max="110" value="60" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>微观留白（正文行间距）</span><span id="vMic">24 px</span></label><input type="range" id="sMic" min="14" max="34" value="24" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🌬️ 宏观留白 vs 微观留白：双层呼吸节奏构建器</h1>
+      <p>很多页面看着别扭，是因为只调了其中一层：<strong>宏观留白</strong>管板块之间的“大骨架间距”，<strong>微观留白</strong>管卡片内部的行高与字距。分别开关下面两层，感受双层共振！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="tog-btn" id="macroBtn">○ 宏观留白（页面外边距 &amp; 卡片间距）：关</button>
+        <button class="tog-btn" id="microBtn">○ 微观留白（卡片内边距 &amp; 舒适行高）：关</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">长文阅读理解率增益</div><div class="k-val" id="kCmp">—</div></div>
-        <div class="kpi"><div class="k-lbl">排版舒适度</div><div class="k-val" id="kCmf">—</div></div>
+
+      <div class="canvas-frame" id="canvasFrame">
+        <div class="layout-grid" id="layoutGrid">
+          <div class="mini-card" id="card1">
+            <div style="font-weight:800;font-size:15px;">设计系统原则</div>
+            <div style="font-size:12.5px;color:var(--tax-muted);margin-top:4px;">宏观留白让读者一眼分清模块边界，不再被整页文字墙吓退。</div>
+          </div>
+          <div class="mini-card" id="card2">
+            <div style="font-weight:800;font-size:15px;">舒适阅读体验</div>
+            <div style="font-size:12.5px;color:var(--tax-muted);margin-top:4px;">微观留白给每行字留出换气缝隙，阅读速度和理解率可提升 20%。</div>
+          </div>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>双层缺失（窒息态）：</strong>现在两张卡片死死贴在一起，里面的字也紧紧顶着边框！分别点亮「宏观留白」和「微观留白」感受差距。
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const mac=+document.getElementById('sMac').value, mic=+document.getElementById('sMic').value;
-  document.getElementById('vMac').textContent=mac+' px';
-  document.getElementById('vMic').textContent=mic+' px';
-  const cmf=Math.max(20, Math.min(98, Math.round(100 - Math.abs(mac-65)*0.55 - Math.abs(mic-24)*2.8)));
-  const cmp=Math.round(cmf*0.22);
-  document.getElementById('kCmp').textContent='+'+cmp+'%';
-  document.getElementById('kCmp').style.color=cmf>=75?'#059669':'#f59e0b';
-  document.getElementById('kCmf').textContent=cmf+' 分';
-  const wLine=Math.max(120, 540 - mac*2);
-  let lines='';
-  for(let i=0;i<5;i++){
-    const y=48+i*mic;
-    if(y<180) lines+=`<rect x="${30+mac}" y="${y}" width="${i===4?Math.round(wLine*0.6):wLine}" height="8" rx="4" fill="#475569" opacity="0.72"/>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <rect x="30" y="18" width="540" height="170" rx="12" fill="var(--tax-surface)" stroke="var(--tax-border)"/>
-    <rect x="30" y="18" width="${mac}" height="170" fill="#3b82f6" opacity="0.1"/>
-    <rect x="${570-mac}" y="18" width="${mac}" height="170" fill="#3b82f6" opacity="0.1"/>
-    ${lines}
-    <text x="300" y="180" text-anchor="middle" font-size="11" fill="var(--tax-muted)">蓝色区域 = 宏观页边距 (${mac}px) · 行间距 = ${mic}px</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>左右页边距收窄行宽，让眼球不必大幅横扫；行距保持在字号的 1.5~1.7 倍，彻底消灭读串行的烦恼！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let macro = false, micro = false, done = false;
+    const macroBtn = document.getElementById('macroBtn');
+    const microBtn = document.getElementById('microBtn');
+    const canvasFrame = document.getElementById('canvasFrame');
+    const layoutGrid = document.getElementById('layoutGrid');
+    const c1 = document.getElementById('card1');
+    const c2 = document.getElementById('card2');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      macroBtn.classList.toggle('on', macro);
+      microBtn.classList.toggle('on', micro);
+      macroBtn.textContent = (macro ? '✓ ' : '○ ') + '宏观留白（页面外边距 & 卡片间距）：' + (macro ? '开' : '关');
+      microBtn.textContent = (micro ? '✓ ' : '○ ') + '微观留白（卡片内边距 & 舒适行高）：' + (micro ? '开' : '关');
+
+      canvasFrame.style.padding = macro ? '26px' : '4px';
+      layoutGrid.style.gap = macro ? '22px' : '3px';
+
+      [c1, c2].forEach(c => {
+        c.style.padding = micro ? '18px 20px' : '5px 6px';
+        c.style.lineHeight = micro ? '1.75' : '1.15';
+      });
+
+      if (macro && micro) {
+        ahaBox.innerHTML = '<strong>双层呼吸共振（最佳态）！</strong>宏观留白（26px 外框 + 22px 栏距）确立大格局，微观留白（18px 内边距 + 1.75 行高）呵护双眼。记住铁律：<strong>外间距 ≥ 内边距</strong>，模块才不会散架！';
+      } else if (macro && !micro) {
+        ahaBox.innerHTML = '<strong>只有宏观没有微观：</strong>板块之间倒是分开了，但每个卡片里的文字依然死贴边框、行距挤成一团，读起来还是累眼！再把微观留白打开试试。';
+      } else if (!macro && micro) {
+        ahaBox.innerHTML = '<strong>只有微观没有宏观：</strong>单看每张卡片内部挺舒服，但两张卡片几乎无缝撞在一起，整体显得拥挤局促！再把宏观留白打开试试。';
+      } else {
+        ahaBox.innerHTML = '<strong>双层缺失（窒息态）：</strong>卡片死贴、文字顶边，典型的“填满主义”灾难。逐个点亮上方开关体验呼吸感！';
+      }
+    }
+
+    macroBtn.onclick = () => { macro = !macro; markDone('切换了宏观留白开关'); render(); };
+    microBtn.onclick = () => { micro = !micro; markDone('切换了微观留白开关'); render(); };
+    render();
   </script>
 </body>
 </html>

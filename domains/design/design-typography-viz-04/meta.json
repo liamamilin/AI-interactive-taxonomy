@@ -4,7 +4,7 @@
   "order": 4,
   "title": "视觉编码优先级（为何饼图常骗人）",
   "icon": "🥧",
-  "subtitle": "为什么人眼一眼能看出两根柱子差了 2%，换成长得差不多的饼图扇区却完全蒙圈？",
+  "subtitle": "为什么人眼看柱状图比饼图准 3 倍？气泡图按半径画为何会把 2 倍夸大成 4 倍？",
   "difficulty": "进阶",
   "related": [
     "design/design-typography-viz-05",
@@ -12,25 +12,25 @@
   ],
   "toys": {
     "01-cleveland-mcgill-rank-svg.html": {
-      "title": "克利夫兰视觉编码精度榜：柱图 vs 饼图（SVG）",
+      "title": "克利夫兰视觉编码精度榜：柱图 vs 饼图",
       "icon": "📊",
-      "archetype": "comparison",
-      "concept": "视觉通道精度 · 位置长度 > 角度面积 > 色深",
-      "summary": "调节两组接近数值（如 24% vs 27%）的微小差值，同步对比柱状图长度和饼图角度谁能让你一眼判胜负！"
+      "archetype": "blind-lab",
+      "concept": "视觉编码精度 · 同基线长度 · 角度面积误判",
+      "summary": "先凭肉眼在饼图里盲猜哪块份额最大，再一键展开柱状图揭晓同基线长度的绝对碾压。"
     },
     "02-pie-slice-overload.html": {
       "title": "饼图灾难阈值：超过 4 块就立刻换条形图！",
       "icon": "🥧",
       "archetype": "simulation",
-      "concept": "饼图切片上限 · 角度辨别失真 · 水平条形图",
-      "summary": "调节分类切片数量与数值接近度，看饼图可读性如何在第 5 块以后断崖崩溃！"
+      "concept": "饼图 4 块阈值 · 彩虹披萨灾难 · 排序条形图",
+      "summary": "把切片从 2 块拖到 12 块，实时对比饼图崩坏与右侧降序水平条形图的清晰度。"
     },
     "03-bubble-radius-vs-area.html": {
       "title": "气泡图面积骗局：按半径映射把 2 倍夸大成 4 倍！",
       "icon": "🫧",
-      "archetype": "comparison",
-      "concept": "面积编码 · 平方放大失真 · 半径开方修正",
-      "summary": "调节真实数据倍率，对比错误“按半径线性放大”和正确“按面积开方缩放”的视觉面积差异！"
+      "archetype": "race",
+      "concept": "面积平方律 · Math.sqrt 映射 · 视觉夸大骗局",
+      "summary": "拖动真实倍数对比直接映射半径（K² 面积膨胀）与开方映射面积的几何诚实度对决。"
     }
   }
 }

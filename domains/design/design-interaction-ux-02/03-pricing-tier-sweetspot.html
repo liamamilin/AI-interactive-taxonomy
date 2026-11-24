@@ -1,71 +1,116 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>💳 为什么 SaaS 定价表几乎全都是 3 档？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>为什么 SaaS 定价表几乎全都是 3 档？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .tiers { display: grid; gap: 8px; margin-bottom: 12px; }
+    .tier-card {
+      padding: 12px 10px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border);
+      text-align: center; position: relative;
+    }
+    .tier-card.rec { border: 2px solid var(--tax-primary); background: var(--tax-primary-soft); }
+    .rec-badge { display: inline-block; font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: var(--tax-primary); color: #fff; margin-bottom: 4px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .s-card { padding: 10px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>💳 为什么 SaaS 定价表几乎全都是 3 档？</h1><p>1 档没得比，7 档算到晕；3 档（基础版 / 推荐专业版 / 旗舰版）恰好同时满足希克定律的极低认知负担与“折中居中效应”！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>定价套餐档位数</span><span id="vTr">3 档</span></label><input type="range" id="sTr" min="1" max="7" value="3" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>是否高亮标出“最受欢迎”推荐档</span><span id="vHi">85%</span></label><input type="range" id="sHi" min="0" max="100" value="85" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>💳 为什么 SaaS 定价表几乎全都是 3 档？（构建器）</h1>
+      <p>在 <strong>1 档</strong>、<strong>3 档黄金结构（+ 推荐徽章）</strong> 与 <strong>7 档复杂矩阵</strong>之间自由切换，观察希克定律、折中效应（Compromise Effect）与付费转化率如何实时联动！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn secondary" id="t1Btn">1 档：一口价</button>
+        <button class="toy-btn" id="t3Btn">✨ 3 档：基础 / 推荐专业 / 企业</button>
+        <button class="toy-btn secondary" id="t7Btn">💥 7 档：细碎功能矩阵</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">付费转化效率指数</div><div class="k-val" id="kCnv">—</div></div>
-        <div class="kpi"><div class="k-lbl">设计评估</div><div class="k-val" id="kEv">—</div></div>
+
+      <div class="tiers" id="tiersGrid"></div>
+
+      <div class="stats">
+        <div class="s-card"><div style="font-size:11.5px;color:var(--tax-muted);">页面转化率</div><strong id="crVal" style="font-size:20px;color:var(--tax-green);">7.4%</strong></div>
+        <div class="s-card"><div style="font-size:11.5px;color:var(--tax-muted);">平均决策耗时</div><strong id="rtVal" style="font-size:20px;">12 秒</strong></div>
+        <div class="s-card"><div style="font-size:11.5px;color:var(--tax-muted);">客单价 ARPU</div><strong id="arpuVal" style="font-size:20px;color:var(--tax-primary);">¥199/月</strong></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>3 档黄金甜点（折中效应 + 锚定）：</strong>第 1 档降低门槛，第 3 档拉高价格锚点，<strong>中间第 2 档</strong>戴上“最受欢迎”徽章后直接承接 65%+ 的付费订单——决策快、客单价还最高！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const tr=+document.getElementById('sTr').value, hi=+document.getElementById('sHi').value;
-  document.getElementById('vTr').textContent=tr+' 档';
-  document.getElementById('vHi').textContent=hi+'%';
-  const base=tr===3?84:(tr===2?72:(tr===4?68:Math.max(28, 70-(tr-3)*12)));
-  const cnv=Math.min(98, Math.round(base + hi*0.14));
-  document.getElementById('kCnv').textContent=cnv+' 分';
-  document.getElementById('kCnv').style.color=cnv>=80?'#059669':'#f59e0b';
-  document.getElementById('kEv').textContent=tr===3?'🏆 黄金三档 + 推荐锚点':(tr>4?'😵 参数表格太长劝退':'⚖️ 尚可');
-  let boxes='';
-  const w=Math.min(110, 480/tr - 10);
-  const startX=300 - (tr*(w+10)-10)/2;
-  for(let i=0;i<tr;i++){
-    const isMid=(i===Math.floor(tr/2) && hi>=50);
-    const x=startX+i*(w+10);
-    boxes+=`<rect x="${x.toFixed(1)}" y="${isMid?48:64}" width="${w.toFixed(1)}" height="${isMid?108:92}" rx="8" fill="${isMid?'#3b82f6':'var(--tax-border)'}" opacity="${isMid?'0.88':'0.35'}"/>
-      <text x="${(x+w/2).toFixed(1)}" y="114" text-anchor="middle" font-size="11.5" font-weight="800" fill="${isMid?'#fff':'var(--tax-text)'}">${isMid?'★ 推荐':('档位'+(i+1))}</text>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">定价页卡片结构预览（当前 ${tr} 档）</text>
-    ${boxes}`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>三档定价不是巧合——便宜档锚定低门槛、昂贵档提供高锚、中间高亮档接住 60% 以上不想费脑比较的买家！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const CONFIGS = {
+      1: {
+        cols: '1fr', cr: '3.8%', rt: '6 秒', arpu: '¥99/月',
+        items: [{ name: '标准全功能版', price: '¥99/月', desc: '买或不买，零对比参考点', rec: false }],
+        aha: '<strong>1 档一口价（转化 3.8%）：</strong>用户心里的问题从“选哪档”变成了“要不要花钱”，缺少高价锚点参照，大客户也只付了 ¥99，白白损失高客单！'
+      },
+      3: {
+        cols: 'repeat(3, 1fr)', cr: '7.4%', rt: '12 秒', arpu: '¥199/月',
+        items: [
+          { name: '入门版', price: '¥69/月', desc: '个人轻量使用', rec: false },
+          { name: '专业版', price: '¥199/月', desc: '团队协作 + 无限空间', rec: true },
+          { name: '企业版', price: '¥699/月', desc: '专属部署 + SLA', rec: false }
+        ],
+        aha: '<strong>3 档黄金结构（转化 7.4% · 客单 ¥199）：</strong>完美踩中希克定律舒适区（3 选 1 极快）+ 行为经济学折中效应（大家天然避开最便宜和最贵，直奔中间推荐档）！'
+      },
+      7: {
+        cols: 'repeat(4, 1fr)', cr: '2.1%', rt: '68 秒', arpu: '¥118/月',
+        items: [
+          { name: 'Mini', price: '¥29' }, { name: 'Lite', price: '¥49' }, { name: 'Basic', price: '¥79' },
+          { name: 'Plus', price: '¥119' }, { name: 'Pro', price: '¥189' }, { name: 'Max', price: '¥299' },
+          { name: 'Ultra', price: '¥499' }
+        ],
+        aha: '<strong>7 档选择瘫痪（转化暴跌至 2.1%）：</strong>为了照顾每个细分需求塞进 7 档价格，结果用户比了 1 分钟还是算不清哪档划算，直接关掉网页走人！'
+      }
+    };
+
+    let cur = 3, done = false;
+    const tiersGrid = document.getElementById('tiersGrid');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      [1, 3, 7].forEach(k => {
+        document.getElementById(`t${k}Btn`).className = cur === k ? 'toy-btn' : 'toy-btn secondary';
+      });
+      const cfg = CONFIGS[cur];
+      tiersGrid.style.gridTemplateColumns = cfg.cols;
+      tiersGrid.innerHTML = cfg.items.map(it => `
+        <div class="tier-card ${it.rec ? 'rec' : ''}">
+          ${it.rec ? '<div class="rec-badge">★ 65% 用户选择</div>' : ''}
+          <div style="font-weight:800;font-size:14px;">${it.name}</div>
+          <div style="font-size:18px;font-weight:900;color:var(--tax-primary);margin:4px 0;">${it.price}</div>
+          ${it.desc ? `<div style="font-size:11.5px;color:var(--tax-muted);">${it.desc}</div>` : ''}
+        </div>
+      `).join('');
+
+      document.getElementById('crVal').textContent = cfg.cr;
+      document.getElementById('crVal').style.color = cur === 3 ? 'var(--tax-green)' : (cur === 7 ? 'var(--tax-red)' : 'var(--tax-amber)');
+      document.getElementById('rtVal').textContent = cfg.rt;
+      document.getElementById('arpuVal').textContent = cfg.arpu;
+      ahaBox.innerHTML = cfg.aha;
+    }
+
+    [1, 3, 7].forEach(k => {
+      document.getElementById(`t${k}Btn`).onclick = () => { cur = k; markDone(`对比了SaaS ${k}档定价表转化率`); render(); };
+    });
+    render();
   </script>
 </body>
 </html>

@@ -1,73 +1,152 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🥁 律动倒 U 曲线：切分音程度 vs 摇摆冲动（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>律动倒 U 曲线：切分音程度 vs 摇摆冲动</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .seq-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-bottom: 12px; }
+    .step-cell {
+      padding: 10px 4px; border-radius: 8px; text-align: center; font-size: 11.5px; font-weight: 800;
+      background: var(--tax-surface-alt); border: 1.5px solid var(--tax-border); color: var(--tax-muted);
+    }
+    .step-cell.hit { background: var(--tax-primary-soft); border-color: var(--tax-primary); color: var(--tax-primary); }
+    .step-cell.now { box-shadow: 0 0 0 2px var(--tax-amber); transform: scale(1.05); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🥁 律动倒 U 曲线：切分音程度 vs 摇摆冲动（SVG）</h1><p>神经音乐学经典发现（Witek 2014）：律动感（想跳舞的冲动）与切分复杂度呈完美的倒 U 曲线——全踩正拍太无聊，全乱切找不到拍子，中等切分最上头！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>节奏切分复杂度（重音挪到弱拍的比例）</span><span id="vSyn">45%（黄金律动）</span></label><input type="range" id="sSyn" min="0" max="100" value="45" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>底鼓（Kick）基础脉搏稳定度</span><span id="vKck">85%</span></label><input type="range" id="sKck" min="20" max="100" value="85" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🥁 律动倒 U 曲线：切分音程度 vs 身体摇摆冲动（模拟器）</h1>
+      <p>音乐神经科学（Witek et al., 2014）发现：让人忍不住跟着点头的<strong>律动感（Groove）</strong>呈倒 U 曲线！太死板（零切分）无聊，太混乱（过度切分）找不到拍子，只有<strong>中等切分（在弱拍制造微惊喜）</strong>能点燃运动皮层！点击试听 3 档鼓组：</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn secondary" id="gLow">🤖 零切分：机械直拍（Groove 35%）</button>
+        <button class="toy-btn" id="gMid">🕺 中等切分：Funk 黄金律动（Groove 95%）</button>
+        <button class="toy-btn secondary" id="gHigh">💥 过度切分：杂乱碎拍（Groove 28%）</button>
+        <button class="toy-btn secondary" id="playBtn">▶ 播放 / 暂停鼓组</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">律动感（忍不住点头指数）</div><div class="k-val" id="kGrv">—</div></div>
-        <div class="kpi"><div class="k-lbl">听感诊断</div><div class="k-val" id="kDia">—</div></div>
-      </div>
+
+      <div class="seq-grid" id="seqGrid"></div>
+
+      <svg id="uSvg" viewBox="0 0 680 145" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="律动倒U曲线"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>预测编码与律动：</strong>按下「▶ 播放鼓组」并切换 3 档节奏！中等切分在强拍之间巧妙“抢半拍”，既保留底鼓锚点又制造轻度预期违背，大脑会立刻指挥你的头和脚去“补齐那个空拍”！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const syn=+document.getElementById('sSyn').value, kck=+document.getElementById('sKck').value;
-  document.getElementById('vSyn').textContent=syn+'%';
-  document.getElementById('vKck').textContent=kck+'%';
-  const grv=Math.max(10, Math.min(98, Math.round(98*Math.exp(-Math.pow((syn-46)/32,2))*(0.55+kck*0.0045))));
-  const dia=syn<18?'📏 像广播体操一样太规矩':(syn>78?'😵 拍子彻底散架找不到北':'🕺 完美 Groove，自动抖腿!');
-  document.getElementById('kGrv').textContent=grv+' 分';
-  document.getElementById('kGrv').style.color=grv>=75?'#059669':'#f59e0b';
-  document.getElementById('kDia').textContent=dia;
-  let pts=[];
-  for(let x=0;x<=100;x+=2){
-    const g=98*Math.exp(-Math.pow((x-46)/32,2))*(0.55+kck*0.0045);
-    pts.push(`${(45+x*5.1).toFixed(1)},${(172-g*1.3).toFixed(1)}`);
-  }
-  const cx=45+syn*5.1, cy=172-grv*1.3;
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="24" font-size="13" font-weight="800" fill="var(--tax-text)">神经音乐学 Groove 倒 U 曲线（大脑渴望“轻微违背节拍预期”）</text>
-    <line x1="45" y1="172" x2="555" y2="172" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <polyline points="${pts.join(' ')}" fill="none" stroke="#f97316" stroke-width="3"/>
-    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="#059669" stroke="#fff" stroke-width="2"/>
-    <text x="45" y="192" font-size="11" fill="var(--tax-muted)">0% 死板正拍</text>
-    <text x="275" y="192" text-anchor="middle" font-size="11" font-weight="800" fill="#059669">45% Funk/R&B 黄金切分</text>
-    <text x="510" y="192" font-size="11" fill="var(--tax-muted)">100% 混乱</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当底鼓稳住预期，而军鼓/吉他故意在弱拍抢半拍击打时，大脑为了补齐空缺的强拍，会直接驱动你的脖子和脚跟着点起来！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const PATTERNS = {
+      low:  { name: '零切分直拍', x: 15, y: 38, kick: [1,0,0,0,1,0,0,0], snare: [0,0,1,0,0,0,1,0], col: 'var(--tax-muted)', aha: '<strong>零切分（38 分）：</strong>每一拍都死死踩在强拍正点上，像广播体操节拍器，100% 可预测但缺乏摇摆张力！' },
+      mid:  { name: '中等切分 Funk', x: 52, y: 95, kick: [1,0,0,1,0,0,1,0], snare: [0,0,1,0,0,1,0,0], col: 'var(--tax-green)', aha: '<strong>黄金律动巅峰（95 分）！</strong>底鼓和军鼓故意落在第 4、6 步弱拍切分点上，形成“欲扬先抑”的弹簧弹性——你的身体会下意识用点头去填补空拍！' },
+      high: { name: '过度切分碎拍', x: 88, y: 28, kick: [0,1,0,1,0,0,0,1], snare: [0,0,0,0,1,0,1,0], col: 'var(--tax-red)', aha: '<strong>过度切分（28 分）：</strong>连第 1 拍强拍锚点都被抽空了，大脑彻底丢失了节拍骨架，只觉得杂乱无章，根本跳不起来！' }
+    };
+
+    let mode = 'mid', playing = false, step = 0, timer = null, ctx = null, done = false;
+    const seqGrid = document.getElementById('seqGrid');
+    const svg = document.getElementById('uSvg');
+    const playBtn = document.getElementById('playBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function hitDrum(isKick) {
+      try {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        if (isKick) {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(140, now);
+          osc.frequency.exponentialRampToValueAtTime(42, now + 0.11);
+          g.gain.setValueAtTime(0.32, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+        } else {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(140, now + 0.06);
+          g.gain.setValueAtTime(0.18, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        }
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(now); osc.stop(now + 0.16);
+      } catch (e) {}
+    }
+
+    function render() {
+      ['low', 'mid', 'high'].forEach(k => {
+        const id = k === 'low' ? 'gLow' : (k === 'mid' ? 'gMid' : 'gHigh');
+        document.getElementById(id).className = mode === k ? 'toy-btn' : 'toy-btn secondary';
+      });
+      const p = PATTERNS[mode];
+      seqGrid.innerHTML = '';
+      for (let i = 0; i < 8; i++) {
+        const div = document.createElement('div');
+        const has = p.kick[i] || p.snare[i];
+        div.className = 'step-cell' + (has ? ' hit' : '') + (playing && step === i ? ' now' : '');
+        div.innerHTML = `${i + 1}<div style="font-size:10px;margin-top:3px;">${p.kick[i] ? '🥁底' : (p.snare[i] ? '⚡军' : '·')}</div>`;
+        seqGrid.appendChild(div);
+      }
+
+      // Draw Inverted-U curve
+      const xOf = v => 50 + (v / 100) * 580;
+      const yOf = v => 118 - (v / 100) * 86;
+      let pts = [];
+      for (let x = 0; x <= 100; x += 2) {
+        const y = 95 * Math.exp(-Math.pow((x - 52) / 28, 2));
+        pts.push(`${xOf(x).toFixed(1)},${yOf(y).toFixed(1)}`);
+      }
+      let html = `<line x1="50" y1="118" x2="630" y2="118" stroke="var(--tax-border)"/>`;
+      html += `<polyline points="${pts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="3"/>`;
+      html += `<circle cx="${xOf(p.x)}" cy="${yOf(p.y)}" r="8" fill="${p.col}" stroke="#fff" stroke-width="2"/>`;
+      html += `<text x="${xOf(p.x)}" y="${yOf(p.y) - 12}" text-anchor="middle" fill="${p.col}" font-size="12" font-weight="800">${p.name} (${p.y}%)</text>`;
+      html += `<text x="50" y="136" fill="var(--tax-muted)" font-size="11">零切分（死板）</text>`;
+      html += `<text x="340" y="136" text-anchor="middle" fill="var(--tax-green)" font-size="11" font-weight="700">中等切分（黄金律动）</text>`;
+      html += `<text x="630" y="136" text-anchor="end" fill="var(--tax-muted)" font-size="11">过度切分（混乱）</text>`;
+      svg.innerHTML = html;
+      ahaBox.innerHTML = p.aha;
+    }
+
+    function togglePlay() {
+      if (playing) {
+        playing = false;
+        clearInterval(timer);
+        playBtn.textContent = '▶ 播放 / 暂停鼓组';
+        render();
+        return;
+      }
+      playing = true;
+      step = 0;
+      playBtn.textContent = '⏸ 暂停鼓组';
+      markDone('试听了律动倒U曲线三档切分鼓组');
+      timer = setInterval(() => {
+        const p = PATTERNS[mode];
+        if (p.kick[step]) hitDrum(true);
+        if (p.snare[step]) hitDrum(false);
+        render();
+        step = (step + 1) % 8;
+      }, 175);
+    }
+
+    document.getElementById('gLow').onclick = () => { mode = 'low'; markDone('切换了零切分鼓组'); render(); };
+    document.getElementById('gMid').onclick = () => { mode = 'mid'; markDone('切换了黄金律动切分鼓组'); render(); };
+    document.getElementById('gHigh').onclick = () => { mode = 'high'; markDone('切换了过度切分鼓组'); render(); };
+    playBtn.onclick = togglePlay;
+    render();
   </script>
 </body>
 </html>

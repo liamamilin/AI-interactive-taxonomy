@@ -1,65 +1,90 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚡ 前置关键词法则：每行前 3 个字决定生死</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>前置关键词法则：每行前 3 个字决定生死</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 640px) { .pair { grid-template-columns: 1fr; } }
+    .list-card { padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .line-item { padding: 7px 0; border-bottom: 1px dashed var(--tax-border); font-size: 13.5px; line-height: 1.5; }
+    .line-item:last-child { border-bottom: none; }
+    .tail { transition: opacity .3s, filter .3s; }
+    .masked .tail { opacity: 0.14; filter: blur(3.5px); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚡ 前置关键词法则：每行前 3 个字决定生死</h1><p>既然 F 型扫读只扫每段最左边的两三个字，把核心信息藏在句子末尾（“关于我们如何提升效率的说明：免费试用”）注定被跳过！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>核心关键词前置比例（放在句首前 3 字）</span><span id="vFrt">85%</span></label><input type="range" id="sFrt" min="10" max="100" value="85" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>列表条目总数量</span><span id="vCnt">12 条</span></label><input type="range" id="sCnt" min="4" max="20" value="12" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⚡ 前置关键词法则：F 型遮罩盲测</h1>
+      <p>眼动仪证实：F 型扫读用户看列表时，<strong>80% 的时间只扫每行最左边的 3–4 个字</strong>！现在右侧 70% 内容已被模拟遮罩——对比左右两份功能清单，哪一份一眼就能看懂产品卖点？</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="maskBtn">👁️ 揭开右侧遮罩（看完整句子）</button>
+        <button class="toy-btn secondary" id="pickL">左栏更清晰</button>
+        <button class="toy-btn secondary" id="pickR">右栏更清晰</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">3 秒内精准扫中率</div><div class="k-val" id="kHit">—</div></div>
-        <div class="kpi"><div class="k-lbl">文案写法对比</div><div class="k-val" id="kEx">—</div></div>
+
+      <div class="pair masked" id="pairWrap">
+        <div class="list-card">
+          <div style="font-size:12px;font-weight:800;color:var(--tax-red);margin-bottom:8px;">📋 方案 A（废话前置）</div>
+          <div class="line-item"><span>我们可以帮助</span><span class="tail">团队实现 0.2 秒全端实时协作同步</span></div>
+          <div class="line-item"><span>您可以随时在</span><span class="tail">没有网络的高铁飞机上离线编辑文档</span></div>
+          <div class="line-item"><span>系统会自动为</span><span class="tail">重要商业机密提供银行级端到端加密</span></div>
+          <div class="line-item"><span>支持一键快速</span><span class="tail">导出高清 PDF 与 Markdown 源码</span></div>
+        </div>
+
+        <div class="list-card">
+          <div style="font-size:12px;font-weight:800;color:var(--tax-green);margin-bottom:8px;">📋 方案 B（信息前置）</div>
+          <div class="line-item"><strong>实时同步</strong><span class="tail">：0.2 秒全端协作，告别版本冲突</span></div>
+          <div class="line-item"><strong>离线编辑</strong><span class="tail">：高铁飞机断网照常写，联网自动合并</span></div>
+          <div class="line-item"><strong>端到端加密</strong><span class="tail">：银行级安全守护重要商业机密</span></div>
+          <div class="line-item"><strong>多格式导出</strong><span class="tail">：一键输出高清 PDF 与 Markdown</span></div>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>盲测观察：</strong>在 F 型遮罩下，左栏只能看见“我们可以…/您可以…/系统会…”一排毫无营养的废话；右栏仅凭每行前 4 个字就瞬间读完 4 大核心卖点！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const frt=+document.getElementById('sFrt').value, cnt=+document.getElementById('sCnt').value;
-  document.getElementById('vFrt').textContent=frt+'%';
-  document.getElementById('vCnt').textContent=cnt+' 条';
-  const hit=Math.max(18, Math.min(97, Math.round(22 + frt*0.76 - cnt*0.8)));
-  document.getElementById('kHit').textContent=hit+'%';
-  document.getElementById('kHit').style.color=hit>=70?'#059669':'#ef4444';
-  document.getElementById('kEx').textContent=frt>=60?'✅ “免费退换：7 天无理由”':'❌ “关于本平台退换政策的说明”';
-  const w=Math.max(15, hit*4.2);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">用户在 ${cnt} 条列表中 3 秒扫中关键信息的概率</text>
-    <rect x="30" y="68" width="440" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${w.toFixed(0)}" height="38" rx="8" fill="${hit>=70?'#059669':'#f59e0b'}"/>
-    <text x="${Math.min(480,38+w).toFixed(0)}" y="93" font-size="14" font-weight="850" fill="${hit>=70?'#059669':'#d97706'}">${hit}%</text>
-    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">写小标题、菜单项和项目要点时，砍掉“关于、如何、进行”等废话，让硬核动词和名词打头阵！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>网页写作不是写悬疑小说，永远用“倒金字塔结构”——把结论塞进第一行前三个字！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let masked = true, done = false;
+    const pairWrap = document.getElementById('pairWrap');
+    const maskBtn = document.getElementById('maskBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function setMask(v) {
+      masked = v;
+      pairWrap.classList.toggle('masked', masked);
+      maskBtn.textContent = masked ? '👁️ 揭开右侧遮罩（看完整句子）' : '🫣 重新开启 F 型扫读遮罩';
+    }
+
+    maskBtn.onclick = () => { markDone('切换了F型前置关键词遮罩'); setMask(!masked); };
+    document.getElementById('pickL').onclick = () => {
+      setMask(false);
+      markDone('完成了前置关键词盲测');
+      ahaBox.innerHTML = '<strong>揭晓真相（右栏 B 完胜）：</strong>两栏传递的是完全相同的 4 个功能，但左栏把最值钱的关键词藏到了行尾，在高速扫读中等于直接隐身！写标题、简历和汇报要点时，永远把<strong>动词+核心价值</strong>顶到最左边！';
+    };
+    document.getElementById('pickR').onclick = () => {
+      setMask(false);
+      markDone('完成了前置关键词盲测');
+      ahaBox.innerHTML = '<strong>精准命中（右栏 B 完胜）！</strong>这就是英文写作与 UX 文案的 <strong>Front-loading（信息前置）</strong>铁律：每条要点的前 2–4 个字必须自带完整信息量，让只扫左侧边缘的读者也能 100% 吸收重点！';
+    };
   </script>
 </body>
 </html>

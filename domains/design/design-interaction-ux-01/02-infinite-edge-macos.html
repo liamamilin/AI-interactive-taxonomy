@@ -1,63 +1,91 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🖥️ 屏幕边缘“无限大宽度”外挂</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>屏幕边缘“无限大宽度”外挂</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🖥️ 屏幕边缘“无限大宽度”外挂</h1><p>为什么把菜单栏紧贴屏幕最顶端（0px 缝隙）比留出 8px 美观缝隙好用十倍？因为光标撞到屏幕边缘会自动停住，相当于目标宽度 W = ∞！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>按钮距离屏幕物理边缘的缝隙</span><span id="vGap">0 px（紧贴边缘）</span></label><input type="range" id="sGap" min="0" max="24" step="2" value="0" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>鼠标快速甩动速度</span><span id="vSpd">高（盲甩）</span></label><input type="range" id="sSpd" min="20" max="100" value="80" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🖥️ 屏幕边缘“无限大宽度”外挂（空间法则）</h1>
+      <p>为什么 macOS 把全局菜单栏死死贴在屏幕最顶端，而 Windows 把开始按钮钉在最左下角？因为光标撞上屏幕物理边框就会被挡住，相当于把目标宽度 <strong>W 瞬间变成无穷大（∞）</strong>！切换两种布局感受边界制动外挂：</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="edgeBtn">✅ 贴边外挂（macOS 顶栏 + 四角死锁，W = ∞）</button>
+        <button class="toy-btn secondary" id="floatBtn">❌ 悬空浮动菜单（距边 18px，极易甩过头！）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">有效命中热区深度</div><div class="k-val" id="kEff">—</div></div>
-        <div class="kpi"><div class="k-lbl">盲甩一次命中率</div><div class="k-val" id="kHit">—</div></div>
-      </div>
+
+      <svg id="deskSvg" viewBox="0 0 680 230" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:2px solid var(--tax-primary);" aria-label="屏幕边缘无限大宽度空间图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>无限边缘外挂（Infinite Edge）：</strong>在费茨定律公式 <code>log₂(D/W + 1)</code> 里，只要光标往顶边或四角猛甩被屏幕挡住，不需要任何减速微调，<strong>W → ∞</strong>，瞄准难度直接趋近 0！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const gap=+document.getElementById('sGap').value, spd=+document.getElementById('sSpd').value;
-  document.getElementById('vGap').textContent=gap+' px'+(gap===0?'（零缝隙贴边）':'');
-  document.getElementById('vSpd').textContent=spd+'%';
-  const hit=gap===0 ? 99 : Math.max(32, Math.round(92 - gap*1.4 - spd*0.35));
-  document.getElementById('kEff').textContent=gap===0?'∞（屏幕边缘物理挡板）':'仅 28 px（容易甩过头）';
-  document.getElementById('kHit').textContent=hit+'%';
-  document.getElementById('kHit').style.color=hit>=90?'#059669':'#ef4444';
-  document.getElementById('svg').innerHTML=`
-    <rect x="60" y="26" width="480" height="148" rx="10" fill="var(--tax-surface)" stroke="#0f172a" stroke-width="3"/>
-    <rect x="62" y="${28+gap}" width="476" height="28" rx="${gap>0?6:0}" fill="${gap===0?'#059669':'#f59e0b'}"/>
-    <text x="300" y="${46+gap}" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">顶部菜单栏（距顶边 ${gap}px）</text>
-    <text x="300" y="130" text-anchor="middle" font-size="12" fill="var(--tax-muted)">${gap===0?'✨ 鼠标用力往上一推直接被顶边挡停，闭眼 100% 命中！':'⚠️ 这条 '+gap+'px 的死缝隙导致鼠标猛甩过去直接点空！'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>屏幕的四个角落与四条边是桌面 UI 最稀缺的黄金地段——永远别在屏幕边缘和按钮之间留出“死像素缝隙”！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let edgeMode = true, done = false;
+    const svg = document.getElementById('deskSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      document.getElementById('edgeBtn').className = edgeMode ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('floatBtn').className = !edgeMode ? 'toy-btn' : 'toy-btn secondary';
+
+      let html = '';
+      if (edgeMode) {
+        // Pinned top bar + pinned corner buttons
+        html += `<rect x="0" y="0" width="680" height="32" fill="rgba(16,185,129,0.26)"/>`;
+        html += `<text x="16" y="21" fill="var(--tax-green)" font-size="12.5" font-weight="800">🍎 文件 · 编辑 · 视图（贴死 0px 顶边，鼠标往上一甩即中！）</text>`;
+        // Top-right corner close target
+        html += `<rect x="612" y="0" width="68" height="32" fill="var(--tax-green)"/>`;
+        html += `<text x="646" y="21" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">角落 ∞</text>`;
+        // Bottom-left start button
+        html += `<rect x="0" y="194" width="110" height="36" fill="var(--tax-green)"/>`;
+        html += `<text x="55" y="217" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">⊞ 左下角 ∞</text>`;
+
+        // Overshoot trajectory stopped cleanly by top edge
+        html += `<path d="M340 165 Q360 80 340 16" fill="none" stroke="var(--tax-green)" stroke-width="3.5" stroke-dasharray="6 4"/>`;
+        html += `<circle cx="340" cy="165" r="7" fill="var(--tax-primary)"/>`;
+        html += `<text x="340" y="185" text-anchor="middle" fill="var(--tax-muted)" font-size="11.5">光标起点（无需减速，直接往上甩！）</text>`;
+        html += `<circle cx="340" cy="16" r="10" fill="var(--tax-green)" stroke="#fff" stroke-width="2"/>`;
+        html += `<text x="340" y="102" text-anchor="middle" fill="var(--tax-green)" font-size="13" font-weight="800">🛡️ 物理屏幕边框当刹车墙，100% 命中零过冲！</text>`;
+      } else {
+        // Floating 18px away from edge!
+        html += `<rect x="44" y="26" width="592" height="30" rx="8" fill="rgba(239,68,68,0.22)" stroke="var(--tax-red)" stroke-width="2"/>`;
+        html += `<text x="60" y="46" fill="var(--tax-red)" font-size="12.5" font-weight="800">⚠️ 悬空菜单栏（距顶边留了 26px 缝隙，鼠标稍微甩猛就飞过去了！）</text>`;
+
+        // Trajectory overshooting into the dead gap!
+        html += `<path d="M340 165 Q355 80 340 10" fill="none" stroke="var(--tax-red)" stroke-width="3.5" stroke-dasharray="6 4"/>`;
+        html += `<circle cx="340" cy="165" r="7" fill="var(--tax-primary)"/>`;
+        html += `<circle cx="340" cy="10" r="8" fill="var(--tax-red)" stroke="#fff" stroke-width="2"/>`;
+        html += `<text x="340" y="102" text-anchor="middle" fill="var(--tax-red)" font-size="13" font-weight="800">💥 甩过头冲进顶部 26px 死缝！必须折返微调（耗时翻倍）</text>`;
+      }
+
+      svg.innerHTML = html;
+      ahaBox.innerHTML = edgeMode
+        ? '<strong>操作系统 5 大魔法像素：</strong>光标当前位置 + 屏幕 <strong>4 个顶角</strong>！因为四角同时被横竖两条物理边界夹死，闭着眼睛猛甩鼠标都能 100% 命中——这就是 Windows 开始菜单和 macOS 触发角的设计秘密！'
+        : '<strong>悬空缝隙的隐性代价：</strong>很多美观的浮动导航条故意留出 12–20px 的外边距，结果彻底废掉了屏幕边缘的“无限宽度外挂”！如果追求美观要留圆角视觉间距，请把按钮的<strong>可点击热区（padding）</strong>透明延伸到 0px 边缘！';
+    }
+
+    document.getElementById('edgeBtn').onclick = () => { edgeMode = true; markDone('体验了屏幕边缘无限宽度外挂'); render(); };
+    document.getElementById('floatBtn').onclick = () => { edgeMode = false; markDone('对比了悬空菜单过冲惩罚'); render(); };
+    render();
   </script>
 </body>
 </html>

@@ -1,66 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🤝 字体混搭黄金律：对比而非撞衫</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>字体混搭黄金律：对比而非撞衫</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .pair-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+    @media (max-width: 640px) { .pair-grid { grid-template-columns: 1fr; } }
+    .p-card {
+      text-align: left; padding: 14px; border-radius: 12px; border: 2px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); cursor: pointer;
+    }
+    .p-card:hover { border-color: var(--tax-primary); }
+    .p-card.good { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .p-card.bad { border-color: var(--tax-red); background: var(--tax-red-soft); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🤝 字体混搭黄金律：对比而非撞衫</h1><p>一个页面里堆 5 种字体会瞬间变成街头小广告；用 2 种风格迥异的字体（如衬线大标题 + 无衬线正文）反而既有变化又高度统一！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🤝 字体混搭黄金律：对比而非撞衫（情景评审）</h1>
+      <p>杂志与官网需要混搭两种字体来制造层次感。面对下面 3 份由实习生提交的<strong>「标题 + 正文」混搭方案</strong>，请你作为设计总监挑出唯一符合<strong>“清晰对比原则”</strong>的过关稿！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="pair-grid" id="pairGrid"></div>
+      <div id="verdictTxt" style="font-size:13.5px;font-weight:700;color:var(--tax-muted);">点击上方 3 张方案卡进行总监评审</div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>混搭铁律（Contrast, Not Conflict）：</strong>要么只用<strong>同一个超级字体家族</strong>的不同字重，要么选<strong>气质截然相反</strong>的两种字体（衬线标题 + 无衬线正文）——最忌讳选两种长得 90% 相似的字体“尴尬撞衫”！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>页面同时使用的字体族数量</span><span id="vCnt">2 种（黄金上限）</span></label><input type="range" id="sCnt" min="1" max="6" value="2" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>主副字体风格反差度</span><span id="vCon">80%（衬线配无衬线）</span></label><input type="range" id="sCon" min="10" max="100" value="80" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">排版统一与美感分</div><div class="k-val" id="kScr">—</div></div>
-        <div class="kpi"><div class="k-lbl">设计诊断</div><div class="k-val" id="kDia">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const cnt=+document.getElementById('sCnt').value, con=+document.getElementById('sCon').value;
-  document.getElementById('vCnt').textContent=cnt+' 种';
-  document.getElementById('vCon').textContent=con+'%';
-  const scr=cnt<=2 ? Math.min(98, Math.round(68 + (cnt===2?con*0.28:18))) : Math.max(18, Math.round(92 - (cnt-2)*19));
-  const dia=cnt<=2?'✅ 克制统一，层次分明':(cnt===3?'⚠️ 略显杂乱，建议精简':'💥 勒索信既视感（字体爆炸）');
-  document.getElementById('kScr').textContent=scr+' 分';
-  document.getElementById('kScr').style.color=scr>=75?'#059669':'#ef4444';
-  document.getElementById('kDia').textContent=dia;
-  const w=Math.max(15, scr*4.2);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">字体配对和谐度（当前混用 ${cnt} 种字体，对比度 ${con}%）</text>
-    <rect x="30" y="68" width="440" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${w.toFixed(0)}" height="38" rx="8" fill="${scr>=75?'#059669':'#ef4444'}"/>
-    <text x="${Math.min(480,38+w).toFixed(0)}" y="93" font-size="14" font-weight="850" fill="${scr>=75?'#059669':'#ef4444'}">${scr} 分</text>
-    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">记住两个铁律：全站不超过 2 种字体；如果混用 2 种，选反差鲜明的，别选长得差不多却略有不同的！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只用 1 种优秀无衬线字体，靠不同字号+字重变化，就能做出 90 分的现代产品界面；绝不盲目堆砌花哨字体！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const CARDS = [
+      {
+        id: 'c1', tag: '方案 A · 优雅衬线 + 清爽无衬线', ok: true,
+        hStyle: 'font-family:Georgia,"Songti SC",serif;font-size:21px;font-weight:700;',
+        bStyle: 'font-family:-apple-system,"PingFang SC",sans-serif;font-size:13px;line-height:1.6;color:var(--tax-muted);',
+        title: '秋季建筑美学特展',
+        body: '用经典衬线体撑起主标题的艺术气场，用干净的无衬线体保证正文信息在手机屏幕上极速可读。',
+        fb: '✅ 满分过关（黄金对比）！标题的古典优雅与正文的现代清爽形成强烈互补，既拉开了层次又绝不打架！'
+      },
+      {
+        id: 'c2', tag: '方案 B · 两种极相似无衬线混用', ok: false,
+        hStyle: 'font-family:Arial,sans-serif;font-size:19px;font-weight:700;',
+        bStyle: 'font-family:Verdana,"PingFang SC",sans-serif;font-size:13px;line-height:1.6;color:var(--tax-muted);',
+        title: '秋季建筑美学特展',
+        body: '标题用 Arial，正文换了个长得几乎一模一样的 Verdana——读者说不清哪不对，只觉得像忘统一字体的半成品。',
+        fb: '❌ 尴尬撞衫（Conflict）！两种长得太像的字体混在一起，不仅没有层次对比，反而像不小心粘贴了不同来源的文字！'
+      },
+      {
+        id: 'c3', tag: '方案 C · 楷体 + 等宽 + 粗黑大乱炖', ok: false,
+        hStyle: 'font-family:"Kaiti SC",cursive;font-size:22px;font-weight:700;',
+        bStyle: 'font-family:ui-monospace,monospace;font-size:12.5px;line-height:1.6;color:var(--tax-muted);',
+        title: '秋季建筑美学特展',
+        body: '标题走古代书画风，正文突然切进冰冷代码终端体，再塞进三种不同风格——人格分裂！',
+        fb: '❌ 情绪冲突（马戏团效应）！一个页面最多不超过 2 种字体家族，且情绪基调必须为同一个主题服务。'
+      }
+    ];
+
+    let picked = null, done = false;
+    const pairGrid = document.getElementById('pairGrid');
+    const verdictTxt = document.getElementById('verdictTxt');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      pairGrid.innerHTML = '';
+      CARDS.forEach(c => {
+        const b = document.createElement('button');
+        b.className = 'p-card' + (picked === c.id ? (c.ok ? ' good' : ' bad') : '');
+        b.innerHTML = `
+          <div style="font-size:11.5px;color:var(--tax-primary);font-weight:700;margin-bottom:8px;">${c.tag}</div>
+          <div style="${c.hStyle}margin-bottom:8px;">${c.title}</div>
+          <div style="${c.bStyle}">${c.body}</div>
+        `;
+        b.onclick = () => {
+          picked = c.id;
+          markDone(`评审了字体混搭方案：${c.tag}`);
+          verdictTxt.textContent = c.fb;
+          verdictTxt.style.color = c.ok ? 'var(--tax-green)' : 'var(--tax-red)';
+          ahaBox.innerHTML = c.ok
+            ? '<strong>总监级审美！</strong>“衬线标题 + 无衬线正文”（或反之）是历经百年考验的百搭公式；如果你拿不准怎么混搭，<strong>全站只用 1 种优质无衬线体 + 字号/字重拉差</strong>永远是最稳妥的高手方案！'
+            : '<strong>避坑提醒：</strong>字体混搭不是“越多越高级”。记住“对比而非撞衫”——再点一下方案 A 感受古典标题与现代正文的黄金反差！';
+          render();
+        };
+        pairGrid.appendChild(b);
+      });
+    }
+
+    render();
   </script>
 </body>
 </html>

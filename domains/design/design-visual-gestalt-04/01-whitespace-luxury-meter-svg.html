@@ -1,70 +1,111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>💎 留白即奢华：密度与高级感转换器（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>留白即奢华：密度与高级感转换器</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .showcase {
+      border-radius: 14px; border: 1px solid var(--tax-border); background: var(--tax-surface-alt);
+      text-align: center; transition: padding .25s;
+    }
+    .promo-strip { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .promo-tag { padding: 3px 8px; border-radius: 4px; background: var(--tax-red); color: #fff; font-size: 11px; font-weight: 800; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>💎 留白即奢华：密度与高级感转换器（SVG）</h1><p>人类潜意识把“拥挤”与“廉价打折”绑定，把“宽敞克制”与“昂贵稀缺”绑定。留白不是浪费屏幕，而是给核心主角搭建聚光灯舞台！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>画面留白/呼吸空间比例</span><span id="vWs">65%</span></label><input type="range" id="sWs" min="10" max="82" value="65" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>单屏强塞元素数量</span><span id="vEl">2 个</span></label><input type="range" id="sEl" min="1" max="8" value="2" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>💎 留白即奢华：密度与品牌高级感模拟器</h1>
+      <p>同样一块机械腕表，没有任何参数改变——仅仅把<strong>页面留白占比</strong>从 10% 拉到 75%，看看大脑自动给它估出的品牌档次和价格标签如何从 ¥199 暴涨到 ¥48,000！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="ctrl-box">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>⬜ 页面负空间（留白）占比</span>
+          <strong id="wsVal" style="color:var(--tax-primary);">15%（低价大促风）</strong>
+        </div>
+        <input type="range" id="wsRange" min="10" max="75" value="15" style="width:100%;" />
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">品牌高端溢价感知</div><div class="k-val" id="kLux">—</div></div>
-        <div class="kpi"><div class="k-lbl">核心产品聚焦度</div><div class="k-val" id="kFoc">—</div></div>
+
+      <div class="showcase" id="showcase">
+        <div class="promo-strip" id="promoStrip">
+          <span class="promo-tag">🔥 限时秒杀</span>
+          <span class="promo-tag">立减 50 元</span>
+          <span class="promo-tag">买一送三</span>
+          <span class="promo-tag">仅剩 3 件</span>
+        </div>
+        <div style="font-size:44px;line-height:1.1;" id="watchIcon">⌚</div>
+        <div id="brandName" style="font-weight:800;margin-top:8px;">CHRONO NO. 09</div>
+        <div id="subCopy" style="font-size:12px;color:var(--tax-muted);margin-top:4px;">全自动机械机芯 · 蓝宝石表镜 · 瑞士日内瓦制表</div>
+        <div id="priceTag" style="font-weight:800;margin-top:10px;color:var(--tax-red);font-size:22px;">¥199 抢购价</div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>视觉经济学：</strong>信息塞得越满，大脑潜意识就把它归类为“菜市场 / 清仓大甩卖”；把留白滑块一路拉到 <strong>65%+</strong>，亲眼感受奢侈品官网的高级感密码！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const ws=+document.getElementById('sWs').value, el=+document.getElementById('sEl').value;
-  document.getElementById('vWs').textContent=ws+'%';
-  document.getElementById('vEl').textContent=el+' 个';
-  const lux=Math.max(12, Math.min(98, Math.round(ws*1.05 - el*5 + 25)));
-  const foc=Math.max(15, Math.min(98, Math.round(105 - el*10 + ws*0.15)));
-  document.getElementById('kLux').textContent=lux+' 分'+(lux>=75?'（奢侈品级）':(lux>=45?'（现代中端）':'（大甩卖传单）'));
-  document.getElementById('kLux').style.color=lux>=75?'#059669':'#f59e0b';
-  document.getElementById('kFoc').textContent=foc+'%';
-  const pad=Math.round(ws*0.95);
-  let extras='';
-  for(let i=1;i<el;i++){
-    const x=48+((i*137)%460), y=34+((i*61)%130);
-    extras+=`<rect x="${x}" y="${y}" width="64" height="22" rx="4" fill="#ef4444" opacity="0.22" stroke="#ef4444"/><text x="${x+32}" y="${y+15}" text-anchor="middle" font-size="10" font-weight="800" fill="#ef4444">爆款标签</text>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <rect x="30" y="18" width="540" height="168" rx="14" fill="var(--tax-surface)" stroke="var(--tax-border)"/>
-    ${extras}
-    <rect x="${30+pad}" y="${18+Math.round(pad*0.35)}" width="${Math.max(120, 540-pad*2)}" height="${Math.max(66, 168-Math.round(pad*0.7))}" rx="12" fill="#0f172a"/>
-    <text x="300" y="106" text-anchor="middle" font-size="16" font-weight="850" fill="#fff">核心主角产品</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>留白不是“空着没填满”，它本身就是一种主动的设计元素——把多余的促销贴纸全撕掉，主角价值瞬间翻倍！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const wsRange = document.getElementById('wsRange');
+    const wsVal = document.getElementById('wsVal');
+    const showcase = document.getElementById('showcase');
+    const promoStrip = document.getElementById('promoStrip');
+    const brandName = document.getElementById('brandName');
+    const subCopy = document.getElementById('subCopy');
+    const priceTag = document.getElementById('priceTag');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const ws = Number(wsRange.value);
+      const padV = Math.round(12 + (ws - 10) * 0.95);
+      showcase.style.padding = `${padV}px 24px`;
+
+      if (ws < 30) {
+        wsVal.textContent = `${ws}%（集市大促密集风）`;
+        promoStrip.style.display = 'flex';
+        brandName.style.letterSpacing = '0px';
+        brandName.style.fontSize = '18px';
+        subCopy.textContent = '爆款直降！全自动机械防水夜光男士商务腕表送礼盒保修三年！';
+        priceTag.textContent = '¥199 限时秒杀！';
+        priceTag.style.color = 'var(--tax-red)';
+        ahaBox.innerHTML = '<strong>低价密集区（留白 <30%）：</strong>红底促销贴纸+塞满的卖点文案传递“薄利多销、赶紧抢”的紧迫感，适合拼团大促，但会彻底摧毁高端溢价！';
+      } else if (ws < 55) {
+        wsVal.textContent = `${ws}%（现代消费品官网风）`;
+        promoStrip.style.display = 'none';
+        brandName.style.letterSpacing = '2px';
+        brandName.style.fontSize = '20px';
+        subCopy.textContent = '全自动机械机芯 · 蓝宝石表镜 · 50 米防水';
+        priceTag.textContent = '¥3,680';
+        priceTag.style.color = 'var(--tax-primary)';
+        ahaBox.innerHTML = '<strong>品质消费区（留白 30%–55%）：</strong>删掉红底贴纸、拉大呼吸感，产品立刻进入“苹果 / 独立设计师品牌”的理性信赖区间！';
+      } else {
+        wsVal.textContent = `${ws}%（高奢旗舰画廊风）`;
+        promoStrip.style.display = 'none';
+        brandName.style.letterSpacing = '6px';
+        brandName.style.fontSize = '22px';
+        subCopy.textContent = 'GENÈVE · 1892';
+        priceTag.textContent = '¥48,000 · 敬请预约品鉴';
+        priceTag.style.color = 'var(--tax-ink)';
+        ahaBox.innerHTML = '<strong>留白即权力（留白 ≥55%）：</strong>奢侈品愿意在昂贵的屏幕/展厅空间里留下大片空白，向大脑发出强烈信号：“我不需要拼命推销，你自然会来仰望。”留白不是浪费，而是最高级的聚光灯！';
+      }
+    }
+
+    wsRange.oninput = () => { markDone('调节了留白占比观察品牌高级感跃迁'); render(); };
+    render();
   </script>
 </body>
 </html>
