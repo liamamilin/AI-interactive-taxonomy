@@ -50,7 +50,7 @@
        const items=[['曝光',s0,'#94a3b8'],['注册',s1,'#2563eb'],['激活',s2,'#f59e0b'],['付费',s3,'#10b981']];
        document.getElementById('svg').innerHTML=items.map((it,i)=>{
          const w=Math.max(8, (it[1]/s0)*380), y=24+i*36;
-         return `<text x="20" y="${y+17}" font-size="12" font-weight="750" fill="var(--tax-text)">${it[0]}</text>
+         return `<text x="20" y="${y+17}" font-size="12" font-weight="750" fill="var(--tax-ink)">${it[0]}</text>
          <rect x="90" y="${y}" width="${w.toFixed(1)}" height="24" rx="5" fill="${it[2]}"/>
          <text x="${(98+w).toFixed(1)}" y="${y+17}" font-size="12" font-weight="800" fill="${it[2]}">${Math.round(it[1]).toLocaleString()} 人</text>`;
        }).join('');

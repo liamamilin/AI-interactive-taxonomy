@@ -49,7 +49,7 @@
       const col=nat>=25?'#10b981':'#ef4444';
       document.getElementById('svg').innerHTML=`
         <path d="${p}" fill="none" stroke="${col}" stroke-width="3.5"/>
-        ${arr.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v).toFixed(1)}" r="4.5" fill="${col}"/><text x="${x(i)}" y="${(y(v)-8).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--tax-text)">${v}%</text>`).join('')}
+        ${arr.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v).toFixed(1)}" r="4.5" fill="${col}"/><text x="${x(i)}" y="${(y(v)-8).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--tax-ink)">${v}%</text>`).join('')}
       `;
       document.getElementById('kRet').textContent=nat+'%';
       document.getElementById('kDiag').textContent=nat>=25?'✅ 真刚需 PMF':'💀 停补贴即归零 (伪 PMF)';

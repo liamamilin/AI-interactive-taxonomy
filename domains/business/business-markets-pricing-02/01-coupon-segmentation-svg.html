@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>✂️ 优惠券价格筛选器：如何赚两拨人的钱？（SVG）</title>
+  <title>✂️ 优惠券价格筛选器：如何赚两拨人的钱？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
@@ -24,13 +24,13 @@
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>✂️ 优惠券价格筛选器：如何赚两拨人的钱？（SVG）</h1><p>误区：商家发优惠券纯粹是在做慈善回馈顾客。真相：优惠券是一道“时间门槛”，只把价格敏感的穷人筛出来打折，同时照样收高收入忙碌人群的原价！</p></div>
+      <div><h1>✂️ 优惠券价格筛选器：如何赚两拨人的钱？</h1><p>误区：商家发优惠券纯粹是在做慈善回馈顾客。真相：优惠券是一道“时间门槛”，只把价格敏感的穷人筛出来打折，同时照样收高收入忙碌人群的原价！</p></div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-       <button class="btn" onclick="setMode('high',this)">统一高价 35 元（穷人全不买）</button>
-       <button class="btn" onclick="setMode('low',this)">统一低价 20 元（富人白省 15 元）</button>
-       <button class="btn active" onclick="setMode('disc',this)">原价 35 元 + 麻烦满减券 20 元</button>
+       <button class="btn" onclick="window.__userActed=true;setMode('high',this)">统一高价 35 元（穷人全不买）</button>
+       <button class="btn" onclick="window.__userActed=true;setMode('low',this)">统一低价 20 元（富人白省 15 元）</button>
+       <button class="btn active" onclick="window.__userActed=true;setMode('disc',this)">原价 35 元 + 麻烦满减券 20 元</button>
      </div>
      <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
      <div class="kpi-row">
@@ -48,10 +48,10 @@
        const poor = m==='high' ? 0 : 15*(20-cost);
        const tot = rich + poor;
        document.getElementById('svg').innerHTML=`
-         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">高薪忙碌群(10人)</text>
+         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">高薪忙碌群(10人)</text>
          <rect x="160" y="36" width="${(rich*1.1).toFixed(1)}" height="26" rx="5" fill="#2563eb"/>
          <text x="${(168+rich*1.1).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#2563eb">${rich} 元</text>
-         <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">时间换折扣群(15人)</text>
+         <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">时间换折扣群(15人)</text>
          <rect x="160" y="96" width="${(poor*1.1).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
          <text x="${(168+poor*1.1).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="#10b981">${poor} 元</text>
        `;
@@ -61,7 +61,7 @@
        document.getElementById('ahaBox').innerHTML=m==='disc'
          ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>商家总利润飙到 <strong>${tot} 元</strong>！故意把优惠券设得麻烦，正是为了筛选出“嫌麻烦直接付 35 元”的高支付意愿用户！`
          : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>统一售价无论定高定低都会丢掉一大块利润（仅 ${tot} 元），只有用优惠券做价格歧视才能把两拨人的钱都赚到！`;
-       if(window.ToySDK) window.ToySDK.markCompleted();
+       if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
      }
      setMode('disc',document.querySelector('.btn.active'));</script>
 </body>

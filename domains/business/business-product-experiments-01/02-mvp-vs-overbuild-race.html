@@ -45,10 +45,10 @@
       const cnt=Math.max(1, Math.floor(24/wk));
       const hit=(1-Math.pow(1-pr, cnt))*100;
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">半年真实试错次数</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">半年真实试错次数</text>
         <rect x="160" y="36" width="${(cnt/24*350).toFixed(1)}" height="26" rx="5" fill="#2563eb"/>
         <text x="${(168+cnt/24*350).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#2563eb">${cnt} 轮</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">命中真需求概率</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">命中真需求概率</text>
         <rect x="160" y="96" width="${(hit*3.5).toFixed(1)}" height="26" rx="5" fill="${hit>=65?'#10b981':'#ef4444'}"/>
         <text x="${(168+hit*3.5).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${hit>=65?'#10b981':'#ef4444'}">${hit.toFixed(1)}%</text>
       `;

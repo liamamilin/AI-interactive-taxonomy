@@ -46,10 +46,10 @@
       const disc=Math.min(48, Math.round((sig/20)*8*Math.log(n)));
       const safe=100-disc;
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">你的原始估值</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">你的原始估值</text>
         <rect x="150" y="36" width="350" height="26" rx="5" fill="#94a3b8" opacity="0.45"/>
         <text x="508" y="54" font-size="12" font-weight="750" fill="var(--tax-muted)">100 万</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">安全理性出价</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">安全理性出价</text>
         <rect x="150" y="96" width="${(safe*3.5).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
         <text x="${(158+safe*3.5).toFixed(1)}" y="114" font-size="12.5" font-weight="800" fill="#10b981">${safe} 万（压低 -${disc}%）</text>
       `;

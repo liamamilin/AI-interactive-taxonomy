@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>😵 赢家诅咒模拟器：出价最高者为什么反而是最冤的？（SVG）</title>
+  <title>😵 赢家诅咒模拟器：出价最高者为什么反而是最冤的？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
@@ -24,7 +24,7 @@
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>😵 赢家诅咒模拟器：出价最高者为什么反而是最冤的？（SVG）</h1><p>误区：拍下稀缺资源说明我们眼光最好。真相：参与竞标的人越多、估价越不准，中标者亏损得就越惨！</p></div>
+      <div><h1>😵 赢家诅咒模拟器：出价最高者为什么反而是最冤的？</h1><p>误区：拍下稀缺资源说明我们眼光最好。真相：参与竞标的人越多、估价越不准，中标者亏损得就越惨！</p></div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row"><button class="btn primary" onclick="sim(true)">🔨 重新模拟一轮竞拍</button></div>
@@ -52,7 +52,7 @@
       const x=i=>55+i*(490/n), y=v=>165-Math.min(145,(v/165)*140);
       document.getElementById('svg').innerHTML=`
         <line x1="40" y1="${y(100).toFixed(1)}" x2="560" y2="${y(100).toFixed(1)}" stroke="#10b981" stroke-dasharray="5,4" stroke-width="2"/>
-        ${bids.map((v,i)=>`<rect x="${x(i).toFixed(1)}" y="${y(v).toFixed(1)}" width="${(bw*0.8).toFixed(1)}" height="${(165-y(v)).toFixed(1)}" rx="3" fill="${i===n-1?'#ef4444':'#94a3b8'}" opacity="${i===n-1?0.9:0.55}"/><text x="${(x(i)+bw*0.4).toFixed(1)}" y="${(y(v)-5).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="750" fill="${i===n-1?'#ef4444':'var(--tax-text)'}">${v}</text>`).join('')}
+        ${bids.map((v,i)=>`<rect x="${x(i).toFixed(1)}" y="${y(v).toFixed(1)}" width="${(bw*0.8).toFixed(1)}" height="${(165-y(v)).toFixed(1)}" rx="3" fill="${i===n-1?'#ef4444':'#94a3b8'}" opacity="${i===n-1?0.9:0.55}"/><text x="${(x(i)+bw*0.4).toFixed(1)}" y="${(y(v)-5).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="750" fill="${i===n-1?'#ef4444':'var(--tax-ink)'}">${v}</text>`).join('')}
       `;
       document.getElementById('kWin').textContent=maxB+' 亿';
       document.getElementById('kPnl').textContent=(pnl>=0?'+':'')+pnl+' 亿';

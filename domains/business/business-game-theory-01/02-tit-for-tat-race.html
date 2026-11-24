@@ -64,7 +64,7 @@
       const items=[['宽容一报还一报 (偶有原谅)',tot.GTFT,'#10b981'],['严格一报还一报 (TFT)',tot.TFT,'#2563eb'],['永远背叛 (恶狼)',tot.D,'#ef4444']];
       document.getElementById('svg').innerHTML=items.map((it,i)=>{
         const w=(it[1]/maxV)*320, y=32+i*46;
-        return `<text x="20" y="${y+18}" font-size="12" font-weight="750" fill="var(--tax-text)">${it[0]}</text>
+        return `<text x="20" y="${y+18}" font-size="12" font-weight="750" fill="var(--tax-ink)">${it[0]}</text>
         <rect x="195" y="${y}" width="${w.toFixed(1)}" height="26" rx="6" fill="${it[2]}"/>
         <text x="${(203+w).toFixed(1)}" y="${y+18}" font-size="12.5" font-weight="800" fill="${it[2]}">${it[1]} 分</text>`;
       }).join('');

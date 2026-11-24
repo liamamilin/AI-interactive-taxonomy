@@ -47,10 +47,10 @@
       const coop=3/(1-d), betray=T+d*(1/(1-d));
       const maxV=Math.max(65,coop,betray);
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">长期诚信合作现值</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">长期诚信合作现值</text>
         <rect x="175" y="36" width="${(coop/maxV*350).toFixed(1)}" height="28" rx="6" fill="#10b981"/>
         <text x="${(183+coop/maxV*350).toFixed(1)}" y="55" font-size="12" font-weight="800" fill="#10b981">${coop.toFixed(1)}</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">背叛捞一票现值</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">背叛捞一票现值</text>
         <rect x="175" y="96" width="${(betray/maxV*350).toFixed(1)}" height="28" rx="6" fill="#ef4444"/>
         <text x="${(183+betray/maxV*350).toFixed(1)}" y="115" font-size="12" font-weight="800" fill="#ef4444">${betray.toFixed(1)}</text>
       `;

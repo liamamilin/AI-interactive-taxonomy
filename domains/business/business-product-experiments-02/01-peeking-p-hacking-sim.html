@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>👀 偷看实验结果陷阱：A/A 测试也能跑出假显著？（SVG）</title>
+  <title>👀 偷看实验结果陷阱：A/A 测试也能跑出假显著？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
@@ -24,7 +24,7 @@
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>👀 偷看实验结果陷阱：A/A 测试也能跑出假显著？（SVG）</h1><p>误区：只要今天看到 p < 0.05 显著胜出，就可以提前结束 A/B 测试上线了！真相：偷看次数越多，假阳性误报率飙升得越恐怖！</p></div>
+      <div><h1>👀 偷看实验结果陷阱：A/A 测试也能跑出假显著？</h1><p>误区：只要今天看到 p < 0.05 显著胜出，就可以提前结束 A/B 测试上线了！真相：偷看次数越多，假阳性误报率飙升得越恐怖！</p></div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="ctrl-grid">
@@ -45,7 +45,7 @@
       const fpr = Math.min(75, (1 - Math.pow(1-alp, 1+(k-1)*0.45))*100);
       const col=fpr<=8?'#10b981':fpr<=20?'#f59e0b':'#ef4444';
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">废改版误判显著概率</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">废改版误判显著概率</text>
         <rect x="190" y="36" width="${(fpr*4.8).toFixed(1)}" height="28" rx="6" fill="${col}"/>
         <text x="${(198+fpr*4.8).toFixed(1)}" y="55" font-size="12.5" font-weight="800" fill="${col}">${fpr.toFixed(1)}%</text>
         <text x="20" y="115" font-size="12" fill="var(--tax-muted)">即使 A 组和 B 组完全一样，偷看 ${k} 次也会把误报率推高到 ${fpr.toFixed(1)}%！</text>

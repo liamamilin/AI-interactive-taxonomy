@@ -3,62 +3,138 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📦 在制品积压效应：上游越努力，系统越堵车？</title>
+  <title>📦 在制品积压空间沙盘：上游越努力，系统越堵车？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:var(--tax-ink); font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .floor-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px; }
+    @media (max-width:680px){ .floor-grid { grid-template-columns:repeat(2,1fr); } }
+    .station { padding:12px; border:2px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); text-align:center; }
+    .station.jam { border-color:var(--tax-red); background:var(--tax-red-soft); }
+    .station.bottle { border-color:var(--tax-amber); }
+    .st-name { font-weight:800; font-size:13.5px; color:var(--tax-ink); }
+    .st-cap { font-size:11.5px; color:var(--tax-muted); margin:3px 0 8px; }
+    .boxes { min-height:46px; display:flex; flex-wrap:wrap; gap:4px; justify-content:center; align-items:center; padding:6px; border-radius:8px; background:var(--tax-surface-alt); border:1px dashed var(--tax-border); }
+    .box-chip { width:14px; height:14px; border-radius:3px; background:var(--tax-primary); }
+    .box-chip.red { background:var(--tax-red); }
+    .kpi-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .kpi { padding:10px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); text-align:center; }
+    .k-lbl { font-size:12px; color:var(--tax-muted); }
+    .k-val { font-size:20px; font-weight:850; color:var(--tax-ink); margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📦 在制品积压效应：上游越努力，系统越堵车？</h1><p>误区：绝对不能让上游员工闲着，没事也要先多写代码。真相：下游处理不过来时，上游超产只会堆出巨额“在制品库存 (WIP)”，拖垮所有人！</p></div>
+      <div>
+        <h1>📦 在制品积压空间沙盘：上游越努力，系统越堵车？</h1>
+        <p>研发流水线 4 个工位：需求(10/周) → 编码(10/周) → <strong>瓶颈测试(仅 4/周)</strong> → 发布(10/周)。点击推进每周迭代，对比「上游拼命满载推料」vs「开启看板 WIP 限流阀」的车间空间堆积与交付周期！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
-    <div class="tax-panel"><div class="ctrl-grid">
-      <div class="ctrl-box"><label><span>上游每周硬塞进来的需求数</span><span id="vIn">15 个</span></label><input id="inQ" type="range" min="5" max="20" step="1" value="15" oninput="draw(true)"></div>
-      <div class="ctrl-box"><label><span>下游测试消化能力</span><span id="vOut">8 个</span></label><input id="outQ" type="range" min="4" max="16" step="1" value="8" oninput="draw(true)"></div>
+
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn primary" id="stepBtn">⏭️ 推进 1 周迭代</button>
+        <button class="btn" id="kanbanBtn">🚦 当前模式：上游自由狂干（点击切换看板限流）</button>
+        <button class="btn" id="resetBtn">清空流水线</button>
+      </div>
+
+      <div class="floor-grid" id="floorGrid"></div>
+
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">当前在制品总数 (WIP)</div><div class="k-val" id="wipVal">0 件</div></div>
+        <div class="kpi"><div class="k-lbl">每周实际交付产出 (TH)</div><div class="k-val" id="thVal">4 件/周</div></div>
+        <div class="kpi"><div class="k-lbl">利特尔法则交付周期 (WIP/TH)</div><div class="k-val" id="ltVal">1.0 周</div></div>
+      </div>
     </div>
-    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-    <div class="kpi-row">
-      <div class="kpi"><div class="k-lbl">8 周后积压半成品 (WIP)</div><div class="k-val" id="kWip" style="color:#ef4444;">—</div></div>
-      <div class="kpi"><div class="k-lbl">新需求平均等待周期</div><div class="k-val" id="kLead">—</div></div>
-    </div></div>
+
     <div class="tax-aha" id="ahaBox"></div>
   </div>
-  <script>function draw(mark){
-      const q=+document.getElementById('inQ').value, cap=+document.getElementById('outQ').value;
-      document.getElementById('vIn').textContent=q+' 个/周';
-      document.getElementById('vOut').textContent=cap+' 个/周';
-      const arr=[]; let wip=0;
-      for(let w=0;w<=8;w++){ arr.push(wip); wip=Math.max(0, wip + q - cap); }
-      const maxV=Math.max(30, ...arr);
-      const x=i=>55+i*62, y=v=>165-(v/maxV)*135;
-      const p=arr.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v).toFixed(1)}`).join(' ');
-      const finWip=arr[8], lead=(finWip/cap + 1);
-      document.getElementById('svg').innerHTML=`
-        <path d="${p}" fill="none" stroke="${finWip>0?'#ef4444':'#10b981'}" stroke-width="3.5"/>
-        ${arr.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v).toFixed(1)}" r="4" fill="${finWip>0?'#ef4444':'#10b981'}"/><text x="${x(i)}" y="${(y(v)-8).toFixed(1)}" text-anchor="middle" font-size="10.5" fill="var(--tax-text)">${v}</text>`).join('')}
-      `;
-      document.getElementById('kWip').textContent=finWip+' 个积压';
-      document.getElementById('kLead').textContent=lead.toFixed(1)+' 周';
-      document.getElementById('ahaBox').innerHTML=finWip>0
-        ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>上游超产导致 8 周积压 <strong>${finWip} 个半成品</strong>，所有新需求都要排 <strong>${lead.toFixed(1)} 周</strong> 才上线！限制 WIP 才是正道。`
-        : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>上下游节拍匹配（≤${cap} 个/周），实现零积压快速流动！`;
-      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+
+  <script>
+    let week = 0;
+    let kanban = false;
+    let q = [0, 0, 0, 0]; // backlog before each station [Req, Dev, QA(bottleneck=4), Release]
+    let delivered = 0;
+    let acted = false;
+
+    function markDone() {
+      if (!acted) { acted = true; if (window.ToySDK) window.ToySDK.markCompleted('操作了在制品积压流水线沙盘'); }
     }
-    draw(false);</script>
+
+    function stepWeek() {
+      week++;
+      const intake = kanban ? 4 : 10; // Drum-Buffer-Rope matches bottleneck rate 4
+      // Flow backward to forward
+      const relOut = Math.min(q[3], 10); q[3] -= relOut; delivered += relOut;
+      const qaOut = Math.min(q[2], 4); q[2] -= qaOut; q[3] += qaOut;
+      const devOut = Math.min(q[1], 10); q[1] -= devOut; q[2] += devOut;
+      const reqOut = Math.min(q[0] + intake, 10); q[0] = (q[0] + intake) - reqOut; q[1] += reqOut;
+      render();
+    }
+
+    function render() {
+      const names = ['1. 产品需求', '2. 研发编码', '3. 瓶颈测试 (上限4)', '4. 灰度发布'];
+      const caps = ['产能 10/周', '产能 10/周', '瓶颈产能 4/周', '产能 10/周'];
+
+      const grid = document.getElementById('floorGrid');
+      grid.innerHTML = q.map((cnt, i) => {
+        const jam = cnt >= 10;
+        const show = Math.min(28, cnt);
+        let chips = '';
+        for (let k = 0; k < show; k++) chips += `<span class="box-chip ${jam ? 'red' : ''}"></span>`;
+        if (cnt > 28) chips += `<span style="font-size:11px;font-weight:800;color:var(--tax-red);">+${cnt - 28}</span>`;
+        return `
+          <div class="station ${jam ? 'jam' : i === 2 ? 'bottle' : ''}">
+            <div class="st-name">${names[i]}</div>
+            <div class="st-cap">${caps[i]} · 积压 <strong>${cnt}</strong> 件</div>
+            <div class="boxes">${chips || '<span style="font-size:11px;color:var(--tax-muted);">通畅</span>'}</div>
+          </div>
+        `;
+      }).join('');
+
+      const wip = q.reduce((a, b) => a + b, 0);
+      const lt = Math.max(1, wip / 4);
+      document.getElementById('wipVal').textContent = wip + ' 件';
+      document.getElementById('thVal').textContent = (week === 0 ? 0 : 4) + ' 件/周';
+      const ltEl = document.getElementById('ltVal');
+      ltEl.textContent = lt.toFixed(1) + ' 周';
+      ltEl.style.color = lt >= 4 ? 'var(--tax-red)' : 'var(--tax-green)';
+
+      document.getElementById('kanbanBtn').textContent = kanban
+        ? '🚦 当前模式：看板 WIP 限流（上游对齐瓶颈 4/周）'
+        : '🚦 当前模式：上游自由狂干（点击切换看板限流）';
+
+      const aha = document.getElementById('ahaBox');
+      if (week === 0) {
+        aha.innerHTML = `💡 <strong>沙盘提示：</strong>连续点击「推进 1 周迭代」4~5 次，观察上游研发满负荷狂写代码时，测试工位门前会发生什么！`;
+      } else if (!kanban && q[2] >= 12) {
+        aha.innerHTML = `💡 <strong>顿悟时刻（利特尔法则堵车灾难）：</strong>虽然上游研发每周狂出 10 个需求，但最终上线产出<strong>依然死死卡在 4 件/周</strong>，反而让测试门前堆了 <strong>${q[2]} 件在制品</strong>，把每个需求的平均交付周期拖垮到 <strong>${lt.toFixed(1)} 周</strong>！点击切换「看板限流」看看奇迹！`;
+      } else if (kanban) {
+        aha.innerHTML = `💡 <strong>顿悟时刻（鼓-缓冲-绳限流破局）：</strong>让上游主动限速对齐瓶颈（4 件/周）后，总产出<strong>一分没少（仍是 4 件/周）</strong>，但在制品库存几乎清零，交付周期缩短到极致的 <strong>${lt.toFixed(1)} 周</strong>——让非瓶颈闲下来帮瓶颈，远比让全员瞎忙高效！`;
+      } else {
+        aha.innerHTML = `💡 <strong>第 ${week} 周观察：</strong>当前在制品 WIP = <strong>${wip} 件</strong>，已累计上线 ${delivered} 件。继续推进几周，看瓶颈测试工位前如何爆仓！`;
+      }
+    }
+
+    document.getElementById('stepBtn').addEventListener('click', () => { markDone(); stepWeek(); });
+    document.getElementById('kanbanBtn').addEventListener('click', () => {
+      kanban = !kanban;
+      week = 0; q = [0, 0, 0, 0]; delivered = 0;
+      markDone();
+      render();
+    });
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      week = 0; q = [0, 0, 0, 0]; delivered = 0;
+      markDone();
+      render();
+    });
+
+    render();
+  </script>
 </body>
 </html>

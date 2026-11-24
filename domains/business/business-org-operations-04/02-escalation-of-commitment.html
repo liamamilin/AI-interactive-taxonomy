@@ -28,9 +28,9 @@
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-       <button class="btn" onclick="pick(0,this)">第 1 次失利：面子挂不住，再加 200 万翻本</button>
-       <button class="btn" onclick="pick(1,this)">第 2 次失利：已经投了那么多，不能认输！</button>
-       <button class="btn active" onclick="pick(2,this)">事前预置铁律：预设好止损红线自动关停</button>
+       <button class="btn" onclick="window.__userActed=true;pick(0,this)">第 1 次失利：面子挂不住，再加 200 万翻本</button>
+       <button class="btn" onclick="window.__userActed=true;pick(1,this)">第 2 次失利：已经投了那么多，不能认输！</button>
+       <button class="btn active" onclick="window.__userActed=true;pick(2,this)">事前预置铁律：预设好止损红线自动关停</button>
      </div>
      <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
      <div class="kpi-row">
@@ -44,7 +44,7 @@
        if(btn) btn.classList.add('active');
        const loss=[300,800,100][i], tm=['12 个月','28 个月','3 个月 (快速试错止损)'][i];
        document.getElementById('svg').innerHTML=`
-         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">最终资金亏损额</text>
+         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">最终资金亏损额</text>
          <rect x="150" y="36" width="${(loss/800*360).toFixed(1)}" height="28" rx="6" fill="${i===2?'#10b981':'#ef4444'}"/>
          <text x="${(158+loss/800*360).toFixed(1)}" y="55" font-size="12.5" font-weight="800" fill="${i===2?'#10b981':'#ef4444'}">-${loss} 万</text>
          <text x="20" y="115" font-size="12" fill="var(--tax-muted)">破局法宝：在项目立项第一天（头脑最清醒时）白纸黑字写下“杀掉项目的客观指标条件”</text>
@@ -52,7 +52,7 @@
        document.getElementById('kLoss').textContent='-'+loss+' 万';
        document.getElementById('kTime').textContent=tm;
        document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>永远不要在深陷泥潭时才讨论要不要停——在出发前就设好“如果 3 个月内留存不到 15% 就自动关停”，才能逃出承诺升级陷阱！`;
-       if(window.ToySDK) window.ToySDK.markCompleted();
+       if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
      }
      pick(2,document.querySelector('.btn.active'));</script>
 </body>

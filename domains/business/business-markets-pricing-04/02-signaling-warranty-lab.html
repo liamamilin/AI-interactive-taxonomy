@@ -44,10 +44,10 @@
       document.getElementById('vF').textContent=(fail*100).toFixed(0)+'%';
       const gCost=yrs*0.15, bNet=2.5 - yrs*fail*3.5;
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">好车质保成本</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">好车质保成本</text>
         <rect x="150" y="36" width="${(gCost*60).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
         <text x="${(158+gCost*60).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#10b981">仅 ${gCost.toFixed(1)} 万</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">烂车冒充净利</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">烂车冒充净利</text>
         <rect x="150" y="96" width="${Math.max(12, Math.abs(bNet)*45).toFixed(1)}" height="26" rx="5" fill="${bNet<0?'#94a3b8':'#ef4444'}"/>
         <text x="${(158+Math.max(12, Math.abs(bNet)*45)).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${bNet<0?'#10b981':'#ef4444'}">${bNet>=0?'+'+bNet.toFixed(1)+'万(仍敢骗)':bNet.toFixed(1)+'万(必亏，不敢骗！)'}</text>
       `;

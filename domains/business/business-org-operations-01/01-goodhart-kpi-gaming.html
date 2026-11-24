@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📊 古德哈特 KPI 刷榜模拟器（SVG）</title>
+  <title>📊 古德哈特 KPI 刷榜模拟器</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
@@ -24,13 +24,13 @@
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📊 古德哈特 KPI 刷榜模拟器（SVG）</h1><p>误区：定一个能直接量化的 KPI（比如程序员代码行数、客服挂断速度），工作效率肯定飙升。真相：当一个指标成为考核目标时，它就不再是一个好指标——员工会疯狂刷分！</p></div>
+      <div><h1>📊 古德哈特 KPI 刷榜模拟器</h1><p>误区：定一个能直接量化的 KPI（比如程序员代码行数、客服挂断速度），工作效率肯定飙升。真相：当一个指标成为考核目标时，它就不再是一个好指标——员工会疯狂刷分！</p></div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-       <button class="btn active" onclick="pick(0,this)">KPI = 代码行数（程序员狂写冗余屎山）</button>
-       <button class="btn" onclick="pick(1,this)">KPI = 客服平均挂断时长（秒挂客户电话）</button>
-       <button class="btn" onclick="pick(2,this)">平衡指标 = 问题一次解决率 + 客户满意度</button>
+       <button class="btn active" onclick="window.__userActed=true;pick(0,this)">KPI = 代码行数（程序员狂写冗余屎山）</button>
+       <button class="btn" onclick="window.__userActed=true;pick(1,this)">KPI = 客服平均挂断时长（秒挂客户电话）</button>
+       <button class="btn" onclick="window.__userActed=true;pick(2,this)">平衡指标 = 问题一次解决率 + 客户满意度</button>
      </div>
      <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
      <div class="kpi-row">
@@ -49,10 +49,10 @@
        if(btn) btn.classList.add('active');
        const d=DATA[i];
        document.getElementById('svg').innerHTML=`
-         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">表面 KPI 漂亮度</text>
+         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">表面 KPI 漂亮度</text>
          <rect x="160" y="36" width="${(d.kpi*3.6).toFixed(1)}" height="26" rx="5" fill="#2563eb"/>
          <text x="${(168+d.kpi*3.6).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#2563eb">${d.kpi} 分</text>
-         <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">真实业务健康度</text>
+         <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">真实业务健康度</text>
          <rect x="160" y="96" width="${(d.real*3.6).toFixed(1)}" height="26" rx="5" fill="${d.col}"/>
          <text x="${(168+d.real*3.6).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${d.col}">${d.real} 分</text>
        `;
@@ -60,7 +60,7 @@
        document.getElementById('kReal').textContent=d.real+' 分';
        document.getElementById('kReal').style.color=d.col;
        document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>${d.msg}`;
-       if(window.ToySDK) window.ToySDK.markCompleted();
+       if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
      }
      pick(0,document.querySelector('.btn.active'));</script>
 </body>

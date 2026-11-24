@@ -44,10 +44,10 @@
       document.getElementById('vP').textContent=pow+' 人';
       const per=pow/k, ok=Math.min(92, Math.round(per*0.82));
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">单行业压强</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">单行业压强</text>
         <rect x="150" y="36" width="${Math.min(360, per*2.5).toFixed(1)}" height="26" rx="5" fill="#2563eb"/>
         <text x="${(158+Math.min(360, per*2.5)).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#2563eb">${per.toFixed(0)} 人/行业</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">打穿口碑成功率</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">打穿口碑成功率</text>
         <rect x="150" y="96" width="${(ok*3.6).toFixed(1)}" height="26" rx="5" fill="${ok>=60?'#10b981':'#ef4444'}"/>
         <text x="${(158+ok*3.6).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${ok>=60?'#10b981':'#ef4444'}">${ok}%</text>
       `;

@@ -57,10 +57,10 @@
       const mar=Math.max(2, Math.round(dif*0.48 + (60-cut)*0.1));
       const col=keep>=60?'#10b981':keep>=35?'#f59e0b':'#ef4444';
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">客流留存率</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">客流留存率</text>
         <rect x="140" y="36" width="${(keep*3.8).toFixed(1)}" height="26" rx="6" fill="${col}"/>
         <text x="${(148+keep*3.8).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="${col}">${keep}%</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">健康毛利率</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">健康毛利率</text>
         <rect x="140" y="96" width="${(mar*5).toFixed(1)}" height="26" rx="6" fill="${col}"/>
         <text x="${(148+mar*5).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${col}">${mar}%</text>
       `;

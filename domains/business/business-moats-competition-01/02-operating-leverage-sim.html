@@ -3,61 +3,108 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚖️ 经营杠杆放大器：高固定成本生意的盈亏临界点</title>
+  <title>⚖️ 经营杠杆装配台：高固定成本生意的盈亏临界点</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .mod-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; margin-bottom:14px; }
+    .mod-card { padding:11px 13px; border:2px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); cursor:pointer; text-align:left; transition:border-color .2s, background .2s; }
+    .mod-card.heavy { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .m-head { display:flex; justify-content:space-between; font-weight:800; font-size:13.5px; color:var(--tax-ink); }
+    .m-sub { font-size:12px; color:var(--tax-muted); margin-top:4px; }
+    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); margin-bottom:12px; }
     .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
     .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); text-align:center; }
+    .k-lbl { font-size:12px; color:var(--tax-muted); }
+    .k-val { font-size:20px; font-weight:850; color:var(--tax-ink); margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⚖️ 经营杠杆放大器：高固定成本生意的盈亏临界点</h1><p>误区：固定成本高的生意风险一定差。真相：一旦销量跨过盈亏平衡点，高经营杠杆会把营收的每一分增长成倍放大为净利润！</p></div>
+      <div>
+        <h1>⚖️ 经营杠杆装配台：高固定成本生意的盈亏临界点</h1>
+        <p>产品单价固定为 <strong>100 元</strong>。点击下方 3 个环节在「轻资产变动成本」与「重资产固定成本」间自由装配，再拖动月销量，感受经营杠杆在繁荣与寒冬时的双刃剑威力！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
-    <div class="tax-panel"><div class="ctrl-grid">
-      <div class="ctrl-box"><label><span>年度销量 (万件)</span><span id="vQ">60 万</span></label><input id="q" type="range" min="10" max="120" step="5" value="60" oninput="draw(true)"></div>
-      <div class="ctrl-box"><label><span>固定研发/厂房成本</span><span id="vF">400 万</span></label><input id="fix" type="range" min="200" max="600" step="50" value="400" oninput="draw(true)"></div>
+
+    <div class="tax-panel">
+      <div class="mod-grid" id="modGrid"></div>
+
+      <div class="ctrl-box">
+        <label><span>当前月销量（单价 100 元）</span><strong id="qVal">1,200 件</strong></label>
+        <input id="qSlider" type="range" min="200" max="3000" step="100" value="1200">
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi"><div class="k-lbl">盈亏平衡销量</div><div class="k-val" id="beVal">—</div></div>
+        <div class="kpi"><div class="k-lbl">单件边际贡献</div><div class="k-val" id="cmVal">—</div></div>
+        <div class="kpi"><div class="k-lbl">本月净利润</div><div class="k-val" id="profVal">—</div></div>
+      </div>
     </div>
-    <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-    <div class="kpi-row">
-      <div class="kpi"><div class="k-lbl">盈亏平衡点销量</div><div class="k-val" id="kBE">—</div></div>
-      <div class="kpi"><div class="k-lbl">总营收 (单价10元)</div><div class="k-val" id="kRev">—</div></div>
-      <div class="kpi"><div class="k-lbl">净利润</div><div class="k-val" id="kProf">—</div></div>
-    </div></div>
+
     <div class="tax-aha" id="ahaBox"></div>
   </div>
-  <script>function draw(mark){
-      const q=+document.getElementById('q').value, fix=+document.getElementById('fix').value;
-      document.getElementById('vQ').textContent=q+' 万';
-      document.getElementById('vF').textContent=fix+' 万';
-      const rev=q*10, cost=fix+q*2, prof=rev-cost, be=fix/8;
-      const x=k=>55+((k-10)/110)*490, y=v=>165-(v/1300)*135;
-      document.getElementById('svg').innerHTML=`
-        <line x1="${x(10)}" y1="${y(100).toFixed(1)}" x2="${x(120)}" y2="${y(1200).toFixed(1)}" stroke="#10b981" stroke-width="3"/>
-        <line x1="${x(10)}" y1="${y(fix+20).toFixed(1)}" x2="${x(120)}" y2="${y(fix+240).toFixed(1)}" stroke="#ef4444" stroke-width="3"/>
-        <circle cx="${x(be).toFixed(1)}" cy="${y(be*10).toFixed(1)}" r="5" fill="var(--tax-muted)"/>
-        <circle cx="${x(q).toFixed(1)}" cy="${y(rev).toFixed(1)}" r="5.5" fill="#10b981"/>
-      `;
-      document.getElementById('kBE').textContent=be.toFixed(1)+' 万件';
-      document.getElementById('kRev').textContent=rev+' 万';
-      document.getElementById('kProf').textContent=(prof>=0?'+':'')+prof+' 万';
-      document.getElementById('kProf').style.color=prof>=0?'#10b981':'#ef4444';
-      document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>固定成本 ${fix} 万时，盈亏平衡线在 <strong>${be.toFixed(1)} 万件</strong>！跨过它之后，每多卖 1 万件就净赚 8 万纯利！`;
-      if(mark && window.ToySDK) window.ToySDK.markCompleted();
+
+  <script>
+    const modules = [
+      { id: 'prod', name: '🏭 生产制造', heavy: true, heavyF: 40000, heavyV: 10, lightF: 5000, lightV: 45, heavyT: '自建自动化工厂（月固 4万 + 单件 10元）', lightT: '找代工厂按件贴牌（月固 0.5万 + 单件 45元）' },
+      { id: 'infra', name: '☁️ 算力与物流', heavy: true, heavyF: 25000, heavyV: 5, lightF: 3000, lightV: 22, heavyT: '自建专线与机房（月固 2.5万 + 单件 5元）', lightT: '按单付云费快递（月固 0.3万 + 单件 22元）' },
+      { id: 'sales', name: '📣 渠道销售', heavy: false, heavyF: 20000, heavyV: 3, lightF: 2000, lightV: 18, heavyT: '养全职直销铁军（月固 2万 + 提成 3元）', lightT: '纯分销按单抽佣（月固 0.2万 + 抽佣 18元）' }
+    ];
+    let acted = false;
+
+    function markDone() {
+      if (!acted) { acted = true; if (window.ToySDK) window.ToySDK.markCompleted('装配了经营杠杆成本结构'); }
     }
-    draw(false);</script>
+
+    function render() {
+      const grid = document.getElementById('modGrid');
+      grid.innerHTML = '';
+      let F = 0, V = 0;
+      modules.forEach(m => {
+        F += m.heavy ? m.heavyF : m.lightF;
+        V += m.heavy ? m.heavyV : m.lightV;
+        const btn = document.createElement('button');
+        btn.className = 'mod-card ' + (m.heavy ? 'heavy' : '');
+        btn.innerHTML = `
+          <div class="m-head"><span>${m.name}</span><span>${m.heavy ? '🏗️ 重固定' : '🪶 轻变动'}</span></div>
+          <div class="m-sub">${m.heavy ? m.heavyT : m.lightT}</div>
+        `;
+        btn.addEventListener('click', () => { m.heavy = !m.heavy; markDone(); render(); });
+        grid.appendChild(btn);
+      });
+
+      const Q = Number(document.getElementById('qSlider').value);
+      document.getElementById('qVal').textContent = Q.toLocaleString() + ' 件';
+      const cm = 100 - V;
+      const be = Math.ceil(F / cm);
+      const profit = Q * cm - F;
+
+      document.getElementById('beVal').textContent = be.toLocaleString() + ' 件';
+      document.getElementById('cmVal').textContent = cm + ' 元/件';
+      const pEl = document.getElementById('profVal');
+      pEl.textContent = (profit >= 0 ? '+' : '') + (profit / 10000).toFixed(1) + ' 万元';
+      pEl.style.color = profit >= 0 ? 'var(--tax-green)' : 'var(--tax-red)';
+
+      const heavyCount = modules.filter(m => m.heavy).length;
+      const aha = document.getElementById('ahaBox');
+      if (heavyCount >= 2 && profit < 0) {
+        aha.innerHTML = `💡 <strong>顿悟时刻（高杠杆寒冬反噬）：</strong>你装配了 <strong>${heavyCount} 个重固定成本模块</strong>（每月刚性支出 ${(F/10000).toFixed(1)} 万），一旦销量跌破 <strong>${be} 件</strong>，亏损就会断崖式放大至 <strong>${(profit/10000).toFixed(1)} 万</strong>！`;
+      } else if (heavyCount >= 2 && Q >= 2000) {
+        aha.innerHTML = `💡 <strong>顿悟时刻（高杠杆印钞机爆发）：</strong>熬过 ${be} 件盈亏线后，每多卖 1 件几乎净赚 <strong>${cm} 元</strong>（利润飙升至 <strong>+${(profit/10000).toFixed(1)} 万</strong>）——这就是软件、航空与晶圆厂一旦起量就利润暴涨的秘密！`;
+      } else if (heavyCount === 0) {
+        aha.innerHTML = `💡 <strong>顿悟时刻（全轻资产安全垫）：</strong>固定成本极低（仅 ${(F/10000).toFixed(1)} 万，卖出 ${be} 件即盈利），寒冬绝不会死；但单件毛利仅 ${cm} 元，销量暴涨时利润天花板也远不如重资产模式。`;
+      } else {
+        aha.innerHTML = `💡 <strong>装配观察：</strong>当前盈亏线 <strong>${be} 件</strong>，单件贡献 <strong>${cm} 元</strong>。试着把销量分别拖到 400 件（寒冬）和 2800 件（旺季），体验不同成本结构的利润振幅！`;
+      }
+    }
+
+    document.getElementById('qSlider').addEventListener('input', () => { markDone(); render(); });
+    render();
+  </script>
 </body>
 </html>

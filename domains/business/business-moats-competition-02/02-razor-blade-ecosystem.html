@@ -47,10 +47,10 @@
       const ltv=(hw-500) + 5*(bl*0.75);
       const tot=vol*ltv;
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">主机销量规模</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">主机销量规模</text>
         <rect x="140" y="36" width="${(vol/120*360).toFixed(1)}" height="26" rx="5" fill="#2563eb"/>
         <text x="${(148+vol/120*360).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#2563eb">${vol} 万台</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">5年总利润池</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">5年总利润池</text>
         <rect x="140" y="96" width="${Math.max(10, Math.min(360, tot/300000*360)).toFixed(1)}" height="26" rx="5" fill="${tot>=0?'#10b981':'#ef4444'}"/>
         <text x="${(148+Math.max(10, Math.min(360, tot/300000*360))).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${tot>=0?'#10b981':'#ef4444'}">${(tot/10000).toFixed(1)} 亿元</text>
       `;

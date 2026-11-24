@@ -44,10 +44,10 @@
       document.getElementById('vDrag').textContent=drag+'%';
       const days = add===0 ? 60 : Math.round(60 + add*(drag*0.35) + (add*add)*0.35);
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">原团队不加人</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">原团队不加人</text>
         <rect x="140" y="36" width="180" height="26" rx="5" fill="#10b981"/>
         <text x="328" y="54" font-size="12" font-weight="800" fill="#10b981">60 天交付</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">加 ${add} 个新人后</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">加 ${add} 个新人后</text>
         <rect x="140" y="96" width="${Math.min(380, days*2.5).toFixed(1)}" height="26" rx="5" fill="${days>60?'#ef4444':'#10b981'}"/>
         <text x="${(148+Math.min(380, days*2.5)).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${days>60?'#ef4444':'#10b981'}">${days} 天 (+${days-60}天)</text>
       `;

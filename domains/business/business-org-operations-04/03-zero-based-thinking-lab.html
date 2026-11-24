@@ -45,10 +45,10 @@
       const vOld=100*Math.pow(1+o,3), vNew=100*Math.pow(1+n,3);
       const stop=vNew>vOld;
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">留守老业务(3年后)</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">留守老业务(3年后)</text>
         <rect x="160" y="36" width="${(vOld/250*350).toFixed(1)}" height="26" rx="5" fill="${stop?'#94a3b8':'#10b981'}"/>
-        <text x="${(168+vOld/250*350).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="var(--tax-text)">${vOld.toFixed(0)} 万</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">转投新机会(3年后)</text>
+        <text x="${(168+vOld/250*350).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="var(--tax-ink)">${vOld.toFixed(0)} 万</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">转投新机会(3年后)</text>
         <rect x="160" y="96" width="${(vNew/250*350).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
         <text x="${(168+vNew/250*350).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="#10b981">${vNew.toFixed(0)} 万</text>
       `;

@@ -47,10 +47,10 @@
       for(let i=0;i<rds;i++){ cur*=K; tot+=cur; }
       const slow=1000+1000*K+1000*K*K;
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">当前周期 (${ct}天/轮)</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">当前周期 (${ct}天/轮)</text>
         <rect x="160" y="36" width="${Math.min(360, (Math.log10(tot)/6)*360).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
         <text x="${(168+Math.min(360, (Math.log10(tot)/6)*360)).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#10b981">${Math.round(tot).toLocaleString()} 人</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">慢周期 (15天/轮)</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">慢周期 (15天/轮)</text>
         <rect x="160" y="96" width="${(Math.log10(slow)/6*360).toFixed(1)}" height="26" rx="5" fill="#94a3b8"/>
         <text x="${(168+Math.log10(slow)/6*360).toFixed(1)}" y="114" font-size="12" font-weight="750" fill="var(--tax-muted)">${Math.round(slow).toLocaleString()} 人</text>
       `;

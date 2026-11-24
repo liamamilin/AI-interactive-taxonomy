@@ -28,9 +28,9 @@
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-       <button class="btn" onclick="pick('base',this)">基准状态（CAC 300 / 月流失 10%）</button>
-       <button class="btn" onclick="pick('cac',this)">方案 A：砍掉 20% 获客费</button>
-       <button class="btn active" onclick="pick('churn',this)">方案 B：把月流失率从 10% 降到 5%</button>
+       <button class="btn" onclick="window.__userActed=true;pick('base',this)">基准状态（CAC 300 / 月流失 10%）</button>
+       <button class="btn" onclick="window.__userActed=true;pick('cac',this)">方案 A：砍掉 20% 获客费</button>
+       <button class="btn active" onclick="window.__userActed=true;pick('churn',this)">方案 B：把月流失率从 10% 降到 5%</button>
      </div>
      <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
      <div class="kpi-row">
@@ -47,17 +47,17 @@
        const net = ltv-cac;
        const up = (net-300)/300*100;
        document.getElementById('svg').innerHTML=`
-         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">生命周期 LTV</text>
+         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">生命周期 LTV</text>
          <rect x="140" y="36" width="${(ltv/1300*360).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
          <text x="${(148+ltv/1300*360).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#10b981">¥${ltv}</text>
-         <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">单客净赚利润</text>
+         <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">单客净赚利润</text>
          <rect x="140" y="96" width="${(net/1300*360).toFixed(1)}" height="26" rx="5" fill="#2563eb"/>
          <text x="${(148+net/1300*360).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="#2563eb">¥${net}</text>
        `;
        document.getElementById('kNet').textContent='¥'+net;
        document.getElementById('kUp').textContent=(up>=0?'+':'')+up.toFixed(0)+'%';
        document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>省 20% 广告费只让净利润涨 20%；而把流失率从 10% 降到 5%，直接让单客净利润暴涨 <strong>+200%</strong>（从 300 元飙到 900 元）！`;
-       if(window.ToySDK) window.ToySDK.markCompleted();
+       if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
      }
      pick('churn',document.querySelector('.btn.active'));</script>
 </body>

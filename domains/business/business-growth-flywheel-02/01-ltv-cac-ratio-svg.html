@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📏 LTV/CAC 单位经济健康仪（SVG）</title>
+  <title>📏 LTV/CAC 单位经济健康仪</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
@@ -24,7 +24,7 @@
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📏 LTV/CAC 单位经济健康仪（SVG）</h1><p>误区：只要用户数在涨，亏点广告费买流量迟早能赚回来。真相：如果获取一个用户的成本 CAC 大于他一辈子贡献的毛利 LTV，卖一单亏一单，越做死得越快！</p></div>
+      <div><h1>📏 LTV/CAC 单位经济健康仪</h1><p>误区：只要用户数在涨，亏点广告费买流量迟早能赚回来。真相：如果获取一个用户的成本 CAC 大于他一辈子贡献的毛利 LTV，卖一单亏一单，越做死得越快！</p></div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="ctrl-grid">
@@ -51,10 +51,10 @@
        const col=ratio>=3?'#10b981':ratio>=1?'#f59e0b':'#ef4444';
        const maxV=Math.max(1500, cac, ltv);
        document.getElementById('svg').innerHTML=`
-         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">获客成本 CAC</text>
+         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">获客成本 CAC</text>
          <rect x="140" y="36" width="${(cac/maxV*360).toFixed(1)}" height="26" rx="5" fill="#ef4444"/>
          <text x="${(148+cac/maxV*360).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#ef4444">¥${cac}</text>
-         <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">生命周期毛利 LTV</text>
+         <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">生命周期毛利 LTV</text>
          <rect x="140" y="96" width="${(ltv/maxV*360).toFixed(1)}" height="26" rx="5" fill="${col}"/>
          <text x="${(148+ltv/maxV*360).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${col}">¥${ltv.toFixed(0)} (${ratio.toFixed(1)}x)</text>
        `;

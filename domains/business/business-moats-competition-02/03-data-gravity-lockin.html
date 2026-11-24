@@ -45,10 +45,10 @@
       const cost=y*y*12;
       const churn=Math.max(1, Math.min(85, Math.round(35*(sub/Math.max(50,cost)))));
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">数据重力迁移代价</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">数据重力迁移代价</text>
         <rect x="160" y="36" width="${(cost/1200*360).toFixed(1)}" height="26" rx="5" fill="#2563eb"/>
         <text x="${(168+cost/1200*360).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#2563eb">折合 ${cost} 元</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">被挖角流失率</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">被挖角流失率</text>
         <rect x="160" y="96" width="${(churn*4).toFixed(1)}" height="26" rx="5" fill="${churn>25?'#ef4444':'#10b981'}"/>
         <text x="${(168+churn*4).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${churn>25?'#ef4444':'#10b981'}">${churn}%</text>
       `;

@@ -45,7 +45,7 @@
       const n=Math.round(16*0.1*0.9/(mde*mde));
       const days=Math.ceil((n*2)/dau);
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">每组所需样本量</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">每组所需样本量</text>
         <rect x="160" y="36" width="${Math.min(360, Math.log10(n)*65).toFixed(1)}" height="28" rx="6" fill="#2563eb"/>
         <text x="${(168+Math.min(360, Math.log10(n)*65)).toFixed(1)}" y="55" font-size="12.5" font-weight="800" fill="#2563eb">${n.toLocaleString()} 人/组</text>
         <text x="20" y="115" font-size="12" fill="var(--tax-muted)">在日活 ${dau.toLocaleString()} 人下，A/B 两组需连续跑 ${days} 天才能出统计显著结果！</text>

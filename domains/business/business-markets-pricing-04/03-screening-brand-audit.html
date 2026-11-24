@@ -44,10 +44,10 @@
       document.getElementById('vYr').textContent=yr+' 年';
       const trust=Math.min(96, Math.round(15 + (inv/3000)*55 + yr*2.5));
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">品牌抵押沉没成本</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">品牌抵押沉没成本</text>
         <rect x="160" y="36" width="${Math.max(8, inv/3000*360).toFixed(1)}" height="26" rx="5" fill="#2563eb"/>
         <text x="${(168+Math.max(8, inv/3000*360)).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#2563eb">${inv} 万</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">消费者信任指数</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">消费者信任指数</text>
         <rect x="160" y="96" width="${(trust*3.6).toFixed(1)}" height="26" rx="5" fill="${trust>=65?'#10b981':'#f59e0b'}"/>
         <text x="${(168+trust*3.6).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${trust>=65?'#10b981':'#f59e0b'}">${trust}%</text>
       `;

@@ -46,7 +46,7 @@
       const ret=Math.min(92, Math.round((s*0.75 + Math.min(s,b)*0.25)));
       const fly=s>=60 && ret>=55;
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">平台飞轮转速</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">平台飞轮转速</text>
         <rect x="140" y="36" width="${(ret*4).toFixed(1)}" height="28" rx="6" fill="${fly?'#10b981':'#f59e0b'}"/>
         <text x="${(148+ret*4).toFixed(1)}" y="55" font-size="12" font-weight="800" fill="${fly?'#10b981':'#f59e0b'}">${fly?'🚀 突破临界点，正向自转！':'⏳ 供给不足，补贴买家也是白烧'}</text>
         <text x="20" y="115" font-size="12" fill="var(--tax-muted)">乘客平均等待 ${wait} 分钟（供给不够时，狂补贴买家只会加速差评卸载）</text>

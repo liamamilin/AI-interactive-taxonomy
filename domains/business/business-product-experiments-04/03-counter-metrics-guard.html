@@ -44,10 +44,10 @@
       document.getElementById('vG').textContent=grd?'严格拦截':'无护栏';
       const t=Math.round(55 + cb*0.5), h=Math.max(10, Math.round(95 - cb*(grd?0.4:1.1)));
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">北极星：停留时长</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">北极星：停留时长</text>
         <rect x="150" y="36" width="${(t*3.6).toFixed(1)}" height="26" rx="5" fill="#2563eb"/>
         <text x="${(158+t*3.6).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#2563eb">${t} 分</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">护栏：长期口碑健康</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">护栏：长期口碑健康</text>
         <rect x="150" y="96" width="${(h*3.6).toFixed(1)}" height="26" rx="5" fill="${h>=60?'#10b981':'#ef4444'}"/>
         <text x="${(158+h*3.6).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${h>=60?'#10b981':'#ef4444'}">${h} 分</text>
       `;

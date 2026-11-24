@@ -28,9 +28,9 @@
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-       <button class="btn active" onclick="pick(0,this)">1. 初始期：重赏抓野生眼镜蛇</button>
-       <button class="btn" onclick="pick(1,this)">2. 套利期：聪明人开始建养蛇场</button>
-       <button class="btn" onclick="pick(2,this)">3. 崩盘期：取消赏金后全放生</button>
+       <button class="btn active" onclick="window.__userActed=true;pick(0,this)">1. 初始期：重赏抓野生眼镜蛇</button>
+       <button class="btn" onclick="window.__userActed=true;pick(1,this)">2. 套利期：聪明人开始建养蛇场</button>
+       <button class="btn" onclick="window.__userActed=true;pick(2,this)">3. 崩盘期：取消赏金后全放生</button>
      </div>
      <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
      <div class="kpi-row">
@@ -49,7 +49,7 @@
        if(btn) btn.classList.add('active');
        const s=ST[i];
        document.getElementById('svg').innerHTML=`
-         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">城市眼镜蛇存量</text>
+         <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">城市眼镜蛇存量</text>
          <rect x="160" y="36" width="${(s.sn/8000*360).toFixed(1)}" height="28" rx="6" fill="#ef4444"/>
          <text x="${(168+s.sn/8000*360).toFixed(1)}" y="55" font-size="12.5" font-weight="800" fill="#ef4444">${s.sn} 条</text>
          <text x="20" y="115" font-size="12" fill="var(--tax-muted)">现象复盘：${s.msg}</text>
@@ -57,7 +57,7 @@
        document.getElementById('kSnake').textContent=s.sn+' 条';
        document.getElementById('kCost').textContent=s.cost;
        document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>设计任何奖励或补贴机制前，必问自己一句：<strong>“如果我是最狡猾的套利者，我会怎么利用这个规则反过来赚钱？”</strong>`;
-       if(window.ToySDK) window.ToySDK.markCompleted();
+       if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
      }
      pick(0,document.querySelector('.btn.active'));</script>
 </body>

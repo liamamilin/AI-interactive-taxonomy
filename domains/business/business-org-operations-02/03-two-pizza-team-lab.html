@@ -47,10 +47,10 @@
       const lines=Math.round(k*(sub*(sub-1)/2) + k*(k-1)/2);
       const out=Math.max(15, Math.min(95, Math.round(92 - lines*0.18)));
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">内部开会对齐连线</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">内部开会对齐连线</text>
         <rect x="160" y="36" width="${Math.min(360, lines*0.9).toFixed(1)}" height="26" rx="5" fill="#ef4444"/>
         <text x="${(168+Math.min(360, lines*0.9)).toFixed(1)}" y="54" font-size="12" font-weight="800" fill="#ef4444">${lines} 条线</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">实际功能交付速度</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">实际功能交付速度</text>
         <rect x="160" y="96" width="${(out*3.6).toFixed(1)}" height="26" rx="5" fill="#10b981"/>
         <text x="${(168+out*3.6).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="#10b981">${out} 分</text>
       `;

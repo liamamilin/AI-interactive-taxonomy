@@ -3,68 +3,144 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⏳ 获客回本周期现金流沙盘：为什么高速增长也会缺钱倒闭？</title>
+  <title>⏳ 获客回本周期现金流竞速：为什么高速增长也会缺钱倒闭？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:var(--tax-ink); font-weight:750; font-size:13px; cursor:pointer; }
+    .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .race-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+    @media (max-width:680px){ .race-grid { grid-template-columns:1fr; } }
+    .lane { padding:12px; border:1.5px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .lane.dead { border-color:var(--tax-red); background:var(--tax-red-soft); }
+    .lane.ok { border-color:var(--tax-green); }
+    .l-head { display:flex; justify-content:space-between; font-weight:800; font-size:13.5px; margin-bottom:8px; }
+    .bar-bg { height:14px; border-radius:99px; background:var(--tax-surface-alt); border:1px solid var(--tax-border); overflow:hidden; margin:6px 0; }
+    .bar-fg { height:100%; transition:width .3s ease; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⏳ 获客回本周期现金流沙盘：为什么高速增长也会缺钱倒闭？</h1><p>误区：只要 LTV 远大于 CAC（比如 4:1），拼命投广告增长就绝对不会缺钱。真相：广告费今天就要付出去，订阅费却要分 18 个月才收回来——高速增长会在前期挖出巨大的现金流深坑！</p></div>
+      <div>
+        <h1>⏳ 获客回本周期现金流竞速：为什么高速增长也会缺钱倒闭？</h1>
+        <p>两家 SaaS 公司起步账上都有 <strong>100 万启动现金</strong>，且每拉 1 个客户长期都赚大钱（LTV = 3×CAC）！唯一区别是回本周期：A 公司 4 个月回本，B 公司 14 个月回本且疯狂扩招投流——鸣枪开跑，看谁先撑过 12 个月！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
-    <div class="tax-panel"><div class="ctrl-grid">
-       <div class="ctrl-box"><label><span>每月新增付费用户数</span><span id="vN">100 人</span></label><input id="n" type="range" min="20" max="200" step="20" value="100" oninput="draw(true)"></div>
-       <div class="ctrl-box"><label><span>单客 CAC 回本周期</span><span id="vP">12 个月</span></label><input id="pay" type="range" min="3" max="18" step="3" value="12" oninput="draw(true)"></div>
-     </div>
-     <svg id="svg" class="svg-box" viewBox="0 0 600 195"></svg>
-     <div class="kpi-row">
-       <div class="kpi"><div class="k-lbl">现金流最低谷（需垫资）</div><div class="k-val" id="kDip" style="color:#ef4444;">—</div></div>
-       <div class="kpi"><div class="k-lbl">第 24 个月账面现金</div><div class="k-val" id="kEnd" style="color:#10b981;">—</div></div>
-     </div></div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="tax-panel">
+      <div class="btn-row">
+        <button class="btn primary" id="runBtn">🏁 开启 12 个月现金流竞速</button>
+        <button class="btn" id="stepBtn">推进 1 个月</button>
+        <button class="btn" id="resetBtn">重置现金 = 100 万</button>
+        <span style="font-size:13px;color:var(--tax-muted);margin-left:auto;">当前月份：<strong id="mVal" style="color:var(--tax-ink);">第 0 / 12 月</strong></span>
+      </div>
+
+      <div class="race-grid">
+        <div class="lane ok" id="laneA">
+          <div class="l-head"><span>🌱 赛道 A：4 个月快回本</span><strong id="cashA" style="color:var(--tax-green);">100 万</strong></div>
+          <div style="font-size:12px;color:var(--tax-muted);">CAC=4,000 · 月毛利=1,000 · 稳步月增 15 客</div>
+          <div class="bar-bg"><div class="bar-fg" id="barA" style="width:50%;background:var(--tax-green);"></div></div>
+          <div style="font-size:12px;color:var(--tax-muted);" id="stA">状态：现金充裕，待起跑</div>
+        </div>
+
+        <div class="lane" id="laneB">
+          <div class="l-head"><span>🔥 赛道 B：14 个月慢回本狂飙</span><strong id="cashB" style="color:var(--tax-amber);">100 万</strong></div>
+          <div style="font-size:12px;color:var(--tax-muted);">CAC=14,000 · 月毛利=1,000 · 激进月增 28 客</div>
+          <div class="bar-bg"><div class="bar-fg" id="barB" style="width:50%;background:var(--tax-amber);"></div></div>
+          <div style="font-size:12px;color:var(--tax-muted);" id="stB">状态：手握融资，待起跑</div>
+        </div>
+      </div>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+    </div>
+
+    <div class="tax-aha" id="ahaBox">
+      💡 <strong>顿悟提示：</strong>点击「开启 12 个月现金流竞速」，亲眼见证什么叫“账面 LTV 很赚钱，却因为回本太慢在增长高峰期活活缺钱猝死”！
+    </div>
   </div>
-  <script>function draw(mark){
-       const n=+document.getElementById('n').value, pay=+document.getElementById('pay').value;
-       document.getElementById('vN').textContent=n+' 人/月';
-       document.getElementById('vP').textContent=pay+' 个月';
-       const cac=600, mRev=cac/pay;
-       let cash=0, minC=0;
-       const arr=[0];
-       for(let m=1;m<=24;m++){
-         cash -= n*cac;
-         cash += (m*n)*mRev;
-         minC=Math.min(minC,cash);
-         arr.push(cash/10000);
-       }
-       const maxA=Math.max(10, ...arr), minA=Math.min(-10, ...arr);
-       const rng=maxA-minA;
-       const x=i=>48+(i/24)*520, y=v=>170-((v-minA)/rng)*140;
-       const p=arr.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
-       document.getElementById('svg').innerHTML=`
-         <line x1="48" y1="${y(0).toFixed(1)}" x2="568" y2="${y(0).toFixed(1)}" stroke="#ef4444" stroke-dasharray="4,4"/>
-         <path d="${p}" fill="none" stroke="#2563eb" stroke-width="3"/>
-         <text x="565" y="${y(0)-5}" text-anchor="end" font-size="10.5" fill="#ef4444">现金零线（跌破即需融资垫资）</text>
-       `;
-       document.getElementById('kDip').textContent=(minC/10000).toFixed(1)+' 万元';
-       document.getElementById('kEnd').textContent=arr[24].toFixed(1)+' 万元';
-       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕模型长期极度赚钱，在 <strong>${pay} 个月</strong> 回本周期下月增 ${n} 客依然要先垫付 <strong>${Math.abs(minC/10000).toFixed(1)} 万</strong> 现金流深坑！无数好产品都是死在回本前的资金链断裂上。`;
-       if(mark && window.ToySDK) window.ToySDK.markCompleted();
-     }
-     draw(false);</script>
+
+  <script>
+    let month = 0, timer = null, acted = false;
+    let histA = [100], histB = [100];
+    let custA = 0, custB = 0;
+
+    function markDone() {
+      if (!acted) { acted = true; if (window.ToySDK) window.ToySDK.markCompleted('完成了获客回本周期现金流竞速'); }
+    }
+
+    function resetRace() {
+      if (timer) { clearInterval(timer); timer = null; }
+      month = 0; histA = [100]; histB = [100]; custA = 0; custB = 0;
+      render();
+    }
+
+    function stepMonth() {
+      if (month >= 12) { if (timer) { clearInterval(timer); timer = null; } return; }
+      month++;
+      // In units of 10k RMB (万元):
+      // A: +15 customers/mo, CAC=0.4万 -> spend 6万/mo, each active customer brings 0.1万/mo
+      custA += 15;
+      const nextA = histA[histA.length - 1] - 6 + custA * 0.1;
+      histA.push(nextA);
+
+      // B: +28 customers/mo, CAC=1.4万 -> spend 39.2万/mo, each active customer brings 0.1万/mo
+      custB += 28;
+      const nextB = histB[histB.length - 1] - 39.2 + custB * 0.1;
+      histB.push(nextB);
+      render();
+    }
+
+    function render() {
+      document.getElementById('mVal').textContent = `第 ${month} / 12 月`;
+      const cA = histA[histA.length - 1];
+      const cB = histB[histB.length - 1];
+
+      document.getElementById('cashA').textContent = cA.toFixed(0) + ' 万';
+      document.getElementById('cashB').textContent = cB.toFixed(0) + ' 万';
+      document.getElementById('barA').style.width = Math.max(0, Math.min(100, (cA / 240) * 100)) + '%';
+      document.getElementById('barB').style.width = Math.max(0, Math.min(100, (cB / 240) * 100)) + '%';
+
+      const bDead = cB <= 0;
+      document.getElementById('laneB').className = 'lane ' + (bDead ? 'dead' : '');
+      document.getElementById('stA').textContent = month === 0 ? '状态：待起跑' : `在服务客户 ${custA} 家 · 现金流持续正向造血`;
+      document.getElementById('stB').textContent = bDead ? `💀 第 ${histB.findIndex(x => x <= 0)} 个月资金链断裂！虽有 ${custB} 家签约客户却发不出工资` : `在服务客户 ${custB} 家 · 每月巨额垫付获客费`;
+
+      const W = 600, H = 185, padL = 46, padR = 20, padT = 18, padB = 28;
+      const sx = m => padL + (m / 12) * (W - padL - padR);
+      const sy = v => H - padB - ((v + 120) / 360) * (H - padT - padB);
+      const toPath = arr => arr.map((v, i) => `${i === 0 ? 'M' : 'L'}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="${padL}" y1="${sy(0).toFixed(1)}" x2="${W - padR}" y2="${sy(0).toFixed(1)}" stroke="var(--tax-red)" stroke-dasharray="5,4"/>
+        <text x="${W - padR - 4}" y="${(sy(0) - 5).toFixed(1)}" text-anchor="end" font-size="11" font-weight="700" fill="var(--tax-red)">0 元破产红线</text>
+        <path d="${toPath(histA)}" fill="none" stroke="var(--tax-green)" stroke-width="3"/>
+        <path d="${toPath(histB)}" fill="none" stroke="var(--tax-amber)" stroke-width="3"/>
+        ${[0,3,6,9,12].map(m => `<text x="${sx(m).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${m}月</text>`).join('')}
+      `;
+
+      const aha = document.getElementById('ahaBox');
+      if (month === 0) {
+        aha.innerHTML = `💡 <strong>顿悟提示：</strong>按下开跑，对比 4 个月快回本与 14 个月慢回本在高速拉新下的现金流走向！`;
+      } else if (bDead) {
+        aha.innerHTML = `💡 <strong>顿悟时刻（增长死亡凹槽）：</strong>赛道 B 的客户长期来看明明盈利，但因为<strong>获客费当天付清、月费慢慢收回</strong>，增速越快反而现金缺口越大，第 <strong>${histB.findIndex(x => x <= 0)} 个月</strong>就砸穿 0 元破产线！而赛道 A 靠 4 个月快回本，第 12 月账上滚出 <strong>${cA.toFixed(0)} 万</strong>健康现金！`;
+      } else {
+        aha.innerHTML = `💡 <strong>第 ${month} 月战况：</strong>赛道 B 客户数冲得更猛（${custB} 家），但账上现金正在快速滑向破产红线（剩 ${cB.toFixed(0)} 万）！`;
+      }
+    }
+
+    document.getElementById('runBtn').addEventListener('click', () => {
+      markDone();
+      if (month >= 12) resetRace();
+      if (timer) clearInterval(timer);
+      timer = setInterval(stepMonth, 360);
+    });
+    document.getElementById('stepBtn').addEventListener('click', () => { markDone(); if (timer) { clearInterval(timer); timer = null; } stepMonth(); });
+    document.getElementById('resetBtn').addEventListener('click', () => { markDone(); resetRace(); });
+    render();
+  </script>
 </body>
 </html>

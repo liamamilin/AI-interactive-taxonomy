@@ -28,9 +28,9 @@
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-       <button class="btn active" onclick="pick(0,this)">🏠 Airbnb（住宿交易平台）</button>
-       <button class="btn" onclick="pick(1,this)">🎵 Spotify（音乐流媒体）</button>
-       <button class="btn" onclick="pick(2,this)">💬 Slack（团队协同）</button>
+       <button class="btn active" onclick="window.__userActed=true;pick(0,this)">🏠 Airbnb（住宿交易平台）</button>
+       <button class="btn" onclick="window.__userActed=true;pick(1,this)">🎵 Spotify（音乐流媒体）</button>
+       <button class="btn" onclick="window.__userActed=true;pick(2,this)">💬 Slack（团队协同）</button>
      </div>
      <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
      <div class="kpi-row">
@@ -56,7 +56,7 @@
        document.getElementById('kNs').textContent=d.ns;
        document.getElementById('kBad').textContent=d.bad;
        document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>北极星指标 = <strong>“用户真正感受到产品核心价值的那一瞬间”</strong>，同时又能直接撬动公司长期营收！`;
-       if(window.ToySDK) window.ToySDK.markCompleted();
+       if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
      }
      pick(0,document.querySelector('.btn.active'));</script>
 </body>
