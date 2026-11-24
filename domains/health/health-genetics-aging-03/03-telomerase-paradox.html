@@ -7,57 +7,85 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .scen-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:9px; margin-bottom:14px; }
+    .s-btn { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .s-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .s-btn .t { font-size:13px; font-weight:800; }
+    .s-btn .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⚖️ 端粒酶悖论：为什么不能直接全身无限加长端粒？</h1><p>误区：既然端粒变短让人衰老，那发明一种药把全身细胞的端粒酶全开到最大就能长生不老。真相：癌细胞之所以杀不死，正是因为它偷偷重启了端粒酶！盲目全局激活端粒酶等于拆掉防癌安全锁！</p></div>
+      <div>
+        <h1>⚖️ 端粒酶悖论：为什么不能直接全身无限加长端粒？</h1>
+        <p>误区：既然端粒变短导致衰老，那只要吃药把全身细胞的“端粒酶”永久打开，人类就能立刻长生不老！真相：<strong>90% 的恶性肿瘤正是靠偷开端粒酶才实现无限增殖的</strong>——端粒缩短其实是演化在“防癌症”与“防衰老”之间做的精妙妥协！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>全局端粒酶强行激活度</span><span id="vTel">65%</span></label><input type="range" id="sTel" min="0" max="100" value="65" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>p53 基因防癌纠错审查力</span><span id="vP53">70%</span></label><input type="range" id="sP53" min="20" max="100" value="70" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">⚖️ 切换 3 种端粒酶调控策略，观察“组织年轻度”与“癌变失控风险”的残酷跷跷板：</div>
+      <div class="scen-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 200"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">组织再生年轻度</div><div class="k-val" id="kReg" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">失控癌变风险</div><div class="k-val" id="kCan" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">🌿 组织再生与抗衰能力</div><div class="k-val" id="kRegen" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🚨 突变细胞永生癌变风险</div><div class="k-val" id="kCanc" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">综合预期寿命结局</div><div class="k-val" id="kLife" style="color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const tel=+document.getElementById('sTel').value, p53=+document.getElementById('sP53').value;
-  document.getElementById('vTel').textContent=tel+'%'; document.getElementById('vP53').textContent=p53+'%';
-  const reg=Math.round(35 + tel*0.62);
-  const can=Math.max(4, Math.round(tel*0.85 - p53*0.45));
-  document.getElementById('kReg').textContent=reg+' 分';
-  document.getElementById('kCan').textContent=can+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">细胞无限分裂再生活力: ${reg} 分</text>
-    <rect x="20" y="44" width="${reg*5.2}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#ef4444">受损突变细胞趁机永生化癌变风险: ${can}%</text>
-    <rect x="20" y="112" width="${can*5.2}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">衰老与癌症是生物演化的一枚硬币两面：怕癌才设了寿命上限</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>人体本来就有端粒酶（只在生殖细胞和干细胞里开启），之所以在普通细胞里关掉它，是因为多活几十年的代价会让受损细胞带着错误一直分裂下去（癌变风险 ${can}%）！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const STRATS = [
+      { id:'nat', icon:'🧬', name:'自然演化默认（体细胞关闭）', desc:'仅干细胞/生殖细胞保留端粒酶', regen:58, canc:18, life:'稳健 80–90 岁', col:'var(--tax-primary)',
+        aha:'💡 <strong>顿悟时刻：</strong>大自然非常精明：只在需要长期造血的干细胞里保留端粒酶，而把普通体细胞的端粒酶关掉——宁可让它们老了慢慢停工，也绝不给变异细胞发“无限续命卡”！' },
+      { id:'max', icon:'💉', name:'激进方案：全身永久拉满端粒酶', desc:'所有细胞获得无限分裂外挂', regen:96, canc:92, life:'⚠️ 肿瘤高发夭折风险!', col:'var(--tax-red)',
+        aha:'💡 <strong>顿悟时刻：</strong>这就是致命的<strong>端粒酶悖论</strong>！当你给全身细胞装上无限加长端粒的外挂，好细胞确实不老了，但体内潜伏的 DNA 突变细胞也顺便拿到了“永生通行证”，肿瘤发生率瞬间飙到 <strong>92%</strong>！' },
+      { id:'smart', icon:'🛡️', name:'科学路径：减缓损耗 + 强免疫', desc:'抗炎运动防磨损 · 不盲目激活', regen:82, canc:12, life:'🏆 健康长寿最优解', col:'var(--tax-green)',
+        aha:'💡 <strong>顿悟时刻：</strong>真正安全的端粒保养不是乱吃号称“狂增端粒酶”的智商税神药，而是<strong>通过抗炎、有氧运动、减压和深睡降低端粒的磨损速率</strong>，在不拉高癌变风险的前提下优雅延长健康寿命！' }
+    ];
+    let cur = 'max';
+
+    function pick(id){ cur = id; if(window.ToySDK) window.ToySDK.markCompleted(); draw(); }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = STRATS.map(s => `
+        <button class="s-btn ${cur===s.id?'active':''}" onclick="pick('${s.id}')">
+          <div class="t">${s.icon} ${s.name}</div>
+          <div class="s">${s.desc}</div>
+        </button>
+      `).join('');
+
+      const s = STRATS.find(x=>x.id===cur);
+      function bar(y, lbl, val, col){
+        return `
+          <text x="24" y="${y+17}" font-size="13" font-weight="850" fill="var(--tax-ink)">${lbl}</text>
+          <rect x="200" y="${y}" width="350" height="24" rx="7" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+          <rect x="200" y="${y}" width="${Math.round(val*3.5)}" height="24" rx="7" fill="${col}"/>
+          <text x="562" y="${y+17}" font-size="13" font-weight="900" fill="${col}">${val}%</text>
+        `;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="28" font-size="13.5" font-weight="900" fill="${s.col}">当前策略：${s.name}</text>
+        ${bar(56, '🌿 组织抗衰再生力', s.regen, 'var(--tax-green)')}
+        ${bar(108, '🚨 恶性癌变失控风险', s.canc, s.canc>50?'var(--tax-red)':'var(--tax-amber)')}
+        <text x="24" y="176" font-size="12" font-weight="800" fill="var(--tax-muted)">演化底层权衡：衰老某种程度上是哺乳动物为了压低年轻时患癌率付出的代价！</text>
+      `;
+
+      document.getElementById('kRegen').textContent = s.regen + ' 分';
+      document.getElementById('kCanc').textContent = s.canc + '%' + (s.canc>50?' 🚨 极危':' ✅ 低危');
+      document.getElementById('kLife').textContent = s.life;
+      document.getElementById('ahaBox').innerHTML = s.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

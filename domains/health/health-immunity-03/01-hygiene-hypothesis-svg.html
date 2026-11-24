@@ -3,61 +3,108 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧼 卫生假说：免疫系统“太闲了”就会乱开枪（SVG）</title>
+  <title>🧼 卫生假说：免疫系统“太闲了”就会乱开枪</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .env-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:9px; margin-bottom:12px; }
+    .e-card { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .e-card.on { border-color:var(--tax-green); background:var(--tax-green-soft); }
+    .e-card.bad.on { border-color:var(--tax-red); background:var(--tax-red-soft); }
+    .e-card .t { display:flex; justify-content:space-between; font-size:13px; font-weight:800; }
+    .e-card .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🧼 卫生假说：免疫系统“太闲了”就会乱开枪（SVG）</h1><p>误区：过敏是因为免疫系统“太弱了”，需要吃保健品把免疫力再拉高一点。真相：过敏恰恰是因为免疫系统太闲太敏感、把无害的花粉/花生当成了恐怖寄生虫，狂喷组胺误伤自己！</p></div>
+      <div>
+        <h1>🧼 卫生假说：免疫系统“太闲了”就会乱开枪</h1>
+        <p>误区：把孩子养在 99.9% 除菌的无菌温室里，就能彻底远离过敏和哮喘。真相：免疫系统需要从小见识无害的泥土与老朋友微生物来训练“调节性 T 细胞（Treg）”；太无菌的军队闲极无聊，就会把无害花粉当核威胁疯狂放炮！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>早期自然微生物接触度 (泥土/宠物)</span><span id="vNat">30%</span></label><input type="range" id="sNat" min="5" max="100" value="30" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>环境无菌/消毒剂过度使用度</span><span id="vSte">75%</span></label><input type="range" id="sSte" min="0" max="100" value="75" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🏡 拼装童年早期微生物暴露环境，观察遇到一粒🌸无害花粉时的免疫反应：</div>
+      <div class="env-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">Th2 过敏倾向活跃度</div><div class="k-val" id="kTh2" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">过敏/哮喘发生风险</div><div class="k-val" id="kRisk">—</div></div>
+        <div class="kpi"><div class="k-lbl">🕊️ Treg 免疫耐受刹车力</div><div class="k-val" id="kTreg" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">💥 IgE 过敏误报率</div><div class="k-val" id="kIge" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">遇到花粉时的表现</div><div class="k-val" id="kPol" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const nat=+document.getElementById('sNat').value, ste=+document.getElementById('sSte').value;
-  document.getElementById('vNat').textContent=nat+'%'; document.getElementById('vSte').textContent=ste+'%';
-  const th2=Math.max(10, Math.min(95, Math.round(50 + ste*0.45 - nat*0.4)));
-  document.getElementById('kTh2').textContent=th2+'%';
-  document.getElementById('kRisk').textContent=th2>60?'高风险 (过度反应)':'免疫耐受平衡';
-  document.getElementById('kRisk').style.color=th2>60?'#ef4444':'#059669';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">调节性 T 细胞 (Treg 维和部队) 成熟度: ${Math.round(nat*0.9)}%</text>
-    <rect x="20" y="44" width="${nat*0.9*5.4}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#ef4444">Th2 过敏误报率 (IgE 组胺炸弹): ${th2}%</text>
-    <rect x="20" y="112" width="${th2*5.4}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">过分无菌环境剥夺了免疫系统的“靶场练兵机会”，导致见啥打啥</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>免疫系统需要靠早期的泥土和益生菌来校准“敌我识别精度”！过度消毒（${ste}%）让维和部队缺席，一粒花粉就能引爆全身组胺警报（${th2}%）！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const ENVS = [
+      { id:'soil', icon:'🌱', name:'常去公园玩泥巴草地', desc:'丰富无害环境菌训兵', bad:false, treg:+26 },
+      { id:'pet', icon:'🐶', name:'家里养猫狗宠物', desc:'早期微生物多样性+1', bad:false, treg:+18 },
+      { id:'food', icon:'🥣', name:'多样化天然饮食', desc:'滋养肠道耐受菌群', bad:false, treg:+18 },
+      { id:'sterile', icon:'🧴', name:'每天全屋 99.9% 除菌', desc:'免疫部队缺少陪练', bad:true, treg:-24 },
+      { id:'abx', icon:'💊', name:'动辄滥用广谱抗生素', desc:'误杀早期肠道老朋友', bad:true, treg:-22 }
+    ];
+    let picked = new Set(['sterile', 'abx']);
+
+    function toggle(id){
+      if(picked.has(id)) picked.delete(id); else picked.add(id);
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = ENVS.map(e => `
+        <button class="e-card ${e.bad?'bad':''} ${picked.has(e.id)?'on':''}" onclick="toggle('${e.id}')">
+          <div class="t"><span>${e.icon} ${e.name}</span><span>${picked.has(e.id)?'✓':'+'}</span></div>
+          <div class="s">${e.desc}</div>
+        </button>
+      `).join('');
+
+      let treg = 48;
+      ENVS.forEach(e => { if(picked.has(e.id)) treg += e.treg; });
+      treg = Math.max(10, Math.min(96, treg));
+      const ige = 100 - treg;
+      const allergic = ige >= 55;
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="24" y="34" width="146" height="124" rx="14" fill="var(--tax-amber-soft)" stroke="var(--tax-amber)" stroke-width="2"/>
+        <text x="97" y="76" text-anchor="middle" font-size="30">🌸</text>
+        <text x="97" y="106" text-anchor="middle" font-size="13" font-weight="850" fill="var(--tax-amber)">无害花粉飘入</text>
+        <text x="97" y="128" text-anchor="middle" font-size="11" fill="var(--tax-muted)">本身零毒性</text>
+
+        <line x1="170" y1="96" x2="236" y2="96" stroke="var(--tax-primary)" stroke-width="3" stroke-dasharray="5 3"/>
+
+        <rect x="240" y="28" width="166" height="136" rx="14" fill="${allergic?'var(--tax-red-soft)':'var(--tax-green-soft)'}" stroke="${allergic?'var(--tax-red)':'var(--tax-green)'}" stroke-width="2.4"/>
+        <text x="323" y="64" text-anchor="middle" font-size="13.5" font-weight="900" fill="${allergic?'var(--tax-red)':'var(--tax-green)'}">${allergic?'🚨 Th2/IgE 暴走':'🕊️ Treg 冷静拦截'}</text>
+        <text x="323" y="92" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-ink)">耐受刹车：${treg}%</text>
+        <text x="323" y="114" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-ink)">过敏警报：${ige}%</text>
+        <text x="323" y="142" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${allergic?'肥大细胞狂放组胺!':'判定无害 · 放行'}</text>
+
+        <line x1="406" y1="96" x2="454" y2="96" stroke="${allergic?'var(--tax-red)':'var(--tax-green)'}" stroke-width="3"/>
+
+        <rect x="458" y="34" width="158" height="124" rx="14" fill="var(--tax-surface-alt)" stroke="${allergic?'var(--tax-red)':'var(--tax-green)'}" stroke-width="2"/>
+        <text x="537" y="80" text-anchor="middle" font-size="30">${allergic?'🤧':'😌'}</text>
+        <text x="537" y="112" text-anchor="middle" font-size="13" font-weight="850" fill="${allergic?'var(--tax-red)':'var(--tax-green)'}">${allergic?'狂打喷嚏/鼻炎/皮疹':'风平浪静 · 零症状'}</text>
+        <text x="537" y="134" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${allergic?'无差别轰炸自己呼吸道':'精准区分敌我'}</text>
+        <text x="320" y="190" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-muted)">注意：卫生假说反对的是“过度无菌消毒”，而不是饭前便后正常洗手！</text>
+      `;
+
+      document.getElementById('kTreg').textContent = treg + '%';
+      document.getElementById('kIge').textContent = ige + '%';
+      document.getElementById('kPol').textContent = allergic ? '组胺风暴（过敏）🤧' : '和平共处 😌';
+
+      document.getElementById('ahaBox').innerHTML = allergic
+        ? `💡 <strong>顿悟时刻：</strong>过度除菌和滥用抗生素让免疫系统从小缺少“无害老朋友”陪练，导致 Treg 刹车只剩 <strong>${treg}%</strong>！一粒毫无威胁的花粉进来，肥大细胞就直接拉响核弹警报狂喷组胺！试试点亮 🌱 泥巴草地与 🐶 宠物看看反转！`
+        : `💡 <strong>顿悟时刻：</strong>见多识广的免疫系统从不草木皆兵！丰富的自然微生物把 Treg 免疫耐受刹车训到了 <strong>${treg}%</strong>，遇到花粉一眼识别为“无害路人”，优雅放行零过敏！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

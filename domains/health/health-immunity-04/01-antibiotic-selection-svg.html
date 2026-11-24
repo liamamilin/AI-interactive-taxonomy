@@ -3,72 +3,108 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🦠 抗生素半途停药：人工筛选超级细菌（SVG）</title>
+  <title>🦠 抗生素半途停药：人工筛选超级细菌</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.danger { border-color:var(--tax-red); color:var(--tax-red); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🦠 抗生素半途停药：人工筛选超级细菌（SVG）</h1><p>误区：症状好了就赶紧停药，少吃两天抗生素既省钱又“减少药物伤身”。真相：前 3 天杀死的只是 95% 的老实弱细菌；你一停药，剩下的 5% 耐药突变体没有竞争对手，立刻繁殖成全军覆没的超级细菌！</p></div>
+      <div>
+        <h1>🦠 抗生素半途停药：人工筛选超级细菌</h1>
+        <p>误区：抗生素吃了 3 天不发烧也不咳了，剩下的药留着下次省着用。真相：前 3 天只杀光了最好欺负的弱菌；此时擅自停药，等于帮最顽强的<strong>红色耐药突变菌</strong>清空了所有竞争对手，把你自己的身体变成“超级细菌选育基地”！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>实际服药坚持天数 (满疗程 7 天)</span><span id="vDay">3 天 (提前停药)</span></label><input type="range" id="sDay" min="1" max="7" value="3" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>细菌初始耐药突变比例</span><span id="vMut">5%</span></label><input type="range" id="sMut" min="1" max="15" value="5" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="takeDose()">💊 按医嘱服药 +1 天</button>
+        <button class="pill danger" onclick="stopEarly()">🛑 感觉好了！现在提前停药</button>
+        <button class="pill" onclick="resetDish()">↺ 重置感染培养皿</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">第10天残留细菌量</div><div class="k-val" id="kTot">—</div></div>
-        <div class="kpi"><div class="k-lbl">耐药超级细菌占比</div><div class="k-val" id="kRes" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">已服药天数</div><div class="k-val" id="kDay" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🔵 普通弱菌 / 🔴 耐药强菌</div><div class="k-val" id="kCnt" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">你的主观症状</div><div class="k-val" id="kSym" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const day=+document.getElementById('sDay').value, mut=+document.getElementById('sMut').value;
-  document.getElementById('vDay').textContent=day+(day<7?' 天 (提前停药!)':' 天 (规范完赛)');
-  document.getElementById('vMut').textContent=mut+'%';
-  let norm=100-mut, res=mut;
-  for(let d=1;d<=10;d++){
-    if(d<=day){ norm*=0.42; res*=0.72; }
-    else { norm*=1.25; res*=1.65; }
-    const cap=norm+res; if(cap>120){ norm=norm/cap*120; res=res/cap*120; }
-  }
-  const tot=Math.round(norm+res);
-  const resPct=tot>0?Math.round(res/tot*100):0;
-  document.getElementById('kTot').textContent=tot+' 单位';
-  document.getElementById('kRes').textContent=resPct+'%';
-  let dots='';
-  const nNorm=Math.round(norm/120*24), nRes=Math.round(res/120*24);
-  for(let i=0;i<24;i++){
-    const col=i<nRes?'#ef4444':(i<nRes+nNorm?'#0284c7':'#e2e8f0');
-    const x=42+(i%12)*45, y=45+Math.floor(i/12)*45;
-    dots+=`<circle cx="${x}" cy="${y}" r="13" fill="${col}"/>`;
-  }
-  document.getElementById('svg').innerHTML=dots+`<text x="35" y="152" font-size="13" font-weight="800" fill="${day<7?'#ef4444':'#059669'}">红点=耐药突变超级菌 (${resPct}%) · 蓝点=普通菌 · 灰点=已清空</text>`;
-  document.getElementById('ahaBox').innerHTML=day<7
-    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>第 ${day} 天退烧就停药是最危险的半吊子！你替耐药菌清掉了全部普通竞争对手，第 10 天卷土重来的全军里有 <strong>${resPct}% 是耐药超级菌</strong>！`
-    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>吃满 7 天高血药浓度才能连那 5% 的硬骨头耐药菌也一并压死到免疫系统能彻底清零的阈值以下！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let day = 0, weak = 32, strong = 4, stopped = false;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function takeDose(){
+      if(stopped){ resetDish(); }
+      day = Math.min(7, day + 1);
+      weak = Math.max(0, Math.round(weak * 0.35));
+      if(day <= 3) strong = Math.max(3, strong); // strong ones survive early doses
+      else strong = Math.max(0, strong - 1);      // full course wipes out resistant ones
+      if(day >= 7){ weak = 0; strong = 0; }
+      markDone(); draw();
+    }
+    function stopEarly(){
+      stopped = true;
+      if(strong > 0){
+        strong = Math.min(36, strong * 7);
+        weak = Math.min(4, weak);
+      }
+      markDone(); draw();
+    }
+    function resetDish(){
+      day = 0; weak = 32; strong = 4; stopped = false;
+      draw();
+    }
+
+    function draw(){
+      const total = weak + strong;
+      let dots = '';
+      for(let i=0; i<weak; i++){
+        const x = 44 + (i % 12) * 48 + ((i*7)%9);
+        const y = 44 + Math.floor(i / 12) * 44 + ((i*11)%8);
+        dots += `<circle cx="${x}" cy="${y}" r="10" fill="var(--tax-primary)" opacity="0.85"/>`;
+      }
+      for(let j=0; j<strong; j++){
+        const idx = weak + j;
+        const x = 44 + (idx % 12) * 48 + ((j*13)%9);
+        const y = 44 + Math.floor(idx / 12) * 44 + ((j*5)%8);
+        dots += `<circle cx="${x}" cy="${y}" r="12" fill="var(--tax-red)" stroke="#fff" stroke-width="1.5"/>
+                 <text x="${x}" y="${y+4}" text-anchor="middle" font-size="10" font-weight="900" fill="#fff">R</text>`;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="18" y="16" width="604" height="170" rx="14" fill="var(--tax-surface-alt)" stroke="${stopped&&strong>0?'var(--tax-red)':total===0?'var(--tax-green)':'var(--tax-border)'}" stroke-width="2"/>
+        ${total === 0 ? `<text x="320" y="106" text-anchor="middle" font-size="18" font-weight="900" fill="var(--tax-green)">✅ 完整 7 天疗程：连耐药强菌也已全部清零！</text>` : dots}
+        <text x="24" y="204" font-size="11.5" font-weight="800" fill="var(--tax-ink)">🔵 蓝点 = 易杀普通细菌 · 🔴 红点(R) = 自带耐药突变的顽固强菌</text>
+      `;
+
+      document.getElementById('kDay').textContent = `第 ${day} / 7 天${stopped?' (已停药)':''}`;
+      document.getElementById('kCnt').textContent = `蓝 ${weak} / 红 ${strong}`;
+      const sym = total === 0 ? '彻底痊愈 ✅' : (stopped && strong > 10 ? '复发！且原药彻底失效 🚨' : (total <= 6 ? '不烧不痛（假象痊愈！）' : '高烧感染中 🤒'));
+      document.getElementById('kSym').textContent = sym;
+
+      document.getElementById('ahaBox').innerHTML = stopped && strong > 10
+        ? `💡 <strong>顿悟时刻：</strong>惨烈反噬！你在第 ${day} 天感觉“不发烧了”就停药，结果幸存的红色耐药菌没了竞争对手，疯狂繁殖出 <strong>${strong} 颗超级细菌军团</strong>——下次复发再吃同款抗生素已经彻底无效！`
+        : total === 0
+        ? `💡 <strong>顿悟时刻：</strong>按医嘱吃满 <strong>7 天完整疗程</strong>，才把最顽固的红色耐药菌也彻底清零，不给演化留下任何火种！`
+        : day >= 2 && day <= 4
+        ? `💡 <strong>顿悟时刻：</strong>危险诱惑点！现在蓝菌几乎死光，你已经<strong>感觉完全好了</strong>，但角落里还藏着 <strong>${strong} 颗红色耐药菌</strong>！点一下 🛑 提前停药看看会发生什么，或者继续吃满 7 天！`
+        : `💡 <strong>顿悟时刻：</strong>细菌群体天生存在耐药度差异。连续点击 <strong>💊 服药 +1 天</strong> 观察前 3 天与满 7 天的截然不同结局！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

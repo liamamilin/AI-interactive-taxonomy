@@ -7,58 +7,136 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .ctrl-bar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
     .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
     .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🚶 餐后散步 15 分钟的奇效</h1><p>误区：饭后散步那点热量消耗才几十千卡，对控糖减肥毫无帮助。真相：哪怕只是饭后慢走 15 分钟，收缩的腿部肌肉就会不经胰岛素直接吸走血液里的葡萄糖，把血糖尖峰削掉三成！</p></div>
+      <div>
+        <h1>🚶 餐后散步 15 分钟的奇效</h1>
+        <p>误区：散步强度那么低，几乎不流汗也不怎么烧卡路里，吃完饭散步纯属心理安慰。真相：饭后 15–30 分钟起身慢走，能让双腿大肌群直接当“血糖海绵”，不靠胰岛素就把餐后尖峰削掉 25%–35%！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>餐后散步时长</span><span id="vMin">15 分钟</span></label><input type="range" id="sMin" min="0" max="45" value="15" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>本餐主食碳水量</span><span id="vCarb">80 克</span></label><input type="range" id="sCarb" min="30" max="150" value="80" oninput="upd()"></div>
+      <div class="ctrl-bar">
+        <button class="tax-btn" id="playBtn" onclick="startRace()">▶ 开始 120 分钟双轨竞速</button>
+        <span style="font-size:12.5px;font-weight:750;color:var(--tax-muted);">起身散步时机：</span>
+        <button class="pill active" onclick="setTiming(15,this)">饭后 15 分钟（黄金窗）</button>
+        <button class="pill" onclick="setTiming(45,this)">饭后 45 分钟（偏晚）</button>
+        <button class="pill" onclick="setTiming(75,this)">饭后 75 分钟（错过峰值）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 640 225"></svg>
+
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">躺平血糖峰值</div><div class="k-val" id="kSit" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">散步后血糖峰值</div><div class="k-val" id="kWlk" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">🛋️ 躺平组峰值</div><div class="k-val" id="kCouch" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🚶 散步组峰值</div><div class="k-val" id="kWalk" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">削峰幅度（胰岛素省力）</div><div class="k-val" id="kSave" style="color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const mins=+document.getElementById('sMin').value, carb=+document.getElementById('sCarb').value;
-  document.getElementById('vMin').textContent=mins+' 分钟'; document.getElementById('vCarb').textContent=carb+' 克';
-  const sit=(5.0 + carb*0.048).toFixed(1);
-  const drop=Math.min(0.38, mins*0.011);
-  const wlk=(5.0 + carb*0.048*(1-drop)).toFixed(1);
-  document.getElementById('kSit').textContent=sit+' mmol/L';
-  document.getElementById('kWlk').textContent=wlk+' mmol/L';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">餐后直接瘫坐: 峰值 ${sit} mmol/L</text>
-    <rect x="20" y="44" width="${Math.min(540,parseFloat(sit)*42)}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">餐后慢走 ${mins} 分钟: 峰值降至 ${wlk} mmol/L (-${(drop*100).toFixed(0)}%)</text>
-    <rect x="20" y="112" width="${Math.min(540,parseFloat(wlk)*42)}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">不用跑步流汗，只需饭后 20 分钟内起身慢走即可大幅削平糖峰</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>餐后 30 分钟是血糖爬坡窗口！只散步 ${mins} 分钟，就能让肌肉当场吸走 ${(drop*100).toFixed(0)}% 的尖峰糖负荷，性价比极高！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let startMin = 15;
+    let curMin = 120;
+    let timer = null;
+
+    function setTiming(m, btn){
+      startMin = m;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      startRace();
+    }
+
+    function glucoseCouch(m){
+      return 4.9 + 4.4 * Math.exp(-Math.pow((m - 42)/24, 2)) - 0.55 * Math.exp(-Math.pow((m - 105)/22, 2));
+    }
+    function glucoseWalk(m){
+      const base = glucoseCouch(m);
+      const effectiveness = startMin <= 20 ? 1.0 : (startMin <= 50 ? 0.58 : 0.22);
+      const absorb = m >= startMin ? 1.55 * effectiveness * Math.exp(-Math.pow((m - (startMin + 18))/24, 2)) : 0;
+      const softenDip = m > 85 ? 0.35 * effectiveness * Math.exp(-Math.pow((m - 105)/22, 2)) : 0;
+      return Math.max(4.4, base - absorb + softenDip);
+    }
+
+    function startRace(){
+      if(timer) clearInterval(timer);
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      curMin = 0;
+      document.getElementById('playBtn').textContent = '⏱ 竞速进行中...';
+      timer = setInterval(()=>{
+        curMin += 3;
+        if(curMin >= 120){
+          curMin = 120;
+          clearInterval(timer);
+          timer = null;
+          document.getElementById('playBtn').textContent = '↻ 重播 120 分钟竞速';
+        }
+        draw();
+      }, 40);
+      draw();
+    }
+
+    function draw(){
+      const x0=54, x1=610, yMin=26, yMax=192;
+      const toX = m => x0 + (m/120)*(x1-x0);
+      const toY = v => yMax - ((v - 3.8)/6.2)*(yMax - yMin);
+
+      let ptsC = [], ptsW = [], maxC = 0, maxW = 0;
+      for(let m=0; m<=curMin; m+=2){
+        const c = glucoseCouch(m), w = glucoseWalk(m);
+        if(c > maxC) maxC = c;
+        if(w > maxW) maxW = w;
+        ptsC.push(`${toX(m).toFixed(1)},${toY(c).toFixed(1)}`);
+        ptsW.push(`${toX(m).toFixed(1)},${toY(w).toFixed(1)}`);
+      }
+      const lastC = glucoseCouch(curMin), lastW = glucoseWalk(curMin);
+      const wx0 = toX(startMin), wx1 = toX(Math.min(120, startMin + 15));
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="${wx0}" y="${yMin}" width="${wx1-wx0}" height="${yMax-yMin}" fill="var(--tax-green-soft)" opacity="0.85"/>
+        <text x="${(wx0+wx1)/2}" y="${yMin+14}" text-anchor="middle" font-size="10.5" font-weight="800" fill="var(--tax-green)">🚶 散步15分</text>
+        <line x1="${x0}" y1="${toY(7.8)}" x2="${x1}" y2="${toY(7.8)}" stroke="var(--tax-red)" stroke-dasharray="4 4" stroke-opacity="0.5"/>
+        <text x="${x1-4}" y="${toY(7.8)-5}" text-anchor="end" font-size="10.5" fill="var(--tax-red)">7.8 高峰警戒线</text>
+        ${[0,20,40,60,80,100,120].map(m=>`<text x="${toX(m)}" y="212" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${m}分</text>`).join('')}
+        <polyline points="${ptsC.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3" stroke-linecap="round"/>
+        <polyline points="${ptsW.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="${toX(curMin)}" cy="${toY(lastC)}" r="5.5" fill="var(--tax-red)"/>
+        <text x="${Math.min(x1-72, toX(curMin)+8)}" y="${toY(lastC)-6}" font-size="11.5" font-weight="800" fill="var(--tax-red)">🛋️ ${lastC.toFixed(1)}</text>
+        <circle cx="${toX(curMin)}" cy="${toY(lastW)}" r="5.5" fill="var(--tax-green)"/>
+        <text x="${Math.min(x1-72, toX(curMin)+8)}" y="${toY(lastW)+15}" font-size="11.5" font-weight="800" fill="var(--tax-green)">🚶 ${lastW.toFixed(1)}</text>
+        <text x="${x0}" y="18" font-size="12" font-weight="800" fill="var(--tax-ink)">当前时间：餐后 ${curMin} 分钟</text>
+      `;
+
+      const fullC = 9.3, fullW = startMin<=20 ? 7.8 : (startMin<=50 ? 8.5 : 9.1);
+      const dropPct = Math.round(((fullC - 4.9) - (fullW - 4.9)) / (fullC - 4.9) * 100);
+      document.getElementById('kCouch').textContent = maxC.toFixed(1) + ' mmol/L';
+      document.getElementById('kWalk').textContent = maxW.toFixed(1) + ' mmol/L';
+      document.getElementById('kSave').textContent = `-${dropPct}% 飙升幅度`;
+
+      let aha = '';
+      if(startMin <= 20){
+        aha = `💡 <strong>顿悟时刻：</strong>黄金拦截！饭后 15 分钟正是肠道开始猛烈吸糖的起点，此时慢走 15 分钟相当于把双腿肌肉变成“活体吸水海绵”，直接截胡 <strong>${dropPct}%</strong> 的血糖尖峰，还能防止 100 分钟后的犯困低谷！`;
+      } else if(startMin <= 50){
+        aha = `💡 <strong>顿悟时刻：</strong>饭后 45 分钟才起身，血糖已经爬到半山腰了，削峰效果打折到 <strong>${dropPct}%</strong>。但依然比一直瘫着强得多！`;
+      } else {
+        aha = `💡 <strong>顿悟时刻：</strong>饭后 75 分钟才动，血糖尖峰早就冲过去了（仅削峰 <strong>${dropPct}%</strong>），胰腺已经完成了过量分泌。记住口诀：<strong>放下碗筷 15–30 分钟内，哪怕在屋里溜达一圈也赚翻！</strong>`;
+      }
+      document.getElementById('ahaBox').innerHTML = aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

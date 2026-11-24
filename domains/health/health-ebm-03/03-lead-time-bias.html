@@ -7,57 +7,85 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⏳ 领先时间偏倚：早查出癌症真的让你多活了 3 年吗？</h1><p>误区：某种癌症早筛让“确诊后 5 年生存率”从 20% 飙升到 80%，就绝对证明早筛拯救了生命。真相：如果 60 岁死于癌症不变，仅仅因为早筛在 53 岁（而不是 57 岁）就提前查出来，你只是多背了 4 年恐慌，5 年生存率却在数学上虚高了！</p></div>
+      <div>
+        <h1>⏳ 领先时间偏倚：早查出癌症真的让你多活了 3 年吗？</h1>
+        <p>误区：某高端早筛广告宣传“把 5 年生存率从 0% 提高到了 100%”，说明它肯定能大幅延长寿命！真相：如果查出来却没有更有效的根治手段，只是把“确诊秒表”提前按了 4 年，<strong>患者离世的年龄一天没变，却白白多当了 4 年焦虑的病人</strong>！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>无症状早筛提前确诊年数</span><span id="vLead">4 年</span></label><input type="range" id="sLead" min="0" max="6" value="4" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>早期干预实际延长的真实寿命</span><span id="vReal">0.5 年</span></label><input type="range" id="sReal" min="0" max="5" step="0.5" value="0.5" oninput="upd()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="setMode('bias',this)">🎭 统计幻觉：早查出 4 年但无根治药（领先时间偏倚）</button>
+        <button class="pill" onclick="setMode('real',this)">🏆 真正有效的早筛（如肠镜切息肉 · 真的延寿！）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">统计账面“确诊后存活”</div><div class="k-val" id="kApp" style="color:#f59e0b;">—</div></div>
-        <div class="kpi"><div class="k-lbl">真实净多活寿命</div><div class="k-val" id="kReal" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">不筛查组：确诊后“5年生存”</div><div class="k-val" style="color:var(--tax-muted);">仅活 3 年 (0%)</div></div>
+        <div class="kpi"><div class="k-lbl">早筛组：确诊后“5年生存”</div><div class="k-val" id="kSurv" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">实际多活了几年？</div><div class="k-val" id="kReal">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const lead=+document.getElementById('sLead').value, real=+document.getElementById('sReal').value;
-  document.getElementById('vLead').textContent=lead+' 年'; document.getElementById('vReal').textContent=real.toFixed(1)+' 年';
-  const app=(2.5+lead+real).toFixed(1);
-  document.getElementById('kApp').textContent=app+' 年 (过5年大关!)';
-  document.getElementById('kReal').textContent='+'+real.toFixed(1)+' 年';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#64748b">未筛查: 60岁出现症状确诊 → 62.5岁去世 (存活 2.5 年)</text>
-    <rect x="260" y="46" width="90" height="22" rx="5" fill="#64748b"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#f59e0b">早筛组: 提前 ${lead} 年确诊 → 账面存活 ${app} 年 (实际只延寿 ${real.toFixed(1)} 年)</text>
-    <rect x="${260-lead*35}" y="114" width="${90+lead*35+real*35}" height="22" rx="5" fill="#f59e0b"/>
-    <rect x="350" y="114" width="${Math.max(4,real*35)}" height="22" rx="5" fill="#059669"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">真正评估筛查是否有效，必须看“全因死亡率有没有降”，而不是“5年生存率”</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>早筛如果不能提供真正有效的早期治疗（真实延寿仅 ${real.toFixed(1)} 年），提前 ${lead} 年查出惰性肿瘤只会凭空刷高“5年生存率”，却让患者提前数年活在恐惧和过度手术里！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let mode = 'bias';
+    function setMode(m, btn){
+      mode = m;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const isReal = mode === 'real';
+      // Axis: age 58 to 76
+      const x0=54, x1=610;
+      const toX = a => x0 + ((a - 58)/18)*(x1-x0);
+
+      const deathB = isReal ? 75 : 68;
+      document.getElementById('svg').innerHTML = `
+        ${[58,60,62,64,66,68,70,72,74,76].map(a=>`<line x1="${toX(a)}" y1="28" x2="${toX(a)}" y2="180" stroke="var(--tax-border)" stroke-dasharray="3 3"/><text x="${toX(a)}" y="200" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${a}岁</text>`).join('')}
+
+        <text x="${x0}" y="46" font-size="12.5" font-weight="850" fill="var(--tax-muted)">路线 A：未做早筛（65岁出现症状确诊 → 68岁离世，确诊后活 3 年）</text>
+        <rect x="${toX(58)}" y="56" width="${toX(65)-toX(58)}" height="24" rx="5" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+        <rect x="${toX(65)}" y="56" width="${toX(68)-toX(65)}" height="24" rx="5" fill="var(--tax-amber)"/>
+        <text x="${toX(66.5)}" y="72" text-anchor="middle" font-size="11" font-weight="850" fill="#fff">3年</text>
+
+        <text x="${x0}" y="118" font-size="12.5" font-weight="850" fill="${isReal?'var(--tax-green)':'var(--tax-red)'}">
+          ${isReal?'路线 B：有效早筛（61岁切掉早癌/息肉 → 真正延寿至 75 岁！）':'路线 B：早筛提前 4 年发现（61岁确诊 → 依然 68岁离世！）'}
+        </text>
+        <rect x="${toX(58)}" y="128" width="${toX(61)-toX(58)}" height="24" rx="5" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+        <rect x="${toX(61)}" y="128" width="${toX(deathB)-toX(61)}" height="24" rx="5" fill="${isReal?'var(--tax-green)':'var(--tax-red)'}"/>
+        <text x="${(toX(61)+toX(deathB))/2}" y="144" text-anchor="middle" font-size="11.5" font-weight="900" fill="#fff">确诊后存活 ${deathB-61} 年（5年生存率 100%!）</text>
+        <line x1="${toX(68)}" y1="48" x2="${toX(68)}" y2="162" stroke="var(--tax-red)" stroke-width="2" stroke-dasharray="4 3"/>
+      `;
+
+      document.getElementById('kSurv').textContent = `活 ${deathB-61} 年 (100%!)`;
+      const kR = document.getElementById('kReal');
+      kR.textContent = isReal ? '+7 年真实延寿 🏆' : '+0 年（一天没多活!）🎭';
+      kR.style.color = isReal ? 'var(--tax-green)' : 'var(--tax-red)';
+
+      document.getElementById('ahaBox').innerHTML = isReal
+        ? `💡 <strong>顿悟时刻：</strong>只有像<strong>肠镜切息肉、宫颈 HPV 筛查、低剂量肺 CT</strong>这样“早发现后确实能靠干预改写死亡终点”的筛查，才能真正降低<strong>全因死亡率</strong>并让你多活 7 年以上！`
+        : `💡 <strong>顿悟时刻：</strong>看清这个经典统计魔术！仅仅把确诊秒表从 65 岁提前到 61 岁，就能让“5 年生存率”从 0% 奇迹般暴涨到 100%，哪怕死亡终点（68 岁红虚线）纹丝不动！所以评价一种早筛值不值得做，永远看<strong>是否降低真实死亡率</strong>，绝不只看“5 年生存率”！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

@@ -7,58 +7,121 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .week-grid { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-bottom:12px; }
+    @media (max-width:600px){ .week-grid { grid-template-columns:repeat(2, 1fr); } }
+    .day-slot { padding:10px 8px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:center; }
+    .day-slot.z2 { border-color:var(--tax-green); background:var(--tax-green-soft); }
+    .day-slot.z3 { border-color:var(--tax-amber); background:var(--tax-amber-soft); }
+    .day-slot.z5 { border-color:var(--tax-red); background:var(--tax-red-soft); }
+    .day-slot .d-t { font-size:11.5px; color:var(--tax-muted); font-weight:750; }
+    .day-slot .d-v { font-size:13px; font-weight:850; margin-top:4px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .pill { padding:7px 12px; border-radius:999px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12px; font-weight:750; cursor:pointer; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🏗️ 80/20 黄金耐力配比：Zone 2 地基 + 间歇尖塔</h1><p>误区：每次跑步都跑到喘得要死（Zone 3~4），心肺进步才最快。真相：职业运动员 80% 时间都在能轻松聊天的 Zone 2 扩建线粒体地基，只留 20% 冲最高强度拔尖塔！</p></div>
+      <div>
+        <h1>🏗️ 80/20 黄金耐力配比：Zone 2 地基 + 间歇尖塔</h1>
+        <p>误区：每次跑步都要跑到“微微喘气、有点拼命（Zone 3）”才算没白练。真相：天天跑中强度是耐力训练最大黑洞——太累没法堆积线粒体，又不够猛拉不动心肺上限！世界冠军都在用 <strong>80% 轻松 Zone 2 + 20% 极猛间歇</strong>！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>温和 Zone 2 有氧时长占比</span><span id="vZ2">80%</span></label><input type="range" id="sZ2" min="20" max="95" value="80" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>每周总耐力训练小时数</span><span id="vHr">4.5 小时</span></label><input type="range" id="sHr" min="1" max="10" step="0.5" value="4.5" oninput="upd()"></div>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🗓️ 点击下方 5 个训练日循环切换强度（Zone 2 轻松跑 → Zone 3 中强度 → Zone 5 间歇冲刺）：</div>
+      <div class="week-grid" id="grid"></div>
+      <div class="bar">
+        <button class="pill" onclick="preset(['z3','z3','z3','z3','z3'])">😵 常见误区：天天中强度“黑洞跑”</button>
+        <button class="pill" onclick="preset(['z2','z2','z2','z2','z5'])">🏆 80/20 极化黄金配比</button>
+        <button class="pill" onclick="preset(['z5','z5','z5','z5','z5'])">💥 拼命三郎：天天极限 HIIT</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">线粒体地基增厚</div><div class="k-val" id="kBase" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">年度 VO2 Max 涨幅</div><div class="k-val" id="kGain" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">有氧线粒体地基高度</div><div class="k-val" id="kBase" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">VO2 Max 尖塔高度</div><div class="k-val" id="kPeak" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">慢性疲劳与伤病风险</div><div class="k-val" id="kFat" style="color:var(--tax-red);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const z2=+document.getElementById('sZ2').value, hr=+document.getElementById('sHr').value;
-  document.getElementById('vZ2').textContent=z2+'%'; document.getElementById('vHr').textContent=hr+' 小时';
-  const base=Math.round(z2*0.6 + hr*4);
-  const hiit=100-z2;
-  const gain=( (100-Math.abs(z2-80)*1.2)/100 * hr * 1.4 ).toFixed(1);
-  document.getElementById('kBase').textContent=base+' 分';
-  document.getElementById('kGain').textContent='+'+gain+' ml/kg/min';
-  document.getElementById('svg').innerHTML=`
-    <rect x="40" y="60" width="${z2*5.2}" height="42" rx="6" fill="#059669"/>
-    <rect x="${40+z2*5.2}" y="60" width="${hiit*5.2}" height="42" rx="6" fill="#ef4444"/>
-    <text x="45" y="46" font-size="13" font-weight="800" fill="#059669">绿区 Zone 2 地基 (${z2}%)：扩建毛细血管与线粒体</text>
-    <text x="560" y="124" text-anchor="end" font-size="13" font-weight="800" fill="#ef4444">红区高强度间歇 (${hiit}%)：拉升心脏每搏输出上限</text>
-    <text x="40" y="164" font-size="12.5" font-weight="750" fill="var(--tax-muted)">80/20 极化训练兼顾“不伤膝盖、可持续积累”与“拔高天花板”</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>天天硬冲高强度不仅极易疲劳受伤，线粒体地基也打不牢；稳住 80% 轻松说话的 Zone 2 + 20% 短冲间歇，VO2 Max 年涨幅反而最高（+${gain}）！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const CYCLE = ['z2', 'z3', 'z5'];
+    const META = {
+      z2: { label:'🌿 Zone 2 轻松跑', sub:'能聊天 · 建地基' },
+      z3: { label:'🟡 Zone 3 中强度', sub:'不上不下 · 灰区' },
+      z5: { label:'🔥 Zone 5 4×4间歇', sub:'拉心肺尖塔' }
+    };
+    let days = ['z3', 'z3', 'z3', 'z3', 'z3'];
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function cycleDay(i){
+      const idx = CYCLE.indexOf(days[i]);
+      days[i] = CYCLE[(idx + 1) % 3];
+      markDone(); draw();
+    }
+    function preset(arr){ days = [...arr]; markDone(); draw(); }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = days.map((z, i) => `
+        <button class="day-slot ${z}" onclick="cycleDay(${i})">
+          <div class="d-t">训练日 ${i+1}</div>
+          <div class="d-v">${META[z].label}</div>
+          <div class="d-t" style="margin-top:3px;">${META[z].sub}</div>
+        </button>
+      `).join('');
+
+      const c2 = days.filter(x=>x==='z2').length;
+      const c3 = days.filter(x=>x==='z3').length;
+      const c5 = days.filter(x=>x==='z5').length;
+
+      const base = Math.min(100, c2 * 24 + c3 * 10 + c5 * 4);
+      const fatigue = Math.min(100, c2 * 6 + c3 * 16 + c5 * 24);
+      const peak = Math.max(15, Math.min(100, Math.round(base * 0.55 + (c5 >= 1 ? 38 : c3 * 5) - Math.max(0, fatigue - 55) * 0.9)));
+
+      // Draw a pyramid: wide base (Zone 2) + spire (VO2 peak) + fatigue bar
+      const baseW = 120 + base * 2.2;
+      const spireH = 24 + peak * 1.1;
+      const isPolarized = (c2 >= 3 && c5 === 1 && c3 <= 1);
+
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="24" font-size="12.5" font-weight="800" fill="var(--tax-ink)">你的有氧金字塔结构（左）与疲劳红线（右）</text>
+        <rect x="${210 - baseW/2}" y="138" width="${baseW}" height="46" rx="8" fill="var(--tax-green-soft)" stroke="var(--tax-green)" stroke-width="2.2"/>
+        <text x="210" y="166" text-anchor="middle" font-size="12.5" font-weight="850" fill="var(--tax-green)">🌿 Zone 2 线粒体地基 (${base}分)</text>
+
+        <polygon points="210,${138 - spireH} ${210 - 52},138 ${210 + 52},138" fill="var(--tax-primary-soft)" stroke="var(--tax-primary)" stroke-width="2.2"/>
+        <text x="210" y="${Math.max(46, 138 - spireH/2 + 6)}" text-anchor="middle" font-size="12" font-weight="850" fill="var(--tax-primary)">VO2 ${peak}</text>
+
+        <rect x="430" y="42" width="184" height="142" rx="12" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+        <text x="448" y="68" font-size="12.5" font-weight="800" fill="var(--tax-ink)">当前配比统计</text>
+        <text x="448" y="92" font-size="12" fill="var(--tax-green)">Zone 2 轻松：${c2*20}%</text>
+        <text x="448" y="112" font-size="12" fill="var(--tax-amber)">Zone 3 灰区：${c3*20}%</text>
+        <text x="448" y="132" font-size="12" fill="var(--tax-red)">Zone 5 间歇：${c5*20}%</text>
+        <text x="448" y="156" font-size="11.5" font-weight="750" fill="var(--tax-muted)">伤病疲劳度：${fatigue}%</text>
+        <rect x="448" y="164" width="148" height="10" rx="5" fill="var(--tax-border)"/>
+        <rect x="448" y="164" width="${Math.round(148*fatigue/100)}" height="10" rx="5" fill="${fatigue>65?'var(--tax-red)':'var(--tax-green)'}"/>
+      `;
+
+      document.getElementById('kBase').textContent = base + ' 分';
+      document.getElementById('kPeak').textContent = peak + ' 分';
+      document.getElementById('kFat').textContent = fatigue + '%' + (fatigue > 65 ? ' 🚨 过劳伤病' : ' ✅ 可持续');
+
+      document.getElementById('ahaBox').innerHTML = isPolarized
+        ? `💡 <strong>顿悟时刻：</strong>完美达成 <strong>80/20 极化训练</strong>！宽厚的 Zone 2 地基（${base} 分）配上一周 1 次高质量 Zone 5 尖塔，把 VO2 Max 推到 <strong>${peak} 分</strong>的同时疲劳度只有 ${fatigue}%——轻松跑要够慢，强度课要够狠！`
+        : c3 >= 3
+        ? `💡 <strong>顿悟时刻：</strong>掉进经典的<strong>“Zone 3 垃圾中强度黑洞”</strong>！每次跑完都挺累（疲劳 ${fatigue}%），却因为强度不上不下，地基没打宽、尖塔也没拉高！点击上方「80/20 极化黄金配比」对比差距！`
+        : c5 >= 3
+        ? `💡 <strong>顿悟时刻：</strong>天天极限间歇把疲劳值轰到 <strong>${fatigue}%</strong>，身体根本来不及修复，不仅极易膝伤和皮质醇飙升，心肺提升反而被过劳拖垮！`
+        : `💡 <strong>顿悟时刻：</strong>纯靠轻松跑打好了宽地基（${base} 分），如果每周再点亮 <strong>1 次 Zone 5 间歇</strong>，就能瞬间把心肺尖塔拔高一大截！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

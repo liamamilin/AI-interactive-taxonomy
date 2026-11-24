@@ -7,60 +7,82 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⛰️ 稳态爬坡律：为什么慢病药要连吃 4 个半衰期才见效？</h1><p>误区：吃降压药或抗抑郁药第一天没感觉，说明这药对我完全没效，赶紧换药。真相：规律服药需要经过 4~5 个半衰期，体内累积与排泄才能打平达到“稳态浓度”——半衰期 3 天的药，两周后才到峰值！</p></div>
+      <div>
+        <h1>⛰️ 稳态爬坡律：为什么慢病药要连吃 4 个半衰期才见效？</h1>
+        <p>误区：降压药、甲状腺素或抗抑郁药吃了两天没感觉，肯定是假药，赶紧自己停掉。真相：按常规剂量服药，血药浓度像“边往桶里倒水边漏一半”，必须连吃 <strong>4–5 个半衰期</strong>才能爬到 94%–97% 的稳态起效平台！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>药物半衰期长度</span><span id="vH">24 小时</span></label><input type="range" id="sH" min="6" max="72" step="6" value="24" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>首日是否采用“首剂加倍负荷”</span><span id="vLoad">1x 常规量</span></label><input type="range" id="sLoad" min="1" max="2" value="1" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="playClimb()">▶ 播放 6 个半衰期双轨爬坡竞速</button>
+        <span style="font-size:12.5px;font-weight:750;color:var(--tax-muted);">对比「常规每日固定剂量」vs「医生处方首剂加倍负荷量 (Loading Dose)」</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">达到 94% 稳态所需天数</div><div class="k-val" id="kDay" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">24小时起效进度</div><div class="k-val" id="k24">—</div></div>
+        <div class="kpi"><div class="k-lbl">1 个半衰期后浓度</div><div class="k-val" style="color:var(--tax-amber);">50%（远未起效）</div></div>
+        <div class="kpi"><div class="k-lbl">4 个半衰期后浓度</div><div class="k-val" style="color:var(--tax-green);">93.8%（稳态达标 ✅）</div></div>
+        <div class="kpi"><div class="k-lbl">首剂加倍负荷量效果</div><div class="k-val" style="color:var(--tax-primary);">第 1 剂直接达标 🚀</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const h=+document.getElementById('sH').value, ld=+document.getElementById('sLoad').value;
-  document.getElementById('vH').textContent=h+' 小时'; document.getElementById('vLoad').textContent=ld===2?'2x 首剂加倍':'1x 常规量';
-  const ssDays=(4.3*h/24).toFixed(1);
-  const p24=Math.min(100, Math.round((1-Math.pow(0.5,24/h))*100*ld));
-  document.getElementById('kDay').textContent=(ld===2?0.5:ssDays)+' 天';
-  document.getElementById('k24').textContent=p24+'%';
-  let pts='';
-  for(let t=0;t<=120;t+=3){
-    const val=ld===2?Math.min(100, 95*(1-Math.pow(0.5,t/h)*0.5)):(100*(1-Math.pow(0.5,t/h)));
-    pts+=`${40+t/120*520},${158-val*1.25} `;
-  }
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="#059669" stroke-width="3" points="${pts}"/>
-    <text x="50" y="28" font-size="12.5" font-weight="800" fill="#059669">稳态爬坡曲线 (4.3 个半衰期到达 95% 稳态平台)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>长半衰期药物（${h}h）常规吃法要 ${ssDays} 天才到稳态，所以急救或部分抗生素会专门注明“首剂加倍”（负荷剂量）让你一步到位！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let curN = 6, timer = null;
+
+    function playClimb(){
+      if(timer) clearInterval(timer);
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      curN = 0;
+      timer = setInterval(()=>{
+        curN += 0.2;
+        if(curN >= 6){ curN = 6; clearInterval(timer); timer=null; }
+        draw();
+      }, 45);
+      draw();
+    }
+
+    function draw(){
+      const x0=54, x1=612, yMin=28, yMax=188;
+      const toX = n => x0 + (n/6)*(x1-x0);
+      const toY = p => yMax - (p/115)*(yMax-yMin);
+
+      let pNorm=[], pLoad=[];
+      for(let n=0; n<=curN; n+=0.1){
+        const vNorm = (1 - Math.pow(0.5, n)) * 100;
+        const vLoad = n < 0.05 ? 100 : 100;
+        pNorm.push(`${toX(n).toFixed(1)},${toY(vNorm).toFixed(1)}`);
+        pLoad.push(`${toX(n).toFixed(1)},${toY(vLoad).toFixed(1)}`);
+      }
+      const nowNorm = Math.round((1 - Math.pow(0.5, curN)) * 100);
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="${x0}" y1="${toY(94)}" x2="${x1}" y2="${toY(94)}" stroke="var(--tax-green)" stroke-dasharray="4 4"/>
+        <text x="${x1-4}" y="${toY(94)-6}" text-anchor="end" font-size="10.5" font-weight="800" fill="var(--tax-green)">稳态达标平台 (94% = 4 个半衰期)</text>
+        ${[0,1,2,3,4,5,6].map(n=>`<text x="${toX(n)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${n}个半衰期</text>`).join('')}
+        <polyline points="${pLoad.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="2.8" stroke-dasharray="6 4"/>
+        <polyline points="${pNorm.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="${toX(curN)}" cy="${toY(nowNorm)}" r="6" fill="var(--tax-green)"/>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-green)">● 常规吃法爬坡：50% → 75% → 87.5% → 93.8%</text>
+        <text x="${x0+295}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-primary)">-- 首剂加倍负荷量 (如阿奇霉素)</text>
+      `;
+
+      document.getElementById('ahaBox').innerHTML = `💡 <strong>顿悟时刻：</strong>这是一个优雅的等比数列：<strong>1/2 + 1/4 + 1/8 + 1/16 = 93.8%</strong>！如果一款慢病药半衰期是 3 天，你必须耐心连吃 <strong>12–15 天</strong>它才真正站稳起效平台——而急症时医生开具“首次服 2 粒（负荷剂量）”，正是为了瞬间跳过漫长的爬坡期！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

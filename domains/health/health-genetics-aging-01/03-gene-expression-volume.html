@@ -7,55 +7,102 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .mix-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:9px; margin-bottom:14px; }
+    .ch { padding:10px 11px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .ch.on { border-color:var(--tax-green); background:var(--tax-green-soft); }
+    .ch .t { display:flex; justify-content:space-between; font-size:13px; font-weight:800; }
+    .ch .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🎛️ 同样的 DNA，为什么脑细胞和肝细胞长得完全不同？</h1><p>误区：肝细胞之所以长成肝细胞，是因为它把不需要的大脑基因全都删掉了。真相：你脚趾甲和大脑里的 DNA 几乎 100% 一模一样！细胞分化的秘密在于“基因调音台”——各自只打开需要的那几百个推子！</p></div>
+      <div>
+        <h1>🎛️ 同样的 DNA，为什么脑细胞和肝细胞长得完全不同？</h1>
+        <p>误区：大脑细胞里只装了“大脑 DNA”，肝脏细胞里只装了“肝脏 DNA”。真相：你全身 37 万亿个细胞里的 DNA 乐谱<strong>100% 完全相同</strong>！它们长得截然不同，只是因为各自的“转录因子调音台”打开了不同的音轨！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>神经元突触基因推子</span><span id="vNeu">90%</span></label><input type="range" id="sNeu" min="0" max="100" value="90" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>肝解毒代谢酶基因推子</span><span id="vLiv">10%</span></label><input type="range" id="sLiv" min="0" max="100" value="10" oninput="upd()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="preset('neuron',this)">🧠 调出：大脑神经元</button>
+        <button class="pill" onclick="preset('liver',this)">🧪 调出：肝脏解毒细胞</button>
+        <button class="pill" onclick="preset('muscle',this)">💪 调出：骨骼肌细胞</button>
+        <button class="pill" onclick="preset('rbc',this)">🩸 调出：运氧红细胞</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">共享 DNA 底本</div><div class="k-val">100% 完全相同</div></div>
-        <div class="kpi"><div class="k-lbl">当前分化细胞身份</div><div class="k-val" id="kCell" style="color:#0284c7;">—</div></div>
-      </div>
+      <div style="font-size:12.5px;font-weight:750;color:var(--tax-muted);margin-bottom:8px;">🎚️ 手动拨动同一套 DNA 上的 4 条基因表达开关（DNA 序列本身始终 0 改变）：</div>
+      <div class="mix-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 195"></svg>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const neu=+document.getElementById('sNeu').value, liv=+document.getElementById('sLiv').value;
-  document.getElementById('vNeu').textContent=neu+'%'; document.getElementById('vLiv').textContent=liv+'%';
-  const cell=neu>liv+25?'🧠 高度特化神经元':(liv>neu+25?'🧪 肝解毒代谢细胞':'🌱 混合/未分化状态');
-  document.getElementById('kCell').textContent=cell;
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">脑神经元专属基因表达量: ${neu}%</text>
-    <rect x="20" y="44" width="${Math.max(6,neu*5.2)}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">肝脏解毒酶专属基因表达量: ${liv}%</text>
-    <rect x="20" y="112" width="${Math.max(6,liv*5.2)}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">同一份乐谱 (DNA)，不同的指挥家 (转录因子) 演奏出完全不同的器官！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>DNA 就像一台装好全套交响乐总谱的钢琴，而细胞之所以形态各异，全靠转录因子推子决定“此刻拉响哪几根弦、静音哪几万根弦”！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const GENES = [
+      { id:'axon', icon:'⚡', name:'神经轴突/突触基因', desc:'负责长出电线与放电' },
+      { id:'cyp',  icon:'🧪', name:'细胞色素 P450 酶', desc:'负责分解酒精与毒素' },
+      { id:'actin',icon:'💪', name:'肌动/肌球蛋白基因', desc:'负责强力收缩发力' },
+      { id:'hgb',  icon:'🩸', name:'血红蛋白合成基因', desc:'负责高效抓取氧气' }
+    ];
+    let on = new Set(['axon']);
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function preset(type, btn){
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(type==='neuron') on = new Set(['axon']);
+      else if(type==='liver') on = new Set(['cyp']);
+      else if(type==='muscle') on = new Set(['actin']);
+      else on = new Set(['hgb']);
+      markDone(); draw();
+    }
+    function toggle(id){
+      if(on.has(id)) on.delete(id); else on.add(id);
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      markDone(); draw();
+    }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = GENES.map(g => `
+        <button class="ch ${on.has(g.id)?'on':''}" onclick="toggle('${g.id}')">
+          <div class="t"><span>${g.icon} ${g.name}</span><span>${on.has(g.id)?'ON':'OFF'}</span></div>
+          <div class="s">${g.desc}</div>
+        </button>
+      `).join('');
+
+      let icon='🧬', cellName='未分化干细胞', desc='所有特化音轨静音，保留无限分化潜能';
+      if(on.size === 1){
+        if(on.has('axon')){ icon='🧠'; cellName='大脑神经元'; desc='只打开电信号与轴突音轨，其余 19,000+ 基因静音！'; }
+        if(on.has('cyp')){ icon='🧪'; cellName='肝脏解毒细胞'; desc='全速表达 P450 代谢酶，成为人体最大化学精炼厂！'; }
+        if(on.has('actin')){ icon='💪'; cellName='骨骼肌纤维'; desc='狂造肌动蛋白丝，把化学能变成机械拉力！'; }
+        if(on.has('hgb')){ icon='🩸'; cellName='运氧红细胞'; desc='把细胞塞满血红蛋白，甚至为了多装氧连细胞核都扔掉！'; }
+      } else if(on.size > 1){
+        icon='⚠️'; cellName='基因表达混乱细胞'; desc='同时打开多个互斥组织开关 → 失去专一功能（类似某些癌细胞去分化）！';
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="24" y="28" width="220" height="140" rx="14" fill="var(--tax-primary-soft)" stroke="var(--tax-primary)" stroke-width="2"/>
+        <text x="134" y="60" text-anchor="middle" font-size="13.5" font-weight="850" fill="var(--tax-primary)">🧬 同一本 30 亿碱基乐谱</text>
+        <text x="134" y="96" text-anchor="middle" font-size="22" font-weight="900" fill="var(--tax-ink)">100% 相同</text>
+        <text x="134" y="132" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">已开启音轨：${on.size} / 4 条</text>
+
+        <line x1="244" y1="98" x2="314" y2="98" stroke="var(--tax-green)" stroke-width="3.5"/>
+        <text x="279" y="84" text-anchor="middle" font-size="11" font-weight="800" fill="var(--tax-green)">转录调控</text>
+
+        <rect x="318" y="28" width="298" height="140" rx="14" fill="${on.size===1?'var(--tax-green-soft)':'var(--tax-amber-soft)'}" stroke="${on.size===1?'var(--tax-green)':'var(--tax-amber)'}" stroke-width="2.4"/>
+        <text x="467" y="70" text-anchor="middle" font-size="34">${icon}</text>
+        <text x="467" y="106" text-anchor="middle" font-size="16" font-weight="900" fill="var(--tax-ink)">${cellName}</text>
+        <text x="467" y="138" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-muted)">${desc}</text>
+      `;
+
+      document.getElementById('ahaBox').innerHTML = `💡 <strong>顿悟时刻：</strong>DNA 就像一台装有 20,000 首曲子的点歌机！全身每个细胞都装着<strong>一模一样的硬件与曲库</strong>，神经元只循环播放“放电歌单”，肝细胞只播放“解毒歌单”——这就是<strong>选择性基因表达</strong>造就 200 多种人体细胞的奇迹！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

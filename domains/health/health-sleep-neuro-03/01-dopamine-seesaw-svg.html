@@ -3,68 +3,136 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚖️ 多巴胺快感与痛苦跷跷板（SVG）</title>
+  <title>⚖️ 多巴胺快感与痛苦跷跷板</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .act-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:9px; margin-bottom:14px; }
+    .a-btn { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; font-weight:800; font-size:13px; }
+    .a-btn small { display:block; font-size:11px; font-weight:600; color:var(--tax-muted); margin-top:3px; }
+    .a-btn.cheap:hover { border-color:var(--tax-red); background:var(--tax-red-soft); }
+    .a-btn.good:hover { border-color:var(--tax-green); background:var(--tax-green-soft); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⚖️ 多巴胺快感与痛苦跷跷板（SVG）</h1><p>误区：多巴胺就是“快乐分子”，刺激越多我就越开心。真相：大脑把多巴胺基线当成恒温器——你每次人为把它推上高潮，大脑就会反向往痛苦端压秤砣来恢复平衡，结果越刷越空虚！</p></div>
+      <div>
+        <h1>⚖️ 多巴胺快感与痛苦跷跷板</h1>
+        <p>误区：刷 1 小时短视频只是白赚了 1 小时快乐，关掉手机心情会回到原点。真相：快感与痛苦共用同一根神经跷跷板！每猛压一次廉价快感，大脑都会往痛苦端狠加配重，让你越刷越空虚！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>单次多巴胺刺激峰值 (如短视频/游戏)</span><span id="vPeak">85 分</span></label><input type="range" id="sPeak" min="20" max="100" value="85" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>每日高频连续刺激时长</span><span id="vDur">4 小时</span></label><input type="range" id="sDur" min="0.5" max="8" step="0.5" value="4" oninput="upd()"></div>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🎮 连续点击下方行为，看多巴胺基线与“痛苦端反制小人”如何演化：</div>
+      <div class="act-grid">
+        <button class="a-btn cheap" onclick="doAct('scroll')">📱 连刷短视频 30 分<small>瞬间飙高 → 基线被砸低</small></button>
+        <button class="a-btn cheap" onclick="doAct('sugar')">🍩 狂炫高糖零食<small>高脉冲 → 反弹空虚焦虑</small></button>
+        <button class="a-btn good" onclick="doAct('cold')">🧊 运动 / 冷水澡<small>先主动压痛苦端 → 持久回弹</small></button>
+        <button class="a-btn good" onclick="doAct('rest')">📖 静坐 / 读纸质书<small>温和恢复 · 卸下痛苦配重</small></button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
+
+      <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--tax-muted);">
+        <span id="logTxt">初始状态：多巴胺基线平稳（50 分），正常生活也能感到愉悦。</span>
+        <button class="tax-back" style="cursor:pointer;" onclick="resetAll()">↺ 重置基线</button>
+      </div>
+
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">刺激后多巴胺基线跌落</div><div class="k-val" id="kDip" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">对读书/散步等低刺激兴致</div><div class="k-val" id="kInt">—</div></div>
+        <div class="kpi"><div class="k-lbl">当前多巴胺基线</div><div class="k-val" id="kBase">—</div></div>
+        <div class="kpi"><div class="k-lbl">痛苦端代偿配重</div><div class="k-val" id="kPain" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">日常小确幸感受力</div><div class="k-val" id="kJoy" style="color:var(--tax-green);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const pk=+document.getElementById('sPeak').value, dur=+document.getElementById('sDur').value;
-  document.getElementById('vPeak').textContent=pk+' 分'; document.getElementById('vDur').textContent=dur+' 小时';
-  const baseDrop=Math.round(pk*0.4 + dur*5.5);
-  const interest=Math.max(5, 100-baseDrop);
-  document.getElementById('kDip').textContent='-'+baseDrop+'%';
-  document.getElementById('kInt').textContent=interest+'%';
-  let pts='40,95 ';
-  for(let t=1;t<=20;t++){
-    const x=40+t*26;
-    let y=95;
-    if(t<=6) y=95 - pk*0.65*Math.sin(t/6*Math.PI);
-    else y=95 + baseDrop*0.85*Math.exp(-(t-7)/7);
-    pts+=`${x.toFixed(1)},${y.toFixed(1)} `;
-  }
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="95" x2="560" y2="95" stroke="#94a3b8" stroke-dasharray="4 3"/>
-    <text x="45" y="88" font-size="11" fill="var(--tax-muted)">多巴胺正常平衡基线</text>
-    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${pts}"/>
-    <text x="550" y="168" text-anchor="end" font-size="12" font-weight="800" fill="#ef4444">快感飙升越大，事后跌入基线以下的空虚痛感就越深！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>刷完 ${dur} 小时高刺激内容后，大脑把你的多巴胺基线狠狠压低了 <strong>-${baseDrop}%</strong>——此时只有更刺激的东西才能让你回本，看书工作只剩 ${interest}% 兴致！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let baseline = 50; // 15..80
+    let painWeights = 1; // 0..6
+    let lastType = 'init';
+    let logMsg = '初始状态：跷跷板水平平衡，读书散步都有乐趣。';
+
+    function doAct(t){
+      lastType = t;
+      if(t === 'scroll'){
+        painWeights = Math.min(6, painWeights + 1);
+        baseline = Math.max(16, baseline - 9);
+        logMsg = '📱 刚刷完短视频：快感瞬间冲顶后，大脑立刻往痛苦端加了一块大铁砣！';
+      } else if(t === 'sugar'){
+        painWeights = Math.min(6, painWeights + 1);
+        baseline = Math.max(18, baseline - 7);
+        logMsg = '🍩 高糖刺激过后：快乐很快消散，痛苦端配重变沉，你开始更烦躁。';
+      } else if(t === 'cold'){
+        painWeights = Math.max(0, painWeights - 1);
+        baseline = Math.min(78, baseline + 10);
+        logMsg = '🧊 主动吃点可控的“小苦”（运动/冷水）：大脑反向代偿释放持久多巴胺，基线抬升！';
+      } else if(t === 'rest'){
+        painWeights = Math.max(0, painWeights - 1);
+        baseline = Math.min(65, baseline + 7);
+        logMsg = '📖 放下手机静心阅读：痛苦端的代偿小人慢慢撤退，基线逐步回稳。';
+      }
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function resetAll(){
+      baseline = 50; painWeights = 1; lastType = 'init';
+      logMsg = '已重置为健康水平基线。';
+      draw();
+    }
+
+    function draw(){
+      // angle: positive tilts right (pain heavier), negative tilts left (pleasure elevated)
+      const angle = ((50 - baseline) / 35) * 16;
+      let weightsSvg = '';
+      for(let i=0; i<painWeights; i++){
+        weightsSvg += `<rect x="${420 + (i%3)*36}" y="${84 - Math.floor(i/3)*26}" width="30" height="22" rx="5" fill="var(--tax-red)"/>
+                       <text x="${435 + (i%3)*36}" y="${99 - Math.floor(i/3)*26}" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">重</text>`;
+      }
+      const joyPct = Math.max(10, Math.min(100, Math.round((baseline / 55) * 100)));
+
+      document.getElementById('svg').innerHTML = `
+        <polygon points="320,136 292,188 348,188" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-width="2"/>
+        <g transform="rotate(${angle.toFixed(1)} 320 136)">
+          <rect x="92" y="128" width="456" height="14" rx="7" fill="var(--tax-primary)"/>
+          <rect x="104" y="64" width="136" height="58" rx="10" fill="var(--tax-green-soft)" stroke="var(--tax-green)" stroke-width="2"/>
+          <text x="172" y="90" text-anchor="middle" font-size="13.5" font-weight="850" fill="var(--tax-green)">✨ 快感端</text>
+          <text x="172" y="110" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-ink)">基线 ${baseline} 分</text>
+
+          <rect x="404" y="108" width="132" height="18" rx="6" fill="var(--tax-red-soft)" stroke="var(--tax-red)"/>
+          <text x="470" y="121" text-anchor="middle" font-size="11" font-weight="800" fill="var(--tax-red)">😫 痛苦代偿端</text>
+          ${weightsSvg}
+        </g>
+        <circle cx="320" cy="136" r="9" fill="var(--tax-ink)"/>
+        <text x="320" y="206" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-muted)">大脑永远追求稳态：廉价快感压得越狠，右侧痛苦铁砣就堆得越高</text>
+      `;
+
+      document.getElementById('logTxt').textContent = logMsg;
+      const kBase = document.getElementById('kBase');
+      kBase.textContent = baseline + ' 分';
+      kBase.style.color = baseline < 35 ? 'var(--tax-red)' : (baseline >= 55 ? 'var(--tax-green)' : 'var(--tax-primary)');
+      document.getElementById('kPain').textContent = `${painWeights} 块铁砣`;
+      document.getElementById('kJoy').textContent = joyPct + '%';
+
+      let aha = '';
+      if(baseline < 35){
+        aha = `💡 <strong>顿悟时刻：</strong>你已经掉进<strong>多巴胺耐受陷阱</strong>（基线跌到 ${baseline} 分）！现在刷手机已经不是为了“开心”，而只是为了暂时把倾斜的跷跷板压平、缓解痛苦端那 ${painWeights} 块铁砣带来的空虚感！`;
+      } else if(lastType === 'cold'){
+        aha = `💡 <strong>顿悟时刻：</strong>反向利用跷跷板！运动或冷水澡先主动往<strong>痛苦端</strong>轻压一下，大脑为了恢复平衡会反向往快感端注入温和持久的多巴胺（基线升至 <strong>${baseline} 分</strong>），而且完全没有戒断低谷！`;
+      } else {
+        aha = `💡 <strong>顿悟时刻：</strong>斯坦福成瘾专家安娜·伦布克的经典模型：快乐和痛苦共用一套神经天平。试着连点 3 次“刷短视频”看基线崩塌，再点“运动/冷水澡”体验先苦后甜的反向抬升！`;
+      }
+      document.getElementById('ahaBox').innerHTML = aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

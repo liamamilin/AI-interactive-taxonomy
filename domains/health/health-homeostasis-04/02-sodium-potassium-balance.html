@@ -7,58 +7,93 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:9px; margin-bottom:14px; }
+    .card { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .card.na.on { border-color:var(--tax-red); background:var(--tax-red-soft); }
+    .card.k.on { border-color:var(--tax-green); background:var(--tax-green-soft); }
+    .card .t { display:flex; justify-content:space-between; font-size:13px; font-weight:800; }
+    .card .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🧂 钠钾水泵失衡：为什么“多吃咸就水肿、血压飙”？</h1><p>误区：吃太咸只是嘴巴渴、多喝两杯水冲下去就没事了。真相：钠离子把水死死锁在血管和组织间隙里（钠水潴留），血容量瞬间胀大顶破血管壁，而蔬菜里的钾才是把多余钠排出去的天然解药！</p></div>
+      <div>
+        <h1>🧂 钠钾水泵失衡：为什么“多吃咸就水肿、血压飙”？</h1>
+        <p>误区：脸肿和高血压纯粹是因为“水喝太多了”。真相：细胞外液的渗透压必须死死恒定！当你狂吃高钠外卖，身体为了稀释高盐只能被迫<strong>狂锁水分扩容</strong>——把血管撑胀、把眼皮撑肿，而多吃高钾蔬果才是天然“排钠消肿开关”！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>每日食盐摄入量 (世卫建议 ≤5g)</span><span id="vSalt">10 克</span></label><input type="range" id="sSalt" min="2" max="16" value="10" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>高钾蔬果摄入充足度</span><span id="vK">35%</span></label><input type="range" id="sK" min="10" max="100" value="35" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🍽️ 拼装你今天的钠（红）与钾（绿）摄入来源，观察血容量膨胀与血压变化：</div>
+      <div class="grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 195"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">血管潴留多余水分</div><div class="k-val" id="kWat" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">血压/水肿额外推力</div><div class="k-val" id="kBP" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">今日钠 / 钾摄入</div><div class="k-val" id="kNk" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">额外锁水潴留（水肿）</div><div class="k-val" id="kWat" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">血管压力变化</div><div class="k-val" id="kBp">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const salt=+document.getElementById('sSalt').value, k=+document.getElementById('sK').value;
-  document.getElementById('vSalt').textContent=salt+' 克'; document.getElementById('vK').textContent=k+'%';
-  const excess=Math.max(0, salt-5*(0.8+k/200));
-  const wat=(excess*0.28).toFixed(2);
-  const bp=Math.round(excess*2.4);
-  document.getElementById('kWat').textContent='+'+wat+' 升';
-  document.getElementById('kBP').textContent='+'+bp+' mmHg';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#f59e0b">钠负荷 vs 钾排钠平衡 (吃盐 ${salt}g / 补钾 ${k}%)</text>
-    <rect x="20" y="46" width="${salt*32}" height="24" rx="6" fill="#f59e0b"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="${bp>8?'#ef4444':'#059669'}">额外水肿潴留 +${wat} L → 推高血压 +${bp} mmHg</text>
-    <rect x="20" y="114" width="${Math.max(8,bp*16)}" height="24" rx="6" fill="${bp>8?'#ef4444':'#059669'}"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">减盐的同时多吃香蕉/菠菜/土豆补钾，双管齐下消水肿降压</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>人体为了保持血液渗透压恒定，每多留 1 克没排掉的盐就得配套存下近 150 毫升水！靠多吃高钾蔬果（${k}%）能激活肾脏把多余的钠请出去！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const FOODS = [
+      { id:'ramen', cls:'na', icon:'🍜', name:'红烧牛肉泡面+汤', desc:'钠 +2200mg · 钾 180mg', na:2200, k:180 },
+      { id:'bbq', cls:'na', icon:'🍢', name:'重口烧烤 / 卤味', desc:'钠 +1800mg · 钾 250mg', na:1800, k:250 },
+      { id:'spinach', cls:'k', icon:'🥬', name:'一大盘清炒菠菜/土豆', desc:'钾 +1100mg · 促肾排钠', na:200, k:1100 },
+      { id:'banana', cls:'k', icon:'🍌', name:'香蕉 + 牛油果/番茄', desc:'钾 +950mg · 血管舒张', na:10, k:950 },
+      { id:'coconut', cls:'k', icon:'🥥', name:'无糖椰子水 / 豆类', desc:'钾 +800mg · 消肿神助攻', na:50, k:800 }
+    ];
+    let picked = new Set(['ramen', 'bbq']);
+
+    function toggle(id){
+      if(picked.has(id)){ if(picked.size > 1) picked.delete(id); } else picked.add(id);
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = FOODS.map(f => `
+        <button class="card ${f.cls} ${picked.has(f.id)?'on':''}" onclick="toggle('${f.id}')">
+          <div class="t"><span>${f.icon} ${f.name}</span><span>${picked.has(f.id)?'✓':'+'}</span></div>
+          <div class="s">${f.desc}</div>
+        </button>
+      `).join('');
+
+      let na = 800, k = 600;
+      FOODS.forEach(f => { if(picked.has(f.id)){ na += f.na; k += f.k; } });
+      const ratio = +(na / k).toFixed(2);
+      const waterMl = Math.max(0, Math.round((na - 1800) * 0.32 - (k - 1200) * 0.14));
+      const bpDelta = Math.max(-4, Math.round((ratio - 0.8) * 9));
+      const col = bpDelta >= 10 ? 'var(--tax-red)' : (bpDelta >= 3 ? 'var(--tax-amber)' : 'var(--tax-green)');
+      const tubeH = Math.min(82, 42 + Math.round(waterMl / 28));
+
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="26" font-size="12.5" font-weight="850" fill="var(--tax-ink)">血管与组织间隙锁水扩容模拟（钠钾比 ${ratio}，理想 < 0.7）</text>
+        <rect x="24" y="${102 - tubeH/2}" width="592" height="${tubeH}" rx="${tubeH/2}" fill="${bpDelta>=10?'var(--tax-red-soft)':'var(--tax-primary-soft)'}" stroke="${col}" stroke-width="3"/>
+        <text x="320" y="98" text-anchor="middle" font-size="14" font-weight="900" fill="${col}">
+          ${waterMl > 300 ? `💧 血管被迫狂锁水 +${waterMl} ml → 撑胀水肿 · 血压 +${bpDelta} mmHg` : `✅ 钠钾平衡顺畅排钠 · 血压 ${bpDelta>=0?'+':''}${bpDelta} mmHg`}
+        </text>
+        <text x="320" y="120" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">每多吃 1 克盐（400mg 钠），身体就要额外扣留约 120ml 水分来稀释！</text>
+        <text x="24" y="176" font-size="11.5" font-weight="750" fill="var(--tax-muted)">科学提示：控血压不只是“少吃盐（减钠）”，把富含钾的深色蔬菜吃够（增钾）同样事半功倍！</text>
+      `;
+
+      document.getElementById('kNk').textContent = `钠 ${na} / 钾 ${k} mg`;
+      document.getElementById('kWat').textContent = waterMl > 0 ? `+${waterMl} ml（次日重 ${(waterMl/1000).toFixed(1)}kg）` : '0 ml（无水肿 ✅）';
+      const kB = document.getElementById('kBp'); kB.textContent = `${bpDelta >= 0 ? '+' : ''}${bpDelta} mmHg`; kB.style.color = col;
+
+      document.getElementById('ahaBox').innerHTML = bpDelta >= 10
+        ? `💡 <strong>顿悟时刻：</strong>吃完重口泡面烧烤第二天体重突然涨 1 公斤、眼皮浮肿，绝不是一夜之间长了 1 公斤纯脂肪，而是<strong>高钠（${na}mg）逼着身体锁住了 +${waterMl}ml 水</strong>！试试勾上 🥬 菠菜 和 🍌 香蕉看看钾离子如何帮肾脏排钠消肿！`
+        : `💡 <strong>顿悟时刻：</strong>高钾蔬果（${k}mg）直接激活肾脏的排钠通道并舒张血管平滑肌，把钠钾比压回健康区间——记住降压消肿黄金公式：<strong>减钠 + 补钾，双管齐下！</strong>`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

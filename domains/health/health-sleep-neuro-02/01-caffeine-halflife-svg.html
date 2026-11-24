@@ -3,69 +3,117 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>☕ 咖啡因 5 小时半衰期残余曲线（SVG）</title>
+  <title>☕ 咖啡因 5 小时半衰期残余曲线</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .cup-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:9px; margin-bottom:14px; }
+    .c-card { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .c-card.on { border-color:var(--tax-amber); background:var(--tax-amber-soft); }
+    .c-card .t { display:flex; justify-content:space-between; font-size:13px; font-weight:800; }
+    .c-card .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>☕ 咖啡因 5 小时半衰期残余曲线（SVG）</h1><p>误区：只要喝完咖啡晚上还能睡着，就说明咖啡因完全不影响我的睡眠质量。真相：咖啡因哪怕没让你失眠，也会把你最修复脑力的深睡期（N3）活活砍掉 20%，让你睡醒依然像没睡！</p></div>
+      <div>
+        <h1>☕ 咖啡因 5 小时半衰期残余曲线</h1>
+        <p>误区：我下午 4 点喝完咖啡晚上 11 点照样能睡着，说明咖啡因对我没影响。真相：咖啡因半衰期约 5 小时，即便你能睡着，血液里残留的咖啡因也会悄悄砍掉你 20%–35% 的深度睡眠！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>最后一杯咖啡饮用时间</span><span id="vT">15:00</span></label><input type="range" id="sT" min="8" max="20" value="15" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>摄入咖啡因总量</span><span id="vMg">200 mg (约1大杯)</span></label><input type="range" id="sMg" min="50" max="400" step="25" value="200" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">☕ 点击拼装你今天的含咖啡因饮品（半衰期按 5 小时计算），看 23:00 睡前体内还剩多少：</div>
+      <div class="cup-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 225"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">23:00 睡前体内残留</div><div class="k-val" id="kRem" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">深睡期受损估算</div><div class="k-val" id="kLoss">—</div></div>
+        <div class="kpi"><div class="k-lbl">全天总摄入咖啡因</div><div class="k-val" id="kSum" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">23:00 睡前体内残留</div><div class="k-val" id="kRem" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">深度睡眠预计损失</div><div class="k-val" id="kLoss" style="color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const t=+document.getElementById('sT').value, mg=+document.getElementById('sMg').value;
-  document.getElementById('vT').textContent=(t<10?'0':'')+t+':00';
-  document.getElementById('vMg').textContent=mg+' mg';
-  const hrs=Math.max(0, 23-t), rem=Math.round(mg*Math.pow(0.5, hrs/5));
-  const loss=Math.min(45, Math.round(rem*0.25));
-  document.getElementById('kRem').textContent=rem+' mg';
-  document.getElementById('kRem').style.color=rem>50?'#ef4444':'#059669';
-  document.getElementById('kLoss').textContent=loss>10?'-'+loss+'% 深睡':'影响极微';
-  let pts='';
-  for(let h=t;h<=25;h+=0.5){
-    const x=40+(h-8)/17*520, y=158-(mg*Math.pow(0.5,(h-t)/5))/400*125;
-    pts+=`${x.toFixed(1)},${y.toFixed(1)} `;
-  }
-  const x23=40+(23-8)/17*520, y23=158-rem/400*125;
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
-    <line x1="${x23}" y1="20" x2="${x23}" y2="158" stroke="#8b5cf6" stroke-dasharray="4 3"/>
-    <text x="${x23-6}" y="30" text-anchor="end" font-size="11.5" font-weight="800" fill="#8b5cf6">23:00 睡前</text>
-    <polyline fill="none" stroke="#b45309" stroke-width="3" points="${pts}"/>
-    <circle cx="${x23}" cy="${y23}" r="6" fill="#ef4444"/>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>咖啡因半衰期长达 5 小时！下午 ${t}:00 喝的 ${mg} mg，到了晚上 11 点还剩 <strong>${rem} mg</strong> 死死堵在腺苷受体上，建议把最后一杯咖啡锁死在午后 2 点前！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const DRINKS = [
+      { id:'am', icon:'☕', name:'08:30 晨间美式', t:8.5, mg:130, desc:'130mg · 提神安全窗' },
+      { id:'noon', icon:'🥛', name:'13:00 午后拿铁', t:13.0, mg:100, desc:'100mg · 10h 衰减至 25%' },
+      { id:'tea', icon:'🧋', name:'16:00 下午茶/奶茶', t:16.0, mg:95, desc:'95mg · 睡前仍剩近 40%' },
+      { id:'energy', icon:'⚡', name:'18:30 加班能量饮', t:18.5, mg:150, desc:'150mg · 睡前超半数残留!' }
+    ];
+    let picked = new Set(['am', 'tea']);
+
+    function toggle(id){
+      if(picked.has(id)){ if(picked.size > 0) picked.delete(id); } else picked.add(id);
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function cafAt(h){
+      let sum = 0;
+      DRINKS.forEach(d => {
+        if(picked.has(d.id) && h >= d.t){
+          sum += d.mg * Math.pow(0.5, (h - d.t) / 5);
+        }
+      });
+      return sum;
+    }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = DRINKS.map(d => `
+        <button class="c-card ${picked.has(d.id)?'on':''}" onclick="toggle('${d.id}')">
+          <div class="t"><span>${d.icon} ${d.name}</span><span>${picked.has(d.id)?'✓':'+'}</span></div>
+          <div class="s">${d.desc}</div>
+        </button>
+      `).join('');
+
+      const x0=52, x1=612, yMin=28, yMax=188;
+      const toX = h => x0 + ((h - 7)/20)*(x1-x0); // 07:00 to 03:00 (27)
+      const toY = mg => yMax - (Math.min(260, mg)/260)*(yMax-yMin);
+
+      let pts = [];
+      for(let h=7; h<=27; h+=0.2){
+        pts.push(`${toX(h).toFixed(1)},${toY(cafAt(h)).toFixed(1)}`);
+      }
+      const bedMg = Math.round(cafAt(23));
+      const totalMg = DRINKS.reduce((s,d)=>s+(picked.has(d.id)?d.mg:0), 0);
+      const loss = Math.min(45, Math.round(bedMg * 0.28));
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="${toX(23)}" y="${yMin}" width="${x1-toX(23)}" height="${yMax-yMin}" fill="var(--tax-primary-soft)" opacity="0.5"/>
+        <text x="${toX(25)}" y="${yMin+14}" text-anchor="middle" font-size="10.5" font-weight="800" fill="var(--tax-primary)">🌙 夜间睡眠区</text>
+        <line x1="${x0}" y1="${toY(50)}" x2="${x1}" y2="${toY(50)}" stroke="var(--tax-green)" stroke-dasharray="4 4"/>
+        <text x="${x0+6}" y="${toY(50)-5}" font-size="10.5" font-weight="750" fill="var(--tax-green)">50mg 睡前安全警戒线</text>
+        ${[8,11,14,17,20,23,26].map(h=>`<text x="${toX(h)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${String(h%24).padStart(2,'0')}:00</text>`).join('')}
+        <polyline points="${pts.join(' ')}" fill="none" stroke="var(--tax-amber)" stroke-width="3.2" stroke-linejoin="round"/>
+        <circle cx="${toX(23)}" cy="${toY(bedMg)}" r="6" fill="${bedMg>50?'var(--tax-red)':'var(--tax-green)'}"/>
+        <text x="${toX(23)-8}" y="${Math.max(42, toY(bedMg)-10)}" text-anchor="end" font-size="12" font-weight="850" fill="${bedMg>50?'var(--tax-red)':'var(--tax-green)'}">23:00 剩 ${bedMg}mg</text>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-ink)">体内血液咖啡因实时浓度（半衰期 = 5 小时）</text>
+      `;
+
+      document.getElementById('kSum').textContent = totalMg + ' mg';
+      document.getElementById('kRem').textContent = bedMg + ' mg' + (bedMg > 50 ? ' ⚠️' : ' ✅');
+      document.getElementById('kLoss').textContent = loss > 5 ? `约 -${loss}% 深睡` : '几乎无影响 ✅';
+
+      let aha = '';
+      if(bedMg >= 80){
+        aha = `💡 <strong>顿悟时刻：</strong>晚上 11 点准备睡觉时，你脑子里还有 <strong>${bedMg} mg</strong> 咖啡因（相当于刚喝完一大口浓缩咖啡）死死堵住腺苷受体！就算你靠疲惫硬睡着了，深睡也被偷走了约 <strong>${loss}%</strong>，第二天醒来照样累！`;
+      } else if(bedMg > 45){
+        aha = `💡 <strong>顿悟时刻：</strong>23:00 残留 <strong>${bedMg} mg</strong>，略高于 50mg 敏感阈值。把下午 4 点的奶茶/咖啡提前到 <strong>13:00 前</strong>，能立刻让夜间深睡质量上一个台阶！`;
+      } else {
+        aha = `💡 <strong>顿悟时刻：</strong>精准卡点！23:00 体内咖啡因已代谢到 <strong>${bedMg} mg</strong> 以下，既享受了上午的专注提神，又给晚上的深度睡眠留出了干干净净的腺苷受体！`;
+      }
+      document.getElementById('ahaBox').innerHTML = aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

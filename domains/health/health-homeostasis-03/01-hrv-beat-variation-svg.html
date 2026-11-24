@@ -3,62 +3,94 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📈 HRV 心率变异性：节拍器 vs 敏捷呼吸波形（SVG）</title>
+  <title>📈 HRV 心率变异性：节拍器 vs 敏捷呼吸波形</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📈 HRV 心率变异性：节拍器 vs 敏捷呼吸波形（SVG）</h1><p>误区：健康的心脏跳得越均匀越好（比如每秒精确跳一次 1000ms）。真相：心率极其死板均匀往往意味着副交感刹车失灵、长期处于高压战备状态；健康的 HRV 越高，说明神经系统越敏捷从容！</p></div>
+      <div>
+        <h1>📈 HRV 心率变异性：节拍器 vs 敏捷呼吸波形</h1>
+        <p>误区：健康的心脏应该像瑞士手表一样，每分钟 60 下、每次间隔精确到 1.000 秒。真相：恰恰相反！<strong>两颗同样 60 bpm 的心脏</strong>，跳动间隔死板僵硬反而是高压过劳信号；随着呼吸灵活变速（高 HRV）才代表副交感神经弹性极佳！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>副交感迷走神经活力 (睡眠/恢复)</span><span id="vVag">75%</span></label><input type="range" id="sVag" min="15" max="100" value="75" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>交感神经紧绷度 (熬夜/饮酒/焦虑)</span><span id="vSym">30%</span></label><input type="range" id="sSym" min="10" max="100" value="30" oninput="upd()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="setFocus('compare',this)">⚡ 双轨对比：两颗同样 60 bpm 的心脏</button>
+        <button class="pill" onclick="setFocus('rigid',this)">🤖 聚焦：低 HRV 僵硬节拍器</button>
+        <button class="pill" onclick="setFocus('agile',this)">🌿 聚焦：高 HRV 灵动敏捷心</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">HRV (RMSSD) 估算</div><div class="k-val" id="kHrv" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">身体恢复准备度</div><div class="k-val" id="kRdy">—</div></div>
+        <div class="kpi"><div class="k-lbl">两颗心脏的平均心率</div><div class="k-val" style="color:var(--tax-primary);">同为 60 bpm</div></div>
+        <div class="kpi"><div class="k-lbl">🤖 僵硬组 HRV (RMSSD)</div><div class="k-val" style="color:var(--tax-red);">14 ms（交感锁死）</div></div>
+        <div class="kpi"><div class="k-lbl">🌿 敏捷组 HRV (RMSSD)</div><div class="k-val" style="color:var(--tax-green);">86 ms（弹性极佳）</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const vag=+document.getElementById('sVag').value, sym=+document.getElementById('sSym').value;
-  document.getElementById('vVag').textContent=vag+'%'; document.getElementById('vSym').textContent=sym+'%';
-  const hrv=Math.max(12, Math.round(vag*0.95 - sym*0.35 + 20));
-  document.getElementById('kHrv').textContent=hrv+' ms';
-  document.getElementById('kRdy').textContent=hrv>60?'满血敏捷 (适合高强度训练)':(hrv>35?'中等':'紧绷疲劳 (宜休息)');
-  let bars='';
-  for(let i=0;i<14;i++){
-    const jit=Math.sin(i*1.3)*(hrv*0.45);
-    const h=65+jit;
-    bars+=`<rect x="${42+i*37}" y="${155-h}" width="24" height="${h}" rx="4" fill="${hrv>60?'#059669':'#f59e0b'}"/>`;
-  }
-  document.getElementById('svg').innerHTML=bars+`
-    <text x="42" y="28" font-size="12.5" font-weight="800" fill="var(--tax-text)">连续 14 次心跳 R-R 间隔毫秒波动（波动越丰富，HRV=${hrv}ms 越高）</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>高 HRV 代表你的心脏同时听得懂“油门”和“刹车”的微操指令（吸气快一点、呼气慢一点）；一旦熬夜喝酒交感锁死，心跳就会变得像死板的机械节拍器！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let focus = 'compare';
+    function setFocus(f, btn){
+      focus = f;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function ecgRow(yBase, beatsMs, col, label, op){
+      const x0 = 30, scale = 0.095; // ms to px
+      let x = x0;
+      let d = `M ${x} ${yBase}`;
+      let labels = '';
+      beatsMs.forEach(ms => {
+        const nx = x + ms * scale;
+        const mid = (x + nx) / 2;
+        d += ` L ${nx-10} ${yBase} L ${nx-6} ${yBase-34} L ${nx-2} ${yBase+10} L ${nx+3} ${yBase}`;
+        labels += `<text x="${mid.toFixed(1)}" y="${yBase+22}" text-anchor="middle" font-size="10.5" font-weight="800" fill="${col}">${(ms/1000).toFixed(2)}s</text>`;
+        x = nx;
+      });
+      return `
+        <g opacity="${op}">
+          <text x="30" y="${yBase-42}" font-size="12.5" font-weight="850" fill="${col}">${label}</text>
+          <path d="${d}" fill="none" stroke="${col}" stroke-width="2.6" stroke-linejoin="round"/>
+          ${labels}
+        </g>
+      `;
+    }
+
+    function draw(){
+      const rigid = [995, 1005, 998, 1002, 1000, 1000];
+      const agile = [850, 960, 1140, 1170, 980, 900]; // avg = 1000ms = 60bpm!
+
+      document.getElementById('svg').innerHTML = `
+        ${ecgRow(74, rigid, 'var(--tax-red)', '🤖 心脏 A（高压熬夜 · 低 HRV = 14ms · 间隔像死板节拍器）', focus==='agile'?0.28:1)}
+        <line x1="24" y1="114" x2="616" y2="114" stroke="var(--tax-border)" stroke-dasharray="4 4"/>
+        ${ecgRow(176, agile, 'var(--tax-green)', '🌿 心脏 B（恢复充沛 · 高 HRV = 86ms · 吸气微加速、呼气微减速）', focus==='rigid'?0.28:1)}
+      `;
+
+      document.getElementById('ahaBox').innerHTML = focus === 'rigid'
+        ? `💡 <strong>顿悟时刻：</strong>心脏 A 虽然平均也是 60 bpm，但每次跳动死板卡在 <strong>1.00 秒</strong>，说明交感神经死死踩着油门、副交感刹车失去微调能力——这是慢性压力、熬夜饮酒或即将生病的典型预警！`
+        : focus === 'agile'
+        ? `💡 <strong>顿悟时刻：</strong>心脏 B 每次跳动在 <strong>0.85s 到 1.17s</strong> 之间灵动伸缩！这代表你的自主神经系统像顶级 F1 赛车：油门和刹车随时能毫秒级微调，抗压与恢复韧性拉满！`
+        : `💡 <strong>顿悟时刻：</strong>两颗心脏 1 分钟都跳 60 下，但<strong>健康藏在相邻两次心跳的毫秒级微小差异（HRV）里</strong>！切记：HRV 是高度个性化的指标，只需跟<strong>自己的 7 天基线</strong>比，不要盲目跟别人攀比绝对值！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

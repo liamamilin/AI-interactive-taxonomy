@@ -7,57 +7,91 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.bad:hover { border-color:var(--tax-red); background:var(--tax-red-soft); }
+    .pill.good:hover { border-color:var(--tax-green); background:var(--tax-green-soft); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🕰️ 霍瓦特表观遗传时钟：衰老其实是“信息丢失”？</h1><p>误区：衰老只是因为细胞零件纯粹用旧磨损了。真相：哈佛辛克莱团队提出的“衰老信息论”认为，年轻细胞里的基因开关原本干干净净，每次修复 DNA 损伤都会留下表观划痕噪声——细胞忘了自己是谁，衰老就开始了！</p></div>
+      <div>
+        <h1>🕰️ 霍瓦特表观遗传时钟：衰老其实是“信息丢失”？</h1>
+        <p>误区：人老了是因为 DNA 里的代码全坏光了、无可挽回。真相：哈佛衰老信息论提出——DNA 就像光盘里的数字音乐，本身还完好；衰老其实是光盘表面的<strong>表观读码层被划花了</strong>（表观噪声累积），细胞读错曲目忘记自己是谁！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>累积 DNA 损伤与修复折腾次数</span><span id="vHit">60 次</span></label><input type="range" id="sHit" min="10" max="100" value="60" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>细胞核表观清洁重置力</span><span id="vCln">35%</span></label><input type="range" id="sCln" min="10" max="90" value="35" oninput="upd()"></div>
+      <div class="bar">
+        <button class="pill bad" onclick="scratch()">⚡ 施加 DNA 断裂损伤（紫外线/熬夜/炎症）</button>
+        <button class="pill good" onclick="polish()">✨ 激活细胞抛光修复（运动+深睡+抗炎）</button>
+        <button class="pill" onclick="resetDisc()">↺ 恢复 25 岁全新光盘</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">表观划痕噪音率</div><div class="k-val" id="kNoise" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">细胞身份保真度</div><div class="k-val" id="kFid" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">DNA 原始数字代码完好率</div><div class="k-val" style="color:var(--tax-primary);">99.8%（基本未丢）</div></div>
+        <div class="kpi"><div class="k-lbl">表观读码光盘划痕噪声</div><div class="k-val" id="kNoise" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">霍瓦特表观生物学年龄</div><div class="k-val" id="kAge" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const hit=+document.getElementById('sHit').value, cln=+document.getElementById('sCln').value;
-  document.getElementById('vHit').textContent=hit+' 次'; document.getElementById('vCln').textContent=cln+'%';
-  const noise=Math.max(5, Math.min(95, Math.round(hit*(1-cln/140))));
-  const fid=100-noise;
-  document.getElementById('kNoise').textContent=noise+'%';
-  document.getElementById('kFid').textContent=fid+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">表观遗传划痕噪音 (光盘刮花度): ${noise}%</text>
-    <rect x="20" y="44" width="${noise*5.2}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">细胞身份记忆保真度: ${fid}%</text>
-    <rect x="20" y="112" width="${fid*5.2}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">基因本身还在，只是光盘被划花导致“读错开关”——这解释了为何部分重编程能逆转表观年龄</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>如果衰老主要是软件层面的“表观光盘划痕噪声（${noise}%）”而非硬件彻底报废，那抗衰的核心思路就是减少无谓损伤 + 给光盘抛光重置！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let scratches = 4; // 0..14
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function scratch(){ scratches = Math.min(14, scratches + 2); markDone(); draw(); }
+    function polish(){ scratches = Math.max(0, scratches - 3); markDone(); draw(); }
+    function resetDisc(){ scratches = 0; markDone(); draw(); }
+
+    function draw(){
+      const noise = Math.round((scratches / 14) * 100);
+      const bioAge = Math.round(25 + (scratches / 14) * 55);
+      const readPct = Math.max(20, 100 - Math.round(noise * 0.78));
+      const col = noise >= 65 ? 'var(--tax-red)' : (noise >= 35 ? 'var(--tax-amber)' : 'var(--tax-green)');
+
+      let lines = '';
+      for(let i=0; i<scratches; i++){
+        const a1 = (i * 47) * Math.PI / 180;
+        const a2 = a1 + 1.1;
+        const r1 = 28 + (i % 4) * 14, r2 = 70;
+        const x1 = 155 + Math.cos(a1) * r1, y1 = 108 + Math.sin(a1) * r1;
+        const x2 = 155 + Math.cos(a2) * r2, y2 = 108 + Math.sin(a2) * r2;
+        lines += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--tax-red)" stroke-width="2.2" opacity="0.85"/>`;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <circle cx="155" cy="108" r="76" fill="var(--tax-primary-soft)" stroke="${col}" stroke-width="3"/>
+        <circle cx="155" cy="108" r="54" fill="none" stroke="var(--tax-border)" stroke-dasharray="4 4"/>
+        <circle cx="155" cy="108" r="18" fill="var(--tax-surface)" stroke="var(--tax-border)" stroke-width="2"/>
+        ${lines}
+        <text x="155" y="202" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--tax-muted)">表观遗传 CD 光盘（当前 ${scratches} 道读码划痕）</text>
+
+        <rect x="280" y="30" width="335" height="154" rx="14" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+        <text x="300" y="58" font-size="13" font-weight="850" fill="var(--tax-ink)">细胞身份准确读取率：${readPct}%</text>
+        <rect x="300" y="70" width="290" height="16" rx="8" fill="var(--tax-border)"/>
+        <rect x="300" y="70" width="${Math.round(290*readPct/100)}" height="16" rx="8" fill="${col}"/>
+        <text x="300" y="114" font-size="12.5" font-weight="800" fill="${col}">霍瓦特时钟估测年龄：${bioAge} 岁</text>
+        <text x="300" y="142" font-size="11.5" fill="var(--tax-muted)">${noise>=60?'⚠️ 划痕过多：细胞频频卡碟、错读基因、功能衰退！':'✅ 激光头顺畅读码，细胞清晰记住自己的年轻身份！'}</text>
+        <text x="300" y="166" font-size="11" fill="var(--tax-primary)">前沿科学：表观重编程的本质就是“给划花的光盘抛光”！</text>
+      `;
+
+      document.getElementById('kNoise').textContent = noise + '%';
+      document.getElementById('kAge').textContent = bioAge + ' 岁';
+
+      document.getElementById('ahaBox').innerHTML = noise >= 60
+        ? `💡 <strong>顿悟时刻：</strong>每次 DNA 双链断裂，表观修复蛋白（如 Sirtuins）都要离岗救火，回来时常站错位置，在光盘表面留下一道划痕（当前噪声 <strong>${noise}%</strong>，表观年龄飙至 <strong>${bioAge} 岁</strong>）！试试点击 ✨ 抛光修复！`
+        : `💡 <strong>顿悟时刻：</strong>因为 DNA 底层数字信息并未丢失，衰老在理论上并不像碎掉的玻璃那样绝对不可逆——减少防晒紫外线/熬夜/炎症损伤，配合运动与节律睡眠，就是在保护和抛光你的表观光盘！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

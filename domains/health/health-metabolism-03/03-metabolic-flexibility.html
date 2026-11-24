@@ -7,57 +7,112 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .scen-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:10px; margin-bottom:14px; }
+    .sc-btn { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .sc-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .sc-btn .t { font-size:13px; font-weight:800; }
+    .sc-btn .s { font-size:11.5px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🔋 代谢灵活性：你的身体会丝滑切换“双燃料”吗？</h1><p>误区：一顿不吃主食就低血糖心慌，说明我天生身体虚、必须顿顿吃满碳水。真相：这是“代谢僵化”——你的线粒体长期只烧糖，把烧脂肪的酶系荒废了，一断糖就当场断电！</p></div>
+      <div>
+        <h1>🔋 代谢灵活性：你的身体会丝滑切换“双燃料”吗？</h1>
+        <p>误区：一顿饭没按时吃就头晕手抖、发脾气，是因为自己“天生低血糖、脂肪不够用”。真相：哪怕最瘦的人身上也存着上万大卡脂肪，只是长期高糖久坐让线粒体生锈，失去了从烧糖切到烧油的能力！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>空腹有氧/低糖耐受训练度</span><span id="vTr">60%</span></label><input type="range" id="sTr" min="10" max="100" value="60" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>距离上一餐断碳水小时数</span><span id="vHr">10 小时</span></label><input type="range" id="sHr" min="2" max="20" value="10" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🧪 点击切换 4 个日常能量挑战，对比「代谢灵活者（油电混动）」vs「代谢僵化者（纯糖依赖）」：</div>
+      <div class="scen-grid" id="scenGrid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">脂肪快速接管能力</div><div class="k-val" id="kFlex" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">当前精神供能状态</div><div class="k-val" id="kSt">—</div></div>
+        <div class="kpi"><div class="k-lbl">⚡ 代谢灵活者状态</div><div class="k-val" id="kFlex" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🪫 代谢僵化者状态</div><div class="k-val" id="kRigid" style="color:var(--tax-red);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const tr=+document.getElementById('sTr').value, hr=+document.getElementById('sHr').value;
-  document.getElementById('vTr').textContent=tr+'%'; document.getElementById('vHr').textContent=hr+' 小时';
-  const energy=Math.max(15, Math.min(98, Math.round(95 - Math.max(0, hr-6)*(100-tr)/35)));
-  document.getElementById('kFlex').textContent=tr+' 分';
-  document.getElementById('kSt').textContent=energy>70?'丝滑切换燃脂 (清醒)':(energy>45?'轻微乏力过渡':'代谢卡顿 (心慌饿)');
-  document.getElementById('kSt').style.color=energy>70?'#059669':(energy>45?'#f59e0b':'#ef4444');
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">混动双燃料切换灵活度: ${tr} 分</text>
-    <rect x="20" y="44" width="${tr*5.2}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="${energy>70?'#0284c7':'#ef4444'}">断餐 ${hr} 小时大脑能量稳定度: ${energy}%</text>
-    <rect x="20" y="112" width="${energy*5.2}" height="24" rx="6" fill="${energy>70?'#0284c7':'#ef4444'}"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">健康的身体像混动汽车：有糖烧糖，糖用完毫秒级切入脂肪电池</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>健康的代谢就像油电混动车，而不是“没充电就抛锚的纯电车”。锻炼脂肪氧化灵活性（${tr} 分），能让你在空腹 ${hr} 小时后依然神清气爽！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const SCENS = [
+      {
+        id:'carb_meal', icon:'🍝', name:'高碳午餐后 1 小时', desc:'大量葡萄糖涌入',
+        flex:{ sugar:82, fat:18, energy:92, tag:'立刻高效切入燃糖模式，快速清空血糖' },
+        rigid:{ sugar:64, fat:36, energy:68, tag:'细胞门锁迟钝，血糖降得慢、饭后犯困' },
+        aha:'💡 <strong>顿悟时刻：</strong>代谢灵活不是“永远只烧脂肪”，而是<strong>有糖时利落烧糖，没糖时丝滑烧油</strong>！吃完高碳餐后，灵活者的胰岛素响应迅速，能瞬间调高燃糖功率稳住血糖。'
+      },
+      {
+        id:'skip_lunch', icon:'⏳', name:'开会错过午餐（空腹 6h）', desc:'肝糖原明显下降',
+        flex:{ sugar:22, fat:78, energy:88, tag:'自动切换脂肪/酮体供能，头脑依旧清醒' },
+        rigid:{ sugar:70, fat:30, energy:32, tag:'线粒体不会烧油，疯狂拉响饥饿恐慌警报' },
+        aha:'💡 <strong>顿悟时刻：</strong>为什么同样 6 小时没吃饭，有人思路清晰、有人却饿得手抖发脾气？因为僵化者的线粒体切不过去烧脂肪，明明油箱（脂肪）满格，车却因为“糖原见底”直接熄火！'
+      },
+      {
+        id:'zone2', icon:'🏃', name:'下午慢跑 40 分钟', desc:'持续中低强度供能',
+        flex:{ sugar:28, fat:72, energy:94, tag:'脂肪引擎顺畅接管，越跑越轻松' },
+        rigid:{ sugar:76, fat:24, energy:46, tag:'刚跑 15 分钟就喘成狗、腿软想放弃' },
+        aha:'💡 <strong>顿悟时刻：</strong>经常做 Zone 2 慢跑的人线粒体密度高，运动时能高效把脂肪拉进锅炉烧；而长期久坐的人只能死磕有限的糖原，跑两公里就精疲力竭。'
+      },
+      {
+        id:'sleep', icon:'🌙', name:'夜间睡眠（8 小时空腹）', desc:'基础代谢修复期',
+        flex:{ sugar:15, fat:85, energy:95, tag:'整晚平稳烧脂修复，清晨精力充沛' },
+        rigid:{ sugar:52, fat:48, energy:55, tag:'夜间血糖波动易醒，早起依然乏力想吃甜' },
+        aha:'💡 <strong>顿悟时刻：</strong>想要重新练出“油电混动”的代谢灵活性，不需要极端节食——只需要<strong>减少全天高频含糖零食 + 每周 2–3 次 Zone 2 有氧 + 保持 12 小时夜间自然空腹</strong>！'
+      }
+    ];
+    let cur = 'skip_lunch';
+
+    function pick(id){
+      cur = id;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      document.getElementById('scenGrid').innerHTML = SCENS.map(s => `
+        <button class="sc-btn ${cur===s.id?'active':''}" onclick="pick('${s.id}')">
+          <div class="t">${s.icon} ${s.name}</div>
+          <div class="s">${s.desc}</div>
+        </button>
+      `).join('');
+
+      const s = SCENS.find(x=>x.id===cur);
+      function panel(x, title, obj, accent){
+        const w = 276;
+        const wS = (obj.sugar/100)*236, wF = (obj.fat/100)*236;
+        const wE = (obj.energy/100)*236;
+        return `
+          <rect x="${x}" y="18" width="${w}" height="182" rx="12" fill="var(--tax-surface-alt)" stroke="${accent}" stroke-width="1.6"/>
+          <text x="${x+16}" y="42" font-size="13.5" font-weight="850" fill="${accent}">${title}</text>
+          <text x="${x+16}" y="66" font-size="11.5" font-weight="700" fill="var(--tax-muted)">当前燃料配比：糖 ${obj.sugar}% / 脂 ${obj.fat}%</text>
+          <rect x="${x+16}" y="74" width="${wS}" height="22" rx="4" fill="var(--tax-primary)"/>
+          <rect x="${x+16+wS}" y="74" width="${wF}" height="22" rx="4" fill="var(--tax-amber)"/>
+          <text x="${x+16}" y="122" font-size="11.5" font-weight="700" fill="var(--tax-muted)">大脑与身体精力输出：${obj.energy}%</text>
+          <rect x="${x+16}" y="130" width="236" height="14" rx="7" fill="var(--tax-border)"/>
+          <rect x="${x+16}" y="130" width="${wE}" height="14" rx="7" fill="${obj.energy>=70?'var(--tax-green)':'var(--tax-red)'}"/>
+          <text x="${x+16}" y="172" font-size="11.5" font-weight="750" fill="var(--tax-ink)">${obj.tag}</text>
+        `;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        ${panel(18, '⚡ 代谢灵活（油电混动）', s.flex, 'var(--tax-green)')}
+        ${panel(346, '🪫 代谢僵化（纯糖依赖）', s.rigid, 'var(--tax-red)')}
+        <text x="320" y="114" text-anchor="middle" font-size="14" font-weight="900" fill="var(--tax-muted)">VS</text>
+      `;
+
+      document.getElementById('kFlex').textContent = `精力 ${s.flex.energy}% · 脂供能 ${s.flex.fat}%`;
+      document.getElementById('kRigid').textContent = `精力 ${s.rigid.energy}% · 脂供能 ${s.rigid.fat}%`;
+      document.getElementById('ahaBox').innerHTML = s.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

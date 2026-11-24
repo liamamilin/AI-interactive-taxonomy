@@ -3,66 +3,131 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚡ 三大供能系统接力赛（SVG）</title>
+  <title>⚡ 三大供能系统接力赛</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⚡ 三大供能系统接力赛（SVG）</h1><p>误区：运动时前 30 分钟先烧糖、30 分钟之后才开始有氧供能。真相：从迈出第一步的第 1 秒起三大系统就同时开机，只是前 10 秒磷酸原占主力，随后无氧糖酵解接棒，2 分钟后有氧氧化才成为绝对主角！</p></div>
+      <div>
+        <h1>⚡ 三大供能系统接力赛</h1>
+        <p>误区：跑步前 30 分钟全是无氧供能，30 分钟后才突然切换到有氧烧脂。真相：从迈出第一步起三台发动机就同时点火，只是随着持续时间拉长，主导接力棒在 10 秒和 2 分钟发生剧烈交接！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>全力持续运动时长 (对数刻度)</span><span id="vSec">45 秒</span></label><input type="range" id="sSec" min="3" max="1800" value="45" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>当前心肺/线粒体有氧能力</span><span id="vFit">65%</span></label><input type="range" id="sFit" min="30" max="100" value="65" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="playRelay()">▶ 播放全流程接力</button>
+        <button class="pill active" onclick="pickIdx(0,this)">🏋️ 极限举重 (5秒)</button>
+        <button class="pill" onclick="pickIdx(1,this)">⚡ 百米冲刺 (12秒)</button>
+        <button class="pill" onclick="pickIdx(2,this)">🔥 400米死磕 (60秒)</button>
+        <button class="pill" onclick="pickIdx(3,this)">🏃 3000米跑 (12分)</button>
+        <button class="pill" onclick="pickIdx(4,this)">🚴 马拉松 (90分)</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 225"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">磷酸原 (爆发)</div><div class="k-val" id="kP" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">无氧糖酵解 (酸痛)</div><div class="k-val" id="kG" style="color:#f59e0b;">—</div></div>
-        <div class="kpi"><div class="k-lbl">有氧氧化 (耐力)</div><div class="k-val" id="kA" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">⚡ 磷酸原 ATP-CP（火箭）</div><div class="k-val" id="kAtp" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🔥 无氧糖酵解（涡轮）</div><div class="k-val" id="kGly" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🫁 有氧氧化（混动巡航）</div><div class="k-val" id="kAer" style="color:var(--tax-green);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const sec=+document.getElementById('sSec').value, fit=+document.getElementById('sFit').value;
-  document.getElementById('vSec').textContent=sec>=60?(sec/60).toFixed(1)+' 分钟':sec+' 秒';
-  document.getElementById('vFit').textContent=fit+'%';
-  const p=Math.round(90*Math.exp(-sec/15));
-  const aer=Math.min(95, Math.round((1-Math.exp(-sec/95))*(75+fit*0.2)));
-  const gly=Math.max(2, 100-p-aer);
-  document.getElementById('kP').textContent=p+'%';
-  document.getElementById('kG').textContent=gly+'%';
-  document.getElementById('kA').textContent=aer+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="32" font-size="13" font-weight="800" fill="#ef4444">磷酸原 ATP-CP (极速爆发 · 无乳酸): ${p}%</text>
-    <rect x="20" y="40" width="${p*5.2}" height="20" rx="5" fill="#ef4444"/>
-    <text x="20" y="84" font-size="13" font-weight="800" fill="#f59e0b">无氧糖酵解 (400米冲刺 · 产乳酸): ${gly}%</text>
-    <rect x="20" y="92" width="${gly*5.2}" height="20" rx="5" fill="#f59e0b"/>
-    <text x="20" y="136" font-size="13" font-weight="800" fill="#059669">有氧氧化 (长跑燃脂 · 最持久): ${aer}%</text>
-    <rect x="20" y="144" width="${aer*5.2}" height="20" rx="5" fill="#059669"/>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>爆发力靠 10 秒见底的磷酸原，中间 30~90 秒最累人的是无氧糖酵解，2 分钟后有氧发动机占比爬上 <strong>${aer}%</strong>，所以长跑刚起步最喘、跑开反而顺了！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    // Log-time axis x in [0..100]: 0=1s, 25=10s, 50=60s, 75=10min, 100=90min
+    const EVENTS = [
+      { pos:12, name:'5 秒极限举重', atp:90, gly:8, aer:2,
+        aha:'💡 <strong>顿悟时刻：</strong>前 10 秒全靠肌肉里现成的 <strong>ATP-CP 磷酸原火箭</strong>瞬间喷射爆发力（占 90%），不需要氧气也不产酸，但燃料箱 10 秒就见底，这就是为什么极限卧推举不了第 6 下！' },
+      { pos:26, name:'12 秒百米冲刺', atp:55, gly:40, aer:5,
+        aha:'💡 <strong>顿悟时刻：</strong>百米冲刺到后半程，磷酸原火箭已经衰减，<strong>无氧糖酵解涡轮（40%）</strong>火速接棒，这就是为什么短跑选手最后 20 米开始感觉双腿灌铅！' },
+      { pos:50, name:'60 秒 400 米死磕', atp:12, gly:68, aer:20,
+        aha:'💡 <strong>顿悟时刻：</strong>400 米被称为田径最痛苦项目！此时 <strong>无氧糖酵解占 68%</strong> 火力全开，大量氢离子 H+ 涌出，而有氧系统还在爬坡赶来的路上！' },
+      { pos:76, name:'12 分钟 3000 米跑', atp:2, gly:18, aer:80,
+        aha:'💡 <strong>顿悟时刻：</strong>根本不需要等 30 分钟！持续运动才 <strong>2 分钟以后</strong>，<strong>有氧氧化系统</strong>就已经全面接管主导权（12 分钟时高达 80%）！' },
+      { pos:95, name:'90 分钟耐力长跑', atp:1, gly:4, aer:95,
+        aha:'💡 <strong>顿悟时刻：</strong>超长续航 95% 靠<strong>有氧氧化</strong>烧糖+烧脂，功率虽不如火箭爆发，却能让你连跑几小时不熄火！' }
+    ];
+    let pos = 12, curIdx = 0, timer = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function pickIdx(i, btn){
+      if(timer){ clearInterval(timer); timer=null; }
+      curIdx = i; pos = EVENTS[i].pos;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); draw();
+    }
+    function playRelay(){
+      if(timer) clearInterval(timer);
+      markDone();
+      pos = 0;
+      timer = setInterval(()=>{
+        pos += 2;
+        if(pos >= 100){ pos = 100; clearInterval(timer); timer=null; }
+        curIdx = EVENTS.reduce((best, ev, i) => Math.abs(ev.pos - pos) < Math.abs(EVENTS[best].pos - pos) ? i : best, 0);
+        draw();
+      }, 45);
+      draw();
+    }
+
+    function sysAt(p){
+      const atp = Math.round(98 * Math.exp(-Math.pow(p / 24, 1.8)));
+      const aer = Math.round(96 / (1 + Math.exp(-(p - 52) / 10)));
+      const gly = Math.max(2, Math.min(82, 100 - atp - aer));
+      const sum = atp + gly + aer;
+      return { atp: Math.round(atp/sum*100), gly: Math.round(gly/sum*100), aer: 100 - Math.round(atp/sum*100) - Math.round(gly/sum*100) };
+    }
+
+    function draw(){
+      const x0=52, x1=612, yMin=28, yMax=188;
+      const toX = p => x0 + (p/100)*(x1-x0);
+      const toY = v => yMax - (v/100)*(yMax-yMin);
+
+      let pA=[], pG=[], pO=[];
+      for(let p=0; p<=100; p+=2){
+        const s = sysAt(p);
+        pA.push(`${toX(p).toFixed(1)},${toY(s.atp).toFixed(1)}`);
+        pG.push(`${toX(p).toFixed(1)},${toY(s.gly).toFixed(1)}`);
+        pO.push(`${toX(p).toFixed(1)},${toY(s.aer).toFixed(1)}`);
+      }
+      const now = sysAt(pos);
+
+      document.getElementById('svg').innerHTML = `
+        ${[{p:0,t:'1秒'},{p:25,t:'10秒'},{p:50,t:'1分钟'},{p:75,t:'10分钟'},{p:100,t:'90分钟'}].map(tk=>`
+          <line x1="${toX(tk.p)}" y1="${yMin}" x2="${toX(tk.p)}" y2="${yMax}" stroke="var(--tax-border)" stroke-dasharray="3 3"/>
+          <text x="${toX(tk.p)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${tk.t}</text>
+        `).join('')}
+        <polyline points="${pA.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3"/>
+        <polyline points="${pG.join(' ')}" fill="none" stroke="var(--tax-amber)" stroke-width="3"/>
+        <polyline points="${pO.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3.2"/>
+        <line x1="${toX(pos)}" y1="${yMin}" x2="${toX(pos)}" y2="${yMax}" stroke="var(--tax-ink)" stroke-width="1.6" stroke-dasharray="4 3"/>
+        <circle cx="${toX(pos)}" cy="${toY(now.atp)}" r="5.5" fill="var(--tax-red)"/>
+        <circle cx="${toX(pos)}" cy="${toY(now.gly)}" r="5.5" fill="var(--tax-amber)"/>
+        <circle cx="${toX(pos)}" cy="${toY(now.aer)}" r="5.5" fill="var(--tax-green)"/>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-red)">● 磷酸原(0-10s)</text>
+        <text x="${x0+125}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-amber)">● 无氧糖酵解(15s-2m)</text>
+        <text x="${x0+290}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-green)">● 有氧氧化(2m+主导)</text>
+      `;
+
+      document.getElementById('kAtp').textContent = now.atp + '%';
+      document.getElementById('kGly').textContent = now.gly + '%';
+      document.getElementById('kAer').textContent = now.aer + '%';
+      document.getElementById('ahaBox').innerHTML = EVENTS[curIdx].aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

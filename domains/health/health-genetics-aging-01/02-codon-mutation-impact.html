@@ -7,66 +7,92 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .scen-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:9px; margin-bottom:14px; }
+    .s-btn { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .s-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .s-btn .t { font-size:13px; font-weight:800; }
+    .s-btn .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🔠 碱基突变影响仪：同义突变 vs 移码灾难</h1><p>误区：DNA 上哪怕只错了一个字母，整个人就会得严重遗传病。真相：密码子具有“简并性”，改最后一个字母常常还是同一个氨基酸（静默无事）；但如果不小心多/少了一个字母导致“移码”，后面整句话就全成了乱码！</p></div>
+      <div>
+        <h1>🔠 碱基突变影响仪：同义突变 vs 移码灾难</h1>
+        <p>误区：DNA 只要错了一个字母，就一定会得严重遗传病。真相：核糖体是<strong>每 3 个字母读一个词（三联体密码子）</strong>！改错 1 个字母可能意思完全不变（同义突变），但<strong>删掉 1 个字母</strong>会让后面整句话全部错位变成乱码！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="btn-row">
-        <button class="btn active" onclick="setMut('syn',this)">同义突变 (改密码子第3位)</button>
-        <button class="btn" onclick="setMut('miss',this)">错义突变 (换掉1个氨基酸)</button>
-        <button class="btn" onclick="setMut('frame',this)">移码突变 (删掉1个字母!)</button>
-      </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>突变发生在基因序列中的位置</span><span id="vPos">靠前 (第20%)</span></label><input type="range" id="sPos" min="10" max="90" value="20" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🧬 用三字母英语句子模拟 DNA 密码子，切换 4 种突变看核糖体读出的蛋白质结果：</div>
+      <div class="scen-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">蛋白质功能保留度</div><div class="k-val" id="kFun">—</div></div>
-        <div class="kpi"><div class="k-lbl">后果严重度</div><div class="k-val" id="kSev">—</div></div>
+        <div class="kpi"><div class="k-lbl">受损密码子数量</div><div class="k-val" id="kDmg">—</div></div>
+        <div class="kpi"><div class="k-lbl">蛋白质功能完好率</div><div class="k-val" id="kFunc">—</div></div>
+        <div class="kpi"><div class="k-lbl">突变类型评级</div><div class="k-val" id="kLvl">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-let mtype='syn';
-function setMut(t,btn){ mtype=t; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const pos=+document.getElementById('sPos').value;
-  document.getElementById('vPos').textContent='第 '+pos+'% 处';
-  const fun=mtype==='syn'?100:(mtype==='miss'?72:Math.max(5, pos-10));
-  document.getElementById('kFun').textContent=fun+'%';
-  document.getElementById('kFun').style.color=fun>80?'#059669':(fun>40?'#f59e0b':'#ef4444');
-  document.getElementById('kSev').textContent=mtype==='syn'?'完全无害 (静默)':(mtype==='miss'?'局部微调':'毁灭性全段乱码!');
-  let txt='';
-  if(mtype==='syn') txt='THE BIG CAT ATE THE RAT → 意思完全不变！';
-  else if(mtype==='miss') txt='THE BIG BAT ATE THE RAT → 只改了一个词';
-  else txt='THE BIC ATA TET HER AT... → 少1字母后面全错位!';
-  document.getElementById('svg').innerHTML=`
-    <rect x="30" y="34" width="540" height="52" rx="10" fill="#f8fafc" stroke="var(--tax-border)"/>
-    <text x="300" y="66" text-anchor="middle" font-size="16" font-weight="850" fill="${mtype==='frame'?'#ef4444':'#0284c7'}">${txt}</text>
-    <text x="30" y="122" font-size="13" font-weight="800" fill="var(--tax-text)">蛋白功能保留率: ${fun}%</text>
-    <rect x="30" y="132" width="${fun*5.4}" height="22" rx="6" fill="${fun>80?'#059669':(fun>40?'#f59e0b':'#ef4444')}"/>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>三个字母读成一个词！只要删掉或插入 1 个字母（移码突变），从第 ${pos}% 位置往后的所有三联体阅读框全部错位，整条蛋白质瞬间废掉！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const BASE = ['THE','FAT','CAT','ATE','THE','RAT'];
+    const MUTS = [
+      { id:'silent', icon:'😌', name:'同义突变 (简并容错)', desc:'改第3位字母 · 氨基酸不变', words:['THE','FAT','CAT','ATE','THE','RAT'], changed:[2], dmg:'0 / 6 词', func:'100% 完好 ✅', lvl:'无害静默', col:'var(--tax-green)',
+        note:'比如密码子 GCU 变成 GCC，翻译出来的依然是同一个丙氨酸（内置容错冗余）！',
+        aha:'💡 <strong>顿悟时刻：</strong>地球生命早就有“容错编码”！64 种三联体密码子只对应 20 种氨基酸，很多密码子改掉第 3 个字母翻译出的氨基酸<strong>完全一样</strong>，所以大部分单点突变悄无声息！' },
+      { id:'missense', icon:'🟡', name:'错义突变 (替换 1 词)', desc:'CAT → BAT · 局部微变', words:['THE','FAT','BAT','ATE','THE','RAT'], changed:[2], dmg:'1 / 6 词', func:'约 75% 仍可用', lvl:'局部改变', col:'var(--tax-amber)',
+        note:'仅第 3 个词从 CAT 变成 BAT，其余整句逻辑依然通顺！',
+        aha:'💡 <strong>顿悟时刻：</strong>错义突变只换掉 1 个氨基酸，有的无关痛痒（甚至带来演化新特性），少数落在关键活性位点上才会影响功能（如镰刀型贫血）。' },
+      { id:'nonsense', icon:'🛑', name:'无义突变 (提前终止)', desc:'半路变 STOP 句号！', words:['THE','FAT','STOP','---','---','---'], changed:[2,3,4,5], dmg:'4 / 6 词截断', func:'15% 残缺报废', lvl:'高危截断', col:'var(--tax-red)',
+        note:'核糖体读到半路突然撞上终止密码子 STOP，后面一整段蛋白质直接停产！',
+        aha:'💡 <strong>顿悟时刻：</strong>一不小心把中间某个词改成了“终止符（UAA/UAG/UGA）”，核糖体立刻提前收工，造出半截残次品蛋白！' },
+      { id:'frame', icon:'💥', name:'移码突变 (删 1 字母!)', desc:'删掉 F → 全句错位乱码', words:['THE','ATC','ATA','TET','HER','AT_'], changed:[1,2,3,4,5], dmg:'5 / 6 词全毁!', func:'0% 彻底乱码 🚨', lvl:'核爆级灾难', col:'var(--tax-red)',
+        note:'仅仅删掉第 4 个字母 F，核糖体依然死板 3 个一读，后面所有词全部错位成天书！',
+        aha:'💡 <strong>顿悟时刻：</strong>最直观的分子生物学震撼！仅仅<strong>删除或插入 1 个碱基</strong>，由于核糖体没有空格键、永远死板按 3 个一读，整条基因下游瞬间发生雪崩式<strong>移码乱码</strong>——蛋白质 100% 彻底报废！' }
+    ];
+    let cur = 'frame';
+
+    function pick(id){ cur = id; if(window.ToySDK) window.ToySDK.markCompleted(); draw(); }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = MUTS.map(m => `
+        <button class="s-btn ${cur===m.id?'active':''}" onclick="pick('${m.id}')">
+          <div class="t">${m.icon} ${m.name}</div>
+          <div class="s">${m.desc}</div>
+        </button>
+      `).join('');
+
+      const m = MUTS.find(x=>x.id===cur);
+      function row(y, lbl, arr, hiSet, hiCol){
+        return `<text x="20" y="${y-8}" font-size="11.5" font-weight="800" fill="var(--tax-muted)">${lbl}</text>` +
+          arr.map((w, i) => {
+            const x = 20 + i * 101;
+            const hi = hiSet.includes(i);
+            return `<rect x="${x}" y="${y}" width="90" height="40" rx="8" fill="${hi?(hiCol==='var(--tax-green)'?'var(--tax-green-soft)':hiCol==='var(--tax-amber)'?'var(--tax-amber-soft)':'var(--tax-red-soft)'):'var(--tax-surface-alt)'}" stroke="${hi?hiCol:'var(--tax-border)'}" stroke-width="${hi?2.4:1.4}"/>
+                    <text x="${x+45}" y="${y+26}" text-anchor="middle" font-size="16" font-weight="900" font-family="monospace" fill="${hi?hiCol:'var(--tax-ink)'}">${w}</text>`;
+          }).join('');
+      }
+
+      document.getElementById('svg').innerHTML = `
+        ${row(34, '📖 原版正常 DNA 三联体密码子序列：', BASE, [], '')}
+        ${row(114, `🧬 发生「${m.name}」后的核糖体翻译读码：`, m.words, m.changed, m.col)}
+        <text x="20" y="186" font-size="12" font-weight="800" fill="${m.col}">${m.note}</text>
+      `;
+
+      const kD = document.getElementById('kDmg'); kD.textContent = m.dmg; kD.style.color = m.col;
+      const kF = document.getElementById('kFunc'); kF.textContent = m.func; kF.style.color = m.col;
+      const kL = document.getElementById('kLvl'); kL.textContent = m.lvl; kL.style.color = m.col;
+      document.getElementById('ahaBox').innerHTML = m.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

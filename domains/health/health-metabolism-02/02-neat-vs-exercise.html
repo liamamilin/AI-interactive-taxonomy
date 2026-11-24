@@ -7,62 +7,113 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .act-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-bottom:14px; }
+    .card { padding:11px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; transition:all .15s; }
+    .card:hover { border-color:var(--tax-primary); }
+    .card.on { border-color:var(--tax-green); background:var(--tax-green-soft); }
+    .card.gym.on { border-color:var(--tax-amber); background:var(--tax-amber-soft); }
+    .card .t { display:flex; justify-content:space-between; font-size:13px; font-weight:800; }
+    .card .s { font-size:11.5px; color:var(--tax-muted); margin-top:4px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
     .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
     .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
     .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🪑 健身 1 小时 vs 全天 NEAT 日常消耗</h1><p>误区：只要每天去健身房狂跑 1 小时，剩下 23 小时躺着刷剧也能瘦。真相：运动消耗往往只占全天总消耗的 10%~15%，而无意识坐着不动会让 NEAT 暴跌 400 大卡，直接把跑步全白跑了！</p></div>
+      <div>
+        <h1>🪑 健身 1 小时 vs 全天 NEAT 日常消耗</h1>
+        <p>误区：只要每天咬牙去健身房练满 1 小时，剩下 15 个清醒小时瘫在椅子上也能狂瘦。真相：非运动性日常消耗（NEAT）的弹性高达 800+ 大卡，完全可以碾压你挥汗如雨的那 1 小时！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>每日健身房高强度运动</span><span id="vEx">45 分钟</span></label><input type="range" id="sEx" min="0" max="90" value="45" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>日常步数与站立活跃度 (NEAT)</span><span id="vNeat">8000 步</span></label><input type="range" id="sNeat" min="1500" max="15000" step="500" value="8000" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🧩 拼装你的一天活动清单（对比「健身房专项运动」与「零碎 NEAT 日常消耗」）：</div>
+      <div class="act-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 190"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">运动消耗 (EAT)</div><div class="k-val" id="kEx">—</div></div>
-        <div class="kpi"><div class="k-lbl">日常非运动消耗 (NEAT)</div><div class="k-val" id="kNeat" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">全天总消耗 TDEE</div><div class="k-val" id="kTot">—</div></div>
+        <div class="kpi"><div class="k-lbl">全天总消耗 (TDEE)</div><div class="k-val" id="kTotal" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">NEAT 日常小动作</div><div class="k-val" id="kNeat" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">专项健身房运动 (EAT)</div><div class="k-val" id="kEat" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const ex=+document.getElementById('sEx').value, neat=+document.getElementById('sNeat').value;
-  document.getElementById('vEx').textContent=ex+' 分钟'; document.getElementById('vNeat').textContent=neat+' 步';
-  const bmr=1450, eat=Math.round(ex*7.5), nCal=Math.round(neat*0.045), tot=bmr+eat+nCal;
-  document.getElementById('kEx').textContent=eat+' kcal';
-  document.getElementById('kNeat').textContent=nCal+' kcal';
-  document.getElementById('kTot').textContent=tot+' kcal';
-  const rows=[['基础代谢 BMR',bmr,'#64748b'],['日常活动 NEAT',nCal,'#059669'],['刻意运动 EAT',eat,'#0284c7']];
-  let svg='';
-  rows.forEach(([nm,val,col],i)=>{
-    const y=26+i*50, w=val/1800*360;
-    svg+=`<text x="16" y="${y+17}" font-size="13" font-weight="800" fill="var(--tax-text)">${nm}</text>
-    <rect x="145" y="${y}" width="360" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="145" y="${y}" width="${w}" height="24" rx="6" fill="${col}"/>
-    <text x="${155+w}" y="${y+17}" font-size="12.5" font-weight="800" fill="${col}">${val} kcal</text>`;
-  });
-  document.getElementById('svg').innerHTML=svg;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>基础代谢占了 ${Math.round(bmr/tot*100)}%，而碎片化的日常走动 NEAT（${nCal} kcal）往往比咬牙苦练 45 分钟（${eat} kcal）贡献还大！别因为跑完步就瘫一天！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const ITEMS = [
+      { id:'gym', type:'eat', icon:'🏋️', name:'健身房狠练 1 小时', kcal:320, desc:'专项运动 EAT · 挥汗如雨' },
+      { id:'commute', type:'neat', icon:'🚶', name:'上下班多走 6000 步', kcal:230, desc:'NEAT · 提前两站下车' },
+      { id:'stand', type:'neat', icon:'🧍', name:'站立办公 3 小时', kcal:150, desc:'NEAT · 替代久坐不动' },
+      { id:'chores', type:'neat', icon:'🧹', name:'做饭/收拾/遛狗 45 分', kcal:170, desc:'NEAT · 日常家务走动' },
+      { id:'stairs', type:'neat', icon:'🪜', name:'全天走楼梯+起身接水', kcal:110, desc:'NEAT · 打破每小时久坐' },
+      { id:'fidget', type:'neat', icon:'⚡', name:'保持日常高频微动', kcal:140, desc:'NEAT · 拒绝练完瘫痪补偿' }
+    ];
+    let active = new Set(['gym']);
+
+    function toggle(id){
+      if(active.has(id)) active.delete(id); else active.add(id);
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      render();
+    }
+
+    function render(){
+      document.getElementById('grid').innerHTML = ITEMS.map(it => `
+        <button class="card ${it.type==='eat'?'gym':''} ${active.has(it.id)?'on':''}" onclick="toggle('${it.id}')">
+          <div class="t"><span>${it.icon} ${it.name}</span><span>+${it.kcal}</span></div>
+          <div class="s">${it.desc}</div>
+        </button>
+      `).join('');
+
+      const bmr = 1500, tef = 180;
+      let neat = 120, eat = 0; // baseline minimal NEAT 120
+      ITEMS.forEach(it=>{ if(active.has(it.id)){ if(it.type==='neat') neat+=it.kcal; else eat+=it.kcal; } });
+      const total = bmr + tef + neat + eat;
+
+      const x0 = 24, maxW = 592, scale = maxW / 2900;
+      const wBmr = bmr * scale, wTef = tef * scale, wEat = eat * scale, wNeat = neat * scale;
+
+      // Reference bar: Couch potato gym-goer (bmr+tef+120+320 = 2120) vs Active non-gym (bmr+tef+920 = 2600)
+      document.getElementById('svg').innerHTML = `
+        <text x="${x0}" y="26" font-size="12.5" font-weight="800" fill="var(--tax-ink)">你的全天热量消耗构成（总计 ${total} kcal）</text>
+        <rect x="${x0}" y="38" width="${wBmr}" height="38" rx="6" fill="var(--tax-primary-soft)" stroke="var(--tax-primary)"/>
+        <text x="${x0+wBmr/2}" y="61" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--tax-primary)">基础代谢 ${bmr}</text>
+
+        <rect x="${x0+wBmr+2}" y="38" width="${wTef}" height="38" rx="5" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+        <text x="${x0+wBmr+2+wTef/2}" y="61" text-anchor="middle" font-size="10" font-weight="750" fill="var(--tax-muted)">TEF</text>
+
+        ${wEat > 0 ? `<rect x="${x0+wBmr+wTef+4}" y="38" width="${wEat}" height="38" rx="5" fill="var(--tax-amber)"/>
+        <text x="${x0+wBmr+wTef+4+wEat/2}" y="61" text-anchor="middle" font-size="11" font-weight="850" fill="#fff">健身 ${eat}</text>` : ''}
+
+        <rect x="${x0+wBmr+wTef+wEat+(wEat>0?6:4)}" y="38" width="${wNeat}" height="38" rx="5" fill="var(--tax-green)"/>
+        <text x="${x0+wBmr+wTef+wEat+(wEat>0?6:4)+wNeat/2}" y="61" text-anchor="middle" font-size="11" font-weight="850" fill="#fff">${wNeat>44?('NEAT '+neat):neat}</text>
+
+        <line x1="${x0}" y1="104" x2="${x0+maxW}" y2="104" stroke="var(--tax-border)"/>
+        <text x="${x0}" y="128" font-size="12" font-weight="750" fill="var(--tax-muted)">对照组 A：每天健身 1h + 其余 15h 久坐瘫痪（2,120 kcal）</text>
+        <rect x="${x0}" y="136" width="${2120*scale}" height="12" rx="4" fill="var(--tax-amber)" opacity="0.55"/>
+        <text x="${x0}" y="168" font-size="12" font-weight="750" fill="var(--tax-muted)">对照组 B：不去健身房但全天 NEAT 拉满（2,600 kcal）</text>
+        <rect x="${x0}" y="176" width="${2600*scale}" height="12" rx="4" fill="var(--tax-green)" opacity="0.65"/>
+      `;
+
+      document.getElementById('kTotal').textContent = total + ' kcal';
+      document.getElementById('kNeat').textContent = neat + ' kcal';
+      document.getElementById('kEat').textContent = eat + ' kcal';
+
+      let aha = '';
+      if(eat > 0 && neat <= 260){
+        aha = `💡 <strong>顿悟时刻：</strong>你辛苦在健身房练了 1 小时（+${eat} 大卡），但其余 15 小时几乎瘫着（NEAT 仅 ${neat} 大卡），总消耗只有 <strong>${total} 大卡</strong>——甚至不如一个不去健身房但爱走动的人！试着点亮几个绿色日常习惯看看。`;
+      } else if(neat > eat * 1.5){
+        aha = `💡 <strong>顿悟时刻：</strong>NEAT（<strong>${neat} 大卡</strong>）已经彻底反超健身房 1 小时！真正拉开人与人“易瘦体质”差距的，往往不是健身房里的那 1 小时，而是剩下 15 小时里积少成多的日常活动量！`;
+      } else {
+        aha = `💡 <strong>顿悟时刻：</strong>健身房运动（塑形+保肌）配合高 NEAT 日常活跃度，你的全天总消耗达到了 <strong>${total} 大卡</strong>，这才是既不挨饿又能稳步减脂的王道组合。`;
+      }
+      document.getElementById('ahaBox').innerHTML = aha;
+    }
+
+    render();
   </script>
 </body>
 </html>

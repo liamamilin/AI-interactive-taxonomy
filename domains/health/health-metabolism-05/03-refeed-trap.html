@@ -7,58 +7,114 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🍔 断食复食暴食陷阱：为什么饿完一顿反而更胖？</h1><p>误区：只要坚持 16:8 断食，进食窗口里想吃多少炸鸡蛋糕都无所谓。真相：过度饥饿后直接灌入高糖高油，在空腹低血糖状态下会引发疯狂暴食与更猛烈的脂肪合成反弹！</p></div>
+      <div>
+        <h1>🍔 断食复食暴食陷阱：为什么饿完一顿反而更胖？</h1>
+        <p>误区：既然已经辛苦空腹 16 小时，开饭第一顿吃点汉堡甜品“犒劳自己”完全没关系。真相：空腹后肠道吸收率拉满、饥饿素高企，第一口猛灌高糖高油会引爆超额胰岛素洪峰，瞬间把热量打包锁进脂肪库！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>复食第一餐热量补偿率</span><span id="vComp">125%</span></label><input type="range" id="sComp" min="70" max="160" value="125" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>复食餐中精制碳水比例</span><span id="vSug">60%</span></label><input type="range" id="sSug" min="10" max="90" value="60" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" id="playBtn" onclick="runRace()">▶ 播放复食后 6 小时双轨实况</button>
+        <span style="font-size:12.5px;font-weight:750;color:var(--tax-muted);">对比基准：同样空腹 16 小时后开餐</span>
+        <button class="pill active" onclick="setFast(16,this)">16h 轻断食后</button>
+        <button class="pill" onclick="setFast(24,this)">24h 延长断食后</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 640 225"></svg>
+
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">全天净热量盈亏</div><div class="k-val" id="kNet">—</div></div>
-        <div class="kpi"><div class="k-lbl">断食结果</div><div class="k-val" id="kRes">—</div></div>
+        <div class="kpi"><div class="k-lbl">🍔 报复性高糖暴食：净脂肪转化</div><div class="k-val" id="kBad" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🍲 蛋白+纤维温和复食：净转化</div><div class="k-val" id="kGood" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">3 小时后再饿反扑程度</div><div class="k-val" id="kRebound" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const comp=+document.getElementById('sComp').value, sug=+document.getElementById('sSug').value;
-  document.getElementById('vComp').textContent=comp+'%'; document.getElementById('vSug').textContent=sug+'%';
-  const net=Math.round((comp-100)*20 + sug*2);
-  const ok=net<0;
-  document.getElementById('kNet').textContent=(net>0?'+':'')+net+' kcal';
-  document.getElementById('kNet').style.color=ok?'#059669':'#ef4444';
-  document.getElementById('kRes').textContent=ok?'成功减脂':'越断食越胖!';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#64748b">日常基准摄入: 2000 kcal</text>
-    <rect x="20" y="44" width="360" height="24" rx="6" fill="#64748b"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="${ok?'#059669':'#ef4444'}">断食后复食总摄入: ${2000+net} kcal (${net>0?'超标 +'+net:'赤字 '+net})</text>
-    <rect x="20" y="112" width="${Math.min(540,(2000+net)/2000*360)}" height="24" rx="6" fill="${ok?'#059669':'#ef4444'}"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">第一口复食必须先喝汤吃蛋白蔬菜，切忌空腹直接灌高糖奶茶</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>断食不是热量豁免证！复食时如果因为“觉得自己忍得很辛苦”而狂吃 125% 并猛炫甜食，全天净盈余反而多出 <strong>+${net} kcal</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let fastHrs = 16, curMin = 360, timer = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setFast(h, btn){
+      fastHrs = h;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); runRace();
+    }
+
+    function badCurve(m){
+      const amp = fastHrs === 24 ? 5.6 : 4.6;
+      return 4.6 + amp * Math.exp(-Math.pow((m - 48)/32, 2)) - 0.9 * Math.exp(-Math.pow((m - 175)/42, 2));
+    }
+    function goodCurve(m){
+      return 4.6 + 1.8 * Math.exp(-Math.pow((m - 65)/50, 2));
+    }
+
+    function runRace(){
+      if(timer) clearInterval(timer);
+      markDone();
+      curMin = 0;
+      document.getElementById('playBtn').textContent = '⏱ 双轨实况播放中...';
+      timer = setInterval(()=>{
+        curMin += 10;
+        if(curMin >= 360){
+          curMin = 360; clearInterval(timer); timer = null;
+          document.getElementById('playBtn').textContent = '↻ 重播 6 小时复食对比';
+        }
+        draw();
+      }, 45);
+      draw();
+    }
+
+    function draw(){
+      const x0=54, x1=610, yMin=28, yMax=190;
+      const toX = m => x0 + (m/360)*(x1-x0);
+      const toY = v => yMax - ((v - 3.2)/7.6)*(yMax-yMin);
+
+      let pB=[], pG=[];
+      for(let m=0; m<=curMin; m+=6){
+        pB.push(`${toX(m).toFixed(1)},${toY(badCurve(m)).toFixed(1)}`);
+        pG.push(`${toX(m).toFixed(1)},${toY(goodCurve(m)).toFixed(1)}`);
+      }
+      const bNow = badCurve(curMin), gNow = goodCurve(curMin);
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="${x0}" y1="${toY(7.8)}" x2="${x1}" y2="${toY(7.8)}" stroke="var(--tax-red)" stroke-dasharray="4 4" stroke-opacity="0.55"/>
+        <text x="${x1-4}" y="${toY(7.8)-5}" text-anchor="end" font-size="10.5" fill="var(--tax-red)">胰岛素疯狂锁脂警戒线</text>
+        ${[0,60,120,180,240,300,360].map(m=>`<text x="${toX(m)}" y="210" text-anchor="middle" font-size="11" fill="var(--tax-muted)">+${m/60}h</text>`).join('')}
+        <polyline points="${pB.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3.2" stroke-linecap="round"/>
+        <polyline points="${pG.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="${toX(curMin)}" cy="${toY(bNow)}" r="5.5" fill="var(--tax-red)"/>
+        <circle cx="${toX(curMin)}" cy="${toY(gNow)}" r="5.5" fill="var(--tax-green)"/>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-red)">● 报复性暴食复食（汉堡+甜饮）</text>
+        <text x="${x0+230}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-green)">● 温和复食（汤+蛋白+蔬菜→主食）</text>
+      `;
+
+      const fatStore = fastHrs === 24 ? '+420 kcal 锁脂' : '+310 kcal 锁脂';
+      document.getElementById('kBad').textContent = fatStore;
+      document.getElementById('kGood').textContent = '平稳供能 · 零暴涨';
+      document.getElementById('kRebound').textContent = fastHrs === 24 ? '极强（低谷暴跌）' : '强烈（3h 后又馋）';
+
+      document.getElementById('ahaBox').innerHTML = fastHrs === 24
+        ? `💡 <strong>顿悟时刻：</strong>空腹 24 小时后，身体对糖分的吸收与胰岛素敏感度被推到极致！此时暴食高糖不仅把断食赤字瞬间吃超标，3 小时后还会跌入惨烈低血糖引发第二波暴食！<strong>复食第一口永远先喝温汤、吃蛋/肉/绿叶菜！</strong>`
+        : `💡 <strong>顿悟时刻：</strong>断食成败一半在“饿”，另一半在“怎么吃第一口”。温和复食（先纤维蛋白、慢嚼细咽）能稳稳保住 16 小时轻断食的燃脂红利，避免坐上血糖暴涨暴跌的过山车！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

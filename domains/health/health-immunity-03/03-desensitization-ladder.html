@@ -7,61 +7,94 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🪜 脱敏疗法阶梯：微剂量诱导“免疫耐受”</h1><p>误区：对某种食物或花粉过敏，一辈子只能绝对零接触，绝不可能逆转。真相：在医生监护下，从十万分之一的极微剂量开始逐周递增，能诱导免疫系统改产温和的 IgG4 抗体，把警报阀彻底调高！</p></div>
+      <div>
+        <h1>🪜 脱敏疗法阶梯：微剂量诱导“免疫耐受”</h1>
+        <p>误区：脱敏就是“狠心硬吃过敏食物，扛过去就习惯了”。真相：硬吃大剂量会直接触发致命过敏性休克！医学脱敏是从<strong>低于警报线的超微剂量</strong>起步，缓慢爬坡诱导出“和平鸽 IgG4 阻断抗体”把过敏开关彻底盖住！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>规范脱敏递增坚持周数</span><span id="vWk">16 周</span></label><input type="range" id="sWk" min="1" max="36" value="16" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>单次增量步幅控制稳健度</span><span id="vStep">85%</span></label><input type="range" id="sStep" min="30" max="100" value="85" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="stepUp()">⬆️ 稳步攀升下一阶梯</button>
+        <button class="pill" onclick="jumpDanger()">💥 危险示范：跳过阶梯直接大剂量硬扛</button>
+        <button class="pill" onclick="resetLadder()">↺ 重置第 1 阶</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">耐受阈值提升倍数</div><div class="k-val" id="kTol" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">安全耐受状态</div><div class="k-val" id="kSafe">—</div></div>
+        <div class="kpi"><div class="k-lbl">当前脱敏剂量阶梯</div><div class="k-val" id="kStep" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🕊️ IgG4 阻断盾牌浓度</div><div class="k-val" id="kIgg4" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">过敏警报状态</div><div class="k-val" id="kStat">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const wk=+document.getElementById('sWk').value, stp=+document.getElementById('sStep').value;
-  document.getElementById('vWk').textContent=wk+' 周'; document.getElementById('vStep').textContent=stp+'%';
-  const mul=Math.round(Math.pow(1.18, wk)*(stp/80));
-  document.getElementById('kTol').textContent=mul+'x';
-  document.getElementById('kSafe').textContent=stp<50?'增量太猛易诱发急性过敏!':(wk>20?'高耐受安全':'稳步建立耐受中');
-  let pts='';
-  for(let w=1;w<=36;w++){
-    const m=Math.min(350, Math.pow(1.18,w)*(stp/80));
-    pts+=`${40+(w-1)/35*520},${158-m/350*125} `;
-  }
-  const cx=40+(wk-1)/35*520, cy=158-Math.min(350,mul)/350*125;
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="#059669" stroke-width="3" points="${pts}"/>
-    <circle cx="${cx}" cy="${cy}" r="6" fill="#0284c7"/>
-    <text x="50" y="28" font-size="12" font-weight="800" fill="#059669">第 ${wk} 周耐受阈值爬升至初始的 ${mul} 倍</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>免疫系统是可以“被重新训练”的！通过极微剂量（稳健度 ${stp}%）反复敲门而不引爆警报，身体会逐步学会把过敏原当成无害路人，耐受量翻升 <strong>${mul} 倍</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const STEPS = [
+      { wk:'第 1 周', dose:'0.1 mg (极微粉尘)', igg4:12, ige:88, safe:true },
+      { wk:'第 4 周', dose:'1 mg (微痕)', igg4:32, ige:76, safe:true },
+      { wk:'第 10 周', dose:'10 mg (小碎屑)', igg4:58, ige:56, safe:true },
+      { wk:'第 18 周', dose:'50 mg (半粒)', igg4:80, ige:36, safe:true },
+      { wk:'第 26 周', dose:'300 mg (稳态耐受)', igg4:95, ige:20, safe:true }
+    ];
+    let idx = 0, danger = false;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function stepUp(){
+      danger = false;
+      idx = Math.min(STEPS.length - 1, idx + 1);
+      markDone(); draw();
+    }
+    function jumpDanger(){ danger = true; markDone(); draw(); }
+    function resetLadder(){ idx = 0; danger = false; markDone(); draw(); }
+
+    function draw(){
+      const s = STEPS[idx];
+      let bars = '';
+      STEPS.forEach((st, i) => {
+        const x = 44 + i * 116;
+        const h = 30 + i * 24;
+        const active = !danger && i <= idx;
+        bars += `
+          <rect x="${x}" y="${178 - h}" width="88" height="${h}" rx="8" fill="${active?'var(--tax-green-soft)':'var(--tax-surface-alt)'}" stroke="${active?'var(--tax-green)':'var(--tax-border)'}" stroke-width="${i===idx&&!danger?2.6:1.4}"/>
+          <text x="${x+44}" y="${178 - h - 8}" text-anchor="middle" font-size="11" font-weight="800" fill="${active?'var(--tax-green)':'var(--tax-muted)'}">${st.wk}</text>
+          <text x="${x+44}" y="196" text-anchor="middle" font-size="10.5" font-weight="750" fill="var(--tax-ink)">${st.dose.split(' ')[0]} ${st.dose.split(' ')[1]}</text>
+        `;
+      });
+
+      const banner = danger
+        ? `<rect x="44" y="18" width="552" height="36" rx="9" fill="var(--tax-red-soft)" stroke="var(--tax-red)" stroke-width="2"/><text x="320" y="41" text-anchor="middle" font-size="13" font-weight="900" fill="var(--tax-red)">🚨 跳过阶梯直接大剂量硬扛 → IgE 瞬间引爆严重过敏反应！（严禁在家自试）</text>`
+        : `<text x="44" y="34" font-size="12.5" font-weight="850" fill="var(--tax-ink)">稳步攀爬微剂量阶梯：🕊️ IgG4 阻断抗体 ${s.igg4}% vs 🚨 IgE 过敏警报 ${s.ige}%</text>`;
+
+      document.getElementById('svg').innerHTML = banner + bars;
+
+      document.getElementById('kStep').textContent = danger ? '🚨 违规跳级 300mg' : `${s.wk} · ${s.dose}`;
+      document.getElementById('kIgg4').textContent = danger ? '12%（毫无防护）' : `${s.igg4}%`;
+      const kSt = document.getElementById('kStat');
+      kSt.textContent = danger ? '休克预警 🚨' : (idx >= 3 ? '已建立免疫耐受 🕊️' : '潜行驯化中 ✅');
+      kSt.style.color = danger ? 'var(--tax-red)' : 'var(--tax-green)';
+
+      document.getElementById('ahaBox').innerHTML = danger
+        ? `💡 <strong>顿悟时刻：</strong>跳过阶梯直接硬吃过敏原，体内还没长出 IgG4 阻断盾牌，IgE 瞬间引爆全身肥大细胞释放组胺——<strong>脱敏治疗必须在专业医生监护下按微克/毫克级严格爬坡！</strong>`
+        : idx >= 3
+        ? `💡 <strong>顿悟时刻：</strong>免疫系统被成功“驯化”了！经过数月潜行爬坡，体内生成了高浓度 <strong>IgG4 阻断抗体（${s.igg4}%）</strong>，它抢在 IgE 之前把过敏原悄悄抱走消化，让身体彻底恢复和平共处！`
+        : `💡 <strong>顿悟时刻：</strong>当前处于 <strong>${s.wk}（${s.dose}）</strong>，剂量精准控制在“不拉响 IgE 警报，但足以唤醒调节性 T 细胞与 IgG4”的黄金缝隙里。继续点击 <strong>⬆️ 攀升下一阶梯</strong> 见证耐受诞生！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

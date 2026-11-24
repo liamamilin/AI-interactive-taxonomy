@@ -7,57 +7,104 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🔥 EPOC 后燃效应：运动完躺着也在多烧多少卡？</h1><p>误区：做完 20 分钟高强度间歇，接下来 24 小时身体会“疯狂后燃”多烧好几百大卡。真相：科学实测 EPOC 通常只有总运动消耗的 6%~15%（几十大卡），真正的后燃红利是微调而非奇迹！</p></div>
+      <div>
+        <h1>🔥 EPOC 后燃效应：运动完躺着也在多烧多少卡？</h1>
+        <p>误区：做完 15 分钟高强度 HIIT，接下来 48 小时躺着能狂燃 500 大卡。真相：EPOC（运动后过量氧耗）确实存在，但运动生理学实测它只占运动本身消耗的 <strong>6%–15%</strong>——别被健身房营销神话忽悠了！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>运动平均强度</span><span id="vInt">80%</span></label><input type="range" id="sInt" min="40" max="95" value="80" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>单次训练总消耗</span><span id="vCal">300 kcal</span></label><input type="range" id="sCal" min="150" max="600" step="50" value="300" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" id="playBtn" onclick="runRace()">▶ 播放运动 + 赛后 12h 燃脂对比</button>
+        <button class="pill active" onclick="setMode('hiit20',this)">🔥 20分 HIIT vs 45分 慢跑</button>
+        <button class="pill" onclick="setMode('hiit30',this)">⚡ 30分 极限 HIIT vs 30分 慢跑</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 210"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">运动中直接消耗</div><div class="k-val" id="kEx">—</div></div>
-        <div class="kpi"><div class="k-lbl">真实 EPOC 后燃加成</div><div class="k-val" id="kEpoc" style="color:#f59e0b;">—</div></div>
+        <div class="kpi"><div class="k-lbl">🔥 HIIT 总消耗（含后燃）</div><div class="k-val" id="kHiit" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🏃 慢跑总消耗（含后燃）</div><div class="k-val" id="kJog" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">HIIT 后燃额外红利</div><div class="k-val" id="kEpoc" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const inten=+document.getElementById('sInt').value, cal=+document.getElementById('sCal').value;
-  document.getElementById('vInt').textContent=inten+'%'; document.getElementById('vCal').textContent=cal+' kcal';
-  const epocPct=Math.round(4 + Math.pow((inten-40)/55, 1.8)*11);
-  const epoc=Math.round(cal*epocPct/100);
-  document.getElementById('kEx').textContent=cal+' kcal';
-  document.getElementById('kEpoc').textContent=`+${epoc} kcal (${epocPct}%)`;
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">训练中实打实消耗: ${cal} kcal</text>
-    <rect x="20" y="44" width="${cal/700*520}" height="26" rx="6" fill="#0284c7"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#f59e0b">运动后 EPOC 后燃效应 (+${epocPct}%): +${epoc} kcal</text>
-    <rect x="20" y="112" width="${Math.max(8,epoc/700*520)}" height="26" rx="6" fill="#f59e0b"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">减脂别迷信“后燃神话”（不过喝半口奶茶），稳扎稳打的训练总量才是王道</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕在 ${inten}% 高强度下，${cal} 大卡训练带来的真实后燃只有 <strong>+${epoc} kcal</strong>（不到半个苹果）；HIIT 的真价值在于省时间与提升心肺上限，而非魔法燃脂！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const DATA = {
+      hiit20: { hLbl:'🔥 20 分钟高强度 HIIT', hEx:230, hEpoc:35, jLbl:'🏃 45 分钟舒适 Zone 2 慢跑', jEx:390, jEpoc:24 },
+      hiit30: { hLbl:'⚡ 30 分钟极限 HIIT', hEx:350, hEpoc:52, jLbl:'🏃 30 分钟轻松慢跑', jEx:260, jEpoc:16 }
+    };
+    let mode = 'hiit20', pct = 100, timer = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setMode(m, btn){
+      mode = m;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); runRace();
+    }
+    function runRace(){
+      if(timer) clearInterval(timer);
+      markDone();
+      pct = 0;
+      timer = setInterval(()=>{
+        pct += 4;
+        if(pct >= 100){ pct = 100; clearInterval(timer); timer=null; }
+        draw();
+      }, 35);
+      draw();
+    }
+
+    function draw(){
+      const d = DATA[mode];
+      const maxK = 460;
+      const scale = 470 / maxK;
+      const pEx = Math.min(1, pct / 65);
+      const pEp = Math.max(0, (pct - 65) / 35);
+
+      function track(y, lbl, ex, ep, col){
+        const wEx = ex * pEx * scale;
+        const wEp = ep * pEp * scale;
+        const curTot = Math.round(ex * pEx + ep * pEp);
+        return `
+          <text x="24" y="${y}" font-size="13" font-weight="850" fill="var(--tax-ink)">${lbl}</text>
+          <rect x="24" y="${y+10}" width="${wEx.toFixed(1)}" height="32" rx="6" fill="${col}"/>
+          ${wEx > 70 ? `<text x="${24+wEx/2}" y="${y+30}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">运动中 ${Math.round(ex*pEx)}</text>` : ''}
+          ${wEp > 1 ? `<rect x="${24+wEx+2}" y="${y+10}" width="${wEp.toFixed(1)}" height="32" rx="5" fill="var(--tax-amber)"/>` : ''}
+          <text x="${Math.min(618, 24+wEx+wEp+10)}" y="${y+30}" font-size="12" font-weight="850" fill="var(--tax-ink)">${curTot} kcal</text>
+        `;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        ${track(36, d.hLbl, d.hEx, d.hEpoc, 'var(--tax-red)')}
+        <line x1="24" y1="104" x2="616" y2="104" stroke="var(--tax-border)" stroke-dasharray="4 4"/>
+        ${track(132, d.jLbl, d.jEx, d.jEpoc, 'var(--tax-green)')}
+        <text x="24" y="196" font-size="11.5" font-weight="750" fill="var(--tax-amber)">■ 橙色尾段 = 赛后躺着多烧的 EPOC 后燃效应（约占运动消耗的 6%–15%）</text>
+      `;
+
+      document.getElementById('kHiit').textContent = `${d.hEx + d.hEpoc} kcal (含后燃 ${d.hEpoc})`;
+      document.getElementById('kJog').textContent = `${d.jEx + d.jEpoc} kcal (含后燃 ${d.jEpoc})`;
+      document.getElementById('kEpoc').textContent = `+${d.hEpoc} kcal（约半个苹果）`;
+
+      document.getElementById('ahaBox').innerHTML = mode === 'hiit20'
+        ? `💡 <strong>顿悟时刻：</strong>20 分钟 HIIT 练到怀疑人生，后燃 EPOC 其实只多烧了约 <strong>${d.hEpoc} 大卡</strong>（半个苹果），总消耗（${d.hEx+d.hEpoc}）反而不如轻松慢跑 45 分钟（${d.jEx+d.jEpoc}）！HIIT 的真正价值是<strong>省时高效提升心肺上限</strong>，而不是靠神话般的后燃躺瘦！`
+        : `💡 <strong>顿悟时刻：</strong>同等 30 分钟下，极限 HIIT 的确比慢跑多烧 <strong>${(d.hEx+d.hEpoc)-(d.jEx+d.jEpoc)} 大卡</strong>（时间效率高），但对神经和关节恢复压力也大得多，每周 1–2 次搭配日常有氧才是黄金组合！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

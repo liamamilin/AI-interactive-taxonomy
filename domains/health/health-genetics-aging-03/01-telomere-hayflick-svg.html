@@ -3,64 +3,93 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>👟 海弗利克极限：染色体端粒鞋带头磨损（SVG）</title>
+  <title>👟 海弗利克极限：染色体端粒鞋带头磨损</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-red); color:#fff; border-color:var(--tax-red); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>👟 海弗利克极限：染色体端粒鞋带头磨损（SVG）</h1><p>误区：只要吃够营养，人体细胞就能永远无限分裂更新下去。真相：DNA 复制机制天生漏掉最末端一小截，每分裂一次端粒“鞋带头”就短一截，磨光后细胞就必须停工以免癌变！</p></div>
+      <div>
+        <h1>👟 海弗利克极限：染色体端粒鞋带头磨损</h1>
+        <p>误区：人体细胞只要营养够，就可以一辈子无限次分裂更新。真相：染色体末端套着像鞋带塑料头一样的<strong>端粒（Telomere）</strong>；每分裂一次就会被剪短一截，磨到第 ~50 次（海弗利克极限）时，细胞为了防止基因散架必须立刻停工！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>细胞累计分裂代数</span><span id="vDiv">30 次</span></label><input type="range" id="sDiv" min="0" max="60" value="30" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>氧化应激/熬夜加速磨损率</span><span id="vOx">30%</span></label><input type="range" id="sOx" min="0" max="80" value="30" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="divide(5)">🧬 触发细胞分裂 +5 次</button>
+        <button class="pill" id="oxBtn" onclick="toggleOx()">🔥 慢性氧化/熬夜加速磨损：关闭</button>
+        <button class="pill" onclick="resetCell()">↺ 重置新生儿满格端粒</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">剩余端粒长度</div><div class="k-val" id="kTel" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">细胞状态</div><div class="k-val" id="kSt">—</div></div>
+        <div class="kpi"><div class="k-lbl">累计分裂次数</div><div class="k-val" id="kDiv" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">剩余端粒保护帽长度</div><div class="k-val" id="kTel" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">细胞命运判定</div><div class="k-val" id="kFate">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const div=+document.getElementById('sDiv').value, ox=+document.getElementById('sOx').value;
-  document.getElementById('vDiv').textContent=div+' 次'; document.getElementById('vOx').textContent=ox+'%';
-  const len=Math.max(0, Math.round(100 - div*1.6*(1+ox/150)));
-  const dead=len<=10;
-  document.getElementById('kTel').textContent=len+'%';
-  document.getElementById('kSt').textContent=dead?'达到海弗利克极限 (停止分裂)':'健康分裂中';
-  document.getElementById('kSt').style.color=dead?'#ef4444':'#059669';
-  const capW=Math.max(4, len*0.8);
-  document.getElementById('svg').innerHTML=`
-    <rect x="${120-capW}" y="70" width="${capW}" height="38" rx="6" fill="#f59e0b"/>
-    <rect x="120" y="70" width="320" height="38" rx="4" fill="#0284c7"/>
-    <rect x="440" y="70" width="${capW}" height="38" rx="6" fill="#f59e0b"/>
-    <text x="280" y="94" text-anchor="middle" font-size="14" font-weight="850" fill="#fff">核心基因 DNA 编码区</text>
-    <text x="280" y="45" text-anchor="middle" font-size="13" font-weight="800" fill="#f59e0b">两侧橙色端粒保护帽剩余: ${len}%</text>
-    <text x="280" y="148" text-anchor="middle" font-size="12.5" fill="var(--tax-muted)">${dead?'⚠️ 端粒磨光！再分裂会伤及核心基因，细胞被迫锁死进入衰老':'每次分裂端粒变短一点，充当细胞的生命倒计时'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>端粒缩短其实是一把防癌安全锁！它宁可让细胞在分裂 50 次后退休（海弗利克极限），也不允许端粒归零后染色体乱粘引发癌症！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let divs = 15, ox = false;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function divide(n){ divs = Math.min(60, divs + n); markDone(); draw(); }
+    function toggleOx(){
+      ox = !ox;
+      const b = document.getElementById('oxBtn');
+      b.classList.toggle('active', ox);
+      b.textContent = ox ? '🔥 慢性氧化/熬夜加速磨损：开启 (1.5×)' : '🔥 慢性氧化/熬夜加速磨损：关闭';
+      markDone(); draw();
+    }
+    function resetCell(){ divs = 0; markDone(); draw(); }
+
+    function draw(){
+      const wear = Math.min(100, Math.round(divs * (ox ? 2.9 : 2.0)));
+      const remain = Math.max(0, 100 - wear);
+      const capW = Math.round((remain / 100) * 110);
+      const stopped = remain <= 6;
+      const col = stopped ? 'var(--tax-red)' : (remain < 35 ? 'var(--tax-amber)' : 'var(--tax-green)');
+
+      document.getElementById('svg').innerHTML = `
+        <text x="320" y="28" text-anchor="middle" font-size="13" font-weight="850" fill="var(--tax-ink)">染色体结构示意（中间蓝条 = 核心基因密码 · 两端橙帽 = 端粒保护头）</text>
+        <rect x="170" y="76" width="300" height="44" rx="8" fill="var(--tax-primary-soft)" stroke="var(--tax-primary)" stroke-width="2.4"/>
+        <text x="320" y="103" text-anchor="middle" font-size="13.5" font-weight="850" fill="var(--tax-primary)">🧬 核心 DNA 编码区（受保护）</text>
+
+        <rect x="${170 - capW}" y="76" width="${capW}" height="44" rx="8" fill="${col}"/>
+        <rect x="470" y="76" width="${capW}" height="44" rx="8" fill="${col}"/>
+        ${capW > 36 ? `<text x="${170 - capW/2}" y="103" text-anchor="middle" font-size="11.5" font-weight="900" fill="#fff">端粒</text><text x="${470 + capW/2}" y="103" text-anchor="middle" font-size="11.5" font-weight="900" fill="#fff">端粒</text>` : ''}
+
+        <text x="320" y="156" text-anchor="middle" font-size="13.5" font-weight="900" fill="${col}">
+          ${stopped ? '🛑 端粒磨穿！触发海弗利克极限 → 细胞永久停止分裂（进入衰老态）' : `✂️ 剩余端粒长度 ${remain}%（DNA 末端复制问题每次都会剪短一点）`}
+        </text>
+        <text x="320" y="186" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">提示：海弗利克极限其实是演化设下的“防癌熔断器”，阻止受损老细胞无休止狂分裂！</text>
+      `;
+
+      document.getElementById('kDiv').textContent = `${divs} 次`;
+      document.getElementById('kTel').textContent = `${remain}%`;
+      const kF = document.getElementById('kFate');
+      kF.textContent = stopped ? '触发海弗利克停工 🛑' : (remain < 35 ? '接近衰老临界 ⚠️' : '年轻活跃分裂 ✅');
+      kF.style.color = col;
+
+      document.getElementById('ahaBox').innerHTML = stopped
+        ? `💡 <strong>顿悟时刻：</strong>鞋带塑料头彻底磨没了！为了防止染色体核心 DNA 像散开的鞋带一样互相粘连癌变，细胞果断拉响 p53 警报<strong>永久停止分裂</strong>——这就是正常细胞约 50 次分裂的“海弗利克极限”！`
+        : `💡 <strong>顿悟时刻：</strong>你已分裂 <strong>${divs} 次</strong>，端粒还剩 <strong>${remain}%</strong>。慢性焦虑、抽烟和长期熬夜带来的氧化应激会让端粒磨损速度加快 50%！继续点击 <strong>🧬 细胞分裂 +5 次</strong> 直到撞线！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

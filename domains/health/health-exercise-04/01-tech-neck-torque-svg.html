@@ -3,64 +3,117 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📱 低头看手机颈椎力矩放大器（SVG）</title>
+  <title>📱 低头看手机颈椎力矩放大器</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .ctrl-box { padding:10px 14px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface-alt); margin-bottom:14px; }
     .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
     .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📱 低头看手机颈椎力矩放大器（SVG）</h1><p>误区：脑袋才 5 公斤左右，低个头看看手机能有多重。真相：颈椎是典型的费力短臂杠杆！每前倾 15 度，颈后肌群和椎间盘承受的等效拉力就会翻倍，60 度低头直接等效扛着一个 8 岁小孩！</p></div>
+      <div>
+        <h1>📱 低头看手机颈椎力矩放大器</h1>
+        <p>误区：只是稍微低头看会儿手机，脑袋才 5 公斤能有多沉？真相：颈椎是一根极其吃亏的杠杆——每多低头 15 度，重力力臂就拉长一截，低头 60 度时你的颈椎其实正在扛着一个 <strong>27 公斤</strong> 的大铁球！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>低头前倾角度</span><span id="vAng">45°</span></label><input type="range" id="sAng" min="0" max="60" step="5" value="45" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>每日保持该姿势累计小时</span><span id="vHr">3.5 小时</span></label><input type="range" id="sHr" min="0.5" max="8" step="0.5" value="3.5" oninput="upd()"></div>
+      <div class="bar">
+        <button class="pill" onclick="setAng(0,this)">🧍 平视屏幕 (0°)</button>
+        <button class="pill" onclick="setAng(15,this)">💻 办公微低头 (15°)</button>
+        <button class="pill active" onclick="setAng(30,this)">💬 走路回微信 (30°)</button>
+        <button class="pill" onclick="setAng(60,this)">📱 地铁狂刷手机 (60°)</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="ctrl-box">
+        <label><span>颈椎前屈低头角度</span><span id="vAng">30°</span></label>
+        <input type="range" id="sAng" min="0" max="60" value="30" oninput="onSlide()">
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">颈椎等效承重</div><div class="k-val" id="kLoad" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">椎间盘劳损风险</div><div class="k-val" id="kRisk">—</div></div>
+        <div class="kpi"><div class="k-lbl">颈椎 C7 实际等效负重</div><div class="k-val" id="kLoad" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">重力放大倍数</div><div class="k-val" id="kMul" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">相当于脖子上挂了</div><div class="k-val" id="kEq" style="color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const ang=+document.getElementById('sAng').value, hr=+document.getElementById('sHr').value;
-  document.getElementById('vAng').textContent=ang+'°'; document.getElementById('vHr').textContent=hr+' 小时';
-  const load=Math.round(5 + ang*0.37);
-  const risk=Math.min(98, Math.round(load*hr*0.95));
-  document.getElementById('kLoad').textContent=load+' kg';
-  document.getElementById('kLoad').style.color=load>18?'#ef4444':'#059669';
-  document.getElementById('kRisk').textContent=risk>60?'高危 (肌肉僵硬/反弓)':'安全可控';
-  const rad=ang*Math.PI/180, hx=130+Math.sin(rad)*65, hy=125-Math.cos(rad)*65;
-  document.getElementById('svg').innerHTML=`
-    <line x1="130" y1="165" x2="130" y2="125" stroke="#64748b" stroke-width="8" stroke-linecap="round"/>
-    <line x1="130" y1="125" x2="${hx}" y2="${hy}" stroke="#0284c7" stroke-width="6" stroke-linecap="round"/>
-    <circle cx="${hx}" cy="${hy}" r="22" fill="${load>18?'#ef4444':'#0284c7'}" opacity="0.85"/>
-    <text x="270" y="64" font-size="14" font-weight="850" fill="var(--tax-text)">头颅前倾 ${ang}° → 力臂暴增</text>
-    <text x="270" y="102" font-size="24" font-weight="900" fill="${load>18?'#ef4444':'#059669'}">等效承重 = ${load} kg</text>
-    <text x="270" y="140" font-size="12.5" fill="var(--tax-muted)">0°=5kg | 15°=12kg | 30°=18kg | 45°=22kg | 60°=27kg</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>把手机举高到视线平齐，只要把低头角度从 45° 降回 15°，脖子瞬间卸掉 <strong>10 公斤</strong>重担！物理杠杆才不管你累不累！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let ang = 30;
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setAng(a, btn){
+      ang = a; document.getElementById('sAng').value = a;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); draw();
+    }
+    function onSlide(){
+      ang = +document.getElementById('sAng').value;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      markDone(); draw();
+    }
+
+    function draw(){
+      document.getElementById('vAng').textContent = ang + '°';
+      // Hansraj (2014) cervical spine load curve: 0->5kg, 15->12kg, 30->18kg, 45->22kg, 60->27kg
+      const load = +(5 + 22 * Math.sin((ang / 60) * (Math.PI / 2))).toFixed(1);
+      const mul = (load / 5).toFixed(1);
+      const col = load >= 22 ? 'var(--tax-red)' : (load >= 14 ? 'var(--tax-amber)' : 'var(--tax-green)');
+
+      const rad = (ang * Math.PI) / 180;
+      const baseX = 185, baseY = 170, neckLen = 78;
+      const headX = baseX + Math.sin(rad) * neckLen;
+      const headY = baseY - Math.cos(rad) * neckLen;
+
+      const eqText = load < 9 ? '1 颗大西瓜 (5kg)' : load < 15 ? '1 箱矿泉水 (12kg)' : load < 21 ? '1 台大微波炉 (18kg)' : '1 个 8 岁小学生 (27kg)!';
+      const barW = Math.round((load / 28) * 210);
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="${baseX}" y1="40" x2="${baseX}" y2="${baseY}" stroke="var(--tax-border)" stroke-dasharray="4 4"/>
+        <rect x="${baseX-24}" y="${baseY}" width="48" height="34" rx="8" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-width="2"/>
+        <text x="${baseX}" y="${baseY+21}" text-anchor="middle" font-size="11" font-weight="800" fill="var(--tax-muted)">胸椎底座</text>
+
+        <line x1="${baseX}" y1="${baseY}" x2="${headX.toFixed(1)}" y2="${headY.toFixed(1)}" stroke="${col}" stroke-width="11" stroke-linecap="round"/>
+        <circle cx="${headX.toFixed(1)}" cy="${headY.toFixed(1)}" r="26" fill="var(--tax-primary-soft)" stroke="${col}" stroke-width="3"/>
+        <text x="${headX.toFixed(1)}" y="${(headY+5).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="850" fill="var(--tax-ink)">5kg</text>
+
+        ${ang > 4 ? `<line x1="${baseX}" y1="${headY.toFixed(1)}" x2="${headX.toFixed(1)}" y2="${headY.toFixed(1)}" stroke="var(--tax-amber)" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="${((baseX+headX)/2).toFixed(1)}" y="${(headY-8).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="800" fill="var(--tax-amber)">力臂放大!</text>` : ''}
+
+        <rect x="355" y="34" width="255" height="156" rx="14" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+        <text x="375" y="64" font-size="13" font-weight="850" fill="var(--tax-ink)">颈椎后侧肌群拉力与椎间盘压力</text>
+        <text x="375" y="100" font-size="28" font-weight="900" fill="${col}">${load} <tspan font-size="13" fill="var(--tax-muted)">kg 等效负重</tspan></text>
+        <rect x="375" y="116" width="210" height="16" rx="8" fill="var(--tax-border)"/>
+        <rect x="375" y="116" width="${barW}" height="16" rx="8" fill="${col}"/>
+        <text x="375" y="156" font-size="12" font-weight="750" fill="var(--tax-muted)">等效于：${eqText}</text>
+        <text x="375" y="176" font-size="11" fill="var(--tax-primary)">解药：把手机举高到视线平齐，瞬间卸掉 20kg！</text>
+      `;
+
+      document.getElementById('kLoad').textContent = load + ' kg';
+      document.getElementById('kLoad').style.color = col;
+      document.getElementById('kMul').textContent = mul + '× 脑袋自重';
+      document.getElementById('kEq').textContent = eqText;
+
+      document.getElementById('ahaBox').innerHTML = ang >= 45
+        ? `💡 <strong>顿悟时刻：</strong>低头 <strong>${ang}°</strong> 刷手机时，你脖颈后侧的细小肌肉正在死死拉住 <strong>${load} 公斤</strong>（相当于一个 8 岁小孩骑在脖子上）！长期如此就会引发颈椎反弓、富贵包和紧张性头痛！`
+        : ang <= 10
+        ? `💡 <strong>顿悟时刻：</strong>保持 <strong>${ang}°</strong> 平视时，头部重心几乎直落脊柱中轴，力臂接近零，颈椎只扛 <strong>${load} kg</strong> 正常自重！把显示器垫高 10 厘米，比买任何颈椎按摩仪都管用！`
+        : `💡 <strong>顿悟时刻：</strong>哪怕只是微低头 <strong>${ang}°</strong>，力矩杠杆就已经把 5kg 的脑袋放大到了 <strong>${load} kg</strong>（${mul} 倍）！试试拉到 60° 看看低头族有多惨。`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

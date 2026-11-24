@@ -7,56 +7,109 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .key-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:10px; margin-bottom:14px; }
+    .k-card { padding:11px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .k-card.on { border-color:var(--tax-green); background:var(--tax-green-soft); }
+    .k-card .t { display:flex; justify-content:space-between; font-size:13px; font-weight:800; }
+    .k-card .s { font-size:11px; color:var(--tax-muted); margin-top:4px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🔑 成年人可塑性双钥匙：肾上腺素 + 乙酰胆碱</h1><p>误区：成年人学东西应该全程轻松愉悦、毫无挫败感，效率才最高。真相：成年大脑只为“觉得重要且有点难”的事开启可塑性——那股学不会时的轻微焦躁，正是肾上腺素在帮你打开重塑大门！</p></div>
+      <div>
+        <h1>🔑 成年人可塑性双钥匙：肾上腺素 + 乙酰胆碱</h1>
+        <p>误区：25 岁以后大脑定型了，再也学不会新技能。真相：儿童靠被动暴露就能重塑大脑，而成年人的大脑加了“防误改门锁”——只要同时插上<strong>适度紧迫感（肾上腺素）+ 高度聚焦（乙酰胆碱）</strong>，再配合当晚睡眠，照样能深度重塑！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>挑战感/轻微挫败紧迫度 (去甲肾上腺素)</span><span id="vAdr">65%</span></label><input type="range" id="sAdr" min="0" max="100" value="65" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>单点全神贯注度 (乙酰胆碱聚光灯)</span><span id="vAch">80%</span></label><input type="range" id="sAch" min="10" max="100" value="80" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🔐 拼装你的成年人深度学习配方，看看哪几把钥匙能真正打开神经重塑大门：</div>
+      <div class="key-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">可塑性大门开启度</div><div class="k-val" id="kGate" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">学习状态</div><div class="k-val" id="kSt">—</div></div>
+        <div class="kpi"><div class="k-lbl">白日突触标记状态</div><div class="k-val" id="kTag" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">夜间永久重塑率</div><div class="k-val" id="kRewire" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">学习体感</div><div class="k-val" id="kFeel" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const adr=+document.getElementById('sAdr').value, ach=+document.getElementById('sAch').value;
-  document.getElementById('vAdr').textContent=adr+'%'; document.getElementById('vAch').textContent=ach+'%';
-  const gate=Math.round((100-Math.abs(adr-65)*0.8)*0.45 + ach*0.55);
-  document.getElementById('kGate').textContent=gate+'%';
-  document.getElementById('kSt').textContent=gate>75?'高效重塑态':(adr<25?'太安逸没触发':'专注或情绪失衡');
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#f59e0b">紧迫警觉信号 (去甲肾上腺素): ${adr}%</text>
-    <rect x="20" y="44" width="${adr*5.2}" height="22" rx="6" fill="#f59e0b"/>
-    <text x="20" y="96" font-size="13" font-weight="800" fill="#0284c7">激光专注标定 (乙酰胆碱): ${ach}%</text>
-    <rect x="20" y="106" width="${ach*5.2}" height="22" rx="6" fill="#0284c7"/>
-    <text x="20" y="156" font-size="13" font-weight="800" fill="#059669">成年可塑性窗口开启度: ${gate}%</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>孩子大脑随时敞开吸收，成年大脑则有双钥匙锁：必须先有轻微受挫时的“紧迫感”放出信号，再用“高度专注”把聚光灯打在要改的突触上！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const KEYS = [
+      { id:'alert', icon:'⚡', name:'适度紧迫/犯错烦躁', desc:'释放去甲肾上腺素（唤醒）' },
+      { id:'focus', icon:'🎯', name:'无干扰深度专注', desc:'释放乙酰胆碱（精准标记）' },
+      { id:'error', icon:'❌', name:'故意练在“略超能力区”', desc:'产生误差信号触发改写' },
+      { id:'sleep', icon:'😴', name:'当晚优质深度睡眠', desc:'把白天标记焊成永久连接' }
+    ];
+    let picked = new Set(['focus']);
+
+    function toggle(id){
+      if(picked.has(id)) picked.delete(id); else picked.add(id);
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = KEYS.map(k => `
+        <button class="k-card ${picked.has(k.id)?'on':''}" onclick="toggle('${k.id}')">
+          <div class="t"><span>${k.icon} ${k.name}</span><span>${picked.has(k.id)?'已插入':'点击'}</span></div>
+          <div class="s">${k.desc}</div>
+        </button>
+      `).join('');
+
+      const hasAlert = picked.has('alert'), hasFocus = picked.has('focus'), hasErr = picked.has('error'), hasSleep = picked.has('sleep');
+      const gateOpen = hasAlert && hasFocus;
+      const tagScore = gateOpen ? (hasErr ? 96 : 70) : (hasAlert || hasFocus ? 24 : 5);
+      const finalRewire = hasSleep ? tagScore : Math.round(tagScore * 0.28);
+
+      const lockCol = gateOpen ? 'var(--tax-green)' : 'var(--tax-amber)';
+      document.getElementById('svg').innerHTML = `
+        <rect x="24" y="34" width="165" height="60" rx="12" fill="${hasAlert?'var(--tax-green-soft)':'var(--tax-surface-alt)'}" stroke="${hasAlert?'var(--tax-green)':'var(--tax-border)'}" stroke-width="2"/>
+        <text x="106" y="60" text-anchor="middle" font-size="13" font-weight="850" fill="var(--tax-ink)">⚡ 钥匙 1：肾上腺素</text>
+        <text x="106" y="80" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${hasAlert?'已唤醒警觉 ✅':'缺失（昏沉/被动听课）'}</text>
+
+        <rect x="24" y="114" width="165" height="60" rx="12" fill="${hasFocus?'var(--tax-green-soft)':'var(--tax-surface-alt)'}" stroke="${hasFocus?'var(--tax-green)':'var(--tax-border)'}" stroke-width="2"/>
+        <text x="106" y="140" text-anchor="middle" font-size="13" font-weight="850" fill="var(--tax-ink)">🎯 钥匙 2：乙酰胆碱</text>
+        <text x="106" y="160" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${hasFocus?'聚光灯精准锁定 ✅':'缺失（边学边回消息）'}</text>
+
+        <line x1="189" y1="64" x2="255" y2="104" stroke="${hasAlert?'var(--tax-green)':'var(--tax-border)'}" stroke-width="2.5"/>
+        <line x1="189" y1="144" x2="255" y2="104" stroke="${hasFocus?'var(--tax-green)':'var(--tax-border)'}" stroke-width="2.5"/>
+
+        <rect x="255" y="64" width="140" height="80" rx="14" fill="${gateOpen?'var(--tax-green-soft)':'var(--tax-amber-soft)'}" stroke="${lockCol}" stroke-width="2.5"/>
+        <text x="325" y="96" text-anchor="middle" font-size="22">${gateOpen?'🔓':'🔒'}</text>
+        <text x="325" y="122" text-anchor="middle" font-size="12.5" font-weight="850" fill="${lockCol}">${gateOpen?'可塑性门控已开':'双钥匙未齐'}</text>
+
+        <line x1="395" y1="104" x2="445" y2="104" stroke="${gateOpen?'var(--tax-primary)':'var(--tax-border)'}" stroke-width="2.5"/>
+
+        <rect x="445" y="48" width="170" height="112" rx="14" fill="${finalRewire>=70?'var(--tax-primary-soft)':'var(--tax-surface-alt)'}" stroke="${finalRewire>=70?'var(--tax-primary)':'var(--tax-border)'}" stroke-width="2"/>
+        <text x="530" y="78" text-anchor="middle" font-size="13" font-weight="850" fill="var(--tax-ink)">🧠 最终神经重塑</text>
+        <text x="530" y="114" text-anchor="middle" font-size="28" font-weight="900" fill="${finalRewire>=70?'var(--tax-green)':'var(--tax-amber)'}">${finalRewire}%</text>
+        <text x="530" y="142" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${hasSleep?'🌙 夜间睡眠完成焊死':'⚠️ 缺深睡：白天白练 70%'}</text>
+      `;
+
+      document.getElementById('kTag').textContent = gateOpen ? `已标记 (${tagScore}%)` : '门锁关闭';
+      document.getElementById('kRewire').textContent = finalRewire + '%';
+      document.getElementById('kFeel').textContent = gateOpen && hasErr ? '有点费脑烦躁（正在长脑子!）' : (gateOpen ? '专注流畅' : '轻松舒适（几乎不重塑）');
+
+      let aha = '';
+      if(finalRewire >= 90){
+        aha = `💡 <strong>顿悟时刻：</strong>满分重塑配方（<strong>${finalRewire}%</strong>）！记住神经科学家胡伯曼的名言：<strong>“学习时感到的那股轻微烦躁和挫败，不是你笨，而是去甲肾上腺素正在替你打开大脑重塑门锁！”</strong>然后交给当晚深睡完成焊死。`;
+      } else if(gateOpen && !hasSleep){
+        aha = `💡 <strong>顿悟时刻：</strong>白天双钥匙全开、突触标记高达 <strong>${tagScore}%</strong>，但因为缺少 😴 <strong>当晚深度睡眠</strong>，真正固化下来的重塑只剩 <strong>${finalRewire}%</strong>！白天只是“打草稿”，睡觉才是真正的“刻盘保存”！`;
+      } else {
+        aha = `💡 <strong>顿悟时刻：</strong>为什么听播客、刷干货视频“听着很爽却什么都没记住”？因为缺少<strong>适度紧迫（肾上腺素）</strong>或<strong>无干扰专注（乙酰胆碱）</strong>，成年人大脑的防误改门锁根本没打开！试试点亮全部 4 把钥匙！`;
+      }
+      document.getElementById('ahaBox').innerHTML = aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

@@ -7,60 +7,119 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .ctrl-box { padding:10px 14px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface-alt); margin-bottom:12px; }
     .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
     .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🔥 群体免疫阈值：1 - 1/R0 防火墙计算器</h1><p>误区：不管什么传染病，只要 60% 的人打了疫苗就肯定能实现群体免疫保护全城。真相：群体免疫阈值等于 1 - 1/R0——越容易传染的病毒（如麻疹 R0=15），需要的防火墙覆盖率就越接近 95%！</p></div>
+      <div>
+        <h1>🔥 群体免疫阈值：1 - 1/R0 防火墙计算器</h1>
+        <p>误区：只要有 50% 的人打了疫苗，任何传染病就都会自动消失。真相：传染力越强（基本再生数 R0 越高），需要建立的“群体防火墙”就越厚——流感只需 50%，而传染力恐怖的麻疹（R0=16）必须达到 <strong>94%</strong> 才能刹住车！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>病毒传染再生数 R0</span><span id="vR0">4.0</span></label><input type="range" id="sR0" min="1.5" max="12" step="0.5" value="4.0" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>全城实际疫苗免疫率</span><span id="vVac">70%</span></label><input type="range" id="sVac" min="0" max="98" value="70" oninput="upd()"></div>
+      <div class="bar">
+        <button class="pill" onclick="setDis(2.0,'流感',this)">🤧 季节性流感 (R0=2)</button>
+        <button class="pill active" onclick="setDis(4.0,'新冠早期',this)">🦠 新冠早期 (R0=4)</button>
+        <button class="pill" onclick="setDis(6.0,'天花',this)">⚠️ 天花 (R0=6)</button>
+        <button class="pill" onclick="setDis(16.0,'麻疹',this)">🔥 麻疹 (R0=16)</button>
+        <button class="tax-btn" style="padding:7px 14px;font-size:12.5px;" onclick="simSpread()">🔄 重新随机模拟传播</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="ctrl-box">
+        <label><span>社区人群疫苗接种覆盖率</span><span id="vVax">70%</span></label>
+        <input type="range" id="sVax" min="0" max="98" value="70" oninput="onSlide()">
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">所需群体免疫门槛</div><div class="k-val" id="kThr" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">实际有效再生数 Re</div><div class="k-val" id="kRe">—</div></div>
+        <div class="kpi"><div class="k-lbl">所需群体免疫阈值 (1 - 1/R0)</div><div class="k-val" id="kThr" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">有效再生数 (Re)</div><div class="k-val" id="kRe">—</div></div>
+        <div class="kpi"><div class="k-lbl">未接种弱势者是否被保护？</div><div class="k-val" id="kProt">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const r0=+document.getElementById('sR0').value, vac=+document.getElementById('sVac').value/100;
-  document.getElementById('vR0').textContent=r0.toFixed(1); document.getElementById('vVac').textContent=(vac*100).toFixed(0)+'%';
-  const thr=Math.round((1-1/r0)*100);
-  const re=(r0*(1-vac)).toFixed(2);
-  const safe=parseFloat(re)<1.0;
-  document.getElementById('kThr').textContent=thr+'%';
-  document.getElementById('kRe').textContent=re+(safe?' (<1 熄灭!)':' (≥1 扩散)');
-  document.getElementById('kRe').style.color=safe?'#059669':'#ef4444';
-  let dots='';
-  for(let i=0;i<24;i++){
-    const imm=i < Math.round(24*vac);
-    const x=42+(i%12)*45, y=45+Math.floor(i/12)*45;
-    dots+=`<circle cx="${x}" cy="${y}" r="13" fill="${imm?'#059669':(safe?'#94a3b8':'#ef4444')}"/>`;
-  }
-  document.getElementById('svg').innerHTML=dots+`<text x="35" y="152" font-size="13" font-weight="800" fill="${safe?'#059669':'#ef4444'}">${safe?'✅ 绿色防火墙已切断传播链，没打疫苗的弱者也被间接保护了！':'❌ 防火墙有缺口，病毒仍在人群中穿梭传染'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>免疫率跨过 <strong>${thr}%</strong>（<code>1 - 1/${r0.toFixed(1)}</code>）的那一刻，有效传染数跌破 1.0，病毒找不到下家就会自然熄灭——这保护了无法打疫苗的新生儿和老人！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let r0 = 4.0, dName = '新冠早期', vax = 70, seed = 1;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setDis(r, name, btn){
+      r0 = r; dName = name;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); draw();
+    }
+    function onSlide(){ vax = +document.getElementById('sVax').value; markDone(); draw(); }
+    function simSpread(){ seed++; markDone(); draw(); }
+
+    function draw(){
+      document.getElementById('vVax').textContent = vax + '%';
+      const thr = Math.round((1 - 1 / r0) * 100);
+      const re = +(r0 * (1 - vax / 100)).toFixed(2);
+      const stopped = re < 1.0;
+
+      // 60-person community grid (12 x 5)
+      const cols = 12, rows = 5, total = 60;
+      const nVax = Math.round(total * vax / 100);
+      // Deterministic pseudo-random assignment
+      const roles = Array(total).fill('sus');
+      for(let i=0; i<total; i++){
+        const hash = ((i * 37 + seed * 17) % total);
+        if(hash < nVax) roles[i] = 'vax';
+      }
+      // Patient zero at center
+      const p0 = 29;
+      roles[p0] = 'inf';
+      // Spread among susceptible based on Re
+      const targetInf = stopped ? Math.min(3, Math.max(1, Math.round(re * 3))) : Math.min(total - nVax, Math.max(4, Math.round((total - nVax) * Math.min(0.92, 0.35 + (re - 1) * 0.25))));
+      let infCount = 1;
+      for(let i=0; i<total && infCount < targetInf; i++){
+        const idx = (p0 + i * 7 + seed * 3) % total;
+        if(roles[idx] === 'sus'){ roles[idx] = 'inf'; infCount++; }
+      }
+
+      let dots = '';
+      for(let i=0; i<total; i++){
+        const c = i % cols, r = Math.floor(i / cols);
+        const cx = 44 + c * 50, cy = 42 + r * 32;
+        const st = roles[i];
+        const fill = st === 'vax' ? 'var(--tax-green)' : (st === 'inf' ? 'var(--tax-red)' : 'var(--tax-amber)');
+        dots += `<circle cx="${cx}" cy="${cy}" r="${st==='inf'?10.5:8.5}" fill="${fill}" opacity="${st==='vax'?0.85:0.95}"/>`;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        ${dots}
+        <text x="26" y="196" font-size="11.5" font-weight="800" fill="var(--tax-ink)">
+          🟢 已免疫防火墙 (${nVax}人) · 🔴 感染扩散 (${infCount}人) · 🟡 幸免未接种者 (${total-nVax-infCount}人)
+        </text>
+      `;
+
+      document.getElementById('kThr').textContent = thr + '%';
+      const kRe = document.getElementById('kRe');
+      kRe.textContent = re + (stopped ? ' (<1 熄灭 ✅)' : ' (≥1 爆发 🔥)');
+      kRe.style.color = stopped ? 'var(--tax-green)' : 'var(--tax-red)';
+      const kP = document.getElementById('kProt');
+      kP.textContent = stopped ? '被防火墙兜底保护 🛡️' : '暴露在爆发火海中 🚨';
+      kP.style.color = stopped ? 'var(--tax-green)' : 'var(--tax-red)';
+
+      document.getElementById('ahaBox').innerHTML = stopped
+        ? `💡 <strong>顿悟时刻：</strong>防火墙成型！面对 <strong>${dName}（R0=${r0}）</strong>，接种率达到 <strong>${vax}% ≥ ${thr}%</strong> 后，有效再生数 Re 跌破 1（${re}），病毒每走一步都撞上绿色免疫墙，连不能打疫苗的婴儿和免疫缺陷者都被间接保护了！`
+        : `💡 <strong>顿悟时刻：</strong>针对 <strong>${dName}（R0=${r0}）</strong>，当前 ${vax}% 接种率还不够（阈值需 <strong>${thr}%</strong>，当前 Re=${re} ≥ 1），病毒照样在人群缝隙里连片引爆！把滑块拉过 ${thr}% 看看防火墙合拢的奇迹！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

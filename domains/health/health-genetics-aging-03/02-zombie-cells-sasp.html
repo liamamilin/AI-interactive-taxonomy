@@ -7,59 +7,97 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.good { border-color:var(--tax-green); color:var(--tax-green); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🧟 僵尸细胞 SASP 传染：一颗坏苹果烂一筐</h1><p>误区：衰老细胞只是自己停止干活安静退休，不会害别人。真相：该凋亡却赖着不死的“僵尸细胞”会疯狂喷吐 SASP 炎性毒液，把附近健康的年轻细胞也诱发炎症甚至一起变老！</p></div>
+      <div>
+        <h1>🧟 僵尸细胞 SASP 传染：一颗坏苹果烂一筐</h1>
+        <p>误区：衰老细胞只是安静地停止工作、占个茅坑而已。真相：它们拒绝凋亡退场，还 24 小时向四周喷射剧毒炎性鸡尾酒 <strong>SASP</strong>，把周围原本年轻健康的邻居一个个拖下水变成新僵尸！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>衰老僵尸细胞比例</span><span id="vZom">20%</span></label><input type="range" id="sZom" min="0" max="50" value="20" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>NK 自然杀伤细胞清扫力度</span><span id="vNk">60%</span></label><input type="range" id="sNk" min="10" max="100" value="60" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" style="background:var(--tax-red);" onclick="spreadYear()">⏳ 推进 1 年（SASP 毒液扩散传染）</button>
+        <button class="pill good" onclick="clearZombies()">🧹 NK 免疫细胞 / Senolytics 清扫</button>
+        <button class="pill" onclick="resetGrid()">↺ 重置组织</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">周围受牵连受损细胞</div><div class="k-val" id="kInf" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">组织整体年轻活力</div><div class="k-val" id="kVit" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">🧟 僵尸细胞数量</div><div class="k-val" id="kZom" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🌿 健康活力细胞</div><div class="k-val" id="kOk" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">组织局部炎性老化</div><div class="k-val" id="kInf" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const zom=+document.getElementById('sZom').value, nk=+document.getElementById('sNk').value;
-  document.getElementById('vZom').textContent=zom+'%'; document.getElementById('vNk').textContent=nk+'%';
-  const effZom=Math.max(1, Math.round(zom*(1-nk/150)));
-  const inf=Math.min(85, Math.round(effZom*1.8));
-  const vit=Math.max(10, 100-inf);
-  document.getElementById('kInf').textContent=inf+'%';
-  document.getElementById('kVit').textContent=vit+' 分';
-  let dots='';
-  for(let i=0;i<24;i++){
-    const isZ=i<Math.round(effZom/4), isS=i>=Math.round(effZom/4) && i<Math.round(inf/4);
-    const col=isZ?'#8b5cf6':(isS?'#f59e0b':'#059669');
-    dots+=`<circle cx="${42+(i%12)*45}" cy="${45+Math.floor(i/12)*45}" r="13" fill="${col}"/>`;
-  }
-  document.getElementById('svg').innerHTML=dots+`<text x="35" y="152" font-size="13" font-weight="800" fill="var(--tax-text)">紫=僵尸细胞喷毒液 · 橙=被牵连发炎邻居 · 绿=健康细胞 (活力 ${vit}分)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕体内只有 ${effZom}% 的僵尸细胞，它们喷出的 SASP 炎性因子也会波及 ${inf}% 的周围健康组织！这就是为什么前沿抗衰研究重点开发清除僵尸细胞的 Senolytics 药物！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    // 8 x 4 = 32 tissue cells; 0 = healthy, 1 = zombie
+    let cells = Array(32).fill(0);
+    cells[11] = 1; cells[20] = 1;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function spreadYear(){
+      const next = [...cells];
+      for(let i=0; i<32; i++){
+        if(cells[i] === 1){
+          const r = Math.floor(i/8), c = i%8;
+          [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(([nr,nc])=>{
+            if(nr>=0 && nr<4 && nc>=0 && nc<8 && Math.random() < 0.55){
+              next[nr*8+nc] = 1;
+            }
+          });
+        }
+      }
+      cells = next;
+      markDone(); draw();
+    }
+    function clearZombies(){
+      cells = cells.map(v => v === 1 ? (Math.random() < 0.85 ? 0 : 1) : 0);
+      markDone(); draw();
+    }
+    function resetGrid(){
+      cells = Array(32).fill(0); cells[11] = 1; cells[20] = 1;
+      markDone(); draw();
+    }
+
+    function draw(){
+      let svg = '';
+      for(let i=0; i<32; i++){
+        const r = Math.floor(i/8), c = i%8;
+        const cx = 64 + c * 72, cy = 44 + r * 40;
+        const isZ = cells[i] === 1;
+        svg += `<circle cx="${cx}" cy="${cy}" r="${isZ?16:13}" fill="${isZ?'var(--tax-red-soft)':'var(--tax-green-soft)'}" stroke="${isZ?'var(--tax-red)':'var(--tax-green)'}" stroke-width="${isZ?2.4:1.6}"/>
+                <text x="${cx}" y="${cy+5}" text-anchor="middle" font-size="${isZ?14:12}">${isZ?'🧟':'🟢'}</text>`;
+      }
+      const zCnt = cells.filter(v=>v===1).length;
+      const pct = Math.round((zCnt / 32) * 100);
+      svg += `<text x="24" y="204" font-size="11.5" font-weight="800" fill="var(--tax-ink)">绿色 = 正常年轻细胞 · 红色 🧟 = 喷射 SASP 炎性毒液传染邻居的僵尸细胞（占比 ${pct}%）</text>`;
+      document.getElementById('svg').innerHTML = svg;
+
+      document.getElementById('kZom').textContent = `${zCnt} / 32 (${pct}%)`;
+      document.getElementById('kOk').textContent = `${32 - zCnt} 颗`;
+      document.getElementById('kInf').textContent = pct >= 40 ? '剧烈退化（关节炎/动脉硬化）🚨' : (pct >= 15 ? '旁分泌扩散中 ⚠️' : '年轻清净 🌿');
+
+      document.getElementById('ahaBox').innerHTML = pct >= 35
+        ? `💡 <strong>顿悟时刻：</strong>典型的“一颗坏苹果烂一筐”！哪怕最初只有 2 颗僵尸细胞，几年不清理就会靠 <strong>SASP 旁分泌毒液</strong>传染出 <strong>${zCnt} 颗僵尸</strong>！点击 <strong>🧹 NK 免疫细胞清扫</strong> 体验抗衰前沿的“定向清道夫”效果！`
+        : pct <= 6
+        ? `💡 <strong>顿悟时刻：</strong>清扫完毕！规律运动、间歇断食和优质睡眠能大幅提升人体自带的 <strong>NK 自然杀伤细胞</strong> 巡逻效率，趁僵尸细胞还没成气候就定点清除，这就是最实在的抗衰防线！`
+        : `💡 <strong>顿悟时刻：</strong>点击 <strong>⏳ 推进 1 年</strong>，亲眼观察红色僵尸细胞如何把身边原本健康的绿色邻居一个个拖下水！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

@@ -7,59 +7,110 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .prot-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
+    .p-box { padding:12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .p-box h3 { font-size:13.5px; margin-bottom:8px; }
+    .pill { padding:6px 10px; border-radius:8px; border:1.5px solid var(--tax-border); background:var(--tax-surface); color:var(--tax-ink); font-size:12px; font-weight:800; cursor:pointer; margin:0 6px 6px 0; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🧊 冰水浴与桑拿：利用可控微应激激活长寿蛋白</h1><p>误区：既然冷浴和桑拿抗炎长寿，那泡得越久（比如冰水泡 30 分钟）效果就越好。真相：Hormesis 只吃“短促可控的冲击”（冰水 2~3 分钟、桑拿 15 分钟），超长硬撑直接变成失温或中暑！</p></div>
+      <div>
+        <h1>🧊 冰水浴与桑拿：利用可控微应激激活长寿蛋白</h1>
+        <p>误区：泡冰水或蒸桑拿“撑得越久越硬汉、越养生”。真相：冷热暴露是典型的 <strong>Hormesis 微应激</strong>——85°C 桑拿 15–20 分钟激活热休克蛋白（HSP）、10°C 冷水 2–3 分钟飙升持久多巴胺；硬撑超时立刻反转为中暑脱水与失温休克！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>高热桑拿 / 冰水浴持续分钟数</span><span id="vMin">12 分钟</span></label><input type="range" id="sMin" min="1" max="35" value="12" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>温度极端刺激强度</span><span id="vInt">70%</span></label><input type="range" id="sInt" min="20" max="100" value="70" oninput="upd()"></div>
+      <div class="prot-grid">
+        <div class="p-box">
+          <h3 style="color:var(--tax-red);">🔥 85°C 芬兰干蒸桑拿时长</h3>
+          <button class="pill" onclick="setSauna(0,this)">不蒸 (0分)</button>
+          <button class="pill active" onclick="setSauna(18,this)">18 分钟 (黄金窗)</button>
+          <button class="pill" onclick="setSauna(50,this)">50 分钟 (硬撑过载!)</button>
+        </div>
+        <div class="p-box">
+          <h3 style="color:var(--tax-primary);">🧊 10°C 冷水/冰浴时长</h3>
+          <button class="pill" onclick="setCold(0,this)">不泡 (0分)</button>
+          <button class="pill active" onclick="setCold(3,this)">3 分钟 (黄金窗)</button>
+          <button class="pill" onclick="setCold(18,this)">18 分钟 (失温危险!)</button>
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 640 195"></svg>
+
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">热/冷休克修复蛋白激活</div><div class="k-val" id="kHsp" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">风险评估</div><div class="k-val" id="kRisk">—</div></div>
+        <div class="kpi"><div class="k-lbl">🔥 热休克蛋白 (HSP 修复)</div><div class="k-val" id="kHsp" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🧊 去甲肾上腺素/多巴胺</div><div class="k-val" id="kNe" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">安全与抗衰综合评级</div><div class="k-val" id="kGrade">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const mins=+document.getElementById('sMin').value, inten=+document.getElementById('sInt').value;
-  document.getElementById('vMin').textContent=mins+' 分钟'; document.getElementById('vInt').textContent=inten+'%';
-  const load=mins*inten/100;
-  const hsp=Math.round(90*Math.exp(-Math.pow((load-10)/7,2)));
-  const over=load>16;
-  document.getElementById('kHsp').textContent=hsp+' 分';
-  document.getElementById('kRisk').textContent=over?'⚠️ 超时中暑/失温风险!':'安全微应激区间';
-  document.getElementById('kRisk').style.color=over?'#ef4444':'#059669';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">修复保护蛋白 (HSP) 唤醒收益: ${hsp} 分</text>
-    <rect x="20" y="44" width="${hsp*5.4}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="${over?'#ef4444':'#0284c7'}">累积热/冷负荷压力: ${load.toFixed(1)} (安全甜蜜点 8~14)</text>
-    <rect x="20" y="112" width="${Math.min(540,load*20)}" height="24" rx="6" fill="${over?'#ef4444':'#0284c7'}"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">适度冷热冲击会欺骗细胞以为遇到危机，从而大批量生产折叠修复蛋白</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>桑拿和冷水浴之所以有用，全靠“短时受一点可控小苦”触发修复基因，但一旦负荷冲破 16（超时硬扛），立刻从长寿法宝变成危险事故！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let sauna = 18, cold = 3;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setSauna(m, btn){
+      sauna = m;
+      btn.parentElement.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      markDone(); draw();
+    }
+    function setCold(m, btn){
+      cold = m;
+      btn.parentElement.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      markDone(); draw();
+    }
+
+    function draw(){
+      const hsp = sauna === 0 ? 10 : (sauna === 18 ? 92 : 40);
+      const ne  = cold === 0 ? 15 : (cold === 3 ? 90 : 35);
+      const danger = sauna > 35 || cold > 10;
+      const risk = (sauna > 35 ? 65 : 10) + (cold > 10 ? 65 : 10);
+      const safeRisk = Math.min(98, risk);
+      const col = danger ? 'var(--tax-red)' : (sauna===18 || cold===3 ? 'var(--tax-green)' : 'var(--tax-muted)');
+
+      function row(y, lbl, val, c){
+        return `
+          <text x="24" y="${y+17}" font-size="12.5" font-weight="800" fill="var(--tax-ink)">${lbl}</text>
+          <rect x="210" y="${y}" width="340" height="22" rx="6" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+          <rect x="210" y="${y}" width="${Math.round(val*3.4)}" height="22" rx="6" fill="${c}"/>
+          <text x="562" y="${y+17}" font-size="12.5" font-weight="900" fill="${c}">${val}%</text>
+        `;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="26" font-size="13" font-weight="900" fill="${col}">当前冷热微应激方案：桑拿 ${sauna} 分钟 + 冷水 ${cold} 分钟</text>
+        ${row(46, '🔥 HSP 蛋白折叠修复活性', hsp, 'var(--tax-amber)')}
+        ${row(88, '🧊 持久多巴胺与清醒度', ne, 'var(--tax-primary)')}
+        ${row(130, '🚨 中暑脱水 / 核心失温风险', safeRisk, danger?'var(--tax-red)':'var(--tax-green)')}
+        <text x="24" y="182" font-size="11.5" font-weight="750" fill="var(--tax-muted)">安全提醒：心血管疾病患者慎用极端冷热交替；力量训练后立刻泡冰水会轻微钝化增肌信号！</text>
+      `;
+
+      document.getElementById('kHsp').textContent = hsp + '% 激活';
+      document.getElementById('kNe').textContent = ne + '% 持久提升';
+      const kG = document.getElementById('kGrade');
+      kG.textContent = danger ? '🚨 危险过载！立刻停止' : (sauna===18 && cold===3 ? '🏆 北欧黄金冷热协议' : (sauna===0 && cold===0 ? '零微应激基线' : '✅ 单项安全有效'));
+      kG.style.color = col;
+
+      document.getElementById('ahaBox').innerHTML = danger
+        ? `💡 <strong>顿悟时刻：</strong>硬撑超时已经跨过 Hormesis 悬崖！50 分钟高温桑拿导致严重脱水与低血压晕厥，18 分钟冰水直接引发核心失温与心律失常——<strong>微应激的精髓是“短、稳、可控”，绝不是拼命硬扛！</strong>`
+        : (sauna === 18 && cold === 3)
+        ? `💡 <strong>顿悟时刻：</strong>教科书级的<strong>北欧冷热交替协议</strong>！18 分钟桑拿唤醒热休克蛋白修复受损蛋白并扩张血管，3 分钟冷水激发 250% 持久温和多巴胺且零戒断低谷！`
+        : `💡 <strong>顿悟时刻：</strong>不需要任何昂贵补剂，短短 <strong>2–3 分钟微冷淋浴</strong> 或 <strong>15–20 分钟热桑拿</strong> 就能安全拨动人体自带的抗衰防御开关！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

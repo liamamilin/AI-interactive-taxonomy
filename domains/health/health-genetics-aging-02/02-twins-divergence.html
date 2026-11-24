@@ -7,60 +7,106 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>👯 同卵双胞胎人生分岔路模拟器</h1><p>误区：只要双胞胎基因一模一样，到了 60 岁得不得大病也必然同步。真相：随着年龄增长和生活习惯分化，表观遗传漂移逐年累积，50 岁双胞胎的基因表达差异可以高达数倍！</p></div>
+      <div>
+        <h1>👯 同卵双胞胎人生分岔路模拟器</h1>
+        <p>误区：同卵双胞胎基因 100% 相同，所以生老病死和衰老速度也必定一模一样。真相：3 岁时两人的表观遗传图谱几乎重叠，但到了 55 岁，截然不同的饮食、运动与烟酒习惯会把两人的<strong>生物学年龄拉开 10 岁以上</strong>！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>双胞胎各自生活环境差异度</span><span id="vDiff">70%</span></label><input type="range" id="sDiff" min="10" max="100" value="70" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>当前观测年龄</span><span id="vAge">50 岁</span></label><input type="range" id="sAge" min="5" max="80" step="5" value="50" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="playLife()">▶ 播放 5 岁 → 55 岁双轨分岔</button>
+        <button class="pill" onclick="jump(5,this)">5 岁（几乎重叠）</button>
+        <button class="pill" onclick="jump(30,this)">30 岁（开始分道扬镳）</button>
+        <button class="pill active" onclick="jump(55,this)">55 岁（天壤之别）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">表观图谱重合度</div><div class="k-val" id="kSim" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">健康结局分化度</div><div class="k-val" id="kDiv">—</div></div>
+        <div class="kpi"><div class="k-lbl">🌿 哥哥（健康作息）生物年龄</div><div class="k-val" id="kBroA" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🚬 弟弟（熬夜抽烟）生物年龄</div><div class="k-val" id="kBroB" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">DNA 序列相似度 / 表观差异</div><div class="k-val" id="kDiff" style="color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const diff=+document.getElementById('sDiff').value, age=+document.getElementById('sAge').value;
-  document.getElementById('vDiff').textContent=diff+'%'; document.getElementById('vAge').textContent=age+' 岁';
-  const sim=Math.max(15, Math.round(100*Math.exp(-age*diff/5500)));
-  document.getElementById('kSim').textContent=sim+'%';
-  document.getElementById('kDiv').textContent=sim<55?'显著分化 (表观漂移)':'高度一致';
-  let pA='', pB='';
-  for(let a=5;a<=age;a+=5){
-    const x=40+(a-5)/75*520;
-    const gap=(100-100*Math.exp(-a*diff/5500))*0.6;
-    pA+=`${x},${95-gap} `; pB+=`${x},${95+gap} `;
-  }
-  document.getElementById('svg').innerHTML=`
-    <polyline fill="none" stroke="#059669" stroke-width="3" points="${pA}"/>
-    <polyline fill="none" stroke="#ef4444" stroke-width="3" points="${pB}"/>
-    <text x="50" y="28" font-size="12" font-weight="800" fill="var(--tax-text)">5 岁重合出发 → ${age} 岁时表观图谱重合度仅剩 ${sim}%</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>5 岁时你们几乎是同一张白纸，但 ${age} 年的饮食、压力和环境差异把相同的基因调出了完全不同的命运轨迹！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let age = 55, timer = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function jump(a, btn){
+      if(timer){ clearInterval(timer); timer=null; }
+      age = a;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); draw();
+    }
+    function playLife(){
+      if(timer) clearInterval(timer);
+      markDone();
+      age = 5;
+      timer = setInterval(()=>{
+        age += 1;
+        draw();
+        if(age >= 55){ clearInterval(timer); timer=null; }
+      }, 65);
+      draw();
+    }
+
+    function bioA(a){ return a <= 18 ? a : +(18 + (a - 18) * 0.86).toFixed(1); }
+    function bioB(a){ return a <= 18 ? a : +(18 + (a - 18) * 1.18).toFixed(1); }
+
+    function draw(){
+      const x0=54, x1=612, yMin=28, yMax=188;
+      const toX = a => x0 + ((a - 5)/50)*(x1-x0);
+      const toY = b => yMax - ((b - 5)/65)*(yMax-yMin);
+
+      let pA=[], pB=[], pRef=[];
+      for(let a=5; a<=age; a+=1){
+        pA.push(`${toX(a).toFixed(1)},${toY(bioA(a)).toFixed(1)}`);
+        pB.push(`${toX(a).toFixed(1)},${toY(bioB(a)).toFixed(1)}`);
+        pRef.push(`${toX(a).toFixed(1)},${toY(a).toFixed(1)}`);
+      }
+      const ba = bioA(age), bb = bioB(age);
+      const gap = +(bb - ba).toFixed(1);
+      const epiDrift = Math.min(82, Math.round(Math.max(0, age - 5) * 1.45));
+
+      document.getElementById('svg').innerHTML = `
+        ${[5,15,25,35,45,55].map(a=>`<text x="${toX(a)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${a}岁</text>`).join('')}
+        <polyline points="${pRef.join(' ')}" fill="none" stroke="var(--tax-muted)" stroke-width="1.8" stroke-dasharray="5 4"/>
+        <polyline points="${pA.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3.4"/>
+        <polyline points="${pB.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3.4"/>
+        <circle cx="${toX(age)}" cy="${toY(ba)}" r="6" fill="var(--tax-green)"/>
+        <circle cx="${toX(age)}" cy="${toY(bb)}" r="6" fill="var(--tax-red)"/>
+        ${gap > 2 ? `<line x1="${toX(age)}" y1="${toY(ba)}" x2="${toX(age)}" y2="${toY(bb)}" stroke="var(--tax-amber)" stroke-width="2" stroke-dasharray="3 3"/><text x="${Math.max(x0+110, toX(age)-10)}" y="${(toY(ba)+toY(bb))/2+4}" text-anchor="end" font-size="12" font-weight="850" fill="var(--tax-amber)">相差 ${gap} 岁!</text>` : ''}
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-green)">● 哥哥（运动+不抽烟）</text>
+        <text x="${x0+165}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-red)">● 弟弟（抽烟+熬夜+高糖）</text>
+        <text x="${x0+355}" y="18" font-size="11.5" font-weight="750" fill="var(--tax-muted)">-- 身份证年龄 (${age}岁)</text>
+      `;
+
+      document.getElementById('kBroA').textContent = ba + ' 岁';
+      document.getElementById('kBroB').textContent = bb + ' 岁';
+      document.getElementById('kDiff').textContent = `DNA 100% 同 / 表观漂移 ${epiDrift}%`;
+
+      document.getElementById('ahaBox').innerHTML = age <= 15
+        ? `💡 <strong>顿悟时刻：</strong>${age} 岁时，同卵双胞胎不仅 DNA 100% 一致，生活环境也几乎相同，表观图谱高度重叠！点击 <strong>55 岁</strong> 或 <strong>▶ 播放</strong> 看看成年后环境如何撕开巨大鸿沟！`
+        : `💡 <strong>顿悟时刻：</strong>同样过完 <strong>${age} 岁生日</strong>，两人的 DNA 依然 100% 一模一样，但表观漂移已经高达 <strong>${epiDrift}%</strong>，生物学年龄足足相差 <strong>${gap} 岁</strong>——这就是长寿研究中“遗传只占约 20%，表观与生活方式占 80%”的铁证！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

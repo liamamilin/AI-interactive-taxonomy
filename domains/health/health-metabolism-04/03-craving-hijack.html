@@ -7,61 +7,136 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .day-card { padding:14px 16px; border-radius:12px; border:1.5px solid var(--tax-primary); background:var(--tax-primary-soft); margin-bottom:14px; }
+    .day-card h3 { font-size:15px; margin-bottom:4px; }
+    .day-card p { font-size:13px; color:var(--tax-muted); margin-bottom:10px; }
+    .choice-row { display:flex; flex-wrap:wrap; gap:10px; }
+    .c-btn { flex:1; min-width:180px; padding:10px 14px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface); color:var(--tax-ink); font-weight:800; font-size:13px; cursor:pointer; }
+    .c-btn.sweet:hover { border-color:var(--tax-red); background:var(--tax-red-soft); }
+    .c-btn.fiber:hover { border-color:var(--tax-green); background:var(--tax-green-soft); }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
     .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
     .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
     .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🍩 嗜糖菌的“大脑劫持”正反馈</h1><p>误区：半夜疯狂想吃炸鸡奶茶纯属个人意志力薄弱。真相：高糖饮食养肥了嗜糖菌，它们会通过迷走神经发送“饿急了、快喂糖”的焦虑信号，熬过 7~14 天菌群更替期后渴求会自动消失！</p></div>
+      <div>
+        <h1>🍩 嗜糖菌的“大脑劫持”正反馈</h1>
+        <p>误区：戒不掉奶茶甜食纯属自己“意志力太差”。真相：肚子里的嗜糖坏菌为了自己繁殖，会分泌神经模拟分子通过迷走神经给大脑发焦虑信号——你以为是你在馋，其实是它们在逼你点外卖！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>坚持低糖天然饮食天数</span><span id="vDay">5 天</span></label><input type="range" id="sDay" min="0" max="21" value="5" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>初始嗜糖菌定植比例</span><span id="vInit">75%</span></label><input type="range" id="sInit" min="20" max="95" value="75" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="day-card" id="dayCard"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">当前垃圾食品渴求度</div><div class="k-val" id="kCrav" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">菌群重塑进度</div><div class="k-val" id="kProg" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">当前进程</div><div class="k-val" id="kDay" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">嗜糖坏菌势力占比</div><div class="k-val" id="kBug" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">大脑催糖渴望强度</div><div class="k-val" id="kCrave" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const day=+document.getElementById('sDay').value, init=+document.getElementById('sInit').value;
-  document.getElementById('vDay').textContent=day+' 天'; document.getElementById('vInit').textContent=init+'%';
-  const crav=Math.max(8, Math.round(init*Math.exp(-day/6.5)));
-  const prog=Math.min(100, Math.round((1-crav/init)*100));
-  document.getElementById('kCrav').textContent=crav+'%';
-  document.getElementById('kProg').textContent=prog+'%';
-  let pts='';
-  for(let d=0;d<=21;d++){
-    pts+=`${40+d*24.5},${155-init*Math.exp(-d/6.5)*1.25} `;
-  }
-  const cx=40+day*24.5, cy=155-crav*1.25;
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="155" x2="560" y2="155" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="#ef4444" stroke-width="3" points="${pts}"/>
-    <circle cx="${cx}" cy="${cy}" r="6" fill="#059669"/>
-    <text x="50" y="30" font-size="12" font-weight="800" fill="#ef4444">坚持到第 ${day} 天：嗜糖信号衰减至 ${crav}%</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“戒糖头 3 天最痛苦”是因为饿极了的嗜糖菌在向大脑疯狂报警！只要挺过第 7~14 天的菌群换代，信号就会降到 ${crav}%，你对甜食的执念自然烟消云散！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const DAYS = [
+      '第 1 天下午 3 点：同事喊拼全糖黑糖珍珠奶茶',
+      '第 2 天晚上 10 点：刷剧时脑海狂闪奶油蛋糕画面',
+      '第 3 天午餐后：犯困难受，极度想来一块巧克力提神',
+      '第 4 天下午：嗜糖菌“断粮抗议”达到高峰，心烦意乱',
+      '第 5 天周末逛街：路过甜品店飘来阵阵焦糖香味',
+      '第 6 天加班夜：压力上来，本能想点含糖快乐水',
+      '第 7 天决胜日：餐桌上摆着免费甜点与原味坚果酸奶'
+    ];
+    let day = 0;
+    let bugHist = [72];
+    let craveHist = [82];
+
+    function choose(type){
+      if(day >= 7) return;
+      const prevB = bugHist[bugHist.length - 1];
+      let nextB, nextC;
+      if(type === 'sweet'){
+        nextB = Math.min(95, prevB + 9);
+        nextC = Math.min(98, nextB + 10);
+      } else {
+        nextB = Math.max(12, prevB - 11);
+        // Day 2-4 extinction burst: craving briefly spikes before crashing!
+        nextC = (day >= 1 && day <= 3 && prevB > 45) ? Math.min(92, prevB + 8) : Math.max(10, nextB - 4);
+      }
+      day++;
+      bugHist.push(nextB);
+      craveHist.push(nextC);
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function resetGame(){
+      day = 0; bugHist = [72]; craveHist = [82];
+      draw();
+    }
+
+    function draw(){
+      const card = document.getElementById('dayCard');
+      if(day < 7){
+        card.innerHTML = `
+          <h3>📅 ${DAYS[day]}</h3>
+          <p>肚子里的嗜糖菌正在疯狂敲响迷走神经警报，你决定怎么回应？</p>
+          <div class="choice-row">
+            <button class="c-btn sweet" onclick="choose('sweet')">🍩 顺从投喂高糖甜食（立刻爽 10 分钟）</button>
+            <button class="c-btn fiber" onclick="choose('fiber')">🥦 吃蔬菜/坚果+喝水扛住（断掉坏菌粮草）</button>
+          </div>
+        `;
+      } else {
+        const finalB = bugHist[bugHist.length - 1];
+        card.innerHTML = `
+          <h3>🏁 7 天攻防实验结束！</h3>
+          <p>${finalB <= 30 ? '🎉 成功翻盘！嗜糖菌大面积退潮，有益菌接管肠道，甜食对你的诱惑力暴跌！' : '⚠️ 嗜糖菌依然占据主导，只要持续投喂糖分，它们就会继续遥控你的大脑！'}</p>
+          <button class="tax-btn" onclick="resetGame()">↻ 重新开始 7 天实验</button>
+        `;
+      }
+
+      const x0=54, x1=610, yMin=26, yMax=178;
+      const toX = d => x0 + (d/7)*(x1-x0);
+      const toY = v => yMax - (v/100)*(yMax-yMin);
+
+      const ptsB = bugHist.map((v,i)=>`${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(' ');
+      const ptsC = craveHist.map((v,i)=>`${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(' ');
+
+      document.getElementById('svg').innerHTML = `
+        ${[0,25,50,75,100].map(v=>`<line x1="${x0}" y1="${toY(v)}" x2="${x1}" y2="${toY(v)}" stroke="var(--tax-border)"/><text x="${x0-8}" y="${toY(v)+4}" text-anchor="end" font-size="11" fill="var(--tax-muted)">${v}%</text>`).join('')}
+        ${[0,1,2,3,4,5,6,7].map(d=>`<text x="${toX(d)}" y="196" text-anchor="middle" font-size="11" fill="var(--tax-muted)">D${d}</text>`).join('')}
+        <polyline points="${ptsB}" fill="none" stroke="var(--tax-red)" stroke-width="3.2" stroke-linecap="round"/>
+        <polyline points="${ptsC}" fill="none" stroke="var(--tax-amber)" stroke-width="2.6" stroke-dasharray="6 4"/>
+        ${bugHist.map((v,i)=>`<circle cx="${toX(i)}" cy="${toY(v)}" r="4.5" fill="var(--tax-red)"/>`).join('')}
+        ${craveHist.map((v,i)=>`<circle cx="${toX(i)}" cy="${toY(v)}" r="4" fill="var(--tax-amber)"/>`).join('')}
+        <text x="${x0}" y="17" font-size="11.5" font-weight="800" fill="var(--tax-red)">● 嗜糖坏菌占比</text>
+        <text x="${x0+115}" y="17" font-size="11.5" font-weight="800" fill="var(--tax-amber)">-- 大脑催糖渴望（注意前3天戒断反扑！）</text>
+      `;
+
+      const curB = bugHist[bugHist.length - 1], curC = craveHist[craveHist.length - 1];
+      document.getElementById('kDay').textContent = `第 ${day} / 7 天`;
+      document.getElementById('kBug').textContent = curB + '%';
+      document.getElementById('kCrave').textContent = curC + ' 分';
+
+      let aha = '';
+      if(day === 0){
+        aha = `💡 <strong>顿悟时刻：</strong>开局嗜糖菌占比高达 72%。试着连续几天坚持“吃纤维扛住”，你会发现第 2–4 天渴望甚至会短暂反扑——那是坏菌临死前的“断粮抗议”！`;
+      } else if(curB <= 30){
+        aha = `💡 <strong>顿悟时刻：</strong>只要挺过前 3–4 天的“坏菌抗议期”，嗜糖菌群大面积饿死（降至 <strong>${curB}%</strong>），催糖渴望自然断崖下跌到 <strong>${curC} 分</strong>——戒糖靠的不是无限意志力，而是换掉肚子里的“房客”！`;
+      } else if(curC > curB + 4){
+        aha = `💡 <strong>顿悟时刻：</strong>注意看虚线反扑！嗜糖菌正在减少（${curB}%），但它们临死前拼命发信号让渴望冲上 <strong>${curC} 分</strong>。明白这是细菌的“垂死挣扎”，再坚持 2 天就能彻底反转！`;
+      } else {
+        aha = `💡 <strong>顿悟时刻：</strong>每次顺从投喂高糖甜食，嗜糖菌就大举繁殖（当前 <strong>${curB}%</strong>），明天它们会用更猛烈的饥饿信号逼你继续吃——这就是典型的微生物正反馈劫持！`;
+      }
+      document.getElementById('ahaBox').innerHTML = aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

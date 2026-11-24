@@ -3,70 +3,182 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📈 餐后血糖过山车曲线（SVG）</title>
+  <title>📈 餐后血糖过山车曲线</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .plate-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-bottom:14px; }
+    .food-card { padding:11px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); cursor:pointer; text-align:left; color:var(--tax-ink); transition:all .15s ease; }
+    .food-card:hover { border-color:var(--tax-primary); transform:translateY(-1px); }
+    .food-card.selected { border-color:var(--tax-primary); background:var(--tax-primary-soft); box-shadow:0 0 0 2px color-mix(in srgb, var(--tax-primary) 25%, transparent); }
+    .food-card .f-top { display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:13.5px; }
+    .food-card .f-sub { font-size:11.5px; color:var(--tax-muted); margin-top:4px; }
+    .order-bar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:14px; }
+    .pill { padding:7px 12px; border-radius:999px; border:1px solid var(--tax-border); background:var(--tax-surface); color:var(--tax-ink); font-size:12.5px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-green); color:#fff; border-color:var(--tax-green); }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
     .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
     .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📈 餐后血糖过山车曲线（SVG）</h1><p>误区：吃完甜食犯困是因为“血液都跑到胃里消化去了”。真相：高 GI 糖分让血糖垂直飙升，迫使胰腺狂喷胰岛素，结果一小时后血糖反杀跌破饥饿线，大脑缺糖才拼命打哈欠！</p></div>
+      <div>
+        <h1>📈 餐后血糖过山车曲线</h1>
+        <p>误区：吃完甜食犯困是因为“血糖太高把脑子糊住了”。真相：高 GI 食物让血糖坐火箭飙升，触发胰腺过量分泌胰岛素，1 小时后把血糖砸穿基线，真正的困倦和手抖来自“反应性低血糖”！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>食物升糖指数 (GI 值)</span><span id="vGI">85 (高糖奶茶)</span></label><input type="range" id="sGI" min="25" max="95" value="85" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>先吃蔬菜/蛋白缓冲比例</span><span id="vFib">10%</span></label><input type="range" id="sFib" min="0" max="80" value="10" oninput="upd()"></div>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🍽️ 点击搭配你的这一餐（可多选组合，实时生成 3 小时血糖/胰岛素双曲线）</div>
+      <div class="plate-grid" id="plateGrid"></div>
+      <div class="order-bar">
+        <span style="font-size:12.5px;font-weight:750;color:var(--tax-muted);">进食顺序策略：</span>
+        <button class="pill active" id="ordCarb" onclick="setOrder('carb',this)">先吃主食/甜饮</button>
+        <button class="pill" id="ordVeg" onclick="setOrder('veg',this)">先吃蔬菜与蛋白，最后吃碳水</button>
+        <button class="pill" onclick="preset('milk')">🧋 极端案例：单喝奶茶+面包</button>
+        <button class="pill" onclick="preset('balanced')">🥗 稳糖示范：全餐+顺序优化</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 640 230"></svg>
+
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">血糖峰值</div><div class="k-val" id="kPeak" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">2小时后跌破基线</div><div class="k-val" id="kDip">—</div></div>
+        <div class="kpi"><div class="k-lbl">餐后血糖峰值</div><div class="k-val" id="kPeak">—</div></div>
+        <div class="kpi"><div class="k-lbl">2 小时低谷（犯困度）</div><div class="k-val" id="kDip">—</div></div>
+        <div class="kpi"><div class="k-lbl">胰岛素过冲风险</div><div class="k-val" id="kIns">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const gi=+document.getElementById('sGI').value, fib=+document.getElementById('sFib').value;
-  document.getElementById('vGI').textContent=gi+(gi>70?' (高GI精制糖)':(gi<50?' (低GI缓释)':' (中GI)'));
-  document.getElementById('vFib').textContent=fib+'%';
-  const damp=1-fib/135;
-  const amp=(gi-20)*damp;
-  let pts='40,115 ', peak=5.0, minV=5.0;
-  for(let t=1;t<=24;t++){
-    const h=t*0.15;
-    const g=5.0 + amp*0.095*Math.exp(-Math.pow((h-0.85)/0.55,2)) - (amp>35?amp*0.022*Math.exp(-Math.pow((h-2.1)/0.65,2)):0);
-    if(g>peak) peak=g; if(g<minV) minV=g;
-    pts+=`${40+t*21.6},${170-(g-3)*16} `;
-  }
-  const dip=minV<4.6;
-  document.getElementById('kPeak').textContent=peak.toFixed(1)+' mmol/L';
-  document.getElementById('kDip').textContent=dip?minV.toFixed(1)+' (反应性低血糖!)':'平稳 '+minV.toFixed(1);
-  document.getElementById('kDip').style.color=dip?'#ef4444':'#10b981';
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="138" x2="560" y2="138" stroke="#94a3b8" stroke-dasharray="4 3"/>
-    <text x="45" y="133" font-size="11" fill="var(--tax-muted)">空腹基线 5.0</text>
-    <polyline fill="none" stroke="${peak>8.5?'#ef4444':'#059669'}" stroke-width="3" points="${pts}"/>
-    <text x="555" y="28" text-anchor="end" font-size="12" font-weight="800" fill="${peak>8.5?'#ef4444':'#059669'}">餐后 0~3.6 小时血糖波动轨迹</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>改变进食顺序（先吃菜肉再吃主食，缓冲率 ${fib}%）能直接把尖峰削平，防止胰岛素过冲引发餐后 2 小时“又饿又困”的低血糖崩溃！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const FOODS = [
+      { id:'rice', icon:'🍚', name:'精白米饭', desc:'GI 83 · 快速吸糖', gl:38, fiber:0, prot:2 },
+      { id:'boba', icon:'🧋', name:'全糖珍珠奶茶', desc:'液态游离糖 · 瞬爆', gl:46, fiber:0, prot:1 },
+      { id:'bread', icon:'🥐', name:'奶油白面包', desc:'精制面粉 · 高升糖', gl:32, fiber:1, prot:3 },
+      { id:'veg', icon:'🥦', name:'清炒西兰花', desc:'膳食纤维网 · 缓释', gl:3, fiber:18, prot:3 },
+      { id:'chicken', icon:'🍗', name:'香煎鸡胸肉', desc:'优质蛋白 · 延缓排空', gl:0, fiber:0, prot:26 },
+      { id:'nuts', icon:'🥜', name:'原味坚果/牛油果', desc:'健康脂肪 · 减缓冲击', gl:2, fiber:10, prot:6 }
+    ];
+    let selected = new Set(['rice', 'boba']);
+    let eatOrder = 'carb';
+    let interacted = false;
+
+    function markDone(){
+      if(!interacted){ interacted = true; if(window.ToySDK) window.ToySDK.markCompleted(); }
+    }
+
+    function renderCards(){
+      const grid = document.getElementById('plateGrid');
+      grid.innerHTML = FOODS.map(f => `
+        <button class="food-card ${selected.has(f.id)?'selected':''}" onclick="toggleFood('${f.id}')">
+          <div class="f-top"><span>${f.icon} ${f.name}</span><span>${selected.has(f.id)?'✓':'+'}</span></div>
+          <div class="f-sub">${f.desc}</div>
+        </button>
+      `).join('');
+    }
+
+    function toggleFood(id){
+      markDone();
+      if(selected.has(id)){ if(selected.size > 1) selected.delete(id); }
+      else selected.add(id);
+      renderCards();
+      draw();
+    }
+
+    function setOrder(ord, btn){
+      markDone();
+      eatOrder = ord;
+      document.getElementById('ordCarb').classList.toggle('active', ord==='carb');
+      document.getElementById('ordVeg').classList.toggle('active', ord==='veg');
+      draw();
+    }
+
+    function preset(type){
+      markDone();
+      if(type==='milk'){ selected = new Set(['boba','bread']); eatOrder='carb'; }
+      else { selected = new Set(['rice','veg','chicken','nuts']); eatOrder='veg'; }
+      document.getElementById('ordCarb').classList.toggle('active', eatOrder==='carb');
+      document.getElementById('ordVeg').classList.toggle('active', eatOrder==='veg');
+      renderCards();
+      draw();
+    }
+
+    function draw(){
+      let gl=0, fiber=0, prot=0;
+      FOODS.forEach(f=>{ if(selected.has(f.id)){ gl+=f.gl; fiber+=f.fiber; prot+=f.prot; } });
+      const buffer = Math.min(0.65, (fiber*0.015 + prot*0.009) + (eatOrder==='veg' && (fiber>0 || prot>0) ? 0.18 : 0));
+      const base = 4.8; // mmol/L
+      const spike = Math.max(0.4, (gl / 11.5) * (1 - buffer));
+      const peakVal = +(base + spike).toFixed(1);
+      const overshoot = Math.max(0, (spike - 1.8) * 0.42);
+      const dipVal = +(Math.max(3.1, base - overshoot)).toFixed(1);
+
+      const x0=54, x1=610, yBase=138, yMin=28, yMax=198;
+      const toX = m => x0 + (m/180)*(x1-x0);
+      const toY = v => yMax - ((v - 2.5) / 10.5) * (yMax - yMin);
+
+      let gPts = [], iPts = [];
+      for(let m=0; m<=180; m+=3){
+        // Glucose curve: rapid rise around 35-50m, dip around 115-135m
+        const tPeak = 36 + buffer*24;
+        const rise = spike * Math.exp(-Math.pow((m - tPeak)/(22 + buffer*18), 2));
+        const crash = overshoot * Math.exp(-Math.pow((m - (tPeak+75))/32, 2));
+        const g = Math.max(2.9, Math.min(12.5, base + rise - crash));
+        // Insulin lags ~18 min behind glucose
+        const ins = Math.max(3.2, Math.min(12.2, base - 0.3 + spike*1.08 * Math.exp(-Math.pow((m - (tPeak+20))/30, 2))));
+        gPts.push(`${toX(m).toFixed(1)},${toY(g).toFixed(1)}`);
+        iPts.push(`${toX(m).toFixed(1)},${toY(ins).toFixed(1)}`);
+      }
+
+      const peakX = toX(36 + buffer*24);
+      const peakY = toY(Math.min(12.5, peakVal));
+      const dipX = toX(36 + buffer*24 + 75);
+      const dipY = toY(dipVal);
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="${x0}" y="${toY(7.8)}" width="${x1-x0}" height="${toY(4.2)-toY(7.8)}" fill="var(--tax-green-soft)" opacity="0.6"/>
+        <text x="${x1-6}" y="${toY(7.8)+14}" text-anchor="end" font-size="11" font-weight="700" fill="var(--tax-green)">平稳舒适区 (4.2–7.8 mmol/L)</text>
+        <line x1="${x0}" y1="${toY(base)}" x2="${x1}" y2="${toY(base)}" stroke="var(--tax-muted)" stroke-dasharray="4 4" stroke-width="1.2"/>
+        <text x="${x0-6}" y="${toY(base)+4}" text-anchor="end" font-size="11" fill="var(--tax-muted)">基线</text>
+        ${[0,30,60,90,120,150,180].map(m=>`<text x="${toX(m)}" y="216" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${m}分</text>`).join('')}
+        ${overshoot > 0.35 ? `<rect x="${dipX-38}" y="${toY(base)}" width="76" height="${toY(3.0)-toY(base)}" rx="6" fill="var(--tax-red-soft)" opacity="0.8"/><text x="${dipX}" y="${toY(3.0)-6}" text-anchor="middle" font-size="11" font-weight="800" fill="var(--tax-red)">😴 饭困低谷</text>` : ''}
+        <polyline points="${iPts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="2.2" stroke-dasharray="6 4"/>
+        <polyline points="${gPts.join(' ')}" fill="none" stroke="${peakVal>8.5?'var(--tax-red)':'var(--tax-amber)'}" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="${peakX}" cy="${peakY}" r="5" fill="${peakVal>8.5?'var(--tax-red)':'var(--tax-amber)'}"/>
+        <text x="${Math.min(x1-55, peakX+8)}" y="${Math.max(18, peakY-8)}" font-size="12" font-weight="850" fill="${peakVal>8.5?'var(--tax-red)':'var(--tax-amber)'}">峰值 ${peakVal}</text>
+        <circle cx="70" cy="18" r="4" fill="var(--tax-amber)"/><text x="80" y="22" font-size="11.5" font-weight="750" fill="var(--tax-ink)">血糖曲线</text>
+        <line x1="150" y1="18" x2="170" y2="18" stroke="var(--tax-primary)" stroke-width="2.2" stroke-dasharray="5 3"/><text x="176" y="22" font-size="11.5" font-weight="750" fill="var(--tax-ink)">胰岛素（滞后分泌）</text>
+      `;
+
+      const kPeak = document.getElementById('kPeak');
+      kPeak.textContent = peakVal + ' mmol/L';
+      kPeak.style.color = peakVal > 8.5 ? 'var(--tax-red)' : (peakVal > 7.2 ? 'var(--tax-amber)' : 'var(--tax-green)');
+
+      const kDip = document.getElementById('kDip');
+      kDip.textContent = dipVal + ' mmol/L' + (overshoot > 0.5 ? ' (重度犯困)' : overshoot > 0.2 ? ' (轻微困倦)' : ' (精力平稳)');
+      kDip.style.color = overshoot > 0.5 ? 'var(--tax-red)' : 'var(--tax-green)';
+
+      const kIns = document.getElementById('kIns');
+      kIns.textContent = overshoot > 0.5 ? '剧烈过冲 ⚠️' : (overshoot > 0.2 ? '轻度波动' : '温和稳态 ✅');
+      kIns.style.color = overshoot > 0.5 ? 'var(--tax-red)' : 'var(--tax-primary)';
+
+      let aha = '';
+      if(peakVal > 8.5){
+        aha = `💡 <strong>顿悟时刻：</strong>你搭配的餐盘碳水负荷极高且缺乏缓冲，血糖冲上 <strong>${peakVal} mmol/L</strong>！胰腺被迫紧急倾倒过量胰岛素，反而在 2 小时后把血糖砸穿基线跌到 <strong>${dipVal}</strong>——这就是你喝完奶茶吃完面条后“又困又想再吃甜食”的恶性循环。试试加入🥦蔬菜、🍗鸡胸肉并切换“先吃菜肉”！`;
+      } else if(peakVal > 6.8){
+        aha = `💡 <strong>顿悟时刻：</strong>餐盘已有一定缓冲，峰值控制在 <strong>${peakVal} mmol/L</strong>。如果把进食顺序改成<strong>先吃纤维和蛋白质</strong>，它们会在肠道提前织出一张“减速网”，还能再把血糖尖峰削平一截！`;
+      } else {
+        aha = `💡 <strong>顿悟时刻：</strong>教科书级的稳糖餐盘！膳食纤维+蛋白+进食顺序让血糖温和画出一座平缓小山丘（峰值仅 <strong>${peakVal} mmol/L</strong>），胰岛素不必恐慌过冲，整个下午大脑都清醒稳定。`;
+      }
+      document.getElementById('ahaBox').innerHTML = aha;
+    }
+
+    renderCards();
+    draw();
   </script>
 </body>
 </html>

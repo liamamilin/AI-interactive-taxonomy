@@ -3,69 +3,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📈 超量恢复黄金窗口曲线（SVG）</title>
+  <title>📈 超量恢复黄金窗口曲线</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .scen-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:9px; margin-bottom:14px; }
+    .s-btn { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .s-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .s-btn .t { font-size:13px; font-weight:800; }
+    .s-btn .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📈 超量恢复黄金窗口曲线（SVG）</h1><p>误区：肌肉是在健身房举铁的那一小时里长出来的，练得越勤快长越快。真相：训练只是在“微损伤破坏肌肉”，真正的生长发生在吃饱睡足的休息日——练太勤会越练越弱，歇太久又会打回原形！</p></div>
+      <div>
+        <h1>📈 超量恢复黄金窗口曲线</h1>
+        <p>误区：肌肉是在健身房举铁的那一小时里长出来的，练得越勤快长得越快。真相：训练只是制造“微撕裂和体能低谷”，真正的变强发生在<strong>随后 48–72 小时的睡眠与营养超量恢复期</strong>！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>两次高强度训练间隔天数</span><span id="vRest">3 天</span></label><input type="range" id="sRest" min="1" max="10" value="3" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>单次训练破坏刺激强度</span><span id="vStim">70%</span></label><input type="range" id="sStim" min="30" max="100" value="70" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🗓️ 选择同一肌群的训练间隔节奏，观察 21 天体能阶梯的三种截然不同命运：</div>
+      <div class="scen-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">下次开练时体能基线</div><div class="k-val" id="kBase">—</div></div>
-        <div class="kpi"><div class="k-lbl">长期演化趋势</div><div class="k-val" id="kTr">—</div></div>
+        <div class="kpi"><div class="k-lbl">21 天后体能水平</div><div class="k-val" id="kEnd">—</div></div>
+        <div class="kpi"><div class="k-lbl">恢复状态诊断</div><div class="k-val" id="kDiag">—</div></div>
+        <div class="kpi"><div class="k-lbl">21 天内训练次数</div><div class="k-val" id="kCnt" style="color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const rest=+document.getElementById('sRest').value, stim=+document.getElementById('sStim').value;
-  document.getElementById('vRest').textContent=rest+' 天'; document.getElementById('vStim').textContent=stim+'%';
-  const peakDay=1.5 + stim/45;
-  const curve=d=>{
-    if(d<peakDay*0.6) return 100 - stim*0.4*(1-d/(peakDay*0.6));
-    return 100 + stim*0.25*Math.exp(-Math.pow((d-peakDay)/1.8,2));
-  };
-  const nextVal=Math.round(curve(rest));
-  const gain=nextVal-100;
-  document.getElementById('kBase').textContent=(gain>=0?'+':'')+gain+'% ('+nextVal+')';
-  document.getElementById('kBase').style.color=gain>=5?'#059669':(gain<0?'#ef4444':'#f59e0b');
-  document.getElementById('kTr').textContent=gain>=5?'螺旋上升 (超量恢复)':(gain<0?'过度训练滑坡!':'原地踏步 (歇太久)');
-  let pts='';
-  for(let d=0;d<=10;d+=0.25){ pts+=`${40+d*52},${125-(curve(d)-100)*2.2} `; }
-  const cx=40+rest*52, cy=125-(nextVal-100)*2.2;
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="125" x2="560" y2="125" stroke="#94a3b8" stroke-dasharray="4 3"/>
-    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${pts}"/>
-    <circle cx="${cx}" cy="${cy}" r="6" fill="${gain>=5?'#059669':'#ef4444'}"/>
-    <text x="50" y="28" font-size="12" font-weight="800" fill="#0284c7">先降(疲劳) → 后升(超量峰值在第 ${peakDay.toFixed(1)} 天) → 再回落(消退)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>超量恢复窗口就在训练后第 <strong>${peakDay.toFixed(1)} 天</strong>！间隔 ${rest} 天开练刚好踩在 ${gain>=0?'+':''}${gain}% 位置，这才是科学的螺旋上升节奏！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const PLANS = [
+      { id:'over', icon:'🔥', name:'天天死磕（间隔 1 天）', desc:'没恢复完又开练 → 过度训练', gap:1,
+        aha:'💡 <strong>顿悟时刻：</strong>每天狂虐同一个肌群，肌肉还没来得及修好又挨了一顿揍，体能一路向下跌成<strong>阶梯式崩盘</strong>——不仅不长肉，还极易拉伤和感冒！' },
+      { id:'gold', icon:'🎯', name:'踩准窗口（间隔 3 天）', desc:'在超量巅峰再叠加刺激', gap:3,
+        aha:'💡 <strong>顿悟时刻：</strong>教科书级的<strong>阶梯式超量恢复</strong>！每次训练都在前一次恢复爬到比起点更高的顶点时精准落脚，21 天稳步垫高体能天花板！' },
+      { id:'lazy', icon:'🦥', name:'三天打鱼（间隔 7 天）', desc:'超量红利消退回起点', gap:7,
+        aha:'💡 <strong>顿悟时刻：</strong>等了整整 7 天才练下一次，上一次辛辛苦苦换来的超量恢复峰值早已回落到基线，21 天下来只是在原地画锯齿、几乎零增长！' }
+    ];
+    let cur = 'gold';
+
+    function pick(id){ cur = id; if(window.ToySDK) window.ToySDK.markCompleted(); draw(); }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = PLANS.map(p => `
+        <button class="s-btn ${cur===p.id?'active':''}" onclick="pick('${p.id}')">
+          <div class="t">${p.icon} ${p.name}</div>
+          <div class="s">${p.desc}</div>
+        </button>
+      `).join('');
+
+      const p = PLANS.find(x=>x.id===cur);
+      const pts = [];
+      const hits = [];
+      let base = 50;
+      let val = 50;
+      for(let d=0; d<=21; d+=0.25){
+        const since = d % p.gap;
+        if(since === 0 && d < 21){
+          hits.push(d);
+          if(p.id === 'over') base = Math.max(18, base - 1.7);
+          else if(p.id === 'gold') base = Math.min(92, base + 5.8);
+          else base = 50;
+        }
+        // Within cycle: dip on day 0.4, rebound to peak at day 2.5-3.0, decay back after day 4.5
+        if(since < 0.7){
+          val = base - 12 * Math.sin((since / 0.7) * Math.PI);
+        } else if(since < 3.2){
+          val = base + 6.5 * Math.sin(((since - 0.7) / 2.5) * (Math.PI / 2));
+        } else {
+          val = base + 6.5 * Math.exp(-(since - 3.2) / 1.8);
+        }
+        pts.push({ d, v: Math.max(12, Math.min(96, val)) });
+      }
+
+      const x0=52, x1=612, yMin=28, yMax=188;
+      const toX = d => x0 + (d/21)*(x1-x0);
+      const toY = v => yMax - (v/100)*(yMax-yMin);
+      const col = p.id === 'gold' ? 'var(--tax-green)' : (p.id === 'over' ? 'var(--tax-red)' : 'var(--tax-amber)');
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="${x0}" y1="${toY(50)}" x2="${x1}" y2="${toY(50)}" stroke="var(--tax-muted)" stroke-dasharray="4 4"/>
+        <text x="${x0-6}" y="${toY(50)+4}" text-anchor="end" font-size="10.5" fill="var(--tax-muted)">初始基线</text>
+        ${[0,3,6,9,12,15,18,21].map(d=>`<text x="${toX(d)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">D${d}</text>`).join('')}
+        ${hits.map(h=>`<line x1="${toX(h)}" y1="${yMin}" x2="${toX(h)}" y2="${yMax}" stroke="var(--tax-border)" stroke-dasharray="2 3"/>`).join('')}
+        <polyline points="${pts.map(pt=>`${toX(pt.d).toFixed(1)},${toY(pt.v).toFixed(1)}`).join(' ')}" fill="none" stroke="${col}" stroke-width="3.2" stroke-linejoin="round"/>
+        <circle cx="${toX(21)}" cy="${toY(pts[pts.length-1].v)}" r="6" fill="${col}"/>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="${col}">21 天体能演化轨迹（垂直虚线 = 每次训练日）</text>
+      `;
+
+      const endV = Math.round(pts[pts.length-1].v);
+      const kEnd = document.getElementById('kEnd');
+      kEnd.textContent = `${endV} 分 (${endV>=50?'+':''}${endV-50})`;
+      kEnd.style.color = col;
+      const kDiag = document.getElementById('kDiag');
+      kDiag.textContent = p.id==='gold'?'黄金超量递增 🏆':(p.id==='over'?'过度训练崩盘 🔥':'原地踏步消退 🦥');
+      kDiag.style.color = col;
+      document.getElementById('kCnt').textContent = `${hits.length} 次训练`;
+      document.getElementById('ahaBox').innerHTML = p.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

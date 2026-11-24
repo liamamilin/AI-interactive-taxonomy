@@ -7,65 +7,114 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .scen-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:9px; margin-bottom:12px; }
+    .s-btn { padding:10px 11px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .s-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .s-btn .t { font-size:13px; font-weight:800; }
+    .s-btn .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
+    .bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+    .pill { padding:7px 12px; border-radius:999px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-green); color:#fff; border-color:var(--tax-green); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🧪 乳酸阈值：为什么不是乳酸让你腿酸？</h1><p>误区：运动后肌肉酸痛全是因为有毒废料“乳酸”堵在肌肉里。真相：乳酸本身其实是极好的能量燃料（能被心脏和慢肌当场回收烧掉）；真正让你腿软发酸的是伴随无氧糖酵解产生的氢离子 H+ 酸化！</p></div>
+      <div>
+        <h1>🧪 乳酸阈值：为什么不是乳酸让你腿酸？</h1>
+        <p>误区：跑步腿灼痛、第二天肌肉酸痛都是“乳酸堆积有毒”。真相：乳酸其实是被冤枉的<strong>优质心脏与肌肉燃料</strong>！真正让你大腿火辣灼烧的，是糖酵解伴随溢出的<strong>氢离子 H+</strong>——超过乳酸阈值，排水管来不及清就会瞬间爆缸！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>当前跑步配速强度</span><span id="vSpd">78%</span></label><input type="range" id="sSpd" min="30" max="100" value="78" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>有氧耐力基础 (乳酸清除速度)</span><span id="vClr">65%</span></label><input type="range" id="sClr" min="30" max="100" value="65" oninput="upd()"></div>
+      <div class="scen-grid" id="grid"></div>
+      <div class="bar">
+        <span style="font-size:12.5px;font-weight:750;color:var(--tax-muted);">跑者线粒体排水管口径：</span>
+        <button class="pill active" onclick="setFit('novice',this)">🐣 新手跑者（清酸能力 45）</button>
+        <button class="pill" onclick="setFit('pro',this)">🏆 资深耐力跑者（清酸能力 82）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">血乳酸浓度</div><div class="k-val" id="kLac">—</div></div>
-        <div class="kpi"><div class="k-lbl">能否长期维持配速</div><div class="k-val" id="kSus">—</div></div>
+        <div class="kpi"><div class="k-lbl">进水口：产酸速率</div><div class="k-val" id="kIn" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">排水口：线粒体回收速率</div><div class="k-val" id="kOut" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">H+ 氢离子灼烧状态</div><div class="k-val" id="kBurn">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const spd=+document.getElementById('sSpd').value, clr=+document.getElementById('sClr').value;
-  document.getElementById('vSpd').textContent=spd+'%'; document.getElementById('vClr').textContent=clr+'%';
-  const thresh=55 + clr*0.32;
-  const lac=Math.max(1.0, (1.2 + Math.exp((spd-thresh)/12)*2.8)).toFixed(1);
-  const over=parseFloat(lac)>4.0;
-  document.getElementById('kLac').textContent=lac+' mmol/L';
-  document.getElementById('kLac').style.color=over?'#ef4444':'#059669';
-  document.getElementById('kSus').textContent=over?'突破阈值 (几分钟后力竭)':'稳态可巡航';
-  let pts='';
-  for(let x=30;x<=100;x+=3){
-    const l=Math.min(14, 1.2 + Math.exp((x-thresh)/12)*2.8);
-    pts+=`${40+(x-30)/70*520},${160-l*9.5} `;
-  }
-  const cx=40+(spd-30)/70*520, cy=160-Math.min(14,parseFloat(lac))*9.5;
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="160" x2="560" y2="160" stroke="#94a3b8"/>
-    <line x1="40" y1="122" x2="560" y2="122" stroke="#f59e0b" stroke-dasharray="4 3"/>
-    <text x="45" y="116" font-size="11" fill="#f59e0b">4.0 mmol/L 乳酸拐点</text>
-    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${pts}"/>
-    <circle cx="${cx}" cy="${cy}" r="6" fill="${over?'#ef4444':'#059669'}"/>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>长跑高手跑得快不是因为他们不产乳酸，而是他们的线粒体清除乳酸能力（当前拐点 ${Math.round(thresh)}%）极高，能一边产一边烧掉！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const PACES = [
+      { id:'easy', icon:'🚶', name:'轻松有氧跑', desc:'心率 135 · 产酸 25', prod:25 },
+      { id:'tempo', icon:'🏃', name:'舒适节奏跑', desc:'心率 158 · 产酸 52', prod:52 },
+      { id:'lt', icon:'🔥', name:'阈值边缘冲刺', desc:'心率 172 · 产酸 76', prod:76 },
+      { id:'allout', icon:'💥', name:'全力无氧爆冲', desc:'心率 188 · 产酸 98', prod:98 }
+    ];
+    let cur = 'tempo', fit = 'novice';
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function pick(id){ cur = id; markDone(); draw(); }
+    function setFit(f, btn){
+      fit = f;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); draw();
+    }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = PACES.map(p => `
+        <button class="s-btn ${cur===p.id?'active':''}" onclick="pick('${p.id}')">
+          <div class="t">${p.icon} ${p.name}</div>
+          <div class="s">${p.desc}</div>
+        </button>
+      `).join('');
+
+      const p = PACES.find(x=>x.id===cur);
+      const drain = fit === 'pro' ? 82 : 45;
+      const net = p.prod - drain;
+      const level = net <= 0 ? Math.max(14, Math.round((p.prod / drain) * 42)) : Math.min(98, Math.round(52 + net * 1.1));
+      const overflow = net > 0;
+      const tankCol = overflow ? 'var(--tax-red)' : 'var(--tax-green)';
+      const tankSoft = overflow ? 'var(--tax-red-soft)' : 'var(--tax-green-soft)';
+
+      const fillH = Math.round((level / 100) * 126);
+      document.getElementById('svg').innerHTML = `
+        <rect x="28" y="42" width="146" height="54" rx="10" fill="var(--tax-amber-soft)" stroke="var(--tax-amber)" stroke-width="2"/>
+        <text x="101" y="66" text-anchor="middle" font-size="13" font-weight="850" fill="var(--tax-amber)">🚰 糖酵解产酸</text>
+        <text x="101" y="84" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-ink)">速率 ${p.prod} 单位/分</text>
+        <line x1="174" y1="69" x2="236" y2="69" stroke="var(--tax-amber)" stroke-width="${3 + p.prod/22}" stroke-linecap="round"/>
+
+        <rect x="240" y="34" width="160" height="140" rx="12" fill="var(--tax-surface-alt)" stroke="${tankCol}" stroke-width="2.4"/>
+        <rect x="244" y="${170 - fillH}" width="152" height="${fillH}" rx="8" fill="${tankSoft}"/>
+        <text x="320" y="88" text-anchor="middle" font-size="14" font-weight="900" fill="${tankCol}">${overflow ? '🔥 突破阈值！' : '✅ 动态平衡'}</text>
+        <text x="320" y="112" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-ink)">H+ 堆积液位 ${level}%</text>
+        <text x="320" y="136" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${overflow ? '肌肉 pH 骤降 · 灼痛力竭' : '乳酸正被循环当燃料烧'}</text>
+
+        <line x1="400" y1="142" x2="462" y2="142" stroke="var(--tax-green)" stroke-width="${3 + drain/20}" stroke-linecap="round"/>
+        <rect x="466" y="112" width="146" height="58" rx="10" fill="var(--tax-green-soft)" stroke="var(--tax-green)" stroke-width="2"/>
+        <text x="539" y="136" text-anchor="middle" font-size="12.5" font-weight="850" fill="var(--tax-green)">♻️ 线粒体回收泵</text>
+        <text x="539" y="156" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--tax-ink)">上限 ${drain} 单位/分</text>
+
+        <text x="320" y="202" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-muted)">提示：第二天腿疼叫 DOMS（肌纤维微撕裂），运动后 1 小时乳酸早就清空回收了！</text>
+      `;
+
+      document.getElementById('kIn').textContent = p.prod + ' / min';
+      document.getElementById('kOut').textContent = drain + ' / min';
+      const kB = document.getElementById('kBurn');
+      kB.textContent = overflow ? `爆缸过载 (+${net}) 🔥` : `稳态可控 ✅`;
+      kB.style.color = tankCol;
+
+      document.getElementById('ahaBox').innerHTML = overflow
+        ? `💡 <strong>顿悟时刻：</strong>进水速度（${p.prod}）已超过线粒体排水管上限（${drain}），大量 <strong>H+ 氢离子</strong> 蓄积让肌肉发酸发硬！试着把身份切换到 <strong>🏆 资深耐力跑者</strong>，看看同一配速下为什么大神面不改色！`
+        : `💡 <strong>顿悟时刻：</strong>水池保持稳态！此时产生的乳酸不仅没害，反而正通过“乳酸穿梭”被心肌和慢肌纤维当成超级燃料二次燃烧——提升耐力的核心就是把右侧<strong>线粒体排水管</strong>练粗！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

@@ -7,62 +7,99 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📓 渐进超负荷：为什么必须记录每次重量/次数？</h1><p>误区：只要每次去健身房出了一身大汗、肌肉酸痛了，就一定在进步。真相：身体极其精明且节能——如果今天的重量和上个月一模一样，身体会觉得“现有肌肉已经够用了”，立刻停止生长！</p></div>
+      <div>
+        <h1>📓 渐进超负荷：为什么必须记录每次重量/次数？</h1>
+        <p>误区：只要每次去健身房出了一身大汗、举得累就行，没必要拿手机记数字。真相：肌肉是极其抠门的节能器官——如果你连续 3 个月永远举同一个 60kg，身体完全没有理由多长哪怕 1 克新肌肉！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>每周渐进微增负荷幅度</span><span id="vInc">2.5%</span></label><input type="range" id="sInc" min="0" max="6" step="0.5" value="2.5" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>营养与恢复执行率</span><span id="vRec">85%</span></label><input type="range" id="sRec" min="40" max="100" value="85" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="runRace()">▶ 播放 12 周力量复利竞速</button>
+        <button class="pill active" onclick="setStep(2.5,this)">📈 每周微增 +2.5%（约 +1.5kg）</button>
+        <button class="pill" onclick="setStep(4.0,this)">🚀 新手红利期 +4%（每周 +2.5kg）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">12周后力量指数</div><div class="k-val" id="kEnd" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">受伤/崩盘风险</div><div class="k-val" id="kInj">—</div></div>
+        <div class="kpi"><div class="k-lbl">😪 佛系不记日志组（第 12 周）</div><div class="k-val" id="kFlat" style="color:var(--tax-muted);">—</div></div>
+        <div class="kpi"><div class="k-lbl">📓 渐进超负荷组（第 12 周）</div><div class="k-val" id="kProg" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">总训练容量（增肌信号）领先</div><div class="k-val" id="kLead" style="color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const inc=+document.getElementById('sInc').value, rec=+document.getElementById('sRec').value;
-  document.getElementById('vInc').textContent=inc+'%'; document.getElementById('vRec').textContent=rec+'%';
-  const maxSafe=rec/22;
-  const inj=inc>maxSafe;
-  let pts='';
-  let cur=100;
-  for(let w=0;w<=12;w++){
-    pts+=`${40+w*43},${160-Math.min(140,(cur-80)*1.4)} `;
-    cur = inj && w>6 ? cur*0.95 : cur*(1+inc/100*0.8);
-  }
-  document.getElementById('kEnd').textContent=Math.round(cur)+' 分';
-  document.getElementById('kInj').textContent=inj?'激进加码拉伤!':'稳步安全突破';
-  document.getElementById('kInj').style.color=inj?'#ef4444':'#059669';
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="160" x2="560" y2="160" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="${inj?'#ef4444':'#059669'}" stroke-width="3" points="${pts}"/>
-    <text x="50" y="28" font-size="12" font-weight="800" fill="${inj?'#ef4444':'#059669'}">12周力量成长曲线 (每周 +${inc}% → 终点 ${Math.round(cur)})</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只靠“小步微增”（哪怕每次多举 1 公斤或 1 次），12 周复利下来就能涨到 ${Math.round(cur)} 分；但一旦超过恢复上限（>${maxSafe.toFixed(1)}%），贪快反而会拉伤倒退！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let pctStep = 2.5, curWk = 12, timer = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setStep(s, btn){
+      pctStep = s;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); runRace();
+    }
+    function runRace(){
+      if(timer) clearInterval(timer);
+      markDone();
+      curWk = 1;
+      timer = setInterval(()=>{
+        curWk++;
+        draw();
+        if(curWk >= 12){ clearInterval(timer); timer=null; }
+      }, 120);
+      draw();
+    }
+
+    function draw(){
+      const base = 60;
+      const x0=54, x1=612, yMin=28, yMax=188;
+      const toX = w => x0 + ((w-1)/11)*(x1-x0);
+      const toY = kg => yMax - ((kg - 50)/55)*(yMax-yMin);
+
+      let pF=[], pP=[];
+      let lastF = 60, lastP = 60;
+      for(let w=1; w<=curWk; w++){
+        const kgF = base + (w <= 2 ? w * 1.2 : 2.4);
+        const kgP = base * Math.pow(1 + pctStep/100, w - 1);
+        lastF = kgF; lastP = kgP;
+        pF.push(`${toX(w).toFixed(1)},${toY(kgF).toFixed(1)}`);
+        pP.push(`${toX(w).toFixed(1)},${toY(Math.min(104, kgP)).toFixed(1)}`);
+      }
+      const leadPct = Math.round(((lastP - lastF) / lastF) * 100);
+
+      document.getElementById('svg').innerHTML = `
+        ${[50,65,80,95].map(k=>`<line x1="${x0}" y1="${toY(k)}" x2="${x1}" y2="${toY(k)}" stroke="var(--tax-border)"/><text x="${x0-8}" y="${toY(k)+4}" text-anchor="end" font-size="11" fill="var(--tax-muted)">${k}kg</text>`).join('')}
+        ${[1,3,6,9,12].map(w=>`<text x="${toX(w)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">第${w}周</text>`).join('')}
+        <polyline points="${pF.join(' ')}" fill="none" stroke="var(--tax-muted)" stroke-width="2.6" stroke-dasharray="6 4"/>
+        <polyline points="${pP.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="${toX(curWk)}" cy="${toY(lastF)}" r="5" fill="var(--tax-muted)"/>
+        <circle cx="${toX(curWk)}" cy="${toY(Math.min(104, lastP))}" r="6" fill="var(--tax-green)"/>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-green)">● 渐进超负荷记录组（${lastP.toFixed(1)}kg）</text>
+        <text x="${x0+225}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-muted)">-- 凭感觉不记日志组（${lastF.toFixed(1)}kg）</text>
+      `;
+
+      document.getElementById('kFlat').textContent = `${lastF.toFixed(1)} kg（停滞）`;
+      document.getElementById('kProg').textContent = `${lastP.toFixed(1)} kg`;
+      document.getElementById('kLead').textContent = `+${leadPct}%`;
+
+      document.getElementById('ahaBox').innerHTML = `💡 <strong>顿悟时刻：</strong>每周哪怕只多推 1 次或多加 1.25kg 小杠铃片，12 周复利下来你的绝对力量就会领先佛系组 <strong>+${leadPct}%</strong>（达到 ${lastP.toFixed(1)} kg）！记住健身第一铁律：<strong>你无法超负荷你没有记录的数字！</strong>`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

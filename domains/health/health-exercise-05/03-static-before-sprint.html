@@ -7,57 +7,94 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🏃 热身雷区：赛前狂做静态拉伸反而跑更慢？</h1><p>误区：跑步或打球前，应该找个栏杆把腿静态压到最软最松才不容易拉伤、跑得最快。真相：赛前长时间静态拉伸（>60秒）会暂时削弱肌腱刚度和神经兴奋度，让你起跑爆发力下降；动态热身才是赛前正解！</p></div>
+      <div>
+        <h1>🏃 热身雷区：赛前狂做静态拉伸反而跑更慢？</h1>
+        <p>误区：打球或短跑比赛前，坐在地上狂压腿 2 分钟能让你跳得更高、跑得更快。真相：超过 60 秒的静态拉伸会把像弹簧一样紧绷的肌腱暂时拉松，直接导致你的<strong>垂直起跳与百米爆发力瞬间掉 5%–8%</strong>！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>赛前单一部位静态压腿时长</span><span id="vSt">60 秒</span></label><input type="range" id="sSt" min="0" max="120" step="10" value="60" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>动态热身激活 (高抬腿/摆腿)</span><span id="vDyn">30%</span></label><input type="range" id="sDyn" min="0" max="100" value="30" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="launchTest()">🚀 发射双轨爆发力实测</button>
+        <button class="pill active" onclick="setTest('jump',this)">🏀 摸高纵跳测试</button>
+        <button class="pill" onclick="setTest('sprint',this)">⚡ 100 米起跑加速</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 210"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">爆发力/弹跳保留率</div><div class="k-val" id="kPow">—</div></div>
-        <div class="kpi"><div class="k-lbl">热身方案建议</div><div class="k-val" id="kAdv">—</div></div>
+        <div class="kpi"><div class="k-lbl">⚡ 赛前动态热身组</div><div class="k-val" id="kDyn" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🧘 赛前狂做 90s 静态压腿组</div><div class="k-val" id="kStat" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">爆发力与弹性势能差</div><div class="k-val" id="kGap" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const st=+document.getElementById('sSt').value, dyn=+document.getElementById('sDyn').value;
-  document.getElementById('vSt').textContent=st+' 秒'; document.getElementById('vDyn').textContent=dyn+'%';
-  const pow=Math.max(65, Math.min(108, Math.round(92 - Math.max(0,st-30)*0.18 + dyn*0.14)));
-  document.getElementById('kPow').textContent=pow+'%';
-  document.getElementById('kPow').style.color=pow>=95?'#059669':'#ef4444';
-  document.getElementById('kAdv').textContent=st>45&&dyn<50?'快停下静态拉，改动态热身!':'备战状态良好';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="${pow>=95?'#059669':'#ef4444'}">比赛瞬时爆发力表现: ${pow}%</text>
-    <rect x="20" y="44" width="${pow*4.5}" height="24" rx="6" fill="${pow>=95?'#059669':'#ef4444'}"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">动态热身血流与神经激活度: ${dyn}%</text>
-    <rect x="20" y="112" width="${dyn*5.2}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">黄金顺序：运动前“动态热身”拉紧弹簧，运动后“静态拉伸”放松恢复！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>肌肉和肌腱就像起跳的弹簧——赛前长时间静态拉伸会把弹簧扯松，爆发力降到 ${pow}%；记住“<strong>赛前动态热身，赛后静态拉伸</strong>”！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let test = 'jump', pct = 100, timer = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setTest(t, btn){
+      test = t;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); launchTest();
+    }
+    function launchTest(){
+      if(timer) clearInterval(timer);
+      markDone();
+      pct = 0;
+      timer = setInterval(()=>{
+        pct += 5;
+        if(pct >= 100){ pct = 100; clearInterval(timer); timer=null; }
+        draw();
+      }, 30);
+      draw();
+    }
+
+    function draw(){
+      const isJump = test === 'jump';
+      const dynVal = isJump ? 66 : 98;   // 66cm jump or 98% speed
+      const statVal = isJump ? 60 : 91;  // 60cm jump or 91% speed
+      const maxScale = isJump ? 72 : 105;
+
+      const wDyn = (dynVal / maxScale) * 440 * (pct / 100);
+      const wStat = (statVal / maxScale) * 440 * (pct / 100);
+
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="34" font-size="13" font-weight="850" fill="var(--tax-green)">⚡ 赛道 A：赛前 5 分钟动态热身（高抬腿/摆腿/深蹲 · 肌腱弹簧紧绷预热）</text>
+        <rect x="24" y="46" width="${wDyn.toFixed(1)}" height="32" rx="8" fill="var(--tax-green)"/>
+        <text x="${24+wDyn+10}" y="67" font-size="13" font-weight="850" fill="var(--tax-green)">${isJump ? Math.round(dynVal*pct/100)+' cm' : Math.round(dynVal*pct/100)+' 分爆发'}</text>
+
+        <line x1="24" y1="102" x2="616" y2="102" stroke="var(--tax-border)" stroke-dasharray="4 4"/>
+
+        <text x="24" y="130" font-size="13" font-weight="850" fill="var(--tax-red)">🧘 赛道 B：赛前静态狂压腿 90 秒（肌腱刚度变松 · 神经募集暂时变迟钝）</text>
+        <rect x="24" y="142" width="${wStat.toFixed(1)}" height="32" rx="8" fill="var(--tax-red)"/>
+        <text x="${24+wStat+10}" y="163" font-size="13" font-weight="850" fill="var(--tax-red)">${isJump ? Math.round(statVal*pct/100)+' cm' : Math.round(statVal*pct/100)+' 分爆发'}</text>
+
+        <text x="24" y="198" font-size="11.5" font-weight="750" fill="var(--tax-muted)">黄金口诀：运动前做【动态热身】激活弹簧，运动后才做【静态拉伸】放松恢复！</text>
+      `;
+
+      document.getElementById('kDyn').textContent = isJump ? '66 cm 摸高 🏆' : '峰值功率 100% 🏆';
+      document.getElementById('kStat').textContent = isJump ? '60 cm（少跳 6cm）' : '峰值功率 92%（掉速）';
+      document.getElementById('kGap').textContent = isJump ? '-9.1% 弹跳损失' : '-8.0% 起跑爆发损失';
+
+      document.getElementById('ahaBox').innerHTML = `💡 <strong>顿悟时刻：</strong>跟腱和肌肉就像一根高性能弹簧！赛前做超长静态拉伸会把弹簧暂时拉松，让你在${isJump?'起跳扣篮':'百米冲刺'}时白白丢掉近 <strong>8%–9%</strong> 的爆发力！<strong>记住：练前动态激活，练后静态拉伸！</strong>`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

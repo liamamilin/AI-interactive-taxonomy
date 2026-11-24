@@ -7,65 +7,86 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🚒 急性炎症救命 vs 慢性炎症伤身</h1><p>误区：既然炎症伤身，那一旦受伤或喉咙发炎就该彻底抑制一切炎症反应。真相：没有急性炎症召唤白细胞和血管修复，一个小伤口就能要命；真正致命的是“打完仗却忘了撤兵”的慢性炎症！</p></div>
+      <div>
+        <h1>🚒 急性炎症救命 vs 慢性炎症伤身</h1>
+        <p>误区：炎症都是坏东西，只要有炎症就该彻底消灭。真相：没有<strong>急性炎症</strong>，手指划破一个小口都能要你的命；真正可怕的是“消防队救完火不撤退、反而在屋里狂喷十年水”的<strong>慢性炎症</strong>！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="btn-row">
-        <button class="btn active" onclick="setType('acute',this)">急性炎症：72小时定点爆破修复</button>
-        <button class="btn" onclick="setType('chronic',this)">慢性炎症：10年持续低度闷烧</button>
+      <div class="bar">
+        <button class="tax-btn" id="playBtn" onclick="runRace()">▶ 播放双轨炎症演化：7 天急性愈合 vs 长期慢性损伤</button>
       </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>免疫消退信号 (Resolvin 撤兵能力)</span><span id="vRes">70%</span></label><input type="range" id="sRes" min="10" max="100" value="70" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 225"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">组织最终修复度</div><div class="k-val" id="kFix">—</div></div>
-        <div class="kpi"><div class="k-lbl">瘢痕/血管损伤累积</div><div class="k-val" id="kScar">—</div></div>
+        <div class="kpi"><div class="k-lbl">🚒 急性炎症结局</div><div class="k-val" id="kAc" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🕯️ 慢性低度炎症结局</div><div class="k-val" id="kCh" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">本质分水岭</div><div class="k-val" style="color:var(--tax-primary);font-size:15px;">有无“消退归零信号”</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-let itype='acute';
-function setType(t,btn){ itype=t; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const res=+document.getElementById('sRes').value; document.getElementById('vRes').textContent=res+'%';
-  const fix=itype==='acute'?Math.min(98, Math.round(60+res*0.38)):Math.max(20, Math.round(res*0.55));
-  const scar=itype==='acute'?Math.max(2, Math.round((100-res)*0.2)):Math.max(15, Math.round(95-res*0.55));
-  document.getElementById('kFix').textContent=fix+'%';
-  document.getElementById('kScar').textContent=scar+'%';
-  let pts='';
-  for(let t=0;t<=20;t++){
-    const x=40+t*26;
-    const v=itype==='acute'?(85*Math.exp(-Math.pow((t-3)/2.5,2))):(38*(1-res/180));
-    pts+=`${x},${158-v*1.3} `;
-  }
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="${itype==='acute'?'#059669':'#ef4444'}" stroke-width="3" points="${pts}"/>
-    <text x="50" y="28" font-size="12.5" font-weight="800" fill="${itype==='acute'?'#059669':'#ef4444'}">${itype==='acute'?'急风暴雨后迅速撤兵，组织满血复活':'火苗不高但永不熄灭，持续烧坏健康细胞'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>健康的免疫反应应当“来如雷霆、去如撤潮”。缺乏撤兵消退信号时，低火闷烧 10 年的累积损伤（${scar}%）远超一次高烧！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let t = 100, timer = null;
+
+    function runRace(){
+      if(timer) clearInterval(timer);
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      t = 0;
+      timer = setInterval(()=>{
+        t += 3;
+        if(t >= 100){ t = 100; clearInterval(timer); timer=null; }
+        draw();
+      }, 45);
+      draw();
+    }
+
+    function acute(x){ return 8 + 86 * Math.exp(-Math.pow((x - 18)/9, 2)); }
+    function chronic(x){ return 10 + 36 * (1 - Math.exp(-x/14)) + 6 * Math.sin(x * 0.25); }
+
+    function draw(){
+      const x0=52, x1=612, yMin=28, yMax=188;
+      const toX = v => x0 + (v/100)*(x1-x0);
+      const toY = v => yMax - (v/100)*(yMax-yMin);
+
+      let pA=[], pC=[];
+      for(let i=0; i<=t; i+=2){
+        pA.push(`${toX(i).toFixed(1)},${toY(acute(i)).toFixed(1)}`);
+        pC.push(`${toX(i).toFixed(1)},${toY(chronic(i)).toFixed(1)}`);
+      }
+      const aNow = acute(t), cNow = chronic(t);
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="${x0}" y1="${toY(28)}" x2="${x1}" y2="${toY(28)}" stroke="var(--tax-amber)" stroke-dasharray="4 4"/>
+        <text x="${x1-4}" y="${toY(28)-5}" text-anchor="end" font-size="10.5" font-weight="750" fill="var(--tax-amber)">长期无症状组织纤维化阈值</text>
+        ${[{p:0,l:'起点'},{p:25,l:'第3天'},{p:50,l:'第1个月'},{p:75,l:'第1年'},{p:100,l:'第10年'}].map(k=>`<text x="${toX(k.p)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${k.l}</text>`).join('')}
+        <polyline points="${pA.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3.2"/>
+        <polyline points="${pC.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3.2"/>
+        <circle cx="${toX(t)}" cy="${toY(aNow)}" r="5.5" fill="var(--tax-green)"/>
+        <circle cx="${toX(t)}" cy="${toY(cNow)}" r="5.5" fill="var(--tax-red)"/>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-green)">● 急性炎症（猛烈红肿 → 迅速清场撤军愈合）</text>
+        <text x="${x0+290}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-red)">● 慢性炎症（低度不痛 → 十年持续腐蚀）</text>
+      `;
+
+      document.getElementById('kAc').textContent = t > 35 ? '彻底愈合撤退 ✅' : '猛烈杀菌清创中 🚒';
+      document.getElementById('kCh').textContent = t > 60 ? '血管斑块/关节损伤 🚨' : '隐形闷烧中 🕯️';
+
+      document.getElementById('ahaBox').innerHTML = `💡 <strong>顿悟时刻：</strong>急性炎症像“冲进来 3 天扑灭大火立刻撤退的消防队”，虽然红肿发痛却在救命；慢性炎症则是“忘了关掉警报的失控喷淋系统”，表面不痛不痒，十年下来却把好好的健康房子泡烂了！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

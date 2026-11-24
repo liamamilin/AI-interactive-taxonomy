@@ -3,61 +3,121 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📈 HPA 压力轴：急性应激 vs 慢性皮质醇内耗（SVG）</title>
+  <title>📈 HPA 压力轴：急性应激 vs 慢性皮质醇内耗</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📈 HPA 压力轴：急性应激 vs 慢性皮质醇内耗（SVG）</h1><p>误区：压力越大越让人清醒，长期高压只会让人“习惯了抗压”。真相：人类演化出皮质醇是为了应付 5 分钟的逃命（临时拆免疫、升血糖）；如果心理压力 24 小时不关闭，高皮质醇会直接杀死海马体神经元！</p></div>
+      <div>
+        <h1>📈 HPA 压力轴：急性应激 vs 慢性皮质醇内耗</h1>
+        <p>误区：皮质醇是十恶不赦的坏激素，越低越好。真相：原始人遇到猛兽时，短促飙升又迅速回落的“急性皮质醇”是救命神药；真正把人熬垮的，是下班躺床上还在反复反刍引发的“慢性低度高位内耗”！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>工作/焦虑精神内耗持续度</span><span id="vStr">75%</span></label><input type="range" id="sStr" min="10" max="100" value="75" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>下班后冥想/运动释放度</span><span id="vRel">25%</span></label><input type="range" id="sRel" min="0" max="100" value="25" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" id="playBtn" onclick="startRace()">▶ 触发压力事件（播放 12 小时双轨实况）</button>
+        <button class="pill active" onclick="setDetach('low',this)">📱 现代内耗：下班不停刷工作群</button>
+        <button class="pill" onclick="setDetach('high',this)">🌳 心理抽离：下班运动+断网放松</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 640 225"></svg>
+
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">夜间皮质醇残留</div><div class="k-val" id="kCor" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">海马体记忆与免疫受损度</div><div class="k-val" id="kDmg">—</div></div>
+        <div class="kpi"><div class="k-lbl">🦁 急性应激组：12h 累积负荷</div><div class="k-val" id="kAcute" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">💻 现代职场组：12h 累积负荷</div><div class="k-val" id="kChron" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">海马体与免疫系统风险</div><div class="k-val" id="kRisk" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const str=+document.getElementById('sStr').value, rel=+document.getElementById('sRel').value;
-  document.getElementById('vStr').textContent=str+'%'; document.getElementById('vRel').textContent=rel+'%';
-  const cor=Math.max(10, Math.round(str*(1-rel/130)));
-  const dmg=Math.max(5, Math.round(cor*0.85));
-  document.getElementById('kCor').textContent=cor+' 单位';
-  document.getElementById('kDmg').textContent=dmg+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="${cor>50?'#ef4444':'#059669'}">慢性皮质醇滞留水平: ${cor} 单位</text>
-    <rect x="20" y="44" width="${cor*5.4}" height="24" rx="6" fill="${cor>50?'#ef4444':'#059669'}"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#f59e0b">海马体记忆压抑 + 免疫防线削弱: ${dmg}%</text>
-    <rect x="20" y="112" width="${dmg*5.4}" height="24" rx="6" fill="#f59e0b"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">大脑分不清“真的老虎在追”还是“明天要交的 PPT”，照样拉响战时警报</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>动物跑完步就把压力荷尔蒙抖干净了，只有人类会在床上反复反刍！通过深呼吸或运动把压力反应“物理闭环”，才能让夜间皮质醇回落到 ${cor} 以下！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let detach = 'low', curHr = 12, timer = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setDetach(d, btn){
+      detach = d;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); startRace();
+    }
+
+    function acuteVal(h){
+      return 18 + 76 * Math.exp(-Math.pow((h - 1.5)/0.7, 2));
+    }
+    function chronicVal(h){
+      if(detach === 'high'){
+        return 22 + 42 * Math.exp(-Math.pow((h - 2.0)/1.4, 2)) + 12 * Math.exp(-Math.pow((h - 5.5)/1.2, 2));
+      }
+      // Persistent rumination keeps cortisol hovering at 62–78 all evening
+      return 24 + 50 * (1 - Math.exp(-h/1.1)) + 8 * Math.sin(h * 1.6);
+    }
+
+    function startRace(){
+      if(timer) clearInterval(timer);
+      markDone();
+      curHr = 0;
+      document.getElementById('playBtn').textContent = '⏱ 双轨实况播放中...';
+      timer = setInterval(()=>{
+        curHr += 0.3;
+        if(curHr >= 12){
+          curHr = 12; clearInterval(timer); timer = null;
+          document.getElementById('playBtn').textContent = '↻ 重播 12 小时对比';
+        }
+        draw();
+      }, 45);
+      draw();
+    }
+
+    function draw(){
+      const x0=52, x1=612, yMin=28, yMax=188;
+      const toX = h => x0 + (h/12)*(x1-x0);
+      const toY = v => yMax - (Math.min(100, v)/100)*(yMax-yMin);
+
+      let pA=[], pC=[], sumA=0, sumC=0;
+      for(let h=0; h<=curHr; h+=0.2){
+        const a = acuteVal(h), c = chronicVal(h);
+        sumA += a * 0.2; sumC += c * 0.2;
+        pA.push(`${toX(h).toFixed(1)},${toY(a).toFixed(1)}`);
+        pC.push(`${toX(h).toFixed(1)},${toY(c).toFixed(1)}`);
+      }
+      const aNow = acuteVal(curHr), cNow = chronicVal(curHr);
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="${x0}" y1="${toY(55)}" x2="${x1}" y2="${toY(55)}" stroke="var(--tax-red)" stroke-dasharray="4 4" stroke-opacity="0.55"/>
+        <text x="${x1-4}" y="${toY(55)-5}" text-anchor="end" font-size="10.5" fill="var(--tax-red)">慢性神经/免疫腐蚀警戒线</text>
+        ${[0,2,4,6,8,10,12].map(h=>`<text x="${toX(h)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">+${h}h</text>`).join('')}
+        <polyline points="${pA.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3"/>
+        <polyline points="${pC.join(' ')}" fill="none" stroke="${detach==='low'?'var(--tax-red)':'var(--tax-primary)'}" stroke-width="3.2"/>
+        <circle cx="${toX(curHr)}" cy="${toY(aNow)}" r="5.5" fill="var(--tax-green)"/>
+        <circle cx="${toX(curHr)}" cy="${toY(cNow)}" r="5.5" fill="${detach==='low'?'var(--tax-red)':'var(--tax-primary)'}"/>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-green)">● 急性逃命应激（瞬间拉满→迅速归零）</text>
+        <text x="${x0+265}" y="18" font-size="11.5" font-weight="800" fill="${detach==='low'?'var(--tax-red)':'var(--tax-primary)'}">● 现代职场压力（${detach==='low'?'持续高位内耗':'下班抽离回落'}）</text>
+      `;
+
+      document.getElementById('kAcute').textContent = Math.round(sumA) + ' 单位（安全）';
+      document.getElementById('kChron').textContent = Math.round(sumC) + ' 单位' + (detach==='low'?' 🔥 3倍过载':' ✅ 可控');
+      document.getElementById('kRisk').textContent = detach==='low' ? '高（失眠/易感冒/腹型肥）' : '低（快速修复）';
+
+      document.getElementById('ahaBox').innerHTML = detach === 'low'
+        ? `💡 <strong>顿悟时刻：</strong>决定压力伤不伤身的，不是<strong>峰值有多高</strong>，而是<strong>曲线下的总面积（持续多久不回落）</strong>！下班后继续刷消息反刍，让大脑以为猛兽一直站在床边，皮质醇整夜降不下来！`
+        : `💡 <strong>顿悟时刻：</strong>下班后真正做到<strong>物理断联 + 运动排压</strong>，HPA 轴就能顺利踩下刹车，把皮质醇迅速拉回安全基线，既应对了白天的挑战，又保住了晚上的免疫与睡眠！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

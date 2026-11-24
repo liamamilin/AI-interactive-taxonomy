@@ -3,70 +3,95 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🩸 弹性血管缓冲器 (Windkessel) 模拟器（SVG）</title>
+  <title>🩸 弹性血管缓冲器 (Windkessel) 模拟器</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🩸 弹性血管缓冲器 (Windkessel) 模拟器（SVG）</h1><p>误区：血压只有高压高才危险，低压越低越好。真相：大动脉像弹性气囊一样在心脏舒张期回弹供血；一旦动脉硬化失去弹性，高压会冲破天际而低压暴跌，拉出危险的“大脉压差”！</p></div>
+      <div>
+        <h1>🩸 弹性血管缓冲器 (Windkessel) 模拟器</h1>
+        <p>误区：高压（收缩压）高、低压（舒张压）偏低说明问题不大。真相：年轻大动脉像有弹性的橡皮气囊，能吸收心跳冲击并在心脏舒张时回弹托住低压；血管硬化成铁管后，高压飙天、低压垮塌，<strong>脉压差暴增</strong>才是最危险的硬化信号！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>主动脉血管弹性 (高=年轻软管)</span><span id="vEl">80%</span></label><input type="range" id="sEl" min="15" max="100" value="80" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>外周小血管收缩阻力</span><span id="vRes">45%</span></label><input type="range" id="sRes" min="20" max="100" value="45" oninput="upd()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="setVessel('elastic',this)">🟢 年轻弹性大动脉（橡皮管）</button>
+        <button class="pill" onclick="setVessel('mid',this)">🟡 中年轻度变硬</button>
+        <button class="pill" onclick="setVessel('stiff',this)">🔴 重度动脉硬化（生锈铁管）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">收缩压 (高压)</div><div class="k-val" id="kSys" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">舒张压 (低压)</div><div class="k-val" id="kDia" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">脉压差 (高压-低压)</div><div class="k-val" id="kPP">—</div></div>
+        <div class="kpi"><div class="k-lbl">高压 / 低压 (mmHg)</div><div class="k-val" id="kBp">—</div></div>
+        <div class="kpi"><div class="k-lbl">脉压差（高压 − 低压）</div><div class="k-val" id="kPp" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">心脏舒张期冠脉供血</div><div class="k-val" id="kFlow" style="color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const el=+document.getElementById('sEl').value, res=+document.getElementById('sRes').value;
-  document.getElementById('vEl').textContent=el+'%'; document.getElementById('vRes').textContent=res+'%';
-  const sys=Math.round(100 + (100-el)*0.65 + res*0.35);
-  const dia=Math.round(52 + el*0.18 + res*0.32);
-  const pp=sys-dia;
-  document.getElementById('kSys').textContent=sys+' mmHg';
-  document.getElementById('kDia').textContent=dia+' mmHg';
-  document.getElementById('kPP').textContent=pp+' mmHg'+(pp>60?' (硬化预警!)':'');
-  let pts='';
-  for(let t=0;t<=40;t++){
-    const x=40+t*13;
-    const cyc=(t%10)/10;
-    const wave=cyc<0.3?Math.sin(cyc/0.3*Math.PI):Math.exp(-(cyc-0.3)*2.5)*0.4;
-    const p=dia + pp*wave;
-    pts+=`${x},${165-(p-40)*0.95} `;
-  }
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="165" x2="560" y2="165" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="${sys>140?'#ef4444':'#059669'}" stroke-width="3" points="${pts}"/>
-    <text x="50" y="28" font-size="12.5" font-weight="800" fill="var(--tax-text)">实时动脉血压波形：${sys}/${dia} mmHg (弹性越高，波形越平缓保护器官)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>健康的弹性动脉就像救火水车上的缓冲气囊，能把心脏每一次喷血的剧烈冲击变成平稳水流；血管变硬（弹性降至 ${el}%）后脉压差拉大到 <strong>${pp} mmHg</strong>，极易冲击肾脏与脑微血管！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const MODES = {
+      elastic: { name:'弹性软橡皮管', sbp:118, dbp:78, col:'var(--tax-green)', flow:'充沛平稳 ✅',
+        aha:'💡 <strong>顿悟时刻：</strong>健康大动脉自带“弹性水囊效应（Windkessel）”！心脏泵血时它扩张吸掉冲击（高压仅 <strong>118</strong>），心脏休息时它弹性回缩继续推血（托住低压 <strong>78</strong>），脉压差仅 40 mmHg！' },
+      mid: { name:'轻度动脉变硬', sbp:142, dbp:74, col:'var(--tax-amber)', flow:'轻度波动 ⚠️',
+        aha:'💡 <strong>顿悟时刻：</strong>随着血管弹性胶原流失，血管缓冲能力下降，高压开始攀升到 <strong>142</strong> 而低压微降到 <strong>74</strong>，脉压差拉大到 <strong>68 mmHg</strong>——这就是血管老化的早期预警！' },
+      stiff: { name:'重度硬化铁管', sbp:174, dbp:64, col:'var(--tax-red)', flow:'舒张期断流风险 🚨',
+        aha:'💡 <strong>顿悟时刻：</strong>血管硬得像一根铁管！心脏一泵血压力无处缓冲直接冲爆 <strong>174</strong>，心脏一歇气铁管又不回弹，低压瞬间掉到 <strong>64</strong>（脉压差高达 <strong>110 mmHg</strong>）！这就是许多老年人“高压极高、低压反倒不高”的物理真相！' }
+    };
+    let mode = 'elastic';
+
+    function setVessel(m, btn){
+      mode = m;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const m = MODES[mode];
+      const pp = m.sbp - m.dbp;
+      const x0=54, x1=612, yMin=28, yMax=188;
+      const toX = t => x0 + (t/3)*(x1-x0);
+      const toY = p => yMax - ((p - 40)/150)*(yMax-yMin);
+
+      let pts = [];
+      for(let t=0; t<=3; t+=0.02){
+        const ph = t % 1;
+        let v;
+        if(ph < 0.28) v = m.dbp + (m.sbp - m.dbp) * Math.sin((ph/0.28)*(Math.PI/2));
+        else v = m.dbp + (m.sbp - m.dbp) * Math.exp(-(ph - 0.28) * (mode==='stiff'?4.2:2.4));
+        pts.push(`${toX(t).toFixed(1)},${toY(v).toFixed(1)}`);
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="${x0}" y="${toY(120)}" width="${x1-x0}" height="${toY(80)-toY(120)}" fill="var(--tax-green-soft)" opacity="0.45"/>
+        ${[60,80,100,120,140,160,180].map(p=>`<line x1="${x0}" y1="${toY(p)}" x2="${x1}" y2="${toY(p)}" stroke="var(--tax-border)" stroke-dasharray="3 3"/><text x="${x0-8}" y="${toY(p)+4}" text-anchor="end" font-size="10.5" fill="var(--tax-muted)">${p}</text>`).join('')}
+        <polyline points="${pts.join(' ')}" fill="none" stroke="${m.col}" stroke-width="3.4" stroke-linejoin="round"/>
+        <text x="${x0}" y="18" font-size="12" font-weight="850" fill="${m.col}">3 次连续心跳血压波形（${m.name} · 脉压差 ${pp} mmHg）</text>
+        <text x="${x1-4}" y="206" text-anchor="end" font-size="11" fill="var(--tax-muted)">绿色阴影 = 理想 80–120 mmHg 稳压带</text>
+      `;
+
+      const kBp = document.getElementById('kBp'); kBp.textContent = `${m.sbp} / ${m.dbp}`; kBp.style.color = m.col;
+      document.getElementById('kPp').textContent = `${pp} mmHg` + (pp >= 60 ? ' 🚨 硬化偏大' : ' ✅ 健康');
+      document.getElementById('kFlow').textContent = m.flow;
+      document.getElementById('ahaBox').innerHTML = m.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

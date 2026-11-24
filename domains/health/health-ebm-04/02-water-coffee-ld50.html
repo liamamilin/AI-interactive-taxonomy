@@ -7,63 +7,109 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .sub-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:9px; margin-bottom:12px; }
+    .s-btn { padding:10px 11px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .s-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .s-btn .t { font-size:13px; font-weight:800; }
+    .s-btn .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
+    .dose-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-amber); color:#fff; border-color:var(--tax-amber); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📏 万物皆有毒：咖啡、水与维生素的致死剂量尺</h1><p>误区：天然无添加的东西（水、维生素、草药）吃再多也没毒，只有化学合成药才有毒。真相：毒理学鼻祖帕拉塞尔苏斯 500 年前就指出“万物皆有毒，唯剂量决定毒性”——连喝水太猛也能致死！</p></div>
+      <div>
+        <h1>📏 万物皆有毒：咖啡、水与维生素的致死剂量尺</h1>
+        <p>误区：天然的（如水、食盐、维生素）绝对安全无毒，化学合成的都有毒。真相：现代毒理学之父帕拉塞尔苏斯 500 年前就道破了铁律：<strong>“万物皆有毒，只要剂量足；抛开剂量谈毒性，全都是耍流氓！”</strong></p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="btn-row">
-        <button class="btn active" onclick="setSub(6,'6 升纯净水 (短时狂饮)',this)">纯净水 (100%天然)</button>
-        <button class="btn" onclick="setSub(100,'100 杯美式咖啡',this)">咖啡因</button>
-        <button class="btn" onclick="setSub(60,'60 克精盐 (一次性)',this)">食盐</button>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🧪 选择一种日常“绝对安全”的天然物质，切换单日/单次摄入剂量看它如何跨过致死红线 (LD50)：</div>
+      <div class="sub-grid" id="subGrid"></div>
+      <div class="dose-row">
+        <button class="pill active" onclick="setLvl(0,this)">🌿 日常健康剂量</button>
+        <button class="pill" onclick="setLvl(1,this)">⚠️ 过量中毒不适区</button>
+        <button class="pill" onclick="setLvl(2,this)">☠️ 逼近致死红线 (LD50)</button>
       </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>一次性摄入占“致死危险线”比例</span><span id="vPct">25%</span></label><input type="range" id="sPct" min="5" max="110" value="25" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">当前摄入绝对量</div><div class="k-val" id="kAmt">—</div></div>
-        <div class="kpi"><div class="k-lbl">身体反应</div><div class="k-val" id="kSt">—</div></div>
-      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 195"></svg>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-let maxAmt=6, label='6 升纯净水 (短时狂饮)', unit='升纯净水';
-function setSub(m,lbl,btn){ maxAmt=m; label=lbl; unit=lbl.split(' ')[1]||lbl; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const pct=+document.getElementById('sPct').value; document.getElementById('vPct').textContent=pct+'%';
-  const amt=(maxAmt*pct/100).toFixed(1);
-  const bad=pct>=70;
-  document.getElementById('kAmt').textContent=amt+' '+unit;
-  document.getElementById('kSt').textContent=pct>=95?'🚨 达到 LD50 致死线!':(bad?'⚠️ 严重中毒反应':'安全日常区');
-  document.getElementById('kSt').style.color=bad?'#ef4444':'#059669';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">安全阈值 vs 致死剂量标尺 (${label})</text>
-    <rect x="20" y="55" width="540" height="34" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="55" width="${Math.min(540,pct*4.9)}" height="34" rx="8" fill="${pct>=95?'#ef4444':(bad?'#f59e0b':'#059669')}"/>
-    <line x1="510" y1="40" x2="510" y2="105" stroke="#ef4444" stroke-width="3"/>
-    <text x="510" y="34" text-anchor="middle" font-size="11.5" font-weight="850" fill="#ef4444">100% 危险红线</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>离开剂量谈毒性都是耍流氓！同样是水，每天喝 2 升维持生命，1 小时内硬灌 6 升就会引发低钠脑水肿致死；健康的关键永远在“安全剂量窗”内！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const SUBS = [
+      { id:'water', icon:'💧', name:'纯净白开水', desc:'安全边际约 3–4 倍',
+        lvls:[
+          { txt:'2.0 升 / 天（分次饮用）', pct:22, stat:'✅ 完美水合', col:'var(--tax-green)', desc:'细胞渗透压平衡，肾脏轻松代谢' },
+          { txt:'短时猛灌 4.5 升', pct:66, stat:'⚠️ 稀释性低钠头晕', col:'var(--tax-amber)', desc:'肾脏每小时最多排 0.8–1L，血液开始变淡' },
+          { txt:'短时狂灌 6–8 升以上', pct:96, stat:'☠️ 致命脑水肿（水中毒）', col:'var(--tax-red)', desc:'实有马拉松与喝水比赛致死案例！' }
+        ]
+      },
+      { id:'caf', icon:'☕', name:'咖啡因', desc:'安全上限 400mg/天',
+        lvls:[
+          { txt:'150 mg（约 1–2 杯美式）', pct:15, stat:'✅ 提神专注', col:'var(--tax-green)', desc:'阻断腺苷提神，心率血压平稳' },
+          { txt:'800–1200 mg（连灌 8 杯）', pct:58, stat:'⚠️ 心悸手抖/失眠呕吐', col:'var(--tax-amber)', desc:'交感神经过度兴奋，焦虑心慌' },
+          { txt:'10,000 mg（纯咖啡因粉）', pct:96, stat:'☠️ 心律失常致死 (LD50)', col:'var(--tax-red)', desc:'喝咖啡很难喝死，但误食纯咖啡因粉极易致命！' }
+        ]
+      },
+      { id:'salt', icon:'🧂', name:'普通食盐 (NaCl)', desc:'推荐 <5g/天',
+        lvls:[
+          { txt:'5 克 / 天', pct:14, stat:'✅ 维持神经传导', col:'var(--tax-green)', desc:'满足体液电解质与神经电位需求' },
+          { txt:'30 克（一次性误食）', pct:56, stat:'⚠️ 剧烈呕吐高钠脱水', col:'var(--tax-amber)', desc:'强烈胃刺激与细胞脱水' },
+          { txt:'70–200 克（高浓度盐水）', pct:96, stat:'☠️ 高钠血症致死', col:'var(--tax-red)', desc:'致死量按体重约 0.5–3 g/kg，婴儿几克即可致命！' }
+        ]
+      },
+      { id:'vitd', icon:'☀️', name:'维生素 D3 补剂', desc:'脂溶性易蓄积',
+        lvls:[
+          { txt:'1,000–2,000 IU / 天', pct:16, stat:'✅ 强骨与免疫支持', col:'var(--tax-green)', desc:'安全补充现代人普遍缺乏的维 D' },
+          { txt:'长期每天 20,000+ IU', pct:64, stat:'⚠️ 血钙飙升/肾结石', col:'var(--tax-amber)', desc:'脂溶性维生素排不出去，在体内持续蓄积' },
+          { txt:'长期超量百万级 IU', pct:96, stat:'☠️ 血管钙化/肾衰竭', col:'var(--tax-red)', desc:'维 D 甚至被直接用作高剂量灭鼠药成分！' }
+        ]
+      }
+    ];
+    let sub = 'water', lvl = 0;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function pickSub(id){ sub = id; markDone(); draw(); }
+    function setLvl(i, btn){
+      lvl = i;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); draw();
+    }
+
+    function draw(){
+      document.getElementById('subGrid').innerHTML = SUBS.map(s => `
+        <button class="s-btn ${sub===s.id?'active':''}" onclick="pickSub('${s.id}')">
+          <div class="t">${s.icon} ${s.name}</div>
+          <div class="s">${s.desc}</div>
+        </button>
+      `).join('');
+
+      const s = SUBS.find(x=>x.id===sub);
+      const d = s.lvls[lvl];
+      const barW = Math.round((d.pct / 100) * 560);
+
+      document.getElementById('svg').innerHTML = `
+        <text x="32" y="34" font-size="14" font-weight="900" fill="var(--tax-ink)">${s.icon} ${s.name} · 当前剂量：${d.txt}</text>
+        <rect x="32" y="58" width="560" height="32" rx="10" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+        <rect x="32" y="58" width="${barW}" height="32" rx="10" fill="${d.col}"/>
+        <line x1="${32+560*0.85}" y1="48" x2="${32+560*0.85}" y2="100" stroke="var(--tax-red)" stroke-width="2.4" stroke-dasharray="4 3"/>
+        <text x="${32+560*0.85}" y="116" text-anchor="middle" font-size="11" font-weight="850" fill="var(--tax-red)">☠️ LD50 致死红线</text>
+        <text x="32" y="148" font-size="15" font-weight="900" fill="${d.col}">生理状态：${d.stat}</text>
+        <text x="32" y="174" font-size="12.5" fill="var(--tax-muted)">机理说明：${d.desc}</text>
+      `;
+
+      document.getElementById('ahaBox').innerHTML = lvl === 2
+        ? `💡 <strong>顿悟时刻：</strong>连最纯粹的<strong>${s.name}</strong>跨过安全边际都会直接致命！下次再看到“某某食品检出微量某某成分就会致癌”的恐慌营销号，第一反应请先问一句：<strong>“含量离安全阈值差几个数量级？”</strong>`
+        : `💡 <strong>顿悟时刻：</strong>毒理学里没有绝对的“零毒天然神物”，只有<strong>安全边际（治疗指数）宽窄之分</strong>。点击右侧 <strong>☠️ 逼近致死红线</strong> 看看${s.name}过量后有多吓人！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

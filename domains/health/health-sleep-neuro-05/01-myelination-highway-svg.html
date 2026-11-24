@@ -3,66 +3,120 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🛣️ 髓鞘化：大脑神经从土路升级光纤（SVG）</title>
+  <title>🛣️ 髓鞘化：大脑神经从土路升级光纤</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill:hover { border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🛣️ 髓鞘化：大脑神经从土路升级光纤（SVG）</h1><p>误区：人过 25 岁大脑就定型了，新技能再怎么练也长不出新回路。真相：反复、高专注、带纠错的练习会刺激大脑给对应神经轴突裹上厚厚的“髓鞘”绝缘层，让电信号像光纤一样跳跃狂飙！</p></div>
+      <div>
+        <h1>🛣️ 髓鞘化：大脑神经从土路升级光纤</h1>
+        <p>误区：高手弹琴、打球反应神速，全靠天生“大脑硬件更快”。真相：每一次高质量刻意练习，少突胶质细胞就会往对应神经轴突上多缠一圈绝缘“髓鞘”，让电信号实现跳跃传导，速度暴涨 50 倍！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>高专注纠错式刻意练习次数</span><span id="vRep">60 次</span></label><input type="range" id="sRep" min="5" max="100" value="60" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>练后深度睡眠修复整合度</span><span id="vSlp">80%</span></label><input type="range" id="sSlp" min="20" max="100" value="80" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="firePulse()">⚡ 发射双轨神经脉冲竞速</button>
+        <button class="pill" onclick="addLayer()">🎯 刻意练习 + 睡眠巩固（髓鞘 +1 层）</button>
+        <button class="pill" onclick="resetLayers()">↺ 重回新手（0 层）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
+
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">髓鞘绝缘厚度</div><div class="k-val" id="kMye" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">神经信号传导倍率</div><div class="k-val" id="kSpd" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">刻意练习包裹层数</div><div class="k-val" id="kLay" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">信号传导速度对比</div><div class="k-val" id="kSpd" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">信号漏电率（动作失误率）</div><div class="k-val" id="kErr" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const rep=+document.getElementById('sRep').value, slp=+document.getElementById('sSlp').value;
-  document.getElementById('vRep').textContent=rep+' 次'; document.getElementById('vSlp').textContent=slp+'%';
-  const mye=Math.min(100, Math.round(rep*0.65 + slp*0.35));
-  const spd=(1 + mye*0.49).toFixed(1)+'x';
-  document.getElementById('kMye').textContent=mye+'%';
-  document.getElementById('kSpd').textContent=spd;
-  let segs='';
-  const thick=4+mye*0.18;
-  for(let i=0;i<5;i++){
-    const x=50+i*105;
-    segs+=`<rect x="${x}" y="${90-thick}" width="85" height="${thick*2}" rx="8" fill="#f59e0b" opacity="0.85"/>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <line x1="30" y1="90" x2="570" y2="90" stroke="#0284c7" stroke-width="5"/>
-    ${segs}
-    <text x="30" y="34" font-size="13" font-weight="800" fill="#0284c7">髓鞘包裹度 ${mye}% → 神经信号跨越兰氏结跳跃传输速度提升至 ${spd}</text>
-    <text x="30" y="160" font-size="12.5" font-weight="750" fill="var(--tax-muted)">练的时候触发错误信号标定电路，睡着的时候大脑才真正动工裹上髓鞘！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>天才的秘密不是生下来就有高速公路，而是用“专心犯错+立刻纠正”点亮回路，再靠睡眠（${slp}%）把髓鞘包裹成 <strong>${spd} 光纤高速</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let layers = 3; // 0..5
+    let pNov = 0, pPro = 0, raf = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function addLayer(){
+      layers = Math.min(5, layers + 1);
+      markDone(); firePulse();
+    }
+    function resetLayers(){
+      layers = 0; markDone(); firePulse();
+    }
+
+    function firePulse(){
+      if(raf) cancelAnimationFrame(raf);
+      markDone();
+      pNov = 0; pPro = 0;
+      const spdPro = 0.008 + layers * 0.011;
+      function step(){
+        pNov = Math.min(1, pNov + 0.008);
+        pPro = Math.min(1, pPro + spdPro);
+        draw();
+        if(pNov < 1 || pPro < 1) raf = requestAnimationFrame(step);
+      }
+      step();
+    }
+
+    function draw(){
+      const x0 = 60, x1 = 590, len = x1 - x0;
+      const novX = x0 + pNov * len;
+      const proX = x0 + pPro * len;
+
+      // Draw myelin sheaths on Track B (5 segments)
+      let sheaths = '';
+      if(layers > 0){
+        const thick = 8 + layers * 4;
+        for(let i=0; i<5; i++){
+          const sx = x0 + 22 + i * 102;
+          sheaths += `<rect x="${sx}" y="${150 - thick/2}" width="78" height="${thick}" rx="8" fill="var(--tax-green-soft)" stroke="var(--tax-green)" stroke-width="2"/>`;
+        }
+      }
+      const speedMs = layers === 0 ? 2 : [2, 12, 28, 52, 84, 110][layers];
+      const leak = [46, 32, 20, 11, 5, 2][layers];
+
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="34" font-size="12.5" font-weight="800" fill="var(--tax-muted)">赛道 A：新手裸露神经轴突（无髓鞘 · 逐点缓慢爬行 · 2 m/s）</text>
+        <line x1="${x0}" y1="64" x2="${x1}" y2="64" stroke="var(--tax-border)" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="${novX.toFixed(1)}" cy="64" r="9" fill="var(--tax-amber)"/>
+        <text x="600" y="68" font-size="12" font-weight="800" fill="${pNov>=1?'var(--tax-amber)':'var(--tax-muted)'}">${pNov>=1?'到达!':'...'}</text>
+
+        <line x1="24" y1="104" x2="616" y2="104" stroke="var(--tax-border)" stroke-dasharray="4 4"/>
+
+        <text x="24" y="128" font-size="12.5" font-weight="800" fill="var(--tax-green)">赛道 B：刻意练习轴突（${layers} 层绝缘髓鞘 · 朗飞结跳跃传导 · ${speedMs} m/s）</text>
+        <line x1="${x0}" y1="150" x2="${x1}" y2="150" stroke="var(--tax-primary)" stroke-width="8" stroke-linecap="round"/>
+        ${sheaths}
+        <circle cx="${proX.toFixed(1)}" cy="150" r="9.5" fill="var(--tax-primary)"/>
+        <text x="600" y="154" font-size="12" font-weight="800" fill="${pPro>=1?'var(--tax-green)':'var(--tax-muted)'}">${pPro>=1?'秒达⚡':'...'}</text>
+
+        <text x="24" y="198" font-size="11.5" font-weight="750" fill="var(--tax-muted)">提示：髓鞘像电线外层的绝缘胶皮，阻止电信号漏电，让脉冲在绿色节点间瞬间“跳跃”！</text>
+      `;
+
+      document.getElementById('kLay').textContent = `${layers} / 5 层`;
+      document.getElementById('kSpd').textContent = `${speedMs} m/s（提速 ${(speedMs/2).toFixed(0)}×）`;
+      document.getElementById('kErr').textContent = `${leak}%`;
+
+      document.getElementById('ahaBox').innerHTML = layers >= 4
+        ? `💡 <strong>顿悟时刻：</strong><strong>${layers} 层厚实髓鞘</strong>把你的神经传导提速了 <strong>${(speedMs/2).toFixed(0)} 倍</strong>（达 ${speedMs} m/s），失误率降到 ${leak}%！你以为的“肌肉记忆”，本质上其实是大脑把这条神经回路修成了绝缘光纤！`
+        : layers === 0
+        ? `💡 <strong>顿悟时刻：</strong>0 层髓鞘时两条赛道一样慢（2 m/s），信号一路漏电、动作磕磕绊绊。点几次 <strong>🎯 刻意练习 +1 层</strong>，亲眼看它如何甩开新手几十倍！`
+        : `💡 <strong>顿悟时刻：</strong>当前包裹 <strong>${layers} 层髓鞘</strong>，传导速度已飙到 <strong>${speedMs} m/s</strong>。注意：漫无目的地机械重复很难长髓鞘，只有<strong>慢速精准纠错 + 夜间睡眠</strong>才会触发胶质细胞疯狂加厚髓鞘！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

@@ -7,62 +7,92 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🎯 普通感冒吃阿莫西林？病毒 vs 细菌靶点图</h1><p>误区：感冒发烧吃点阿莫西林或头孢，就算不对症也能当“消炎药”压一压。真相：抗生素专门攻击细菌的细胞壁和核糖体——病毒压根没有这些结构！吃抗生素治感冒等于用鱼网抓空气，顺手把自己肠道益生菌全杀光！</p></div>
+      <div>
+        <h1>🎯 普通感冒吃阿莫西林？病毒 vs 细菌靶点图</h1>
+        <p>误区：头孢、阿莫西林是“万能消炎药”，一感冒发烧就来两粒准没错。真相：90% 的普通感冒和流感都是<strong>病毒</strong>引起的；抗生素专打“细菌细胞壁”，病毒连细胞壁都没有——吃错药等于<strong>敌军零伤亡、肠道友军大团灭</strong>！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="btn-row">
-        <button class="btn active" onclick="setPath('virus',this)">普通感冒 / 流感（病毒入侵）</button>
-        <button class="btn" onclick="setPath('bacteria',this)">化脓性链球菌肺炎（细菌入侵）</button>
+      <div class="bar">
+        <button class="pill active" onclick="setTarget('virus',this)">🦠 入侵者：普通感冒/流感病毒</button>
+        <button class="pill" onclick="setTarget('bacteria',this)">🧫 入侵者：化脓性链球菌（细菌）</button>
+        <button class="tax-btn" onclick="fireAbx()">💊 发射阿莫西林（细胞壁破坏弹）</button>
       </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>服用抗生素剂量强度</span><span id="vDos">80%</span></label><input type="range" id="sDos" min="0" max="100" value="80" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">敌军被消灭率</div><div class="k-val" id="kKill">—</div></div>
-        <div class="kpi"><div class="k-lbl">肠道有益菌误杀率</div><div class="k-val" id="kGut" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">🎯 入侵病原体伤亡率</div><div class="k-val" id="kEnemy">—</div></div>
+        <div class="kpi"><div class="k-lbl">🥗 肠道无辜益生菌伤亡</div><div class="k-val" id="kGut" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">用药医学判定</div><div class="k-val" id="kJudge">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-let ptype='virus';
-function setPath(t,btn){ ptype=t; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const dos=+document.getElementById('sDos').value; document.getElementById('vDos').textContent=dos+'%';
-  const kill=ptype==='virus'?0:Math.round(dos*0.95);
-  const gut=Math.round(dos*0.65);
-  document.getElementById('kKill').textContent=kill+'%';
-  document.getElementById('kKill').style.color=kill>50?'#059669':'#ef4444';
-  document.getElementById('kGut').textContent=gut+'% 惨遭团灭';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="${kill>50?'#059669':'#ef4444'}">对当前入侵者 (${ptype==='virus'?'病毒 · 无细胞壁':'细菌 · 有靶点'}) 杀伤率: ${kill}%</text>
-    <rect x="20" y="44" width="${Math.max(8,kill*5.2)}" height="24" rx="6" fill="${kill>50?'#059669':'#ef4444'}"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#f59e0b">对体内有益肠道菌群的附带误杀: ${gut}%</text>
-    <rect x="20" y="112" width="${Math.max(8,gut*5.2)}" height="24" rx="6" fill="#f59e0b"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">${ptype==='virus'?'❌ 病毒没有细胞壁，抗生素完全无效且白白摧毁益生菌！':'✅ 确认细菌感染后，抗生素能精准击穿细菌防线'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>90% 的普通感冒和喉咙痛都是病毒引起的！这时候吃抗生素对病毒杀伤率为 <strong>0%</strong>，却会误杀 <strong>${gut}%</strong> 的肠道友军，顺带培养出耐药菌！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let target = 'virus', fired = false;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setTarget(t, btn){
+      target = t; fired = false;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); draw();
+    }
+    function fireAbx(){ fired = true; markDone(); draw(); }
+
+    function draw(){
+      const isVir = target === 'virus';
+      const enemyHit = fired && !isVir;
+      const enemyCol = enemyHit ? 'var(--tax-green)' : 'var(--tax-red)';
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="24" y="54" width="142" height="106" rx="14" fill="var(--tax-primary-soft)" stroke="var(--tax-primary)" stroke-width="2"/>
+        <text x="95" y="96" text-anchor="middle" font-size="26">💊</text>
+        <text x="95" y="124" text-anchor="middle" font-size="13" font-weight="850" fill="var(--tax-primary)">阿莫西林 / 头孢</text>
+        <text x="95" y="144" text-anchor="middle" font-size="10.5" fill="var(--tax-muted)">唯一靶点：细菌细胞壁</text>
+
+        ${fired ? `<line x1="166" y1="84" x2="364" y2="58" stroke="${enemyHit?'var(--tax-green)':'var(--tax-muted)'}" stroke-width="3.2" stroke-dasharray="${enemyHit?'0':'6 4'}"/>
+        <line x1="166" y1="128" x2="364" y2="152" stroke="var(--tax-red)" stroke-width="3.2"/>` : ''}
+
+        <rect x="368" y="20" width="246" height="74" rx="12" fill="${enemyHit?'var(--tax-green-soft)':'var(--tax-red-soft)'}" stroke="${enemyCol}" stroke-width="2"/>
+        <text x="491" y="48" text-anchor="middle" font-size="13.5" font-weight="850" fill="${enemyCol}">${isVir?'🦠 感冒病毒（无细胞壁！）':'🧫 致病细菌（有肽聚糖细胞壁）'}</text>
+        <text x="491" y="74" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-ink)">${!fired?'等待发射药丸...':(isVir?'💨 子弹直接穿空！病毒毫发无损':'💥 细胞壁被精准炸裂！病菌团灭')}</text>
+
+        <rect x="368" y="116" width="246" height="74" rx="12" fill="${fired?'var(--tax-amber-soft)':'var(--tax-green-soft)'}" stroke="${fired?'var(--tax-amber)':'var(--tax-green)'}" stroke-width="2"/>
+        <text x="491" y="144" text-anchor="middle" font-size="13.5" font-weight="850" fill="${fired?'var(--tax-amber)':'var(--tax-green)'}">🥗 肠道有益菌群（也有细胞壁）</text>
+        <text x="491" y="170" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-ink)">${!fired?'和平护卫肠道中':'⚠️ 遭无差别误杀 65%（腹泻+耐药风险）'}</text>
+      `;
+
+      const kE = document.getElementById('kEnemy');
+      kE.textContent = !fired ? '待测试' : (isVir ? '0%（完全无效！）' : '98%（精准清除 ✅）');
+      kE.style.color = !fired ? 'var(--tax-muted)' : enemyCol;
+      document.getElementById('kGut').textContent = !fired ? '0%（安全）' : '-65% 附带误伤';
+      const kJ = document.getElementById('kJudge');
+      kJ.textContent = !fired ? '点击上方发射' : (isVir ? '❌ 典型滥用！白伤肠胃' : '✅ 对症精准打击');
+      kJ.style.color = !fired ? 'var(--tax-muted)' : (isVir ? 'var(--tax-red)' : 'var(--tax-green)');
+
+      document.getElementById('ahaBox').innerHTML = !fired
+        ? `💡 <strong>顿悟时刻：</strong>先点击 <strong>💊 发射阿莫西林</strong> 看看它打在感冒病毒身上会发生什么，再切换成细菌对比！`
+        : isVir
+        ? `💡 <strong>顿悟时刻：</strong>感冒病毒只是蛋白质外壳裹着一段 RNA，压根没有细胞壁！吃阿莫西林对病毒<strong>0% 杀伤力</strong>，却顺手把你肠道里同样有细胞壁的益生菌炸毁 65%，还帮潜在坏菌练出了耐药性！`
+        : `💡 <strong>顿悟时刻：</strong>面对明确的<strong>细菌感染</strong>（如链球菌扁桃体化脓、细菌性肺炎），阿莫西林精准锁死细菌细胞壁靶点，虽然会附带误伤部分肠道菌群，但收益远大于代价！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

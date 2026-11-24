@@ -7,58 +7,98 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .food-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:9px; margin-bottom:14px; }
+    .f-card { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .f-card.o6.on { border-color:var(--tax-red); background:var(--tax-red-soft); }
+    .f-card.o3.on { border-color:var(--tax-green); background:var(--tax-green-soft); }
+    .f-card .t { display:flex; justify-content:space-between; font-size:13px; font-weight:800; }
+    .f-card .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🐟 餐桌上的抗炎杠杆：Omega-6 vs Omega-3 比例</h1><p>误区：只要少吃肥肉猪油，天天吃大豆油/玉米油炒的外卖就绝对健康清淡。真相：现代外卖精炼植物油把 Omega-6:3 比例推到了 20:1，而人类演化适应的比例是 4:1 以下，失衡本身就在助燃炎症！</p></div>
+      <div>
+        <h1>🐟 餐桌上的抗炎杠杆：Omega-6 vs Omega-3 比例</h1>
+        <p>误区：植物油一定比动物油健康，吃得越多越养生。真相：人类演化出的理想 Omega-6 : Omega-3 比例是 <strong>1:1 ~ 4:1</strong>，而现代工业精炼大豆油/玉米油外卖让这个比例飙到了恐怖的 <strong>20:1</strong>，把细胞膜直接调成“易燃促炎态”！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>外卖精炼植物油 (Omega-6) 比例</span><span id="vO6">16 份</span></label><input type="range" id="sO6" min="4" max="24" value="16" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>深海鱼/鱼油 (Omega-3) 摄入量</span><span id="vO3">1 份</span></label><input type="range" id="sO3" min="1" max="6" value="1" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🥗 拼装你这周的日常油脂来源（点击替换外卖精炼油、加入深海鱼与坚果），实时看天平反转：</div>
+      <div class="food-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">当前 O6 : O3 比值</div><div class="k-val" id="kRat">—</div></div>
-        <div class="kpi"><div class="k-lbl">细胞膜炎症倾向</div><div class="k-val" id="kTend">—</div></div>
+        <div class="kpi"><div class="k-lbl">你的 Omega-6 : Omega-3 比例</div><div class="k-val" id="kRatio">—</div></div>
+        <div class="kpi"><div class="k-lbl">细胞膜炎症倾向</div><div class="k-val" id="kMem">—</div></div>
+        <div class="kpi"><div class="k-lbl">人类演化推荐目标</div><div class="k-val" style="color:var(--tax-green);">≤ 4 : 1</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const o6=+document.getElementById('sO6').value, o3=+document.getElementById('sO3').value;
-  document.getElementById('vO6').textContent=o6+' 份'; document.getElementById('vO3').textContent=o3+' 份';
-  const rat=(o6/o3).toFixed(1);
-  const good=parseFloat(rat)<=4.5;
-  document.getElementById('kRat').textContent=rat+' : 1';
-  document.getElementById('kRat').style.color=good?'#059669':'#ef4444';
-  document.getElementById('kTend').textContent=good?'抗炎均衡态':'高度促炎倾向';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#f59e0b">促炎前体原料 Omega-6 (大豆/玉米油): ${o6} 份</text>
-    <rect x="20" y="44" width="${o6*20}" height="24" rx="6" fill="#f59e0b"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">抗炎消退原料 Omega-3 (深海鱼/EPA): ${o3} 份</text>
-    <rect x="20" y="112" width="${o3*45}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">理想比值 ≤ 4:1；少吃外卖油炸并每周吃 2 次深海鱼能迅速扭转失衡</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>Omega-6 和 Omega-3 共用同一套代谢酶！当外卖植物油把比值推到 <strong>${rat}:1</strong> 时，抗炎通道被彻底挤占，补充 Omega-3 与换用橄榄油能一键降温！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const ITEMS = [
+      { id:'takeout', cls:'o6', icon:'🍟', name:'重油外卖/大豆玉米油', desc:'极高 Omega-6 (+12g)', o6:12, o3:0.2 },
+      { id:'snacks', cls:'o6', icon:'🍪', name:'薯片/起酥烘焙零食', desc:'隐藏精炼植物油 (+8g)', o6:8, o3:0.1 },
+      { id:'salmon', cls:'o3', icon:'🐟', name:'三文鱼/鲭鱼/沙丁鱼', desc:'直补高纯 EPA+DHA', o6:0.5, o3:3.0 },
+      { id:'flax', cls:'o3', icon:'🌰', name:'核桃 / 奇亚籽 / 亚麻籽', desc:'植物源 Omega-3 (+2g)', o6:1.5, o3:2.0 },
+      { id:'olive', cls:'o3', icon:'🫒', name:'改用特级初榨橄榄油', desc:'极低 Omega-6 · 稳态', o6:1.0, o3:0.4 }
+    ];
+    let picked = new Set(['takeout', 'snacks']);
+
+    function toggle(id){
+      if(picked.has(id)){ if(picked.size > 1) picked.delete(id); } else picked.add(id);
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = ITEMS.map(it => `
+        <button class="f-card ${it.cls} ${picked.has(it.id)?'on':''}" onclick="toggle('${it.id}')">
+          <div class="t"><span>${it.icon} ${it.name}</span><span>${picked.has(it.id)?'✓':'+'}</span></div>
+          <div class="s">${it.desc}</div>
+        </button>
+      `).join('');
+
+      let o6 = 2.0, o3 = 0.6; // baseline diet
+      ITEMS.forEach(it => { if(picked.has(it.id)){ o6 += it.o6; o3 += it.o3; } });
+      const ratio = +(o6 / o3).toFixed(1);
+      const col = ratio <= 4.5 ? 'var(--tax-green)' : (ratio <= 10 ? 'var(--tax-amber)' : 'var(--tax-red)');
+      const angle = Math.max(-16, Math.min(16, (4 - ratio) * 1.1)); // tilt left (red) when o6 heavy
+
+      document.getElementById('svg').innerHTML = `
+        <polygon points="320,130 294,180 346,180" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-width="2"/>
+        <g transform="rotate(${(-angle).toFixed(1)} 320 130)">
+          <rect x="96" y="122" width="448" height="14" rx="7" fill="var(--tax-primary)"/>
+          <rect x="104" y="48" width="150" height="68" rx="12" fill="var(--tax-red-soft)" stroke="var(--tax-red)" stroke-width="2"/>
+          <text x="179" y="76" text-anchor="middle" font-size="13.5" font-weight="850" fill="var(--tax-red)">🔥 Omega-6 促炎</text>
+          <text x="179" y="100" text-anchor="middle" font-size="14" font-weight="900" fill="var(--tax-ink)">${o6.toFixed(1)} g</text>
+
+          <rect x="386" y="48" width="150" height="68" rx="12" fill="var(--tax-green-soft)" stroke="var(--tax-green)" stroke-width="2"/>
+          <text x="461" y="76" text-anchor="middle" font-size="13.5" font-weight="850" fill="var(--tax-green)">🧊 Omega-3 抗炎</text>
+          <text x="461" y="100" text-anchor="middle" font-size="14" font-weight="900" fill="var(--tax-ink)">${o3.toFixed(1)} g</text>
+        </g>
+        <circle cx="320" cy="130" r="8" fill="var(--tax-ink)"/>
+        <text x="320" y="198" text-anchor="middle" font-size="12" font-weight="800" fill="${col}">当前比例 ${ratio} : 1（Omega-6 与 Omega-3 抢占同一套代谢酶！）</text>
+      `;
+
+      const kR = document.getElementById('kRatio'); kR.textContent = `${ratio} : 1`; kR.style.color = col;
+      const kM = document.getElementById('kMem');
+      kM.textContent = ratio <= 4.5 ? '抗炎平衡稳态 🌿' : (ratio <= 10 ? '轻度偏促炎 🕯️' : '重度促炎易燃态 🔥');
+      kM.style.color = col;
+
+      document.getElementById('ahaBox').innerHTML = ratio <= 4.5
+        ? `💡 <strong>顿悟时刻：</strong>漂亮！比例拉回到了黄金抗炎区（<strong>${ratio}:1</strong>）！Omega-6 本身不是毒药，只是它和 Omega-3 共用同一套酶——<strong>减少重油外卖 + 每周吃两次深海鱼</strong>，就能同时从两端把天平拨正！`
+        : `💡 <strong>顿悟时刻：</strong>当前比例失衡高达 <strong>${ratio}:1</strong>！光靠吃两粒鱼油胶囊很难对抗每天满锅大豆玉米油的外卖——试着去掉 🍟 外卖重油 并点亮 🐟 三文鱼 与 🫒 橄榄油，看比例如何断崖回落！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

@@ -3,64 +3,117 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔥 炎症闷烧雷达：内脏脂肪 + 熬夜 + 久坐（SVG）</title>
+  <title>🔥 炎症闷烧雷达：内脏脂肪 + 熬夜 + 久坐</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:9px; margin-bottom:14px; }
+    .card { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .card.fire.on { border-color:var(--tax-red); background:var(--tax-red-soft); }
+    .card.water.on { border-color:var(--tax-green); background:var(--tax-green-soft); }
+    .card .t { display:flex; justify-content:space-between; font-size:13px; font-weight:800; }
+    .card .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🔥 炎症闷烧雷达：内脏脂肪 + 熬夜 + 久坐（SVG）</h1><p>误区：只要身上没有红肿热痛、没有发烧，体内就没有炎症。真相：内脏脂肪、高糖饮食和睡眠剥夺会让巨噬细胞像永不关火的闷烧灶一样，24 小时持续释放低浓度炎性因子，悄悄腐蚀血管和大脑！</p></div>
+      <div>
+        <h1>🔥 炎症闷烧雷达：内脏脂肪 + 熬夜 + 久坐</h1>
+        <p>误区：不红、不肿、不发烧，身体里就没有炎症。真相：内脏脂肪不是惰性仓库，而是 24 小时狂喷 <strong>IL-6 / TNF-α 炎症因子</strong>的内分泌器官！叠加熬夜与久坐，体内会燃起看不见的“慢火（Inflammaging）”！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>腰围/内脏脂肪与精制糖负荷</span><span id="vVis">65%</span></label><input type="range" id="sVis" min="10" max="100" value="65" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>抗炎生活习惯 (睡眠+运动+Omega3)</span><span id="vAnti">40%</span></label><input type="range" id="sAnti" min="10" max="100" value="40" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🧯 点击叠加“点火因子（红）”与“灭火习惯（绿）”，实时观测体内隐形炎症火势：</div>
+      <div class="grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">慢性炎症闷烧指数</div><div class="k-val" id="kInf" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">血管/代谢衰老加速</div><div class="k-val" id="kAg">—</div></div>
+        <div class="kpi"><div class="k-lbl">超敏 C 反应蛋白 (hs-CRP)</div><div class="k-val" id="kCrp">—</div></div>
+        <div class="kpi"><div class="k-lbl">血管/代谢炎性老化增速</div><div class="k-val" id="kAge" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">总体闷烧状态</div><div class="k-val" id="kStat">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const vis=+document.getElementById('sVis').value, anti=+document.getElementById('sAnti').value;
-  document.getElementById('vVis').textContent=vis+'%'; document.getElementById('vAnti').textContent=anti+'%';
-  const inf=Math.max(8, Math.min(98, Math.round(vis*0.75 - anti*0.45 + 30)));
-  const ag=(1 + inf/100*0.8).toFixed(2)+'x';
-  document.getElementById('kInf').textContent=inf+' 分';
-  document.getElementById('kInf').style.color=inf>55?'#ef4444':'#059669';
-  document.getElementById('kAg').textContent=ag;
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="${inf>55?'#ef4444':'#059669'}">体内慢性低度炎症 (CRP / IL-6) 闷烧水平: ${inf} 分</text>
-    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${inf*5.4}" height="24" rx="6" fill="${inf>55?'#ef4444':'#059669'}"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">抗炎灭火系统储备: ${anti}%</text>
-    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${anti*5.4}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">减掉内脏脂肪 + 规律深睡 + 肌肉收缩释放抗炎肌因子，是最高效的灭火器</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>心脑血管病、糖尿病和神经退行性变的共同底层推手正是“炎性衰老”！把内脏脂肪和垃圾睡眠的火源压低，器官衰老速度能立刻从 ${ag} 回落！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const FACTORS = [
+      { id:'fat', type:'fire', icon:'🫃', name:'内脏脂肪超标', desc:'持续分泌 TNF-α / IL-6', delta:+30 },
+      { id:'sleep', type:'fire', icon:'🦉', name:'长期熬夜 <6 小时', desc:'交感亢奋促炎飙升', delta:+24 },
+      { id:'sit', type:'fire', icon:'🪑', name:'久坐 + 超加工高糖', desc:'血糖波动+氧化应激', delta:+22 },
+      { id:'move', type:'water', icon:'🏃', name:'规律运动释放肌因子', desc:'肌肉分泌抗炎 IL-10', delta:-24 },
+      { id:'diet', type:'water', icon:'🥦', name:'多酚蔬菜 + Omega-3', desc:'熄灭细胞膜炎症链', delta:-20 },
+      { id:'rest', type:'water', icon:'😴', name:'每晚 7.5h 深度修复', desc:'夜间重启免疫稳态', delta:-18 }
+    ];
+    let picked = new Set(['fat', 'sleep', 'sit']);
+
+    function toggle(id){
+      if(picked.has(id)) picked.delete(id); else picked.add(id);
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = FACTORS.map(f => `
+        <button class="card ${f.type} ${picked.has(f.id)?'on':''}" onclick="toggle('${f.id}')">
+          <div class="t"><span>${f.icon} ${f.name}</span><span>${picked.has(f.id)?'✓':'+'}</span></div>
+          <div class="s">${f.desc}</div>
+        </button>
+      `).join('');
+
+      let score = 20;
+      FACTORS.forEach(f => { if(picked.has(f.id)) score += f.delta; });
+      score = Math.max(8, Math.min(98, score));
+      const crp = +(0.3 + (score / 100) * 5.2).toFixed(1);
+      const col = score >= 65 ? 'var(--tax-red)' : (score >= 38 ? 'var(--tax-amber)' : 'var(--tax-green)');
+      const soft = score >= 65 ? 'var(--tax-red-soft)' : (score >= 38 ? 'var(--tax-amber-soft)' : 'var(--tax-green-soft)');
+
+      // Visual flame gauge + 3 organ impact bars
+      const flameR = 24 + (score / 100) * 44;
+      const organs = [
+        { name:'🩸 血管内皮（斑块风险）', val: Math.min(98, Math.round(score * 1.02)) },
+        { name:'🧠 大脑神经（脑雾/情绪）', val: Math.min(96, Math.round(score * 0.9)) },
+        { name:'⚙️ 胰岛素敏感度受损', val: Math.min(98, Math.round(score * 0.96)) }
+      ];
+
+      document.getElementById('svg').innerHTML = `
+        <circle cx="136" cy="104" r="${flameR.toFixed(1)}" fill="${soft}" stroke="${col}" stroke-width="2.6"/>
+        <text x="136" y="98" text-anchor="middle" font-size="28">${score>=65?'🔥':score>=38?'🕯️':'🌿'}</text>
+        <text x="136" y="126" text-anchor="middle" font-size="14" font-weight="900" fill="${col}">炎症指数 ${score}</text>
+        <text x="136" y="186" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-muted)">看不见的体内闷烧火势</text>
+
+        ${organs.map((o, i) => {
+          const y = 42 + i * 50;
+          const w = Math.round((o.val / 100) * 280);
+          return `
+            <text x="276" y="${y}" font-size="12" font-weight="800" fill="var(--tax-ink)">${o.name}</text>
+            <rect x="276" y="${y+8}" width="280" height="14" rx="7" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+            <rect x="276" y="${y+8}" width="${w}" height="14" rx="7" fill="${col}"/>
+            <text x="566" y="${y+19}" font-size="12" font-weight="850" fill="${col}">${o.val}%</text>
+          `;
+        }).join('')}
+      `;
+
+      const kC = document.getElementById('kCrp'); kC.textContent = crp + ' mg/L'; kC.style.color = col;
+      document.getElementById('kAge').textContent = score >= 65 ? '1.8× 加速老化' : (score >= 38 ? '1.2× 轻度磨损' : '0.85× 逆龄保护');
+      const kS = document.getElementById('kStat');
+      kS.textContent = score >= 65 ? '烈火闷烧 🚨' : (score >= 38 ? '微火隐患 🕯️' : '清凉稳态 🌿');
+      kS.style.color = col;
+
+      document.getElementById('ahaBox').innerHTML = score >= 65
+        ? `💡 <strong>顿悟时刻：</strong>危险的“三连击”！内脏脂肪 + 熬夜 + 久坐把你的慢性炎症推到了 <strong>${score} 分（hs-CRP ≈ ${crp}）</strong>——体检单可能还没报红字，但血管和大脑每天都在小火慢炖！试着点亮右侧 3 个绿色灭火器！`
+        : score < 38
+        ? `💡 <strong>顿悟时刻：</strong>成功把体内的隐形慢火压到 <strong>${score} 分（hs-CRP ≈ ${crp}）</strong>！规律运动时肌肉主动分泌的肌因子（Myokines）是最强、免费的全身抗炎灭火剂！`
+        : `💡 <strong>顿悟时刻：</strong>当前处于轻度炎症闷烧状态（${score} 分）。减掉哪怕 5% 的腰围内脏脂肪，往往比吃任何昂贵的“抗炎神药”降温效果都更直接！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

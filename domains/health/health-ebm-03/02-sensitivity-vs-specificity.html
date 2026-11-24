@@ -7,58 +7,106 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .ctrl-box { padding:10px 14px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface-alt); margin-bottom:12px; }
     .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
     .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🎛️ 灵敏度 vs 特异度：安检门槛往哪边调？</h1><p>误区：好医生和好仪器可以同时做到零漏诊和零误诊。真相：就像机场安检门——调太敏感连皮带扣都响（特异度暴跌），调太松真带刀过去也不响（灵敏度暴跌），两头永远互相拉扯！</p></div>
+      <div>
+        <h1>🎛️ 灵敏度 vs 特异度：安检门槛往哪边调？</h1>
+        <p>误区：好的诊断仪器应该同时做到 100% 不漏诊、100% 不误诊。真相：健康人与病人的化验数值天然存在重叠带！门槛往左移就“宁可错杀一百（高灵敏）”，往右移就“绝不冤枉好人（高特异）”，两者天生是死对头！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>化验单判定阈值严松度 (左=极敏, 右=极严)</span><span id="vCut">45 分</span></label><input type="range" id="sCut" min="15" max="85" value="45" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>病症与健康指标区分清晰度</span><span id="vSep">70%</span></label><input type="range" id="sSep" min="30" max="95" value="70" oninput="upd()"></div>
+      <div class="bar">
+        <button class="pill" onclick="setThr(34,this)">🛫 初筛/机场排爆（高灵敏 · 防漏诊）</button>
+        <button class="pill active" onclick="setThr(50,this)">⚖️ 常规平衡门槛</button>
+        <button class="pill" onclick="setThr(68,this)">🔪 手术确诊前复查（高特异 · 防冤枉）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="ctrl-box">
+        <label><span>诊断仪器阳性报警门槛线</span><span id="vThr">阈值 50</span></label>
+        <input type="range" id="sThr" min="20" max="80" value="50" oninput="onSlide()">
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">灵敏度 (真病人检出率)</div><div class="k-val" id="kSen" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">特异度 (健康人放行率)</div><div class="k-val" id="kSpe" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">灵敏度（抓出真病人的能力）</div><div class="k-val" id="kSens" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">特异度（放过健康人的能力）</div><div class="k-val" id="kSpec" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">漏诊率 / 误诊率</div><div class="k-val" id="kErr" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const cut=+document.getElementById('sCut').value, sep=+document.getElementById('sSep').value;
-  document.getElementById('vCut').textContent=cut+' 分'; document.getElementById('vSep').textContent=sep+'%';
-  const spread=40 - sep*0.25;
-  const sen=Math.round(100/(1+Math.exp((cut-62)/spread)));
-  const spe=Math.round(100/(1+Math.exp((38-cut)/spread)));
-  document.getElementById('kSen').textContent=sen+'%';
-  document.getElementById('kSpe').textContent=spe+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">灵敏度 (不错放真病人 · 初筛指标): ${sen}%</text>
-    <rect x="20" y="44" width="${sen*5.2}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">特异度 (不误伤健康人 · 确诊指标): ${spe}%</text>
-    <rect x="20" y="112" width="${spe*5.2}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">两步法策略：先用高灵敏度初筛捞出全部嫌疑，再用高特异度确诊排除假阳性</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>初筛试纸（如核酸/血压初测）必须高灵敏（${sen}%），宁可错报也别漏掉；而动手术切器官前的活检确诊则必须高特异（${spe}%），绝不能切错好人！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let thr = 50;
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setThr(v, btn){
+      thr = v; document.getElementById('sThr').value = v;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); draw();
+    }
+    function onSlide(){
+      thr = +document.getElementById('sThr').value;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      markDone(); draw();
+    }
+
+    // Normal CDF approx
+    function cdf(x, mu, sd){
+      const z = (x - mu) / sd;
+      return 1 / (1 + Math.exp(-1.7 * z));
+    }
+
+    function draw(){
+      document.getElementById('vThr').textContent = `阈值 ${thr}`;
+      // Healthy ~ N(36, 12), Sick ~ N(64, 12)
+      const spec = Math.round(cdf(thr, 36, 12) * 100);
+      const sens = Math.round((1 - cdf(thr, 64, 12)) * 100);
+
+      const x0=44, x1=612, yMin=30, yMax=182;
+      const toX = v => x0 + (v/100)*(x1-x0);
+      const gauss = (x, mu, sd) => Math.exp(-0.5 * Math.pow((x - mu)/sd, 2));
+
+      let pH=[], pS=[];
+      for(let v=0; v<=100; v+=1.5){
+        pH.push(`${toX(v).toFixed(1)},${(yMax - gauss(v, 36, 12)*135).toFixed(1)}`);
+        pS.push(`${toX(v).toFixed(1)},${(yMax - gauss(v, 64, 12)*135).toFixed(1)}`);
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <polyline points="${pH.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3"/>
+        <polyline points="${pS.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3"/>
+        <line x1="${toX(thr)}" y1="${yMin}" x2="${toX(thr)}" y2="${yMax}" stroke="var(--tax-primary)" stroke-width="3"/>
+        <text x="${toX(thr)}" y="22" text-anchor="middle" font-size="12" font-weight="900" fill="var(--tax-primary)">▼ 报警阈值 ${thr}（右侧判阳性）</text>
+        <text x="${toX(28)}" y="198" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--tax-green)">🌿 健康人群分布</text>
+        <text x="${toX(72)}" y="198" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--tax-red)">🦠 患病人群分布</text>
+      `;
+
+      document.getElementById('kSens').textContent = sens + '%';
+      document.getElementById('kSpec').textContent = spec + '%';
+      document.getElementById('kErr').textContent = `漏诊 ${100-sens}% / 误报 ${100-spec}%`;
+
+      document.getElementById('ahaBox').innerHTML = thr <= 40
+        ? `💡 <strong>顿悟时刻：</strong>门槛左移（<strong>高灵敏 ${sens}%</strong>）：几乎不漏掉任何真病人（漏诊仅 ${100-sens}%），但误报了 <strong>${100-spec}%</strong> 的健康人——这正是医院<strong>第一道便宜初筛</strong>的策略：先把疑似者全圈进来！`
+        : thr >= 60
+        ? `💡 <strong>顿悟时刻：</strong>门槛右移（<strong>高特异 ${spec}%</strong>）：几乎绝不冤枉好人（误报仅 ${100-spec}%），但会漏掉 ${100-sens}% 轻症病人——这正是<strong>有创活检或开刀前确诊</strong>必须用的严苛标准！`
+        : `💡 <strong>顿悟时刻：</strong>因为两座山峰天生重叠，医院从不靠一次检查定生死，而是用<strong>“先高灵敏初筛（宁可错抓）→ 再高特异复查（绝不冤枉）”</strong>的两步接力破解死对头悖论！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

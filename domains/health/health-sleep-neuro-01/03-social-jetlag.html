@@ -7,59 +7,97 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .preset-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>✈️ 周末补觉的“社交时差”陷阱</h1><p>误区：平时每天只睡 6 小时没关系，周末一口气睡到中午 12 点就能把睡眠债全补回来。真相：周末晚起 3 小时等价于每周末强行飞一趟东京到迪拜的时差，导致周一早上像被卡车碾过一样昏沉！</p></div>
+      <div>
+        <h1>✈️ 周末补觉的“社交时差”陷阱</h1>
+        <p>误区：平时熬夜上班，周末一口气睡到中午 12 点就能把睡眠债“完美补回来”。真相：每晚睡晚起 3–4 小时，等于每周五飞去欧洲、周一早上再硬飞回来——这就是周一综合征的生理元凶！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>工作日早晨起床时间</span><span id="vWk">07:00</span></label><input type="range" id="sWk" min="5" max="9" step="0.5" value="7" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>周末自然醒起床时间</span><span id="vWe">10:30</span></label><input type="range" id="sWe" min="6" max="13" step="0.5" value="10.5" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🛫 切换 4 种周末作息习惯，双轨对比你的工作日与周末睡眠中点（Mid-sleep）偏移：</div>
+      <div class="preset-row" id="presets"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">等效跨国时差</div><div class="k-val" id="kJet" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">周一综合征严重度</div><div class="k-val" id="kMon">—</div></div>
+        <div class="kpi"><div class="k-lbl">社交时差（中点偏移）</div><div class="k-val" id="kLag" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">每周一等效跨国飞行</div><div class="k-val" id="kFlight" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">周一早晨大脑清醒度</div><div class="k-val" id="kMon" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function fmtH(h){ const hh=Math.floor(h), mm=(h%1)?'30':'00'; return (hh<10?'0':'')+hh+':'+mm; }
-function upd(){
-  const wk=+document.getElementById('sWk').value, we=+document.getElementById('sWe').value;
-  document.getElementById('vWk').textContent=fmtH(wk); document.getElementById('vWe').textContent=fmtH(we);
-  const diff=Math.abs(we-wk);
-  const sev=diff<=1?'节律极稳':(diff<=2?'轻度时差':'重度社交时差 (周一暴毙)');
-  document.getElementById('kJet').textContent=diff.toFixed(1)+' 小时时差';
-  document.getElementById('kMon').textContent=sev;
-  document.getElementById('kMon').style.color=diff>2?'#ef4444':'#059669';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">工作日节律锚点: ${fmtH(wk)}</text>
-    <rect x="40" y="46" width="${wk*35}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="${diff>2?'#ef4444':'#059669'}">周末节律漂移: ${fmtH(we)} (撕裂 ${diff.toFixed(1)} 小时)</text>
-    <rect x="40" y="114" width="${we*35}" height="24" rx="6" fill="${diff>2?'#ef4444':'#059669'}"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">补觉最好靠“提前 1 小时早睡”或“午睡 20 分钟”，周末起床波动 ≤ 1 小时</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>周末赖床 ${diff.toFixed(1)} 小时等同于每周一次跨国倒时差！固定起床时间比固定入睡时间更能锁定生物钟！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const MODES = [
+      { id:'steady', label:'🌿 规律微补（差 0.5h）', wk:[23, 31], we:[23.5, 31.5], flight:'原地不动 · 零时差', mon:'94% 神清气爽',
+        aha:'💡 <strong>顿悟时刻：</strong>周末起床时间与工作日相差不超过 <strong>1 小时</strong>，生物钟零撕裂！如果真的缺觉，宁可早起后下午小憩 20 分钟，也别睡到中午！' },
+      { id:'mild', label:'😴 周末赖床到 9:30（差 2h）', wk:[23.5, 31], we:[25, 33.5], flight:'北京 ↔ 曼谷（2 小时时差）', mon:'72% 轻微昏沉',
+        aha:'💡 <strong>顿悟时刻：</strong>只是周末晚睡 1.5 小时、晚起 2.5 小时，你的睡眠中点就已经向后漂移了 <strong>2 小时</strong>——周一早上 7 点闹钟响时，你的身体还停在凌晨 5 点！' },
+      { id:'heavy', label:'🦉 熬到 2:30 睡到 11:30（差 3.5h）', wk:[23.5, 31], we:[26.5, 35.5], flight:'北京 ↔ 迪拜（4 小时时差）', mon:'45% 重度周一综合征',
+        aha:'💡 <strong>顿悟时刻：</strong>你没买机票，却在自己卧室里完成了每周一次“往返迪拜的红眼航班”！周一全天头晕、暴躁、狂想喝奶茶，全都是生物钟硬着陆的后遗症！' },
+      { id:'extreme', label:'🎮 报复性通宵到 4 点（差 5h）', wk:[23.5, 31], we:[28, 37], flight:'北京 ↔ 莫斯科（5 小时时差）', mon:'22% 大脑宕机',
+        aha:'💡 <strong>顿悟时刻：</strong>高达 <strong>5 小时</strong>的社交时差会直接打乱皮质醇和胰岛素节律！流行病学研究显示，长期重度社交时差与代谢紊乱、肥胖和情绪低落高度相关。' }
+    ];
+    let cur = 'heavy';
+
+    function pick(id){
+      cur = id;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      document.getElementById('presets').innerHTML = MODES.map(m => `
+        <button class="pill ${cur===m.id?'active':''}" onclick="pick('${m.id}')">${m.label}</button>
+      `).join('');
+
+      const m = MODES.find(x=>x.id===cur);
+      const midWk = (m.wk[0] + m.wk[1]) / 2;
+      const midWe = (m.we[0] + m.we[1]) / 2;
+      const lag = +(midWe - midWk).toFixed(1);
+
+      // Axis 22:00 (22) to 14:00 (38)
+      const x0=56, x1=612;
+      const toX = h => x0 + ((h - 22)/16)*(x1-x0);
+      const fmt = h => `${String(Math.floor(h)%24).padStart(2,'0')}:${(h%1)?'30':'00'}`;
+
+      document.getElementById('svg').innerHTML = `
+        ${[22,24,26,28,30,32,34,36,38].map(h=>`<line x1="${toX(h)}" y1="28" x2="${toX(h)}" y2="176" stroke="var(--tax-border)" stroke-dasharray="3 3"/><text x="${toX(h)}" y="195" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${String(h%24).padStart(2,'0')}:00</text>`).join('')}
+
+        <text x="16" y="64" font-size="12" font-weight="800" fill="var(--tax-primary)">工作日</text>
+        <rect x="${toX(m.wk[0])}" y="44" width="${toX(m.wk[1])-toX(m.wk[0])}" height="32" rx="8" fill="var(--tax-primary-soft)" stroke="var(--tax-primary)" stroke-width="2"/>
+        <text x="${toX(midWk)}" y="64" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--tax-primary)">${fmt(m.wk[0])} – ${fmt(m.wk[1])}</text>
+        <circle cx="${toX(midWk)}" cy="60" r="4.5" fill="var(--tax-primary)"/>
+
+        <text x="16" y="144" font-size="12" font-weight="800" fill="${lag>=2?'var(--tax-red)':'var(--tax-green)'}">周末</text>
+        <rect x="${toX(m.we[0])}" y="124" width="${toX(m.we[1])-toX(m.we[0])}" height="32" rx="8" fill="${lag>=2?'var(--tax-red-soft)':'var(--tax-green-soft)'}" stroke="${lag>=2?'var(--tax-red)':'var(--tax-green)'}" stroke-width="2"/>
+        <text x="${toX(midWe)}" y="144" text-anchor="middle" font-size="11.5" font-weight="800" fill="${lag>=2?'var(--tax-red)':'var(--tax-green)'}">${fmt(m.we[0])} – ${fmt(m.we[1])}</text>
+        <circle cx="${toX(midWe)}" cy="140" r="4.5" fill="${lag>=2?'var(--tax-red)':'var(--tax-green)'}"/>
+
+        <line x1="${toX(midWk)}" y1="76" x2="${toX(midWe)}" y2="124" stroke="var(--tax-amber)" stroke-width="2.6" stroke-dasharray="5 3"/>
+        <rect x="${(toX(midWk)+toX(midWe))/2 - 58}" y="89" width="116" height="22" rx="6" fill="var(--tax-amber-soft)" stroke="var(--tax-amber)"/>
+        <text x="${(toX(midWk)+toX(midWe))/2}" y="104" text-anchor="middle" font-size="11.5" font-weight="850" fill="var(--tax-amber)">✈️ 时差 ${lag} 小时</text>
+      `;
+
+      document.getElementById('kLag').textContent = lag + ' 小时';
+      document.getElementById('kFlight').textContent = m.flight;
+      document.getElementById('kMon').textContent = m.mon;
+      document.getElementById('ahaBox').innerHTML = m.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

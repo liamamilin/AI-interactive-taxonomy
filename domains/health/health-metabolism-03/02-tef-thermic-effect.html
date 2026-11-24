@@ -7,60 +7,147 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .preset-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-bottom:14px; }
+    .m-card { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .m-card.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .m-card .t { font-size:13px; font-weight:800; }
+    .m-card .s { font-size:11.5px; color:var(--tax-muted); margin-top:3px; }
+    .adj-row { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; align-items:center; }
+    .adj { display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); font-size:12.5px; font-weight:750; }
+    .adj button { width:26px; height:26px; border-radius:7px; border:1px solid var(--tax-border); background:var(--tax-surface); color:var(--tax-ink); font-weight:850; cursor:pointer; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
     .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
     .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🥩 食物热效应 (TEF)：同样吃 100 大卡，谁净剩最少？</h1><p>误区：吃进去 500 大卡的食物，身体就实打实吸收 500 大卡，三大营养素全一样。真相：蛋白质需要消耗自身 25%~30% 的热量去拆解消化，而脂肪只需要 2%——吃同样热量，高蛋白净吸收少得多！</p></div>
+      <div>
+        <h1>🥩 食物热效应 (TEF)：同样吃 100 大卡，谁净剩最少？</h1>
+        <p>误区：1000 大卡炸鸡和 1000 大卡鸡胸肉进肚子后，身体吸收的净热量完全一样。真相：消化蛋白质需要消耗其自身 25%–30% 的热量交“消化税（TEF）”，而油脂几乎零税率直奔腰间！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>蛋白质供能占比</span><span id="vP">35%</span></label><input type="range" id="sP" min="10" max="60" value="35" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>脂肪供能占比</span><span id="vF">25%</span></label><input type="range" id="sF" min="10" max="60" value="25" oninput="upd()"></div>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🍱 选择一套 1,000 大卡餐盘，或手动微调三大营养素占比：</div>
+      <div class="preset-grid" id="presets"></div>
+      <div class="adj-row">
+        <div class="adj">🥩 蛋白 <strong id="vP">50%</strong> <button onclick="shift('p',-10)">-</button><button onclick="shift('p',10)">+</button></div>
+        <div class="adj">🍚 碳水 <strong id="vC">35%</strong> <button onclick="shift('c',-10)">-</button><button onclick="shift('c',10)">+</button></div>
+        <div class="adj">🧈 脂肪 <strong id="vF">15%</strong> <button onclick="shift('f',-10)">-</button><button onclick="shift('f',10)">+</button></div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
+
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">消化过程白烧掉 (TEF)</div><div class="k-val" id="kTef" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">实际净吸收热量 (每1000kcal)</div><div class="k-val" id="kNet">—</div></div>
+        <div class="kpi"><div class="k-lbl">消化本身烧掉的“TEF 税”</div><div class="k-val" id="kTef" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">真正落袋净热量（每 1000 大卡）</div><div class="k-val" id="kNet" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">消化税率</div><div class="k-val" id="kRate" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const p=+document.getElementById('sP').value;
-  let f=+document.getElementById('sF').value;
-  if(p+f>90){ f=90-p; document.getElementById('sF').value=f; }
-  const c=100-p-f;
-  document.getElementById('vP').textContent=p+'%'; document.getElementById('vF').textContent=f+'%';
-  const tef=Math.round(10*(p*0.28 + c*0.08 + f*0.02));
-  const net=1000-tef;
-  document.getElementById('kTef').textContent=tef+' kcal';
-  document.getElementById('kNet').textContent=net+' kcal';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">食物热效应 (消化自己消耗的热量): ${tef} kcal (${(tef/10).toFixed(1)}%)</text>
-    <rect x="20" y="44" width="${tef*1.8}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">净吸收热量 (蛋白质 ${p}% · 碳水 ${c}% · 脂肪 ${f}%): ${net} kcal</text>
-    <rect x="20" y="112" width="${net*0.54}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">蛋白质 TEF ≈ 25-30% | 碳水 ≈ 8% | 脂肪 ≈ 2%</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>同样标着 1000 大卡的食谱，把蛋白质拉到 ${p}% 时，光是胃肠消化拆解氨基酸就替你白烧掉了 <strong>${tef} 大卡</strong>，外加极强饱腹感！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const PRESETS = [
+      { id:'fit', icon:'🥩', name:'高蛋白增肌餐', desc:'50%蛋白 · 35%碳水 · 15%脂', p:50, c:35, f:15 },
+      { id:'med', icon:'🥗', name:'均衡地中海餐', desc:'30%蛋白 · 40%碳水 · 30%脂', p:30, c:40, f:30 },
+      { id:'noodle', icon:'🍜', name:'精制碳水盖浇饭', desc:'15%蛋白 · 70%碳水 · 15%脂', p:15, c:70, f:15 },
+      { id:'fried', icon:'🍟', name:'炸鸡薯条高油餐', desc:'15%蛋白 · 35%碳水 · 50%脂', p:15, c:35, f:50 }
+    ];
+    let p=50, c=35, f=15, activeId='fit';
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function selectPreset(id){
+      const pr = PRESETS.find(x=>x.id===id);
+      p=pr.p; c=pr.c; f=pr.f; activeId=id;
+      markDone(); draw();
+    }
+    function shift(k, delta){
+      activeId = '';
+      if(k==='p'){
+        const np = Math.max(0, Math.min(80, p+delta));
+        const d = np - p; p = np;
+        c = Math.max(0, c - d);
+        f = 100 - p - c;
+        if(f < 0){ c += f; f = 0; }
+      } else if(k==='c'){
+        const nc = Math.max(0, Math.min(85, c+delta));
+        const d = nc - c; c = nc;
+        f = Math.max(0, f - d);
+        p = 100 - c - f;
+        if(p < 0){ f += p; p = 0; }
+      } else {
+        const nf = Math.max(0, Math.min(85, f+delta));
+        const d = nf - f; f = nf;
+        c = Math.max(0, c - d);
+        p = 100 - c - f;
+        if(p < 0){ c += p; p = 0; }
+      }
+      markDone(); draw();
+    }
+
+    function draw(){
+      document.getElementById('presets').innerHTML = PRESETS.map(pr => `
+        <button class="m-card ${activeId===pr.id?'active':''}" onclick="selectPreset('${pr.id}')">
+          <div class="t">${pr.icon} ${pr.name}</div>
+          <div class="s">${pr.desc}</div>
+        </button>
+      `).join('');
+
+      document.getElementById('vP').textContent = p+'%';
+      document.getElementById('vC').textContent = c+'%';
+      document.getElementById('vF').textContent = f+'%';
+
+      // TEF rates: Protein ~25%, Carb ~8%, Fat ~2%
+      const pK = p*10, cK = c*10, fK = f*10;
+      const tefP = Math.round(pK * 0.25);
+      const tefC = Math.round(cK * 0.08);
+      const tefF = Math.round(fK * 0.02);
+      const totalTef = tefP + tefC + tefF;
+      const net = 1000 - totalTef;
+
+      const x0 = 115, maxW = 480;
+      function row(y, lbl, total, tef, col){
+        const wTot = (total / 850) * maxW;
+        const wNet = ((total - tef) / 850) * maxW;
+        const wTef = wTot - wNet;
+        return `
+          <text x="16" y="${y+19}" font-size="12.5" font-weight="800" fill="var(--tax-ink)">${lbl} (${total})</text>
+          <rect x="${x0}" y="${y}" width="${Math.max(0,wNet)}" height="28" rx="5" fill="${col}" opacity="0.88"/>
+          <rect x="${x0+wNet}" y="${y}" width="${Math.max(0,wTef)}" height="28" rx="5" fill="var(--tax-green)"/>
+          <text x="${Math.min(628, x0+wTot+8)}" y="${y+19}" font-size="11.5" font-weight="750" fill="var(--tax-green)">-税 ${tef}</text>
+        `;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <text x="16" y="22" font-size="12" font-weight="800" fill="var(--tax-muted)">每 1,000 大卡餐盘拆解（绿色块 = 消化过程直接发热烧掉的 TEF 热量）</text>
+        ${row(36, '🥩 蛋白质', pK, tefP, 'var(--tax-primary)')}
+        ${row(80, '🍚 碳水', cK, tefC, 'var(--tax-amber)')}
+        ${row(124, '🧈 脂肪', fK, tefF, 'var(--tax-red)')}
+        <line x1="16" y1="166" x2="624" y2="166" stroke="var(--tax-border)"/>
+        <text x="16" y="190" font-size="13" font-weight="850" fill="var(--tax-ink)">总计 1,000 大卡 → 消化税烧掉 <tspan fill="var(--tax-green)">${totalTef} 大卡</tspan>，实际净吸收 <tspan fill="var(--tax-primary)">${net} 大卡</tspan></text>
+      `;
+
+      document.getElementById('kTef').textContent = `-${totalTef} kcal`;
+      document.getElementById('kNet').textContent = `${net} kcal`;
+      document.getElementById('kRate').textContent = `${(totalTef/10).toFixed(1)}%`;
+
+      let aha = '';
+      if(totalTef >= 140){
+        aha = `💡 <strong>顿悟时刻：</strong>高蛋白餐自带“隐形折扣”！同样吃进 1,000 大卡，拆解蛋白质氨基酸链本身就烧掉了 <strong>${totalTef} 大卡</strong>（相当于慢跑 20 分钟），不仅饱腹感强，净吸收热量也比高油餐少一大截！`;
+      } else if(totalTef <= 85){
+        aha = `💡 <strong>顿悟时刻：</strong>高油/精制碳水餐的消化税极低（仅烧掉 <strong>${totalTef} 大卡</strong>），高达 <strong>${net} 大卡</strong>几乎无损落袋！这就是为什么喝奶茶吃炸鸡特别容易在不知不觉中热量超标。`;
+      } else {
+        aha = `💡 <strong>顿悟时刻：</strong>当前餐盘消化税为 <strong>${totalTef} 大卡</strong>（${(totalTef/10).toFixed(1)}%）。试着把脂肪换成蛋白质，观察绿色“TEF 消化税”条如何肉眼可见地变长！`;
+      }
+      document.getElementById('ahaBox').innerHTML = aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

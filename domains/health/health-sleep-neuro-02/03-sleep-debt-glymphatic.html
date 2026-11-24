@@ -7,57 +7,129 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🧼 大脑“类淋巴洗脑系统”夜间清理实验</h1><p>误区：晚上少睡一点，只要白天靠喝浓咖啡撑住不困，大脑就不会受损。真相：大脑只有在夜间深睡时，胶质细胞才会收缩腾出 60% 空间让脑脊液冲刷代谢废物——咖啡因只能屏蔽困意，洗不掉垃圾！</p></div>
+      <div>
+        <h1>🧼 大脑“类淋巴洗脑系统”夜间清理实验</h1>
+        <p>误区：睡觉只是让大脑“待机关机省电”。真相：大脑白天代谢产生大量 β-淀粉样蛋白等垃圾，只有在进入深度睡眠时，胶质细胞才会主动收缩腾出 60% 缝隙，让脑脊液像高压水枪一样把垃圾冲走！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>平均每晚有效深睡时长</span><span id="vDeep">90 分钟</span></label><input type="range" id="sDeep" min="20" max="140" value="90" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>连续睡眠不足天数</span><span id="vDays">3 天</span></label><input type="range" id="sDays" min="0" max="14" value="3" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" id="playBtn" onclick="startWash()">▶ 启动夜间脑脊液冲刷模拟</button>
+        <button class="pill" onclick="setSleep('short',this)">😵 熬夜仅睡 4.5 小时</button>
+        <button class="pill active" onclick="setSleep('mid',this)">😐 碎片睡眠 6 小时</button>
+        <button class="pill" onclick="setSleep('full',this)">😴 优质深睡 8 小时</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
+
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">夜间脑脊液冲刷率</div><div class="k-val" id="kWash" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">脑雾代谢垃圾残留</div><div class="k-val" id="kTrash" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">胶质细胞缝隙扩张度</div><div class="k-val" id="kGap" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">代谢废物清除率</div><div class="k-val" id="kClear" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">次日晨起脑雾残留</div><div class="k-val" id="kFog" style="color:var(--tax-red);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const deep=+document.getElementById('sDeep').value, days=+document.getElementById('sDays').value;
-  document.getElementById('vDeep').textContent=deep+' 分钟'; document.getElementById('vDays').textContent=days+' 天';
-  const wash=Math.min(98, Math.round(deep/110*100));
-  const trash=Math.min(95, Math.round(Math.max(0, 100-wash)*0.5 + days*4.2));
-  document.getElementById('kWash').textContent=wash+'%';
-  document.getElementById('kTrash').textContent=trash+' 单位';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">类淋巴系统脑脊液冲刷效率: ${wash}%</text>
-    <rect x="20" y="44" width="${wash*5.4}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#ef4444">累积 β-淀粉样蛋白/代谢残留: ${trash} 单位</text>
-    <rect x="20" y="112" width="${trash*5.4}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">清醒时脑细胞间隙紧闭，只有深睡才会打开 60% 排污通道</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>睡眠不是关机待机，而是大脑的强制清洁工时！连续 ${days} 天深睡不足会累积 <strong>${trash} 单位</strong>代谢垃圾，直接表现为次日的注意力涣散与“脑雾”。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const MODES = {
+      short: { name:'熬夜 4.5 小时', maxClear:38, gap:'+18%', shrink:4 },
+      mid:   { name:'碎片睡眠 6 小时', maxClear:66, gap:'+38%', shrink:9 },
+      full:  { name:'优质深睡 8 小时', maxClear:95, gap:'+60%', shrink:15 }
+    };
+    let mode = 'mid', progress = 100, timer = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setSleep(m, btn){
+      mode = m;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone();
+      startWash();
+    }
+
+    function startWash(){
+      if(timer) clearInterval(timer);
+      markDone();
+      progress = 0;
+      document.getElementById('playBtn').textContent = '🌊 脑脊液正在冲刷...';
+      timer = setInterval(()=>{
+        progress += 5;
+        if(progress >= 100){
+          progress = 100; clearInterval(timer); timer = null;
+          document.getElementById('playBtn').textContent = '↻ 重播夜间洗脑实验';
+        }
+        draw();
+      }, 45);
+      draw();
+    }
+
+    function draw(){
+      const cfg = MODES[mode];
+      const cleared = Math.round(cfg.maxClear * (progress / 100));
+      const remain = 100 - cleared;
+      const cellR = 34 - Math.round(cfg.shrink * (progress / 100));
+
+      // Draw 8 brain cells in 2 rows + flowing CSF wave + remaining waste particles
+      let cells = '';
+      for(let r=0; r<2; r++){
+        for(let c=0; c<4; c++){
+          const cx = 110 + c * 140, cy = 68 + r * 86;
+          cells += `<circle cx="${cx}" cy="${cy}" r="${cellR}" fill="var(--tax-surface-alt)" stroke="var(--tax-primary)" stroke-width="2"/>`;
+          cells += `<text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="11" font-weight="750" fill="var(--tax-muted)">脑细胞</text>`;
+        }
+      }
+      // Waste particles (28 total)
+      const totalDots = 28;
+      const leftDots = Math.round(totalDots * (remain / 100));
+      let dots = '';
+      for(let i=0; i<totalDots; i++){
+        const baseX = 46 + (i * 21) % 540;
+        const baseY = 30 + ((i * 53) % 150);
+        if(i < leftDots){
+          dots += `<circle cx="${baseX}" cy="${baseY}" r="5.5" fill="var(--tax-amber)"/>`;
+        } else {
+          // Washed toward right exit
+          const wx = Math.min(625, baseX + progress * 4.5);
+          if(wx < 620) dots += `<circle cx="${wx}" cy="${baseY}" r="4.5" fill="var(--tax-green)" opacity="0.45"/>`;
+        }
+      }
+      const waveX = (progress / 100) * 620;
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="0" y="0" width="${waveX}" height="215" fill="var(--tax-primary-soft)" opacity="0.4"/>
+        ${cells}
+        ${dots}
+        <line x1="${waveX}" y1="10" x2="${waveX}" y2="205" stroke="var(--tax-primary)" stroke-width="2.5" stroke-dasharray="5 3" opacity="${progress<100?0.9:0}"/>
+        <text x="16" y="204" font-size="11.5" font-weight="800" fill="var(--tax-ink)">橙色颗粒 = β-淀粉样蛋白等代谢废物（剩余 ${remain}%） · 蓝色流体 = 脑脊液冲刷</text>
+      `;
+
+      document.getElementById('kGap').textContent = cfg.gap;
+      document.getElementById('kClear').textContent = cleared + '%';
+      document.getElementById('kFog').textContent = remain + '%' + (remain > 45 ? ' 🌫️ 重度脑雾' : remain > 20 ? ' 轻微迟钝' : ' ✨ 清透无比');
+
+      document.getElementById('ahaBox').innerHTML = mode === 'full'
+        ? `💡 <strong>顿悟时刻：</strong>优质深睡 8 小时让胶质细胞收缩腾出 <strong>+60%</strong> 的冲刷通道，脑脊液把 <strong>${cleared}%</strong> 的日间代谢废物一冲而空——深度睡眠就是大脑每天一次的“高压自动洗车”！`
+        : mode === 'short'
+        ? `💡 <strong>顿悟时刻：</strong>只睡 4.5 小时，类淋巴通道刚打开一点就被闹钟强行关闭，高达 <strong>${remain}%</strong> 的代谢垃圾残留在脑细胞缝隙里——这就是熬夜第二天脑子像灌了浆糊的物理真相！`
+        : `💡 <strong>顿悟时刻：</strong>碎片睡眠 6 小时只能清掉 <strong>${cleared}%</strong> 的垃圾，剩下的 <strong>${remain}%</strong> 会在一周内逐日叠加成“慢性睡眠债”。试试切换到 <strong>优质深睡 8 小时</strong> 对比冲刷威力！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

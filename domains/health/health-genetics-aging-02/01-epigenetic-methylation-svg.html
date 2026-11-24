@@ -3,66 +3,104 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔐 DNA 甲基化与组蛋白松紧调音台（SVG）</title>
+  <title>🔐 DNA 甲基化与组蛋白松紧调音台</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .g-hit { cursor:pointer; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🔐 DNA 甲基化与组蛋白松紧调音台（SVG）</h1><p>误区：基因序列一出生就决定了全部命运，后天生活习惯改不了基因表达。真相：生活方式虽不改 DNA 字母，却会往 DNA 上狂贴“甲基化封条”，把好基因锁进黑盒、把坏基因放出来！</p></div>
+      <div>
+        <h1>🔐 DNA 甲基化与组蛋白松紧调音台</h1>
+        <p>误区：基因是出生就写死的宿命，后天生活习惯改不了基因表达。真相：生活方式虽不改 DNA 字母本身，却能直接在 DNA 上贴/撕<strong>“甲基化封条（锁死沉默）”</strong>、松紧<strong>组蛋白线轴</strong>，实时开关你的抗衰与致病基因！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>不良环境/压力/抽烟导致的错误甲基化封条</span><span id="vMeth">55%</span></label><input type="range" id="sMeth" min="5" max="95" value="55" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>规律运动与植物多酚打开组蛋白活力</span><span id="vAcet">60%</span></label><input type="range" id="sAcet" min="10" max="100" value="60" oninput="upd()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="preset('good',this)">🌿 运动 + 深睡 + 抗炎饮食</button>
+        <button class="pill" onclick="preset('bad',this)">🚬 长期抽烟 + 熬夜 + 慢性高压</button>
+        <span style="font-size:12px;color:var(--tax-muted);">👆 也可直接点击下方任意基因片段，手动贴上/撕掉甲基化封条</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 210"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">长寿修复基因可读率</div><div class="k-val" id="kRead" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">表观年龄 vs 实际年龄</div><div class="k-val" id="kBio">—</div></div>
+        <div class="kpi"><div class="k-lbl">🛡️ 保护性基因开启数</div><div class="k-val" id="kGood" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🔥 促炎基因沉默锁定</div><div class="k-val" id="kBad" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">细胞健康表观评分</div><div class="k-val" id="kScore">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const meth=+document.getElementById('sMeth').value, acet=+document.getElementById('sAcet').value;
-  document.getElementById('vMeth').textContent=meth+'%'; document.getElementById('vAcet').textContent=acet+'%';
-  const read=Math.max(10, Math.min(98, Math.round(50 + acet*0.5 - meth*0.45)));
-  const bioDiff=Math.round((55-read)/5);
-  document.getElementById('kRead').textContent=read+'%';
-  document.getElementById('kBio').textContent=(bioDiff>0?'显老 +':'年轻 ')+bioDiff+' 岁';
-  document.getElementById('kBio').style.color=bioDiff>0?'#ef4444':'#059669';
-  let locks='';
-  for(let i=0;i<8;i++){
-    const locked=i < Math.round(meth/12);
-    const x=55+i*64;
-    locks+=`<rect x="${x}" y="68" width="46" height="44" rx="8" fill="${locked?'#ef4444':'#059669'}" opacity="0.22" stroke="${locked?'#ef4444':'#059669'}" stroke-width="2"/>
-    <text x="${x+23}" y="95" text-anchor="middle" font-size="13" font-weight="850" fill="${locked?'#ef4444':'#059669'}">${locked?'🔒锁':'🔓开'}</text>`;
-  }
-  document.getElementById('svg').innerHTML=locks+`
-    <text x="35" y="36" font-size="13" font-weight="800" fill="var(--tax-text)">长寿修复基因片段上的“表观开关”状态 (可读率 ${read}%)</text>
-    <text x="35" y="152" font-size="12.5" font-weight="750" fill="var(--tax-muted)">DNA 是硬件代码，表观遗传是动态配置文件——且这份配置是可逆的！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“基因上膛，生活方式扣动扳机。”通过运动与健康作息把表观封条撕掉，你的生物表观年龄就能直接比身份证年轻/显老 <strong>${Math.abs(bioDiff)} 岁</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const GENES = [
+      { id:0, name:'p53 抑癌守卫', good:true,  locked:false },
+      { id:1, name:'PGC-1α 线粒体', good:true,  locked:false },
+      { id:2, name:'抗氧化修复酶', good:true,  locked:false },
+      { id:3, name:'NF-κB 促炎开关', good:false, locked:true }
+    ];
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function preset(mode, btn){
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(mode === 'good'){ GENES[0].locked=false; GENES[1].locked=false; GENES[2].locked=false; GENES[3].locked=true; }
+      else { GENES[0].locked=true; GENES[1].locked=true; GENES[2].locked=true; GENES[3].locked=false; }
+      markDone(); draw();
+    }
+    function toggleGene(id){
+      GENES[id].locked = !GENES[id].locked;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      markDone(); draw();
+    }
+
+    function draw(){
+      let svg = `<line x1="20" y1="108" x2="620" y2="108" stroke="var(--tax-primary)" stroke-width="5" stroke-opacity="0.35"/>`;
+      GENES.forEach((g, i) => {
+        const x = 34 + i * 148;
+        const isDesired = g.good ? !g.locked : g.locked;
+        const col = isDesired ? 'var(--tax-green)' : 'var(--tax-red)';
+        const soft = isDesired ? 'var(--tax-green-soft)' : 'var(--tax-red-soft)';
+        svg += `
+          <g class="g-hit" onclick="toggleGene(${g.id})">
+            <rect x="${x}" y="46" width="128" height="124" rx="14" fill="${soft}" stroke="${col}" stroke-width="2.4"/>
+            <text x="${x+64}" y="76" text-anchor="middle" font-size="22">${g.locked ? '🔒' : '📖'}</text>
+            <text x="${x+64}" y="106" text-anchor="middle" font-size="12.5" font-weight="850" fill="var(--tax-ink)">${g.name}</text>
+            <text x="${x+64}" y="130" text-anchor="middle" font-size="11" font-weight="800" fill="${col}">${g.locked ? '甲基化封条锁定' : '组蛋白松开·活跃'}</text>
+            <text x="${x+64}" y="152" text-anchor="middle" font-size="10.5" fill="var(--tax-muted)">点击切换封条</text>
+          </g>
+        `;
+      });
+      svg += `<text x="320" y="26" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-muted)">同一条 DNA 链：点击任意基因贴上/撕下甲基化封条（CH₃）</text>`;
+      svg += `<text x="320" y="196" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-muted)">好基因需要松开读取，促炎坏基因需要贴上甲基化封条锁死！</text>`;
+      document.getElementById('svg').innerHTML = svg;
+
+      const goodOn = GENES.filter(g=>g.good && !g.locked).length;
+      const badOff = GENES.filter(g=>!g.good && g.locked).length;
+      const score = Math.round(((goodOn + badOff) / 4) * 100);
+      const sCol = score >= 75 ? 'var(--tax-green)' : (score >= 50 ? 'var(--tax-amber)' : 'var(--tax-red)');
+
+      document.getElementById('kGood').textContent = `${goodOn} / 3 活跃`;
+      document.getElementById('kBad').textContent = badOff ? '已安全锁死 ✅' : '解封暴走 🚨';
+      const kS = document.getElementById('kScore'); kS.textContent = score + ' 分'; kS.style.color = sCol;
+
+      document.getElementById('ahaBox').innerHTML = score >= 75
+        ? `💡 <strong>顿悟时刻：</strong>表观遗传评分 <strong>${score} 分</strong>！<strong>“基因给你装上子弹，但表观遗传和生活方式决定要不要扣动扳机。”</strong>规律运动与优质睡眠能撕掉保护基因上的封条、把促炎基因死死锁住！`
+        : `💡 <strong>顿悟时刻：</strong>警告！抽烟、熬夜与高压把本该保护你的抑癌/修复基因贴上了 <strong>甲基化封条</strong>，却把促炎基因彻底放了出来（评分仅 ${score} 分）——好在表观标记是<strong>可逆的</strong>，改变习惯几周内就能开始重写！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

@@ -3,61 +3,114 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⏱️ 肌梭拉警报 vs 高尔基腱器放行时间轴（SVG）</title>
+  <title>⏱️ 肌梭拉警报 vs 高尔基腱器放行时间轴</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⏱️ 肌梭拉警报 vs 高尔基腱器放行时间轴（SVG）</h1><p>误区：压腿时一上一下猛弹、疼得越惨拉得越开。真相：猛拉会立刻触发“肌梭牵张反射”强行收缩肌肉保护肌腱不被扯断；只有保持静止 20~30 秒，高尔基腱器才会发出“安全松手”指令！</p></div>
+      <div>
+        <h1>⏱️ 肌梭拉警报 vs 高尔基腱器放行时间轴</h1>
+        <p>误区：压腿时一上一下猛烈弹震，能把筋拉得更快更开。真相：猛拉会瞬间触发<strong>肌梭（牵张反射）</strong>拼命往回收缩自保；只有温和保持 <strong>15–30 秒</strong>，<strong>高尔基腱器（GTO）</strong>才会发指令解除刹车真正放行！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>静态保持拉伸时长</span><span id="vSec">30 秒</span></label><input type="range" id="sSec" min="2" max="60" value="30" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>动作猛拉/弹震冲击度</span><span id="vJerk">15%</span></label><input type="range" id="sJerk" min="0" max="100" value="15" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="playSim()">▶ 播放 40 秒神经反射时间轴</button>
+        <button class="pill active" onclick="setMode('static',this)">🧘 缓慢深呼吸静拉</button>
+        <button class="pill" onclick="setMode('bounce',this)">💥 猛烈上下弹震压腿</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">肌梭防卫反抗力</div><div class="k-val" id="kSp" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">真实柔韧延展收获</div><div class="k-val" id="kRel" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">🚨 肌梭防撕裂反抗张力</div><div class="k-val" id="kSpin" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🟢 高尔基腱器 (GTO) 放行度</div><div class="k-val" id="kGto" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">实际肌肉伸展收益</div><div class="k-val" id="kRom" style="color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const sec=+document.getElementById('sSec').value, jerk=+document.getElementById('sJerk').value;
-  document.getElementById('vSec').textContent=sec+' 秒'; document.getElementById('vJerk').textContent=jerk+'%';
-  const sp=Math.min(98, Math.round(jerk*0.75 + 45*Math.exp(-sec/12)));
-  const rel=Math.max(5, Math.round(95*(1-Math.exp(-sec/18)) - jerk*0.45));
-  document.getElementById('kSp').textContent=sp+'%';
-  document.getElementById('kRel').textContent=rel+' 分';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">肌梭防御性反向收缩 (防扯断): ${sp}%</text>
-    <rect x="20" y="44" width="${sp*5.2}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">高尔基腱器放行放松度: ${rel} 分</text>
-    <rect x="20" y="112" width="${rel*5.2}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">静待 25~30 秒 + 深呼气，神经系统才会解除防卫锁，真正打开活动度</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>拉伸本质上不是“把橡皮筋硬拉长”，而是“说服神经系统解除保护锁”！猛弹只会吓得肌梭锁死（${sp}%），慢呼吸静待 ${sec} 秒才能骗过防卫！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let mode = 'static', sec = 40, timer = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setMode(m, btn){
+      mode = m;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); playSim();
+    }
+    function playSim(){
+      if(timer) clearInterval(timer);
+      markDone();
+      sec = 0;
+      timer = setInterval(()=>{
+        sec += 1;
+        if(sec >= 40){ sec = 40; clearInterval(timer); timer=null; }
+        draw();
+      }, 60);
+      draw();
+    }
+
+    function vals(s){
+      if(mode === 'bounce'){
+        const spin = Math.round(78 + 16 * Math.abs(Math.sin(s * 0.9)));
+        const gto = Math.round(12 + 4 * Math.sin(s * 0.4));
+        return { spin, gto };
+      }
+      const spin = Math.round(14 + 70 * Math.exp(-s / 11));
+      const gto = Math.round(92 / (1 + Math.exp(-(s - 18) / 4.2)));
+      return { spin, gto };
+    }
+
+    function draw(){
+      const x0=52, x1=612, yMin=28, yMax=188;
+      const toX = s => x0 + (s/40)*(x1-x0);
+      const toY = v => yMax - (v/100)*(yMax-yMin);
+
+      let pS=[], pG=[];
+      for(let s=0; s<=sec; s++){
+        const v = vals(s);
+        pS.push(`${toX(s).toFixed(1)},${toY(v.spin).toFixed(1)}`);
+        pG.push(`${toX(s).toFixed(1)},${toY(v.gto).toFixed(1)}`);
+      }
+      const now = vals(sec);
+      const rom = mode === 'bounce' ? '+2°（越弹越紧）' : (sec < 15 ? '+4°（肌梭仍在抵抗）' : `+${Math.round(4 + (now.gto/100)*16)}°（深度松解）`);
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="${toX(18)}" y="${yMin}" width="${x1-toX(18)}" height="${yMax-yMin}" fill="var(--tax-green-soft)" opacity="0.5"/>
+        <text x="${toX(29)}" y="${yMin+14}" text-anchor="middle" font-size="10.5" font-weight="800" fill="var(--tax-green)">GTO 自生抑制黄金放行区 (18s–40s)</text>
+        ${[0,10,20,30,40].map(s=>`<text x="${toX(s)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${s}秒</text>`).join('')}
+        <polyline points="${pS.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3"/>
+        <polyline points="${pG.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3.2"/>
+        <circle cx="${toX(sec)}" cy="${toY(now.spin)}" r="5.5" fill="var(--tax-red)"/>
+        <circle cx="${toX(sec)}" cy="${toY(now.gto)}" r="5.5" fill="var(--tax-green)"/>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-red)">● 肌梭反抗刹车（怕被拉断）</text>
+        <text x="${x0+195}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-green)">● 高尔基腱器 GTO（发令彻底放松）</text>
+      `;
+
+      document.getElementById('kSpin').textContent = now.spin + '%';
+      document.getElementById('kGto').textContent = now.gto + '%';
+      document.getElementById('kRom').textContent = rom;
+
+      document.getElementById('ahaBox').innerHTML = mode === 'bounce'
+        ? `💡 <strong>顿悟时刻：</strong>每次猛烈弹震，肌梭都以为肌肉快要被扯断了，立刻把反抗张力死死拉满在 <strong>${now.spin}%</strong>，高尔基腱器根本没机会介入！这就是越猛压越容易拉伤的神经机制！`
+        : `💡 <strong>顿悟时刻：</strong>拉筋不是硬扯橡皮筋，而是<strong>和神经系统谈判</strong>！缓慢保持到第 <strong>20–30 秒</strong>后，肌梭确认安全撤防（降至 ${now.spin}%），高尔基腱器（${now.gto}%）下令彻底松闸，幅度瞬间丝滑打开！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

@@ -7,60 +7,119 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .eng-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px; margin-bottom:14px; }
+    .eng-box { padding:11px 13px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .eng-box .t { display:flex; justify-content:space-between; font-size:13px; font-weight:850; margin-bottom:8px; }
+    .btn-sm { padding:6px 11px; border-radius:8px; border:1px solid var(--tax-border); background:var(--tax-surface); color:var(--tax-ink); font-size:12px; font-weight:800; cursor:pointer; margin-right:6px; }
+    .btn-sm:hover { border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .node-hit { cursor:pointer; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⚙️ 菲克公式：心脏泵血 × 肌肉抽氧双引擎</h1><p>误区：提升最大摄氧量全靠肺活量大，跟腿部肌肉没关系。真相：肺部吸氧很少成为瓶颈，真正的木桶短板在于心脏每跳一次泵出多少血，以及肌肉里的线粒体能从血液里抢走多少氧！</p></div>
+      <div>
+        <h1>⚙️ 菲克公式：心脏泵血 × 肌肉抽氧双引擎</h1>
+        <p>误区：心肺耐力差纯粹是“心脏不够强”或“肺活量太小”。真相：根据菲克公式（VO2 = 心输出量 Q × 动静脉氧差），哪怕心脏像跑车引擎一样疯狂泵血，如果大腿肌肉毛细血管和线粒体太稀疏、抽不走氧气，照样跑不动！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>心脏泵血输出量 Q</span><span id="vQ">20 L/min</span></label><input type="range" id="sQ" min="12" max="32" value="20" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>肌肉动静脉氧差 (抽氧率)</span><span id="vO">14 ml/dL</span></label><input type="range" id="sO" min="10" max="18" value="14" oninput="upd()"></div>
+      <div class="eng-row">
+        <div class="eng-box">
+          <div class="t"><span style="color:var(--tax-red);">❤️ 引擎 1：心脏泵血 (Q)</span><span id="vQ">20 L/分</span></div>
+          <button class="btn-sm" onclick="adj('q', -3)">- 减弱</button>
+          <button class="btn-sm" onclick="adj('q', +3)">+ 练 4×4 强心</button>
+        </div>
+        <div class="eng-box">
+          <div class="t"><span style="color:var(--tax-primary);">💪 引擎 2：肌肉抽氧 (Δa-vO2)</span><span id="vAv">130 ml/L</span></div>
+          <button class="btn-sm" onclick="adj('av', -15)">- 减弱</button>
+          <button class="btn-sm" onclick="adj('av', +15)">+ 练 Zone 2 建线粒体</button>
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 640 200"></svg>
+
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">总摄氧量 (Q × ΔO2)</div><div class="k-val" id="kTot" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">相对普通人倍率</div><div class="k-val" id="kMul">—</div></div>
+        <div class="kpi"><div class="k-lbl">总摄氧功率 (VO2)</div><div class="k-val" id="kVo2" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">相对 VO2 Max (按 70kg)</div><div class="k-val" id="kRel" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">当前木桶短板诊断</div><div class="k-val" id="kBot" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const q=+document.getElementById('sQ').value, o=+document.getElementById('sO').value;
-  document.getElementById('vQ').textContent=q+' L/min'; document.getElementById('vO').textContent=o+' ml/dL';
-  const tot=(q*o/100).toFixed(2);
-  const mul=(q*o/220).toFixed(1)+'x';
-  document.getElementById('kTot').textContent=tot+' L/min';
-  document.getElementById('kMul').textContent=mul;
-  document.getElementById('svg').innerHTML=`
-    <rect x="40" y="45" width="170" height="85" rx="12" fill="#fee2e2" stroke="#ef4444" stroke-width="2.5"/>
-    <text x="125" y="80" text-anchor="middle" font-size="14" font-weight="850" fill="#b91c1c">❤️ 心脏水泵 Q</text>
-    <text x="125" y="106" text-anchor="middle" font-size="13" font-weight="800" fill="#ef4444">${q} L/min</text>
-    <text x="245" y="95" text-anchor="middle" font-size="22" font-weight="900" fill="var(--tax-text)">×</text>
-    <rect x="280" y="45" width="170" height="85" rx="12" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5"/>
-    <text x="365" y="80" text-anchor="middle" font-size="14" font-weight="850" fill="#0369a1">🦵 肌肉抽氧率</text>
-    <text x="365" y="106" text-anchor="middle" font-size="13" font-weight="800" fill="#0284c7">${o} ml/dL</text>
-    <text x="520" y="95" text-anchor="middle" font-size="16" font-weight="900" fill="#059669">= ${tot} L</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>菲克公式告诉我们，运动耐力是中央心脏水泵与外周肌肉毛细血管的乘积（当前相当于普通人的 ${mul}）——两边一起练才能突破平台！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let q = 20;   // 14..32 L/min
+    let av = 130; // 100..175 ml/L
+    let focus = 'both';
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function adj(k, d){
+      if(k==='q') q = Math.max(14, Math.min(32, q + d));
+      else av = Math.max(100, Math.min(175, av + d));
+      focus = k;
+      markDone(); draw();
+    }
+    function clickNode(k){ focus = k; markDone(); draw(); }
+
+    function draw(){
+      document.getElementById('vQ').textContent = q + ' L/分';
+      document.getElementById('vAv').textContent = av + ' ml/L';
+      const vo2 = q * av; // ml/min
+      const rel = +(vo2 / 70).toFixed(1);
+      const qScore = (q - 14) / 18, avScore = (av - 100) / 75;
+      const bottleneck = Math.abs(qScore - avScore) < 0.18 ? '双引擎均衡 ✅' : (qScore < avScore ? '❤️ 心脏泵血偏弱' : '💪 外周肌肉抽氧偏弱');
+
+      const pipeW = 6 + (q - 14) * 0.7;
+      document.getElementById('svg').innerHTML = `
+        <g class="node-hit" onclick="clickNode('q')">
+          <rect x="24" y="42" width="166" height="114" rx="14" fill="var(--tax-red-soft)" stroke="var(--tax-red)" stroke-width="${focus==='q'?3.2:2}"/>
+          <text x="107" y="76" text-anchor="middle" font-size="24">❤️</text>
+          <text x="107" y="102" text-anchor="middle" font-size="13.5" font-weight="850" fill="var(--tax-red)">心脏泵血 (Q)</text>
+          <text x="107" y="126" text-anchor="middle" font-size="15" font-weight="900" fill="var(--tax-ink)">${q} L/min</text>
+          <text x="107" y="144" text-anchor="middle" font-size="10.5" fill="var(--tax-muted)">每搏输出量 × 心率</text>
+        </g>
+
+        <line x1="190" y1="99" x2="254" y2="99" stroke="var(--tax-red)" stroke-width="${pipeW.toFixed(1)}" stroke-linecap="round"/>
+        <text x="222" y="80" text-anchor="middle" font-size="16" font-weight="900" fill="var(--tax-muted)">×</text>
+
+        <g class="node-hit" onclick="clickNode('av')">
+          <rect x="256" y="42" width="166" height="114" rx="14" fill="var(--tax-primary-soft)" stroke="var(--tax-primary)" stroke-width="${focus==='av'?3.2:2}"/>
+          <text x="339" y="76" text-anchor="middle" font-size="24">💪</text>
+          <text x="339" y="102" text-anchor="middle" font-size="13.5" font-weight="850" fill="var(--tax-primary)">肌肉抽氧 (Δa-vO2)</text>
+          <text x="339" y="126" text-anchor="middle" font-size="15" font-weight="900" fill="var(--tax-ink)">${av} ml/L</text>
+          <text x="339" y="144" text-anchor="middle" font-size="10.5" fill="var(--tax-muted)">毛细血管 × 线粒体密度</text>
+        </g>
+
+        <text x="444" y="106" text-anchor="middle" font-size="18" font-weight="900" fill="var(--tax-muted)">=</text>
+
+        <rect x="466" y="42" width="150" height="114" rx="14" fill="var(--tax-green-soft)" stroke="var(--tax-green)" stroke-width="2.4"/>
+        <text x="541" y="76" text-anchor="middle" font-size="13" font-weight="850" fill="var(--tax-green)">🏆 VO2 Max</text>
+        <text x="541" y="114" text-anchor="middle" font-size="26" font-weight="900" fill="var(--tax-ink)">${rel}</text>
+        <text x="541" y="140" text-anchor="middle" font-size="11" fill="var(--tax-muted)">ml/kg/min</text>
+        <text x="320" y="186" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-muted)">乘法效应：双引擎同时强化，耐力上限是指数级翻倍！</text>
+      `;
+
+      document.getElementById('kVo2').textContent = (vo2 / 1000).toFixed(2) + ' L/min';
+      document.getElementById('kRel').textContent = rel + ' ml/kg/min';
+      document.getElementById('kBot').textContent = bottleneck;
+
+      document.getElementById('ahaBox').innerHTML = rel >= 60
+        ? `💡 <strong>顿悟时刻：</strong>双引擎拉满！你的 VO2 Max 冲上 <strong>${rel}</strong>（精英耐力级）！大心脏负责把富氧血高压送出去，高密度线粒体肌肉把每一滴氧气榨干，两者相乘才造就顶级耐力！`
+        : qScore < avScore - 0.18
+        ? `💡 <strong>顿悟时刻：</strong>当前短板在<strong>❤️ 中央泵血（Q=${q}）</strong>！肌肉已经很能抽氧了，但心脏单次泵血量偏小——每周加 1 次高强度 4×4 间歇撑大左心室，能立刻突破瓶颈！`
+        : avScore < qScore - 0.18
+        ? `💡 <strong>顿悟时刻：</strong>当前短板在<strong>💪 外周肌肉抽氧（${av}）</strong>！心脏泵出来的富氧血，肌肉还没用完就白白流回静脉了——多练 Zone 2 慢跑扩建毛细血管网和线粒体最有效！`
+        : `💡 <strong>顿悟时刻：</strong>菲克公式是<strong>乘法关系</strong>！试着分别强化“心脏泵血”与“肌肉抽氧”，感受中央供给与外周利用协同暴涨的威力！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

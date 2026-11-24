@@ -7,59 +7,166 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .act-bar { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-bottom:14px; }
+    .act-btn { padding:11px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-weight:800; font-size:13px; cursor:pointer; text-align:left; transition:all .15s ease; }
+    .act-btn:hover { border-color:var(--tax-primary); transform:translateY(-1px); }
+    .act-btn small { display:block; font-weight:600; font-size:11.5px; color:var(--tax-muted); margin-top:3px; }
+    .act-btn.danger:hover { border-color:var(--tax-red); background:var(--tax-red-soft); }
+    .act-btn.good:hover { border-color:var(--tax-green); background:var(--tax-green-soft); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
+    .log-line { margin-top:10px; font-size:12.5px; color:var(--tax-muted); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🔐 胰岛素抵抗：细胞门锁是如何生锈的？</h1><p>误区：只要空腹血糖还没超标，我的糖代谢就完全健康。真相：在血糖升高前 5~10 年，胰腺就已经在用 3 倍剂量的胰岛素硬压血糖了——这就是隐蔽的“胰岛素抵抗”！</p></div>
+      <div>
+        <h1>🔐 胰岛素抵抗：细胞门锁是如何生锈的？</h1>
+        <p>误区：2 型糖尿病早期是因为“胰腺坏了、分泌不出胰岛素”。真相：恰恰相反！早期胰腺拼命分泌 3–5 倍的胰岛素，只因细胞门锁长期被高频高糖轰炸而生锈脱敏，钥匙插不进去！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>每日高糖加餐/零食频次</span><span id="vFreq">5 次/天</span></label><input type="range" id="sFreq" min="1" max="8" value="5" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>每周肌肉力量/有氧耗糖量</span><span id="vEx">20 分</span></label><input type="range" id="sEx" min="0" max="100" value="20" oninput="upd()"></div>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🎮 点击连续施加生活事件，观察细胞膜受体锁、血管积糖与胰腺负荷的动态演化：</div>
+      <div class="act-bar">
+        <button class="act-btn danger" onclick="applyEvent('sugar')">🥤 连喝含糖饮料<small>血糖骤升 · 门锁加速生锈</small></button>
+        <button class="act-btn danger" onclick="applyEvent('snack')">🍪 全天不停嘴加餐<small>胰岛素持续高位 · 受体脱敏</small></button>
+        <button class="act-btn good" onclick="applyEvent('workout')">🏃‍♂️ 抗阻/快走 30 分钟<small>打开免钥匙 GLUT4 侧门</small></button>
+        <button class="act-btn good" onclick="applyEvent('fast')">⏳ 停止加餐+规律空腹<small>胰岛素回落 · 门锁逐步去锈</small></button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
+
+      <div class="log-line">
+        <span id="statusText">当前状态：健康基准（点击上方按钮模拟连续数月的生活习惯）</span>
+        <button class="tax-back" style="cursor:pointer;" onclick="resetSim()">↺ 重置细胞状态</button>
+      </div>
+
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">细胞胰岛素敏感度</div><div class="k-val" id="kSens" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">胰腺被迫代偿倍率</div><div class="k-val" id="kLoad" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">细胞门锁灵敏度</div><div class="k-val" id="kSens">—</div></div>
+        <div class="kpi"><div class="k-lbl">胰腺被迫加班负荷</div><div class="k-val" id="kPanc">—</div></div>
+        <div class="kpi"><div class="k-lbl">血管滞留糖量</div><div class="k-val" id="kBlood">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const freq=+document.getElementById('sFreq').value, ex=+document.getElementById('sEx').value;
-  document.getElementById('vFreq').textContent=freq+' 次/天'; document.getElementById('vEx').textContent=ex+' 分';
-  const sens=Math.max(15, Math.min(98, Math.round(90 - freq*8.5 + ex*0.35)));
-  const load=(100/sens).toFixed(1)+'x';
-  document.getElementById('kSens').textContent=sens+'%';
-  document.getElementById('kLoad').textContent=load;
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">细胞门锁敏感度 (GLUT4 开门效率): ${sens}%</text>
-    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${sens*5.4}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="${sens<50?'#ef4444':'#f59e0b'}">胰腺 β 细胞被迫分泌倍率: ${load}</text>
-    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${Math.min(540, (100/sens)*120)}" height="24" rx="6" fill="${sens<50?'#ef4444':'#f59e0b'}"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">肌肉收缩无需胰岛素也能开糖门——运动是最好的门锁除锈剂</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>天天泡在高频胰岛素里，细胞门锁会脱敏生锈（敏感度跌至 ${sens}%）；少加餐 + 肌肉运动能瞬间重启门锁，给过劳的胰腺放个大假！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let sens = 88;       // 15..100
+    let bloodSugar = 35; // 20..100
+    let glut4Open = false;
+    let steps = 0;
+    let lastMsg = '健康基准：细胞门锁灵敏，少量胰岛素钥匙就能顺畅开门。';
+
+    function applyEvent(type){
+      steps++;
+      glut4Open = false;
+      if(type==='sugar'){
+        sens = Math.max(18, sens - 18);
+        bloodSugar = Math.min(98, bloodSugar + 24);
+        lastMsg = '🥤 高糖轰炸！大量血糖涌入血管，胰岛素疯狂敲门，受体开始下调生锈。';
+      } else if(type==='snack'){
+        sens = Math.max(18, sens - 14);
+        bloodSugar = Math.min(95, bloodSugar + 14);
+        lastMsg = '🍪 持续加餐让胰岛素全天降不下来，细胞为了自保主动“关门脱敏”。';
+      } else if(type==='workout'){
+        glut4Open = true;
+        sens = Math.min(98, sens + 16);
+        bloodSugar = Math.max(25, bloodSugar - 26);
+        lastMsg = '🏃‍♂️ 肌肉收缩直接开启免钥匙通道（GLUT4 侧门），血管积糖迅速被肌肉抽干！';
+      } else if(type==='fast'){
+        sens = Math.min(98, sens + 14);
+        bloodSugar = Math.max(25, bloodSugar - 15);
+        lastMsg = '⏳ 胰岛素回归低谷，生锈的受体门锁重新上浮到细胞膜表面恢复灵敏。';
+      }
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function resetSim(){
+      sens = 88; bloodSugar = 35; glut4Open = false; steps = 0;
+      lastMsg = '已重置为健康基准状态。';
+      draw();
+    }
+
+    function draw(){
+      const pancLoad = Math.min(450, Math.round(100 + (100 - sens) * 3.8 + Math.max(0, bloodSugar - 40) * 1.2));
+      const rustLevel = 100 - sens;
+      const lockColor = sens >= 70 ? 'var(--tax-green)' : (sens >= 42 ? 'var(--tax-amber)' : 'var(--tax-red)');
+      const nBloodDots = Math.round(bloodSugar / 5.5);
+      const nCellDots = Math.max(2, Math.round((sens / 12) + (glut4Open ? 5 : 0)));
+      const nKeys = Math.min(10, Math.max(2, Math.round(pancLoad / 45)));
+
+      let dotsSvg = '';
+      for(let i=0; i<nBloodDots; i++){
+        const cx = 36 + (i % 6) * 36 + ((i*13)%9);
+        const cy = 54 + Math.floor(i / 6) * 36 + ((i*7)%10);
+        dotsSvg += `<circle cx="${cx}" cy="${cy}" r="7.5" fill="var(--tax-amber)" opacity="0.92"/>`;
+      }
+      let keysSvg = '';
+      for(let i=0; i<nKeys; i++){
+        const ky = 44 + i * 16;
+        keysSvg += `<text x="275" y="${ky}" font-size="13" fill="var(--tax-primary)">🔑</text>`;
+      }
+      let cellDots = '';
+      for(let i=0; i<nCellDots; i++){
+        const cx = 420 + (i % 5) * 38;
+        const cy = 62 + Math.floor(i / 5) * 36;
+        cellDots += `<circle cx="${cx}" cy="${cy}" r="7" fill="var(--tax-green)" opacity="0.9"/>`;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="16" y="20" width="246" height="180" rx="12" fill="var(--tax-red-soft)" stroke="var(--tax-red)" stroke-opacity="0.45"/>
+        <text x="28" y="38" font-size="12" font-weight="800" fill="var(--tax-red)">🩸 血管（滞留葡萄糖：${bloodSugar}%）</text>
+        ${dotsSvg}
+
+        <rect x="308" y="20" width="22" height="180" rx="6" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-width="2"/>
+        <rect x="302" y="64" width="34" height="36" rx="8" fill="${lockColor}"/>
+        <text x="319" y="87" text-anchor="middle" font-size="16">${sens < 45 ? '🔒' : '🔓'}</text>
+        <text x="319" y="114" text-anchor="middle" font-size="10.5" font-weight="800" fill="${lockColor}">主锁 ${sens}%</text>
+
+        <rect x="302" y="138" width="34" height="36" rx="8" fill="${glut4Open ? 'var(--tax-green)' : 'var(--tax-border)'}"/>
+        <text x="319" y="160" text-anchor="middle" font-size="11" font-weight="850" fill="${glut4Open ? '#fff' : 'var(--tax-muted)'}">${glut4Open ? '开!' : '闭'}</text>
+        <text x="319" y="188" text-anchor="middle" font-size="10" font-weight="750" fill="${glut4Open ? 'var(--tax-green)' : 'var(--tax-muted)'}">运动侧门</text>
+
+        ${keysSvg}
+        <text x="284" y="195" text-anchor="middle" font-size="10.5" font-weight="750" fill="var(--tax-primary)">胰岛素×${nKeys}</text>
+
+        <rect x="374" y="20" width="250" height="180" rx="12" fill="var(--tax-green-soft)" stroke="var(--tax-green)" stroke-opacity="0.45"/>
+        <text x="386" y="38" font-size="12" font-weight="800" fill="var(--tax-green)">💪 肌肉/肝脏细胞内部（燃料充足度）</text>
+        ${cellDots}
+        ${glut4Open ? `<line x1="255" y1="156" x2="395" y2="156" stroke="var(--tax-green)" stroke-width="3.5" stroke-dasharray="6 4"/>` : ''}
+      `;
+
+      document.getElementById('statusText').textContent = lastMsg;
+      const kSens = document.getElementById('kSens');
+      kSens.textContent = sens + '% ' + (sens<45?'(严重抵抗)':sens<70?'(轻度脱敏)':'(灵敏)');
+      kSens.style.color = lockColor;
+
+      const kPanc = document.getElementById('kPanc');
+      kPanc.textContent = pancLoad + '% ' + (pancLoad>260?'🔥 过劳预警':'');
+      kPanc.style.color = pancLoad>260 ? 'var(--tax-red)' : 'var(--tax-primary)';
+
+      const kBlood = document.getElementById('kBlood');
+      kBlood.textContent = bloodSugar + '%';
+      kBlood.style.color = bloodSugar>65 ? 'var(--tax-red)' : 'var(--tax-amber)';
+
+      let aha = '';
+      if(glut4Open){
+        aha = `💡 <strong>顿悟时刻：</strong>这就是运动逆转胰岛素抵抗的“外挂”！肌肉收缩时能直接把 <strong>GLUT4 转运蛋白</strong>推到细胞膜上开出一扇<strong>不依赖胰岛素的侧门</strong>，立刻清空血管积糖，让过劳的胰腺喘口气！`;
+      } else if(sens < 45){
+        aha = `💡 <strong>顿悟时刻：</strong>门锁已经严重生锈（灵敏度跌至 ${sens}%）！此时体检空腹血糖可能才刚偏高，但胰腺其实已经被迫以 <strong>${pancLoad}%</strong> 负荷拼命分泌大量胰岛素代偿——这正是“高胰岛素血症”的隐形危机。试试点击🏃‍♂️运动或⏳空腹修复！`;
+      } else {
+        aha = `💡 <strong>顿悟时刻：</strong>胰岛素不是敌人，<strong>全天居高不下的高频刺激</strong>才是门锁生锈的元凶。试着连续点几次“含糖饮料”和“加餐”，看看血管塞满糖却进不了细胞的悖论。`;
+      }
+      document.getElementById('ahaBox').innerHTML = aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

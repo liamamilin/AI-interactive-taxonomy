@@ -7,55 +7,95 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .step-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-bottom:14px; }
+    .st-btn { padding:11px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .st-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .st-btn .t { font-size:13px; font-weight:850; }
+    .st-btn .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⚡ PNF 神经拉伸术：先发力再放松的黑科技</h1><p>误区：柔韧性只能靠每天忍痛硬掰慢慢熬。真相：利用 PNF“先绷紧抗阻 6 秒再彻底吐气放松”，高尔基腱器会被强力激活并当场关闭肌肉张力，活动度一分钟就能肉眼可见地突破！</p></div>
+      <div>
+        <h1>⚡ PNF 神经拉伸术：先发力再放松的黑科技</h1>
+        <p>误区：想要把腿抬得更高，只能忍着剧痛死命硬压。真相：物理治疗师最爱的 <strong>PNF（收缩-放松法）</strong> 利用了神经系统后门——在极限位故意主动发力对抗 6 秒，再长呼气放松，10 秒内就能瞬间多打开 15°–20°！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>PNF 阶段一：主动等长对抗发力度</span><span id="vCon">65%</span></label><input type="range" id="sCon" min="10" max="90" value="65" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>阶段二：呼气放松再延展秒数</span><span id="vSec">20 秒</span></label><input type="range" id="sSec" min="5" max="40" value="20" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🎮 按顺序点击体验 PNF 神经拉伸 3 步流程（观察直腿抬高角度突破）：</div>
+      <div class="step-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">普通静态拉伸幅度</div><div class="k-val">+8°</div></div>
-        <div class="kpi"><div class="k-lbl">PNF 黑科技即时突破</div><div class="k-val" id="kPnf" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">当前直腿抬高角度</div><div class="k-val" id="kAng" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">神经保护刹车状态</div><div class="k-val" id="kBrake" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">相比普通硬压多突破</div><div class="k-val" id="kBonus" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const con=+document.getElementById('sCon').value, sec=+document.getElementById('sSec').value;
-  document.getElementById('vCon').textContent=con+'%'; document.getElementById('vSec').textContent=sec+' 秒';
-  const gain=Math.round(8 + con*0.18 + sec*0.2);
-  document.getElementById('kPnf').textContent='+'+gain+'°';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#64748b">传统忍痛静态拉伸: +8°</text>
-    <rect x="20" y="44" width="140" height="24" rx="6" fill="#64748b"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#059669">PNF 先绷紧(${con}%)再放松(${sec}s): +${gain}°</text>
-    <rect x="20" y="112" width="${Math.min(540,gain*14)}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">先主动发力骗出高尔基腱器的“自生抑制”，随后肌纤维顺从放行</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>物理治疗师最爱的 PNF 拉伸法就是利用神经反射的“后门”：先绷紧对抗 6 秒，再深呼一口气放松，活动度当场多开 <strong>+${gain}°</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const STEPS = [
+      { id:0, title:'① 拉至微紧边界', desc:'被动抬腿到 72° 卡住', ang:72, brake:'肌梭锁死边界', bonus:'+0°', col:'var(--tax-primary)',
+        aha:'💡 <strong>顿悟时刻：</strong>你平时拉伸卡在 <strong>72°</strong> 并不是韧带物理长度到头了，而是大脑担心撕裂拉下了“神经防盗锁”。点击 <strong>② 主动发力对抗 6 秒</strong> 来撬开这把锁！' },
+      { id:1, title:'② 等长对抗发力 6 秒', desc:'腿往下蹬对抗毛巾/搭档', ang:72, brake:'🔥 强力触发 GTO 传感器', bonus:'蓄力中...', col:'var(--tax-amber)',
+        aha:'💡 <strong>顿悟时刻：</strong>在极限位故意用 60% 力量反向发力 6 秒，肌腱张力瞬间拉满，直接向高尔基腱器（GTO）发出强烈信号：“压力太大，准备执行强制松闸（自生抑制）！” 点击 <strong>③ 呼气放松突破</strong>！' },
+      { id:2, title:'③ 长呼气彻底放松突破！', desc:'神经锁解开 → 丝滑冲上 94°', ang:94, brake:'✅ 保护锁短暂下线 10 秒', bonus:'+22° 黑科技突破!', col:'var(--tax-green)',
+        aha:'💡 <strong>顿悟时刻：</strong>砰！松力呼气的那一瞬间，高尔基腱器把神经刹车彻底撤掉，腿毫不费力地抬升到了 <strong>94°</strong>（足足多打开 <strong>+22°</strong>）！这就是运动员热身和康复师最常用的神经黑客技巧！' }
+    ];
+    let cur = 0;
+
+    function pick(i){ cur = i; if(window.ToySDK) window.ToySDK.markCompleted(); draw(); }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = STEPS.map(s => `
+        <button class="st-btn ${cur===s.id?'active':''}" onclick="pick(${s.id})">
+          <div class="t">${s.title}</div>
+          <div class="s">${s.desc}</div>
+        </button>
+      `).join('');
+
+      const s = STEPS[cur];
+      const rad = (s.ang * Math.PI) / 180;
+      const hx = 190, hy = 175, len = 135;
+      const lx = hx + Math.cos(rad) * len;
+      const ly = hy - Math.sin(rad) * len;
+
+      // Baseline 72 deg ghost
+      const r0 = (72 * Math.PI) / 180;
+      const gx = hx + Math.cos(r0) * len, gy = hy - Math.sin(r0) * len;
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="60" y1="${hy}" x2="360" y2="${hy}" stroke="var(--tax-border)" stroke-width="6" stroke-linecap="round"/>
+        <circle cx="${hx}" cy="${hy}" r="10" fill="var(--tax-primary)"/>
+        <line x1="${hx}" y1="${hy}" x2="${gx.toFixed(1)}" y2="${gy.toFixed(1)}" stroke="var(--tax-muted)" stroke-width="4" stroke-dasharray="5 4" opacity="0.5"/>
+        <line x1="${hx}" y1="${hy}" x2="${lx.toFixed(1)}" y2="${ly.toFixed(1)}" stroke="${s.col}" stroke-width="11" stroke-linecap="round"/>
+        <text x="${lx+12}" y="${ly+6}" font-size="14" font-weight="900" fill="${s.col}">${s.ang}°</text>
+        ${cur === 1 ? `<text x="275" y="102" font-size="13" font-weight="850" fill="var(--tax-amber)">↙ 主动用力下压对抗 6 秒!</text>` : ''}
+        ${cur === 2 ? `<text x="240" y="70" font-size="13" font-weight="850" fill="var(--tax-green)">✨ 瞬间突破 +22°!</text>` : ''}
+
+        <rect x="386" y="34" width="230" height="148" rx="14" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+        <text x="404" y="64" font-size="13" font-weight="850" fill="var(--tax-ink)">神经机制图解</text>
+        <text x="404" y="92" font-size="12" fill="var(--tax-muted)">① 普通死压极限：72°</text>
+        <text x="404" y="116" font-size="12" font-weight="800" fill="${s.col}">② 当前状态：${s.title}</text>
+        <text x="404" y="142" font-size="12" fill="var(--tax-muted)">③ 当前解锁角度：${s.ang}°</text>
+        <text x="404" y="166" font-size="11" fill="var(--tax-primary)">柔韧性 80% 归神经管，20% 归韧带</text>
+      `;
+
+      document.getElementById('kAng').textContent = s.ang + '°';
+      document.getElementById('kBrake').textContent = s.brake;
+      document.getElementById('kBonus').textContent = s.bonus;
+      document.getElementById('ahaBox').innerHTML = s.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

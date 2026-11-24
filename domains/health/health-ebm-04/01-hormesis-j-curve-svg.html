@@ -3,67 +3,114 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📈 毒物兴奋效应 (Hormesis) J 型反应曲线（SVG）</title>
+  <title>📈 毒物兴奋效应 (Hormesis) J 型反应曲线</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .ctrl-box { padding:10px 14px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface-alt); margin-bottom:12px; }
     .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
     .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📈 毒物兴奋效应 (Hormesis) J 型反应曲线（SVG）</h1><p>误区：所有压力和微毒都是有害的，人应该住在绝对零压力、恒温恒湿的无菌温室里。真相：没有适度微刺激（Hormesis），细胞就会关掉修复酶躺平退化；低剂量微压力恰恰是激活长寿防御体系的钥匙！</p></div>
+      <div>
+        <h1>📈 毒物兴奋效应 (Hormesis) J 型反应曲线</h1>
+        <p>误区：任何压力、自由基或微毒素对身体都是线性有害的，最好归零。真相：生物体是“反脆弱”的——零刺激会退化萎缩，<strong>适度微应激（Hormesis 窗口）</strong>反而会唤醒超量修复机制让你更强壮，只有超量才会崩盘中毒！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>外部生理刺激剂量 (如冷/热/运动强度)</span><span id="vDos">35%</span></label><input type="range" id="sDos" min="0" max="100" value="35" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>个人恢复修复基础储备</span><span id="vRes">75%</span></label><input type="range" id="sRes" min="30" max="100" value="75" oninput="upd()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="setStim('ex',this)">🏋️ 力量与有氧运动</button>
+        <button class="pill" onclick="setStim('sun',this)">☀️ 阳光紫外线 UV</button>
+        <button class="pill" onclick="setStim('poly',this)">🥦 植物多酚（微毒自卫素）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="ctrl-box">
+        <label><span id="lblStim">当前运动微应激剂量</span><span id="vDose">38%（黄金变强区）</span></label>
+        <input type="range" id="sDose" min="0" max="100" value="38" oninput="onSlide()">
+      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">身体净健康增益</div><div class="k-val" id="kNet">—</div></div>
-        <div class="kpi"><div class="k-lbl">所处剂量区间</div><div class="k-val" id="kZone">—</div></div>
+        <div class="kpi"><div class="k-lbl">当前所处区间</div><div class="k-val" id="kZone">—</div></div>
+        <div class="kpi"><div class="k-lbl">身体净健康收益</div><div class="k-val" id="kBen">—</div></div>
+        <div class="kpi"><div class="k-lbl">代表生理机制</div><div class="k-val" id="kMech" style="font-size:14.5px;color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function hormFn(x,res){
-  const opt=res*0.48;
-  return Math.round(35*Math.exp(-Math.pow((x-opt)/18,2)) - Math.max(0, x-opt*1.6)*1.4);
-}
-function upd(){
-  const dos=+document.getElementById('sDos').value, res=+document.getElementById('sRes').value;
-  document.getElementById('vDos').textContent=dos+'%'; document.getElementById('vRes').textContent=res+'%';
-  const net=hormFn(dos,res);
-  document.getElementById('kNet').textContent=(net>0?'+':'')+net+' 分';
-  document.getElementById('kNet').style.color=net>15?'#059669':(net<0?'#ef4444':'#f59e0b');
-  document.getElementById('kZone').textContent=dos<10?'温室退化区':(net>15?'Hormesis 强身黄金区':(net<0?'过量损伤中毒区':'过渡区'));
-  let pts='';
-  for(let x=0;x<=100;x+=2){ pts+=`${40+x*5.2},${115-hormFn(x,res)*2.2} `; }
-  const cx=40+dos*5.2, cy=115-net*2.2;
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="115" x2="560" y2="115" stroke="#94a3b8" stroke-dasharray="4 3"/>
-    <polyline fill="none" stroke="#059669" stroke-width="3" points="${pts}"/>
-    <circle cx="${cx}" cy="${cy}" r="6" fill="${net<0?'#ef4444':'#0284c7'}"/>
-    <text x="50" y="28" font-size="12" font-weight="800" fill="#059669">倒 J 型 Hormesis 曲线：低剂量微刺激变强，高剂量直接受损！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“杀不死你的微刺激让你更强大”是有精确剂量窗口的！超出恢复储备（${res}%）的过量硬撑只会跌破 0 线变成纯伤害！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const STIMS = {
+      ex:   { name:'运动微应激剂量', low:'久坐肌少/骨松退化', opt:'线粒体增生 + 肌纤维超量恢复', high:'横纹肌溶解 / 过度训练伤病', mech:'AMPK / 抗氧化酶上调' },
+      sun:  { name:'日晒紫外线 UV 剂量', low:'维生素 D 缺乏 / 抑郁', opt:'合成维 D + 锚定昼夜节律', high:'DNA 晒伤 / 黑色素瘤风险', mech:'皮肤 7-脱氢胆固醇转化' },
+      poly: { name:'植物微毒多酚（如萝卜硫素）', low:'缺乏抗氧化酶演练', opt:'激活 Nrf2 自身超级解毒系统', high:'肝肾代谢过载中毒', mech:'Nrf2 细胞防御通路激活' }
+    };
+    let stim = 'ex', dose = 38;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setStim(s, btn){
+      stim = s;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); draw();
+    }
+    function onSlide(){ dose = +document.getElementById('sDose').value; markDone(); draw(); }
+
+    // Hormesis curve: starts at -15 at 0, peaks at +85 around 38, crosses 0 at 68, crashes to -95 at 100
+    function benefit(d){
+      if(d <= 65) return -15 + 100 * Math.sin((d / 65) * Math.PI);
+      return -15 - Math.pow((d - 65) / 35, 1.5) * 85;
+    }
+
+    function draw(){
+      const cfg = STIMS[stim];
+      document.getElementById('lblStim').textContent = '当前' + cfg.name;
+      const b = Math.round(benefit(dose));
+      const zone = dose < 12 ? '零刺激退化区 🛋️' : (b >= 20 ? 'Hormesis 黄金变强区 🏆' : (b >= -15 ? '临界过载区 ⚠️' : '毒性崩盘区 🚨'));
+      document.getElementById('vDose').textContent = `${dose}% · ${zone}`;
+      const col = b >= 20 ? 'var(--tax-green)' : (b >= -15 ? 'var(--tax-amber)' : 'var(--tax-red)');
+
+      const x0=54, x1=612, yMin=28, yMax=188;
+      const toX = d => x0 + (d/100)*(x1-x0);
+      const toY = v => yMax - ((v + 105)/205)*(yMax-yMin);
+
+      let pts = [];
+      for(let d=0; d<=100; d+=2) pts.push(`${toX(d).toFixed(1)},${toY(benefit(d)).toFixed(1)}`);
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="${toX(14)}" y="${yMin}" width="${toX(56)-toX(14)}" height="${toY(0)-yMin}" fill="var(--tax-green-soft)" opacity="0.55"/>
+        <text x="${toX(35)}" y="${yMin+14}" text-anchor="middle" font-size="10.5" font-weight="800" fill="var(--tax-green)">🏆 Hormesis 黄金变强窗</text>
+        <line x1="${x0}" y1="${toY(0)}" x2="${x1}" y2="${toY(0)}" stroke="var(--tax-muted)" stroke-dasharray="4 4"/>
+        <text x="${x0-6}" y="${toY(0)+4}" text-anchor="end" font-size="10.5" fill="var(--tax-muted)">0 收益</text>
+        <polyline points="${pts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="3.4" stroke-linecap="round"/>
+        <circle cx="${toX(dose)}" cy="${toY(b)}" r="7" fill="${col}"/>
+        <text x="${Math.min(x1-85, toX(dose)+10)}" y="${Math.max(42, toY(b)-8)}" font-size="12" font-weight="900" fill="${col}">收益 ${b>=0?'+':''}${b}</text>
+        <text x="${x0}" y="206" font-size="11" fill="var(--tax-muted)">0% (温室零刺激)</text>
+        <text x="${x1}" y="206" text-anchor="end" font-size="11" fill="var(--tax-red)">100% (过量毒害)</text>
+      `;
+
+      const kZ = document.getElementById('kZone'); kZ.textContent = zone; kZ.style.color = col;
+      const kB = document.getElementById('kBen'); kB.textContent = `${b>=0?'+':''}${b} 分`; kB.style.color = col;
+      document.getElementById('kMech').textContent = cfg.mech;
+
+      document.getElementById('ahaBox').innerHTML = b >= 20
+        ? `💡 <strong>顿悟时刻：</strong>精准卡在 <strong>Hormesis 黄金窗</strong>！适度的可控微压力触发了「${cfg.opt}」——尼采那句<strong>“凡杀不死我的，必使我更强大”</strong>，在分子生物学里叫毒物兴奋效应！`
+        : dose < 12
+        ? `💡 <strong>顿悟时刻：</strong>完全躲在温室里零刺激，结果是「${cfg.low}」——生命不是陶瓷花瓶，缺少适度压力的身体会迅速用进废退！`
+        : `💡 <strong>顿悟时刻：</strong>剂量过猛跌进右侧红区：「${cfg.high}」！好东西拉满就会变成毒药，这就是生命非线性的底层规律！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

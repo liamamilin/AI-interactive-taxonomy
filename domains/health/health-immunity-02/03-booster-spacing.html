@@ -7,62 +7,91 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .scen-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:9px; margin-bottom:14px; }
+    .s-btn { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .s-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .s-btn .t { font-size:13px; font-weight:800; }
+    .s-btn .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🗓️ 加强针时机：为什么间隔太近反而白打？</h1><p>误区：为了快点满级，疫苗两针隔得越近（比如隔 3 天连打两针）效果越强。真相：刚打完第一针时现有抗体会直接中和掉第二针抗原，且记忆细胞还没来得及在生发中心完成亲和力进化，隔太近等于浪费！</p></div>
+      <div>
+        <h1>🗓️ 加强针时机：为什么间隔太近反而白打？</h1>
+        <p>误区：打完第一针隔三天立刻打第二针，抗体肯定翻倍更快。真相：淋巴结里的“生发中心训练营”需要几周时间完成<strong>亲和力成熟</strong>——打太早时，上一针留下的抗体反而会把新疫苗直接中和拦截掉！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>两针疫苗接种间隔</span><span id="vWk">4 周</span></label><input type="range" id="sWk" min="1" max="24" value="4" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>加强针抗原剂量</span><span id="vDos">100%</span></label><input type="range" id="sDos" min="30" max="100" value="100" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">💉 选择第 2 针（加强针）的接种间隔，对比生发中心抗体质量与峰值高度：</div>
+      <div class="scen-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">二次抗体滴度高度</div><div class="k-val" id="kTit" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">生发中心成熟度</div><div class="k-val" id="kMat">—</div></div>
+        <div class="kpi"><div class="k-lbl">加强后抗体峰值</div><div class="k-val" id="kPeak">—</div></div>
+        <div class="kpi"><div class="k-lbl">抗体精准亲和力等级</div><div class="k-val" id="kAff" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">持久保护半衰期</div><div class="k-val" id="kDur" style="color:var(--tax-green);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const wk=+document.getElementById('sWk').value, dos=+document.getElementById('sDos').value;
-  document.getElementById('vWk').textContent=wk+' 周'; document.getElementById('vDos').textContent=dos+'%';
-  const mat=Math.min(98, Math.round(100*(1-Math.exp(-wk/4))));
-  const tit=Math.round(mat*(0.6+dos/250));
-  document.getElementById('kTit').textContent=tit+' 倍基线';
-  document.getElementById('kMat').textContent=wk<3?'太早 (被旧抗体中和)':(wk<=12?'黄金成熟窗口':'长期长效记忆');
-  let pts='';
-  for(let w=1;w<=24;w++){
-    const m=100*(1-Math.exp(-w/4))*(0.6+dos/250);
-    pts+=`${40+(w-1)/23*520},${158-m*1.25} `;
-  }
-  const cx=40+(wk-1)/23*520, cy=158-tit*1.25;
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="#059669" stroke-width="3" points="${pts}"/>
-    <circle cx="${cx}" cy="${cy}" r="6" fill="${wk<3?'#ef4444':'#0284c7'}"/>
-    <text x="50" y="28" font-size="12" font-weight="800" fill="#059669">间隔 ${wk} 周接种 → 抗体跃升 ${tit} 倍</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>免疫系统需要 3~8 周时间在淋巴结里精选出最高精度的 B 细胞！隔太近打针会被原有抗体拦截，拉足 ${wk} 周再打才能打出 ${tit} 倍超级记忆！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const PLANS = [
+      { id:'soon', icon:'⚡', name:'间隔 1 周就打', desc:'生发中心还没毕业 · 互相中和', wk:1, peak:38, aff:'低（粗糙初版）', dur:'短（约 2 个月）', col:'var(--tax-red)',
+        aha:'💡 <strong>顿悟时刻：</strong>太急反而白打！第 1 周时第一针诱发的初代抗体正处于活跃期，新打进去的抗原直接被老抗体吃掉，而且记忆 B 细胞根本没完成进化，峰值只爬到 <strong>38 分</strong>！' },
+      { id:'opt', icon:'🎯', name:'间隔 6–8 周（黄金窗）', desc:'亲和力成熟完成 · 暴涨 10 倍', wk:7, peak:94, aff:'极高（精修神枪手）', dur:'长（12+ 个月）', col:'var(--tax-green)',
+        aha:'💡 <strong>顿悟时刻：</strong>精准卡在 <strong>6–8 周黄金窗口</strong>！淋巴结生发中心已完成多轮突变筛选，把抗体打磨成“高精度神枪手”，此时打加强针直接引发核爆级回忆应答（峰值 <strong>94 分</strong>）！' },
+      { id:'long', icon:'🗓️', name:'间隔 6 个月加强', desc:'长程唤醒 · 广谱抗变异更强', wk:12, peak:98, aff:'顶级（广谱交叉保护）', dur:'超长（数年以上）', col:'var(--tax-primary)',
+        aha:'💡 <strong>顿悟时刻：</strong>这正是乙肝疫苗（0-1-6 月）和 HPV 疫苗为什么要等半年再打最后一针的免疫学原理——更长的成熟间隔能造出<strong>更广谱、更耐变异的长期记忆细胞</strong>！' }
+    ];
+    let cur = 'opt';
+
+    function pick(id){ cur = id; if(window.ToySDK) window.ToySDK.markCompleted(); draw(); }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = PLANS.map(p => `
+        <button class="s-btn ${cur===p.id?'active':''}" onclick="pick('${p.id}')">
+          <div class="t">${p.icon} ${p.name}</div>
+          <div class="s">${p.desc}</div>
+        </button>
+      `).join('');
+
+      const p = PLANS.find(x=>x.id===cur);
+      const x0=52, x1=612, yMin=28, yMax=188;
+      const toX = w => x0 + (w/16)*(x1-x0);
+      const toY = v => yMax - (v/104)*(yMax-yMin);
+
+      let pts = [];
+      for(let w=0; w<=16; w+=0.2){
+        const shot1 = 28 * Math.exp(-Math.pow((w - 2.2)/1.8, 2));
+        const shot2 = w >= p.wk ? (p.peak - 10) * Math.exp(-Math.pow((w - (p.wk + 1.5))/2.4, 2)) + 16 * (1 - Math.exp(-(w - p.wk))) : 0;
+        const v = Math.min(100, Math.max(shot1, shot2));
+        pts.push(`${toX(w).toFixed(1)},${toY(v).toFixed(1)}`);
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="${toX(0)}" y1="${yMin}" x2="${toX(0)}" y2="${yMax}" stroke="var(--tax-muted)" stroke-dasharray="3 3"/>
+        <text x="${toX(0)+6}" y="${yMin+14}" font-size="10.5" font-weight="800" fill="var(--tax-muted)">💉 第1针</text>
+        <line x1="${toX(p.wk)}" y1="${yMin}" x2="${toX(p.wk)}" y2="${yMax}" stroke="${p.col}" stroke-dasharray="4 3" stroke-width="2"/>
+        <text x="${toX(p.wk)+6}" y="${yMin+14}" font-size="10.5" font-weight="850" fill="${p.col}">💉 第2针 (${p.name})</text>
+        ${[0,4,8,12,16].map(w=>`<text x="${toX(w)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">第${w}周</text>`).join('')}
+        <polyline points="${pts.join(' ')}" fill="none" stroke="${p.col}" stroke-width="3.4" stroke-linecap="round"/>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-ink)">体内中和抗体滴度与亲和力成熟演化曲线</text>
+      `;
+
+      const kP = document.getElementById('kPeak'); kP.textContent = p.peak + ' 分'; kP.style.color = p.col;
+      document.getElementById('kAff').textContent = p.aff;
+      document.getElementById('kDur').textContent = p.dur;
+      document.getElementById('ahaBox').innerHTML = p.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

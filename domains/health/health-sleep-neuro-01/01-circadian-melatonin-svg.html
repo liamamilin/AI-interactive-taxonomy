@@ -3,66 +3,121 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>☀️ 视交叉上核与褪黑素节律曲线（SVG）</title>
+  <title>☀️ 视交叉上核与褪黑素节律曲线</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .light-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:9px; margin-bottom:14px; }
+    .l-card { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .l-card.on { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .l-card.bad.on { border-color:var(--tax-red); background:var(--tax-red-soft); }
+    .l-card .t { display:flex; justify-content:space-between; font-size:13px; font-weight:800; }
+    .l-card .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>☀️ 视交叉上核与褪黑素节律曲线（SVG）</h1><p>误区：只要每天睡够 8 小时，凌晨 3 点睡到上午 11 点和晚上 11 点睡到早上 7 点毫无区别。真相：褪黑素和皮质醇按昼夜节律工作，睡前蓝光会直接欺骗大脑“现在还是中午”并推迟整套激素节律！</p></div>
+      <div>
+        <h1>☀️ 视交叉上核与褪黑素节律曲线</h1>
+        <p>误区：晚上睡不着只怪晚上看了手机，跟白天晒不晒太阳没关系。真相：早晨户外强光（10,000+ Lux）才是给大脑生物钟（SCN）按下“14 小时后准时释放褪黑素”倒计时的总开关！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>晨间户外自然光暴露</span><span id="vSun">20 分钟</span></label><input type="range" id="sSun" min="0" max="60" value="20" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>睡前 2 小时蓝光屏幕强度</span><span id="vBlu">70%</span></label><input type="range" id="sBlu" min="0" max="100" value="70" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">💡 拼装你今天的光照行程（多选切换），观察夜间褪黑素分泌峰值与入睡时机：</div>
+      <div class="light-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">褪黑素分泌峰值</div><div class="k-val" id="kMel" style="color:#8b5cf6;">—</div></div>
-        <div class="kpi"><div class="k-lbl">入睡时钟相位偏移</div><div class="k-val" id="kLag" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">褪黑素夜间峰值强度</div><div class="k-val" id="kPeak" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">自然困意启动时间</div><div class="k-val" id="kOnset" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">生物钟相位偏移</div><div class="k-val" id="kShift" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const sun=+document.getElementById('sSun').value, blu=+document.getElementById('sBlu').value;
-  document.getElementById('vSun').textContent=sun+' 分钟'; document.getElementById('vBlu').textContent=blu+'%';
-  const peak=Math.max(15, Math.min(98, Math.round(55 + sun*0.65 - blu*0.48)));
-  const lag=((blu*0.025) - (sun*0.015)).toFixed(1);
-  document.getElementById('kMel').textContent=peak+'%';
-  document.getElementById('kLag').textContent=(lag>0?'推迟 +':'提前 ')+lag+' 小时';
-  let pts='';
-  for(let h=18;h<=30;h+=0.4){
-    const x=40+(h-18)/12*520;
-    const center=25.5 + parseFloat(lag);
-    const val=peak*Math.exp(-Math.pow((h-center)/2.2,2));
-    pts+=`${x.toFixed(1)},${158-val*1.25} `;
-  }
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="#8b5cf6" stroke-width="3" points="${pts}"/>
-    <text x="50" y="28" font-size="12" font-weight="800" fill="#8b5cf6">18:00 ~ 次日06:00 褪黑素分泌曲线（峰值 ${peak}%）</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>早上晒 ${sun} 分钟真太阳是在“拧紧发条”（提前并放大晚上的褪黑素），而睡前刷蓝光则像把发条倒拔了 <strong>${lag} 小时</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const EVENTS = [
+      { id:'morning_sun', icon:'☀️', name:'08:00 户外晨光 15 分', desc:'强光锚定 SCN 倒计时', bad:false, peak:+28, shift:-1.0 },
+      { id:'sunset', icon:'🌇', name:'18:00 看日落低角暖光', desc:'给视网膜发“天黑预警”', bad:false, peak:+12, shift:-0.4 },
+      { id:'dim_night', icon:'🕯️', name:'21:30 切暗暖灯光', desc:'解除松果体蓝光刹车', bad:false, peak:+16, shift:-0.5 },
+      { id:'dark_office', icon:'🏢', name:'全天拉窗帘室内暗光', desc:'昼夜光差太小·节律变平', bad:true, peak:-18, shift:+0.7 },
+      { id:'phone_bed', icon:'📱', name:'23:00 关灯刷亮屏手机', desc:'480nm 蓝光急刹褪黑素', bad:true, peak:-34, shift:+1.9 }
+    ];
+    let picked = new Set(['dark_office', 'phone_bed']);
+
+    function toggle(id){
+      if(picked.has(id)) picked.delete(id); else picked.add(id);
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = EVENTS.map(e => `
+        <button class="l-card ${e.bad?'bad':''} ${picked.has(e.id)?'on':''}" onclick="toggle('${e.id}')">
+          <div class="t"><span>${e.icon} ${e.name}</span><span>${picked.has(e.id)?'✓':'+'}</span></div>
+          <div class="s">${e.desc}</div>
+        </button>
+      `).join('');
+
+      let peak = 62, shift = 0.6;
+      EVENTS.forEach(e => { if(picked.has(e.id)){ peak += e.peak; shift += e.shift; } });
+      peak = Math.max(18, Math.min(100, peak));
+      shift = Math.max(-0.8, Math.min(3.2, shift));
+
+      // Timeline from 16:00 to next day 08:00 (16 hours)
+      const x0=52, x1=612, yMin=28, yMax=188;
+      const toX = h => x0 + ((h - 16)/16)*(x1-x0); // h in [16..32]
+      const toY = v => yMax - (v/100)*(yMax-yMin);
+
+      const peakHr = 26.8 + shift; // 02:48 + shift
+      let ptsRef = [], ptsCur = [];
+      for(let h=16; h<=32; h+=0.25){
+        const ref = 90 * Math.exp(-Math.pow((h - 26.5)/2.6, 2));
+        const cur = peak * Math.exp(-Math.pow((h - peakHr)/2.5, 2));
+        ptsRef.push(`${toX(h).toFixed(1)},${toY(ref).toFixed(1)}`);
+        ptsCur.push(`${toX(h).toFixed(1)},${toY(cur).toFixed(1)}`);
+      }
+      const onsetHr = 21.8 + shift;
+      const fmtHr = h => {
+        const hh = Math.floor(h) % 24;
+        const mm = Math.round((h - Math.floor(h))*60);
+        return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+      };
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="${toX(22)}" y="${yMin}" width="${toX(30)-toX(22)}" height="${yMax-yMin}" fill="var(--tax-primary-soft)" opacity="0.45"/>
+        <text x="${toX(26)}" y="${yMin+14}" text-anchor="middle" font-size="10.5" font-weight="750" fill="var(--tax-primary)">理想睡眠窗口 (22:00 – 06:00)</text>
+        ${[16,18,20,22,24,26,28,30,32].map(h=>`<text x="${toX(h)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${String(h%24).padStart(2,'0')}:00</text>`).join('')}
+        <polyline points="${ptsRef.join(' ')}" fill="none" stroke="var(--tax-muted)" stroke-width="2" stroke-dasharray="5 4"/>
+        <polyline points="${ptsCur.join(' ')}" fill="none" stroke="${peak>=70?'var(--tax-green)':'var(--tax-red)'}" stroke-width="3.4" stroke-linecap="round"/>
+        <circle cx="${toX(Math.min(31.8, peakHr))}" cy="${toY(peak)}" r="5.5" fill="${peak>=70?'var(--tax-green)':'var(--tax-red)'}"/>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-muted)">-- 理想自然节律</text>
+        <text x="${x0+125}" y="18" font-size="11.5" font-weight="800" fill="${peak>=70?'var(--tax-green)':'var(--tax-red)'}">● 你今晚的褪黑素曲线（峰值 ${peak}%）</text>
+      `;
+
+      document.getElementById('kPeak').textContent = peak + '%';
+      document.getElementById('kOnset').textContent = fmtHr(onsetHr);
+      document.getElementById('kShift').textContent = shift > 0.3 ? `推迟 +${shift.toFixed(1)}h` : (shift < -0.2 ? `提前 ${Math.abs(shift).toFixed(1)}h` : '准时同步 ✅');
+
+      let aha = '';
+      if(peak < 45){
+        aha = `💡 <strong>顿悟时刻：</strong>白天暗室 + 睡前关灯刷亮屏，把你的褪黑素峰值压扁到 <strong>${peak}%</strong>，困意硬生生推迟到 <strong>${fmtHr(onsetHr)}</strong>！试试勾上 ☀️ 晨光 15 分钟并去掉 📱 睡前亮屏看看剧变！`;
+      } else if(peak >= 80){
+        aha = `💡 <strong>顿悟时刻：</strong>昼夜光差拉满！早晨强光像上紧发条，晚上暗暖光解除刹车，松果体在 <strong>${fmtHr(onsetHr)}</strong> 准时释放高达 <strong>${peak}%</strong> 的天然褪黑素，完全不需要吃褪黑素补剂！`;
+      } else {
+        aha = `💡 <strong>顿悟时刻：</strong>生物钟喜欢<strong>“白天极亮、晚上极暗”</strong>的强烈反差。当前褪黑素峰值 ${peak}%，补上早晨户外自然光能显著抬高夜间睡眠深度！`;
+      }
+      document.getElementById('ahaBox').innerHTML = aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

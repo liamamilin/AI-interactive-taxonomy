@@ -7,67 +7,122 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .alarm-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; cursor:crosshair; }
     .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
     .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⏰ 90 分钟睡眠周期与“起床惯性”避坑</h1><p>误区：睡 7 小时一定比睡 6 小时精神。真相：如果闹钟刚好把你从第 4 个周期最深的 N3 深睡期里强行拖起来，严重的“睡眠惯性”会让你昏沉一上午；卡在 90 分钟整数倍周期末尾醒来才最神清气爽！</p></div>
+      <div>
+        <h1>⏰ 90 分钟睡眠周期与“起床惯性”避坑</h1>
+        <p>误区：睡 7 小时一定比睡 6 小时醒来更精神。真相：如果闹钟正好在你钻进 N3 深度慢波睡眠谷底时响起，大脑会被生生“断电重启”，产生长达 1 小时的剧烈起床惯性（越睡越晕）！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>设定夜间实际总睡眠时长</span><span id="vDur">7.5 小时 (5个完整周期)</span></label><input type="range" id="sDur" min="5" max="9" step="0.5" value="7.5" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>入睡前辗转反侧耗时</span><span id="vLat">15 分钟</span></label><input type="range" id="sLat" min="5" max="45" step="5" value="15" oninput="upd()"></div>
+      <div class="alarm-row">
+        <span style="font-size:12.5px;font-weight:800;color:var(--tax-muted);">⏰ 选定闹钟响起时长（或直接点击下方睡眠图谱任意位置）：</span>
+        <button class="pill" onclick="setWake(5.3,this)">5.3h (深睡谷底)</button>
+        <button class="pill" onclick="setWake(6.0,this)">6.0h (4 周期末)</button>
+        <button class="pill active" onclick="setWake(6.8,this)">6.8h (周期中途)</button>
+        <button class="pill" onclick="setWake(7.5,this)">7.5h (5 周期末)</button>
+        <button class="pill" onclick="setWake(8.3,this)">8.3h (深陷 REM)</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220" onclick="onSvgClick(event)"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">闹钟唤醒瞬间所处阶段</div><div class="k-val" id="kSt">—</div></div>
-        <div class="kpi"><div class="k-lbl">醒后清醒度评分</div><div class="k-val" id="kClr" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">闹钟响起时所处阶段</div><div class="k-val" id="kStage">—</div></div>
+        <div class="kpi"><div class="k-lbl">起床惯性（晕眩时长）</div><div class="k-val" id="kInertia">—</div></div>
+        <div class="kpi"><div class="k-lbl">完整经历的睡眠周期</div><div class="k-val" id="kCycles" style="color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const dur=+document.getElementById('sDur').value, lat=+document.getElementById('sLat').value;
-  const cycs=(dur/1.5).toFixed(1);
-  document.getElementById('vDur').textContent=`${dur} 小时 (${cycs}周期)`;
-  document.getElementById('vLat').textContent=lat+' 分钟';
-  const phase=(dur*60)%90;
-  const inDeep=phase>=25 && phase<=65;
-  const clr=inDeep?45:92;
-  document.getElementById('kSt').textContent=inDeep?'深度睡眠谷底 (昏沉惯性!)':'浅睡/周期交界 (清爽)';
-  document.getElementById('kSt').style.color=inDeep?'#ef4444':'#059669';
-  document.getElementById('kClr').textContent=clr+' 分';
-  let pts='';
-  for(let m=0;m<=dur*60;m+=10){
-    const x=40+m/540*520;
-    const depth=Math.sin((m%90)/90*Math.PI)*(m<200?1:0.55);
-    pts+=`${x.toFixed(1)},${35+depth*115} `;
-  }
-  const ex=40+(dur*60)/540*520;
-  document.getElementById('svg').innerHTML=`
-    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${pts}"/>
-    <line x1="${ex}" y1="20" x2="${ex}" y2="160" stroke="${inDeep?'#ef4444':'#059669'}" stroke-width="3"/>
-    <text x="${ex-6}" y="28" text-anchor="end" font-size="12" font-weight="800" fill="${inDeep?'#ef4444':'#059669'}">闹钟响 (${dur}h)</text>
-    <text x="45" y="172" font-size="12" fill="var(--tax-muted)">波谷=深睡修复身体（前半夜多）；波峰=REM快速眼动（后半夜多，整理记忆）</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>记住 90 分钟周期律加上 ${lat} 分钟入睡缓冲！闹钟切忌响在深睡波谷里，卡在 6.0 / 7.5 / 9.0 小时周期交界点（清醒度 ${clr} 分）醒来最轻松！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let wakeH = 6.8;
+    const x0 = 60, x1 = 612, yMin = 30, yMax = 186;
+
+    // Sleep depth: 0 = Awake, 1 = REM/Light, 2 = N2, 3 = Deep N3
+    function sleepDepth(h){
+      const cycle = Math.floor(h / 1.5);
+      const phase = (h % 1.5) / 1.5; // 0..1
+      // Early cycles go deep to N3 (3.0), later cycles stay shallower & longer REM
+      const maxDeep = Math.max(1.5, 3.0 - cycle * 0.35);
+      if(phase < 0.15) return 0.7 + (phase / 0.15) * 0.8;
+      if(phase < 0.55) return 1.5 + Math.sin(((phase - 0.15) / 0.4) * Math.PI) * (maxDeep - 1.5);
+      if(phase < 0.85) return 0.95; // REM plateau
+      return 0.45 + ((1 - phase) / 0.15) * 0.5; // near light/awake boundary
+    }
+
+    function setWake(h, btn){
+      wakeH = h;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function onSvgClick(e){
+      const svg = document.getElementById('svg');
+      const rect = svg.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width * 640;
+      const h = Math.max(1.0, Math.min(9.0, ((px - x0) / (x1 - x0)) * 9.0));
+      wakeH = +h.toFixed(1);
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const toX = h => x0 + (h / 9.0) * (x1 - x0);
+      const toY = d => yMin + (d / 3.2) * (yMax - yMin);
+
+      let pts = [];
+      for(let h=0; h<=9.0; h+=0.05){
+        pts.push(`${toX(h).toFixed(1)},${toY(sleepDepth(h)).toFixed(1)}`);
+      }
+      const dNow = sleepDepth(wakeH);
+      const isGood = dNow < 0.85;
+      const isDeep = dNow >= 1.75;
+      const col = isGood ? 'var(--tax-green)' : (isDeep ? 'var(--tax-red)' : 'var(--tax-amber)');
+
+      document.getElementById('svg').innerHTML = `
+        ${[{d:0.3,t:'清醒/极浅'},{d:1.0,t:'REM 梦境'},{d:1.8,t:'N2 浅睡'},{d:2.8,t:'N3 深睡'}].map(r=>`
+          <line x1="${x0}" y1="${toY(r.d)}" x2="${x1}" y2="${toY(r.d)}" stroke="var(--tax-border)" stroke-dasharray="3 3"/>
+          <text x="${x0-6}" y="${toY(r.d)+4}" text-anchor="end" font-size="10.5" fill="var(--tax-muted)">${r.t}</text>
+        `).join('')}
+        ${[1.5,3,4.5,6,7.5,9].map(h=>`
+          <line x1="${toX(h)}" y1="${yMin}" x2="${toX(h)}" y2="${yMax}" stroke="var(--tax-green)" stroke-opacity="0.35" stroke-dasharray="4 4"/>
+          <text x="${toX(h)}" y="206" text-anchor="middle" font-size="11" font-weight="750" fill="var(--tax-muted)">${h}h</text>
+        `).join('')}
+        <polyline points="${pts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="3.2" stroke-linejoin="round"/>
+        <line x1="${toX(wakeH)}" y1="${yMin}" x2="${toX(wakeH)}" y2="${yMax}" stroke="${col}" stroke-width="2.2"/>
+        <circle cx="${toX(wakeH)}" cy="${toY(dNow)}" r="6.5" fill="${col}"/>
+        <text x="${Math.min(x1-80, Math.max(x0+10, toX(wakeH)+8))}" y="${Math.max(44, toY(dNow)-8)}" font-size="12" font-weight="850" fill="${col}">⏰ ${wakeH}h 闹钟</text>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-ink)">👆 点击图中任意时刻放置闹钟（绿色虚线 = 90 分钟完整周期边界）</text>
+      `;
+
+      const stageTxt = isGood ? '周期边缘极浅睡 ✅' : (isDeep ? 'N3 深度慢波谷底 💥' : 'N2 / REM 梦境中途 ⚠️');
+      const inertia = isGood ? '仅 3–5 分钟（神清气爽）' : (isDeep ? '45–90 分钟（剧烈眩晕）' : '15–25 分钟（轻微迷糊）');
+      const kStage = document.getElementById('kStage'); kStage.textContent = stageTxt; kStage.style.color = col;
+      const kIn = document.getElementById('kInertia'); kIn.textContent = inertia; kIn.style.color = col;
+      document.getElementById('kCycles').textContent = `${(wakeH / 1.5).toFixed(1)} 个周期`;
+
+      document.getElementById('ahaBox').innerHTML = isGood
+        ? `💡 <strong>顿悟时刻：</strong>精准踩在 90 分钟周期交界点（<strong>${wakeH} 小时</strong>）醒来！此时大脑已经自然上浮到最接近清醒的浅睡层，起床几乎零惯性——这就是为什么有时睡 <strong>6.0h / 7.5h</strong> 比睡 6.8h 更精神！`
+        : isDeep
+        ? `💡 <strong>顿悟时刻：</strong>踩雷了！在 <strong>${wakeH} 小时</strong> 处闹钟把你从 <strong>N3 深睡谷底</strong>生生拽醒，前额叶还处于低血流量休眠态，接下来近 1 小时你会浑身发沉、暴躁想按掉闹钟！`
+        : `💡 <strong>顿悟时刻：</strong>闹钟打断了正在进行的浅睡/REM 周期（<strong>${wakeH}h</strong>），会出现短暂迷糊。试着点击 <strong>6.0h</strong> 或 <strong>7.5h</strong> 的绿色周期边界线对比感受！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

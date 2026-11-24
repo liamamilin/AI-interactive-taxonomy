@@ -7,57 +7,150 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px; }
+    .phase-badge { padding:7px 14px; border-radius:999px; font-size:13px; font-weight:850; background:var(--tax-primary-soft); color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🌬️ 生理叹气法 (Physiological Sigh)：快速降压原理</h1><p>误区：紧张心跳加速时，必须用力大口快速深呼吸吸进更多氧气。真相：快速喘气反而会导致过度通气；真正激活副交感迷走神经刹车、迅速降低心率的动作是“把呼气拖得比吸气长”！</p></div>
+      <div>
+        <h1>🌬️ 生理叹气法 (Physiological Sigh)：快速降压原理</h1>
+        <p>误区：紧张心慌时应该靠“心里默念别紧张”来硬扛。真相：你可以直接用肺部物理拉动迷走神经刹车——<strong>两次鼻吸（把塌陷肺泡二次撑开）+ 一次超长慢呼</strong>，3 轮只需 25 秒就能把心率拉下来！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>呼气时长 / 吸气时长比</span><span id="vRat">2.0x</span></label><input type="range" id="sRat" min="0.8" max="3.0" step="0.2" value="2.0" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>执行生理叹气循环次数</span><span id="vCyc">3 次</span></label><input type="range" id="sCyc" min="1" max="8" value="3" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" id="startBtn" onclick="toggleGuide()">▶ 开始 3 轮真实跟练（27 秒）</button>
+        <button class="tax-back" style="cursor:pointer;" onclick="stepPhase()">⏭ 手动单步体验各阶段</button>
+        <span class="phase-badge" id="phaseBadge">待机中 · 点击开始跟着动画呼吸</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 640 225"></svg>
+
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">迷走神经刹车激活度</div><div class="k-val" id="kVag" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">心率即时回落幅度</div><div class="k-val" id="kHR">—</div></div>
+        <div class="kpi"><div class="k-lbl">模拟实时心率</div><div class="k-val" id="kHr" style="color:var(--tax-red);">94 bpm</div></div>
+        <div class="kpi"><div class="k-lbl">肺泡展开率（排 CO2 效率）</div><div class="k-val" id="kAlv" style="color:var(--tax-primary);">62%</div></div>
+        <div class="kpi"><div class="k-lbl">迷走神经刹车力度</div><div class="k-val" id="kVag" style="color:var(--tax-green);">待激活</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const rat=+document.getElementById('sRat').value, cyc=+document.getElementById('sCyc').value;
-  document.getElementById('vRat').textContent=rat.toFixed(1)+'x'; document.getElementById('vCyc').textContent=cyc+' 次';
-  const vag=Math.min(98, Math.round((rat-0.5)*30 + cyc*5));
-  const drop=Math.min(22, Math.round(vag*0.22));
-  document.getElementById('kVag').textContent=vag+'%';
-  document.getElementById('kHR').textContent='-'+drop+' bpm';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">副交感神经刹车信号 (心率 -${drop} bpm): ${vag}%</text>
-    <rect x="20" y="44" width="${vag*5.4}" height="24" rx="6" fill="#059669"/>
-    <path d="M40,145 L100,100 L125,85 L280,145" fill="none" stroke="#0284c7" stroke-width="3.5"/>
-    <text x="112" y="76" text-anchor="middle" font-size="12" font-weight="800" fill="#0284c7">两段深吸 (撑开肺泡)</text>
-    <text x="240" y="130" font-size="12" font-weight="800" fill="#059669">长长慢呼 (排 CO2 + 降心率)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>不用等心理开导，直接通过“两吸一长呼”的物理呼吸模式就能在 30 秒内用迷走神经踩下压力刹车，让心率回落 ${drop} 下！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    // Cycle = 9.0s: 0..2.5 Inhale 1, 2.5..3.8 Double-Inhale pop, 3.8..9.0 Long Exhale
+    let running = false, raf = null, startTs = 0, round = 0;
+    let manualIdx = 0;
+    const MANUAL_STEPS = [
+      { label:'① 第一口深吸气（鼻子吸满 80%）', r:48, alv:78, hr:92, vag:'吸气期（心率略升）' },
+      { label:'② 关键二次短吸！（把塌陷肺泡“啵”撑开）', r:64, alv:99, hr:90, vag:'肺泡全开 · 换气拉满' },
+      { label:'③ 嘴巴超长慢呼气（呼气 > 吸气 2 倍）', r:32, alv:95, hr:76, vag:'迷走神经强力刹车 🌿' }
+    ];
+
+    function toggleGuide(){
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      if(running){
+        running = false; cancelAnimationFrame(raf);
+        document.getElementById('startBtn').textContent = '▶ 继续 3 轮跟练';
+        return;
+      }
+      running = true; round = 1; startTs = performance.now();
+      document.getElementById('startBtn').textContent = '⏸ 暂停跟练';
+      tick();
+    }
+
+    function stepPhase(){
+      if(running){ running = false; cancelAnimationFrame(raf); document.getElementById('startBtn').textContent = '▶ 开始 3 轮跟练'; }
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      const s = MANUAL_STEPS[manualIdx % 3];
+      manualIdx++;
+      renderScene(s.r, s.alv, s.hr, s.label, s.vag, Math.min(3, Math.ceil(manualIdx/3)));
+    }
+
+    function tick(){
+      if(!running) return;
+      const elapsed = (performance.now() - startTs) / 1000;
+      const totalCycle = 9.0;
+      const curRound = Math.floor(elapsed / totalCycle) + 1;
+      if(curRound > 3){
+        running = false;
+        document.getElementById('startBtn').textContent = '↻ 再练 3 轮';
+        renderScene(34, 98, 71, '✅ 完成 3 轮生理叹气！心率已显著回落', '副交感神经接管 🌿', 3);
+        return;
+      }
+      const t = elapsed % totalCycle;
+      let r, alv, label, vag;
+      const baseDrop = (curRound - 1) * 7;
+      let hr = 94 - baseDrop;
+      if(t < 2.5){
+        const p = t / 2.5;
+        r = 32 + p * 18; alv = Math.round(64 + p * 16);
+        label = `第 ${curRound}/3 轮 · ① 鼻子深吸气`;
+        vag = '胸腔扩张';
+      } else if(t < 3.8){
+        const p = (t - 2.5) / 1.3;
+        r = 50 + p * 15; alv = Math.round(80 + p * 19);
+        label = `第 ${curRound}/3 轮 · ② 再补一口短吸！（撑开肺泡）`;
+        vag = '肺泡全开 ✨';
+      } else {
+        const p = (t - 3.8) / 5.2;
+        r = 65 - p * 33; alv = 96;
+        hr = Math.round(94 - baseDrop - p * 8);
+        label = `第 ${curRound}/3 轮 · ③ 嘴巴缓缓长呼气...`;
+        vag = '迷走神经强力刹车 🌿';
+      }
+      renderScene(r, alv, hr, label, vag, curRound);
+      raf = requestAnimationFrame(tick);
+    }
+
+    function renderScene(radius, alv, hr, label, vag, rd){
+      document.getElementById('phaseBadge').textContent = label;
+      const col = label.includes('呼气') || label.includes('完成') ? 'var(--tax-green)' : (label.includes('二次') ? 'var(--tax-amber)' : 'var(--tax-primary)');
+      const soft = label.includes('呼气') || label.includes('完成') ? 'var(--tax-green-soft)' : (label.includes('二次') ? 'var(--tax-amber-soft)' : 'var(--tax-primary-soft)');
+
+      // Draw twin lungs / alveoli cluster + heart rate bar
+      let bubbles = '';
+      for(let i=0; i<9; i++){
+        const a = (i / 9) * Math.PI * 2;
+        const bx = 200 + Math.cos(a) * (radius * 0.65);
+        const by = 112 + Math.sin(a) * (radius * 0.65);
+        const br = alv > 85 ? 11 : (i % 3 === 0 ? 5 : 9);
+        bubbles += `<circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${br}" fill="${col}" opacity="0.35" stroke="${col}" stroke-width="1.5"/>`;
+      }
+      const hrW = ((hr - 55) / 50) * 210;
+
+      document.getElementById('svg').innerHTML = `
+        <circle cx="200" cy="112" r="${radius.toFixed(1)}" fill="${soft}" stroke="${col}" stroke-width="3"/>
+        ${bubbles}
+        <text x="200" y="116" text-anchor="middle" font-size="13" font-weight="850" fill="var(--tax-ink)">肺泡 ${alv}%</text>
+        <text x="200" y="202" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-muted)">二次补吸把瘪掉的微肺泡重新“啵”地吹开</text>
+
+        <rect x="370" y="34" width="240" height="156" rx="14" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+        <text x="390" y="64" font-size="13" font-weight="850" fill="var(--tax-ink)">❤️ 实时心率反馈</text>
+        <text x="390" y="96" font-size="28" font-weight="900" fill="${hr<=78?'var(--tax-green)':'var(--tax-red)'}">${hr} <tspan font-size="13" fill="var(--tax-muted)">bpm</tspan></text>
+        <rect x="390" y="112" width="200" height="14" rx="7" fill="var(--tax-border)"/>
+        <rect x="390" y="112" width="${Math.max(20, Math.min(200, hrW)).toFixed(1)}" height="14" rx="7" fill="${hr<=78?'var(--tax-green)':'var(--tax-red)'}"/>
+        <text x="390" y="152" font-size="12" font-weight="750" fill="var(--tax-muted)">迷走神经：${vag}</text>
+        <text x="390" y="174" font-size="11.5" fill="var(--tax-primary)">吸气=油门微加速 · 长呼气=物理踩刹车</text>
+      `;
+
+      document.getElementById('kHr').textContent = hr + ' bpm';
+      document.getElementById('kHr').style.color = hr <= 78 ? 'var(--tax-green)' : 'var(--tax-red)';
+      document.getElementById('kAlv').textContent = alv + '%';
+      document.getElementById('kVag').textContent = vag;
+
+      document.getElementById('ahaBox').innerHTML = hr <= 78
+        ? `💡 <strong>顿悟时刻：</strong>你刚完成了生理叹气减速！呼气时膈肌上移、胸腔压力升高，心脏容积微缩，大脑立刻通过<strong>迷走神经</strong>给窦房结发送减速指令——这是人体自带、无需意志力的“30 秒物理降压开关”！`
+        : `💡 <strong>顿悟时刻：</strong>为什么必须<strong>吸两口</strong>？紧张浅呼吸会让肺里数百万小肺泡像湿气球一样粘连塌陷；第二口短促补吸能瞬间把它们吹开，最大化排出引发焦虑的 CO2！点击上方开始跟练 3 轮试试。`;
+    }
+
+    renderScene(36, 62, 94, '待机中 · 点击开始跟着动画呼吸', '待激活', 0);
   </script>
 </body>
 </html>

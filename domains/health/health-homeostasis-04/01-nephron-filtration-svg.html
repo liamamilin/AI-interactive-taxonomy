@@ -3,67 +3,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔄 肾小球 180L 超滤与 99% 重吸收流水线（SVG）</title>
+  <title>🔄 肾小球 180L 超滤与 99% 重吸收流水线</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .st-hit { cursor:pointer; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🔄 肾小球 180L 超滤与 99% 重吸收流水线（SVG）</h1><p>误区：喝多少水肾脏就只过滤多少水，排出多少尿。真相：肾脏每天把全身血液像洗衣服一样疯狂超滤出 180 升“原尿”，然后再由肾小管把 99% 的干净水和营养回收回去，只留 1% 带走垃圾！</p></div>
+      <div>
+        <h1>🔄 肾小球 180L 超滤与 99% 重吸收流水线</h1>
+        <p>误区：肾脏只是把喝进去多余的 1.5 升水直接挑出来排掉。真相：肾脏采用的是极其震撼的<strong>“先全盘清空、再挑拣回收”</strong>策略——每天过滤 <strong>180 升（360 瓶矿泉水）原尿</strong>，再把 99% 的水和全部葡萄糖精细吸回血液！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>肾小球每日滤过原尿总量</span><span id="vGfr">180 L/天</span></label><input type="range" id="sGfr" min="90" max="200" step="10" value="180" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>身体缺水度 (抗利尿激素 ADH 回收率)</span><span id="vAdh">99.1%</span></label><input type="range" id="sAdh" min="975" max="996" value="991" oninput="upd()"></div>
+      <div class="bar">
+        <span style="font-size:12.5px;font-weight:800;color:var(--tax-muted);">体液状态：</span>
+        <button class="pill active" onclick="setState('norm',this)">💧 正常饮水（ADH 适中）</button>
+        <button class="pill" onclick="setState('dry',this)">🏜️ 暴汗缺水（ADH 拉满锁水）</button>
+        <button class="pill" onclick="setState('beer',this)">🍺 喝啤酒（酒精抑制 ADH）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">每日回收干净水</div><div class="k-val" id="kRec" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">最终排出尿液量</div><div class="k-val" id="kOut" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">每日肾小球超滤原尿</div><div class="k-val" style="color:var(--tax-primary);">180.0 L</div></div>
+        <div class="kpi"><div class="k-lbl">肾小管重吸收回血液</div><div class="k-val" id="kRec" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">最终排出尿量与颜色</div><div class="k-val" id="kOut" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const gfr=+document.getElementById('sGfr').value, adh=+document.getElementById('sAdh').value/10;
-  document.getElementById('vGfr').textContent=gfr+' L/天'; document.getElementById('vAdh').textContent=adh.toFixed(1)+'%';
-  const out=(gfr*(1-adh/100)).toFixed(2);
-  const rec=(gfr-parseFloat(out)).toFixed(1);
-  document.getElementById('kRec').textContent=rec+' L';
-  document.getElementById('kOut').textContent=out+' L/天';
-  document.getElementById('svg').innerHTML=`
-    <rect x="30" y="55" width="160" height="75" rx="12" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5"/>
-    <text x="110" y="88" text-anchor="middle" font-size="14" font-weight="850" fill="#0369a1">肾小球超滤</text>
-    <text x="110" y="110" text-anchor="middle" font-size="13" font-weight="800" fill="#0284c7">${gfr} L 原尿</text>
-    <line x1="190" y1="92" x2="265" y2="92" stroke="#0284c7" stroke-width="3"/>
-    <rect x="265" y="45" width="160" height="95" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/>
-    <text x="345" y="82" text-anchor="middle" font-size="13.5" font-weight="850" fill="#047857">肾小管重吸收</text>
-    <text x="345" y="106" text-anchor="middle" font-size="13" font-weight="800" fill="#059669">回收 ${rec} L (${adh.toFixed(1)}%)</text>
-    <line x1="425" y1="92" x2="475" y2="92" stroke="#f59e0b" stroke-width="3"/>
-    <rect x="475" y="60" width="100" height="65" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
-    <text x="525" y="90" text-anchor="middle" font-size="13" font-weight="850" fill="#b45309">终尿</text>
-    <text x="525" y="110" text-anchor="middle" font-size="12.5" font-weight="800" fill="#b45309">${out} L</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>肾脏采用“先全部倒出来洗一遍（${gfr} L），再把好东西全捡回去（${rec} L）”的暴力精密策略——所以任何损伤肾小球的慢性高血压和高血糖，都会直接搞坏这套超滤网！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const STATES = {
+      norm: { out:1.5, pct:'99.2%', adh:'适中', col:'var(--tax-green)', desc:'淡黄色 · 清亮健康' },
+      dry:  { out:0.6, pct:'99.7%', adh:'🔥 拉满锁水', col:'var(--tax-amber)', desc:'深琥珀黄 · 高度浓缩' },
+      beer: { out:3.4, pct:'98.1%', adh:'🚫 被酒精关闸', col:'var(--tax-primary)', desc:'几乎无色 · 频繁跑厕所脱水' }
+    };
+    let st = 'norm', focus = 1;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setState(s, btn){
+      st = s;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); draw();
+    }
+    function focusNode(i){ focus = i; markDone(); draw(); }
+
+    function draw(){
+      const d = STATES[st];
+      const rec = (180 - d.out).toFixed(1);
+      const nodes = [
+        { id:0, x:24,  w:170, title:'① 肾小球超滤网', sub:'180 L/天 原尿', note:'像把整个房间东西全搬出门', col:'var(--tax-primary)', soft:'var(--tax-primary-soft)' },
+        { id:1, x:234, w:172, title:'② 肾小管重吸收', sub:`回收 ${rec} L (${d.pct})`, note:'100% 葡萄糖+氨基酸+水分回收', col:'var(--tax-green)', soft:'var(--tax-green-soft)' },
+        { id:2, x:446, w:170, title:'③ 集合管 ADH 闸门', sub:`终尿 ${d.out} L/天`, note:`ADH: ${d.adh}`, col:d.col, soft:'var(--tax-amber-soft)' }
+      ];
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="194" y1="98" x2="234" y2="98" stroke="var(--tax-primary)" stroke-width="4"/>
+        <line x1="406" y1="98" x2="446" y2="98" stroke="var(--tax-green)" stroke-width="4"/>
+        ${nodes.map(n => `
+          <g class="st-hit" onclick="focusNode(${n.id})">
+            <rect x="${n.x}" y="36" width="${n.w}" height="124" rx="14" fill="${n.soft}" stroke="${n.col}" stroke-width="${focus===n.id?3.2:1.8}"/>
+            <text x="${n.x+n.w/2}" y="68" text-anchor="middle" font-size="13" font-weight="850" fill="${n.col}">${n.title}</text>
+            <text x="${n.x+n.w/2}" y="102" text-anchor="middle" font-size="15" font-weight="900" fill="var(--tax-ink)">${n.sub}</text>
+            <text x="${n.x+n.w/2}" y="132" text-anchor="middle" font-size="10.8" fill="var(--tax-muted)">${n.note}</text>
+          </g>
+        `).join('')}
+        <text x="320" y="194" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-muted)">👆 点击任意站点查看细节 · 当前终尿：${d.desc}</text>
+      `;
+
+      document.getElementById('kRec').textContent = `${rec} L (${d.pct})`;
+      document.getElementById('kOut').textContent = `${d.out} L · ${d.desc.split(' ')[0]}`;
+
+      document.getElementById('ahaBox').innerHTML = st === 'beer'
+        ? `💡 <strong>顿悟时刻：</strong>为什么喝啤酒越喝越渴、跑厕所停不下来？因为酒精直接关闭了大脑分泌的<strong>抗利尿激素（ADH）</strong>，让集合管水闸大开，终尿暴增到 <strong>${d.out} L</strong>——你排出去的水比喝进去的还多，这就是宿醉口干头痛的真相！`
+        : st === 'dry'
+        ? `💡 <strong>顿悟时刻：</strong>暴汗缺水时，下丘脑狂喷 ADH 锁水，肾小管把 <strong>99.7%</strong> 的水死死吸回血管，终尿浓缩到仅 <strong>${d.out} L</strong>——尿液变成深黄色就是肾脏在求你赶紧喝水！`
+        : `💡 <strong>顿悟时刻：</strong>为什么肾脏宁可每天费劲过滤 <strong>180 升</strong>再回收 99.2%？因为人体根本无法预知你今天会吃进什么陌生毒素——<strong>先全滤出来、只捡认识的营养回去</strong>，陌生毒物就会自动留在 1.5L 尿液里被安全冲走！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

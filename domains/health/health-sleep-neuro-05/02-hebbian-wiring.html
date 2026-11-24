@@ -7,58 +7,131 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill:hover { border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .node { cursor:pointer; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🔗 赫布定律：一起激发的神经元连在一起</h1><p>误区：记不住东西是因为脑容量满了，需要少记点。真相：大脑遵循“用进废退”原则，不用的连接会被小胶质细胞主动修剪，经常同步激发的连接才会越长越粗！</p></div>
+      <div>
+        <h1>🔗 赫布定律：一起激发的神经元连在一起</h1>
+        <p>误区：学过的知识和坏习惯一旦进脑子就永久固定不变。真相：大脑遵循“用进废退”的赫布定律（Neurons that fire together, wire together）——同步激发的突触会越焊越粗，长期不用的连接会被小胶质细胞无情剪掉！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>两神经元同步触发频率</span><span id="vSync">75%</span></label><input type="range" id="sSync" min="5" max="100" value="75" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>最近连续闲置未使用天数</span><span id="vIdle">5 天</span></label><input type="range" id="sIdle" min="0" max="60" value="5" oninput="upd()"></div>
+      <div class="bar">
+        <span style="font-size:12.5px;font-weight:800;color:var(--tax-muted);">👆 依次点击下方图中任意两个神经元，让它们“同步激发”：</span>
+        <button class="pill" onclick="prune()">✂️ 闲置 30 天（触发突触修剪）</button>
+        <button class="pill" onclick="resetNet()">↺ 重置网络</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 225"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">突触连接强度</div><div class="k-val" id="kW" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">小胶质修剪状态</div><div class="k-val" id="kPr">—</div></div>
+        <div class="kpi"><div class="k-lbl">最强突触权重</div><div class="k-val" id="kMax" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">活跃强连接数（LTP）</div><div class="k-val" id="kStrong" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">最近操作</div><div class="k-val" id="kAct" style="font-size:14px;color:var(--tax-amber);">等待同步激发</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const sync=+document.getElementById('sSync').value, idle=+document.getElementById('sIdle').value;
-  document.getElementById('vSync').textContent=sync+'%'; document.getElementById('vIdle').textContent=idle+' 天';
-  const w=Math.max(5, Math.min(98, Math.round(sync - idle*1.1)));
-  document.getElementById('kW').textContent=w+'%';
-  document.getElementById('kPr').textContent=w<25?'触发突触修剪 (遗忘)':'稳固强化 (LTP)';
-  document.getElementById('kPr').style.color=w<25?'#ef4444':'#059669';
-  document.getElementById('svg').innerHTML=`
-    <circle cx="140" cy="92" r="34" fill="#e0f2fe" stroke="#0284c7" stroke-width="3"/>
-    <text x="140" y="97" text-anchor="middle" font-size="14" font-weight="850" fill="#0369a1">神经元 A</text>
-    <line x1="174" y1="92" x2="426" y2="92" stroke="${w<25?'#ef4444':'#059669'}" stroke-width="${Math.max(1.5,w/6)}" stroke-dasharray="${w<25?'6 4':'0'}"/>
-    <text x="300" y="72" text-anchor="middle" font-size="13" font-weight="800" fill="${w<25?'#ef4444':'#059669'}">突触连接权重: ${w}%</text>
-    <circle cx="460" cy="92" r="34" fill="#ecfdf5" stroke="#059669" stroke-width="3"/>
-    <text x="460" y="97" text-anchor="middle" font-size="14" font-weight="850" fill="#047857">神经元 B</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“Fire together, wire together.” 每一次主动回忆和跨概念联想都在加粗突触连线；闲置 ${idle} 天不复习，连接就会跌回 ${w}% 并被大脑当成废线剪掉！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const NODES = [
+      { id:0, x:130, y:62, icon:'👀', name:'视觉区' },
+      { id:1, x:510, y:62, icon:'🎹', name:'运动区' },
+      { id:2, x:130, y:172, icon:'🎵', name:'听觉区' },
+      { id:3, x:510, y:172, icon:'❤️', name:'奖赏情绪' }
+    ];
+    let weights = { '0-1':2, '0-2':1, '0-3':1, '1-2':1, '1-3':1, '2-3':2 };
+    let firstNode = null;
+    let lastAct = '点击任意两个节点，触发长时程增强 (LTP)';
+
+    function keyOf(a,b){ return a < b ? `${a}-${b}` : `${b}-${a}`; }
+
+    function clickNode(id){
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      if(firstNode === null){
+        firstNode = id;
+        lastAct = `已选中「${NODES[id].name}」，再点另一个节点同步激发！`;
+      } else if(firstNode === id){
+        firstNode = null;
+        lastAct = '已取消选中';
+      } else {
+        const k = keyOf(firstNode, id);
+        weights[k] = Math.min(10, (weights[k] || 1) + 2);
+        lastAct = `⚡ ${NODES[firstNode].name} + ${NODES[id].name} 同步激发！突触增粗至 ${weights[k]}/10`;
+        firstNode = null;
+      }
+      draw();
+    }
+
+    function prune(){
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      Object.keys(weights).forEach(k => { weights[k] = Math.max(0, weights[k] - 2); });
+      firstNode = null;
+      lastAct = '✂️ 闲置 30 天：小胶质细胞修剪了所有弱连接！';
+      draw();
+    }
+
+    function resetNet(){
+      weights = { '0-1':2, '0-2':1, '0-3':1, '1-2':1, '1-3':1, '2-3':2 };
+      firstNode = null;
+      lastAct = '网络已重置为初始弱连接。';
+      draw();
+    }
+
+    function draw(){
+      let edgesSvg = '';
+      Object.entries(weights).forEach(([k, w]) => {
+        const [a, b] = k.split('-').map(Number);
+        const na = NODES[a], nb = NODES[b];
+        if(w <= 0){
+          edgesSvg += `<line x1="${na.x}" y1="${na.y}" x2="${nb.x}" y2="${nb.y}" stroke="var(--tax-border)" stroke-width="1" stroke-dasharray="3 5" opacity="0.5"/>`;
+        } else {
+          const col = w >= 6 ? 'var(--tax-green)' : (w >= 3 ? 'var(--tax-primary)' : 'var(--tax-muted)');
+          edgesSvg += `<line x1="${na.x}" y1="${na.y}" x2="${nb.x}" y2="${nb.y}" stroke="${col}" stroke-width="${1 + w * 1.1}" opacity="${0.35 + w * 0.065}" stroke-linecap="round"/>`;
+          const mx = (na.x + nb.x)/2, my = (na.y + nb.y)/2;
+          edgesSvg += `<circle cx="${mx}" cy="${my}" r="11" fill="var(--tax-surface)" stroke="${col}" stroke-width="1.5"/>
+                       <text x="${mx}" y="${my+4}" text-anchor="middle" font-size="10.5" font-weight="850" fill="${col}">${w}</text>`;
+        }
+      });
+
+      const nodesSvg = NODES.map(n => {
+        const sel = firstNode === n.id;
+        return `
+          <g class="node" onclick="clickNode(${n.id})">
+            <circle cx="${n.x}" cy="${n.y}" r="34" fill="${sel?'var(--tax-amber-soft)':'var(--tax-primary-soft)'}" stroke="${sel?'var(--tax-amber)':'var(--tax-primary)'}" stroke-width="${sel?3.5:2}"/>
+            <text x="${n.x}" y="${n.y-2}" text-anchor="middle" font-size="18">${n.icon}</text>
+            <text x="${n.x}" y="${n.y+18}" text-anchor="middle" font-size="11.5" font-weight="850" fill="var(--tax-ink)">${n.name}</text>
+          </g>
+        `;
+      }).join('');
+
+      document.getElementById('svg').innerHTML = edgesSvg + nodesSvg;
+
+      const vals = Object.values(weights);
+      const maxW = Math.max(...vals);
+      const strong = vals.filter(v => v >= 6).length;
+      document.getElementById('kMax').textContent = `${maxW} / 10`;
+      document.getElementById('kStrong').textContent = `${strong} 条高速公路`;
+      document.getElementById('kAct').textContent = lastAct;
+
+      document.getElementById('ahaBox').innerHTML = strong >= 2
+        ? `💡 <strong>顿悟时刻：</strong>你已焊出 <strong>${strong} 条强突触高速路</strong>（长时程增强 LTP）！无论是弹钢琴、背单词还是改掉“焦虑→刷手机”的条件反射，本质都是在重写哪两个节点一起放电！`
+        : maxW === 0
+        ? `💡 <strong>顿悟时刻：</strong>所有弱连接都被修剪归零了！好消息是：<strong>坏习惯的神经回路同样可以被“饿死”</strong>——只要长期不给它同步激发的机会，大脑就会自动帮你拆线！`
+        : `💡 <strong>顿悟时刻：</strong>试着连续点击同一对神经元（比如 👀视觉 + 🎹运动）3 次看突触变绿变粗，再点一次 ✂️ 闲置修剪，直观感受什么叫“用进废退”！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

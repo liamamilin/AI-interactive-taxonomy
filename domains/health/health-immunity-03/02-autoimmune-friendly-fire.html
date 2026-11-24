@@ -7,57 +7,91 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .scen-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:9px; margin-bottom:14px; }
+    .s-btn { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .s-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .s-btn .t { font-size:13px; font-weight:800; }
+    .s-btn .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🎯 自身免疫误伤：胸腺“新兵政审”漏网之鱼</h1><p>误区：自身免疫病（如红斑狼疮/类风湿）是因为免疫力太差。真相：恰恰相反，是免疫系统火力太猛、且病毒长得太像人体自身蛋白（分子模拟），导致部队在清敌时把自己的关节或胰岛也当敌人炸了！</p></div>
+      <div>
+        <h1>🎯 自身免疫误伤：胸腺“新兵政审”漏网之鱼</h1>
+        <p>误区：免疫系统越强悍、攻击力越高就越健康。真相：新兵 T 细胞上岗前必须在胸腺接受残酷的“政审（淘汰 98% 会打自己人的兵）”；一旦病毒玩“分子模拟”伪装成自身器官，杀红眼的免疫部队就会把友军一起端掉！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>免疫系统识别容错宽松度</span><span id="vTol">35%</span></label><input type="range" id="sTol" min="10" max="90" value="35" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>病原体与自身组织的“分子伪装度”</span><span id="vMim">70%</span></label><input type="range" id="sMim" min="10" max="95" value="70" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🔬 切换 3 种免疫敌我识别情景，看自身免疫病（如类风湿、桥本甲状腺炎）如何被触发：</div>
+      <div class="scen-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 210"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">漏过病原体风险</div><div class="k-val" id="kMiss" style="color:#f59e0b;">—</div></div>
-        <div class="kpi"><div class="k-lbl">友军误伤 (自身免疫)</div><div class="k-val" id="kAuto" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">🦠 病毒清除率</div><div class="k-val" id="kVir" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">💥 自身器官友军误伤</div><div class="k-val" id="kSelf">—</div></div>
+        <div class="kpi"><div class="k-lbl">触发机制</div><div class="k-val" id="kMech" style="font-size:15px;color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const tol=+document.getElementById('sTol').value, mim=+document.getElementById('sMim').value;
-  document.getElementById('vTol').textContent=tol+'%'; document.getElementById('vMim').textContent=mim+'%';
-  const miss=Math.round(tol*0.65);
-  const auto=Math.max(3, Math.round(mim*0.65 - tol*0.35));
-  document.getElementById('kMiss').textContent=miss+'%';
-  document.getElementById('kAuto').textContent=auto+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#f59e0b">过度宽容导致放跑伪装病毒: ${miss}%</text>
-    <rect x="20" y="44" width="${miss*5.4}" height="24" rx="6" fill="#f59e0b"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#ef4444">宁杀错不放过导致误伤自身器官: ${auto}%</text>
-    <rect x="20" y="112" width="${auto*5.4}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">免疫平衡就是走钢丝：既要打死披着羊皮的狼，又不能误伤真羊</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>很多病毒会故意长得和人类关节、心肌或神经髓鞘很像（伪装度 ${mim}%）。为了消灭病毒，免疫系统有时不得不冒着 ${auto}% 的友军误伤风险开火！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const SCENS = [
+      { id:'clean', icon:'🛡️', name:'正常政审 + 清晰敌我', desc:'胸腺淘汰 98% 叛徒 · 精准打击', vir:96, self:2, mech:'中枢耐受正常运转', col:'var(--tax-green)',
+        virusShape:'▲ 异形病毒', selfShape:'● 自身甲状腺/关节', hitSelf:false,
+        aha:'💡 <strong>顿悟时刻：</strong>胸腺堪称人体最严格的政审基地——每 100 个新兵 T 细胞里，有 <strong>98 个</strong>会因为“可能攻击自己人”或“太弱”被当场销毁，只留下精准打敌人的精英上岗！' },
+      { id:'mimic', icon:'🎭', name:'病毒“分子模拟”伪装', desc:'病毒表面蛋白与人体关节撞脸', vir:90, self:68, mech:'分子模拟 (Molecular Mimicry)', col:'var(--tax-red)',
+        virusShape:'● 伪装成自身外衣的病毒', selfShape:'● 自身关节/心肌蛋白', hitSelf:true,
+        aha:'💡 <strong>顿悟时刻：</strong>狡猾的链球菌或某些病毒演化出了与人体心脏瓣膜、关节或甲状腺高度撞脸的表面蛋白！免疫部队在追杀病毒时杀红了眼，顺手把长相一样的<strong>自身组织</strong>也当敌军猛轰——这就是经典“分子模拟”误伤！' },
+      { id:'treg_fail', icon:'⚠️', name:'政审漏网 + Treg 失灵', desc:'高压/遗传/肠漏导致刹车失效', vir:85, self:78, mech:'外周耐受失衡', col:'var(--tax-red)',
+        virusShape:'▲ 常规刺激', selfShape:'● 自身组织暴露', hitSelf:true,
+        aha:'💡 <strong>顿悟时刻：</strong>所以医学上从不鼓励盲目“狂补免疫力”！免疫系统最宝贵的不是猛冲猛打，而是<strong>精准识别敌我 + 随时能刹住车的平衡力</strong>！' }
+    ];
+    let cur = 'mimic';
+
+    function pick(id){ cur = id; if(window.ToySDK) window.ToySDK.markCompleted(); draw(); }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = SCENS.map(s => `
+        <button class="s-btn ${cur===s.id?'active':''}" onclick="pick('${s.id}')">
+          <div class="t">${s.icon} ${s.name}</div>
+          <div class="s">${s.desc}</div>
+        </button>
+      `).join('');
+
+      const s = SCENS.find(x=>x.id===cur);
+      document.getElementById('svg').innerHTML = `
+        <rect x="24" y="56" width="150" height="96" rx="14" fill="var(--tax-primary-soft)" stroke="var(--tax-primary)" stroke-width="2"/>
+        <text x="99" y="96" text-anchor="middle" font-size="24">⚔️</text>
+        <text x="99" y="124" text-anchor="middle" font-size="13" font-weight="850" fill="var(--tax-primary)">T 细胞特种兵</text>
+        <text x="99" y="142" text-anchor="middle" font-size="10.5" fill="var(--tax-muted)">按通缉令形状开火</text>
+
+        <line x1="174" y1="84" x2="368" y2="54" stroke="var(--tax-green)" stroke-width="3"/>
+        <rect x="372" y="22" width="242" height="64" rx="12" fill="var(--tax-amber-soft)" stroke="var(--tax-amber)" stroke-width="2"/>
+        <text x="493" y="48" text-anchor="middle" font-size="13" font-weight="850" fill="var(--tax-amber)">🦠 敌军：${s.virusShape}</text>
+        <text x="493" y="70" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-green)">✅ 精准命中清除 (${s.vir}%)</text>
+
+        <line x1="174" y1="124" x2="368" y2="152" stroke="${s.hitSelf?'var(--tax-red)':'var(--tax-border)'}" stroke-width="${s.hitSelf?3.5:1.5}" stroke-dasharray="${s.hitSelf?'0':'5 4'}"/>
+        <rect x="372" y="118" width="242" height="66" rx="12" fill="${s.hitSelf?'var(--tax-red-soft)':'var(--tax-green-soft)'}" stroke="${s.hitSelf?'var(--tax-red)':'var(--tax-green)'}" stroke-width="2.2"/>
+        <text x="493" y="145" text-anchor="middle" font-size="13" font-weight="850" fill="${s.hitSelf?'var(--tax-red)':'var(--tax-green)'}">🫀 友军：${s.selfShape}</text>
+        <text x="493" y="168" text-anchor="middle" font-size="11.5" font-weight="800" fill="${s.hitSelf?'var(--tax-red)':'var(--tax-green)'}">${s.hitSelf?`🚨 遭到友军误伤 (${s.self}% 炎症!)`:'🛡️ 识别为自己人 · 安全豁免'}</text>
+      `;
+
+      document.getElementById('kVir').textContent = s.vir + '%';
+      const kS = document.getElementById('kSelf');
+      kS.textContent = s.self + '%' + (s.hitSelf ? ' 🚨 自身免疫发作' : ' ✅ 安全');
+      kS.style.color = s.col;
+      document.getElementById('kMech').textContent = s.mech;
+      document.getElementById('ahaBox').innerHTML = s.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

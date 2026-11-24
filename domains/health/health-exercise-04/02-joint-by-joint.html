@@ -7,60 +7,98 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:750; cursor:pointer; }
+    .pill:hover { border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .j-hit { cursor:pointer; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:17px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⛓️ 相邻关节假说：为什么膝盖痛往往是髋关节的锅？</h1><p>误区：深蹲膝盖痛就只贴膝盖膏药，腰痛就只按腰。真相：人体关节是“灵活-稳定-灵活”交替串起来的！只要髋关节或脚踝死硬，夹在中间的膝盖和下腰部就会被迫乱晃代偿直到受伤！</p></div>
+      <div>
+        <h1>⛓️ 相邻关节假说：为什么膝盖痛往往是髋关节的锅？</h1>
+        <p>误区：哪里痛就只管给哪里贴膏药、戴护具（膝盖痛只治膝盖，腰痛只按腰）。真相：人体关节按<strong>“灵活—稳定—灵活—稳定”</strong>交替串联！一旦灵活关节久坐僵死，夹在旁边的稳定关节就必须被迫扭曲代偿、替人背锅！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>髋关节与脚踝灵活度</span><span id="vMob">45%</span></label><input type="range" id="sMob" min="15" max="100" value="45" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>核心深层肌肉稳定能力</span><span id="vStb">60%</span></label><input type="range" id="sStb" min="20" max="100" value="60" oninput="upd()"></div>
+      <div class="bar">
+        <span style="font-size:12.5px;font-weight:800;color:var(--tax-muted);">👆 点击下方图中任意「绿色灵活关节」将其锁死变僵硬，观察谁会替它背锅报警：</span>
+        <button class="pill" onclick="resetAll()">↺ 恢复全部健康状态</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 245"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">腰椎与膝盖代偿剪切力</div><div class="k-val" id="kCmp" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">解决思路</div><div class="k-val" id="kFix">—</div></div>
+        <div class="kpi"><div class="k-lbl">被锁死的根源关节</div><div class="k-val" id="kRoot" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">被迫代偿的受害关节</div><div class="k-val" id="kVictim" style="color:var(--tax-red);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const mob=+document.getElementById('sMob').value, stb=+document.getElementById('sStb').value;
-  document.getElementById('vMob').textContent=mob+'%'; document.getElementById('vStb').textContent=stb+'%';
-  const comp=Math.max(5, Math.round((100-mob)*0.75 + (100-stb)*0.25));
-  document.getElementById('kCmp').textContent=comp+'%';
-  document.getElementById('kCmp').style.color=comp>45?'#ef4444':'#059669';
-  document.getElementById('kFix').textContent=mob<60?'优先松解髋与踝!':'强化核心稳定';
-  const joints=[['脚踝 (需灵活)',mob,'#0284c7'],['膝盖 (需稳定)',100-comp,'#ef4444'],['髋部 (需灵活)',mob,'#0284c7'],['下腰 (需稳定)',100-comp,'#f59e0b']];
-  let svg='';
-  joints.forEach(([nm,val,col],i)=>{
-    const x=45+i*135;
-    svg+=`<rect x="${x}" y="45" width="115" height="80" rx="12" fill="${col}" opacity="0.18" stroke="${col}" stroke-width="2"/>
-    <text x="${x+57}" y="78" text-anchor="middle" font-size="12.5" font-weight="800" fill="${col}">${nm}</text>
-    <text x="${x+57}" y="106" text-anchor="middle" font-size="14" font-weight="850" fill="var(--tax-text)">${val}%</text>`;
-  });
-  document.getElementById('svg').innerHTML=svg+`<text x="45" y="162" font-size="12.5" font-weight="750" fill="var(--tax-muted)">痛点往往是“受害者”，上下游僵硬的邻居才是“罪魁祸首”</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>下腰痛和膝盖痛很多时候是“替罪羊”！因为久坐把髋关节锁死了（灵活度仅 ${mob}%），弯腰和下蹲时腰椎膝盖被迫接手工作，代偿压力飙到 ${comp}%！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const JOINTS = [
+      { id:'thoracic', name:'胸椎', role:'灵活', y:36, stiff:false, victims:['腰椎','肩颈'], desc:'久坐驼背僵硬' },
+      { id:'lumbar',   name:'腰椎', role:'稳定', y:78, stiff:false, victims:[], desc:'本应像钢梁保持稳定' },
+      { id:'hip',      name:'髋关节', role:'灵活', y:120, stiff:true, victims:['腰椎','膝盖'], desc:'久坐卡死屈髋受限' },
+      { id:'knee',     name:'膝盖', role:'稳定', y:162, stiff:false, victims:[], desc:'本应只做单一折页稳定' },
+      { id:'ankle',    name:'踝关节', role:'灵活', y:204, stiff:false, victims:['膝盖'], desc:'足背屈受限蹲不下去' }
+    ];
+
+    function toggleJoint(id){
+      const j = JOINTS.find(x=>x.id===id);
+      if(!j || j.role !== '灵活') return;
+      j.stiff = !j.stiff;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+    function resetAll(){
+      JOINTS.forEach(j => j.stiff = false);
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const stiffList = JOINTS.filter(j => j.stiff);
+      const victimSet = new Set();
+      stiffList.forEach(j => j.victims.forEach(v => victimSet.add(v)));
+
+      let svg = `<line x1="160" y1="36" x2="160" y2="204" stroke="var(--tax-border)" stroke-width="5"/>`;
+      JOINTS.forEach(j => {
+        const isFlex = j.role === '灵活';
+        const isVictim = victimSet.has(j.name);
+        let fill = isFlex ? (j.stiff ? 'var(--tax-amber-soft)' : 'var(--tax-green-soft)') : (isVictim ? 'var(--tax-red-soft)' : 'var(--tax-primary-soft)');
+        let stroke = isFlex ? (j.stiff ? 'var(--tax-amber)' : 'var(--tax-green)') : (isVictim ? 'var(--tax-red)' : 'var(--tax-primary)');
+        let status = isFlex ? (j.stiff ? '🔒 已僵硬卡死（点击解锁）' : '✅ 灵活顺畅（点击锁死测试）') : (isVictim ? '🚨 替人代偿发炎疼痛！' : '🛡️ 稳固无压力');
+
+        svg += `
+          <g class="${isFlex?'j-hit':''}" onclick="toggleJoint('${j.id}')">
+            <rect x="64" y="${j.y-17}" width="192" height="34" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="${j.stiff||isVictim?2.6:1.6}"/>
+            <text x="160" y="${j.y+4}" text-anchor="middle" font-size="13" font-weight="850" fill="var(--tax-ink)">${j.name} · [${j.role}型]</text>
+            <line x1="256" y1="${j.y}" x2="296" y2="${j.y}" stroke="${stroke}" stroke-width="2" stroke-dasharray="${isVictim?'4 3':'0'}"/>
+            <text x="306" y="${j.y+4}" font-size="12.5" font-weight="800" fill="${stroke}">${status}</text>
+          </g>
+        `;
+      });
+
+      document.getElementById('svg').innerHTML = svg;
+
+      const roots = stiffList.map(j => j.name).join('、') || '无（全链顺畅）';
+      const vics = Array.from(victimSet).join('、') || '无代偿报警 ✅';
+      document.getElementById('kRoot').textContent = roots;
+      document.getElementById('kVictim').textContent = vics;
+
+      document.getElementById('ahaBox').innerHTML = stiffList.length === 0
+        ? `💡 <strong>顿悟时刻：</strong>所有灵活关节（胸椎、髋、踝）各司其职，稳定关节（腰椎、膝盖）安稳无伤！试着点击锁死 <strong>髋关节</strong> 或 <strong>踝关节</strong>，看看疼痛是如何跨关节传导的！`
+        : `💡 <strong>顿悟时刻：</strong><strong>“痛的地方往往是受害者，而不是罪犯！”</strong> 当前因为 <strong>${roots}</strong> 僵硬偷懒，导致相邻的 <strong>${vics}</strong> 被迫过度扭转和剪切代偿——只给痛处贴膏药治标不治本，松解它的上下游灵活关节才是断根之道！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

@@ -7,60 +7,94 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🌬️ 呼吸性窦性心律不齐：6次/分钟共振呼吸</h1><p>误区：呼吸频率和心跳毫无关系，每分钟喘 18 次还是 6 次都一样。真相：吸气心率升、呼气心率降！放慢到每分钟 5.5~6 次共振呼吸时，血压波与心率波完美叠加，能把 HRV 拉到峰值！</p></div>
+      <div>
+        <h1>🌬️ 呼吸性窦性心律不齐：6次/分钟共振呼吸</h1>
+        <p>误区：体检报告写着“窦性心律不齐”就是得了严重心脏病。真相：年轻人吸气心跳加快、呼气心跳变慢叫<strong>呼吸性窦性心律不齐（RSA）</strong>，反而是心肺极度健康的标志！调到 <strong>6 次/分钟（吸 5 秒 + 呼 5 秒）</strong>还能触发 0.1Hz 黄金共振！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>每分钟呼吸节拍次数</span><span id="vBr">6 次/分</span></label><input type="range" id="sBr" min="4" max="16" value="6" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>腹式呼吸深沉度</span><span id="vDep">85%</span></label><input type="range" id="sDep" min="30" max="100" value="85" oninput="upd()"></div>
+      <div class="bar">
+        <button class="pill" onclick="setRate(16,this)">😰 焦虑浅快呼吸 (16 次/分)</button>
+        <button class="pill" onclick="setRate(12,this)">😐 日常普通呼吸 (12 次/分)</button>
+        <button class="pill active" onclick="setRate(6,this)">🏆 0.1Hz 黄金共振 (6 次/分 · 吸5呼5)</button>
+        <button class="pill" onclick="setRate(4,this)">😮‍💨 过度憋气慢呼吸 (4 次/分)</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">心肺共振振幅</div><div class="k-val" id="kAmp" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">压力缓解效率</div><div class="k-val" id="kEff">—</div></div>
+        <div class="kpi"><div class="k-lbl">呼吸-心率同频共振度</div><div class="k-val" id="kRes" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">HRV 振幅放大倍数</div><div class="k-val" id="kAmp" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">呼吸频率 (Hz)</div><div class="k-val" id="kHz" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const br=+document.getElementById('sBr').value, dep=+document.getElementById('sDep').value;
-  document.getElementById('vBr').textContent=br+' 次/分'; document.getElementById('vDep').textContent=dep+'%';
-  const res=Math.round((100*Math.exp(-Math.pow((br-6)/3.5,2)))*(dep/100));
-  document.getElementById('kAmp').textContent=res+' 分';
-  document.getElementById('kEff').textContent=res>75?'触发 0.1Hz 共振巅峰!':'普通呼吸态';
-  let pts='';
-  for(let t=0;t<=40;t++){
-    const x=40+t*13;
-    const y=95 - (res*0.55)*Math.sin(t*br/15);
-    pts+=`${x},${y.toFixed(1)} `;
-  }
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="95" x2="560" y2="95" stroke="#94a3b8" stroke-dasharray="4 3"/>
-    <polyline fill="none" stroke="#059669" stroke-width="3" points="${pts}"/>
-    <text x="50" y="28" font-size="12.5" font-weight="800" fill="#059669">心率随呼吸起伏波（6次/分钟 = 吸5秒呼5秒，共振振幅 ${res} 分）</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“吸气 5 秒、呼气 5 秒”（每分钟 6 次）刚好吻合人体血压压力反射的 0.1Hz 固有频率，相当于给自主神经系统做共振按摩！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let rate = 6;
+    function setRate(r, btn){
+      rate = r;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const hz = +(rate / 60).toFixed(2);
+      const resonance = Math.round(98 * Math.exp(-Math.pow((rate - 6) / 4.2, 2)));
+      const amp = +(1.0 + (resonance / 100) * 2.6).toFixed(1);
+      const col = resonance >= 80 ? 'var(--tax-green)' : (resonance >= 40 ? 'var(--tax-primary)' : 'var(--tax-red)');
+
+      // Plot 20 seconds of Breath wave & Heart-Rate wave
+      const x0=52, x1=612, yMid=114;
+      const toX = t => x0 + (t/20)*(x1-x0);
+      let pB=[], pH=[];
+      const hrAmp = 14 + (resonance / 100) * 48;
+      const phaseLag = Math.abs(rate - 6) * 0.22; // 0 lag at 6 bpm!
+
+      for(let t=0; t<=20; t+=0.1){
+        const br = Math.sin(2 * Math.PI * (rate / 60) * t) * 42;
+        const hr = Math.sin(2 * Math.PI * (rate / 60) * t - phaseLag) * hrAmp;
+        pB.push(`${toX(t).toFixed(1)},${(yMid - br).toFixed(1)}`);
+        pH.push(`${toX(t).toFixed(1)},${(yMid - hr).toFixed(1)}`);
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="${x0}" y1="${yMid}" x2="${x1}" y2="${yMid}" stroke="var(--tax-border)" stroke-dasharray="4 4"/>
+        ${[0,5,10,15,20].map(t=>`<text x="${toX(t)}" y="206" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${t}秒</text>`).join('')}
+        <polyline points="${pB.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="2.6" stroke-dasharray="6 4"/>
+        <polyline points="${pH.join(' ')}" fill="none" stroke="${col}" stroke-width="3.5" stroke-linecap="round"/>
+        <text x="${x0}" y="20" font-size="11.5" font-weight="800" fill="var(--tax-primary)">-- 肺部呼吸起伏波</text>
+        <text x="${x0+140}" y="20" font-size="11.5" font-weight="800" fill="${col}">● 瞬时心率波动波（共振度 ${resonance}% · 振幅 ${amp}×）</text>
+      `;
+
+      document.getElementById('kRes').textContent = resonance + '%';
+      document.getElementById('kRes').style.color = col;
+      document.getElementById('kAmp').textContent = amp + '× 基准振幅';
+      document.getElementById('kHz').textContent = hz + ' Hz';
+
+      document.getElementById('ahaBox').innerHTML = rate === 6
+        ? `💡 <strong>顿悟时刻：</strong>完美 <strong>0.1Hz 共振频率（每分钟 6 次 = 吸 5 秒、呼 5 秒）</strong>！两条波峰几乎严丝合缝叠在一起，把迷走神经刹车与压力感受器振幅放大 <strong>${amp} 倍</strong>——这就是全球冥想与生物反馈疗法最核心的“共振呼吸”密码！`
+        : rate >= 15
+        ? `💡 <strong>顿悟时刻：</strong>每分钟 16 次急促浅呼吸彻底打散了心肺共振（仅 ${resonance}%），心率波扁平僵硬，交感神经持续处于戒备状态。试着切到 <strong>6 次/分钟</strong> 看两条波瞬间同频放大！`
+        : `💡 <strong>顿悟时刻：</strong>当前呼吸频率（${rate} 次/分）与心血管固有延迟略有相位差（共振度 ${resonance}%）。微调到 <strong>6 次/分钟</strong> 可让肺、心脏和血压反射形成最强同频共振！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

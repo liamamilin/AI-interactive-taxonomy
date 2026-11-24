@@ -3,66 +3,103 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📈 氧解离 S 型曲线与波尔效应（SVG）</title>
+  <title>📈 氧解离 S 型曲线与波尔效应</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📈 氧解离 S 型曲线与波尔效应（SVG）</h1><p>误区：血红蛋白抓氧气抓得越死、亲和力越高越好。真相：抓得太死到了肌肉放不下来照样缺氧！血红蛋白靠“S 型协同效应”和“波尔效应”，在肺里拼命抢氧、到缺氧偏酸的肌肉里自动松手卸货！</p></div>
+      <div>
+        <h1>📈 氧解离 S 型曲线与波尔效应</h1>
+        <p>误区：血红蛋白在全身各处抓氧气的力道是一样的。真相：血红蛋白堪称“智能快递员”——遇到正在剧烈运动的肌肉（高温 + 高 CO2 + 偏酸），S 型曲线立刻<strong>右移（波尔效应）</strong>，自动松手把氧气精准倾倒给最缺氧的部位！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>组织局部酸度/CO2 浓度 (运动产酸)</span><span id="vAcid">60%</span></label><input type="range" id="sAcid" min="10" max="100" value="60" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>组织氧气分压 PO2</span><span id="vPo2">40 mmHg</span></label><input type="range" id="sPo2" min="15" max="100" value="40" oninput="upd()"></div>
+      <div class="bar">
+        <button class="pill" onclick="setEnv('rest',this)">🛋️ 静息组织 (pH 7.4 · 37°C)</button>
+        <button class="pill active" onclick="setEnv('run',this)">🏃 剧烈冲刺肌肉 (pH 7.2 · 39.5°C)</button>
+        <button class="pill" onclick="setEnv('hyper',this)">🥶 过度换气低 CO2 (pH 7.55 · 左移!)</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">血红蛋白当前携氧饱和度</div><div class="k-val" id="kSat" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">向肌肉实际卸氧释放量</div><div class="k-val" id="kRel" style="color:#059669;">—</div></div>
+        <div class="kpi"><div class="k-lbl">肺泡装货饱和度 (100 mmHg)</div><div class="k-val" id="kLung" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">肌肉卸货后剩余 (30 mmHg)</div><div class="k-val" id="kMus" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">实际精准卸氧量</div><div class="k-val" id="kUnload" style="color:var(--tax-green);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function satFn(po2,acid){
-  const p50=20 + acid*0.18;
-  return 100*(Math.pow(po2,2.7)/(Math.pow(po2,2.7)+Math.pow(p50,2.7)));
-}
-function upd(){
-  const acid=+document.getElementById('sAcid').value, po2=+document.getElementById('sPo2').value;
-  document.getElementById('vAcid').textContent=acid+'%'; document.getElementById('vPo2').textContent=po2+' mmHg';
-  const sat=Math.round(satFn(po2,acid)), rel=Math.max(0, 98-sat);
-  document.getElementById('kSat').textContent=sat+'%';
-  document.getElementById('kRel').textContent=rel+'% 卸给肌肉';
-  let pts='';
-  for(let p=5;p<=100;p+=3){ pts+=`${40+(p-5)/95*520},${158-satFn(p,acid)*1.25} `; }
-  const cx=40+(po2-5)/95*520, cy=158-sat*1.25;
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="#ef4444" stroke-width="3" points="${pts}"/>
-    <circle cx="${cx}" cy="${cy}" r="6" fill="#059669"/>
-    <text x="50" y="28" font-size="12" font-weight="800" fill="#ef4444">酸度/CO2 升高使 S 型曲线右移 → 同一氧压下主动多卸下氧气！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪块肌肉在干活产酸（酸度 ${acid}%），血红蛋白路过时就能自动感应并右移曲线，慷慨卸下 <strong>${rel}%</strong> 的氧气——这就是精妙的“按需配送”波尔效应！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const ENVS = {
+      rest:  { name:'静息肌肉', p50:27, col:'var(--tax-primary)',
+        aha:'💡 <strong>顿悟时刻：</strong>静息时曲线居中（P50=27），血红蛋白在肺泡满载 98%，流经静息肌肉只松手卸下 <strong>约 38%</strong>，其余作为储备安全带回，绝不浪费！' },
+      run:   { name:'冲刺肌肉（波尔右移）', p50:38, col:'var(--tax-green)',
+        aha:'💡 <strong>顿悟时刻：</strong><strong>波尔效应大显神威！</strong>剧烈运动的肌肉产生大量 CO2、酸性和热量，把曲线狠狠往右推（P50=38），血红蛋白瞬间大方松手，在肌肉处多卸出近一倍的氧气（<strong>66%</strong>）！' },
+      hyper: { name:'过度换气（波尔左移）', p50:19, col:'var(--tax-red)',
+        aha:'💡 <strong>顿悟时刻：</strong>恐慌时疯狂大口喘气（过度换气）会把血液里的 CO2 排得太干净，导致曲线<strong>向左死移</strong>！血红蛋白把氧气死死攥在手里不肯松手（仅卸出 <strong>18%</strong>），大脑反而因为“拿不到氧”头晕手麻！' }
+    };
+    let env = 'run';
+
+    function setEnv(e, btn){
+      env = e;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function sat(po2, p50){
+      const n = 2.7;
+      return (Math.pow(po2, n) / (Math.pow(po2, n) + Math.pow(p50, n))) * 100;
+    }
+
+    function draw(){
+      const cfg = ENVS[env];
+      const x0=54, x1=612, yMin=26, yMax=188;
+      const toX = p => x0 + (p/100)*(x1-x0);
+      const toY = s => yMax - (s/105)*(yMax-yMin);
+
+      let ptsRef=[], ptsCur=[];
+      for(let p=0; p<=100; p+=2){
+        ptsRef.push(`${toX(p).toFixed(1)},${toY(sat(p, 27)).toFixed(1)}`);
+        ptsCur.push(`${toX(p).toFixed(1)},${toY(sat(p, cfg.p50)).toFixed(1)}`);
+      }
+      const sLung = Math.round(sat(100, cfg.p50));
+      const sMus = Math.round(sat(30, cfg.p50));
+      const unload = sLung - sMus;
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="${toX(30)}" y1="${yMin}" x2="${toX(30)}" y2="${yMax}" stroke="var(--tax-amber)" stroke-dasharray="4 3"/>
+        <text x="${toX(30)}" y="${yMin+12}" text-anchor="middle" font-size="10.5" font-weight="800" fill="var(--tax-amber)">肌肉卸货点 (30mmHg)</text>
+        ${[0,20,40,60,80,100].map(p=>`<text x="${toX(p)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${p} mmHg</text>`).join('')}
+        <polyline points="${ptsRef.join(' ')}" fill="none" stroke="var(--tax-muted)" stroke-width="2" stroke-dasharray="5 4"/>
+        <polyline points="${ptsCur.join(' ')}" fill="none" stroke="${cfg.col}" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="${toX(100)}" cy="${toY(sLung)}" r="5.5" fill="var(--tax-primary)"/>
+        <circle cx="${toX(30)}" cy="${toY(sMus)}" r="6" fill="${cfg.col}"/>
+        <text x="${toX(30)+10}" y="${toY(sMus)+4}" font-size="12" font-weight="850" fill="${cfg.col}">剩 ${sMus}% (已卸 ${unload}%)</text>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-ink)">虚线：正常静息基准 · 实线：${cfg.name}</text>
+      `;
+
+      document.getElementById('kLung').textContent = sLung + '%';
+      document.getElementById('kMus').textContent = sMus + '%';
+      document.getElementById('kUnload').textContent = unload + '% 卸氧效率';
+      document.getElementById('ahaBox').innerHTML = cfg.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

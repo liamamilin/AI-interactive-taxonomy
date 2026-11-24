@@ -7,58 +7,130 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
+    .plant-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:9px; margin-bottom:12px; }
+    .p-card { padding:10px 11px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .p-card.on { border-color:var(--tax-green); background:var(--tax-green-soft); }
+    .p-card .t { display:flex; justify-content:space-between; font-size:13px; font-weight:800; }
+    .p-card .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
+    .shock-bar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:12px; }
+    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
     .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
     .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
     .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🥗 菌群多样性：单调饮食 vs 30 种植物挑战</h1><p>误区：只要每天吃同一种“最健康的减肥餐”（比如水煮鸡胸+西兰花），肠道就最健康。真相：单一食谱会饿死 80% 的有益菌种，让肠道变成脆弱的荒漠，一旦遇上病菌或抗生素立刻崩溃！</p></div>
+      <div>
+        <h1>🥗 菌群多样性：单调饮食 vs 30 种植物挑战</h1>
+        <p>误区：每天雷打不动吃同一种“水煮鸡胸+西兰花”，肠道就最健康。真相：单一食谱会饿死 80% 的细分有益菌，让肠道变成脆弱的荒漠；每周吃够 30 种不同植物才能织出抗冲击的热带雨林！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>每周不重样天然植物种类</span><span id="vDiv">18 种</span></label><input type="range" id="sDiv" min="3" max="35" value="18" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>突发广谱抗生素/熬夜冲击</span><span id="vHit">40%</span></label><input type="range" id="sHit" min="0" max="90" value="40" oninput="upd()"></div>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🧺 勾选你这周吃过的植物门类（凑够 30 种目标），然后测试突发抗生素/熬夜冲击：</div>
+      <div class="plant-grid" id="grid"></div>
+      <div class="shock-bar">
+        <button class="tax-btn" style="background:var(--tax-red);" id="shockBtn" onclick="toggleShock()">⚡ 施加广谱抗生素 / 熬夜冲击</button>
+        <button class="tax-back" style="cursor:pointer;" onclick="presetSingle()">🥦 单调减肥餐（仅 3 种）</button>
+        <button class="tax-back" style="cursor:pointer;" onclick="presetRainforest()">🌈 30+ 植物全拉满</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 190"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">菌群生态韧性</div><div class="k-val" id="kRes" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">致病菌趁虚占比</div><div class="k-val" id="kBad" style="color:#ef4444;">—</div></div>
+        <div class="kpi"><div class="k-lbl">本周植物种类数</div><div class="k-val" id="kTypes" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">肠道生态位占领率</div><div class="k-val" id="kGood" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">致病菌趁虚扩张</div><div class="k-val" id="kBad" style="color:var(--tax-red);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const div=+document.getElementById('sDiv').value, hit=+document.getElementById('sHit').value;
-  document.getElementById('vDiv').textContent=div+' 种'; document.getElementById('vHit').textContent=hit+'%';
-  const res=Math.max(10, Math.min(98, Math.round(div*2.8 - hit*0.4)));
-  const bad=Math.max(2, 100-res);
-  document.getElementById('kRes').textContent=res+' 分';
-  document.getElementById('kBad').textContent=bad+'%';
-  let dots='';
-  for(let i=0;i<24;i++){
-    const x=42+(i%12)*45, y=45+Math.floor(i/12)*50;
-    const isGood=i < Math.round(24*res/100);
-    dots+=`<circle cx="${x}" cy="${y}" r="14" fill="${isGood?`hsl(${140+i*11},65%,45%)`:'#ef4444'}"/>`;
-  }
-  document.getElementById('svg').innerHTML=dots+`<text x="35" y="155" font-size="13" font-weight="800" fill="var(--tax-text)">彩色为多样有益菌群，红色为趁虚而入的致病菌 (${bad}%)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>营养学前沿的“每周 30 种植物原则”不是玄学——物种越丰富的肠道热带雨林（当前 ${div} 种），越不会给坏细菌留出空生态位！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const GROUPS = [
+      { id:'veg', icon:'🥦', name:'基础绿叶菜', count:3, desc:'西兰花/菠菜/生菜' },
+      { id:'grain', icon:'🌾', name:'全谷杂粮组', count:6, desc:'燕麦/糙米/藜麦/荞麦/小米/黑米' },
+      { id:'bean', icon:'🫘', name:'豆类与荚果', count:5, desc:'鹰嘴豆/毛豆/黑豆/扁豆/红豆' },
+      { id:'fungus', icon:'🍄', name:'菌菇与海藻', count:5, desc:'香菇/金针菇/木耳/海带/裙带菜' },
+      { id:'nuts', icon:'🥜', name:'坚果与种子', count:6, desc:'核桃/杏仁/奇亚籽/亚麻籽/南瓜籽/芝麻' },
+      { id:'spice', icon:'🧄', name:'香草葱蒜发酵', count:7, desc:'大蒜/洋葱/姜黄/泡菜/纳豆/蓝莓/苹果' }
+    ];
+    let picked = new Set(['veg']);
+    let shocked = false;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function toggle(id){
+      if(picked.has(id)){ if(picked.size > 1) picked.delete(id); } else picked.add(id);
+      markDone(); draw();
+    }
+    function toggleShock(){
+      shocked = !shocked;
+      const b = document.getElementById('shockBtn');
+      b.textContent = shocked ? '🛡️ 撤除冲击（恢复日常）' : '⚡ 施加广谱抗生素 / 熬夜冲击';
+      b.style.background = shocked ? 'var(--tax-green)' : 'var(--tax-red)';
+      markDone(); draw();
+    }
+    function presetSingle(){ picked = new Set(['veg']); shocked = true; markDone(); syncShockBtn(); draw(); }
+    function presetRainforest(){ picked = new Set(GROUPS.map(g=>g.id)); shocked = true; markDone(); syncShockBtn(); draw(); }
+    function syncShockBtn(){
+      const b = document.getElementById('shockBtn');
+      b.textContent = shocked ? '🛡️ 撤除冲击（恢复日常）' : '⚡ 施加广谱抗生素 / 熬夜冲击';
+      b.style.background = shocked ? 'var(--tax-green)' : 'var(--tax-red)';
+    }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = GROUPS.map(g => `
+        <button class="p-card ${picked.has(g.id)?'on':''}" onclick="toggle('${g.id}')">
+          <div class="t"><span>${g.icon} ${g.name}</span><span>+${g.count}种</span></div>
+          <div class="s">${g.desc}</div>
+        </button>
+      `).join('');
+
+      let types = 0;
+      GROUPS.forEach(g => { if(picked.has(g.id)) types += g.count; });
+      const baseRes = Math.min(96, 22 + types * 2.4);
+      const shockPenalty = shocked ? Math.round(48 - types * 1.1) : 0;
+      const goodPct = Math.max(12, Math.min(96, Math.round(baseRes - Math.max(6, shockPenalty))));
+      const badPct = 100 - goodPct;
+
+      const totalCells = 36;
+      const goodCells = Math.round(totalCells * goodPct / 100);
+      let cells = '';
+      for(let i=0; i<totalCells; i++){
+        const col = i % 12, row = Math.floor(i / 12);
+        const cx = 42 + col * 50, cy = 44 + row * 44;
+        const isGood = i < goodCells;
+        const hue = 110 + ((i * 29) % Math.max(15, types * 6));
+        const fill = isGood ? `hsl(${hue}, 62%, 46%)` : 'var(--tax-red)';
+        const r = isGood ? (12 + (i % 3) * 2) : (shocked ? 15 : 11);
+        cells += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" opacity="${isGood?0.9:0.88}"/>`;
+        if(!isGood) cells += `<text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="11" fill="#fff">!</text>`;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        ${cells}
+        <text x="26" y="176" font-size="12.5" font-weight="800" fill="var(--tax-ink)">
+          ${shocked ? '⚡ 冲击测试中：' : '🌿 日常生态：'}彩色圆 = 多样有益菌（${goodPct}%） · 红色叹号 = 趁虚占据生态位的致病菌（${badPct}%）
+        </text>
+      `;
+
+      document.getElementById('kTypes').textContent = `${types} / 30 种`;
+      document.getElementById('kGood').textContent = goodPct + '%';
+      document.getElementById('kBad').textContent = badPct + '%';
+
+      let aha = '';
+      if(types < 10 && shocked){
+        aha = `💡 <strong>顿悟时刻：</strong>单调食谱（仅 ${types} 种）在遭遇抗生素或熬夜冲击时瞬间溃堤，致病菌暴涨到 <strong>${badPct}%</strong>！因为单一物种没有“备份替补”，一倒下就把肠壁地盘全让给了坏菌！`;
+      } else if(types >= 28){
+        aha = `💡 <strong>顿悟时刻：</strong>达成“每周 30 种植物”热带雨林级防线！哪怕遭遇突发冲击，仍有高达 <strong>${goodPct}%</strong> 的多元有益菌紧紧占住生态位，让致病菌根本抢不到落脚点！`;
+      } else {
+        aha = `💡 <strong>顿悟时刻：</strong>不同植物含有不同的多酚与益生元，分别喂养不同家族的益生菌。你目前已选 <strong>${types} 种</strong>，试着再多勾几个门类并点击“施加冲击”对比抗风险韧性！`;
+      }
+      document.getElementById('ahaBox').innerHTML = aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

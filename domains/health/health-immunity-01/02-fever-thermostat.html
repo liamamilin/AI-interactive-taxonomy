@@ -7,57 +7,89 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .scen-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(142px,1fr)); gap:9px; margin-bottom:14px; }
+    .s-btn { padding:10px 11px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .s-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .s-btn .t { font-size:13px; font-weight:800; }
+    .s-btn .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🌡️ 发烧的演化智慧：为什么免疫系统故意调高体温？</h1><p>误区：只要体温一超过 37.5°C 就必须立刻吃强效退烧药压回正常。真相：38~39°C 的适度发烧能把白细胞游走和抗体合成速度翻倍，同时抑制细菌病毒复制——盲目压低微烧反而延长病程！</p></div>
+      <div>
+        <h1>🌡️ 发烧的演化智慧：为什么免疫系统故意调高体温？</h1>
+        <p>误区：发烧是病毒把人体烧坏了，只要超过 37.5°C 就必须立刻吃退烧药压回正常。真相：发烧是大脑下丘脑主动开启的<strong>“高温防御战”</strong>——38.5°C 能让白细胞战斗力翻倍，同时直接卡死病毒复制酶！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>当前人体设定体温</span><span id="vTemp">38.5 °C</span></label><input type="range" id="sTemp" min="36.5" max="41.0" step="0.2" value="38.5" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>患者耐受储备 (儿童/老人更脆弱)</span><span id="vTol">75%</span></label><input type="range" id="sTol" min="30" max="100" value="75" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🌡️ 切换不同体温档位，观察免疫细胞速度、病毒复制与人体能耗的演化权衡：</div>
+      <div class="scen-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">免疫细胞杀伤增速</div><div class="k-val" id="kImm" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">高热风险与建议</div><div class="k-val" id="kAdv">—</div></div>
+        <div class="kpi"><div class="k-lbl">🛡️ 白细胞迁徙杀敌增速</div><div class="k-val" id="kImm" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🦠 病毒复制受抑率</div><div class="k-val" id="kVir" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">临床处理建议</div><div class="k-val" id="kAdv" style="color:var(--tax-amber);font-size:15px;">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const t=+document.getElementById('sTemp').value, tol=+document.getElementById('sTol').value;
-  document.getElementById('vTemp').textContent=t.toFixed(1)+' °C'; document.getElementById('vTol').textContent=tol+'%';
-  const boost=Math.round(100 + (t-36.8)*48 - Math.max(0, t-39.8)*90);
-  const danger=t >= (38.8 + tol*0.015);
-  document.getElementById('kImm').textContent=boost+'%';
-  document.getElementById('kAdv').textContent=danger?'⚠️ 需物理/药物退热':'高温杀敌黄金区间';
-  document.getElementById('kAdv').style.color=danger?'#ef4444':'#059669';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#059669">白细胞与干扰素战斗效率 (${t.toFixed(1)}°C): ${boost}%</text>
-    <rect x="20" y="44" width="${Math.min(540,boost*2.2)}" height="24" rx="6" fill="#059669"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="${danger?'#ef4444':'#0284c7'}">${danger?'体温过载危险区：蛋白酶开始受损':'安全高能防御区：病菌繁殖被高温压制'}</text>
-    <rect x="20" y="112" width="${Math.min(540,(t-36)*110)}" height="24" rx="6" fill="${danger?'#ef4444':'#0284c7'}"/>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>发烧不是身体坏了，而是下丘脑主动把空调调高到 ${t.toFixed(1)}°C 来“煮沸”入侵者；退烧药主要用于缓解痛苦与防止超高热损伤，而非消灭病毒本身！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const TEMPS = [
+      { id:'t37', temp:'37.0°C', icon:'💊', name:'强吃退烧药压至 37°C', desc:'体感凉快 · 但撤销高温优势', imm:100, vir:15, risk:5, adv:'舒适优先（仅不适时用）',
+        aha:'💡 <strong>顿悟时刻：</strong>37.0°C 正是呼吸道病毒最喜欢的繁殖舒适温床！刚烧到 37.8°C 且精神不错就急着吃退烧药，反而帮病毒拆掉了高温压制网，可能略微拉长病程！' },
+      { id:'t385', temp:'38.5°C', icon:'🔥', name:'38.5°C 黄金免疫增压', desc:'白细胞飙速 · 病毒酶失活', imm:185, vir:74, risk:18, adv:'多喝水补液 · 物理舒适护理',
+        aha:'💡 <strong>顿悟时刻：</strong>演化保留了 4 亿年的杀手锏！体温升高 1.5°C 让 T 细胞奔赴淋巴结的速度翻近一倍（185%），同时让病毒复制效率断崖跌掉 <strong>74%</strong>——只要精神尚可，不必恐慌！' },
+      { id:'t395', temp:'39.5°C', icon:'🥵', name:'39.5°C 剧烈高热', desc:'杀敌极猛 · 代谢脱水剧增', imm:210, vir:88, risk:58, adv:'按需用布洛芬/对乙酰氨基酚缓解',
+        aha:'💡 <strong>顿悟时刻：</strong>体温每升 1°C 基础代谢率暴涨 13%，39.5°C 虽然压制病毒极强，但人会极度难受、脱水且心率飙升。<strong>退烧药的真正目的不是“把数字压成 36.8”，而是让你舒服休息、恢复体力！</strong>' },
+      { id:'t408', temp:'40.8°C', icon:'🚨', name:'40.8°C 危险超高热', desc:'蛋白质变性 · 惊厥脱水警报', imm:140, vir:92, risk:95, adv:'🚨 立即降温并尽快就医！',
+        aha:'💡 <strong>顿悟时刻：</strong>超过 40.5°C 已经突破安全红线，高温开始反噬自身神经与器官酶活性！必须立刻采取规范退热措施并及时就医排查重症感染！' }
+    ];
+    let cur = 't385';
+
+    function pick(id){ cur = id; if(window.ToySDK) window.ToySDK.markCompleted(); draw(); }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = TEMPS.map(t => `
+        <button class="s-btn ${cur===t.id?'active':''}" onclick="pick('${t.id}')">
+          <div class="t">${t.icon} ${t.name}</div>
+          <div class="s">${t.desc}</div>
+        </button>
+      `).join('');
+
+      const t = TEMPS.find(x=>x.id===cur);
+      function bar(y, lbl, val, maxV, col, unit){
+        const w = Math.round((val / maxV) * 380);
+        return `
+          <text x="24" y="${y+17}" font-size="12.5" font-weight="800" fill="var(--tax-ink)">${lbl}</text>
+          <rect x="176" y="${y}" width="380" height="24" rx="7" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+          <rect x="176" y="${y}" width="${w}" height="24" rx="7" fill="${col}"/>
+          <text x="568" y="${y+17}" font-size="12.5" font-weight="850" fill="${col}">${val}${unit}</text>
+        `;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="26" font-size="14" font-weight="900" fill="var(--tax-primary)">当前下丘脑恒温设定：${t.temp}</text>
+        ${bar(46, '🛡️ 白细胞迁移增速', t.imm, 220, 'var(--tax-green)', '%')}
+        ${bar(94, '🦠 病毒复制压制率', t.vir, 100, 'var(--tax-primary)', '%')}
+        ${bar(142, '⚠️ 脱水与高热负荷', t.risk, 100, t.risk>50?'var(--tax-red)':'var(--tax-amber)', '%')}
+        <text x="24" y="192" font-size="11.5" font-weight="750" fill="var(--tax-muted)">医学共识：发烧本身极少“烧坏脑子”（脑炎才是病因），用药核心原则是“治不舒服”而非死磕体温计数字。</text>
+      `;
+
+      document.getElementById('kImm').textContent = t.imm + '% 活性';
+      document.getElementById('kVir').textContent = '-' + t.vir + '% 复制率';
+      document.getElementById('kAdv').textContent = t.adv;
+      document.getElementById('ahaBox').innerHTML = t.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

@@ -7,60 +7,108 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>💫 压力感受器反射：蹲久了猛站起来为什么眼前一黑？</h1><p>误区：站起来眼前一黑全都是因为“贫血”或者“低血糖”。真相：更多时候只是重力瞬间把 500 毫升血液扯进双腿，而你的颈动脉压力感受器反射慢了半拍，导致大脑短暂缺血 2 秒！</p></div>
+      <div>
+        <h1>💫 压力感受器反射：蹲久了猛站起来为什么眼前一黑？</h1>
+        <p>误区：蹲久了猛站起来眼前发黑，说明自己一定“严重贫血”或“低血糖”。真相：猛起身瞬间重力会把约 <strong>500ml 血液</strong>拽进双腿静脉！如果颈动脉窦“压力传感器”慢了半拍没立刻收缩血管，大脑就会短暂缺血 2 秒（体位性低血压）！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>站起身动作突兀度</span><span id="vSpd">80%</span></label><input type="range" id="sSpd" min="20" max="100" value="80" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>压力感受器血管收缩反应敏锐度</span><span id="vRef">55%</span></label><input type="range" id="sRef" min="20" max="100" value="55" oninput="upd()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="standUp()">🧍 模拟“猛地站起来！”（播放 6 秒神经负反馈）</button>
+        <button class="pill active" onclick="setState('dehyd',this)">😵 熬夜/脱水/反射偏慢</button>
+        <button class="pill" onclick="setState('healthy',this)">⚡ 水分充足/反射敏捷</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">脑部血压瞬间跌落</div><div class="k-val" id="kDip" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">症状判定</div><div class="k-val" id="kSym">—</div></div>
+        <div class="kpi"><div class="k-lbl">大脑最低瞬间血压</div><div class="k-val" id="kMin">—</div></div>
+        <div class="kpi"><div class="k-lbl">心率紧急代偿飙升</div><div class="k-val" id="kHr" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">视觉与体感状态</div><div class="k-val" id="kVis">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const spd=+document.getElementById('sSpd').value, ref=+document.getElementById('sRef').value;
-  document.getElementById('vSpd').textContent=spd+'%'; document.getElementById('vRef').textContent=ref+'%';
-  const dip=Math.max(4, Math.round(spd*0.35 - ref*0.22));
-  document.getElementById('kDip').textContent='-'+dip+' mmHg';
-  document.getElementById('kSym').textContent=dip>18?'眼前发黑晕眩 (体位性低血压)':'瞬间稳住清晰';
-  document.getElementById('kSym').style.color=dip>18?'#ef4444':'#059669';
-  let pts='40,55 ';
-  for(let t=1;t<=15;t++){
-    const drop=dip*Math.exp(-Math.pow((t-3)/2.2,2))*(1-ref/140);
-    pts+=`${40+t*34},${55+drop*3.2} `;
-  }
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="55" x2="560" y2="55" stroke="#94a3b8" stroke-dasharray="4 3"/>
-    <polyline fill="none" stroke="${dip>18?'#ef4444':'#059669'}" stroke-width="3" points="${pts}"/>
-    <text x="50" y="30" font-size="12.5" font-weight="800" fill="var(--tax-text)">起身瞬间脑灌注压先跌后拉回曲线（负反馈闭环约 3 秒完成）</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>喝水不够、熬夜或服降压药后，压力感受器响应变慢；起身前先勾几下脚尖把小腿血泵上去，就能防止血压骤降 -${dip} mmHg 导致发黑！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let state = 'dehyd', sec = 6.0, timer = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setState(s, btn){
+      state = s;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); standUp();
+    }
+    function standUp(){
+      if(timer) clearInterval(timer);
+      markDone();
+      sec = 0;
+      timer = setInterval(()=>{
+        sec += 0.15;
+        if(sec >= 6){ sec = 6; clearInterval(timer); timer=null; }
+        draw();
+      }, 40);
+      draw();
+    }
+
+    function bpAt(t){
+      if(t < 0.8) return 96;
+      const drop = state === 'dehyd' ? 38 : 16;
+      const rec = state === 'dehyd' ? 2.1 : 1.0;
+      return 96 - drop * Math.exp(-Math.pow((t - 1.7)/rec, 2));
+    }
+
+    function draw(){
+      const x0=54, x1=612, yMin=28, yMax=188;
+      const toX = t => x0 + (t/6)*(x1-x0);
+      const toY = v => yMax - ((v - 45)/65)*(yMax-yMin);
+
+      let pts = [];
+      let minV = 999;
+      for(let t=0; t<=sec; t+=0.1){
+        const v = bpAt(t);
+        if(v < minV) minV = v;
+        pts.push(`${toX(t).toFixed(1)},${toY(v).toFixed(1)}`);
+      }
+      const nowV = bpAt(sec);
+      const blackout = minV < 68;
+      const col = blackout ? 'var(--tax-red)' : 'var(--tax-green)';
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="${x0}" y="${toY(68)}" width="${x1-x0}" height="${yMax-toY(68)}" fill="var(--tax-red-soft)" opacity="0.65"/>
+        <line x1="${x0}" y1="${toY(68)}" x2="${x1}" y2="${toY(68)}" stroke="var(--tax-red)" stroke-dasharray="4 4"/>
+        <text x="${x1-6}" y="${toY(68)+14}" text-anchor="end" font-size="10.5" font-weight="800" fill="var(--tax-red)">眼前发黑警戒线 (大脑灌注压 < 68)</text>
+        ${[0,1,2,3,4,5,6].map(t=>`<text x="${toX(t)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">${t}秒</text>`).join('')}
+        <polyline points="${pts.join(' ')}" fill="none" stroke="${col}" stroke-width="3.4" stroke-linecap="round"/>
+        <circle cx="${toX(sec)}" cy="${toY(nowV)}" r="6" fill="${col}"/>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="${col}">第 0.8s 猛起身 → 血液下坠 → 颈动脉窦急令缩血管+心跳加速救场！</text>
+      `;
+
+      const kM = document.getElementById('kMin'); kM.textContent = Math.round(minV) + ' mmHg'; kM.style.color = col;
+      document.getElementById('kHr').textContent = state === 'dehyd' ? '72 → 104 bpm (+32)' : '72 → 86 bpm (+14)';
+      const kV = document.getElementById('kVis');
+      kV.textContent = blackout ? '眼前一黑 2 秒 💫' : '视野清晰无感 ✅';
+      kV.style.color = col;
+
+      document.getElementById('ahaBox').innerHTML = blackout
+        ? `💡 <strong>顿悟时刻：</strong>不是贫血！熬夜或喝水少让血容量偏低，猛站起来时大脑灌注压瞬间砸到 <strong>${Math.round(minV)} mmHg</strong> 跌破视网膜供血线，眼前发黑 2 秒后颈动脉窦压力反射才把血泵回大脑！下次记得<strong>慢起身 + 平时多补水</strong>！`
+        : `💡 <strong>顿悟时刻：</strong>水分充足、自主神经敏捷时，颈动脉窦在 <strong>0.5 秒内</strong>就完成“缩紧下肢血管 + 心率微升”负反馈，大脑血压稳在 <strong>${Math.round(minV)} mmHg</strong> 以上，丝毫不会发晕！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

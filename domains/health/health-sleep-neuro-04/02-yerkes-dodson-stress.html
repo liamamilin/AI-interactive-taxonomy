@@ -7,62 +7,119 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .scen-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:9px; margin-bottom:12px; }
+    .s-btn { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .s-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .s-btn .t { font-size:13px; font-weight:800; }
+    .s-btn .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; }
+    .pill { padding:7px 12px; border-radius:999px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:750; cursor:pointer; }
+    .pill.active { background:var(--tax-amber); color:#fff; border-color:var(--tax-amber); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🏔️ 耶克斯-多德森倒 U 曲线：适度压力 vs 崩溃过载</h1><p>误区：要想发挥出最好成绩，压力越低、越佛系越好（或者相反，逼得越狠越好）。真相：完全没压力会昏昏欲睡，压力爆表会直接宕机——只有处于倒 U 型顶点的适度挑战才能激发巅峰表现！</p></div>
+      <div>
+        <h1>🏔️ 耶克斯-多德森倒 U 曲线：适度压力 vs 崩溃过载</h1>
+        <p>误区：压力越小效率越高，或者“高压出奇迹，越逼越能干”。真相：表现与压力呈倒 U 曲线——没压力会摸鱼走神，压力过载大脑直接宕机，而且越复杂的烧脑任务，最佳压力峰值越偏左！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>当前精神紧张/压力唤醒度</span><span id="vAro">60 分</span></label><input type="range" id="sAro" min="5" max="100" value="60" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>手头任务的认知复杂度</span><span id="vTask">70%</span></label><input type="range" id="sTask" min="10" max="100" value="70" oninput="upd()"></div>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🎭 选择一个当前工作情景，并切换任务复杂度，定位你在倒 U 曲线上的落点：</div>
+      <div class="scen-grid" id="grid"></div>
+      <div class="bar">
+        <span style="font-size:12.5px;font-weight:750;color:var(--tax-muted);">任务复杂度：</span>
+        <button class="pill active" onclick="setTask('complex',this)">🧠 复杂创意/深度编码（最怕高压）</button>
+        <button class="pill" onclick="setTask('simple',this)">📦 简单重复/体力冲刺（抗压更高）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">最佳压力甜蜜点</div><div class="k-val" id="kOpt" style="color:#059669;">—</div></div>
-        <div class="kpi"><div class="k-lbl">当前实际表现分</div><div class="k-val" id="kPerf" style="color:#0284c7;">—</div></div>
+        <div class="kpi"><div class="k-lbl">当前压力唤醒度</div><div class="k-val" id="kStr" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">大脑实际发挥表现</div><div class="k-val" id="kPerf" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">所处心理区间</div><div class="k-val" id="kZone" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const aro=+document.getElementById('sAro').value, task=+document.getElementById('sTask').value;
-  document.getElementById('vAro').textContent=aro+' 分'; document.getElementById('vTask').textContent=task+'%';
-  const opt=Math.round(78 - task*0.35);
-  const perf=Math.max(12, Math.round(100*Math.exp(-Math.pow((aro-opt)/28,2))));
-  document.getElementById('kOpt').textContent=opt+' 分';
-  document.getElementById('kPerf').textContent=perf+' 分';
-  let pts='';
-  for(let x=5;x<=100;x+=3){
-    const p=100*Math.exp(-Math.pow((x-opt)/28,2));
-    pts+=`${40+(x-5)/95*520},${160-p*1.25} `;
-  }
-  const cx=40+(aro-5)/95*520, cy=160-perf*1.25;
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="160" x2="560" y2="160" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${pts}"/>
-    <circle cx="${cx}" cy="${cy}" r="6" fill="${perf>80?'#059669':'#ef4444'}"/>
-    <text x="50" y="30" font-size="12" font-weight="800" fill="#0284c7">倒 U 型表现曲线（复杂脑力活的最佳压力峰值仅为 ${opt} 分）</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>搬砖体力活能扛住高压力，但写代码/考试等复杂脑力任务（复杂度 ${task}%）只要压力超过 <strong>${opt} 分</strong>，前额叶立刻短路掉线！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const SCENS = [
+      { id:'bore', icon:'🥱', name:'无截止日摸鱼', desc:'唤醒度 18 · 毫无紧迫感', stress:18 },
+      { id:'flow', icon:'🎯', name:'清晰小目标+限时', desc:'唤醒度 48 · 适度专注挑战', stress:48 },
+      { id:'rush', icon:'🔥', name:'临近 DDL 冲刺', desc:'唤醒度 72 · 肾上腺素飙升', stress:72 },
+      { id:'panic', icon:'💥', name:'通宵救火+老板催命', desc:'唤醒度 92 · 前额叶过载', stress:92 }
+    ];
+    let cur = 'flow', task = 'complex';
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function pick(id){ cur = id; markDone(); draw(); }
+    function setTask(t, btn){
+      task = t;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); draw();
+    }
+
+    function perf(s, tk){
+      const peak = tk === 'complex' ? 48 : 70;
+      const spread = tk === 'complex' ? 23 : 27;
+      return Math.max(12, Math.round(98 * Math.exp(-Math.pow((s - peak)/spread, 2))));
+    }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = SCENS.map(s => `
+        <button class="s-btn ${cur===s.id?'active':''}" onclick="pick('${s.id}')">
+          <div class="t">${s.icon} ${s.name}</div>
+          <div class="s">${s.desc}</div>
+        </button>
+      `).join('');
+
+      const sc = SCENS.find(x=>x.id===cur);
+      const x0=52, x1=612, yMin=28, yMax=188;
+      const toX = s => x0 + (s/100)*(x1-x0);
+      const toY = p => yMax - (p/105)*(yMax-yMin);
+
+      let pComp=[], pSimp=[];
+      for(let s=0; s<=100; s+=2){
+        pComp.push(`${toX(s).toFixed(1)},${toY(perf(s,'complex')).toFixed(1)}`);
+        pSimp.push(`${toX(s).toFixed(1)},${toY(perf(s,'simple')).toFixed(1)}`);
+      }
+      const pNow = perf(sc.stress, task);
+      const peakX = task === 'complex' ? 48 : 70;
+      const col = pNow >= 80 ? 'var(--tax-green)' : (sc.stress > peakX ? 'var(--tax-red)' : 'var(--tax-amber)');
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="${toX(peakX-14)}" y="${yMin}" width="${toX(peakX+14)-toX(peakX-14)}" height="${yMax-yMin}" fill="var(--tax-green-soft)" opacity="0.6"/>
+        <text x="${toX(peakX)}" y="${yMin+14}" text-anchor="middle" font-size="10.5" font-weight="800" fill="var(--tax-green)">🎯 最佳心流区</text>
+        ${[0,25,50,75,100].map(s=>`<text x="${toX(s)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">压力 ${s}</text>`).join('')}
+        <polyline points="${pSimp.join(' ')}" fill="none" stroke="var(--tax-muted)" stroke-width="${task==='simple'?3.2:1.8}" stroke-dasharray="${task==='simple'?'0':'5 4'}"/>
+        <polyline points="${pComp.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="${task==='complex'?3.4:1.8}" stroke-dasharray="${task==='complex'?'0':'5 4'}"/>
+        <circle cx="${toX(sc.stress)}" cy="${toY(pNow)}" r="7" fill="${col}"/>
+        <text x="${Math.min(x1-80, toX(sc.stress)+10)}" y="${Math.max(44, toY(pNow)-8)}" font-size="12" font-weight="850" fill="${col}">表现 ${pNow} 分</text>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-primary)">● 复杂烧脑任务（最佳点偏左）</text>
+        <text x="${x0+225}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-muted)">-- 简单体力任务（抗压峰值偏右）</text>
+      `;
+
+      document.getElementById('kStr').textContent = sc.stress + ' / 100';
+      document.getElementById('kPerf').textContent = pNow + ' 分';
+      const zone = pNow >= 80 ? '心流巅峰 🎯' : (sc.stress < peakX ? '无聊欠唤醒 🥱' : '过载宕机区 💥');
+      document.getElementById('kZone').textContent = zone;
+
+      document.getElementById('ahaBox').innerHTML = pNow >= 80
+        ? `💡 <strong>顿悟时刻：</strong>精准落入<strong>心流甜蜜区（${pNow} 分）</strong>！适度压力让去甲肾上腺素把前额叶调到最锋利的状态，既不会无聊走神，也不会被焦虑冲垮！`
+        : sc.stress < peakX
+        ? `💡 <strong>顿悟时刻：</strong>压力过低（唤醒度仅 ${sc.stress}）会让大脑进入“省电摸鱼态”，效率反而跌到 <strong>${pNow} 分</strong>。给自己设一个 25 分钟番茄钟小挑战就能瞬间拉回状态！`
+        : `💡 <strong>顿悟时刻：</strong>压力过载！同样是唤醒度 ${sc.stress}，干简单搬砖活可能还行，但做<strong>复杂创意/深度编码</strong>时前额叶直接过载宕机（仅剩 <strong>${pNow} 分</strong>）——高难度思考绝不能靠制造恐慌来逼！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

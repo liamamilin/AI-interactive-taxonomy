@@ -7,57 +7,111 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .stage-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:9px 14px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>💪 肌肉 vs 脂肪：为什么“节食掉肌肉”最亏？</h1><p>误区：体重秤上数字掉得越快越好，不管是水分还是肌肉，轻了就是赢。真相：肌肉是全身最耗能的火炉；节食饿掉 5 斤肌肉后，基础代谢永久塌陷，恢复正常饮食立刻报复性反弹成易胖体质！</p></div>
+      <div>
+        <h1>💪 肌肉 vs 脂肪：为什么“节食掉肌肉”最亏？</h1>
+        <p>误区：只要体重秤上的数字掉了 10 斤，用什么方法都一样。真相：靠纯挨饿减掉的 10 斤里近一半是宝贵的肌肉；一旦恢复正常饮食，反弹回来的几乎全是纯脂肪，让你变成更易胖的“泡芙人”！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>减掉 10kg 体重中“流失肌肉占比”</span><span id="vMus">40%</span></label><input type="range" id="sMus" min="5" max="65" value="40" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>减重后恢复正常饮食程度</span><span id="vEat">70%</span></label><input type="range" id="sEat" min="20" max="100" value="70" oninput="upd()"></div>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🏁 切换 3 个时间节点，双轨对比两位同为 70kg 的减重者：</div>
+      <div class="stage-row">
+        <button class="pill active" onclick="setStage(0,this)">① 起点：同为 70 kg（体脂 30%）</button>
+        <button class="pill" onclick="setStage(1,this)">② 12 周后：两人都瘦到 62 kg</button>
+        <button class="pill" onclick="setStage(2,this)">③ 恢复正常饮食 6 个月后</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
+
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">基础代谢永久损伤</div><div class="k-val" id="kLoss" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">半年后复胖概率</div><div class="k-val" id="kReb">—</div></div>
+        <div class="kpi"><div class="k-lbl">🥀 纯饿组：最终体脂率 / BMR</div><div class="k-val" id="kA" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">💪 力量+高蛋白组：体脂率 / BMR</div><div class="k-val" id="kB" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">基础代谢每日差距</div><div class="k-val" id="kDiff" style="color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function upd(){
-  const mus=+document.getElementById('sMus').value, eat=+document.getElementById('sEat').value;
-  document.getElementById('vMus').textContent=mus+'%'; document.getElementById('vEat').textContent=eat+'%';
-  const loss=Math.round(mus*4.5);
-  const reb=Math.min(96, Math.round(mus*0.9 + eat*0.45));
-  document.getElementById('kLoss').textContent='-'+loss+' kcal/天';
-  document.getElementById('kReb').textContent=reb+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">基础代谢永久下降: -${loss} kcal/天</text>
-    <rect x="20" y="44" width="${Math.min(540,loss*1.8)}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="${reb>60?'#ef4444':'#059669'}">复胖反弹风险: ${reb}%</text>
-    <rect x="20" y="112" width="${reb*5.4}" height="24" rx="6" fill="${reb>60?'#ef4444':'#059669'}"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">减脂期必须吃够蛋白质并做抗阻训练，死守肌肉引擎不掉</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只靠饿瘦掉的体重里有 ${mus}% 是珍贵的肌肉，每天直接少烧 ${loss} 大卡！减脂的本质是“减脂保肌”，而不是和体重秤上的水分肌肉较劲。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const STAGES = [
+      {
+        label:'起点基准',
+        a:{ wt:70, fat:21.0, mus:31.0, bmr:1520, tag:'起点：70kg' },
+        b:{ wt:70, fat:21.0, mus:31.0, bmr:1520, tag:'起点：70kg' },
+        aha:'💡 <strong>顿悟时刻：</strong>两位主角出发时体重、体脂率（30%）和基础代谢完全相同。点击 <strong>② 12 周后</strong> 看看同样减掉 8 公斤，身体内部发生了怎样截然不同的拆迁！'
+      },
+      {
+        label:'12 周减重结束',
+        a:{ wt:62, fat:16.8, mus:27.2, bmr:1310, tag:'纯饿瘦 8kg（含 3.8kg 肌肉！）' },
+        b:{ wt:62, fat:13.6, mus:30.4, bmr:1490, tag:'高蛋白+力量瘦 8kg（保住肌肉）' },
+        aha:'💡 <strong>顿悟时刻：</strong>体重秤上都是 <strong>62 kg</strong>，但纯饿组拆掉了 <strong>3.8 kg 肌肉引擎</strong>，基础代谢暴跌 210 大卡/天；而力量组几乎纯掉脂肪，体脂率直降到 <strong>21.9%</strong>！点击 <strong>③ 恢复饮食 6 个月后</strong> 看最残酷的结局。'
+      },
+      {
+        label:'恢复正常饮食 6 个月',
+        a:{ wt:71, fat:25.2, mus:27.8, bmr:1340, tag:'反弹到 71kg（体脂飙到 35.5%！）' },
+        b:{ wt:63, fat:14.2, mus:30.8, bmr:1505, tag:'稳在 63kg（易瘦高代谢引擎）' },
+        aha:'💡 <strong>顿悟时刻：</strong>这就是“越减越肥”的底层陷阱！纯饿组因为肌肉发动机被拆小了，恢复正常饭量立刻变成热量过剩，长回来的全是脂肪——体重回到起点，<strong>体脂率却比减肥前还高了 5.5%</strong>！'
+      }
+    ];
+    let st = 0;
+
+    function setStage(i, btn){
+      st = i;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const d = STAGES[st];
+      const bfA = (d.a.fat / d.a.wt * 100).toFixed(1);
+      const bfB = (d.b.fat / d.b.wt * 100).toFixed(1);
+      const scale = 6.2; // px per kg
+
+      function track(y, title, obj, bf, accent){
+        const wMus = obj.mus * scale;
+        const wFat = obj.fat * scale;
+        const wOth = (obj.wt - obj.mus - obj.fat) * scale;
+        return `
+          <text x="24" y="${y}" font-size="13" font-weight="850" fill="${accent}">${title} · ${obj.tag}</text>
+          <rect x="24" y="${y+10}" width="${wMus}" height="32" rx="6" fill="var(--tax-primary)"/>
+          <text x="${24+wMus/2}" y="${y+30}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">肌肉 ${obj.mus}kg</text>
+          <rect x="${24+wMus+3}" y="${y+10}" width="${wFat}" height="32" rx="6" fill="var(--tax-amber)"/>
+          <text x="${24+wMus+3+wFat/2}" y="${y+30}" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">脂肪 ${obj.fat}kg</text>
+          <rect x="${24+wMus+wFat+6}" y="${y+10}" width="${wOth}" height="32" rx="6" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+          <text x="${24+wMus+wFat+6+wOth/2}" y="${y+30}" text-anchor="middle" font-size="10.5" fill="var(--tax-muted)">水/骨</text>
+          <text x="616" y="${y+30}" text-anchor="end" font-size="12" font-weight="800" fill="var(--tax-ink)">体脂 ${bf}%</text>
+        `;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        ${track(34, '🥀 路线 A：纯挨饿节食', d.a, bfA, 'var(--tax-red)')}
+        <line x1="24" y1="108" x2="616" y2="108" stroke="var(--tax-border)" stroke-dasharray="4 4"/>
+        ${track(138, '💪 路线 B：高蛋白 + 力量训练', d.b, bfB, 'var(--tax-green)')}
+      `;
+
+      document.getElementById('kA').textContent = `${bfA}% / ${d.a.bmr} kcal`;
+      document.getElementById('kB').textContent = `${bfB}% / ${d.b.bmr} kcal`;
+      const diff = d.b.bmr - d.a.bmr;
+      document.getElementById('kDiff').textContent = diff > 0 ? `多烧 +${diff} kcal/天` : '0 kcal（起跑线相同）';
+      document.getElementById('ahaBox').innerHTML = d.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>
