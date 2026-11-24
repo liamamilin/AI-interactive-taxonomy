@@ -12373,7 +12373,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-training-toys/03-scaling-overfit-lab.html",
               "title": "炼丹炉控制室",
               "icon": "⚗️",
-              "archetype": "simulation",
+              "archetype": "builder",
               "concept": "Scaling Law · 过拟合 · 涌现",
               "summary": "拉动参数、数据、轮数三拉杆，对比刷题与考场新题剪刀差，调出解锁涌现的黄金配比。"
             }
@@ -12897,7 +12897,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-infra-toys/01-vram-kv-cache.html",
               "title": "显存搬家大作战",
               "icon": "🚛",
-              "archetype": "simulation",
+              "archetype": "spatial",
               "concept": "Quantization 量化 · KV Cache",
               "summary": "用 INT4 把 70B 大模型瘦身塞进单卡，再开关 KV Cache 看计算量从 55 次暴降到 10 次。"
             },
@@ -13563,7 +13563,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/token-embedding-toys/03-polysemy-embedding.html",
               "title": "词义变色龙",
               "icon": "🦎",
-              "archetype": "spatial",
+              "archetype": "scenario",
               "concept": "静态词向量 vs 动态语境向量",
               "summary": "切换包含“苹果”和“杜鹃”的不同句子，亲眼看着同一个词的坐标点在水果、科技、金融星云之间实时滑行。"
             }
@@ -13762,7 +13762,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/ai-security-toys/03-privilege-isolation.html",
               "title": "最小权限防线",
               "icon": "🔐",
-              "archetype": "scenario",
+              "archetype": "spatial",
               "concept": "Agent 数据泄露防御 · 最小权限原则",
               "summary": "当邮件摘要 Agent 读到藏着恶意指令的钓鱼邮件时，对比大权限裸奔泄密与最小权限隔离如何免疫。"
             }
@@ -14062,7 +14062,7 @@ window.TAXONOMY_DATA = {
               "path": "./domains/ai/llm-evals-toys/03-arena-elo-matcher.html",
               "title": "盲测竞技场（Elo）",
               "icon": "⚔️",
-              "archetype": "blind-lab",
+              "archetype": "race",
               "concept": "Chatbot Arena 匿名盲测 · Elo 积分",
               "summary": "亲自当 3 轮匿名盲测评委（只看回答不看模型名），投票揭晓幕后真身并实时计算 Elo 天梯分涨跌！"
             }
