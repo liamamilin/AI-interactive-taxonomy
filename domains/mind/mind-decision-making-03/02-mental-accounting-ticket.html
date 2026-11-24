@@ -7,63 +7,76 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .scen-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:14px; }
+    .s-btn { padding:12px 14px; border-radius:12px; border:1.8px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .s-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .s-btn .t { font-size:13.5px; font-weight:900; }
+    .s-btn .s { font-size:12px; color:var(--tax-muted); margin-top:4px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🎟️ 心理账户：丢电影票 vs 丢现金悖论</h1><p>经济学家理查德·塞勒的经典实验：两种情境下你损失的净财富完全都是 100 元，但人们在“丢票”时拒绝再买，在“丢钞票”时却照买不误！</p></div>
+      <div>
+        <h1>🎟️ 心理账户：丢电影票 vs 丢现金悖论</h1>
+        <p>诺贝尔经济学奖得主理查德·塞勒经典实验：两个情景在数学上 <strong>100% 完全等价（你都损失了 100 元，且都还没看到电影）</strong>，为什么人们重买电影票的意愿却暴跌了一半？</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>电影票单价金额</span><span id="vPr">100 元</span></label><input type="range" id="sPr" min="40" max="300" step="20" value="100" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>心理分账刻板程度</span><span id="vRig">75%</span></label><input type="range" id="sRig" min="10" max="100" value="75" oninput="draw()"></div>
+      <div class="scen-grid">
+        <button class="s-btn active" id="bA" onclick="pick('ticket')">
+          <div class="t">🎟️ 情景 A：把提前买好的 100 元电影票弄丢了</div>
+          <div class="s">到了影院门口发现票不见了。你会再掏 100 元重买一张吗？</div>
+        </button>
+        <button class="s-btn" id="bB" onclick="pick('cash')">
+          <div class="t">💵 情景 B：到了影院门口发现丢了一张 100 元钞票</div>
+          <div class="s">你还没买票，但路上丢了 100 元现金。你会照常掏 100 元买票看吗？</div>
+        </button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">丢现金后仍愿买票比例</div><div class="k-val" id="kCash">—</div></div>
-        <div class="kpi"><div class="k-lbl">丢电影票后愿重买比例</div><div class="k-val" id="kTkt">—</div></div>
-      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const pr=+document.getElementById('sPr').value, rig=+document.getElementById('sRig').value;
-  document.getElementById('vPr').textContent=pr+' 元';
-  document.getElementById('vRig').textContent=rig+'%';
-  const cash=Math.max(45, Math.min(95, Math.round(92 - pr*0.08)));
-  const tkt=Math.max(12, Math.round(cash - rig*0.52));
-  document.getElementById('kCash').textContent=cash+'%';
-  document.getElementById('kTkt').textContent=tkt+'%';
-  document.getElementById('kTkt').style.color='#ef4444';
-  const wC=Math.max(12, cash*3.6), wT=Math.max(12, tkt*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">净资产同样减少 ${pr} 元，两个场景下继续看电影的意愿</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">丢了 ${pr} 元现金</text>
-    <rect x="155" y="64" width="${wC.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(163+wC).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#059669">${cash}% 照买不误</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">丢了 ${pr} 元门票</text>
-    <rect x="155" y="120" width="${wT.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
-    <text x="${(163+wT).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#ef4444">${tkt}% 愿意重买</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">原因：重买门票会被记入“娱乐账户”感觉花双倍价钱(${pr*2}元)，丢现金则被摊进“总资产”不心疼！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>钱在经济学上是完全同质可替代的，但大脑却悄悄给钱贴上了“血汗钱、娱乐钱、意外钱”等小信封，导致荒诞的消费双标。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let cur = 'ticket';
+    function pick(c){
+      cur = c;
+      document.getElementById('bA').classList.toggle('active', c==='ticket');
+      document.getElementById('bB').classList.toggle('active', c==='cash');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const isT = cur === 'ticket';
+      const wA = Math.round(0.46 * 360), wB = Math.round(0.88 * 360);
+
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="26" font-size="13" font-weight="850" fill="var(--tax-ink)">真实心理学实验结果对比（两情景客观总财富减少完全相同 = -200 元）：</text>
+        <text x="24" y="62" font-size="12.5" font-weight="800" fill="${isT?'var(--tax-red)':'var(--tax-muted)'}">🎟️ 情景 A（丢电影票）：愿意重买的人仅占 46%</text>
+        <rect x="24" y="72" width="360" height="24" rx="6" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+        <rect x="24" y="72" width="${wA}" height="24" rx="6" fill="var(--tax-red)" opacity="${isT?1:0.4}"/>
+        <text x="396" y="89" font-size="12" font-weight="900" fill="var(--tax-red)">46% 愿意看</text>
+
+        <text x="24" y="128" font-size="12.5" font-weight="800" fill="${!isT?'var(--tax-green)':'var(--tax-muted)'}">💵 情景 B（丢 100 元钞票）：照常买票的人高达 88%！</text>
+        <rect x="24" y="138" width="360" height="24" rx="6" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+        <rect x="24" y="138" width="${wB}" height="24" rx="6" fill="var(--tax-green)" opacity="${!isT?1:0.4}"/>
+        <text x="396" y="155" font-size="12" font-weight="900" fill="var(--tax-green)">88% 照常看</text>
+
+        <text x="24" y="190" font-size="12" font-weight="800" fill="var(--tax-primary)">
+          ${isT ? '🧠 大脑记账方式：把两笔 100 元都记进了【电影娱乐抽屉】→ “花 200 元看场破电影太亏了！”' : '🧠 大脑记账方式：丢钞票记进【一般杂项抽屉】，买票记进【电影抽屉 100 元】→ “票价没贵，照看！”'}
+        </text>
+      `;
+
+      document.getElementById('ahaBox').innerHTML = isT
+        ? `💡 <strong>顿悟时刻：</strong>你心里把钱分装在了不同的<strong>“心理抽屉”</strong>里！丢电影票让你觉得“这场电影成本变成了 200 元”而心痛放弃；但其实从总资产角度看，<strong>钱是完全可替代的（Fungible）</strong>——丢票和丢钞票没有任何财务区别！`
+        : `💡 <strong>顿悟时刻：</strong>因为丢掉的 100 元现金被大脑归进了“倒霉杂费账户”，没有污染“看电影账户”，88% 的人爽快买票进场！商家最爱利用心理账户：买 30 万的车时顺手让你加 8000 元脚垫毫不心疼，单卖 8000 元脚垫你却绝不会买！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

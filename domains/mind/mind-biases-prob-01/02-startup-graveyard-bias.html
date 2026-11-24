@@ -7,66 +7,88 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🪦 创业成功学幻觉：沉默的墓碑</h1><p>媒体只采访敲钟的 3 位辍学首富，却不报道同样辍学却破产的 997 人，于是大脑错把“高风险特征”当成“成功密码”。</p></div>
+      <div>
+        <h1>🪦 创业成功学幻觉：沉默的墓碑</h1>
+        <p>误区：首富访谈里人人都在讲“我当年大学辍学、借钱 All-in 豪赌才成功”，所以辍学豪赌就是致富密码！真相：媒体聚光灯只照着活下来的 3 个人，却把同样辍学豪赌却血本无归的 <strong>47 座沉默墓碑</strong>藏在了黑暗里！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>同期下海创业者总数</span><span id="vTot">500 人</span></label><input type="range" id="sTot" min="100" max="1000" step="50" value="500" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>激进梭哈策略真实存活率</span><span id="vSur">3%</span></label><input type="range" id="sSur" min="1" max="20" value="3" oninput="draw()"></div>
+      <div class="bar">
+        <button class="tax-btn" id="toggleBtn" onclick="toggleLights()">🔦 关掉媒体聚光灯：照亮全部 50 家创业者真相！</button>
+        <span style="font-size:12.5px;font-weight:750;color:var(--tax-muted);" id="modeHint">当前视角：📺 媒体热搜聚光灯（仅见幸存者）</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">登台演讲的幸存英雄</div><div class="k-val" id="kWin">—</div></div>
-        <div class="kpi"><div class="k-lbl">无人问津的失败墓碑</div><div class="k-val" id="kLos">—</div></div>
+        <div class="kpi"><div class="k-lbl">你眼中“辍学豪赌”成功率</div><div class="k-val" id="kRate">—</div></div>
+        <div class="kpi"><div class="k-lbl">被聚光灯隐藏的失败墓碑</div><div class="k-val" id="kDead" style="color:var(--tax-muted);">—</div></div>
+        <div class="kpi"><div class="k-lbl">认知状态</div><div class="k-val" id="kStat">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const tot=+document.getElementById('sTot').value, sur=+document.getElementById('sSur').value;
-  document.getElementById('vTot').textContent=tot+' 人';
-  document.getElementById('vSur').textContent=sur+'%';
-  const win=Math.max(1, Math.round(tot*sur/100));
-  const los=tot - win;
-  document.getElementById('kWin').textContent=win+' 人 (媒体曝光 100%)';
-  document.getElementById('kLos').textContent=los+' 人 (媒体曝光 0%)';
-  document.getElementById('kLos').style.color='#ef4444';
-  let dots='';
-  const show=100;
-  const winDots=Math.max(1, Math.round(show*sur/100));
-  for(let i=0;i<show;i++){
-    const col=i%20, row=Math.floor(i/20);
-    const x=38+col*26, y=54+row*26;
-    const isW=i<winDots;
-    dots+=`<circle cx="${x}" cy="${y}" r="${isW?8:5}" fill="${isW?'#f59e0b':'#94a3b8'}" opacity="${isW?'1':'0.35'}"/>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">百人微缩样本：金点=被写进畅销书的幸存者，灰点=沉默的大多数</text>
-    ${dots}
-    <text x="30" y="192" font-size="11.5" fill="var(--tax-muted)">每 1 个高喊“只要敢梭哈就能成功”的英雄背后，躺着 ${Math.round(los/win)} 个同样敢梭哈却血本无归的人。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>听成功者复盘时，先补上看不见的分母——问一句“用同样方法但失败的人有多少？”立刻免疫 90% 的毒鸡汤。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let revealAll = false;
+    const WINNERS = new Set([6, 23, 41]); // 3 out of 50 = 6%
+
+    function toggleLights(){
+      revealAll = !revealAll;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      document.getElementById('toggleBtn').textContent = revealAll ? '📺 切回媒体聚光灯视角（只看热搜成功学）' : '🔦 关掉媒体聚光灯：照亮全部 50 家创业者真相！';
+      document.getElementById('modeHint').textContent = revealAll ? '当前视角：🧾 全样本上帝视角（含沉默墓碑）' : '当前视角：📺 媒体热搜聚光灯（仅见幸存者）';
+      draw();
+    }
+
+    function draw(){
+      let grid = '';
+      for(let i=0; i<50; i++){
+        const c = i % 10, r = Math.floor(i / 10);
+        const cx = 48 + c * 60, cy = 38 + r * 35;
+        const win = WINNERS.has(i);
+        if(win){
+          grid += `<circle cx="${cx}" cy="${cy}" r="14" fill="var(--tax-amber-soft)" stroke="var(--tax-amber)" stroke-width="2.4"/>
+                   <text x="${cx}" y="${cy+5}" text-anchor="middle" font-size="13">🏆</text>`;
+        } else if(revealAll){
+          grid += `<rect x="${cx-12}" y="${cy-12}" width="24" height="24" rx="5" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-width="1.4"/>
+                   <text x="${cx}" y="${cy+5}" text-anchor="middle" font-size="12" opacity="0.75">🪦</text>`;
+        } else {
+          grid += `<circle cx="${cx}" cy="${cy}" r="4" fill="var(--tax-border)" opacity="0.22"/>`;
+        }
+      }
+
+      document.getElementById('svg').innerHTML = `
+        ${grid}
+        <text x="26" y="206" font-size="11.5" font-weight="800" fill="${revealAll?'var(--tax-red)':'var(--tax-amber)'}">
+          ${revealAll ? '全样本真相：同样采取“高风险豪赌”的 50 人中，仅 3 人登台演讲（6%），47 人悄然破产负债！' : '热搜视角：3 位登台分享的亿万富翁 100% 都曾“辍学+借钱豪赌”——你以为这就是成功秘籍？'}
+        </text>
+      `;
+
+      const kR = document.getElementById('kRate');
+      kR.textContent = revealAll ? '仅 6% (3 / 50)' : '错觉 100% (3 / 3) 📺';
+      kR.style.color = revealAll ? 'var(--tax-red)' : 'var(--tax-amber)';
+      document.getElementById('kDead').textContent = revealAll ? '已显影：47 座墓碑 🪦' : '被刻意屏蔽（看不见）';
+      const kS = document.getElementById('kStat');
+      kS.textContent = revealAll ? '清醒识别沉默证据 ✅' : '被成功学滤镜蒙蔽 ⚠️';
+      kS.style.color = revealAll ? 'var(--tax-green)' : 'var(--tax-red)';
+
+      document.getElementById('ahaBox').innerHTML = revealAll
+        ? `💡 <strong>顿悟时刻：</strong>死人不会写畅销书，破产者也不会被请上访谈节目！当你把 <strong>47 座沉默的墓碑</strong>放回分母，就会发现“豪赌”其实是高方差赌博，而不是高胜率秘诀——<strong>评价任何成功经验，先问分母里死了多少同样这么干的人！</strong>`
+        : `💡 <strong>顿悟时刻：</strong>现在屏幕上亮着的 3 位大佬全靠“孤注一掷”逆袭，让你感觉成功概率极高！点击上方 <strong>🔦 照亮全部 50 家真相</strong>，看看媒体聚光灯之外藏着什么！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

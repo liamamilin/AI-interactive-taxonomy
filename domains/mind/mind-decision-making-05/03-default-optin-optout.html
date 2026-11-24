@@ -7,63 +7,79 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:9px 14px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>☑️ 默认选项框架：器官捐献率 12% vs 99%</h1><p>德国与奥地利文化语言几乎相同，器官捐献率却一个是 12%、一个是 99.9%——唯一区别只是表格上那一行“默认不勾”还是“默认勾选”！</p></div>
+      <div>
+        <h1>☑️ 默认选项框架：器官捐献率 12% vs 99%</h1>
+        <p>误区：奥地利人比文化、语言几乎完全相同的邻居德国人善良 8 倍，所以器官捐献率高达 99.9% vs 德国 12%。真相：根本不是道德差距，而是<strong>驾照申请表上那一个小勾的“默认状态”不同</strong>！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="btn-row">
-        <button class="btn active" onclick="setD('in',this)">Opt-in：默认不参与（需主动勾选）</button>
-        <button class="btn" onclick="setD('out',this)">Opt-out：默认参与（需主动取消）</button>
+      <div class="bar">
+        <button class="pill active" onclick="setMode('optin',this)">⬜ 主动勾选加入 (Opt-in：德国/丹麦/英国)</button>
+        <button class="pill" onclick="setMode('optout',this)">☑️ 默认加入可退出 (Opt-out：奥地利/法国/比利时)</button>
       </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>修改默认选项的填表繁琐度（摩擦）</span><span id="vFrc">65%</span></label><input type="range" id="sFrc" min="10" max="100" value="65" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">最终社会参与率</div><div class="k-val" id="kPar">—</div></div>
-        <div class="kpi"><div class="k-lbl">选择架构威力</div><div class="k-val" id="kPow">—</div></div>
-      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 210"></svg>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-let dm='in';
-function setD(m,btn){ dm=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const frc=+document.getElementById('sFrc').value;
-  document.getElementById('vFrc').textContent=frc+'%';
-  const par=dm==='in' ? Math.max(8, Math.round(45 - frc*0.35)) : Math.min(99, Math.round(62 + frc*0.37));
-  document.getElementById('kPar').textContent=par+'%';
-  document.getElementById('kPar').style.color=par>=70?'#059669':'#f59e0b';
-  document.getElementById('kPow').textContent=dm==='in'?'默认阻力抑制了善意':'现状偏差放大了参与';
-  const w=Math.max(12, par*4.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">仅改变“默认勾选框”位置后的最终参与率</text>
-    <rect x="30" y="68" width="460" height="42" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${w.toFixed(0)}" height="42" rx="8" fill="${par>=70?'#059669':'#f59e0b'}"/>
-    <text x="${Math.min(500, 38+w).toFixed(0)}" y="95" font-size="15" font-weight="850" fill="${par>=70?'#059669':'#d97706'}">${par}%</text>
-    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">养老金自动扣款、软件自动续费、隐私默认授权——谁设计了“默认值”，谁就决定了 80% 人的最终选择。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>不存在绝对中立的选择界面！理解默认框架后，你既能看穿商家的自动续费套路，也能为自己设计“默认健康、默认存钱”的生活系统。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const DATA = {
+      optin: {
+        form:'☐ 如你愿意参与器官捐献，请在此处打勾并签字',
+        countries:[{n:'丹麦',v:4},{n:'德国',v:12},{n:'英国(旧)',v:17},{n:'荷兰',v:28}],
+        col:'var(--tax-amber)',
+        aha:'💡 <strong>顿悟时刻：</strong>在 Opt-in（主动勾选）国家，人们并非反对捐献，而是面对沉重话题时选择<strong>“先空着不管（现状偏差）”</strong>——结果德语同源的德国捐献率竟然只有 <strong>12%</strong>！点击切换到 <strong>☑️ 默认加入可退出</strong> 看惊人反差！'
+      },
+      optout: {
+        form:'☑ 你已默认加入器官捐献计划（如不愿意，请打勾退出）',
+        countries:[{n:'奥地利',v:99.9},{n:'法国',v:99.9},{n:'比利时',v:98},{n:'葡萄牙',v:99.6}],
+        col:'var(--tax-green)',
+        aha:'💡 <strong>顿悟时刻：</strong>仅仅改了一行表单默认文案（<strong>助推设计 Nudge</strong>），零强制、零罚款，奥地利和法国的捐献率直接飙到 <strong>99.9%</strong>！同样，互联网 App 的“默认勾选自动续费”也是这招的暗黑版——<strong>永远警惕替你做决定的默认选项！</strong>'
+      }
+    };
+    let cur = 'optin';
+
+    function setMode(m, btn){
+      cur = m;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const d = DATA[cur];
+      const bars = d.countries.map((c, i) => {
+        const y = 78 + i * 31;
+        const w = Math.round((c.v / 100) * 430);
+        return `
+          <text x="24" y="${y+16}" font-size="12.5" font-weight="800" fill="var(--tax-ink)">${c.n}</text>
+          <rect x="115" y="${y}" width="430" height="22" rx="6" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+          <rect x="115" y="${y}" width="${w}" height="22" rx="6" fill="${d.col}"/>
+          <text x="556" y="${y+16}" font-size="12.5" font-weight="900" fill="${d.col}">${c.v}%</text>
+        `;
+      }).join('');
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="24" y="16" width="592" height="42" rx="10" fill="var(--tax-primary-soft)" stroke="var(--tax-primary)" stroke-width="1.8"/>
+        <text x="320" y="42" text-anchor="middle" font-size="13" font-weight="900" fill="var(--tax-primary)">驾照表单文案：${d.form}</text>
+        ${bars}
+      `;
+
+      document.getElementById('ahaBox').innerHTML = d.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

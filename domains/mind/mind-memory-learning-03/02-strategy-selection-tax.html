@@ -1,72 +1,131 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧰 解题两步：选对工具 vs 算对步骤</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>解题两步：选对工具 vs 算对步骤</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .q-box { padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .tool-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    @media (max-width: 600px) { .tool-row { grid-template-columns: 1fr; } }
+    .tool-btn {
+      padding: 10px; border-radius: 9px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .tool-btn:hover { border-color: var(--tax-primary); }
+    .tool-btn.ok { border-color: var(--tax-green); background: var(--tax-green-soft); color: var(--tax-green); }
+    .tool-btn.bad { border-color: var(--tax-red); background: var(--tax-red-soft); color: var(--tax-red); }
+    .mode-pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--tax-primary-soft); color: var(--tax-primary); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🧰 解题两步：选对工具 vs 算对步骤</h1><p>真实世界的问题从来不会在脑门上贴标签写着“请用第 3 章公式”。不会选工具，算得再快也是南辕北辙。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>单题型计算熟练度</span><span id="vCal">90%</span></label><input type="range" id="sCal" min="30" max="100" value="90" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>跨题型“选对公式”辨别率</span><span id="vSel">45%</span></label><input type="range" id="sSel" min="20" max="100" value="45" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🧰 解题两步：策略判别盲测实验室</h1>
+      <p>真实考场里的任何一道题都有两步：<strong>① 识别该掏哪件工具（判别）</strong> + ② 动手执行。体验下面两轮：先做「章节集中刷题」，再做「无标签交错混测」，看哪一轮才真正逼你动用了第 ① 步！</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+        <span class="mode-pill" id="modeBadge">第 1 轮 · 集中刷题模式（已知本章：贝叶斯概率）</span>
+        <span style="font-size:13px;color:var(--tax-muted);" id="progressTxt">题目 1 / 4</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">综合卷最终得分率</div><div class="k-val" id="kTot">—</div></div>
-        <div class="kpi"><div class="k-lbl">当前最大瓶颈</div><div class="k-val" id="kBot">—</div></div>
+
+      <div class="q-box">
+        <div style="font-size:15px;font-weight:700;line-height:1.55;" id="qText"></div>
+        <div style="font-size:12px;color:var(--tax-muted);margin-top:6px;">请为这道题选择最核心的解题工具：</div>
+        <div class="tool-row" id="toolRow"></div>
       </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:13px;color:var(--tax-muted);" id="fbTxt">点击上方工具作答</span>
+        <button class="toy-btn secondary" id="nextBtn" style="display:none;">下一题 →</button>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>实验观察：</strong>注意第 1 轮顶部已经剧透了“本章专题”，你的大脑根本不需要做判别；第 2 轮把章节标签撕掉后，才是真正考验区分力的开始！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const cal=+document.getElementById('sCal').value, sel=+document.getElementById('sSel').value;
-  document.getElementById('vCal').textContent=cal+'%';
-  document.getElementById('vSel').textContent=sel+'%';
-  const tot=Math.round(cal*sel/100);
-  document.getElementById('kTot').textContent=tot+'%';
-  document.getElementById('kTot').style.color=tot>=70?'#059669':'#ef4444';
-  document.getElementById('kBot').textContent=sel<cal?'🎯 判别选型短板':'⚙️ 执行计算短板';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">串联乘法效应：最终得分 = 选对工具 (${sel}%) × 算对步骤 (${cal}%)</text>
-    <rect x="30" y="65" width="150" height="68" rx="10" fill="#3b82f6" opacity="0.16" stroke="#3b82f6" stroke-width="2"/>
-    <text x="105" y="94" text-anchor="middle" font-size="12" font-weight="800" fill="#2563eb">Step 1: 选对工具</text>
-    <text x="105" y="118" text-anchor="middle" font-size="18" font-weight="850" fill="#2563eb">${sel}%</text>
-    <text x="202" y="106" font-size="20" font-weight="800" fill="var(--tax-muted)">×</text>
-    <rect x="225" y="65" width="150" height="68" rx="10" fill="#8b5cf6" opacity="0.16" stroke="#8b5cf6" stroke-width="2"/>
-    <text x="300" y="94" text-anchor="middle" font-size="12" font-weight="800" fill="#7c3aed">Step 2: 执行步骤</text>
-    <text x="300" y="118" text-anchor="middle" font-size="18" font-weight="850" fill="#7c3aed">${cal}%</text>
-    <text x="398" y="106" font-size="20" font-weight="800" fill="var(--tax-muted)">=</text>
-    <rect x="425" y="65" width="145" height="68" rx="10" fill="${tot>=70?'#059669':'#ef4444'}" opacity="0.18" stroke="${tot>=70?'#059669':'#ef4444'}" stroke-width="2"/>
-    <text x="497" y="94" text-anchor="middle" font-size="12" font-weight="800" fill="${tot>=70?'#059669':'#ef4444'}">真实得分</text>
-    <text x="497" y="118" text-anchor="middle" font-size="20" font-weight="900" fill="${tot>=70?'#059669':'#ef4444'}">${tot}%</text>
-    <text x="30" y="172" font-size="11.5" fill="var(--tax-muted)">把题混起来练，专门补齐 Step 1 的短板，边际提分远超继续死磕 Step 2！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>集中练习只把 Step 2 刷到 95%，却让 Step 1 停在 45%，两者一相乘照样不及格。交错练习补上的正是缺失的“路由判断力”。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const TOOLS = ['条件概率 / 贝叶斯', '期望值 / 边际分析', '组合计数 / 排列'];
+    const QUESTIONS = [
+      { mode: 'blocked', q: '【第 3 章·贝叶斯课后题 1】某疾病发病率 1%，检测灵敏度 99%，测出阳性后真正患病的概率？', ans: 0 },
+      { mode: 'blocked', q: '【第 3 章·贝叶斯课后题 2】两枚硬币一枚正常一枚双面正，随机抽一枚抛 3 次全正，抽到假币概率？', ans: 0 },
+      { mode: 'interleaved', q: '【混合考场题 1】从 8 名工程师里选 3 人组成评审组（不计顺序），共有多少种组队方案？', ans: 2 },
+      { mode: 'interleaved', q: '【混合考场题 2】花 10 元抽盲盒，10% 概率中 80 元，90% 概率中 0 元，长期抽是否划算？', ans: 1 }
+    ];
+
+    let idx = 0;
+    let locked = false;
+    let interCorrect = 0;
+    let done = false;
+
+    const modeBadge = document.getElementById('modeBadge');
+    const progressTxt = document.getElementById('progressTxt');
+    const qText = document.getElementById('qText');
+    const toolRow = document.getElementById('toolRow');
+    const fbTxt = document.getElementById('fbTxt');
+    const nextBtn = document.getElementById('nextBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const item = QUESTIONS[idx];
+      locked = false;
+      nextBtn.style.display = 'none';
+      progressTxt.textContent = `题目 ${idx + 1} / ${QUESTIONS.length}`;
+      modeBadge.textContent = item.mode === 'blocked'
+        ? '阶段 A · 集中刷题（章节标签已剧透答案工具）'
+        : '阶段 B · 交错混测（撕掉标签，必须自主判别工具！）';
+      qText.textContent = item.q;
+      fbTxt.textContent = '请选择这道题对应的核心工具';
+      toolRow.innerHTML = '';
+
+      TOOLS.forEach((t, ti) => {
+        const b = document.createElement('button');
+        b.className = 'tool-btn';
+        b.textContent = t;
+        b.onclick = () => {
+          if (locked) return;
+          locked = true;
+          const ok = ti === item.ans;
+          b.classList.add(ok ? 'ok' : 'bad');
+          if (item.mode === 'interleaved' && ok) interCorrect++;
+          fbTxt.textContent = ok
+            ? (item.mode === 'blocked' ? '✓ 对了——但其实你不读题也知道选贝叶斯，第 1 步判别能力训练量为 0！' : '✓ 精准识别！你在没有提示的情况下独立完成了“题型→工具”映射！')
+            : `✕ 这道题的核心工具是「${TOOLS[item.ans]}」。`;
+
+          if (idx < QUESTIONS.length - 1) {
+            nextBtn.textContent = '下一题 →';
+            nextBtn.style.display = 'inline-block';
+          } else {
+            markDone(`完成策略判别盲测（交错阶段答对 ${interCorrect}/2）`);
+            nextBtn.textContent = '↺ 重新体验';
+            nextBtn.style.display = 'inline-block';
+            ahaBox.innerHTML = '<strong>为什么交错练习更管用？</strong>课后集中刷题把“第 ① 步：选工具”直接外包给了章节标题，只练了机械代入；只有撕掉章节标签、把易混淆题型混在一起刷，大脑才会被迫提炼“题干特征 → 策略选择”的判别边界！';
+          }
+        };
+        toolRow.appendChild(b);
+      });
+    }
+
+    nextBtn.onclick = () => {
+      if (idx < QUESTIONS.length - 1) idx++;
+      else { idx = 0; interCorrect = 0; }
+      render();
+    };
+
+    render();
   </script>
 </body>
 </html>

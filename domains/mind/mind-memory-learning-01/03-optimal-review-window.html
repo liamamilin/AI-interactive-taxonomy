@@ -1,75 +1,182 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎯 最佳复习点：太早无效，太晚重学</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>最佳复习点：太早无效，太晚重学</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .scenario-box { padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .choice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+    @media (max-width: 640px) { .choice-grid { grid-template-columns: 1fr; } }
+    .opt-btn {
+      text-align: left; padding: 12px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); cursor: pointer; transition: border-color .15s, transform .12s;
+    }
+    .opt-btn:hover { border-color: var(--tax-primary); transform: translateY(-1px); }
+    .opt-btn.picked { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .opt-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+    .opt-sub { font-size: 12px; color: var(--tax-muted); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎯 最佳复习点：太早无效，太晚重学</h1><p>刚背完 5 分钟就再看一遍，因为毫无提取难度，几乎不增加长期记忆强度；拖到彻底忘光再背，又得从零重学。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>触发复习时的剩余记忆率</span><span id="vRem">55%</span></label><input type="range" id="sRem" min="10" max="98" value="55" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>新知识抽象难度</span><span id="vDif">50%</span></label><input type="range" id="sDif" min="10" max="90" value="50" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🎯 最佳复习点：太早无效，太晚重学（情景决策）</h1>
+      <p>认知心理学称之为<strong>“合意难度（Desirable Difficulty）”</strong>：在记忆快掉到悬崖边、提取有点吃力但还能想起来的那一刻复习，单位时间的记忆增益最高！为下面 3 组卡片选择最佳复习时机。</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="scenario-box">
+        <div style="font-size:12px;color:var(--tax-muted);" id="roundBadge">情境 1 / 3 · 记忆预算有限（每次复习耗 10 分钟）</div>
+        <div style="font-size:16px;font-weight:700;margin-top:4px;" id="promptTitle"></div>
+        <div class="choice-grid" id="choiceGrid"></div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">单次复习记忆增益</div><div class="k-val" id="kGain">—</div></div>
-        <div class="kpi"><div class="k-lbl">区间诊断</div><div class="k-val" id="kZone">—</div></div>
+
+      <svg id="roiSvg" viewBox="0 0 680 175" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="复习时机投资回报曲线"></svg>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+        <span style="font-size:13px;color:var(--tax-muted);" id="scoreText">累计选出最佳复习窗：0 / 3</span>
+        <button class="toy-btn secondary" id="nextBtn" style="display:none;">下一组情境 →</button>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>决策原则：</strong>别凭“看着眼熟”或“彻底忘了再说”做决定。选一个时机，看看大脑稳定性到底涨了多少天！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const rem=+document.getElementById('sRem').value, dif=+document.getElementById('sDif').value;
-  document.getElementById('vRem').textContent=rem+'%';
-  document.getElementById('vDif').textContent=dif+'%';
-  const opt=42 + dif*0.25;
-  const gain=Math.max(8, Math.round(98*Math.exp(-Math.pow((rem-opt)/26, 2))));
-  const zone=rem>opt+20?'😴 太早复习（虚假流畅感）':(rem<opt-20?'🔄 太晚复习（被迫从零重学）':'🎯 必要难度黄金区');
-  document.getElementById('kGain').textContent='+'+gain+' 分';
-  document.getElementById('kGain').style.color=gain>=75?'#059669':'#f59e0b';
-  document.getElementById('kZone').textContent=zone;
-  let pts=[];
-  for(let r=10;r<=98;r+=2){
-    const g=98*Math.exp(-Math.pow((r-opt)/26, 2));
-    const x=45+(r-10)*5.8, y=170-g*1.25;
-    pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
-  }
-  const cx=45+(rem-10)*5.8, cy=170-gain*1.25;
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">复习时机收益倒 U 曲线（最佳点约剩余 ${opt.toFixed(0)}% 时）</text>
-    <line x1="45" y1="170" x2="560" y2="170" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <polyline points="${pts.join(' ')}" fill="none" stroke="#059669" stroke-width="3"/>
-    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
-    <text x="45" y="192" font-size="11" fill="var(--tax-muted)">10%（几乎忘光）</text>
-    <text x="270" y="192" font-size="11" font-weight="750" fill="#059669">黄金提取区</text>
-    <text x="495" y="192" font-size="11" fill="var(--tax-muted)">98%（刚背完）</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>大脑遵循“必要难度”原则：觉得复习起来有点费劲、需要搜肠刮肚想 3 秒钟时，恰恰是神经连接强化最快的一刻！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const ROUNDS = [
+      {
+        title: '你刚背完 40 个医学解剖词，什么时候安排第 1 次复习最划算？',
+        options: [
+          { tag: '太早', title: '10 分钟后再看一遍', sub: '当前留存 97%，一眼全认识', r: 97, gainDays: 0.4, best: false, feedback: '太早了！记忆还在工作记忆里，看一遍几乎零阻力，稳定性仅延长 0.4 天，纯属自我感动。' },
+          { tag: '黄金窗', title: '24 小时后合书默写', sub: '当前留存 68%，要想 3 秒才想起', r: 68, gainDays: 4.5, best: true, feedback: '命中黄金复习窗！提取时那 3 秒的“卡壳感”正是突触重构信号，稳定性暴涨 +4.5 天！' },
+          { tag: '太晚', title: '14 天后再翻开', sub: '当前留存 12%，几乎像生词', r: 12, gainDays: 1.1, best: false, feedback: '太晚了！记忆痕迹已断裂，这次相当于重新初学，单位时间 ROI 很低。' }
+        ]
+      },
+      {
+        title: '一组算法模板你已成功间隔复习过 2 次（稳定性约 10 天），第 3 次何时复习？',
+        options: [
+          { tag: '太早', title: '第 2 天就刷一遍', sub: '当前留存 92%，闭眼都能写', r: 92, gainDays: 1.5, best: false, feedback: '过度复习！此时提取太轻松，对长期记忆固化贡献微乎其微。' },
+          { tag: '黄金窗', title: '第 8~9 天抽测', sub: '当前留存 62%，需动脑推演细节', r: 62, gainDays: 16.0, best: true, feedback: '精准命中！在高稳定阶段踩中 60%–75% 留存区，一次复习就能把记忆保质期再推长 16 天！' },
+          { tag: '太晚', title: '第 45 天考前再看', sub: '当前留存 8%，完全写不出来', r: 8, gainDays: 2.2, best: false, feedback: '掉出悬崖了！不得不重看教程从头推导，错失了复利窗口。' }
+        ]
+      },
+      {
+        title: 'Anki 提示你有 3 组卡片待复习，今天只剩 10 分钟，应该优先复习哪组？',
+        options: [
+          { tag: '太早', title: '昨天刚全对的“熟悉组”', sub: '留存 95%，刷起来最爽', r: 95, gainDays: 0.6, best: false, feedback: '避坑！人脑喜欢刷熟练题找成就感，但边际收益几乎为零。' },
+          { tag: '黄金窗', title: '刚好到期的“临界组”', sub: '留存 70%，稍微犹豫能答出', r: 70, gainDays: 9.5, best: true, feedback: '最优分配！把有限时间全砸在 60%–80% 临界遗忘区的卡片上，就是 FSRS/Anki 算法的核心秘密。' },
+          { tag: '太晚', title: '荒废半年的“遗忘废墟组”', sub: '留存 5%，基本全靠重背', r: 5, gainDays: 1.4, best: false, feedback: '这组已退化为新知识，需要专门大块时间重学，10 分钟碎片时间优先抢救“临界组”回报最高！' }
+        ]
+      }
+    ];
+
+    let idx = 0;
+    let score = 0;
+    let pickedOpt = null;
+    let done = false;
+
+    const roundBadge = document.getElementById('roundBadge');
+    const promptTitle = document.getElementById('promptTitle');
+    const choiceGrid = document.getElementById('choiceGrid');
+    const svg = document.getElementById('roiSvg');
+    const scoreText = document.getElementById('scoreText');
+    const nextBtn = document.getElementById('nextBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function drawCurve(markerR) {
+      // Inverted-U ROI curve over retention R (0..100), peaking around R=68
+      const xOf = r => 50 + (r / 100) * 580;
+      const roiOf = r => Math.exp(-Math.pow((r - 68) / 22, 2));
+      const yOf = v => 142 - v * 102;
+
+      let pts = [];
+      for (let r = 0; r <= 100; r += 2) {
+        pts.push(`${xOf(r).toFixed(1)},${yOf(roiOf(r)).toFixed(1)}`);
+      }
+
+      let html = '';
+      // Sweet spot band (55..80)
+      html += `<rect x="${xOf(55)}" y="28" width="${xOf(80) - xOf(55)}" height="114" fill="rgba(16,185,129,0.16)"/>`;
+      html += `<text x="${xOf(67.5)}" y="22" text-anchor="middle" fill="var(--tax-green)" font-size="11" font-weight="700">黄金复习窗（55%–80%）</text>`;
+
+      html += `<line x1="50" y1="142" x2="630" y2="142" stroke="var(--tax-border)"/>`;
+      html += `<polyline points="${pts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="3"/>`;
+
+      html += `<text x="${xOf(12)}" y="162" text-anchor="middle" fill="var(--tax-red)" font-size="11">10% 太晚（重学）</text>`;
+      html += `<text x="${xOf(68)}" y="162" text-anchor="middle" fill="var(--tax-green)" font-size="11" font-weight="700">68% 费力但能想起</text>`;
+      html += `<text x="${xOf(95)}" y="162" text-anchor="middle" fill="var(--tax-amber)" font-size="11">95% 太早（白刷）</text>`;
+
+      if (markerR !== null) {
+        const mx = xOf(markerR);
+        const my = yOf(roiOf(markerR));
+        const col = markerR >= 55 && markerR <= 80 ? 'var(--tax-green)' : 'var(--tax-red)';
+        html += `<line x1="${mx}" y1="${my}" x2="${mx}" y2="142" stroke="${col}" stroke-dasharray="4 3" stroke-width="2"/>`;
+        html += `<circle cx="${mx}" cy="${my}" r="6.5" fill="${col}"/>`;
+        html += `<text x="${mx}" y="${my - 10}" text-anchor="middle" fill="${col}" font-size="12" font-weight="700">你的选择（${markerR}%）</text>`;
+      }
+
+      svg.innerHTML = html;
+    }
+
+    function renderRound() {
+      const r = ROUNDS[idx];
+      pickedOpt = null;
+      roundBadge.textContent = `情境 ${idx + 1} / ${ROUNDS.length} · 记忆预算有限（每次复习耗 10 分钟）`;
+      promptTitle.textContent = r.title;
+      nextBtn.style.display = 'none';
+      choiceGrid.innerHTML = '';
+
+      r.options.forEach(opt => {
+        const b = document.createElement('button');
+        b.className = 'opt-btn';
+        b.innerHTML = `<div class="opt-title">${opt.title}</div><div class="opt-sub">${opt.sub}</div>`;
+        b.onclick = () => {
+          if (pickedOpt) return;
+          pickedOpt = opt;
+          b.classList.add('picked');
+          if (opt.best) score++;
+          scoreText.textContent = `累计选出最佳复习窗：${score} / ${ROUNDS.length}`;
+          drawCurve(opt.r);
+          ahaBox.innerHTML = `<strong>${opt.best ? '✓ 最佳策略' : '⚠️ 效率折损'}（稳定性 +${opt.gainDays} 天）：</strong>${opt.feedback}`;
+          if (idx < ROUNDS.length - 1) {
+            nextBtn.style.display = 'inline-block';
+          } else {
+            markDone(`完成最佳复习窗情景挑战（${score}/${ROUNDS.length}）`);
+            nextBtn.textContent = '↺ 重新挑战';
+            nextBtn.style.display = 'inline-block';
+          }
+        };
+        choiceGrid.appendChild(b);
+      });
+
+      drawCurve(null);
+    }
+
+    nextBtn.onclick = () => {
+      if (idx < ROUNDS.length - 1) {
+        idx++;
+        renderRound();
+      } else {
+        idx = 0; score = 0;
+        nextBtn.textContent = '下一组情境 →';
+        scoreText.textContent = '累计选出最佳复习窗：0 / 3';
+        renderRound();
+      }
+    };
+
+    renderRound();
   </script>
 </body>
 </html>

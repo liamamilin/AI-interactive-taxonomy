@@ -1,71 +1,133 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🍦 混杂变量幕后黑手：冰淇淋与溺水（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>混杂变量幕后黑手：冰淇淋与溺水</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🍦 混杂变量幕后黑手：冰淇淋与溺水（SVG）</h1><p>数据里冰淇淋销量和溺水事故高度正相关（r=0.92），但禁售冰淇淋根本救不了任何人——因为真正驱动两者的幕后变量是“夏季高温”！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>幕后混杂变量：夏季气温</span><span id="vTmp">34 °C</span></label><input type="range" id="sTmp" min="10" max="40" value="34" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>人为干预：对冰淇淋打折促销</span><span id="vAds">50%</span></label><input type="range" id="sAds" min="0" max="100" value="50" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🍦 混杂变量幕后黑手：因果图（DAG）空间透视</h1>
+      <p>统计数据显示：冰淇淋销量越高，海滩溺水人数就越多（相关系数 <strong>r = 0.94</strong>）。难道吃冰淇淋会导致溺水？点击「揪出幕后混杂变量」或拖动气温，亲手拆穿虚假因果！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="revealBtn">🔍 揪出幕后混杂变量（夏季高温）</button>
+        <button class="toy-btn secondary" id="ctrlBtn">🧪 控制变量：把气温锁定在 28℃</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">冰淇淋销量指数</div><div class="k-val" id="kIce">—</div></div>
-        <div class="kpi"><div class="k-lbl">真实溺水风险指数</div><div class="k-val" id="kDrw">—</div></div>
+
+      <div class="ctrl-box" id="tempBox">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>☀️ 当前环境气温（幕后黑手 Z）</span>
+          <strong id="tempVal" style="color:var(--tax-amber);">34℃（盛夏高峰）</strong>
+        </div>
+        <input type="range" id="tempRange" min="10" max="38" value="34" style="width:100%;" />
       </div>
+
+      <svg id="dagSvg" viewBox="0 0 680 220" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="冰淇淋与溺水混杂变量因果图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>虚假相关警报：</strong>目前只看到冰淇淋和溺水同步上涨（r = 0.94）。点击「🔍 揪出幕后混杂变量」看看真正的因果箭头长什么样！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const tmp=+document.getElementById('sTmp').value, ads=+document.getElementById('sAds').value;
-  document.getElementById('vTmp').textContent=tmp+' °C';
-  document.getElementById('vAds').textContent=ads+'%';
-  const ice=Math.min(100, Math.round((tmp-8)*2.3 + ads*0.26));
-  const drw=Math.max(5, Math.min(100, Math.round((tmp-8)*2.8)));
-  document.getElementById('kIce').textContent=ice+' 分';
-  document.getElementById('kDrw').textContent=drw+' 分 (不受打折影响!)';
-  document.getElementById('kDrw').style.color=drw>=70?'#ef4444':'#059669';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">因果有向图（DAG）：试着拉动“促销滑块”，溺水风险纹丝不动！</text>
-    <rect x="215" y="42" width="170" height="44" rx="10" fill="#f59e0b" opacity="0.2" stroke="#f59e0b" stroke-width="2"/>
-    <text x="300" y="69" text-anchor="middle" font-size="13" font-weight="850" fill="#d97706">☀️ 夏季高温 ${tmp}°C</text>
-    <line x1="255" y1="86" x2="145" y2="128" stroke="#f59e0b" stroke-width="2.5"/>
-    <line x1="345" y1="86" x2="455" y2="128" stroke="#f59e0b" stroke-width="2.5"/>
-    <rect x="55" y="130" width="175" height="48" rx="10" fill="#3b82f6" opacity="0.16" stroke="#3b82f6" stroke-width="2"/>
-    <text x="142" y="159" text-anchor="middle" font-size="12.5" font-weight="800" fill="#2563eb">🍦 冰淇淋销量 ${ice}</text>
-    <rect x="370" y="130" width="175" height="48" rx="10" fill="#ef4444" opacity="0.16" stroke="#ef4444" stroke-width="2"/>
-    <text x="457" y="159" text-anchor="middle" font-size="12.5" font-weight="800" fill="#ef4444">🏊 溺水风险 ${drw}</text>
-    <line x1="236" y1="154" x2="364" y2="154" stroke="#94a3b8" stroke-dasharray="4,4" stroke-width="2"/>
-    <text x="300" y="148" text-anchor="middle" font-size="11" font-weight="800" fill="#ef4444">无直接因果 ❌</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>看到两个指标同步上涨，先找背后有没有隐藏的“共同原因（混杂变量）”——把变量 A 单独动一动，看 B 动不动，才是检验因果的试金石。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let revealed = false;
+    let controlled = false;
+    let done = false;
+
+    const tempRange = document.getElementById('tempRange');
+    const tempVal = document.getElementById('tempVal');
+    const revealBtn = document.getElementById('revealBtn');
+    const ctrlBtn = document.getElementById('ctrlBtn');
+    const svg = document.getElementById('dagSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const temp = controlled ? 28 : Number(tempRange.value);
+      tempRange.disabled = controlled;
+      tempVal.textContent = controlled ? '28℃（已锁定控制变量）' : `${temp}℃`;
+
+      const ice = Math.round(12 + (temp - 10) * 3.1);
+      const drown = Math.round(5 + (temp - 10) * 2.6);
+
+      let html = '';
+      if (revealed) {
+        // True confounder Z at top center
+        html += `<rect x="240" y="18" width="200" height="54" rx="12" fill="rgba(245,158,11,0.22)" stroke="var(--tax-amber)" stroke-width="2.5"/>`;
+        html += `<text x="340" y="42" text-anchor="middle" fill="var(--tax-amber)" font-size="13.5" font-weight="800">☀️ 混杂变量 Z：夏季高温</text>`;
+        html += `<text x="340" y="61" text-anchor="middle" fill="var(--tax-ink)" font-size="12">当前气温：${temp}℃ ${controlled ? '（已固定）' : ''}</text>`;
+
+        // True arrows Z -> X and Z -> Y
+        html += `<line x1="290" y1="72" x2="170" y2="128" stroke="var(--tax-green)" stroke-width="3"/>`;
+        html += `<line x1="390" y1="72" x2="510" y2="128" stroke="var(--tax-green)" stroke-width="3"/>`;
+        html += `<text x="200" y="96" fill="var(--tax-green)" font-size="11.5" font-weight="700">真因果 →</text>`;
+        html += `<text x="435" y="96" fill="var(--tax-green)" font-size="11.5" font-weight="700">真因果 →</text>`;
+      } else {
+        html += `<text x="340" y="46" text-anchor="middle" fill="var(--tax-muted)" font-size="13">❓ 隐藏的第三变量尚未揭露…</text>`;
+      }
+
+      // Left node X: Ice cream
+      html += `<rect x="46" y="128" width="210" height="68" rx="12" fill="rgba(59,130,246,0.16)" stroke="var(--tax-primary)" stroke-width="2"/>`;
+      html += `<text x="151" y="156" text-anchor="middle" fill="var(--tax-ink)" font-size="14" font-weight="800">🍦 冰淇淋销量</text>`;
+      html += `<text x="151" y="180" text-anchor="middle" fill="var(--tax-primary)" font-size="13" font-weight="700">指数：${ice}</text>`;
+
+      // Right node Y: Drowning
+      html += `<rect x="424" y="128" width="210" height="68" rx="12" fill="rgba(239,68,68,0.15)" stroke="var(--tax-red)" stroke-width="2"/>`;
+      html += `<text x="529" y="156" text-anchor="middle" fill="var(--tax-ink)" font-size="14" font-weight="800">🏊 海滩溺水事件</text>`;
+      html += `<text x="529" y="180" text-anchor="middle" fill="var(--tax-red)" font-size="13" font-weight="700">指数：${drown}</text>`;
+
+      // Middle spurious arrow X <-> Y
+      if (!revealed) {
+        html += `<line x1="256" y1="162" x2="424" y2="162" stroke="var(--tax-red)" stroke-width="3" stroke-dasharray="6 4"/>`;
+        html += `<text x="340" y="152" text-anchor="middle" fill="var(--tax-red)" font-size="12" font-weight="800">表面强相关 r = 0.94</text>`;
+        html += `<text x="340" y="182" text-anchor="middle" fill="var(--tax-muted)" font-size="11">禁售冰淇淋能防溺水吗？</text>`;
+      } else {
+        html += `<line x1="256" y1="162" x2="424" y2="162" stroke="var(--tax-muted)" stroke-width="1.5" stroke-dasharray="3 5" opacity="0.5"/>`;
+        html += `<text x="340" y="154" text-anchor="middle" fill="var(--tax-green)" font-size="12" font-weight="800">${controlled ? '✕ 偏相关 r ≈ 0.00（彻底断裂！）' : '✕ 并无直接因果（同源混杂）'}</text>`;
+      }
+
+      svg.innerHTML = html;
+
+      if (controlled) {
+        ahaBox.innerHTML = '<strong>控制变量实证（偏相关 r ≈ 0）：</strong>只要把气温固定在同一个 28℃ 的夏日，当天多卖 1000 支冰淇淋并不会多出 1 例溺水！这就是因果推断中“控制混杂因子（Confounder）”的威力。';
+      } else if (revealed) {
+        ahaBox.innerHTML = '<strong>幕后黑手现形！</strong>冰淇淋与溺水之间根本没有因果箭头，是顶部的「夏季高温」同时拉高了买冰淇淋的人和下海游泳的人。点击「控制变量」把气温锁死看看相关性如何归零！';
+      }
+    }
+
+    revealBtn.onclick = () => {
+      revealed = !revealed;
+      revealBtn.textContent = revealed ? '🙈 隐藏混杂变量' : '🔍 揪出幕后混杂变量（夏季高温）';
+      markDone('揭露了冰淇淋与溺水背后的高温混杂变量');
+      render();
+    };
+    ctrlBtn.onclick = () => {
+      controlled = !controlled;
+      if (controlled) revealed = true;
+      ctrlBtn.textContent = controlled ? '🔓 解除气温锁定' : '🧪 控制变量：把气温锁定在 28℃';
+      revealBtn.textContent = revealed ? '🙈 隐藏混杂变量' : '🔍 揪出幕后混杂变量（夏季高温）';
+      markDone('使用控制变量法消除了虚假相关');
+      render();
+    };
+    tempRange.oninput = () => { markDone('拖动气温验证了混杂变量同步驱动'); render(); };
+    render();
   </script>
 </body>
 </html>

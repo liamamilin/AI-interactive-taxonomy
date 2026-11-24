@@ -1,77 +1,153 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>♟️ 象棋大师的“作弊器”：真实棋局 vs 乱摆棋盘（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>象棋大师的“作弊器”：真实棋局 vs 乱摆棋盘</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .board-wrap { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; align-items: center; }
+    @media (max-width: 640px) { .board-wrap { grid-template-columns: 1fr; } }
+    .side-panel { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .metric-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--tax-border); font-size: 13px; }
+    .metric-row:last-child { border-bottom: none; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>♟️ 象棋大师的“作弊器”：真实棋局 vs 乱摆棋盘（SVG）</h1><p>Chase & Simon 经典实验：看 5 秒真实棋局，大师能还原 22 颗子，新手仅 4 颗；但把棋子随机乱摆，大师立刻跌回 5 颗！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>棋手领域经验（模式库规模）</span><span id="vExp">85%（特级大师）</span></label><input type="range" id="sExp" min="10" max="100" value="85" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>棋局符合真实战术规律比例</span><span id="vReal">90%（真实对局）</span></label><input type="range" id="sReal" min="0" max="100" value="90" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>♟️ 象棋大师的“作弊器”：真实棋局 vs 乱摆棋盘</h1>
+      <p>Chase &amp; Simon (1973) 让国际象棋大师和新手看棋盘 <strong>5 秒</strong>后盲复原。切换「真实棋局」与「随机乱摆」，再点「大师组块透视」，看穿大师并不是记忆力超人，而是靠<strong>战术组块</strong>压缩信息！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="realBtn">♟️ 真实实战棋局（16 子）</button>
+        <button class="toy-btn secondary" id="randBtn">🎲 随机乱摆棋盘（16 子）</button>
+        <button class="toy-btn secondary" id="visionBtn">👁️ 视角：新手（逐子记忆）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">5 秒记住棋子数（满 25）</div><div class="k-val" id="kCnt">—</div></div>
-        <div class="kpi"><div class="k-lbl">单个工作记忆槽打包量</div><div class="k-val" id="kPack">—</div></div>
+
+      <div class="board-wrap">
+        <svg id="boardSvg" viewBox="0 0 320 320" width="100%" style="display:block;border-radius:10px;border:1px solid var(--tax-border);" aria-label="国际象棋组块空间视图"></svg>
+
+        <div class="side-panel">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px;" id="panelTitle">新手逐子视角 · 真实棋局</div>
+          <div class="metric-row"><span>棋盘总棋子数</span><strong>16 枚</strong></div>
+          <div class="metric-row"><span>需占用的工作记忆槽</span><strong id="slotNeed" style="color:var(--tax-red);">16 槽（严重溢出！）</strong></div>
+          <div class="metric-row"><span>5 秒后大师复原率</span><strong id="masterRecall" style="color:var(--tax-green);">15 / 16 枚（94%）</strong></div>
+          <div class="metric-row"><span>5 秒后新手复原率</span><strong id="noviceRecall" style="color:var(--tax-muted);">4 / 16 枚（25%）</strong></div>
+          <p style="font-size:12px;color:var(--tax-muted);margin:10px 0 0;line-height:1.6;" id="panelNote"></p>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>动手试试：</strong>先点击「👁️ 视角：切换到大师组块透视」，看看 16 枚棋子如何瞬间折叠成 4 个熟悉的战术图案；再切到「🎲 随机乱摆棋盘」，见证大师的超能力如何瞬间归零！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const exp=+document.getElementById('sExp').value, real=+document.getElementById('sReal').value;
-  document.getElementById('vExp').textContent=exp+'%'+(exp>=80?'（大师）':(exp>=45?'（业余高手）':'（新手）'));
-  document.getElementById('vReal').textContent=real+'%'+(real>=75?'（真实对局）':(real>=30?'（半随机）':'（纯乱摆）'));
-  const bonus=(exp/100)*(real/100)*19;
-  const cnt=Math.min(25, Math.round(4 + bonus));
-  const pack=(cnt/4).toFixed(1);
-  document.getElementById('kCnt').textContent=cnt+' / 25 颗';
-  document.getElementById('kCnt').style.color=cnt>=16?'#059669':'#f59e0b';
-  document.getElementById('kPack').textContent=pack+' 颗/槽';
-  let cells='';
-  for(let i=0;i<25;i++){
-    const col=i%5, row=Math.floor(i/5);
-    const x=45+col*48, y=42+row*28;
-    const ok=i<cnt;
-    cells+=`<rect x="${x}" y="${y}" width="42" height="23" rx="4" fill="${ok?'#059669':'var(--tax-border)'}" opacity="${ok?'0.88':'0.25'}"/>
-      <text x="${x+21}" y="${y+15}" text-anchor="middle" font-size="11" fill="${ok?'#fff':'var(--tax-muted)'}">${ok?'♟':'·'}</text>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">5 秒扫视后准确复原的棋子矩阵（25 颗）</text>
-    ${cells}
-    <rect x="315" y="48" width="255" height="126" rx="12" fill="var(--tax-border)" opacity="0.18"/>
-    <text x="332" y="76" font-size="12.5" font-weight="800" fill="var(--tax-text)">为什么大师在乱摆盘上也失灵？</text>
-    <text x="332" y="102" font-size="11.5" fill="var(--tax-muted)">大师的工作记忆照样只有 4 个槽！</text>
-    <text x="332" y="124" font-size="11.5" fill="var(--tax-muted)">真实对局里他能把“王车易位”等</text>
-    <text x="332" y="144" font-size="11.5" fill="var(--tax-muted)">6 颗子压成 1 个组块；乱摆盘无法</text>
-    <text x="332" y="164" font-size="11.5" fill="var(--tax-muted)">打包，瞬间打回 4~5 颗原形。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>专家不是天生内存比你大，而是脑子里装了几万个“高压缩比组块”。所谓“一眼看穿的直觉”，不过是高密度组块的瞬间模式匹配。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const REAL_PIECES = [
+      // Chunk 1: Black kingside castle (top-right)
+      { x: 5, y: 0, s: '♜', c: 0 }, { x: 6, y: 0, s: '♚', c: 0 }, { x: 5, y: 1, s: '♟', c: 0 }, { x: 6, y: 1, s: '♟', c: 0 }, { x: 7, y: 1, s: '♟', c: 0 },
+      // Chunk 2: Center pawn tension
+      { x: 3, y: 3, s: '♟', c: 1 }, { x: 4, y: 4, s: '♙', c: 1 }, { x: 3, y: 4, s: '♙', c: 1 }, { x: 2, y: 2, s: '♞', c: 1 },
+      // Chunk 3: White attack battery
+      { x: 5, y: 4, s: '♘', c: 2 }, { x: 4, y: 5, s: '♗', c: 2 }, { x: 3, y: 5, s: '♕', c: 2 },
+      // Chunk 4: White kingside castle (bottom-right)
+      { x: 6, y: 7, s: '♔', c: 3 }, { x: 5, y: 7, s: '♖', c: 3 }, { x: 6, y: 6, s: '♙', c: 3 }, { x: 7, y: 6, s: '♙', c: 3 }
+    ];
+
+    const REAL_CHUNKS = [
+      { x: 5, y: 0, w: 3, h: 2, name: '黑王易位堡垒', col: 'rgba(239,68,68,0.28)', stroke: 'var(--tax-red)' },
+      { x: 2, y: 2, w: 3, h: 3, name: '中心兵链争夺', col: 'rgba(245,158,11,0.24)', stroke: 'var(--tax-amber)' },
+      { x: 3, y: 4, w: 3, h: 2, name: '后象马协同进攻', col: 'rgba(59,130,246,0.25)', stroke: 'var(--tax-primary)' },
+      { x: 5, y: 6, w: 3, h: 2, name: '白王防守阵型', col: 'rgba(16,185,129,0.25)', stroke: 'var(--tax-green)' }
+    ];
+
+    const RAND_PIECES = [
+      { x: 0, y: 0, s: '♙' }, { x: 3, y: 0, s: '♔' }, { x: 7, y: 0, s: '♞' }, { x: 1, y: 1, s: '♜' },
+      { x: 5, y: 2, s: '♕' }, { x: 0, y: 3, s: '♟' }, { x: 4, y: 3, s: '♖' }, { x: 7, y: 3, s: '♙' },
+      { x: 2, y: 4, s: '♚' }, { x: 6, y: 4, s: '♟' }, { x: 1, y: 5, s: '♗' }, { x: 5, y: 5, s: '♟' },
+      { x: 3, y: 6, s: '♘' }, { x: 7, y: 6, s: '♟' }, { x: 0, y: 7, s: '♙' }, { x: 4, y: 7, s: '♙' }
+    ];
+
+    let isReal = true;
+    let masterView = false;
+    let done = false;
+
+    const svg = document.getElementById('boardSvg');
+    const realBtn = document.getElementById('realBtn');
+    const randBtn = document.getElementById('randBtn');
+    const visionBtn = document.getElementById('visionBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      realBtn.className = isReal ? 'toy-btn' : 'toy-btn secondary';
+      randBtn.className = !isReal ? 'toy-btn' : 'toy-btn secondary';
+      visionBtn.textContent = masterView ? '👁️ 视角：大师（组块透视）' : '👁️ 视角：新手（逐子记忆）';
+
+      let html = '';
+      // Draw 8x8 board
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const dark = (r + c) % 2 === 1;
+          html += `<rect x="${c * 40}" y="${r * 40}" width="40" height="40" fill="${dark ? 'rgba(148,163,184,0.22)' : 'rgba(148,163,184,0.06)'}"/>`;
+        }
+      }
+
+      // Draw chunk overlays if masterView & real board
+      if (masterView && isReal) {
+        REAL_CHUNKS.forEach(ch => {
+          html += `<rect x="${ch.x * 40 + 2}" y="${ch.y * 40 + 2}" width="${ch.w * 40 - 4}" height="${ch.h * 40 - 4}" rx="8" fill="${ch.col}" stroke="${ch.stroke}" stroke-width="2.5"/>`;
+          html += `<text x="${ch.x * 40 + (ch.w * 20)}" y="${ch.y * 40 + 13}" text-anchor="middle" fill="var(--tax-ink)" font-size="10" font-weight="700">${ch.name}</text>`;
+        });
+      }
+
+      const list = isReal ? REAL_PIECES : RAND_PIECES;
+      list.forEach(p => {
+        html += `<text x="${p.x * 40 + 20}" y="${p.y * 40 + 30}" text-anchor="middle" font-size="24" fill="var(--tax-ink)">${p.s}</text>`;
+      });
+
+      svg.innerHTML = html;
+
+      if (isReal && masterView) {
+        document.getElementById('panelTitle').textContent = '大师组块透视 · 真实棋局';
+        document.getElementById('slotNeed').textContent = '仅 4 槽（轻松装下 16 子！）';
+        document.getElementById('slotNeed').style.color = 'var(--tax-green)';
+        document.getElementById('masterRecall').textContent = '15 / 16 枚（94%）';
+        document.getElementById('panelNote').textContent = '大师眼里没有 16 个零散棋子，只有“黑王易位”“中心兵链”“后象马进攻”“白王防守”4 个熟悉组块，刚好放进工作记忆 4 槽！';
+        ahaBox.innerHTML = '<strong>组块压缩的魔力：</strong>同样 16 枚棋子、同样 4 个工作记忆槽，大师把 16 个单位压缩成 4 个大组块，记忆容量瞬间放大 4 倍！现在点「随机乱摆棋盘」试试！';
+      } else if (!isReal) {
+        document.getElementById('panelTitle').textContent = (masterView ? '大师视角' : '新手视角') + ' · 随机乱摆棋盘';
+        document.getElementById('slotNeed').textContent = '16 槽（无法组块，全部失效！）';
+        document.getElementById('slotNeed').style.color = 'var(--tax-red)';
+        document.getElementById('masterRecall').textContent = '4 / 16 枚（25%，退化为新手！）';
+        document.getElementById('panelNote').textContent = '棋子违反实战规律随机散落，大师脑中 5 万个棋谱组块全部匹配失败，工作记忆立刻打回 4 槽原形！';
+        ahaBox.innerHTML = '<strong>反直觉真相：</strong>在随机乱摆的棋盘上，世界冠军和刚学 3 天的新手记忆力完全一样（都只能记住 4 枚左右）！专家优势不是天生脑容量大，而是长期积累了海量<strong>领域专属组块</strong>。';
+      } else {
+        document.getElementById('panelTitle').textContent = '新手逐子视角 · 真实棋局';
+        document.getElementById('slotNeed').textContent = '16 槽（严重溢出 4 槽上限）';
+        document.getElementById('slotNeed').style.color = 'var(--tax-red)';
+        document.getElementById('masterRecall').textContent = '15 / 16 枚（94%）';
+        document.getElementById('panelNote').textContent = '新手必须死记“白马在 f4、黑兵在 d5……”16 个独立坐标，5 秒后只能勉强记住 4 枚。点击「视角：大师」开启组块透视！';
+      }
+    }
+
+    realBtn.onclick = () => { isReal = true; markDone('对比了象棋真实棋局与随机棋盘'); render(); };
+    randBtn.onclick = () => { isReal = false; markDone('验证了随机棋盘下大师组块失效'); render(); };
+    visionBtn.onclick = () => { masterView = !masterView; markDone('切换了象棋大师组块透视'); render(); };
+
+    render();
   </script>
 </body>
 </html>

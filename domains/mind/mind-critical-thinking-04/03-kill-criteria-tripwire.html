@@ -1,71 +1,120 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚡ 给未来埋好“熔断绊线”：防沉没成本</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>给未来埋好“熔断绊线”：防沉没成本</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .wire-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 12px; }
+    .wire-btn {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      text-align: left; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); cursor: pointer;
+    }
+    .wire-btn.on { border-color: var(--tax-amber); background: var(--tax-amber-soft); }
+    .tag { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--tax-surface); border: 1px solid var(--tax-border); white-space: nowrap; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚡ 给未来埋好“熔断绊线”：防沉没成本</h1><p>事前验尸的最后一步，是把最致命的 2 个死因写成白纸黑字的“止损熔断线”（例如：3 个月留存低于 15% 自动关停），防止日后深陷沉没成本泥潭！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>事前熔断止损线（触发月数）</span><span id="vCut">第 3 个月</span></label><input type="range" id="sCut" min="2" max="12" value="3" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>项目每月烧钱速度</span><span id="vBrn">20 万/月</span></label><input type="range" id="sBrn" min="5" max="50" step="5" value="20" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⚡ 给未来埋好“熔断绊线”：防沉没成本（构建器）</h1>
+      <p>一旦项目投了 200 万，人就会被沉没成本绑架不断“再加一点预算试试”。在开工前最清醒的时刻，亲手埋下量化的<strong>熔断绊线（Kill Criteria）</strong>，然后模拟一场 6 个月的市场遇冷危机，看能保住多少真金白银！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="wire-grid" id="wireGrid"></div>
+
+      <div style="margin-bottom:12px;">
+        <button class="toy-btn" id="simBtn">📉 模拟运行 6 个月（遭遇伪需求遇冷）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">触发熔断实际止损额</div><div class="k-val" id="kCut">—</div></div>
-        <div class="kpi"><div class="k-lbl">相比死扛 12 月节省资金</div><div class="k-val" id="kSav">—</div></div>
-      </div>
+
+      <svg id="lossSvg" viewBox="0 0 680 155" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="熔断绊线止损对比"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>构建挑战：</strong>如果不提前写死量化止损线，项目往往会一路烧光全部 300 万预算！勾选上方 1–3 道事前熔断绊线，再点击「模拟运行 6 个月」验证止损威力！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const cut=+document.getElementById('sCut').value, brn=+document.getElementById('sBrn').value;
-  document.getElementById('vCut').textContent='第 '+cut+' 个月';
-  document.getElementById('vBrn').textContent=brn+' 万/月';
-  const full=12*brn;
-  const act=cut*brn;
-  const sav=full - act;
-  document.getElementById('kCut').textContent='-'+act+' 万';
-  document.getElementById('kSav').textContent='省下 '+sav+' 万';
-  document.getElementById('kSav').style.color='#059669';
-  const sc=265/Math.max(1, full);
-  const wF=Math.max(15, full*sc), wA=Math.max(15, act*sc);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">项目不达标时：无熔断死扛 12 月 vs 预设第 ${cut} 月自动止损</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">无绊线死扛到底</text>
-    <rect x="155" y="64" width="${wF.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
-    <text x="${(163+wF).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#ef4444">亏 ${full} 万</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">触发事前熔断线</text>
-    <rect x="155" y="120" width="${wA.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(163+wA).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">亏 ${act} 万（保住 ${sav} 万）</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">在还没投入感情的 Day 0 写下量化止损红线，就能在未来陷入当局者迷时自动救自己一命！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>事前验尸 + 事前熔断线 = 给团队和个人装上飞机黑匣子 + 自动弹射座椅。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const WIRES = [
+      { id: 'w1', title: '📊 绊线 1 · 留存红线（第 2 个月触发）', sub: '“若上线 60 天次周留存率 < 15%，立即停止买量并复盘转型”', stopMonth: 2, on: false },
+      { id: 'w2', title: '💸 绊线 2 · 预算红线（第 3 个月触发）', sub: '“若累计烧钱达 120 万仍无付费验证，自动冻结后续 180 万拨款”', stopMonth: 3, on: false },
+      { id: 'w3', title: '📅 绊线 3 · 时间红线（第 4 个月触发）', sub: '“若第 4 个月仍未签下 3 家种子付费客户，直接体面关停项目”', stopMonth: 4, on: false }
+    ];
+
+    let simulated = false;
+    let done = false;
+
+    const wireGrid = document.getElementById('wireGrid');
+    const svg = document.getElementById('lossSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      wireGrid.innerHTML = '';
+      WIRES.forEach(w => {
+        const b = document.createElement('button');
+        b.className = 'wire-btn' + (w.on ? ' on' : '');
+        b.innerHTML = `<div><div style="font-weight:700;font-size:13.5px;">${w.title}</div><div style="font-size:12px;color:var(--tax-muted);margin-top:3px;">${w.sub}</div></div><span class="tag">${w.on ? '⚡ 已埋设' : '未启用'}</span>`;
+        b.onclick = () => {
+          w.on = !w.on;
+          simulated = false;
+          markDone('配置了事前熔断绊线');
+          render();
+        };
+        wireGrid.appendChild(b);
+      });
+
+      const activeWires = WIRES.filter(w => w.on);
+      const stopM = activeWires.length ? Math.min(...activeWires.map(w => w.stopMonth)) : 6;
+      const burned = stopM * 50; // 50万 / 月, total 300万
+      const saved = 300 - burned;
+
+      let html = '';
+      html += `<text x="24" y="32" fill="var(--tax-ink)" font-size="13.5" font-weight="800">${simulated ? `📉 模拟结果：在第 ${stopM} 个月停止失血 · 实际亏损 ${burned} 万 · 成功抢救回 ${saved} 万！` : '已埋设 ' + activeWires.length + ' / 3 道事前熔断绊线（总预算池：300 万，月烧 50 万）'}</text>`;
+
+      // Bar representing 300万
+      const barW = 632;
+      const burnW = (burned / 300) * barW;
+      html += `<rect x="24" y="50" width="${burnW}" height="32" rx="8" fill="rgba(239,68,68,0.75)"/>`;
+      if (saved > 0) {
+        html += `<rect x="${24 + burnW}" y="50" width="${barW - burnW}" height="32" rx="8" fill="rgba(16,185,129,0.80)"/>`;
+        html += `<text x="${24 + burnW + (barW - burnW)/2}" y="71" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">抢救回 ${saved} 万弹药</text>`;
+      }
+      html += `<text x="${24 + burnW/2}" y="71" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">沉没消耗 ${burned} 万</text>`;
+
+      // Month ticks
+      for (let m = 1; m <= 6; m++) {
+        const x = 24 + (m / 6) * barW;
+        html += `<text x="${x - 10}" y="102" text-anchor="end" fill="var(--tax-muted)" font-size="11">M${m}</text>`;
+      }
+
+      html += `<text x="24" y="132" fill="var(--tax-muted)" font-size="12">${simulated ? (saved > 0 ? '⚡ 熔断成功！事前白纸黑字的客观指标替你战胜了“不甘心再赌一把”的人性弱点！' : '💥 无熔断线保护：每次开会都觉得“再熬一个月就成了”，最终 300 万全部清零！') : '点击「模拟运行 6 个月」测试你埋下的熔断绊线。'}</text>`;
+      svg.innerHTML = html;
+
+      if (simulated) {
+        ahaBox.innerHTML = saved > 0
+          ? `<strong>止损抢救回 ${saved} 万（留住 ${Math.round((saved / 300) * 100)}% 弹药）！</strong>心理学家 Annie Duke 称熔断绊线为“写给未来深陷泥潭的自己的一封清醒遗书”。把放弃标准提前量化写死，让你在项目遇冷时能果断转身、体面止损！`
+          : '<strong>全军覆没（亏损 300 万）：</strong>没有提前定好退出条件时，沉没成本谬误会让你不断给失败项目续命。赶紧勾选 1–2 道量化熔断绊线再模拟一次！';
+      }
+    }
+
+    document.getElementById('simBtn').onclick = () => {
+      simulated = true;
+      markDone('模拟了熔断绊线在沉没成本危机中的止损效果');
+      render();
+    };
+    render();
   </script>
 </body>
 </html>

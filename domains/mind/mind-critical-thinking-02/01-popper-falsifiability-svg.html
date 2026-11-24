@@ -1,67 +1,111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔭 波普尔可证伪性雷达：科学 vs 算命（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>波普尔可证伪性雷达：科学 vs 算命</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .stmt-box { padding: 16px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; text-align: center; }
+    .btn-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .cls-btn { padding: 12px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-ink); font-size: 14px; font-weight: 700; cursor: pointer; }
+    .cls-btn.ok { border-color: var(--tax-green); background: var(--tax-green-soft); color: var(--tax-green); }
+    .cls-btn.bad { border-color: var(--tax-red); background: var(--tax-red-soft); color: var(--tax-red); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔭 波普尔可证伪性雷达：科学 vs 算命（SVG）</h1><p>卡尔·波普尔提出：科学的核心标准不是“能找到多少支持的例子”，而是你敢不敢说出“如果发生什么现象，我就承认自己错了”！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>预言具体精确度（敢不敢冒被打脸风险）</span><span id="vPre">80%</span></label><input type="range" id="sPre" min="5" max="100" value="80" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>失败后“事后打补丁圆谎”倾向</span><span id="vAdh">20%</span></label><input type="range" id="sAdh" min="0" max="100" value="20" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔭 波普尔可证伪性雷达：科学 vs 万能圆场（盲测）</h1>
+      <p>科学哲学家卡尔·波普尔提出：划清“科学”与“伪科学”的界线不是“能不能找到支持证据”，而是<strong>“能不能想象出哪怕一个可能推翻它的反例”</strong>！鉴定下面 4 条论断：</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;color:var(--tax-muted);">
+        <span id="idxTag">论断 1 / 4</span>
+        <span id="scoreTag" style="color:var(--tax-primary);font-weight:700;">准确鉴定：0 / 4</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">科学可证伪性评分</div><div class="k-val" id="kSci">—</div></div>
-        <div class="kpi"><div class="k-lbl">理论属性判定</div><div class="k-val" id="kTyp">—</div></div>
+
+      <div class="stmt-box">
+        <div style="font-size:17px;font-weight:800;line-height:1.55;" id="stmtTxt"></div>
+        <div class="btn-pair">
+          <button class="cls-btn" id="btnSci">🔬 可证伪（科学命题）</button>
+          <button class="cls-btn" id="btnPseudo">🔮 不可证伪（万能圆场）</button>
+        </div>
       </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span id="fbTxt" style="font-size:13px;color:var(--tax-muted);">判断它是否敢给出“可能被打脸的明确预言”</span>
+        <button class="toy-btn secondary" id="nextBtn" style="display:none;">下一条论断 →</button>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>波普尔金标准：</strong>一个“不管发生什么都能自圆其说”的理论，信息量为零！只有敢把脖子伸出来接受实验证伪的命题，才属于科学。
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const pre=+document.getElementById('sPre').value, adh=+document.getElementById('sAdh').value;
-  document.getElementById('vPre').textContent=pre+'%';
-  document.getElementById('vAdh').textContent=adh+'%';
-  const sci=Math.max(5, Math.min(99, Math.round(pre*0.85 - adh*0.55 + 20)));
-  const typ=sci>=65?'🔬 严谨可检验科学假说':(sci>=35?'⚠️ 模糊擦边理论':'🔮 不可证伪伪科学/算命');
-  document.getElementById('kSci').textContent=sci+' 分';
-  document.getElementById('kSci').style.color=sci>=65?'#059669':'#ef4444';
-  document.getElementById('kTyp').textContent=typ;
-  const w=Math.max(15, sci*4.4);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">理论含金量与可证伪性标尺（敢于禁止某些事情发生，才有信息量）</text>
-    <rect x="30" y="68" width="440" height="40" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${w.toFixed(0)}" height="40" rx="8" fill="${sci>=65?'#059669':(sci>=35?'#f59e0b':'#ef4444')}"/>
-    <text x="${Math.min(480, 38+w).toFixed(0)}" y="94" font-size="14" font-weight="850" fill="${sci>=65?'#059669':'#ef4444'}">${sci} 分</text>
-    <text x="30" y="144" font-size="11.5" fill="var(--tax-muted)">爱因斯坦敢预言“星光精确偏折 1.75 角秒，不符就认错”；</text>
-    <text x="30" y="166" font-size="11.5" fill="var(--tax-muted)">而星座运势说“近期有波动”，永远不会错，所以毫无信息量！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>衡量一个观点有没有价值，先问一句：“什么证据出现时，你会承认它是错的？”如果回答“没有”，那它只是信仰而非知识。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const ITEMS = [
+      { text: '“水星近日点进动每世纪精确为 43 角秒，且星光经过太阳边缘会偏折 1.75 角秒。”', falsifiable: true, exp: '高度可证伪！爱因斯坦广义相对论给出了精确数字——1919 年日全食观测只要偏离这个数，相对论就会当场被推翻！' },
+      { text: '“你表面看起来外向开朗，但内心深处其实常常渴望独处，最近在人际或事业上正面临转折。”', falsifiable: false, exp: '不可证伪（巴纳姆效应+模糊算命）！无论发生在谁身上都能硬套，你根本找不到任何观测事实能证明这句话是错的。' },
+      { text: '“明天地球上不会出现一只会说中文的野生企鹅，且纯水在标准大气压下 100℃ 沸腾。”', falsifiable: true, exp: '高度可证伪！只要拿温度计在标准大气压下测出纯水 80℃ 沸腾，立刻就能证伪。' },
+      { text: '“这个护身符极其灵验：如果考试过了是它保佑；如果没过，说明你心不够诚或帮挡了更大的灾。”', falsifiable: false, exp: '经典不可证伪闭环！正反两种结果都被提前包圆，永远立于不败之地的说法不是真理，而是拒绝检验的文字游戏。' }
+    ];
+
+    let idx = 0, score = 0, locked = false, done = false;
+    const btnSci = document.getElementById('btnSci');
+    const btnPseudo = document.getElementById('btnPseudo');
+    const nextBtn = document.getElementById('nextBtn');
+    const fbTxt = document.getElementById('fbTxt');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const it = ITEMS[idx];
+      locked = false;
+      nextBtn.style.display = 'none';
+      btnSci.className = 'cls-btn';
+      btnPseudo.className = 'cls-btn';
+      document.getElementById('idxTag').textContent = `论断 ${idx + 1} / ${ITEMS.length}`;
+      document.getElementById('stmtTxt').textContent = it.text;
+      fbTxt.textContent = '它是否敢给出“可能被打脸的明确预言”？';
+    }
+
+    function answer(choiceSci) {
+      if (locked) return;
+      locked = true;
+      const it = ITEMS[idx];
+      const ok = choiceSci === it.falsifiable;
+      (choiceSci ? btnSci : btnPseudo).classList.add(ok ? 'ok' : 'bad');
+      if (ok) score++;
+      document.getElementById('scoreTag').textContent = `准确鉴定：${score} / ${ITEMS.length}`;
+      fbTxt.textContent = ok ? '✓ 鉴定精准！' : '✕ 落入语言迷雾，看下方波普尔判定';
+      ahaBox.innerHTML = `<strong>${it.falsifiable ? '🔬 可证伪（科学）' : '🔮 不可证伪（伪科学/圆场）'}：</strong>${it.exp}`;
+      if (idx === ITEMS.length - 1) {
+        markDone(`完成波普尔可证伪性雷达盲测（${score}/4）`);
+        nextBtn.textContent = '↺ 重新鉴定';
+      } else {
+        nextBtn.textContent = '下一条论断 →';
+      }
+      nextBtn.style.display = 'inline-block';
+    }
+
+    btnSci.onclick = () => answer(true);
+    btnPseudo.onclick = () => answer(false);
+    nextBtn.onclick = () => {
+      if (idx === ITEMS.length - 1) { idx = 0; score = 0; document.getElementById('scoreTag').textContent = '准确鉴定：0 / 4'; }
+      else idx++;
+      render();
+    };
+    render();
   </script>
 </body>
 </html>

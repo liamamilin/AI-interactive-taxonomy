@@ -1,69 +1,152 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧱 组块的双刃剑：定势思维陷阱</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>组块的双刃剑：定势思维陷阱</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .jar-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0; }
+    .jar-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; }
+    .jar-num { font-size: 26px; font-weight: 800; color: var(--tax-primary); }
+    .opt-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    @media (max-width: 600px) { .opt-list { grid-template-columns: 1fr; } }
+    .opt-btn {
+      padding: 12px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+    .opt-btn:hover { border-color: var(--tax-primary); }
+    .opt-btn.ok { border-color: var(--tax-green); background: var(--tax-green-soft); color: var(--tax-green); }
+    .opt-btn.trap { border-color: var(--tax-amber); background: var(--tax-amber-soft); color: var(--tax-amber); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🧱 组块的双刃剑：定势思维陷阱</h1><p>当环境规则突然改变时，过度自动化的旧组块反而会变成“盲区”，让你死活看不到更简单的新解法。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>旧套路自动化固化程度</span><span id="vFix">80%</span></label><input type="range" id="sFix" min="10" max="100" value="80" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>新环境底层规则变异度</span><span id="vChg">70%</span></label><input type="range" id="sChg" min="0" max="100" value="70" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🧱 组块的双刃剑：定势思维陷阱（经典量水盲测）</h1>
+      <p>复现 Luchins (1942) 著名的<strong>定势效应（Einstellung Effect）</strong>实验！给你 A、B、C 三个水壶，快速选出量出目标水量的公式。共 3 关，千万别放松警惕！</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong id="stageTitle" style="font-size:15px;">第 1 关 / 3 · 目标水量：100 升</strong>
+        <span id="stepHint" style="font-size:12px;color:var(--tax-muted);">建立解题组块中…</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">老手表现效率</div><div class="k-val" id="kVet">—</div></div>
-        <div class="kpi"><div class="k-lbl">陷入定势盲区风险</div><div class="k-val" id="kTrap">—</div></div>
+
+      <div class="jar-row">
+        <div class="jar-card"><div style="font-size:12px;color:var(--tax-muted);">水壶 A</div><div class="jar-num" id="jarA">21</div></div>
+        <div class="jar-card"><div style="font-size:12px;color:var(--tax-muted);">水壶 B</div><div class="jar-num" id="jarB">127</div></div>
+        <div class="jar-card"><div style="font-size:12px;color:var(--tax-muted);">水壶 C</div><div class="jar-num" id="jarC">3</div></div>
       </div>
+
+      <div class="opt-list" id="optList"></div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">
+        <span id="fbLine" style="font-size:13px;color:var(--tax-muted);">点击下方公式作答</span>
+        <button class="toy-btn secondary" id="nextBtn" style="display:none;">进入下一关 →</button>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>实验说明：</strong>先快速解开前两关，然后看第 3 关你有没有掉进专家最常踩的“组块自动巡航”陷阱！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const fix=+document.getElementById('sFix').value, chg=+document.getElementById('sChg').value;
-  document.getElementById('vFix').textContent=fix+'%';
-  document.getElementById('vChg').textContent=chg+'%';
-  const trap=Math.round((fix*chg)/100);
-  const vet=Math.max(12, Math.min(98, Math.round(50 + fix*0.45 - trap*0.75)));
-  document.getElementById('kVet').textContent=vet+' 分';
-  document.getElementById('kTrap').textContent=trap+'%';
-  document.getElementById('kTrap').style.color=trap>50?'#ef4444':'#059669';
-  const wV=Math.max(12, vet*3.6), wT=Math.max(12, trap*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">规则稳定时组块是加速器，规则剧变时组块变绊脚石</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">综合应对效能</text>
-    <rect x="145" y="64" width="${wV.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
-    <text x="${(153+wV).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#3b82f6">${vet} 分</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">定势盲区风险</text>
-    <rect x="145" y="120" width="${wT.toFixed(0)}" height="28" rx="6" fill="${trap>50?'#ef4444':'#f59e0b'}"/>
-    <text x="${(153+wT).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="${trap>50?'#ef4444':'#d97706'}">${trap}%</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">${trap>50?'⚠️ 规则大变时，老手最容易犯“拿着锤子看啥都是钉子”的错误！':'✅ 规则相对稳定或保持开放拆解，经验组块发挥正向复利！'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>面对范式转移（如 AI 时代），刻意“拆开旧组块”、回归第一性原理，才能避免被过去的成功经验锁死。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const LEVELS = [
+      {
+        title: '第 1 关 / 3 · 目标水量：100 升',
+        hint: '热身关',
+        a: 21, b: 127, c: 3, target: 100,
+        options: [
+          { label: 'B − A − 2C（127 − 21 − 6 = 100）', type: 'ok', msg: '✓ 正确！记住这个顺手的套路：B − A − 2C。' },
+          { label: 'A + 2C（21 + 6 = 27）', type: 'wrong', msg: '✕ 算出来是 27，不是 100，再试一次。' }
+        ]
+      },
+      {
+        title: '第 2 关 / 3 · 目标水量：99 升',
+        hint: '强化组块中…',
+        a: 14, b: 163, c: 25, target: 99,
+        options: [
+          { label: 'B − A − 2C（163 − 14 − 50 = 99）', type: 'ok', msg: '✓ 秒解！同样的 B − A − 2C 组块再次奏效，你的大脑已经准备自动复用了！' },
+          { label: 'B − 2C（163 − 50 = 113）', type: 'wrong', msg: '✕ 结果是 113，不是 99。' }
+        ]
+      },
+      {
+        title: '第 3 关 / 3（关键测试！）· 目标水量：20 升',
+        hint: '请尽快选出你的解法！',
+        a: 23, b: 49, c: 3, target: 20,
+        options: [
+          { label: 'B − A − 2C（49 − 23 − 6 = 20）', type: 'trap', msg: '⚠️ 掉进定势思维陷阱了！虽然 B − A − 2C 也能算出 20，但你完全没看见旁边一步搞定的 <strong>A − C（23 − 3 = 20）</strong>！' },
+          { label: 'A − C（23 − 3 = 20，一步直达！）', type: 'ok', msg: '🎯 成功跳出定势！你没有被前两关的 B − A − 2C 组块劫持，一眼发现了最简一步解！' }
+        ]
+      }
+    ];
+
+    let idx = 0;
+    let locked = false;
+    let done = false;
+
+    const optList = document.getElementById('optList');
+    const fbLine = document.getElementById('fbLine');
+    const nextBtn = document.getElementById('nextBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const lv = LEVELS[idx];
+      locked = false;
+      nextBtn.style.display = 'none';
+      document.getElementById('stageTitle').textContent = lv.title;
+      document.getElementById('stepHint').textContent = lv.hint;
+      document.getElementById('jarA').textContent = lv.a;
+      document.getElementById('jarB').textContent = lv.b;
+      document.getElementById('jarC').textContent = lv.c;
+      fbLine.textContent = '选择公式量出目标水量';
+      optList.innerHTML = '';
+
+      lv.options.forEach(opt => {
+        const b = document.createElement('button');
+        b.className = 'opt-btn';
+        b.textContent = opt.label;
+        b.onclick = () => {
+          if (locked && opt.type !== 'wrong') return;
+          if (opt.type === 'wrong') {
+            fbLine.innerHTML = opt.msg;
+            return;
+          }
+          locked = true;
+          b.classList.add(opt.type === 'trap' ? 'trap' : 'ok');
+          fbLine.innerHTML = opt.msg;
+
+          if (idx < LEVELS.length - 1) {
+            nextBtn.textContent = '进入下一关 →';
+            nextBtn.style.display = 'inline-block';
+          } else {
+            markDone(`完成定势思维盲测（第3关结果：${opt.type === 'trap' ? '触发定势' : '识破捷径'}）`);
+            nextBtn.textContent = '↺ 重新体验';
+            nextBtn.style.display = 'inline-block';
+            ahaBox.innerHTML = opt.type === 'trap'
+              ? '<strong>这就是“定势效应（Einstellung）”！</strong>Luchins 实验发现，前几轮练熟复杂套路的组块后，超过 80% 的人会盲目套用旧公式而对一步直达的新解视而不见。专家越资深，越需要主动问一句：“如果从零开始，有没有更简单的解法？”'
+              : '<strong>敏锐破局！</strong>在真实实验室里，当受试者连做 5 轮 B−A−2C 后，超过 80% 的人（包括经验丰富的专家）都会在第 3 关自动套用旧组块而漏掉 A−C。保持“初学者心态”正是对抗组块僵化的解药！';
+          }
+        };
+        optList.appendChild(b);
+      });
+    }
+
+    nextBtn.onclick = () => {
+      idx = (idx + 1) % LEVELS.length;
+      render();
+    };
+    render();
   </script>
 </body>
 </html>

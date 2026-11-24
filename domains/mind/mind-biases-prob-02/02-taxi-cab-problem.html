@@ -7,65 +7,96 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .quiz-box { padding:14px 16px; border-radius:12px; border:1.5px solid var(--tax-primary); background:var(--tax-primary-soft); margin-bottom:14px; }
+    .quiz-box p { font-size:13.5px; margin-bottom:10px; }
+    .opt-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; }
+    .opt { padding:10px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface); color:var(--tax-ink); font-size:13.5px; font-weight:850; cursor:pointer; }
+    .opt:hover { border-color:var(--tax-primary); }
+    .opt.sel { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🚕 卡尼曼蓝绿出租车难题</h1><p>城市里 85% 是绿车、15% 是蓝车。夜间目击者指认肇事车是蓝车，其夜间辨色准确率 80%——肇事车真是蓝车的概率其实不到一半！</p></div>
+      <div>
+        <h1>🚕 卡尼曼蓝绿出租车难题</h1>
+        <p>诺贝尔奖得主卡尼曼最著名的认知实验：全城 <strong>85% 是绿车、15% 是蓝车</strong>。夜晚发生肇事逃逸，目击者指认是<strong>蓝车</strong>（经测试，他夜间辨色准确率是 <strong>80%</strong>）。请凭第一直觉盲猜！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>全城蓝车占比（基础比率）</span><span id="vBlu">15%</span></label><input type="range" id="sBlu" min="5" max="80" value="15" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>目击者夜间辨色准确率</span><span id="vAcc">80%</span></label><input type="range" id="sAcc" min="55" max="98" value="80" oninput="draw()"></div>
+      <div class="quiz-box">
+        <p><strong>🕵️ 盲测挑战：</strong>肇事逃逸的出租车<strong>真的是蓝车</strong>的概率大约是多少？</p>
+        <div class="opt-row">
+          <button class="opt" onclick="guess(80,this)">A. 约 80%</button>
+          <button class="opt" onclick="guess(65,this)">B. 约 65%</button>
+          <button class="opt" onclick="guess(41,this)">C. 约 41%</button>
+          <button class="opt" onclick="guess(15,this)">D. 约 15%</button>
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">直觉误猜概率</div><div class="k-val" id="kInt">—</div></div>
-        <div class="kpi"><div class="k-lbl">贝叶斯真实概率</div><div class="k-val" id="kBay">—</div></div>
-      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const blu=+document.getElementById('sBlu').value, acc=+document.getElementById('sAcc').value;
-  document.getElementById('vBlu').textContent=blu+'%';
-  document.getElementById('vAcc').textContent=acc+'%';
-  const grn=100 - blu;
-  const trueBlue=blu*acc;
-  const falseBlue=grn*(100 - acc);
-  const bay=Math.round(trueBlue/(trueBlue+falseBlue)*100);
-  document.getElementById('kInt').textContent=acc+'% (直接信目击者)';
-  document.getElementById('kBay').textContent=bay+'%';
-  document.getElementById('kBay').style.color=bay<50?'#ef4444':'#3b82f6';
-  const w1=Math.max(12, acc*3.6), w2=Math.max(12, bay*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">目击者说“是蓝车”时：直觉 vs 贝叶斯真相</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">直觉（忽略基数）</text>
-    <rect x="160" y="64" width="${w1.toFixed(0)}" height="28" rx="6" fill="#94a3b8"/>
-    <text x="${(168+w1).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="var(--tax-muted)">${acc}%</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">贝叶斯后验概率</text>
-    <rect x="160" y="120" width="${w2.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
-    <text x="${(168+w2).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#2563eb">${bay}%</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">每 100 起事故：真蓝车被认对 ${(trueBlue/100).toFixed(1)} 次，绿车被错认成蓝车 ${(falseBlue/100).toFixed(1)} 次。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>人类大脑酷爱生动的具体故事（目击者证词），天生讨厌枯燥的统计底数（全城车辆比例）——这就是基础比率谬误的根源。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let picked = null;
+
+    function guess(val, btn){
+      picked = val;
+      document.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));
+      if(btn) btn.classList.add('sel');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      if(picked === null){
+        document.getElementById('svg').innerHTML = `
+          <rect x="40" y="34" width="560" height="145" rx="14" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-dasharray="6 4"/>
+          <text x="320" y="96" text-anchor="middle" font-size="16" font-weight="900" fill="var(--tax-primary)">🚕 请先点击上方 A / B / C / D 做出你的直觉盲猜！</text>
+          <text x="320" y="128" text-anchor="middle" font-size="12.5" fill="var(--tax-muted)">提交后立刻展开 100 辆出租车的贝叶斯自然频率拆解树</text>
+        `;
+        document.getElementById('ahaBox').innerHTML = `💡 <strong>实验提示：</strong>在卡尼曼的真实实验中，超过 <strong>80% 的受试者（包括名校研究生）</strong>都会脱口而出选 A（80%）——完全忽略了全城 85% 都是绿车的先验基数！`;
+        return;
+      }
+
+      // Reveal 100-cab tree: 15 Blue -> 12 seen Blue (80%), 3 seen Green; 85 Green -> 17 misread as Blue (20%), 68 seen Green
+      // Total "witness says Blue" = 12 + 17 = 29; True Blue = 12/29 = 41.4%
+      document.getElementById('svg').innerHTML = `
+        <rect x="24" y="76" width="110" height="58" rx="12" fill="var(--tax-primary-soft)" stroke="var(--tax-primary)" stroke-width="2"/>
+        <text x="79" y="102" text-anchor="middle" font-size="13" font-weight="900" fill="var(--tax-primary)">100 辆车</text>
+        <text x="79" y="120" text-anchor="middle" font-size="10.5" fill="var(--tax-muted)">全城先验分布</text>
+
+        <line x1="134" y1="92" x2="196" y2="52" stroke="var(--tax-primary)" stroke-width="2.5"/>
+        <line x1="134" y1="118" x2="196" y2="154" stroke="var(--tax-green)" stroke-width="2.5"/>
+
+        <rect x="198" y="24" width="150" height="56" rx="10" fill="var(--tax-primary-soft)" stroke="var(--tax-primary)" stroke-width="2"/>
+        <text x="273" y="48" text-anchor="middle" font-size="12.5" font-weight="850" fill="var(--tax-primary)">🔵 真蓝车：15 辆</text>
+        <text x="273" y="68" text-anchor="middle" font-size="11" fill="var(--tax-muted)">80% 认对 → 12 辆</text>
+
+        <rect x="198" y="126" width="150" height="56" rx="10" fill="var(--tax-green-soft)" stroke="var(--tax-green)" stroke-width="2"/>
+        <text x="273" y="150" text-anchor="middle" font-size="12.5" font-weight="850" fill="var(--tax-green)">🟢 真绿车：85 辆</text>
+        <text x="273" y="170" text-anchor="middle" font-size="11" fill="var(--tax-muted)">20% 看错成蓝 → 17 辆!</text>
+
+        <line x1="348" y1="52" x2="412" y2="92" stroke="var(--tax-primary)" stroke-width="3"/>
+        <line x1="348" y1="154" x2="412" y2="114" stroke="var(--tax-amber)" stroke-width="3"/>
+
+        <rect x="414" y="42" width="204" height="122" rx="14" fill="var(--tax-amber-soft)" stroke="var(--tax-amber)" stroke-width="2.4"/>
+        <text x="516" y="70" text-anchor="middle" font-size="12.5" font-weight="900" fill="var(--tax-amber)">目击者喊“蓝车”共 29 次</text>
+        <text x="516" y="96" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-primary)">真蓝：12 次</text>
+        <text x="516" y="116" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-red)">绿看成蓝：17 次！</text>
+        <text x="516" y="146" text-anchor="middle" font-size="15" font-weight="900" fill="var(--tax-ink)">12 ÷ 29 = 41.4%</text>
+      `;
+
+      const right = picked === 41;
+      document.getElementById('ahaBox').innerHTML = right
+        ? `🎉 <strong>精准命中（41.4%）！</strong>你成功抵挡住了“目击者 80% 准确率”的诱惑！因为全城绿车基数实在太大（85 辆），哪怕只看错 20% 也有 <strong>17 辆假蓝车</strong>，直接超过了 12 辆真蓝车——肇事车其实大概率还是绿车！`
+        : `💡 <strong>真相揭晓（你选了 ${picked}%，正确答案是 C. 41.4%）：</strong>别灰心，80% 的名校学生都会掉进这个直觉陷阱！关键在于把 85% 绿车乘以 20% 误看率 = <strong>17 辆</strong>，竟比 15 辆蓝车认对的 <strong>12 辆</strong>还多！<strong>直觉爱听生动个案，理性必须先算先验基数！</strong>`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

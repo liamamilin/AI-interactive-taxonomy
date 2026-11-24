@@ -1,71 +1,150 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>💓 把紧张当成兴奋：心跳加速的重新归因</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>把紧张当成兴奋：心跳加速的重新归因</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .scene-box { padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    @media (max-width: 600px) { .choice-grid { grid-template-columns: 1fr; } }
+    .opt-btn {
+      text-align: left; padding: 12px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); cursor: pointer;
+    }
+    .opt-btn.good { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .opt-btn.bad { border-color: var(--tax-amber); background: var(--tax-amber-soft); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>💓 把紧张当成兴奋：心跳加速的重新归因</h1><p>哈佛商学院实验：上台演讲前心跳 120 时，默念“我好冷静”往往失败（生理状态反差太大）；改说“我好兴奋！”竟能让表现飙升！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>💓 把紧张当成兴奋：心跳加速的重新归因（情景实验）</h1>
+      <p>哈佛商学院 Alison Wood Brooks (2014) 发现：紧张和兴奋的生理信号几乎一模一样（心跳 115 bpm、手心出汗、肾上腺素飙升）。临上场前，你的自我对话选“强行冷静”还是“转向兴奋”？</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="scene-box">
+        <div style="font-size:12px;color:var(--tax-muted);" id="stepTag">情境 1 / 3 · 当前心率：118 bpm（高唤醒态）</div>
+        <div style="font-size:16px;font-weight:700;margin-top:4px;" id="sceneTitle"></div>
+        <div class="choice-grid" id="choiceGrid"></div>
+      </div>
+
+      <svg id="quadSvg" viewBox="0 0 680 175" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="焦虑重评为兴奋的情绪象限跳转"></svg>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+        <span id="scoreLine" style="font-size:13px;color:var(--tax-muted);">完成重新归因：0 / 3</span>
+        <button class="toy-btn secondary" id="nextBtn" style="display:none;">下一个高压场景 →</button>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>生理秘密：</strong>“焦虑”和“兴奋”同属<strong>高唤醒（High Arousal）</strong>，一步跨过去极容易；而“冷静”属于低唤醒，临场硬压心率几乎不可能成功！
     </div>
-    <div class="tax-panel">
-      <div class="btn-row">
-        <button class="btn active" onclick="setM('calm',this)">自我催眠：“我一点都不紧张，我很冷静”</button>
-        <button class="btn" onclick="setM('excite',this)">高唤醒重评：“心跳加速说明我超兴奋，准备好了！”</button>
-      </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>上台前生理心跳唤醒强度</span><span id="vHr">80%（手心出汗）</span></label><input type="range" id="sHr" min="30" max="100" value="80" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">认知-生理冲突损耗</div><div class="k-val" id="kCnf">—</div></div>
-        <div class="kpi"><div class="k-lbl">演讲/面试综合得分</div><div class="k-val" id="kScr">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-let sm='calm';
-function setM(m,btn){ sm=m; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const hr=+document.getElementById('sHr').value;
-  document.getElementById('vHr').textContent=hr+'%';
-  const cnf=sm==='calm' ? Math.round(hr*0.78) : Math.round(hr*0.18);
-  const scr=sm==='calm' ? Math.max(35, Math.round(88 - cnf*0.55)) : Math.min(96, Math.round(68 + hr*0.24));
-  document.getElementById('kCnf').textContent=cnf+'%';
-  document.getElementById('kCnf').style.color=cnf>40?'#ef4444':'#059669';
-  document.getElementById('kScr').textContent=scr+' 分';
-  document.getElementById('kScr').style.color='#059669';
-  const w=Math.max(15, scr*4.4);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">焦虑和兴奋都是“高唤醒”状态，顺势借力远比强行压抑容易！</text>
-    <rect x="30" y="68" width="440" height="40" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${w.toFixed(0)}" height="40" rx="8" fill="${sm==='excite'?'#059669':'#f59e0b'}"/>
-    <text x="${Math.min(480, 38+w).toFixed(0)}" y="94" font-size="14" font-weight="850" fill="${sm==='excite'?'#059669':'#d97706'}">${scr} 分</text>
-    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">${sm==='calm'?'试图从高唤醒一步跳到低唤醒（冷静），身体根本不信，反而引发二次焦虑！':'把高唤醒的肾上腺素贴上“兴奋挑战”标签，血管舒张，能量直接变燃料！'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>心跳加速不是你怯场的证明，而是身体正在往你大脑和肌肉里泵送额外氧气与能量。接住它，说一句“我很兴奋”！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const SCENES = [
+      {
+        title: '还有 2 分钟轮到你上台做全公司年度演讲，心跳狂飙、手心微微发凉：',
+        calm: { title: '🧊 默念：“别紧张，我要冷静下来”', perf: 61, fb: '表现分 61：强行把 118 bpm 压成“冷静”逆着生理潮流，越压越发现压不住，反而更慌！' },
+        excite: { title: '🔥 默念：“我好兴奋！身体在给我充能！”', perf: 86, fb: '表现分 86（+25 分！）：Brooks 实验证实，说出“我很兴奋”能把威胁心态切换成机遇心态，声音更洪亮、说服力暴涨！' }
+      },
+      {
+        title: '你刚走进梦寐以求公司的终面会议室，呼吸变浅、肾上腺素飙升：',
+        calm: { title: '🧊 默念：“千万别慌，稳住别露馅”', perf: 58, fb: '表现分 58：“别出错”的防御框架会缩窄表达创造力，显得拘谨呆板。' },
+        excite: { title: '🔥 默念：“终于能展示我的作品了，太带感了！”', perf: 88, fb: '表现分 88（+30 分！）：同样高心率，被大脑解读成“期待展示”后，临场应变与眼神交流明显更自信！' }
+      },
+      {
+        title: '大型数学/代码限时赛开考前 30 秒，胃里像有蝴蝶在飞：',
+        calm: { title: '🧊 默念：“心跳快是不是要考砸了，快静下来”', perf: 64, fb: '表现分 64：把心跳解读成“考砸前兆”会额外占用宝贵的工作记忆带宽。' },
+        excite: { title: '🔥 默念：“这是大脑在给前额叶泵氧，准备大干一场！”', perf: 89, fb: '表现分 89（+25 分！）：把生理信号重新归因为“能量补给”，不仅不消耗带宽，还能让专注力瞬间拉满！' }
+      }
+    ];
+
+    let idx = 0, wins = 0, picked = null, done = false;
+    const svg = document.getElementById('quadSvg');
+    const nextBtn = document.getElementById('nextBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function drawMap(mode) {
+      let html = '';
+      // 3 nodes: Anxiety (left-top), Excitement (right-top), Calm (right-bottom)
+      html += `<rect x="46" y="28" width="170" height="54" rx="10" fill="rgba(239,68,68,0.16)" stroke="var(--tax-red)" stroke-width="2"/>`;
+      html += `<text x="131" y="51" text-anchor="middle" fill="var(--tax-red)" font-size="13" font-weight="800">😰 焦虑（高唤醒·负向）</text>`;
+      html += `<text x="131" y="70" text-anchor="middle" fill="var(--tax-muted)" font-size="11">心率 118 bpm · 威胁态</text>`;
+
+      html += `<rect x="464" y="28" width="170" height="54" rx="10" fill="rgba(16,185,129,0.18)" stroke="var(--tax-green)" stroke-width="2"/>`;
+      html += `<text x="549" y="51" text-anchor="middle" fill="var(--tax-green)" font-size="13" font-weight="800">🔥 兴奋（高唤醒·正向）</text>`;
+      html += `<text x="549" y="70" text-anchor="middle" fill="var(--tax-muted)" font-size="11">心率 118 bpm · 机遇态</text>`;
+
+      html += `<rect x="464" y="112" width="170" height="48" rx="10" fill="rgba(148,163,184,0.14)" stroke="var(--tax-border)" stroke-width="1.5"/>`;
+      html += `<text x="549" y="135" text-anchor="middle" fill="var(--tax-muted)" font-size="13" font-weight="700">🧊 冷静（低唤醒·正向）</text>`;
+      html += `<text x="549" y="152" text-anchor="middle" fill="var(--tax-muted)" font-size="11">心率 68 bpm · 临场难达到</text>`;
+
+      // Arrows
+      const hiEx = mode === 'excite';
+      const hiCa = mode === 'calm';
+      html += `<line x1="216" y1="55" x2="460" y2="55" stroke="${hiEx ? 'var(--tax-green)' : 'var(--tax-border)'}" stroke-width="${hiEx ? 4 : 2}"/>`;
+      html += `<text x="340" y="45" text-anchor="middle" fill="${hiEx ? 'var(--tax-green)' : 'var(--tax-muted)'}" font-size="12" font-weight="700">顺势横移（同频高唤醒，极易成功 ✓）</text>`;
+
+      html += `<line x1="216" y1="74" x2="460" y2="132" stroke="${hiCa ? 'var(--tax-amber)' : 'var(--tax-border)'}" stroke-width="${hiCa ? 3.5 : 1.5}" stroke-dasharray="5 4"/>`;
+      html += `<text x="330" y="128" text-anchor="middle" fill="${hiCa ? 'var(--tax-amber)' : 'var(--tax-muted)'}" font-size="11.5" font-weight="700">逆势硬压心率（跨度太大，容易失败 ✕）</text>`;
+      svg.innerHTML = html;
+    }
+
+    function render() {
+      const s = SCENES[idx];
+      picked = null;
+      nextBtn.style.display = 'none';
+      document.getElementById('stepTag').textContent = `情境 ${idx + 1} / 3 · 当前心率：118 bpm（高唤醒态）`;
+      document.getElementById('sceneTitle').textContent = s.title;
+      const grid = document.getElementById('choiceGrid');
+      grid.innerHTML = '';
+
+      [
+        { key: 'calm', data: s.calm },
+        { key: 'excite', data: s.excite }
+      ].forEach(item => {
+        const b = document.createElement('button');
+        b.className = 'opt-btn';
+        b.innerHTML = `<div style="font-weight:700;font-size:14px;">${item.data.title}</div>`;
+        b.onclick = () => {
+          if (picked) return;
+          picked = item.key;
+          b.classList.add(item.key === 'excite' ? 'good' : 'bad');
+          if (item.key === 'excite') wins++;
+          document.getElementById('scoreLine').textContent = `完成兴奋重评：${wins} / 3`;
+          drawMap(item.key);
+          ahaBox.innerHTML = `<strong>${item.key === 'excite' ? '⚡ 顺势重评成功' : '⚠️ 逆势压抑受阻'}：</strong>${item.data.fb}`;
+          if (idx === SCENES.length - 1) {
+            markDone(`完成紧张重评为兴奋情景实验（${wins}/3）`);
+            nextBtn.textContent = '↺ 重头体验';
+          } else {
+            nextBtn.textContent = '下一个高压场景 →';
+          }
+          nextBtn.style.display = 'inline-block';
+        };
+        grid.appendChild(b);
+      });
+      drawMap(null);
+    }
+
+    nextBtn.onclick = () => {
+      if (idx === SCENES.length - 1) { idx = 0; wins = 0; document.getElementById('scoreLine').textContent = '完成兴奋重评：0 / 3'; }
+      else idx++;
+      render();
+    };
+    render();
   </script>
 </body>
 </html>

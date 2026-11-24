@@ -1,71 +1,129 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔋 意志力硬扛 vs 屏蔽诱惑：全天胜率曲线</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>意志力硬扛 vs 屏蔽诱惑：全天胜率曲线</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .s-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .big-num { font-size: 22px; font-weight: 800; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔋 意志力硬扛 vs 屏蔽诱惑：全天胜率曲线</h1><p>心理学追踪研究发现：高自控力人群并不是“更能忍受诱惑”，而是他们主动设计生活，让自己一天遇到诱惑的次数远少于常人！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>全天直面诱惑的暴露次数（如零食摆桌）</span><span id="vExp">12 次</span></label><input type="range" id="sExp" min="1" max="25" value="12" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>单次抵抗成功概率（意志力）</span><span id="vRes">85%</span></label><input type="range" id="sRes" min="50" max="98" value="85" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔋 意志力硬扛 vs 屏蔽诱惑：全天 15 小时耐力赛</h1>
+      <p>心理学追踪研究（Hofmann et al., 2012）颠覆了常识：<strong>自控力最高的人并不是最会“硬忍诱惑”的人，而是最少让自己暴露在诱惑面前的人！</strong>按下播放键，追踪 8:00 到 23:00 的意志力电量竞速。</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="playBtn">▶ 播放 8:00–23:00 全天竞速</button>
+        <button class="toy-btn secondary" id="jumpBtn">⏩ 跳到 22:00 深夜破防时刻</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重置回早 8 点</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">全天一次不破戒的概率</div><div class="k-val" id="kAll">—</div></div>
-        <div class="kpi"><div class="k-lbl">防线结论</div><div class="k-val" id="kVer">—</div></div>
+
+      <svg id="raceSvg" viewBox="0 0 680 215" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="意志力硬扛与屏蔽诱惑全天电量竞速"></svg>
+
+      <div class="cards">
+        <div class="s-card">
+          <div style="font-size:12px;color:var(--tax-muted);">😤 桌面摆满零食+手机（硬扛派）</div>
+          <div class="big-num" id="wVal" style="color:var(--tax-red);">100% 电量</div>
+        </div>
+        <div class="s-card">
+          <div style="font-size:12px;color:var(--tax-muted);">🛡️ 视线外隔离诱惑（环境派）</div>
+          <div class="big-num" id="eVal" style="color:var(--tax-green);">100% 电量</div>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>竞速观察：</strong>早上 8 点两人都满血 100%。点开播放键，看经过 6 次决策疲惫与诱惑消耗后，谁能活过晚上 22:00！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const exp=+document.getElementById('sExp').value, res=+document.getElementById('sRes').value;
-  document.getElementById('vExp').textContent=exp+' 次';
-  document.getElementById('vRes').textContent=res+'%';
-  const all=Math.max(1, Math.round(Math.pow(res/100, exp)*100));
-  document.getElementById('kAll').textContent=all+'%';
-  document.getElementById('kAll').style.color=all>=65?'#059669':'#ef4444';
-  document.getElementById('kVer').textContent=all>=65?'✅ 暴露极少，轻松守住':'💥 久守必失（连乘坍塌）';
-  let pts=[];
-  for(let n=1;n<=25;n++){
-    const p=Math.pow(res/100, n)*100;
-    pts.push(`${(45+n*20).toFixed(1)},${(172-p*1.3).toFixed(1)}`);
-  }
-  const cx=45+exp*20, cy=172-all*1.3;
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">连乘陷阱：单次 ${res}% 自控力，连续扛 ${exp} 次后全天守约率只剩 ${all}%</text>
-    <line x1="45" y1="172" x2="555" y2="172" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <polyline points="${pts.join(' ')}" fill="none" stroke="#ef4444" stroke-width="3"/>
-    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="#3b82f6" stroke="#fff" stroke-width="2"/>
-    <text x="45" y="192" font-size="11" fill="var(--tax-muted)">暴露 1 次</text>
-    <text x="515" y="192" font-size="11" fill="var(--tax-muted)">25 次</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕你的意志力高达 85%，只要把薯片放在手边路过 15 次，全天不吃的概率就跌破 9%！根本不买回家，暴露次数直接降为 0。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+    const WILL =  [100, 92, 80, 72, 60, 54, 42, 34, 24, 18, 12, 8, 5, 3, 0, 0];
+    const ENV  =  [100, 98, 96, 94, 91, 90, 88, 86, 85, 83, 82, 80, 79, 78, 76, 75];
+
+    let step = 0;
+    let playing = false;
+    let timer = null;
+    let done = false;
+
+    const svg = document.getElementById('raceSvg');
+    const playBtn = document.getElementById('playBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function draw() {
+      const hr = HOURS[step];
+      const w = WILL[step], e = ENV[step];
+      document.getElementById('wVal').textContent = w <= 10 ? `${w}%（💥 彻底破防暴食/刷剧）` : `${w}% 电量`;
+      document.getElementById('eVal').textContent = `${e}% 电量（稳健达标）`;
+
+      const xOf = i => 48 + (i / (HOURS.length - 1)) * 592;
+      const yOf = v => 180 - (v / 100) * 140;
+
+      let wPts = [], ePts = [];
+      for (let i = 0; i <= step; i++) {
+        wPts.push(`${xOf(i).toFixed(1)},${yOf(WILL[i]).toFixed(1)}`);
+        ePts.push(`${xOf(i).toFixed(1)},${yOf(ENV[i]).toFixed(1)}`);
+      }
+
+      let html = '';
+      // Collapse zone (<20%)
+      html += `<rect x="48" y="${yOf(20)}" width="592" height="${yOf(0) - yOf(20)}" fill="rgba(239,68,68,0.14)"/>`;
+      html += `<text x="56" y="${yOf(20) + 14}" fill="var(--tax-red)" font-size="11" font-weight="700">⚠️ 20% 破防警戒线（一碰即溃）</text>`;
+
+      [0, 3, 6, 9, 12, 15].forEach(i => {
+        html += `<text x="${xOf(i)}" y="200" text-anchor="middle" fill="var(--tax-muted)" font-size="11">${HOURS[i]}:00</text>`;
+      });
+
+      if (wPts.length > 1) {
+        html += `<polyline points="${wPts.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3"/>`;
+        html += `<polyline points="${ePts.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3"/>`;
+      }
+      html += `<circle cx="${xOf(step)}" cy="${yOf(w)}" r="6" fill="var(--tax-red)"/>`;
+      html += `<circle cx="${xOf(step)}" cy="${yOf(e)}" r="6" fill="var(--tax-green)"/>`;
+      html += `<text x="340" y="24" text-anchor="middle" fill="var(--tax-ink)" font-size="13" font-weight="700">当前时间：${hr}:00</text>`;
+      svg.innerHTML = html;
+
+      if (hr >= 20) {
+        ahaBox.innerHTML = '<strong>晚间破防真相（0% vs 76%）：</strong>硬扛派白天每忍住看一次手机、每忍住吃一块饼干，都在疯狂扣电；到了晚上电量归零，立刻报复性崩溃。环境派从一开始就不把诱惑放进视线，压根不需要调用意志力！';
+      } else if (hr >= 15) {
+        ahaBox.innerHTML = `<strong>下午 ${hr}:00：</strong>经过一整天工作决策，硬扛派电量已跌破 35% 逼近破防线，而环境派因为几乎零诱惑摩擦，还剩 ${e}% 电量！`;
+      }
+    }
+
+    function stop() { playing = false; clearInterval(timer); playBtn.textContent = '▶ 播放 8:00–23:00 全天竞速'; }
+
+    playBtn.onclick = () => {
+      markDone('播放了意志力硬扛与环境隔离全天竞速');
+      if (playing) { stop(); return; }
+      if (step >= HOURS.length - 1) step = 0;
+      playing = true;
+      playBtn.textContent = '⏸ 暂停';
+      timer = setInterval(() => {
+        step++;
+        draw();
+        if (step >= HOURS.length - 1) stop();
+      }, 280);
+    };
+    document.getElementById('jumpBtn').onclick = () => { stop(); step = 14; markDone('查看了22点深夜破防对比'); draw(); };
+    document.getElementById('resetBtn').onclick = () => { stop(); step = 0; draw(); };
+    draw();
   </script>
 </body>
 </html>

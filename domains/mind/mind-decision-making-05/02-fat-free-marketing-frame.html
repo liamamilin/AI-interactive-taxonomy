@@ -7,64 +7,83 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🥛 “90% 无脂” vs “含 10% 脂肪”营销框架</h1><p>同样的酸奶和牛肉：写“90% 瘦肉”时顾客觉得健康美味，写“含 10% 肥肉”时顾客瞬间皱眉——这就是属性框架的魔力。</p></div>
+      <div>
+        <h1>🥛 “90% 无脂” vs “含 10% 脂肪”营销框架</h1>
+        <p>误区：只要成分表写得一模一样，换个宣传语不会影响理性消费者的评价。真相：正向属性框架瞬间唤醒“健康/安全/优惠”联想，负向框架瞬间拉响“油腻/死亡/被坑”警报——哪怕两者描述的是<strong>100% 同一个东西</strong>！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>产品真实脂肪含量</span><span id="vFat">10%</span></label><input type="range" id="sFat" min="2" max="30" value="10" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>包装采用正向框架（强调“XX%无脂”）强度</span><span id="vPos">90%</span></label><input type="range" id="sPos" min="0" max="100" value="90" oninput="draw()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="setCase('yogurt',this)">🥛 酸奶/牛肉：90% 无脂 vs 含 10% 脂肪</button>
+        <button class="pill" onclick="setCase('surgery',this)">🏥 手术知情：90% 存活率 vs 10% 死亡率</button>
+        <button class="pill" onclick="setCase('card',this)">💳 结账规则：现金 95 折 vs 刷卡加收 5% 费</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">标签呈现文案</div><div class="k-val" id="kLbl">—</div></div>
-        <div class="kpi"><div class="k-lbl">消费者健康印象分</div><div class="k-val" id="kScr">—</div></div>
-      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const fat=+document.getElementById('sFat').value, pos=+document.getElementById('sPos').value;
-  document.getElementById('vFat').textContent=fat+'%';
-  document.getElementById('vPos').textContent=pos+'%';
-  const lean=100 - fat;
-  const negScr=Math.max(15, Math.round(72 - fat*1.8));
-  const posScr=Math.min(98, Math.round(negScr + pos*0.26));
-  document.getElementById('kLbl').textContent=pos>=50?(`${lean}% 零脂纯净`):(`含 ${fat}% 脂肪`);
-  document.getElementById('kScr').textContent=posScr+' 分 (负向写法仅 '+negScr+' 分)';
-  document.getElementById('kScr').style.color=posScr>=70?'#059669':'#f59e0b';
-  const wN=Math.max(12, negScr*3.6), wP=Math.max(12, posScr*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">同一成分表，不同框架文案带来的健康评分差</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">写“含 ${fat}% 脂肪”</text>
-    <rect x="165" y="64" width="${wN.toFixed(0)}" height="28" rx="6" fill="#94a3b8"/>
-    <text x="${(173+wN).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="var(--tax-muted)">${negScr} 分</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">当前正向包装</text>
-    <rect x="165" y="120" width="${wP.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(173+wP).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${posScr} 分 (+${posScr-negScr})</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">同理：把“信用卡加收 3% 手续费”改写成“现金支付立享 3% 优惠”，投诉率立刻暴跌！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>看商品和合同，别被大字框架牵着走——直接翻到背面看客观营养成分表或真实年化费率。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const CASES = {
+      yogurt: {
+        posLbl:'🟢 正向包装：“90% 无脂 / 90% 纯瘦肉”', posScore:84,
+        negLbl:'🔴 负向实话：“含有 10% 脂肪”', negScore:47,
+        metric:'消费者“健康/购买意愿”评分',
+        aha:'💡 <strong>顿悟时刻：</strong>同一盒酸奶、同一块牛肉，正面印上“90% Fat-Free”健康评分飙到 <strong>84 分</strong>，印上“含 10% 脂肪”瞬间暴跌到 <strong>47 分</strong>！破解方法：看到“95% 无糖/无添加”时，立刻在脑子里手动翻译成“含 5% 糖/添加剂”！'
+      },
+      surgery: {
+        posLbl:'🟢 存活框架：“术后 1 个月存活率高达 90%”', posScore:82,
+        negLbl:'🔴 死亡框架：“术后 1 个月死亡率达到 10%”', negScore:50,
+        metric:'患者及家属同意接受手术比例',
+        aha:'💡 <strong>顿悟时刻：</strong>《新英格兰医学杂志》经典研究证实：连哈佛医学院的医生在面对“90% 存活”与“10% 死亡”时，推荐手术的比例也会暴差 <strong>32 个百分点</strong>！做重大医疗或财务决策前，务必强迫自己把正反两种说法都念一遍！'
+      },
+      card: {
+        posLbl:'🟢 折扣框架：“现金支付享 95 折优惠”', posScore:79,
+        negLbl:'🔴 罚金框架：“刷卡支付加收 5% 手续费”', negScore:26,
+        metric:'顾客心理接受度与满意度',
+        aha:'💡 <strong>顿悟时刻：</strong>信用卡游说集团当年死活要求法律禁止商家写“刷卡加收手续费”，但允许写“现金折扣”——因为同样多付 5%，被称作“失去折扣”让人微感遗憾，被称作“额外罚款”却让人怒火中烧！'
+      }
+    };
+    let cur = 'yogurt';
+
+    function setCase(c, btn){
+      cur = c;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const d = CASES[cur];
+      const wP = Math.round((d.posScore / 100) * 420), wN = Math.round((d.negScore / 100) * 420);
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="26" font-size="13" font-weight="850" fill="var(--tax-ink)">${d.metric}（两组数学事实 100% 完全等价）：</text>
+        <text x="24" y="66" font-size="12.5" font-weight="850" fill="var(--tax-green)">${d.posLbl}</text>
+        <rect x="24" y="76" width="420" height="26" rx="6" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+        <rect x="24" y="76" width="${wP}" height="26" rx="6" fill="var(--tax-green)"/>
+        <text x="456" y="94" font-size="13" font-weight="900" fill="var(--tax-green)">${d.posScore}%</text>
+
+        <text x="24" y="136" font-size="12.5" font-weight="850" fill="var(--tax-red)">${d.negLbl}</text>
+        <rect x="24" y="146" width="420" height="26" rx="6" fill="var(--tax-surface-alt)" stroke="var(--tax-border)"/>
+        <rect x="24" y="146" width="${wN}" height="26" rx="6" fill="var(--tax-red)"/>
+        <text x="456" y="164" font-size="13" font-weight="900" fill="var(--tax-red)">${d.negScore}% (暴跌 -${d.posScore-d.negScore}%!)</text>
+      `;
+
+      document.getElementById('ahaBox').innerHTML = d.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

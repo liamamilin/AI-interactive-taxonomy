@@ -1,68 +1,134 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>👹 死线恐慌怪：为什么拖到最后一晚才开工？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>死线恐慌怪：为什么拖到最后一晚才开工？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .s-card { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .s-val { font-size: 20px; font-weight: 800; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>👹 死线恐慌怪：为什么拖到最后一晚才开工？</h1><p>皮尔斯·斯蒂尔拖延方程：动机 = (期望 × 价值) / (冲动 × 延迟)。只要截止日还远，分母“延迟”巨大，动机就永远低于开工线！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>距离截止日期剩余天数</span><span id="vRem">5 天</span></label><input type="range" id="sRem" min="0.5" max="14" step="0.5" value="5" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>任务拆分后的里程碑密度（缩短延迟）</span><span id="vSpl">1 个大死线</span></label><input type="range" id="sSpl" min="1" max="5" value="1" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>👹 死线恐慌怪：10 天交稿竞速对决</h1>
+      <p>同样一份 10 天后截止的重要报告：<strong>方案 A</strong> 只有一个最终死线；<strong>方案 B</strong> 拆成第 3、6、9 天三个公开微死线。按下播放键，看“即时满足猴”与“死线恐慌怪”如何角力！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="playBtn">▶ 播放 10 天进度竞速</button>
+        <button class="toy-btn secondary" id="jumpEndBtn">⏩ 直接看第 10 天结局</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重置回第 1 天</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">当下行动力得分（开工线 60）</div><div class="k-val" id="kMot">—</div></div>
-        <div class="kpi"><div class="k-lbl">行为状态</div><div class="k-val" id="kAct">—</div></div>
+
+      <svg id="raceSvg" viewBox="0 0 680 220" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="死线恐慌怪与微死线进度竞速"></svg>
+
+      <div class="stats">
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">当前倒计时</div><div class="s-val" id="dayVal">第 1 / 10 天</div></div>
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">👹 单一死线组进度 / 质量</div><div class="s-val" id="singleVal" style="color:var(--tax-red);">0%</div></div>
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">🎯 微死线拆分组进度 / 质量</div><div class="s-val" id="microVal" style="color:var(--tax-green);">12%</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>竞速说明：</strong>点击「播放 10 天进度竞速」，观察前 8 天大脑如何被“即时满足猴”完全接管，直到第 9 天恐慌怪才被迫通宵救火！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const rem=+document.getElementById('sRem').value, spl=+document.getElementById('sSpl').value;
-  document.getElementById('vRem').textContent=rem.toFixed(1)+' 天';
-  document.getElementById('vSpl').textContent=spl+' 个阶段小死线';
-  const effDelay=rem/spl;
-  const mot=Math.min(100, Math.round(110/(1 + 0.45*effDelay)));
-  const go=mot>=60;
-  document.getElementById('kMot').textContent=mot+' 分';
-  document.getElementById('kMot').style.color=go?'#059669':'#ef4444';
-  document.getElementById('kAct').textContent=go?'🚀 立刻进入开工状态!':'🦥 继续刷手机拖延';
-  const w=Math.max(12, mot*4.4);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="32" font-size="13" font-weight="800" fill="var(--tax-text)">行动力进度条 vs 开工触发阈值（60 分红线）</text>
-    <rect x="30" y="66" width="440" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="66" width="${w.toFixed(0)}" height="38" rx="8" fill="${go?'#059669':'#f59e0b'}"/>
-    <line x1="${30+60*4.4}" y1="50" x2="${30+60*4.4}" y2="120" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4,3"/>
-    <text x="${30+60*4.4}" y="46" text-anchor="middle" font-size="11" font-weight="800" fill="#ef4444">60 分开工线</text>
-    <text x="30" y="152" font-size="12" fill="var(--tax-muted)">把 14 天的大死线拆成 ${spl} 个小里程碑，有效延迟立刻从 ${rem.toFixed(1)} 天压缩到 ${effDelay.toFixed(1)} 天，提前唤醒行动力！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>拖延不是因为你懒，而是大目标离得太远导致分母太大。把一个大死线切成 3~5 个“今晚就要交的小交付”，拖延症立刻不药而愈！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const SINGLE = [0, 2, 4, 5, 7, 10, 14, 20, 42, 85]; // Panic sprint on Day 9-10
+    const MICRO  = [12, 24, 35, 45, 56, 68, 76, 85, 93, 100]; // Steady 3-day milestones
+
+    let day = 1;
+    let timer = null;
+    let playing = false;
+    let done = false;
+
+    const svg = document.getElementById('raceSvg');
+    const playBtn = document.getElementById('playBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function draw() {
+      const s = SINGLE[day - 1];
+      const m = MICRO[day - 1];
+      document.getElementById('dayVal').textContent = `第 ${day} / 10 天`;
+      document.getElementById('singleVal').textContent = day === 10 ? `${s}%（熬夜交差 62分）` : `${s}%`;
+      document.getElementById('microVal').textContent = day === 10 ? `${m}%（从容打磨 94分）` : `${m}%`;
+
+      const xOf = d => 48 + ((d - 1) / 9) * 592;
+      const yOf = v => 185 - (v / 100) * 145;
+
+      let sPts = [], mPts = [];
+      for (let d = 1; d <= day; d++) {
+        sPts.push(`${xOf(d).toFixed(1)},${yOf(SINGLE[d - 1]).toFixed(1)}`);
+        mPts.push(`${xOf(d).toFixed(1)},${yOf(MICRO[d - 1]).toFixed(1)}`);
+      }
+
+      let html = '';
+      [25, 50, 75, 100].forEach(v => {
+        const y = yOf(v);
+        html += `<line x1="48" y1="${y}" x2="640" y2="${y}" stroke="var(--tax-border)" stroke-dasharray="3 3"/>`;
+        html += `<text x="40" y="${y + 4}" text-anchor="end" fill="var(--tax-muted)" font-size="11">${v}%</text>`;
+      });
+
+      // Micro-deadline vertical markers at D3, D6, D9
+      [3, 6, 9].forEach(md => {
+        html += `<line x1="${xOf(md)}" y1="32" x2="${xOf(md)}" y2="185" stroke="var(--tax-green)" stroke-dasharray="3 4" opacity="0.5"/>`;
+        html += `<text x="${xOf(md)}" y="26" text-anchor="middle" fill="var(--tax-green)" font-size="10">微死线 D${md}</text>`;
+      });
+
+      for (let d = 1; d <= 10; d++) {
+        html += `<text x="${xOf(d)}" y="205" text-anchor="middle" fill="var(--tax-muted)" font-size="11">D${d}</text>`;
+      }
+
+      if (sPts.length > 1) {
+        html += `<polyline points="${sPts.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3"/>`;
+        html += `<polyline points="${mPts.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3"/>`;
+      }
+      html += `<circle cx="${xOf(day)}" cy="${yOf(s)}" r="6" fill="var(--tax-red)"/>`;
+      html += `<circle cx="${xOf(day)}" cy="${yOf(m)}" r="6" fill="var(--tax-green)"/>`;
+      svg.innerHTML = html;
+
+      if (day <= 7) {
+        ahaBox.innerHTML = `<strong>第 ${day} 天（即时满足猴统治期）：</strong>单一死线组还有 ${10 - day} 天，双曲贴现把遥远的痛苦折算得几乎为零，进度纹丝不动；而微死线组借着 D3/D6 节点稳步推进到 ${m}%！`;
+      } else if (day < 10) {
+        ahaBox.innerHTML = `<strong>第 ${day} 天（👹 恐慌怪苏醒！）：</strong>死线迫近眼前，公开出丑的恐惧终于压倒刷手机的快乐，单一死线组开始肾上腺素狂飙通宵赶工！`;
+      } else {
+        ahaBox.innerHTML = '<strong>第 10 天终局（94 分 vs 62 分）：</strong>别等最后一只大恐慌怪来救命——把一个 10 天的大死线切成 3 个公开交付的小里程碑（如第 3 天交大纲、第 6 天交初稿），等于提前召唤温和可控的“小恐慌怪”！';
+      }
+    }
+
+    function stop() { playing = false; clearInterval(timer); playBtn.textContent = '▶ 播放 10 天进度竞速'; }
+
+    playBtn.onclick = () => {
+      markDone('播放了死线恐慌怪与微死线竞速');
+      if (playing) { stop(); return; }
+      if (day >= 10) day = 1;
+      playing = true;
+      playBtn.textContent = '⏸ 暂停';
+      timer = setInterval(() => {
+        day++;
+        draw();
+        if (day >= 10) stop();
+      }, 360);
+    };
+
+    document.getElementById('jumpEndBtn').onclick = () => { stop(); day = 10; markDone('查看了死线恐慌怪第10天终局'); draw(); };
+    document.getElementById('resetBtn').onclick = () => { stop(); day = 1; draw(); };
+    draw();
   </script>
 </body>
 </html>

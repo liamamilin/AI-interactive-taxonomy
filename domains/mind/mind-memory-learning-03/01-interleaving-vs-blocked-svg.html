@@ -1,69 +1,136 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔄 练习期顺手 vs 考场识别率反转（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>练习期顺手 vs 考场识别率反转</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .seq-strip { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; font-size: 12px; }
+    .pill { padding: 3px 8px; border-radius: 6px; font-weight: 700; }
+    .pA { background: rgba(59,130,246,0.18); color: var(--tax-primary); }
+    .pB { background: rgba(245,158,11,0.20); color: var(--tax-amber); }
+    .pC { background: rgba(16,185,129,0.20); color: var(--tax-green); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔄 练习期顺手 vs 考场识别率反转（SVG）</h1><p>集中刷题（AAA-BBB-CCC）跳过了一个最关键的技能——“先判断这题属于哪一类”。交错练习（ABC-BCA-CAB）在练习时让你难受，却在真实综合考场大获全胜。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>练习题型交错混合度</span><span id="vMix">75%</span></label><input type="range" id="sMix" min="0" max="100" value="75" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>易混淆题型种类数</span><span id="vTyp">4 类</span></label><input type="range" id="sTyp" min="2" max="6" value="4" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔄 练习期顺手 vs 考场识别率反转（双轨竞速）</h1>
+      <p>Rohrer &amp; Taylor (2007) 让两组学生学习 4 种几何体体积公式：<strong>集中组</strong>（AAA-BBB-CCC）每类连刷 4 题，<strong>交错组</strong>（ABC-BCA-CAB）打乱混刷。对比“练习期手感”和“一周后真考场”！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="p1Btn">✍️ 阶段一：当日练习期</button>
+        <button class="toy-btn secondary" id="p2Btn">📝 阶段二：一周后综合考场</button>
+        <button class="toy-btn secondary" id="playBtn">▶ 播放反转动画</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">练习当下顺手度</div><div class="k-val" id="kPra">—</div></div>
-        <div class="kpi"><div class="k-lbl">一周后综合考场得分</div><div class="k-val" id="kExm">—</div></div>
+
+      <div class="seq-strip">
+        <span style="color:var(--tax-muted);margin-right:4px;">集中刷题顺序：</span>
+        <span class="pill pA">A</span><span class="pill pA">A</span><span class="pill pA">A</span>
+        <span class="pill pB">B</span><span class="pill pB">B</span><span class="pill pB">B</span>
+        <span class="pill pC">C</span><span class="pill pC">C</span><span class="pill pC">C</span>
+        <span style="color:var(--tax-muted);margin:0 4px 0 14px;">交错混刷顺序：</span>
+        <span class="pill pA">A</span><span class="pill pB">B</span><span class="pill pC">C</span>
+        <span class="pill pB">B</span><span class="pill pC">C</span><span class="pill pA">A</span>
+        <span class="pill pC">C</span><span class="pill pA">A</span><span class="pill pB">B</span>
       </div>
+
+      <svg id="raceSvg" viewBox="0 0 680 225" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="集中刷题与交错练习反转对比"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>为什么大家都爱“集中刷题”？</strong>因为在练习期集中组高达 <strong>89%</strong>，做起来极其丝滑！点击「阶段二：一周后综合考场」看残酷真相。
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const mix=+document.getElementById('sMix').value, typ=+document.getElementById('sTyp').value;
-  document.getElementById('vMix').textContent=mix+'%';
-  document.getElementById('vTyp').textContent=typ+' 类';
-  const pra=Math.max(30, Math.round(92 - mix*0.32 - typ*2));
-  const exm=Math.max(25, Math.min(95, Math.round(38 + mix*0.52 - (typ-2)*3)));
-  document.getElementById('kPra').textContent=pra+' 分';
-  document.getElementById('kExm').textContent=exm+' 分';
-  document.getElementById('kExm').style.color=exm>=70?'#059669':'#ef4444';
-  const wP=Math.max(12, pra*3.6), wE=Math.max(12, exm*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">练习表现 vs 综合实战的惊人反转</text>
-    <text x="20" y="84" font-size="12.5" font-weight="750" fill="var(--tax-text)">练习当下正确率</text>
-    <rect x="155" y="66" width="${wP.toFixed(0)}" height="28" rx="6" fill="#94a3b8"/>
-    <text x="${(163+wP).toFixed(0)}" y="85" font-size="12" font-weight="800" fill="var(--tax-muted)">${pra} 分</text>
-    <text x="20" y="140" font-size="12.5" font-weight="750" fill="var(--tax-text)">综合考场得分</text>
-    <rect x="155" y="122" width="${wE.toFixed(0)}" height="28" rx="6" fill="${exm>=70?'#059669':'#f59e0b'}"/>
-    <text x="${(163+wE).toFixed(0)}" y="141" font-size="12" font-weight="800" fill="${exm>=70?'#059669':'#d97706'}">${exm} 分</text>
-    <text x="20" y="184" font-size="11.5" fill="var(--tax-muted)">${mix<30?'⚠️ 集中连刷让你当下很爽，但一进考场看到混合题瞬间懵圈！':'✅ 交错练习强迫你每题都重做“特征辨别”，实战能力大幅提升！'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>刷题时感到“顺滑无阻”往往是危险信号——那意味着你只是在机械复用上一题的模板，并没有真正训练出“看穿题型”的判别力。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let t = 0; // 0 = practice, 1 = exam
+    let raf = null;
+    let done = false;
+
+    const svg = document.getElementById('raceSvg');
+    const p1Btn = document.getElementById('p1Btn');
+    const p2Btn = document.getElementById('p2Btn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function draw() {
+      const blocked = Math.round(89 - 69 * t); // 89% -> 20%
+      const inter = Math.round(60 + 3 * t);    // 60% -> 63%
+      p1Btn.className = t < 0.5 ? 'toy-btn' : 'toy-btn secondary';
+      p2Btn.className = t >= 0.5 ? 'toy-btn' : 'toy-btn secondary';
+
+      const x0 = 60, x1 = 350;
+      const yOf = v => 190 - (v / 100) * 145;
+      const curX = x0 + t * (x1 - x0);
+
+      let html = '';
+      [20, 40, 60, 80, 100].forEach(v => {
+        const y = yOf(v);
+        html += `<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(--tax-border)" stroke-dasharray="3 3"/>`;
+        html += `<text x="${x0 - 8}" y="${y + 4}" text-anchor="end" fill="var(--tax-muted)" font-size="11">${v}%</text>`;
+      });
+      html += `<text x="${x0}" y="210" text-anchor="middle" fill="var(--tax-muted)" font-size="11">当日练习期</text>`;
+      html += `<text x="${x1}" y="210" text-anchor="middle" fill="var(--tax-muted)" font-size="11">一周后考场</text>`;
+
+      html += `<line x1="${x0}" y1="${yOf(89)}" x2="${x1}" y2="${yOf(20)}" stroke="var(--tax-red)" stroke-width="3" opacity="0.35"/>`;
+      html += `<line x1="${x0}" y1="${yOf(60)}" x2="${x1}" y2="${yOf(63)}" stroke="var(--tax-green)" stroke-width="3" opacity="0.35"/>`;
+
+      html += `<line x1="${x0}" y1="${yOf(89)}" x2="${curX}" y2="${yOf(blocked)}" stroke="var(--tax-red)" stroke-width="3.5"/>`;
+      html += `<line x1="${x0}" y1="${yOf(60)}" x2="${curX}" y2="${yOf(inter)}" stroke="var(--tax-green)" stroke-width="3.5"/>`;
+      html += `<circle cx="${curX}" cy="${yOf(blocked)}" r="6" fill="var(--tax-red)"/>`;
+      html += `<circle cx="${curX}" cy="${yOf(inter)}" r="6" fill="var(--tax-green)"/>`;
+
+      // Right bar snapshot
+      const phaseTxt = t < 0.1 ? '当日练习期' : (t > 0.9 ? '一周后真考场' : '迁移过渡中…');
+      html += `<text x="520" y="34" text-anchor="middle" fill="var(--tax-ink)" font-size="13" font-weight="700">${phaseTxt}</text>`;
+      const hB = (blocked / 100) * 135;
+      const hI = (inter / 100) * 135;
+      html += `<rect x="440" y="${190 - hB}" width="64" height="${hB}" rx="8" fill="rgba(239,68,68,0.75)"/>`;
+      html += `<text x="472" y="${190 - hB - 8}" text-anchor="middle" fill="var(--tax-red)" font-size="14" font-weight="800">${blocked}%</text>`;
+      html += `<text x="472" y="210" text-anchor="middle" fill="var(--tax-muted)" font-size="11">集中刷题</text>`;
+
+      html += `<rect x="536" y="${190 - hI}" width="64" height="${hI}" rx="8" fill="rgba(16,185,129,0.8)"/>`;
+      html += `<text x="568" y="${190 - hI - 8}" text-anchor="middle" fill="var(--tax-green)" font-size="14" font-weight="800">${inter}%</text>`;
+      html += `<text x="568" y="210" text-anchor="middle" fill="var(--tax-muted)" font-size="11">交错混刷</text>`;
+
+      svg.innerHTML = html;
+
+      if (t >= 0.85) {
+        ahaBox.innerHTML = '<strong>考场 3 倍碾压（63% vs 20%）！</strong>集中刷题让你只练了“套公式计算”，却从未练过“看清这道题该用哪个公式”。一上混合考场，集中组直接懵圈！';
+      } else if (t <= 0.1) {
+        ahaBox.innerHTML = '<strong>练习期错觉（89% vs 60%）：</strong>集中刷题时大脑直接照抄上一题的套路，爽感极强；交错混刷每题都要重新判断策略，感觉又慢又挫败——但这恰恰是有效学习的信号！';
+      }
+    }
+
+    function animateTo(target) {
+      cancelAnimationFrame(raf);
+      const start = t;
+      const sMs = performance.now();
+      function step(now) {
+        const p = Math.min(1, (now - sMs) / 1000);
+        t = start + (target - start) * (p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2);
+        draw();
+        if (p < 1) raf = requestAnimationFrame(step);
+      }
+      raf = requestAnimationFrame(step);
+    }
+
+    p1Btn.onclick = () => { markDone('查看了交错练习当日练习期对比'); animateTo(0); };
+    p2Btn.onclick = () => { markDone('查看了交错练习一周后考场大反转'); animateTo(1); };
+    document.getElementById('playBtn').onclick = () => { markDone('播放了交错练习反转动画'); t = 0; animateTo(1); };
+    draw();
   </script>
 </body>
 </html>

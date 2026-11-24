@@ -1,65 +1,92 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎯 心流三要素：目标清晰 + 即时反馈</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>心流三要素：目标清晰 + 即时反馈</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .mod-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 12px; }
+    .mod-btn {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      text-align: left; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); cursor: pointer;
+    }
+    .mod-btn.on { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .pill { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--tax-surface); border: 1px solid var(--tax-border); white-space: nowrap; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎯 心流三要素：目标清晰 + 即时反馈</h1><p>打游戏每一秒都知道要打哪只怪、血条实时跳动；而很多职场工作既不知道“做到什么算好”，又要等两周才听反馈——大脑根本无从沉浸！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🎯 心流三要素：把枯燥工作改造成“游戏化心流”</h1>
+      <p>为什么打游戏 3 小时不知疲倦，写工作报告 10 分钟就想摸鱼？因为游戏自带<strong>清晰目标 + 即时反馈 + 黄金难度</strong>。试着给“写季度复盘报告”逐个装上心流改造件！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="mod-grid" id="modGrid"></div>
+
+      <svg id="gaugeSvg" viewBox="0 0 680 140" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="心流触发指数仪表盘"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>改造起点（18%）：</strong>原始任务“本周写完季度报告”既模糊又缺乏进度反馈，大脑根本不知道下一步该干嘛。依次点亮上方 3 个心流改造件试试！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>下一步具体目标清晰度</span><span id="vClr">80%</span></label><input type="range" id="sClr" min="10" max="100" value="80" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>行动后的反馈即时性</span><span id="vFbk">75%</span></label><input type="range" id="sFbk" min="10" max="100" value="75" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">心流沉浸指数</div><div class="k-val" id="kFlw">—</div></div>
-        <div class="kpi"><div class="k-lbl">工作体验</div><div class="k-val" id="kExp">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const clr=+document.getElementById('sClr').value, fbk=+document.getElementById('sFbk').value;
-  document.getElementById('vClr').textContent=clr+'%';
-  document.getElementById('vFbk').textContent=fbk+'%';
-  const flw=Math.round(Math.sqrt(clr*fbk));
-  document.getElementById('kFlw').textContent=flw+' / 100';
-  document.getElementById('kFlw').style.color=flw>=70?'#059669':'#f59e0b';
-  document.getElementById('kExp').textContent=flw>=70?'🌊 丝滑忘我沉浸':'😵 边做边自我怀疑内耗';
-  const w=Math.max(15, flw*4.4);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="32" font-size="13" font-weight="800" fill="var(--tax-text)">心流沉浸度 = 清晰目标 (${clr}%) × 即时反馈 (${fbk}%) 的几何耦合</text>
-    <rect x="30" y="66" width="440" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="66" width="${w.toFixed(0)}" height="38" rx="8" fill="${flw>=70?'#059669':'#3b82f6'}"/>
-    <text x="${Math.min(480, 38+w).toFixed(0)}" y="91" font-size="14" font-weight="850" fill="${flw>=70?'#059669':'#2563eb'}">${flw} 分</text>
-    <text x="30" y="148" font-size="12" fill="var(--tax-muted)">想把枯燥工作变成心流游戏？给它拆出清晰的“本小时通关清单”，并建立即时可见的进度条！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>程序员爱写代码、医生爱做手术、玩家爱打排位，底层共性都是：目标极清晰、每一步都有毫秒到分钟级的即时反馈。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const MODS = [
+      { id: 'goal', title: '🎯 要素 1：把“写完报告”拆成“25 分钟写出 3 条核心数据结论”', sub: '目标从模糊巨石变成一眼可见的下一关', gain: 26, on: false },
+      { id: 'fb', title: '⚡ 要素 2：开启实时进度反馈（清单逐条打勾 / 字数条 / 单元测试绿灯）', sub: '把“一周后老板点评”缩短成每 5 分钟可见的即时正反馈', gain: 28, on: false },
+      { id: 'bal', title: '⚖️ 要素 3：把难度校准到“+4% 黄金区”（自己先写核心观点，模板交给工具）', sub: '砍掉无聊排版，把脑力集中在刚好有点挑战的深度分析上', gain: 22, on: false }
+    ];
+
+    let done = false;
+    const modGrid = document.getElementById('modGrid');
+    const svg = document.getElementById('gaugeSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      modGrid.innerHTML = '';
+      MODS.forEach(m => {
+        const b = document.createElement('button');
+        b.className = 'mod-btn' + (m.on ? ' on' : '');
+        b.innerHTML = `<div><div style="font-weight:700;font-size:13.5px;">${m.title}</div><div style="font-size:12px;color:var(--tax-muted);margin-top:3px;">${m.sub}</div></div><span class="pill">${m.on ? '✓ 已装配' : '+' + m.gain + '%'}</span>`;
+        b.onclick = () => {
+          m.on = !m.on;
+          markDone('装配了心流三要素工作改造件');
+          render();
+        };
+        modGrid.appendChild(b);
+      });
+
+      const score = 18 + MODS.filter(m => m.on).reduce((s, m) => s + m.gain, 0);
+      const count = MODS.filter(m => m.on).length;
+      const col = score >= 85 ? 'var(--tax-green)' : (score >= 55 ? 'var(--tax-primary)' : 'var(--tax-amber)');
+
+      let html = '';
+      html += `<text x="24" y="34" fill="var(--tax-ink)" font-size="14" font-weight="700">🌊 心流进入概率：${score}%（已集齐 ${count} / 3 大触发要素）</text>`;
+      html += `<rect x="24" y="52" width="632" height="24" rx="12" fill="rgba(148,163,184,0.16)"/>`;
+      html += `<rect x="24" y="52" width="${(score / 100) * 632}" height="24" rx="12" fill="${col}"/>`;
+      html += `<text x="24" y="104" fill="var(--tax-muted)" font-size="12">${count === 3 ? '🎉 恭喜！你把枯燥工作改造成了“高心流游戏关卡”，专注会像磁铁一样自动吸住你！' : '提示：游戏设计师从来不靠玩家“自律”，而是靠“清晰下一关 + 秒级反馈”制造心流。'}</text>`;
+      svg.innerHTML = html;
+
+      if (count === 3) {
+        ahaBox.innerHTML = '<strong>心流三要素闭环（94%）：</strong>工作之所以难进入心流，往往不是因为你不努力，而是工作环境天然缺少<strong>清晰微目标</strong>和<strong>即时反馈</strong>。主动给自己装上这三件套，就能像打游戏一样顺滑进入深度工作！';
+      } else if (count > 0) {
+        ahaBox.innerHTML = `<strong>心流概率提升至 ${score}%：</strong>继续点亮剩下的 ${3 - count} 个要素，看看三者叠加如何产生质变！`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

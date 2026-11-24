@@ -3,70 +3,89 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧮 万人自然频率方块阵：贝叶斯直觉（SVG）</title>
+  <title>🧮 万人自然频率方块阵：贝叶斯直觉</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🧮 万人自然频率方块阵：贝叶斯直觉（SVG）</h1><p>人类大脑对抽象百分比天生犯晕，但把概率换成“10,000 人中有多少真阳性、多少假阳性”，贝叶斯公式瞬间一目了然。</p></div>
+      <div>
+        <h1>🧮 万人自然频率方块阵：贝叶斯直觉</h1>
+        <p>误区：大脑看到“检测准确率 95%”就下意识以为“查出阳性 = 95% 确定”。真相：心理学家吉仁泽发现，只要把抽象百分比换成<strong>“100 个人里数人头（自然频率）”</strong>，连小学生都能瞬间破解基础比率谬误！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>人群真实患病率（基础比率）</span><span id="vPre">0.5%</span></label><input type="range" id="sPre" min="0.1" max="10" step="0.1" value="0.5" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>试剂假阳性率（健康人误报）</span><span id="vFpr">2.0%</span></label><input type="range" id="sFpr" min="0.2" max="10" step="0.2" value="2.0" oninput="draw()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="setCase(1,5,this)">🔍 极罕见事件 (基础率 1% · 误报 5%)</button>
+        <button class="pill" onclick="setCase(5,5,this)">🟡 中等基础率 (基础率 5% · 误报 5%)</button>
+        <button class="pill" onclick="setCase(20,5,this)">🔥 高发人群 (基础率 20% · 误报 5%)</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">万人中真阳性 / 假阳性</div><div class="k-val" id="kCnt">—</div></div>
-        <div class="kpi"><div class="k-lbl">测出阳性后真患病概率</div><div class="k-val" id="kPpv">—</div></div>
+        <div class="kpi"><div class="k-lbl">100 人中：真阳性 vs 假阳性</div><div class="k-val" id="kFreq" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">后验概率 P(真 | 阳性)</div><div class="k-val" id="kPost">—</div></div>
+        <div class="kpi"><div class="k-lbl">直觉常见错估 vs 真相</div><div class="k-val" id="kGap" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const pre=+document.getElementById('sPre').value, fpr=+document.getElementById('sFpr').value;
-  document.getElementById('vPre').textContent=pre.toFixed(1)+'%';
-  document.getElementById('vFpr').textContent=fpr.toFixed(1)+'%';
-  const sick=Math.round(10000*pre/100);
-  const healthy=10000 - sick;
-  const tp=Math.max(1, Math.round(sick*0.99));
-  const fp=Math.max(1, Math.round(healthy*fpr/100));
-  const ppv=Math.round(tp/(tp+fp)*100);
-  document.getElementById('kCnt').textContent=tp+' 真 / '+fp+' 假';
-  document.getElementById('kPpv').textContent=ppv+'%';
-  document.getElementById('kPpv').style.color=ppv<30?'#ef4444':'#059669';
-  const totalPos=tp+fp;
-  const wTp=Math.max(6, Math.round(520*tp/totalPos));
-  const wFp=Math.max(6, 520 - wTp);
-  document.getElementById('svg').innerHTML=`
-    <text x="40" y="32" font-size="13" font-weight="800" fill="var(--tax-text)">全部 ${totalPos} 名“阳性报告”持有者的真实构成</text>
-    <rect x="40" y="60" width="${wTp}" height="46" rx="6" fill="#ef4444"/>
-    <rect x="${40+wTp}" y="60" width="${wFp}" height="46" rx="6" fill="#94a3b8" opacity="0.5"/>
-    <text x="40" y="135" font-size="12.5" font-weight="800" fill="#ef4444">真阳性：${tp} 人（占 ${ppv}%）</text>
-    <text x="270" y="135" font-size="12.5" font-weight="800" fill="var(--tax-muted)">健康误报假阳性：${fp} 人（占 ${100-ppv}%）</text>
-    <text x="40" y="176" font-size="11.5" fill="var(--tax-muted)">因为健康人基数（${healthy}人）极庞大，哪怕仅 ${fpr.toFixed(1)}% 误报也会制造海量假阳性！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>永远别只盯着“检测准确率 98%”吓自己——当基础比率极低时，绝大多数阳性信号其实都是虚惊一场，需要二次复检确认！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let base = 1, fpRate = 5;
+    function setCase(b, f, btn){
+      base = b; fpRate = f;
+      document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      // Out of 100 people: base are truly positive (95% detected -> tp), (100-base) are negative (fpRate% false alarm -> fp)
+      const tp = Math.max(1, Math.round(base * 0.95));
+      const fp = Math.max(1, Math.round((100 - base) * (fpRate / 100)));
+      const post = Math.round((tp / (tp + fp)) * 100);
+      const col = post < 30 ? 'var(--tax-red)' : (post < 70 ? 'var(--tax-amber)' : 'var(--tax-green)');
+
+      // 20 x 5 = 100 squares
+      let cells = '';
+      for(let i=0; i<100; i++){
+        const c = i % 20, r = Math.floor(i / 20);
+        const x = 32 + c * 29, y = 38 + r * 28;
+        let fill = 'var(--tax-surface-alt)', stroke = 'var(--tax-border)';
+        if(i < tp){ fill = 'var(--tax-red)'; stroke = 'var(--tax-red)'; }
+        else if(i < tp + fp){ fill = 'var(--tax-amber)'; stroke = 'var(--tax-amber)'; }
+        cells += `<rect x="${x}" y="${y}" width="22" height="22" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>`;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <text x="32" y="24" font-size="12" font-weight="850" fill="var(--tax-ink)">100 人自然频率矩阵：🔴 真阳性 ${tp} 人 · 🟠 假阳性误报 ${fp} 人 · ⬜ 阴性健康 ${100-tp-fp} 人</text>
+        ${cells}
+        <text x="32" y="198" font-size="12.5" font-weight="900" fill="${col}">直接数红+橙方块：全部 ${tp+fp} 个报警者中，只有 ${tp} 个是真的 → 真实概率 = ${tp} / ${tp+fp} = ${post}%！</text>
+      `;
+
+      document.getElementById('kFreq').textContent = `🔴 ${tp} 人 vs 🟠 ${fp} 人`;
+      const kP = document.getElementById('kPost'); kP.textContent = post + '%'; kP.style.color = col;
+      document.getElementById('kGap').textContent = `直觉 95% vs 真相 ${post}%`;
+
+      document.getElementById('ahaBox').innerHTML = post < 30
+        ? `💡 <strong>顿悟时刻：</strong>一目了然！当基础比率只有 <strong>${base}%</strong> 时，哪怕检测准确率高达 95%，99 个好人里 5% 的误报（<strong>${fp} 个橙方块</strong>）也直接把唯一的 <strong>${tp} 个红方块</strong>淹没了——真实概率只有 <strong>${post}%</strong>！`
+        : `💡 <strong>顿悟时刻：</strong>基础比率升到 <strong>${base}%</strong> 后，红色真阳性大军（${tp} 人）迅速反超橙色误报（${fp} 人），后验概率跃升到 <strong>${post}%</strong>——永远先看“池子里的先验基数”！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

@@ -1,74 +1,111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧅 隐含假设剥洋葱：物理定律 vs 历史包袱</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>隐含假设剥洋葱：物理定律 vs 历史包袱</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .card-box { padding: 16px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; margin-bottom: 12px; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .cls-btn { padding: 12px; border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-ink); font-size: 14px; font-weight: 700; cursor: pointer; }
+    .cls-btn.ok { border-color: var(--tax-green); background: var(--tax-green-soft); color: var(--tax-green); }
+    .cls-btn.bad { border-color: var(--tax-red); background: var(--tax-red-soft); color: var(--tax-red); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🧅 隐含假设剥洋葱：物理定律 vs 历史包袱</h1><p>许多被奉为铁律的“行规”（如火箭必须一次性报废），剥开一看根本不是物理定律，只是没人质疑过的历史习惯。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>连续追问“为什么必须这样”的深度</span><span id="vDep">4 层</span></label><input type="range" id="sDep" min="1" max="5" value="4" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>原有流程中真实“物理硬约束”占比</span><span id="vPhy">20%</span></label><input type="range" id="sPhy" min="10" max="50" value="20" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🧅 隐含假设剥洋葱：物理硬约束 vs 历史包袱（盲测）</h1>
+      <p>绝大多数限制创新的“不可能”，其实只是伪装成物理定律的<strong>历史习惯</strong>！快速鉴定下面 4 条行业“常识”：哪条是不可违背的物理铁律，哪条是可以推翻重构的历史包袱？</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;color:var(--tax-muted);">
+        <span id="idxTag">常识鉴定 1 / 4</span>
+        <span id="scoreTag" style="color:var(--tax-primary);font-weight:700;">剥离成功：0 / 4</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">已剥离的虚假行规包袱</div><div class="k-val" id="kPel">—</div></div>
-        <div class="kpi"><div class="k-lbl">释放的创新自由度</div><div class="k-val" id="kFre">—</div></div>
+
+      <div class="card-box">
+        <div style="font-size:17px;font-weight:800;line-height:1.55;" id="ruleTxt"></div>
+        <div class="pair">
+          <button class="cls-btn" id="btnPhys">🧱 物理/数学硬定律（不可违背）</button>
+          <button class="cls-btn" id="btnHist">📦 历史包袱假设（可推翻创新！）</button>
+        </div>
       </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span id="fbTxt" style="font-size:13px;color:var(--tax-muted);">判断它能否被工程创新打破</span>
+        <button class="toy-btn secondary" id="nextBtn" style="display:none;">下一条常识 →</button>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>剥洋葱口诀：</strong>把每条“行业规矩”都拷问一遍：“违背它会违反热力学或数学定律吗？”如果不会，那里就藏着下一代颠覆式创新的入口！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const dep=+document.getElementById('sDep').value, phy=+document.getElementById('sPhy').value;
-  document.getElementById('vDep').textContent=dep+' 层';
-  document.getElementById('vPhy').textContent=phy+'%';
-  const fake=100 - phy;
-  const peeled=Math.round(fake*(dep/5));
-  document.getElementById('kPel').textContent=peeled+'%';
-  document.getElementById('kFre').textContent='+'+peeled+'% 设计空间';
-  document.getElementById('kFre').style.color='#059669';
-  let rings='';
-  for(let i=5;i>=1;i--){
-    const r=22 + i*14;
-    const isGone=(6-i)<=dep && i>1;
-    rings+=`<circle cx="155" cy="110" r="${r}" fill="${i===1?'#3b82f6':(isGone?'none':'#f59e0b')}" opacity="${i===1?'0.85':(isGone?'0.35':'0.22')}" stroke="${i===1?'#2563eb':'#d97706'}" stroke-dasharray="${isGone?'4,3':''}" stroke-width="2"/>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">逐层剥离历史惯例，直达最核心的物理/数学公理（蓝核）</text>
-    ${rings}
-    <text x="155" y="114" text-anchor="middle" font-size="11" font-weight="850" fill="#fff">物理底线</text>
-    <rect x="295" y="55" width="275" height="112" rx="12" fill="var(--tax-border)" opacity="0.18"/>
-    <text x="315" y="84" font-size="12.5" font-weight="800" fill="var(--tax-text)">当前已追问 ${dep} 层“为什么”：</text>
-    <text x="315" y="110" font-size="12" fill="#059669">✓ 剥离虚假惯例：${peeled}%</text>
-    <text x="315" y="134" font-size="12" fill="#2563eb">● 不可违背物理硬核：${phy}%</text>
-    <text x="315" y="156" font-size="11" fill="var(--tax-muted)">凡是“大家一直这么干”的，都可以重写！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>检验一条限制是不是真约束，只需问：“它违背物理学定律吗？”如果不违背，它就只是一个待打破的旧假设。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const RULES = [
+      { text: '“火箭发一次就必须坠海报废，就像飞机飞一趟就扔掉一样。”', isPhysics: false, exp: '纯历史包袱！物理定律从未禁止火箭垂直着陆回收，只是早期控制算力与冷战思维形成了“一次性”惯性。' },
+      { text: '“任何热机的能量转换效率都不可能突破卡诺循环上限（热力学第二定律）。”', isPhysics: true, exp: '真正的物理硬约束！无论多有创意，永动机都绝不可能实现——第一性原理让你避开违背物理定律的死胡同。' },
+      { text: '“行李箱一直都是手提的，所以没人需要给箱子装轮子。”', isPhysics: false, exp: '搞笑的历史包袱！人类 1969 年都登月了，直到 1970 年才有人把轮子装到行李箱上——因为大家默认“箱子就该拎着”。' },
+      { text: '“光在真空中的信息传递速度存在上限，跨越地球两端的网络延迟不可能为 0 毫秒。”', isPhysics: true, exp: '物理硬约束（光速限制）！所以低延迟系统不能靠“加速光速”，而必须用边缘节点（CDN）把数据提前放到用户身边。' }
+    ];
+
+    let idx = 0, score = 0, locked = false, done = false;
+    const btnP = document.getElementById('btnPhys');
+    const btnH = document.getElementById('btnHist');
+    const nextBtn = document.getElementById('nextBtn');
+    const fbTxt = document.getElementById('fbTxt');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const r = RULES[idx];
+      locked = false;
+      nextBtn.style.display = 'none';
+      btnP.className = 'cls-btn';
+      btnH.className = 'cls-btn';
+      document.getElementById('idxTag').textContent = `常识鉴定 ${idx + 1} / ${RULES.length}`;
+      document.getElementById('ruleTxt').textContent = r.text;
+      fbTxt.textContent = '它是物理硬定律，还是历史惯性包袱？';
+    }
+
+    function pick(chosePhysics) {
+      if (locked) return;
+      locked = true;
+      const r = RULES[idx];
+      const ok = chosePhysics === r.isPhysics;
+      (chosePhysics ? btnP : btnH).classList.add(ok ? 'ok' : 'bad');
+      if (ok) score++;
+      document.getElementById('scoreTag').textContent = `剥离成功：${score} / ${RULES.length}`;
+      fbTxt.textContent = ok ? '✓ 精准识别！' : '✕ 混淆了物理边界与历史习惯';
+      ahaBox.innerHTML = `<strong>${r.isPhysics ? '🧱 物理硬约束' : '📦 历史包袱（可推翻！）'}：</strong>${r.exp}`;
+      if (idx === RULES.length - 1) {
+        markDone(`完成隐含假设剥洋葱盲测（${score}/4）`);
+        nextBtn.textContent = '↺ 重新剥洋葱';
+      } else {
+        nextBtn.textContent = '下一条常识 →';
+      }
+      nextBtn.style.display = 'inline-block';
+    }
+
+    btnP.onclick = () => pick(true);
+    btnH.onclick = () => pick(false);
+    nextBtn.onclick = () => {
+      if (idx === RULES.length - 1) { idx = 0; score = 0; document.getElementById('scoreTag').textContent = '剥离成功：0 / 4'; }
+      else idx++;
+      render();
+    };
+    render();
   </script>
 </body>
 </html>

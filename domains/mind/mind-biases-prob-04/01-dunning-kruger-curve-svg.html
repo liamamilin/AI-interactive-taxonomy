@@ -3,75 +3,113 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏔️ 达克效应“愚昧之山”曲线（SVG）</title>
+  <title>🏔️ 达克效应“愚昧之山”曲线</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🏔️ 达克效应“愚昧之山”曲线（SVG）</h1><p>刚学了一点皮毛时，你压根不知道这个领域有多深，所以自信爆棚；学得越深，见识到未知的冰山越大，自信反而跌入绝望之谷。</p></div>
+      <div>
+        <h1>🏔️ 达克效应“愚昧之山”曲线</h1>
+        <p>误区：自信心是随着能力线性增长的——懂得越多越敢拍胸脯。真相：初学一点皮毛时，因为“不知道自己不知道”，自信心会瞬间飙上<strong>愚昧之山顶</strong>；直到撞上真实难题跌进<strong>绝望之谷</strong>，才真正开始成长！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>当前领域真实熟练度</span><span id="vCmp">18%</span></label><input type="range" id="sCmp" min="2" max="100" value="18" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>高质量实战/同行纠错反馈</span><span id="vFbk">25%</span></label><input type="range" id="sFbk" min="0" max="100" value="25" oninput="draw()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="playClimb()">▶ 播放成长轨迹</button>
+        <button class="pill active" onclick="jump(12,this)">🐣 刚看 2 篇爆文（愚昧之山）</button>
+        <button class="pill" onclick="jump(34,this)">😰 实战踩坑（绝望之谷）</button>
+        <button class="pill" onclick="jump(66,this)">🛠️ 刻意深耕（开悟之坡）</button>
+        <button class="pill" onclick="jump(92,this)">🧙 行业专家（平稳高原）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 215"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 225"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">主观自信心</div><div class="k-val" id="kCnf">—</div></div>
-        <div class="kpi"><div class="k-lbl">所处阶段</div><div class="k-val" id="kStg">—</div></div>
+        <div class="kpi"><div class="k-lbl">当前真实领域能力</div><div class="k-val" id="kSkill" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">当前主观自信心</div><div class="k-val" id="kConf">—</div></div>
+        <div class="kpi"><div class="k-lbl">所处达克阶段</div><div class="k-val" id="kPhase">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const c=+document.getElementById('sCmp').value, fbk=+document.getElementById('sFbk').value;
-  document.getElementById('vCmp').textContent=c+'%';
-  document.getElementById('vFbk').textContent=fbk+'%';
-  function confAt(x){
-    const raw=15 + 80*Math.exp(-Math.pow((x-16)/11,2)) + 0.72*x - 22*Math.exp(-Math.pow((x-42)/15,2));
-    const damp=fbk/100;
-    return Math.max(10, Math.min(98, raw*(1-damp*0.45) + x*(damp*0.45)));
-  }
-  const cnf=Math.round(confAt(c));
-  const stg=c<28?'🏔️ 愚昧之山（不知深浅）':(c<55?'🕳️ 绝望之谷（看见未知冰山）':(c<82?'🧗 开悟之坡（稳步对齐）':'🎓 持续平稳高原'));
-  document.getElementById('kCnf').textContent=cnf+'%';
-  document.getElementById('kStg').textContent=stg;
-  let pts=[];
-  for(let x=2;x<=100;x+=2){
-    pts.push(`${(45+x*5.1).toFixed(1)},${(178-confAt(x)*1.35).toFixed(1)}`);
-  }
-  const cx=45+c*5.1, cy=178-cnf*1.35;
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">自信心 vs 真实能力曲线（虚线 = 完美自知对角线）</text>
-    <line x1="45" y1="178" x2="555" y2="178" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <line x1="45" y1="178" x2="555" y2="43" stroke="#94a3b8" stroke-dasharray="4,4"/>
-    <polyline points="${pts.join(' ')}" fill="none" stroke="#8b5cf6" stroke-width="3"/>
-    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
-    <text x="45" y="198" font-size="11" fill="var(--tax-muted)">新手 (0%)</text>
-    <text x="260" y="198" font-size="11" fill="var(--tax-muted)">进阶 (50%)</text>
-    <text x="515" y="198" font-size="11" fill="var(--tax-muted)">大师 (100%)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当你开始觉得自己“什么都不懂、好焦虑”时别灰心——那恰恰说明你已经走下愚昧之山，真正摸到这个领域的门槛了！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let sk = 12, timer = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function jump(v, btn){
+      if(timer){ clearInterval(timer); timer=null; }
+      sk = v;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); draw();
+    }
+    function playClimb(){
+      if(timer) clearInterval(timer);
+      markDone();
+      sk = 2;
+      timer = setInterval(()=>{
+        sk += 2;
+        if(sk >= 96){ sk = 96; clearInterval(timer); timer=null; }
+        draw();
+      }, 45);
+      draw();
+    }
+
+    function confAt(x){
+      // Mount Stupid peak at x=12 (~92), Valley of Despair at x=34 (~24), Slope of Enlightenment -> Plateau (~78)
+      const peak = 82 * Math.exp(-Math.pow((x - 11) / 8.5, 2));
+      const valley = -32 * Math.exp(-Math.pow((x - 34) / 14, 2));
+      const slope = 78 / (1 + Math.exp(-(x - 46) / 14));
+      return Math.max(15, Math.min(96, Math.round(14 + peak + valley + slope * 0.82)));
+    }
+
+    function draw(){
+      const x0=52, x1=612, yMin=28, yMax=188;
+      const toX = v => x0 + (v/100)*(x1-x0);
+      const toY = v => yMax - (v/100)*(yMax-yMin);
+
+      let pts = [];
+      for(let v=0; v<=100; v+=2) pts.push(`${toX(v).toFixed(1)},${toY(confAt(v)).toFixed(1)}`);
+      const c = confAt(sk);
+      const phase = sk < 22 ? '🏔️ 愚昧之山顶' : (sk < 48 ? '🕳️ 绝望之谷' : (sk < 80 ? '⛰️ 开悟之坡' : '🧙 平稳高原'));
+      const col = sk < 22 ? 'var(--tax-red)' : (sk < 48 ? 'var(--tax-amber)' : 'var(--tax-green)');
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="${x0}" y1="${yMax}" x2="${x1}" y2="${yMin}" stroke="var(--tax-muted)" stroke-dasharray="5 4" stroke-opacity="0.5"/>
+        <text x="${toX(12)}" y="${toY(95)}" text-anchor="middle" font-size="10.5" font-weight="800" fill="var(--tax-red)">愚昧之山</text>
+        <text x="${toX(34)}" y="${toY(14)}" text-anchor="middle" font-size="10.5" font-weight="800" fill="var(--tax-amber)">绝望之谷</text>
+        <text x="${toX(88)}" y="${toY(83)}" text-anchor="middle" font-size="10.5" font-weight="800" fill="var(--tax-green)">平稳高原</text>
+        <polyline points="${pts.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="3.4" stroke-linecap="round"/>
+        <circle cx="${toX(sk)}" cy="${toY(c)}" r="7" fill="${col}"/>
+        <text x="${x0}" y="208" font-size="11" fill="var(--tax-muted)">0% 零基础</text>
+        <text x="${x1}" y="208" text-anchor="end" font-size="11" fill="var(--tax-muted)">100% 领域宗师</text>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-ink)">横轴：真实能力 · 纵轴：主观自信（虚线 = 理想校准线）</text>
+      `;
+
+      document.getElementById('kSkill').textContent = sk + ' 分';
+      const kC = document.getElementById('kConf'); kC.textContent = c + ' 分'; kC.style.color = col;
+      const kP = document.getElementById('kPhase'); kP.textContent = phase; kP.style.color = col;
+
+      document.getElementById('ahaBox').innerHTML = sk < 22
+        ? `💡 <strong>顿悟时刻：</strong>你正站在<strong>愚昧之山顶</strong>（能力 ${sk}，自信却飙到 <strong>${c}</strong>）！因为还没见过冰山下的复杂细节，以为“这玩意就这么简单”——此时最容易在评论区大放厥词！`
+        : sk < 48
+        ? `💡 <strong>顿悟时刻：</strong>恭喜跌进<strong>绝望之谷</strong>（能力涨到了 ${sk}，自信却暴跌到 ${c}）！别沮丧——<strong>感到自己很菜，恰恰是你真正看清领域深度的第一个成熟标志！</strong>`
+        : `💡 <strong>顿悟时刻：</strong>越过绝望之谷走上<strong>${phase}</strong>！真正的大师（能力 ${sk}）反而比半吊子更谦逊谨慎（自信 ${c}），因为他们比谁都清楚边界和例外在哪里！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

@@ -1,69 +1,131 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🩺 事前验尸 vs 乐观计划谬误（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>事前验尸 vs 乐观计划谬误</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .s-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .big-num { font-size: 22px; font-weight: 800; margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🩺 事前验尸 vs 乐观计划谬误（SVG）</h1><p>心理学家加里·克莱因发明的决策神技：在项目启动前，假定已经快进到一年后且项目彻底惨败，让每个人花 10 分钟独立写下“它是怎么死掉的”——能将找错能力提升 30% 以上！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>团队初始乐观偏误（计划谬误）</span><span id="vOpt">75%</span></label><input type="range" id="sOpt" min="20" max="100" value="75" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>事前验尸覆盖的致命死因比例</span><span id="vCov">70%</span></label><input type="range" id="sCov" min="10" max="95" value="70" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🩺 事前验尸 vs 乐观计划谬误（90 天上线竞速）</h1>
+      <p>心理学家 Gary Klein 提出<strong>事前验尸（Pre-mortem）</strong>：项目启动前不问“我们能成吗”，而是直接宣布<strong>“现在是 1 年后，这个项目已经彻底惨败，请写下死因！”</strong>按下播放键，对比两支团队 90 天后的真实排雷战绩！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="playBtn">▶ 播放 90 天项目推进对决</button>
+        <button class="toy-btn secondary" id="jumpBtn">⏩ 直接看第 90 天上线结局</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重置</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">常规启动会项目存活率</div><div class="k-val" id="kNrm">—</div></div>
-        <div class="kpi"><div class="k-lbl">事前验尸后项目存活率</div><div class="k-val" id="kPre">—</div></div>
+
+      <svg id="raceSvg" viewBox="0 0 680 215" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="事前验尸与乐观计划谬误90天竞速"></svg>
+
+      <div class="cards">
+        <div class="s-card">
+          <div style="font-size:12px;color:var(--tax-muted);">🎉 乐观评审组（开工前发现 2 个浅风险）</div>
+          <div class="big-num" id="optVal" style="color:var(--tax-red);">0% 进度</div>
+        </div>
+        <div class="s-card">
+          <div style="font-size:12px;color:var(--tax-muted);">🩺 事前验尸组（开工前挖出 7 个致命暗雷）</div>
+          <div class="big-num" id="preVal" style="color:var(--tax-green);">0% 进度</div>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>竞速观察：</strong>前 30 天乐观组看着冲得更快，但隐藏暗雷都在第 45–80 天集中引爆！点击播放看事前验尸如何靠“前瞻性后见之明”稳健通关！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const opt=+document.getElementById('sOpt').value, cov=+document.getElementById('sCov').value;
-  document.getElementById('vOpt').textContent=opt+'%';
-  document.getElementById('vCov').textContent=cov+'%';
-  const nrm=Math.max(15, Math.round(78 - opt*0.52));
-  const pre=Math.min(95, Math.round(nrm + (100-nrm)*(cov/100)*0.72));
-  document.getElementById('kNrm').textContent=nrm+'%';
-  document.getElementById('kPre').textContent=pre+'% (+'+(pre-nrm)+'%)';
-  document.getElementById('kPre').style.color='#059669';
-  const wN=Math.max(12, nrm*3.6), wP=Math.max(12, pre*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">开工前把“事后诸葛亮”提前到“事前”的收益对比</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">常规乐观启动会</text>
-    <rect x="155" y="64" width="${wN.toFixed(0)}" height="28" rx="6" fill="#94a3b8"/>
-    <text x="${(163+wN).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="var(--tax-muted)">${nrm}%</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">执行事前验尸</text>
-    <rect x="155" y="120" width="${wP.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(163+wP).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${pre}%</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">当大脑被强制假设“失败已成既定事实”时，它会自动从“辩护模式”切换到“侦探找死因模式”！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>医学上的验尸只能帮助下一个病人，决策里的“事前验尸”却能在项目还健康时就救活它自己！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    // Progress across 10 checkpoints (Day 0 to Day 90)
+    const DAYS = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90];
+    const OPT  = [0, 18, 34, 48, 52, 46, 54, 58, 62, 66]; // Hits hidden mines at D40, D50, D70 -> delayed!
+    const PRE  = [0, 10, 22, 36, 50, 64, 76, 86, 94, 100]; // Spends D0-10 defusing mines, then smooth cruise
+
+    let step = 0, playing = false, timer = null, done = false;
+    const svg = document.getElementById('raceSvg');
+    const playBtn = document.getElementById('playBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function draw() {
+      const d = DAYS[step];
+      const o = OPT[step], p = PRE[step];
+      document.getElementById('optVal').textContent = step === 9 ? `${o}%（💥 延误 42 天返工）` : `${o}% 进度`;
+      document.getElementById('preVal').textContent = step === 9 ? `${p}%（✅ 准时高质量上线）` : `${p}% 进度`;
+
+      const xOf = i => 50 + (i / 9) * 580;
+      const yOf = v => 180 - (v / 100) * 140;
+
+      let oPts = [], pPts = [];
+      for (let i = 0; i <= step; i++) {
+        oPts.push(`${xOf(i).toFixed(1)},${yOf(OPT[i]).toFixed(1)}`);
+        pPts.push(`${xOf(i).toFixed(1)},${yOf(PRE[i]).toFixed(1)}`);
+      }
+
+      let html = '';
+      [25, 50, 75, 100].forEach(v => {
+        const y = yOf(v);
+        html += `<line x1="50" y1="${y}" x2="630" y2="${y}" stroke="var(--tax-border)" stroke-dasharray="3 3"/>`;
+        html += `<text x="42" y="${y + 4}" text-anchor="end" fill="var(--tax-muted)" font-size="11">${v}%</text>`;
+      });
+      DAYS.forEach((dayVal, i) => {
+        if (i % 2 === 0 || i === 9) html += `<text x="${xOf(i)}" y="200" text-anchor="middle" fill="var(--tax-muted)" font-size="11">D${dayVal}</text>`;
+      });
+
+      // Mine marker at Day 50
+      html += `<text x="${xOf(5)}" y="24" text-anchor="middle" fill="var(--tax-red)" font-size="11" font-weight="700">💣 第 50 天：核心接口/合规暗雷引爆点</text>`;
+
+      if (oPts.length > 1) {
+        html += `<polyline points="${oPts.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3.5"/>`;
+        html += `<polyline points="${pPts.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3.5"/>`;
+      }
+      html += `<circle cx="${xOf(step)}" cy="${yOf(o)}" r="6" fill="var(--tax-red)"/>`;
+      html += `<circle cx="${xOf(step)}" cy="${yOf(p)}" r="6" fill="var(--tax-green)"/>`;
+      svg.innerHTML = html;
+
+      if (step === 9) {
+        ahaBox.innerHTML = '<strong>前瞻性后见之明完胜（100% vs 66%）！</strong>研究证实，事前验尸能把团队准确识别潜在失败原因的能力提高 <strong>30% 以上</strong>。开工前多花 1 小时假设项目已经惨死，能省掉上线前 40 天通宵救火！';
+      } else if (step >= 4) {
+        ahaBox.innerHTML = `<strong>第 ${d} 天（暗雷爆发！）：</strong>乐观组撞上了事前没想过的第三方合规与性能瓶颈，被迫倒退返工；事前验尸组早在第 1 周就绕开了这些坑，一路丝滑反超！`;
+      } else if (step >= 1) {
+        ahaBox.innerHTML = `<strong>第 ${d} 天：</strong>乐观组跳过排雷直接开干，前期看似领先（${o}% vs ${p}%）；验尸组正忙着补齐预案。接着往后看！`;
+      }
+    }
+
+    function stop() { playing = false; clearInterval(timer); playBtn.textContent = '▶ 播放 90 天项目推进对决'; }
+
+    playBtn.onclick = () => {
+      markDone('播放了事前验尸与乐观计划谬误90天竞速');
+      if (playing) { stop(); return; }
+      if (step >= 9) step = 0;
+      playing = true;
+      playBtn.textContent = '⏸ 暂停';
+      timer = setInterval(() => {
+        step++;
+        draw();
+        if (step >= 9) stop();
+      }, 360);
+    };
+    document.getElementById('jumpBtn').onclick = () => { stop(); step = 9; markDone('查看了事前验尸第90天结局'); draw(); };
+    document.getElementById('resetBtn').onclick = () => { stop(); step = 0; draw(); };
+    draw();
   </script>
 </body>
 </html>

@@ -1,67 +1,120 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🕊️ 习得性无助形成与“小胜破冰”器（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>习得性无助形成与“小胜破冰”器</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .s-card { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .s-val { font-size: 20px; font-weight: 800; color: var(--tax-ink); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🕊️ 习得性无助形成与“小胜破冰”器（SVG）</h1><p>塞利格曼经典研究：当个体反复经历“无论怎么努力结果都一样糟”的不可控挫败后，即使后来环境变好了，也会放弃一切反抗——唯有通过“微小但 100% 可控的胜利”才能重启大脑掌控回路！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>前期经历“努力无效”受挫轮次</span><span id="vFail">6 次</span></label><input type="range" id="sFail" min="0" max="10" value="6" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>近期刻意设计的“可控微胜利”次数</span><span id="vWin">3 次</span></label><input type="range" id="sWin" min="0" max="10" value="3" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🕊️ 习得性无助形成与“小胜破冰”模拟器</h1>
+      <p>塞利格曼（Seligman）发现：当个体反复经历“无论怎么努力都没用”的不可控挫败后，即使后来<strong>出口已经敞开</strong>，大脑也会彻底放弃尝试。但只要连续制造 <strong>3 次极小、百分百可控的微胜利</strong>，就能重新点亮掌控感！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn secondary" id="failBtn">⚡ 经历 1 次不可控挫败（逃生门锁死）</button>
+        <button class="toy-btn" id="winBtn">🪜 制造 1 次可控小胜（整理桌角 / 跑 5 分钟）</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重置状态</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">主观自我效能感（掌控感）</div><div class="k-val" id="kEff">—</div></div>
-        <div class="kpi"><div class="k-lbl">面对新机会时的反应</div><div class="k-val" id="kSt">—</div></div>
+
+      <svg id="helpSvg" viewBox="0 0 680 190" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="习得性无助与小胜破冰模拟"></svg>
+
+      <div class="stats">
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">主观掌控感（Agency）</div><div class="s-val" id="agVal">70%</div></div>
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">行动尝试意愿</div><div class="s-val" id="tryVal" style="font-size:16px;">主动探索</div></div>
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">累计小胜破冰</div><div class="s-val" id="winVal">0 次</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>动手体验：</strong>先连点 3 次「不可控挫败」，看看主观掌控感跌破 20% 后即使新出口已打开为什么也动弹不得；再连点「制造可控小胜」完成破冰！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const fail=+document.getElementById('sFail').value, win=+document.getElementById('sWin').value;
-  document.getElementById('vFail').textContent=fail+' 次';
-  document.getElementById('vWin').textContent=win+' 次';
-  const eff=Math.max(5, Math.min(98, Math.round(60 - fail*7.5 + win*8.8)));
-  const st=eff<35?'😔 习得性无助（门开了也不走）':(eff<65?'🌱 破冰试探中':'🕊️ 恢复掌控，主动出击');
-  document.getElementById('kEff').textContent=eff+'%';
-  document.getElementById('kEff').style.color=eff>=65?'#059669':(eff<35?'#ef4444':'#f59e0b');
-  document.getElementById('kSt').textContent=st;
-  const w=Math.max(12, eff*4.4);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">大脑“行动-结果因果感”电量条（低于 35% 进入习得性无助）</text>
-    <rect x="30" y="68" width="440" height="40" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${w.toFixed(0)}" height="40" rx="8" fill="${eff>=65?'#059669':(eff<35?'#ef4444':'#f59e0b')}"/>
-    <line x1="${30+35*4.4}" y1="54" x2="${30+35*4.4}" y2="122" stroke="#ef4444" stroke-dasharray="4,3" stroke-width="2"/>
-    <text x="${Math.min(480, 38+w).toFixed(0)}" y="94" font-size="14" font-weight="850" fill="${eff>=65?'#059669':(eff<35?'#ef4444':'#d97706')}">${eff}%</text>
-    <text x="30" y="152" font-size="12" fill="var(--tax-muted)">走出低谷的秘诀不是喊口号，而是立刻做 3 件极小、但你 100% 能亲手搞定的事，重启因果感！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>无助感是“学”出来的，掌控感同样可以通过一个个小胜重新“学”回来！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let agency = 70;
+    let fails = 0, wins = 0;
+    let doorOpen = false;
+    let done = false;
+
+    const svg = document.getElementById('helpSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function draw() {
+      const helpless = agency <= 25;
+      document.getElementById('agVal').textContent = agency + '%';
+      document.getElementById('agVal').style.color = helpless ? 'var(--tax-red)' : (agency >= 65 ? 'var(--tax-green)' : 'var(--tax-amber)');
+      document.getElementById('tryVal').textContent = helpless ? '🧊 习得性无助（放弃尝试）' : (agency >= 65 ? '🚀 主动破局' : '🌱 正在复苏');
+      document.getElementById('winVal').textContent = wins + ' 次';
+
+      let html = '';
+      // Left: Cage / Environment box
+      html += `<rect x="34" y="34" width="260" height="122" rx="12" fill="rgba(148,163,184,0.10)" stroke="${helpless ? 'var(--tax-red)' : 'var(--tax-primary)'}" stroke-width="2"/>`;
+      // Door on right wall of cage
+      if (doorOpen) {
+        html += `<line x1="294" y1="62" x2="294" y2="128" stroke="var(--tax-surface-alt)" stroke-width="5"/>`;
+        html += `<text x="312" y="99" fill="var(--tax-green)" font-size="12" font-weight="800">🚪 出口已敞开 →</text>`;
+      } else {
+        html += `<text x="312" y="99" fill="var(--tax-muted)" font-size="12">🔒 当前通道</text>`;
+      }
+
+      // Agent dot inside cage
+      const ax = helpless ? 90 : (doorOpen ? 255 : 164);
+      html += `<circle cx="${ax}" cy="95" r="22" fill="${helpless ? 'var(--tax-red)' : 'var(--tax-green)'}" opacity="0.22"/>`;
+      html += `<circle cx="${ax}" cy="95" r="12" fill="${helpless ? 'var(--tax-red)' : 'var(--tax-green)'}"/>`;
+      html += `<text x="164" y="144" text-anchor="middle" fill="var(--tax-muted)" font-size="11.5">${helpless ? '已习得“努力无用”，明明门开了也不愿起身' : '感受到行为与结果的因果连接'}</text>`;
+
+      // Right: Agency Meter
+      html += `<text x="440" y="54" fill="var(--tax-ink)" font-size="13" font-weight="700">内部掌控感能量槽：${agency}%</text>`;
+      html += `<rect x="440" y="68" width="210" height="22" rx="11" fill="rgba(148,163,184,0.16)"/>`;
+      html += `<rect x="440" y="68" width="${(agency / 100) * 210}" height="22" rx="11" fill="${helpless ? 'var(--tax-red)' : (agency >= 65 ? 'var(--tax-green)' : 'var(--tax-amber)')}"/>`;
+      html += `<text x="440" y="114" fill="var(--tax-muted)" font-size="11.5">不可控挫败：${fails} 次 · 可控小胜：${wins} 次</text>`;
+      html += `<text x="440" y="138" fill="var(--tax-muted)" font-size="11.5">${helpless ? '⚠️ 破冰处方：别立大目标，立刻做一件 5 分钟必成小事！' : '✓ 大脑相信“我的行动能改变结果”'}</text>`;
+      svg.innerHTML = html;
+
+      if (helpless) {
+        ahaBox.innerHTML = '<strong>进入习得性无助态（掌控感 ≤25%）：</strong>注意看右侧的门其实已经打开了，但大脑记住了“努力=白费”，于是彻底冻僵！现在点击「🪜 制造 1 次可控小胜」，用微小确定的正反馈重启引擎！';
+      } else if (wins >= 2 && fails >= 2) {
+        ahaBox.innerHTML = '<strong>小胜破冰成功！</strong>神经科学发现，重新激活掌控感靠的不是鸡血口号，而是让大脑亲眼见证“我做一个小动作 → 世界真的变了一点点”。连续 3 次微小胜利，就能彻底打破习得性无助！';
+      }
+    }
+
+    document.getElementById('failBtn').onclick = () => {
+      fails++;
+      agency = Math.max(8, agency - 22);
+      if (fails >= 3) doorOpen = true; // Door opens right after helplessness forms!
+      markDone('模拟了习得性无助的形成过程');
+      draw();
+    };
+    document.getElementById('winBtn').onclick = () => {
+      wins++;
+      doorOpen = true;
+      agency = Math.min(95, agency + 24);
+      markDone('使用可控小胜打破了习得性无助');
+      draw();
+    };
+    document.getElementById('resetBtn').onclick = () => {
+      agency = 70; fails = 0; wins = 0; doorOpen = false;
+      draw();
+    };
+    draw();
   </script>
 </body>
 </html>

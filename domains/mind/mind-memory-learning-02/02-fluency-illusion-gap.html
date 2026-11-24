@@ -1,73 +1,166 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🪞 流畅感错觉：预测成绩 vs 真实成绩</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>流畅感错觉：预测成绩 vs 真实成绩</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .passage { padding: 14px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); line-height: 1.75; font-size: 14px; }
+    .hl { background: rgba(245,158,11,0.28); padding: 1px 4px; border-radius: 4px; }
+    .quiz-item { margin-bottom: 10px; padding: 10px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .quiz-input { width: 100%; margin-top: 6px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-ink); font-size: 14px; }
+    .gap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .gap-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; }
+    .gap-val { font-size: 26px; font-weight: 800; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🪞 流畅感错觉：预测成绩 vs 真实成绩</h1><p>把同一页笔记读 5 遍后，你觉得自己“全懂了”，但那只是“识别流畅”，一到闭卷“回忆”就露馅。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>重复浏览/划重点次数</span><span id="vRd">5 遍</span></label><input type="range" id="sRd" min="1" max="10" value="5" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>闭卷自测纠错次数</span><span id="vQz">1 次</span></label><input type="range" id="sQz" min="0" max="6" value="1" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🪞 流畅感错觉：预测成绩 vs 真实成绩（盲测）</h1>
+      <p>读一遍下面这段只有 4 个知识点的科普短文（你也可以点“荧光笔划重点”多读一遍），然后<strong>先预测你能答对几题</strong>，再合上短文接受突击测验！</p>
+    </header>
+
+    <section class="toy-card">
+      <!-- Phase 1: Read & Predict -->
+      <div id="phaseRead">
+        <div class="passage" id="passageBox">
+          海马体是人脑中负责将短期记忆转化为长期记忆的关键结构，它的英文名 <strong>Hippocampus</strong> 源自希腊语“海马”。在 1953 年著名的 <strong>H.M. 患者</strong>手术案例中，医生为了治疗癫痫切除了他的双侧海马体，结果他保留了童年记忆，却彻底失去了形成新情景记忆的能力。研究还发现，伦敦出租车司机因长期记忆 <strong>25,000 条</strong>街道，其<strong>后海马体</strong>灰质体积显著大于常人。
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px;">
+          <button class="toy-btn secondary" id="hlBtn">🖍️ 荧光笔划重点再读一遍</button>
+          <span style="font-size:13px;color:var(--tax-muted);" id="readHint">读完觉得顺畅了吗？先预测你的闭卷成绩：</span>
+        </div>
+
+        <div style="margin-top:12px;padding:12px;border-radius:10px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+            <span>你预测闭卷能答对几道填空？（0~4 题）</span>
+            <strong id="predLabel" style="color:var(--tax-primary);">4 / 4 题（100% 有把握）</strong>
+          </div>
+          <input type="range" id="predRange" min="0" max="4" value="4" style="width:100%;" />
+          <div style="margin-top:10px;">
+            <button class="toy-btn" id="toQuizBtn">📕 合上短文，开始闭卷盲测</button>
+          </div>
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">自我感觉掌握度</div><div class="k-val" id="kFeel">—</div></div>
-        <div class="kpi"><div class="k-lbl">一周后真实闭卷分</div><div class="k-val" id="kReal">—</div></div>
-        <div class="kpi"><div class="k-lbl">认知幻觉落差</div><div class="k-val" id="kGap">—</div></div>
+
+      <!-- Phase 2: Closed-book Quiz -->
+      <div id="phaseQuiz" style="display:none;">
+        <div class="quiz-item">
+          <div>1. 海马体的英文名是什么？（拼写大致对即可）</div>
+          <input class="quiz-input" id="q1" placeholder="输入英文单词..." autocomplete="off" />
+        </div>
+        <div class="quiz-item">
+          <div>2. 著名的切除双侧海马体案例发生在哪一年？（四位年份）</div>
+          <input class="quiz-input" id="q2" placeholder="例如 19xx" autocomplete="off" />
+        </div>
+        <div class="quiz-item">
+          <div>3. 伦敦出租车司机需要记忆大约多少条街道？（数字）</div>
+          <input class="quiz-input" id="q3" placeholder="例如 10000" autocomplete="off" />
+        </div>
+        <div class="quiz-item">
+          <div>4. 伦敦司机显著增大的是海马体的哪个具体部位？（前/中/后）</div>
+          <input class="quiz-input" id="q4" placeholder="填部位名称..." autocomplete="off" />
+        </div>
+        <button class="toy-btn" id="gradeBtn">提交并揭晓错觉落差</button>
       </div>
+
+      <!-- Phase 3: Reveal -->
+      <div id="phaseResult" style="display:none;">
+        <div class="gap-grid">
+          <div class="gap-card">
+            <div style="font-size:12px;color:var(--tax-muted);">🪞 你的闭卷前预测（主观流畅感）</div>
+            <div class="gap-val" id="resPred" style="color:var(--tax-amber);">—</div>
+          </div>
+          <div class="gap-card">
+            <div style="font-size:12px;color:var(--tax-muted);">🎯 你的真实闭卷提取得分</div>
+            <div class="gap-val" id="resActual" style="color:var(--tax-green);">—</div>
+          </div>
+        </div>
+        <div id="answerDetail" style="margin-top:12px;font-size:13px;line-height:1.7;"></div>
+        <button class="toy-btn secondary" id="retryBtn" style="margin-top:10px;">↺ 再测一次</button>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>盲测原理：</strong>眼睛扫过文字时“丝滑无阻”，大脑会把这种<strong>加工流畅感（Processing Fluency）</strong>误判为“我已经记住了”。合上书试试，落差立刻现形！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const rd=+document.getElementById('sRd').value, qz=+document.getElementById('sQz').value;
-  document.getElementById('vRd').textContent=rd+' 遍';
-  document.getElementById('vQz').textContent=qz+' 次';
-  const feel=Math.min(98, Math.round(40 + rd*6.2 + qz*2));
-  const real=Math.min(96, Math.round(24 + Math.min(rd,3)*5 + qz*10.5));
-  const gap=feel - real;
-  document.getElementById('kFeel').textContent=feel+' 分';
-  document.getElementById('kReal').textContent=real+' 分';
-  document.getElementById('kReal').style.color=real>=70?'#059669':'#f59e0b';
-  document.getElementById('kGap').textContent=(gap>0?'高估 +':'校准 ')+gap+' 分';
-  document.getElementById('kGap').style.color=gap>20?'#ef4444':'#059669';
-  const w1=Math.max(10, feel*3.6), w2=Math.max(10, real*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">自我感觉（流畅感）vs 真实闭卷表现</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">自以为学会了</text>
-    <rect x="145" y="64" width="${w1.toFixed(0)}" height="28" rx="6" fill="#8b5cf6" opacity="0.8"/>
-    <text x="${(153+w1).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#8b5cf6">${feel} 分</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">真实闭卷成绩</text>
-    <rect x="145" y="120" width="${w2.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(153+w2).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${real} 分</text>
-    <text x="20" y="182" font-size="11.5" fill="var(--tax-muted)">${gap>20?'⚠️ 严重“眼熟当学会”幻觉！多做闭卷提取才能戳破虚高自信。':'✅ 自我评估与真实能力高度对齐！'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“看懂答案”和“自己写得出答案”调用的是两条完全不同的神经通路。永远别拿看书时的顺畅感当成学会的证据。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const phaseRead = document.getElementById('phaseRead');
+    const phaseQuiz = document.getElementById('phaseQuiz');
+    const phaseResult = document.getElementById('phaseResult');
+    const predRange = document.getElementById('predRange');
+    const predLabel = document.getElementById('predLabel');
+    const passageBox = document.getElementById('passageBox');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    predRange.oninput = () => {
+      const v = Number(predRange.value);
+      predLabel.textContent = `${v} / 4 题（${v * 25}% 有把握）`;
+    };
+
+    document.getElementById('hlBtn').onclick = () => {
+      passageBox.innerHTML = '海马体是人脑中负责将短期记忆转化为长期记忆的关键结构，它的英文名 <span class="hl"><strong>Hippocampus</strong></span> 源自希腊语“海马”。在 <span class="hl"><strong>1953 年</strong></span>著名的 <strong>H.M. 患者</strong>手术案例中，医生为了治疗癫痫切除了他的双侧海马体，结果他保留了童年记忆，却彻底失去了形成新情景记忆的能力。研究还发现，伦敦出租车司机因长期记忆 <span class="hl"><strong>25,000 条</strong></span>街道，其<span class="hl"><strong>后海马体</strong></span>灰质体积显著大于常人。';
+      document.getElementById('readHint').textContent = '✨ 划完荧光笔看起来是不是更“眼熟”了？快去测测吧！';
+    };
+
+    document.getElementById('toQuizBtn').onclick = () => {
+      phaseRead.style.display = 'none';
+      phaseQuiz.style.display = 'block';
+    };
+
+    document.getElementById('gradeBtn').onclick = () => {
+      const a1 = document.getElementById('q1').value.trim().toLowerCase();
+      const a2 = document.getElementById('q2').value.trim();
+      const a3 = document.getElementById('q3').value.replace(/[,，\s条万]/g, '').trim();
+      const a4 = document.getElementById('q4').value.trim();
+
+      const ok1 = a1.includes('hippocamp');
+      const ok2 = a2.includes('1953');
+      const ok3 = a3.includes('25000') || document.getElementById('q3').value.includes('2.5万');
+      const ok4 = a4.includes('后');
+
+      const actual = [ok1, ok2, ok3, ok4].filter(Boolean).length;
+      const pred = Number(predRange.value);
+
+      document.getElementById('resPred').textContent = `${pred} / 4`;
+      document.getElementById('resActual').textContent = `${actual} / 4`;
+      document.getElementById('answerDetail').innerHTML = `
+        1. 英文名（Hippocampus）：${ok1 ? '✅ 正确' : '❌ 漏记'}<br/>
+        2. 手术年份（1953）：${ok2 ? '✅ 正确' : '❌ 漏记'}<br/>
+        3. 街道数量（25,000 条）：${ok3 ? '✅ 正确' : '❌ 漏记'}<br/>
+        4. 增大部位（后海马体）：${ok4 ? '✅ 正确' : '❌ 漏记'}
+      `;
+
+      phaseQuiz.style.display = 'none';
+      phaseResult.style.display = 'block';
+      markDone(`完成流畅感错觉盲测：预测 ${pred}/4 vs 实际 ${actual}/4`);
+
+      if (pred > actual) {
+        ahaBox.innerHTML = `<strong>抓到流畅感错觉（高估了 ${pred - actual} 题）！</strong>阅读时每个字都认识，让你产生了“全都懂了”的错觉；可一旦合上书本，细节立刻卡壳。检验学会的唯一标准不是“看懂了”，而是“合上书能说出来”！`;
+      } else {
+        ahaBox.innerHTML = `<strong>校准精准（预测 ${pred}/4，实得 ${actual}/4）！</strong>你没有被阅读流畅感骗到（或你的即时提取很强）。即便如此，如果 3 天后再盲测，只读不测的人成绩往往会比自己预测低 30%–40%！`;
+      }
+    };
+
+    document.getElementById('retryBtn').onclick = () => {
+      ['q1', 'q2', 'q3', 'q4'].forEach(id => document.getElementById(id).value = '');
+      phaseResult.style.display = 'none';
+      phaseRead.style.display = 'block';
+    };
   </script>
 </body>
 </html>

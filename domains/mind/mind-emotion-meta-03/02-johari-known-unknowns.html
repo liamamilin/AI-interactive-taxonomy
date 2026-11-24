@@ -1,70 +1,118 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧭 知识四象限：已知未知 vs 未知的未知</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>知识四象限：已知未知 vs 未知的未知</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .probe-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .probe-btn { padding: 7px 12px; border-radius: 999px; border: 1px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 12.5px; cursor: pointer; }
+    .probe-btn.on { border-color: var(--tax-green); background: var(--tax-green-soft); color: var(--tax-green); font-weight: 700; }
+    svg .quad-cell { cursor: pointer; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🧭 知识四象限：已知未知 vs 未知的未知</h1><p>最危险的不是“我知道我不会”（你可以查资料或请外援），而是“我压根不知道这里还有个坑”（未知的未知）！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🧭 知识四象限：缩小“未知的未知”空间雷达</h1>
+      <p>点击下方 2×2 知识矩阵的任意象限查看定义与案例，再开启顶部 <strong>3 个元认知雷达探针</strong>，亲眼看它们如何把最危险的红色“未知的未知”黑区压缩、转化为可攻克的“已知的未知”！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="probe-row" id="probeRow"></div>
+
+      <svg id="quadSvg" viewBox="0 0 680 250" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="知识四象限空间地图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>空间探索：</strong>最可怕的不是“知道自己不会”（已知的未知），而是“根本不知道存在这个盲区”（未知的未知）。点击上方雷达探针压缩红区！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>主动请教异见专家/红队挑刺频率</span><span id="vRed">60%</span></label><input type="range" id="sRed" min="0" max="100" value="60" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>跨学科广度探索投入</span><span id="vBrd">55%</span></label><input type="range" id="sBrd" min="0" max="100" value="55" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">致命黑天鹅盲区占比</div><div class="k-val" id="kUnk">—</div></div>
-        <div class="kpi"><div class="k-lbl">转化为可控“已知未知”</div><div class="k-val" id="kKnw">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const red=+document.getElementById('sRed').value, brd=+document.getElementById('sBrd').value;
-  document.getElementById('vRed').textContent=red+'%';
-  document.getElementById('vBrd').textContent=brd+'%';
-  const unk=Math.max(8, Math.round(62 - red*0.32 - brd*0.22));
-  const knw=Math.min(70, 78 - unk);
-  const mastered=22;
-  document.getElementById('kUnk').textContent=unk+'%';
-  document.getElementById('kUnk').style.color=unk>35?'#ef4444':'#059669';
-  document.getElementById('kKnw').textContent=knw+'%';
-  const w1=mastered*5.2, w2=knw*5.2, w3=unk*5.2;
-  document.getElementById('svg').innerHTML=`
-    <text x="40" y="32" font-size="13" font-weight="800" fill="var(--tax-text)">你的认知地图构成（把红色暗礁变成黄色可见清单）</text>
-    <rect x="40" y="65" width="${w1.toFixed(0)}" height="46" rx="4" fill="#059669"/>
-    <rect x="${(40+w1).toFixed(0)}" y="65" width="${w2.toFixed(0)}" height="46" fill="#f59e0b"/>
-    <rect x="${(40+w1+w2).toFixed(0)}" y="65" width="${w3.toFixed(0)}" height="46" rx="4" fill="#ef4444"/>
-    <text x="40" y="138" font-size="12" font-weight="800" fill="#059669">已知的已知 ${mastered}%</text>
-    <text x="190" y="138" font-size="12" font-weight="800" fill="#d97706">已知的未知 ${knw}% (可控)</text>
-    <text x="380" y="138" font-size="12" font-weight="800" fill="#ef4444">未知的未知 ${unk}% (暗礁)</text>
-    <text x="40" y="176" font-size="11.5" fill="var(--tax-muted)">多问一句“这件事里有什么是我连问都没想到该问的？”能把隐形暗礁拉出水面！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>真正的智慧不是记住所有答案，而是清楚地画出自己的“能力圈边界”——知道哪里该自己上，哪里该求助。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const PROBES = [
+      { id: 'peer', name: '👥 探针 1：跨领域同行盲审', shrink: 18, on: false },
+      { id: 'pre',  name: '🩺 探针 2：上线前做事前验尸', shrink: 18, on: false },
+      { id: 'test', name: '🧪 探针 3：小步快跑真实用户灰度', shrink: 20, on: false }
+    ];
+
+    const QUADS = {
+      kk: { title: '已知的已知（明知识）', desc: '你知道自己掌握的技能：如写常规代码、骑自行车。舒适但容易陷入路径依赖。' },
+      ku: { title: '已知的未知（学习清单）', desc: '你知道自己还不懂的问题：如“我不熟悉分布式锁”。这是最安全的成长区，查资料就能补齐！' },
+      uk: { title: '未知的已知（隐性直觉）', desc: '你其实会但说不出来的默会经验：如老司机凭听声音判断故障，需要通过费曼输出显性化。' },
+      uu: { title: '未知的未知（黑天鹅盲区）', desc: '你连自己漏掉了什么都不知道！历史上绝大多数灾难性翻车都源自这里，只能靠外部反馈探针暴露。' }
+    };
+
+    let selected = 'uu';
+    let done = false;
+
+    const probeRow = document.getElementById('probeRow');
+    const svg = document.getElementById('quadSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      probeRow.innerHTML = '';
+      PROBES.forEach(p => {
+        const b = document.createElement('button');
+        b.className = 'probe-btn' + (p.on ? ' on' : '');
+        b.textContent = (p.on ? '✓ ' : '+ ') + p.name;
+        b.onclick = () => { p.on = !p.on; markDone(`开启了知识盲区探针：${p.name}`); render(); };
+        probeRow.appendChild(b);
+      });
+
+      const shrink = PROBES.filter(p => p.on).reduce((s, p) => s + p.shrink, 0);
+      // Split line shifts rightward & downward as unknown-unknowns shrink
+      const splitX = 330 + shrink * 2.2;
+      const splitY = 128 + shrink * 0.9;
+      const uuPct = Math.max(8, 35 - Math.round(shrink * 0.48));
+
+      const x0 = 56, x1 = 650, y0 = 30, y1 = 224;
+      const wL = splitX - x0, wR = x1 - splitX;
+      const hT = splitY - y0, hB = y1 - splitY;
+
+      let html = '';
+      // Top-left: Known Knowns
+      html += `<g class="quad-cell" data-k="kk"><rect x="${x0}" y="${y0}" width="${wL}" height="${hT}" fill="rgba(16,185,129,0.16)" stroke="${selected === 'kk' ? 'var(--tax-green)' : 'var(--tax-border)'}" stroke-width="${selected === 'kk' ? 3 : 1.2}"/>`;
+      html += `<text x="${x0 + wL/2}" y="${y0 + hT/2}" text-anchor="middle" fill="var(--tax-green)" font-size="13" font-weight="800">✅ 已知的已知</text></g>`;
+
+      // Top-right: Known Unknowns
+      html += `<g class="quad-cell" data-k="ku"><rect x="${splitX}" y="${y0}" width="${wR}" height="${hT}" fill="rgba(59,130,246,0.16)" stroke="${selected === 'ku' ? 'var(--tax-primary)' : 'var(--tax-border)'}" stroke-width="${selected === 'ku' ? 3 : 1.2}"/>`;
+      html += `<text x="${splitX + wR/2}" y="${y0 + hT/2}" text-anchor="middle" fill="var(--tax-primary)" font-size="13" font-weight="800">📘 已知的未知</text></g>`;
+
+      // Bottom-left: Unknown Knowns
+      html += `<g class="quad-cell" data-k="uk"><rect x="${x0}" y="${splitY}" width="${wL}" height="${hB}" fill="rgba(245,158,11,0.15)" stroke="${selected === 'uk' ? 'var(--tax-amber)' : 'var(--tax-border)'}" stroke-width="${selected === 'uk' ? 3 : 1.2}"/>`;
+      html += `<text x="${x0 + wL/2}" y="${splitY + hB/2 + 4}" text-anchor="middle" fill="var(--tax-amber)" font-size="13" font-weight="800">💡 未知的已知</text></g>`;
+
+      // Bottom-right: Unknown Unknowns
+      html += `<g class="quad-cell" data-k="uu"><rect x="${splitX}" y="${splitY}" width="${wR}" height="${hB}" fill="rgba(239,68,68,0.20)" stroke="${selected === 'uu' ? 'var(--tax-red)' : 'var(--tax-border)'}" stroke-width="${selected === 'uu' ? 3 : 1.2}"/>`;
+      html += `<text x="${splitX + wR/2}" y="${splitY + hB/2 + 4}" text-anchor="middle" fill="var(--tax-red)" font-size="13" font-weight="800">🕳️ 未知的未知 (${uuPct}%)</text></g>`;
+
+      // Axis labels
+      html += `<text x="353" y="20" text-anchor="middle" fill="var(--tax-muted)" font-size="11.5">← 我掌握的技能 | 我尚未掌握的领域 →</text>`;
+      html += `<text x="24" y="130" text-anchor="middle" fill="var(--tax-muted)" font-size="11.5" transform="rotate(-90 24 130)">未察觉 ← | → 已察觉</text>`;
+
+      svg.innerHTML = html;
+      svg.querySelectorAll('.quad-cell').forEach(g => {
+        g.onclick = () => { selected = g.dataset.k; markDone('点击探索了知识四象限'); render(); };
+      });
+
+      const q = QUADS[selected];
+      const activeProbes = PROBES.filter(p => p.on).length;
+      ahaBox.innerHTML = activeProbes === 3
+        ? `<strong>盲区已压缩至 ${uuPct}%！</strong>靠自己闭门冥想永远看不见“未知的未知”，只有引入外部视角（同行盲审+事前验尸+真实灰度），才能把暗礁提前翻成“已知的未知”！`
+        : `<strong>${q.title}：</strong>${q.desc}`;
+    }
+
+    render();
   </script>
 </body>
 </html>

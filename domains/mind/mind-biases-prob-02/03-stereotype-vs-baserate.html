@@ -7,64 +7,83 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📚 性格画像 vs 职业人数基数陷阱</h1><p>史蒂夫害羞、一丝不苟、酷爱整理。他更可能是图书管理员还是农民？多数人选图书管理员，却忘了农民总人数是图书管理员的 20 倍！</p></div>
+      <div>
+        <h1>📚 性格画像 vs 职业人数基数陷阱</h1>
+        <p>情景：“史蒂夫腼腆、细心、爱整洁、痴迷于把事物分类整理。”他是<strong>图书管理员</strong>还是<strong>农民</strong>？大脑的“代表性启发式”让你秒选图书管理员——却忘了社会上农民人数是图书管理员的 <strong>20 倍</strong>！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>农民人数 / 图书管理员人数倍率</span><span id="vRat">20 倍</span></label><input type="range" id="sRat" min="1" max="40" value="20" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>该性格在图书管理员 vs 农民中的相对契合度</span><span id="vFit">4 倍</span></label><input type="range" id="sFit" min="1" max="10" value="4" oninput="draw()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="setRatio(20,this)">🌾 真实社会基数（农民 : 馆员 = 20 : 1）</button>
+        <button class="pill" onclick="setRatio(5,this)">🏙️ 大学城社区（5 : 1）</button>
+        <button class="pill" onclick="setRatio(1,this)">🏛️ 图书馆年会现场（1 : 1）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">是图书管理员的概率</div><div class="k-val" id="kLib">—</div></div>
-        <div class="kpi"><div class="k-lbl">是农民的概率</div><div class="k-val" id="kFrm">—</div></div>
+        <div class="kpi"><div class="k-lbl">符合画像的图书管理员</div><div class="k-val" id="kLib" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">符合画像的农民人数</div><div class="k-val" id="kFrm" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">史蒂夫真是农民的概率</div><div class="k-val" id="kProb" style="color:var(--tax-amber);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const rat=+document.getElementById('sRat').value, fit=+document.getElementById('sFit').value;
-  document.getElementById('vRat').textContent=rat+' 倍';
-  document.getElementById('vFit').textContent=fit+' 倍';
-  const libW=1*fit, frmW=rat*1;
-  const pLib=Math.round(libW/(libW+frmW)*100);
-  const pFrm=100 - pLib;
-  document.getElementById('kLib').textContent=pLib+'%';
-  document.getElementById('kFrm').textContent=pFrm+'%';
-  document.getElementById('kFrm').style.color='#059669';
-  const wL=Math.max(12, pLib*3.6), wF=Math.max(12, pFrm*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">符合“害羞爱整理”画像的人群中，两类职业的真实占比</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">图书管理员</text>
-    <rect x="145" y="64" width="${wL.toFixed(0)}" height="28" rx="6" fill="#8b5cf6"/>
-    <text x="${(153+wL).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#8b5cf6">${pLib}%</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">农民</text>
-    <rect x="145" y="120" width="${wF.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(153+wF).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${pFrm}%</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">只要农民人数基数 (${rat}x) 远大于性格匹配倍率 (${fit}x)，概率天平就牢牢倒向农民！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>刻板印象（代表性启发式）会让我们忘记先看大盘人数比例。做任何判断前，先查基础比率！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    // Assume 40% of librarians fit stereotype, only 10% of farmers fit stereotype (4x more typical!)
+    let ratio = 20;
+    function setRatio(r, btn){
+      ratio = r;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const nLib = 100, nFrm = 100 * ratio;
+      const fitLib = Math.round(nLib * 0.40); // 40
+      const fitFrm = Math.round(nFrm * 0.10); // 10 * ratio
+      const pFrm = Math.round((fitFrm / (fitLib + fitFrm)) * 100);
+      const maxFit = Math.max(fitLib, fitFrm);
+
+      const wLib = Math.max(18, Math.round((fitLib / maxFit) * 380));
+      const wFrm = Math.max(18, Math.round((fitFrm / maxFit) * 380));
+
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="28" font-size="12.5" font-weight="800" fill="var(--tax-muted)">设定：图书管理员 40% 符合“腼腆爱整理” · 农民仅 10% 符合（画像典型度差 4 倍！）</text>
+        <text x="24" y="68" font-size="13" font-weight="850" fill="var(--tax-primary)">📚 符合画像的图书管理员（基数 ${nLib} × 40% = ${fitLib} 人）</text>
+        <rect x="24" y="78" width="${wLib}" height="28" rx="6" fill="var(--tax-primary)"/>
+        <text x="${24+wLib+10}" y="97" font-size="13" font-weight="900" fill="var(--tax-primary)">${fitLib} 人 (${100-pFrm}%)</text>
+
+        <text x="24" y="138" font-size="13" font-weight="850" fill="var(--tax-green)">🌾 符合画像的农民（基数 ${nFrm} × 10% = ${fitFrm} 人）</text>
+        <rect x="24" y="148" width="${wFrm}" height="28" rx="6" fill="var(--tax-green)"/>
+        <text x="${24+wFrm+10}" y="167" font-size="13" font-weight="900" fill="var(--tax-green)">${fitFrm} 人 (${pFrm}%)</text>
+      `;
+
+      document.getElementById('kLib').textContent = fitLib + ' 人';
+      document.getElementById('kFrm').textContent = fitFrm + ' 人';
+      document.getElementById('kProb').textContent = pFrm + '% 概率是农民';
+
+      document.getElementById('ahaBox').innerHTML = pFrm > 55
+        ? `💡 <strong>顿悟时刻：</strong>尽管“腼腆爱整理”听起来像极了图书管理员（典型度高 4 倍），但因为农民总数是馆员的 <strong>${ratio} 倍</strong>，绝对人数上符合该性格的农民（<strong>${fitFrm} 人</strong>）依然碾压图书管理员（${fitLib} 人）——他有 <strong>${pFrm}%</strong> 的概率其实是农民！`
+        : `💡 <strong>顿悟时刻：</strong>只有当你身处 <strong>1:1 人数相当</strong> 的场合（如大学城或年会），性格刻板印象才能占上风（此时馆员概率升至 <strong>${100-pFrm}%</strong>）。永远别让生动画像盖过庞大的先验基数！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

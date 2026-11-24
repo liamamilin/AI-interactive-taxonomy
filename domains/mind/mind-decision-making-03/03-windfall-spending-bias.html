@@ -7,62 +7,78 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🎁 意外之财效应：奖金为何比工资花得快？</h1><p>退税到账 2000 元、股市赚 2000 元、加班攒下 2000 元——明明都是你银行卡里完全等价的 2000 元，消费冲动却天差地别！</p></div>
+      <div>
+        <h1>🎁 意外之财效应：奖金为何比工资花得快？</h1>
+        <p>误区：同样都是 1,000 元人民币，购买力一模一样，我的花钱克制力肯定完全相同。真相：大脑给钱贴了“血汗标签”——<strong>辛苦加班赚的工资</strong>你会精打细算存起来，而<strong>退税、红包或股票浮盈</strong>却瞬间变成“白捡的筹码（House Money）”被光速挥霍！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>这笔钱的“意外/白捡感”程度</span><span id="vWnd">80%（退税/红包）</span></label><input type="range" id="sWnd" min="0" max="100" value="80" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>到账金额</span><span id="vAmt">2000 元</span></label><input type="range" id="sAmt" min="500" max="10000" step="500" value="2000" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🏷️ 给同一张 1,000 元钞票换上不同来源标签，观察大脑把它分配进三个篮子的真实比例：</div>
+      <div class="bar" id="bar"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 195"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">30 天内被冲动花掉比例</div><div class="k-val" id="kSpd">—</div></div>
-        <div class="kpi"><div class="k-lbl">最终留存储蓄金额</div><div class="k-val" id="kSav">—</div></div>
+        <div class="kpi"><div class="k-lbl">🏦 储蓄与长期投资</div><div class="k-val" id="kSav" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🏠 房租账单日常刚需</div><div class="k-val" id="kNeed" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🎉 冲动享乐/大餐消费</div><div class="k-val" id="kFun" style="color:var(--tax-red);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const wnd=+document.getElementById('sWnd').value, amt=+document.getElementById('sAmt').value;
-  document.getElementById('vWnd').textContent=wnd+'%'+(wnd>=70?'（意外之财）':(wnd>=30?'（年终奖金）':'（辛苦月薪）'));
-  document.getElementById('vAmt').textContent=amt+' 元';
-  const spd=Math.min(92, Math.round(18 + wnd*0.68));
-  const savAmt=Math.round(amt*(100-spd)/100);
-  const spdAmt=amt - savAmt;
-  document.getElementById('kSpd').textContent=spd+'% ('+spdAmt+' 元)';
-  document.getElementById('kSpd').style.color=spd>=60?'#ef4444':'#059669';
-  document.getElementById('kSav').textContent=savAmt+' 元';
-  const wSp=Math.max(10, spd*5.2), wSv=Math.max(10, (100-spd)*5.2);
-  document.getElementById('svg').innerHTML=`
-    <text x="40" y="32" font-size="13" font-weight="800" fill="var(--tax-text)">同一笔 ${amt} 元在 30 天后的去向切片</text>
-    <rect x="40" y="65" width="${wSp.toFixed(0)}" height="44" rx="6" fill="#f59e0b"/>
-    <rect x="${(40+wSp).toFixed(0)}" y="65" width="${wSv.toFixed(0)}" height="44" rx="6" fill="#059669"/>
-    <text x="40" y="136" font-size="12.5" font-weight="800" fill="#d97706">🛍️ 非必要挥霍：${spdAmt} 元 (${spd}%)</text>
-    <text x="320" y="136" font-size="12.5" font-weight="800" fill="#059669">🏦 理性储蓄/投资：${savAmt} 元 (${100-spd}%)</text>
-    <text x="40" y="176" font-size="11.5" fill="var(--tax-muted)">赌场把现金换成筹码、平台发满减券，全都是在利用心理账户降低你花钱的心痛感！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>收到奖金或退税时，立刻把它混进工资主账户静置 48 小时——洗掉“意外标签”，就能守住真金白银。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const TAGS = [
+      { id:'salary', icon:'💼', name:'辛苦加班月薪 1000 元', sav:480, need:420, fun:100,
+        aha:'💡 <strong>顿悟时刻：</strong>贴上“血汗工资”标签后，你对每一块钱都充满敬畏——高达 <strong>90%</strong> 流入了储蓄和刚需，只舍得花 100 元犒劳自己！' },
+      { id:'tax', icon:'🧾', name:'个税退税到账 1000 元', sav:220, need:280, fun:500,
+        aha:'💡 <strong>顿悟时刻：</strong>其实退税本来就是你去年多交的血汗工资！但仅仅因为换成了“意外退税”标签，大脑就把它当成白捡的甜头，享乐冲动直接翻了 <strong>5 倍（500 元）</strong>！' },
+      { id:'lucky', icon:'🎰', name:'年会抽奖/股票盈利 1000 元', sav:80, need:120, fun:800,
+        aha:'💡 <strong>顿悟时刻：</strong>这就是赌场最爱的<strong>“庄家钱效应（House Money Effect）”</strong>！大脑把意外横财归类为“免费筹码”，不仅极易挥霍（800 元），在股市里还敢拿利润去加杠杆豪赌，最终连本带利全亏回去！' }
+    ];
+    let cur = 'lucky';
+
+    function pick(id){ cur = id; if(window.ToySDK) window.ToySDK.markCompleted(); draw(); }
+
+    function draw(){
+      document.getElementById('bar').innerHTML = TAGS.map(t => `
+        <button class="pill ${cur===t.id?'active':''}" onclick="pick('${t.id}')">${t.icon} ${t.name}</button>
+      `).join('');
+
+      const t = TAGS.find(x=>x.id===cur);
+      const scale = 0.56; // 1000 -> 560px
+      const wS = t.sav * scale, wN = t.need * scale, wF = t.fun * scale;
+
+      document.getElementById('svg').innerHTML = `
+        <text x="32" y="34" font-size="13.5" font-weight="900" fill="var(--tax-ink)">同一张 1,000 元钞票（贴上「${t.name}」标签后的流向）：</text>
+        <rect x="32" y="58" width="${wS}" height="48" rx="7" fill="var(--tax-green)"/>
+        ${wS>55?`<text x="${32+wS/2}" y="87" text-anchor="middle" font-size="12" font-weight="900" fill="#fff">存 ${t.sav}</text>`:''}
+        <rect x="${32+wS+3}" y="58" width="${wN}" height="48" rx="7" fill="var(--tax-primary)"/>
+        ${wN>55?`<text x="${32+wS+3+wN/2}" y="87" text-anchor="middle" font-size="12" font-weight="900" fill="#fff">刚需 ${t.need}</text>`:''}
+        <rect x="${32+wS+wN+6}" y="58" width="${wF}" height="48" rx="7" fill="var(--tax-red)"/>
+        ${wF>55?`<text x="${32+wS+wN+6+wF/2}" y="87" text-anchor="middle" font-size="12" font-weight="900" fill="#fff">挥霍 ${t.fun}</text>`:''}
+        <text x="32" y="146" font-size="12.5" font-weight="800" fill="var(--tax-muted)">反心理账户技巧：凡是收到退税、年终奖或意外分红，到账第一秒先强制转入主储蓄池撕掉“白捡标签”！</text>
+      `;
+
+      document.getElementById('kSav').textContent = t.sav + ' 元';
+      document.getElementById('kNeed').textContent = t.need + ' 元';
+      document.getElementById('kFun').textContent = t.fun + ' 元';
+      document.getElementById('ahaBox').innerHTML = t.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

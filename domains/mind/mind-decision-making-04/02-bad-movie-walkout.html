@@ -7,65 +7,80 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .choice-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:14px; }
+    .c-btn { padding:13px 14px; border-radius:12px; border:1.8px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .c-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .c-btn .t { font-size:13.5px; font-weight:900; }
+    .c-btn .s { font-size:12px; color:var(--tax-muted); margin-top:4px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🎬 烂片离场计算器：别拿未来时间陪葬</h1><p>花 80 元买票看电影，30 分钟后发现烂到坐立难安。继续硬坐 90 分钟，你不仅没把 80 元赚回来，还额外亏掉了 90 分钟宝贵人生！</p></div>
+      <div>
+        <h1>🎬 烂片离场计算器：别拿未来时间陪葬</h1>
+        <p>误区：票钱 80 元已经花了，中途走人岂不是血亏 80 元？硬着头皮看完才算“值回票价”。真相：无论你走不走，80 元都已经进了影院口袋；<strong>硬坐着看完等于用宝贵的未来 90 分钟心情，给已经死掉的 80 元陪葬！</strong></p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>已花掉的电影票价（已沉没）</span><span id="vTic">80 元</span></label><input type="range" id="sTic" min="30" max="200" step="10" value="80" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>剩余 90 分钟的煎熬折磨度</span><span id="vPain">75 分</span></label><input type="range" id="sPain" min="10" max="100" value="75" oninput="draw()"></div>
+      <div style="font-size:13.5px;font-weight:850;margin-bottom:10px;color:var(--tax-ink);">🍿 情景：80 元买的不可退电影票，刚看 30 分钟就发现是绝世烂片，还剩 90 分钟：</div>
+      <div class="choice-grid">
+        <button class="c-btn active" id="bStay" onclick="pick('stay')">
+          <div class="t" style="color:var(--tax-red);">🪑 咬牙硬坐完（企图“回本”）</div>
+          <div class="s">“来都来了、钱都花了，坐满 2 小时才不亏！”</div>
+        </button>
+        <button class="c-btn" id="bWalk" onclick="pick('walk')">
+          <div class="t" style="color:var(--tax-green);">🚪 果断起身离场（时间止损）</div>
+          <div class="s">立刻去公园散步、喝杯咖啡或回家读本好书！</div>
+        </button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">提前离场总体验</div><div class="k-val" id="kLve">—</div></div>
-        <div class="kpi"><div class="k-lbl">硬坐到底总体验</div><div class="k-val" id="kSty">—</div></div>
-      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 195"></svg>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const tic=+document.getElementById('sTic').value, pain=+document.getElementById('sPain').value;
-  document.getElementById('vTic').textContent=tic+' 元';
-  document.getElementById('vPain').textContent=pain+' 分';
-  const leaveVal=40;
-  const stayVal=-pain;
-  document.getElementById('kLve').textContent='+'+leaveVal+' 分（省下 90 分钟去喝咖啡）';
-  document.getElementById('kLve').style.color='#059669';
-  document.getElementById('kSty').textContent=stayVal+' 分（白白受罪 90 分钟）';
-  document.getElementById('kSty').style.color='#ef4444';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">无论票价是 ${tic} 元还是 200 元，它都在检票那一刻归零了</text>
-    <rect x="30" y="60" width="250" height="86" rx="10" fill="#059669" opacity="0.14" stroke="#059669" stroke-width="2"/>
-    <text x="155" y="90" text-anchor="middle" font-size="13" font-weight="800" fill="#059669">🚶 果断离场</text>
-    <text x="155" y="114" text-anchor="middle" font-size="12" fill="var(--tax-text)">花费：已付 ${tic} 元</text>
-    <text x="155" y="134" text-anchor="middle" font-size="12" font-weight="750" fill="#059669">收获：90 分钟自由好心情</text>
-    <rect x="320" y="60" width="250" height="86" rx="10" fill="#ef4444" opacity="0.14" stroke="#ef4444" stroke-width="2"/>
-    <text x="445" y="90" text-anchor="middle" font-size="13" font-weight="800" fill="#ef4444">🪑 硬坐到底</text>
-    <text x="445" y="114" text-anchor="middle" font-size="12" fill="var(--tax-text)">花费：已付 ${tic} 元 + 90 分钟</text>
-    <text x="445" y="134" text-anchor="middle" font-size="12" font-weight="750" fill="#ef4444">收获：${pain} 分煎熬窝火</text>
-    <text x="30" y="178" font-size="11.5" fill="var(--tax-muted)">同样适用于读不下去的烂书、消耗你的坏关系、和没有未来的鸡肋项目。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>提前离场不是“浪费了票钱”，硬坐到底才是“既浪费了票钱，又浪费了人生”的双重亏损！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let cur = 'stay';
+    function pick(c){
+      cur = c;
+      document.getElementById('bStay').classList.toggle('active', c==='stay');
+      document.getElementById('bWalk').classList.toggle('active', c==='walk');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const stay = cur === 'stay';
+      document.getElementById('svg').innerHTML = `
+        <rect x="24" y="24" width="180" height="145" rx="14" fill="var(--tax-surface-alt)" stroke="var(--tax-muted)" stroke-dasharray="5 4"/>
+        <text x="114" y="64" text-anchor="middle" font-size="24">💸</text>
+        <text x="114" y="96" text-anchor="middle" font-size="13.5" font-weight="900" fill="var(--tax-muted)">已花 80 元票钱</text>
+        <text x="114" y="122" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">（已沉没 · 不可逆）</text>
+        <text x="114" y="148" text-anchor="middle" font-size="11" font-weight="800" fill="var(--tax-muted)">走不走都 = -80 元</text>
+
+        <text x="234" y="102" text-anchor="middle" font-size="22" font-weight="900" fill="var(--tax-muted)">+</text>
+
+        <rect x="266" y="24" width="350" height="145" rx="14" fill="${stay?'var(--tax-red-soft)':'var(--tax-green-soft)'}" stroke="${stay?'var(--tax-red)':'var(--tax-green)'}" stroke-width="2.4"/>
+        <text x="441" y="64" text-anchor="middle" font-size="26">${stay?'😫':'☕'}</text>
+        <text x="441" y="98" text-anchor="middle" font-size="15" font-weight="900" fill="${stay?'var(--tax-red)':'var(--tax-green)'}">
+          ${stay ? '未来 90 分钟：坐牢折磨 (-90分心情)' : '未来 90 分钟：自由愉快 (+90分好时光)'}
+        </text>
+        <text x="441" y="128" text-anchor="middle" font-size="12.5" font-weight="800" fill="var(--tax-ink)">
+          ${stay ? '总账单 = 亏 80 元 + 搭进 90 分钟生命（双倍血亏!）' : '总账单 = 亏 80 元 + 赚回 90 分钟快乐（及时止损!）'}
+        </text>
+        <text x="441" y="152" text-anchor="middle" font-size="11" fill="var(--tax-muted)">
+          适用一切：读不下去的烂书、吃撑了的自助餐、消耗你的错人
+        </text>
+      `;
+
+      document.getElementById('ahaBox').innerHTML = stay
+        ? `💡 <strong>顿悟时刻：</strong>“来都来了”是中国人最昂贵的沉没成本魔咒！花掉的 80 元已经是固定常量，硬坐着看完不仅拿不回一分钱，还白白搭上了不可再生的 <strong>90 分钟生命</strong>！点击 <strong>🚪 果断离场</strong> 看看账本瞬间清爽！`
+        : `💡 <strong>顿悟时刻：</strong>清醒的止损智慧！不管是 80 元烂片、吃到撑还硬塞的自助餐，还是耗了三年已经变质的关系——<strong>永远只为“接下来的体验”做决定，绝不拿未来给过去陪葬！</strong>`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

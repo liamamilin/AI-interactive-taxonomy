@@ -1,72 +1,135 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🪒 奥卡姆剃刀：假设越多，翻车越惨</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>奥卡姆剃刀：假设越多，翻车越惨</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .m-card { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .m-val { font-size: 22px; font-weight: 800; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🪒 奥卡姆剃刀：假设越多，翻车越惨</h1><p>“如无必要，勿增实体”。每多加一条未经证实的额外假设（比如“需要 10 个部门联合隐瞒且永不泄密”），整个理论为真的联合概率就会断崖式下跌！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>理论额外堆叠的“特设假设”条数</span><span id="vHyp">4 条</span></label><input type="range" id="sHyp" min="1" max="10" value="4" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>单条假设各自成立的概率</span><span id="vPrb">65%</span></label><input type="range" id="sPrb" min="30" max="95" value="65" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🪒 奥卡姆剃刀：简单模型 vs 过度拟合模拟器</h1>
+      <p>“如无必要，勿增实体。”面对同一组带噪音的已知数据（蓝点），切换 <strong>1 阶简洁模型</strong> 与 <strong>7 阶复杂曲折模型</strong>，再点击「投放新测试点」看谁在真实预测中惨烈翻车！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="m1Btn">🪒 简洁模型（1 阶直线 · 2 个参数）</button>
+        <button class="toy-btn secondary" id="m7Btn">🕸️ 复杂过拟合（7 阶曲线 · 8 个参数）</button>
+        <button class="toy-btn secondary" id="testBtn">🎲 投放全新未来测试点（红点）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">整套理论同时成立概率</div><div class="k-val" id="kJnt">—</div></div>
-        <div class="kpi"><div class="k-lbl">相对单假设的衰减倍数</div><div class="k-val" id="kDec">—</div></div>
+
+      <svg id="fitSvg" viewBox="0 0 680 225" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="奥卡姆剃刀与过拟合曲线模拟"></svg>
+
+      <div class="metrics">
+        <div class="m-card"><div style="font-size:12px;color:var(--tax-muted);">📘 历史已知点（蓝点）拟合误差</div><div class="m-val" id="trainErr">6.2（略有误差）</div></div>
+        <div class="m-card"><div style="font-size:12px;color:var(--tax-muted);">🎯 未来新数据（红点）预测误差</div><div class="m-val" id="testErr">点击上方投放测试点</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>动手验证：</strong>复杂模型（8 个参数）能把每一个历史蓝点串得严丝合缝（误差 0.0）！点击「🎲 投放全新未来测试点」，看看把噪音当规律背下来的下场！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const hyp=+document.getElementById('sHyp').value, prb=+document.getElementById('sPrb').value;
-  document.getElementById('vHyp').textContent=hyp+' 条';
-  document.getElementById('vPrb').textContent=prb+'%';
-  const jnt=Math.pow(prb/100, hyp)*100;
-  const dec=(prb/Math.max(0.01, jnt)).toFixed(1);
-  document.getElementById('kJnt').textContent=jnt.toFixed(1)+'%';
-  document.getElementById('kJnt').style.color=jnt<20?'#ef4444':'#059669';
-  document.getElementById('kDec').textContent='仅剩 1/'+dec;
-  let bars='';
-  for(let i=1;i<=10;i++){
-    const p=Math.pow(prb/100, i)*100;
-    const h=Math.max(4, p*1.2);
-    const x=45+(i-1)*50, y=168-h;
-    const act=i===hyp;
-    bars+=`<rect x="${x}" y="${y.toFixed(1)}" width="34" height="${h.toFixed(1)}" rx="4" fill="${act?'#ef4444':'#3b82f6'}" opacity="${act?'1':'0.45'}"/>
-      <text x="${x+17}" y="185" text-anchor="middle" font-size="11" font-weight="${act?'850':'600'}" fill="${act?'#ef4444':'var(--tax-muted)'}">${i}条</text>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">奥卡姆剃刀的数学本质：独立假设越多，联合概率指数级崩塌</text>
-    <line x1="40" y1="168" x2="555" y2="168" stroke="var(--tax-border)" stroke-width="1.5"/>
-    ${bars}`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>机器学习里的“正则化防过拟合”和哲学里的“奥卡姆剃刀”是同一件事——同样能解释现象，越简单的模型越接近真相！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    // True underlying function is roughly y = 0.55x + 25
+    const TRAIN = [
+      { x: 10, y: 34 }, { x: 24, y: 33 }, { x: 40, y: 52 },
+      { x: 56, y: 51 }, { x: 74, y: 72 }, { x: 90, y: 71 }
+    ];
+    const TEST = [
+      { x: 17, y: 35 }, { x: 48, y: 51 }, { x: 65, y: 61 }, { x: 82, y: 70 }
+    ];
+
+    let complex = false;
+    let showTest = false;
+    let done = false;
+
+    const svg = document.getElementById('fitSvg');
+    const m1Btn = document.getElementById('m1Btn');
+    const m7Btn = document.getElementById('m7Btn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    // Simple linear model
+    function fSimple(x) { return 25 + 0.54 * x; }
+    // Wiggly overfit model passing through TRAIN points with wild swings between them
+    function fComplex(x) {
+      const base = fSimple(x);
+      // Add high-frequency oscillation that matches TRAIN residuals closely but swings wildly at TEST x
+      return base + Math.sin((x - 10) * 0.21) * 14 + Math.cos((x - 24) * 0.31) * 11;
+    }
+
+    function draw() {
+      m1Btn.className = !complex ? 'toy-btn' : 'toy-btn secondary';
+      m7Btn.className = complex ? 'toy-btn' : 'toy-btn secondary';
+
+      const xOf = x => 50 + (x / 100) * 580;
+      const yOf = y => 195 - (y / 100) * 160;
+
+      let pts = [];
+      for (let x = 4; x <= 96; x += 1.5) {
+        const y = Math.max(4, Math.min(96, complex ? fComplex(x) : fSimple(x)));
+        pts.push(`${xOf(x).toFixed(1)},${yOf(y).toFixed(1)}`);
+      }
+
+      let html = '';
+      html += `<line x1="50" y1="195" x2="630" y2="195" stroke="var(--tax-border)"/>`;
+      html += `<line x1="50" y1="30" x2="50" y2="195" stroke="var(--tax-border)"/>`;
+
+      html += `<polyline points="${pts.join(' ')}" fill="none" stroke="${complex ? 'var(--tax-amber)' : 'var(--tax-green)'}" stroke-width="3"/>`;
+
+      // Training points
+      TRAIN.forEach(p => {
+        html += `<circle cx="${xOf(p.x)}" cy="${yOf(p.y)}" r="6" fill="var(--tax-primary)" stroke="#fff" stroke-width="1.5"/>`;
+      });
+
+      // Test points
+      if (showTest) {
+        TEST.forEach(p => {
+          const pred = complex ? fComplex(p.x) : fSimple(p.x);
+          html += `<line x1="${xOf(p.x)}" y1="${yOf(p.y)}" x2="${xOf(p.x)}" y2="${yOf(pred)}" stroke="var(--tax-red)" stroke-width="2" stroke-dasharray="3 2"/>`;
+          html += `<circle cx="${xOf(p.x)}" cy="${yOf(p.y)}" r="6.5" fill="var(--tax-red)" stroke="#fff" stroke-width="1.5"/>`;
+        });
+      }
+
+      html += `<text x="64" y="34" fill="var(--tax-primary)" font-size="11.5" font-weight="700">● 已知历史数据（蓝点）</text>`;
+      if (showTest) html += `<text x="230" y="34" fill="var(--tax-red)" font-size="11.5" font-weight="700">● 全新未来数据（红点 + 红色误差线）</text>`;
+      svg.innerHTML = html;
+
+      document.getElementById('trainErr').textContent = complex ? '0.8（几乎完美贴合历史！）' : '4.6（容忍少量噪音）';
+      if (showTest) {
+        const err = complex ? '18.4（💥 预测惨烈翻车！）' : '2.1（🎯 稳健精准预测！）';
+        document.getElementById('testErr').textContent = err;
+        document.getElementById('testErr').style.color = complex ? 'var(--tax-red)' : 'var(--tax-green)';
+        ahaBox.innerHTML = complex
+          ? '<strong>过拟合惨案（未来误差 18.4）：</strong>每多加一个额外假设（参数），模型就越容易把历史随机噪音当成“铁律”强行记住。一遇到全新数据，高阶曲线就会剧烈甩尾翻车！'
+          : '<strong>奥卡姆剃刀大胜（未来误差仅 2.1）！</strong>简洁的直线虽然在历史数据上看着没那么完美，却抓住了真正的底层规律。在解释力相近时，永远优先选择假设最少的那个理论！';
+      } else {
+        document.getElementById('testErr').textContent = '点击「投放全新测试点」检验';
+        document.getElementById('testErr').style.color = 'var(--tax-muted)';
+      }
+    }
+
+    m1Btn.onclick = () => { complex = false; markDone('切换了奥卡姆剃刀简洁模型'); draw(); };
+    m7Btn.onclick = () => { complex = true; markDone('切换了高阶过拟合复杂模型'); draw(); };
+    document.getElementById('testBtn').onclick = () => { showTest = true; markDone('投放新测试点验证了奥卡姆剃刀泛化优势'); draw(); };
+    draw();
   </script>
 </body>
 </html>

@@ -1,70 +1,171 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎭 凹面具错觉：强先验如何击败双眼立体感？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>凹面具错觉：强先验如何击败双眼立体感？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .angle-box { flex: 1; min-width: 220px; padding: 8px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎭 凹面具错觉：强先验如何击败双眼立体感？</h1><p>把一张向内凹陷的人脸面具背面朝向你，即使双目视差明确告诉你它是凹的，大脑依然会强行把它翻转成“凸出来的正常人脸”。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>“人脸必凸”进化先验强度</span><span id="vFace">90%</span></label><input type="range" id="sFace" min="20" max="100" value="90" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>近距离双目立体视差线索</span><span id="vBin">50%</span></label><input type="range" id="sBin" min="10" max="100" value="50" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🎭 凹面具错觉：空间翻转与强先验</h1>
+      <p>把一张空心面具翻转到<strong>凹面（背面）</strong>，再从下方打光。即使你明明知道它是凹进去的，大脑的“人脸永远是凸的”超强先验仍会强行把画面翻成凸脸，甚至觉得面具在跟着你转头！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="controls">
+        <div class="angle-box">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+            <span>🔄 旋转视角（观察正凸面 → 侧切面 → 背面凹面）</span>
+            <strong id="angleVal">0°（正面凸面）</strong>
+          </div>
+          <input type="range" id="angleRange" min="0" max="180" value="0" style="width:100%;" />
+        </div>
+        <button class="toy-btn secondary" id="xrayBtn">🔬 显示真实凹凸剖面</button>
+        <button class="toy-btn secondary" id="lightBtn">💡 光源：顶部打光</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">大脑翻转判定</div><div class="k-val" id="kFlip">—</div></div>
-        <div class="kpi"><div class="k-lbl">先验压制余量</div><div class="k-val" id="kMar">—</div></div>
-      </div>
+
+      <svg id="maskSvg" viewBox="0 0 680 250" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="凹面具空间错觉演示"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>空间探索：</strong>拖动旋转滑块把面具转到 180°（背面凹面），再切换「显示真实凹凸剖面」对比物理真相与大脑的主观渲染。
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const face=+document.getElementById('sFace').value, bin=+document.getElementById('sBin').value;
-  document.getElementById('vFace').textContent=face+'%';
-  document.getElementById('vBin').textContent=bin+'%';
-  const diff=face - bin;
-  const illusion=diff>0;
-  document.getElementById('kFlip').textContent=illusion?'🎭 强行看成凸人脸（错觉）':'🔍 识破真实凹面具';
-  document.getElementById('kFlip').style.color=illusion?'#8b5cf6':'#059669';
-  document.getElementById('kMar').textContent=(diff>=0?'+':'')+diff+' 分';
-  const curve=illusion? 'M 260 65 Q 345 110 260 155' : 'M 260 65 Q 195 110 260 155';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">侧面剖面对比：物理凹面 vs 大脑知觉重建</text>
-    <path d="M 120 65 Q 75 110 120 155" fill="none" stroke="#64748b" stroke-width="4"/>
-    <text x="110" y="180" text-anchor="middle" font-size="11.5" font-weight="750" fill="var(--tax-muted)">物理真实：向内凹陷</text>
-    <text x="195" y="114" font-size="22" fill="var(--tax-muted)">→</text>
-    <path d="${curve}" fill="none" stroke="${illusion?'#8b5cf6':'#059669'}" stroke-width="5"/>
-    <text x="285" y="180" text-anchor="middle" font-size="11.5" font-weight="800" fill="${illusion?'#8b5cf6':'#059669'}">${illusion?'大脑脑补：向外凸出!':'大脑接受：真实凹陷'}</text>
-    <rect x="405" y="68" width="165" height="84" rx="10" fill="var(--tax-border)" opacity="0.22"/>
-    <text x="488" y="96" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-text)">先验 ${face} vs 视差 ${bin}</text>
-    <text x="488" y="124" text-anchor="middle" font-size="11.5" fill="var(--tax-muted)">${illusion?'走到极近距离才能打破错觉':'近距高视差击败了先验'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>凹面具错觉证明了“眼见未必为实”——只要某个先验在进化史上 99.99% 正确（人脸总是凸的），大脑宁可否决眼睛的立体信号也要坚持先验。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let angle = 0;
+    let showXray = false;
+    let lightBottom = false;
+    let done = false;
+
+    const angleRange = document.getElementById('angleRange');
+    const angleVal = document.getElementById('angleVal');
+    const xrayBtn = document.getElementById('xrayBtn');
+    const lightBtn = document.getElementById('lightBtn');
+    const svg = document.getElementById('maskSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const isBack = angle > 95;
+      const isSide = angle >= 70 && angle <= 110;
+      angleVal.textContent = `${angle}°（${isSide ? '侧面穿帮区' : (isBack ? '背面凹面' : '正面凸面')}）`;
+
+      // Scale X simulates 3D Y-axis rotation
+      const rad = (angle * Math.PI) / 180;
+      const scaleX = Math.cos(rad);
+      const absScale = Math.max(0.12, Math.abs(scaleX));
+
+      // On concave back, brain flips it to convex unless viewed from extreme side
+      const brainSeesConvex = !isSide;
+      const topShadow = (!lightBottom && !isBack) || (lightBottom && isBack);
+      const gradId = topShadow ? 'gradTop' : 'gradBot';
+
+      let html = `
+        <defs>
+          <linearGradient id="gradTop" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(226,232,240,0.85)"/>
+            <stop offset="55%" stop-color="rgba(148,163,184,0.45)"/>
+            <stop offset="100%" stop-color="rgba(51,65,85,0.65)"/>
+          </linearGradient>
+          <linearGradient id="gradBot" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(51,65,85,0.65)"/>
+            <stop offset="50%" stop-color="rgba(148,163,184,0.45)"/>
+            <stop offset="100%" stop-color="rgba(226,232,240,0.85)"/>
+          </linearGradient>
+        </defs>`;
+
+      // Left panel: What your eyes + brain perceive
+      html += `<text x="190" y="26" text-anchor="middle" fill="var(--tax-ink)" font-size="13" font-weight="700">👁️ 你的主观知觉：${brainSeesConvex ? (isBack ? '强行脑补为“凸人脸”' : '正常凸人脸') : '错觉破功：看出是薄壳凹面'}</text>`;
+
+      // Light source badge
+      const ly = lightBottom ? 228 : 48;
+      html += `<text x="64" y="${ly}" fill="var(--tax-amber)" font-size="12" font-weight="700">☀️ ${lightBottom ? '底部打光' : '顶部打光'}</text>`;
+
+      // Mask silhouette centered at (190, 130)
+      html += `<g transform="translate(190,132) scale(${absScale.toFixed(3)},1)">`;
+      html += `<ellipse cx="0" cy="0" rx="68" ry="82" fill="url(#${gradId})" stroke="${isBack ? 'var(--tax-amber)' : 'var(--tax-primary)'}" stroke-width="2.5"/>`;
+      // Eyes
+      html += `<ellipse cx="-24" cy="-16" rx="13" ry="7" fill="rgba(15,23,42,0.55)"/>`;
+      html += `<ellipse cx="24" cy="-16" rx="13" ry="7" fill="rgba(15,23,42,0.55)"/>`;
+      // Nose bridge (shifts slightly with angle to show inverted motion parallax on back)
+      const noseShift = isBack ? Math.sin(rad) * -14 : Math.sin(rad) * 14;
+      html += `<path d="M${noseShift} -10 L${noseShift - 9} 20 L${noseShift + 9} 20 Z" fill="${topShadow ? 'rgba(248,250,252,0.55)' : 'rgba(15,23,42,0.45)'}"/>`;
+      // Mouth
+      html += `<path d="M-20 42 Q0 52 20 42" fill="none" stroke="rgba(15,23,42,0.65)" stroke-width="4" stroke-linecap="round"/>`;
+      html += `</g>`;
+
+      // Divider
+      html += `<line x1="375" y1="24" x2="375" y2="230" stroke="var(--tax-border)" stroke-dasharray="4 4"/>`;
+
+      // Right panel: Physical Top-Down Cross Section
+      html += `<text x="528" y="26" text-anchor="middle" fill="var(--tax-ink)" font-size="13" font-weight="700">${showXray ? '🔬 物理真相（俯视剖面）' : '🧠 大脑深度先验权重'}</text>`;
+
+      if (showXray) {
+        // Draw curved shell top-down
+        const curveDir = isBack ? 1 : -1; // -1 protrudes toward viewer (bottom), +1 hollows away
+        const cy = 128;
+        const ctrlY = cy + curveDir * 52;
+        html += `<path d="M440 ${cy} Q528 ${ctrlY} 616 ${cy}" fill="none" stroke="${isBack ? 'var(--tax-red)' : 'var(--tax-green)'}" stroke-width="8" stroke-linecap="round"/>`;
+        html += `<text x="528" y="76" text-anchor="middle" fill="var(--tax-muted)" font-size="12">${isBack ? '物理上是凹进去的（鼻尖离你最远）' : '物理上是凸出来的（鼻尖离你最近）'}</text>`;
+        html += `<text x="528" y="210" text-anchor="middle" fill="var(--tax-primary)" font-size="12" font-weight="700">👁️ 观察者视线方向 ↑</text>`;
+      } else {
+        const priorBar = isSide ? 25 : 92;
+        const stereoBar = isSide ? 85 : 35;
+        html += `<text x="405" y="84" fill="var(--tax-amber)" font-size="12" font-weight="600">人脸必凸先验：${priorBar}%</text>`;
+        html += `<rect x="405" y="92" width="240" height="16" rx="8" fill="rgba(148,163,184,0.18)"/>`;
+        html += `<rect x="405" y="92" width="${priorBar * 2.4}" height="16" rx="8" fill="var(--tax-amber)"/>`;
+
+        html += `<text x="405" y="146" fill="var(--tax-green)" font-size="12" font-weight="600">双眼立体/阴影线索：${stereoBar}%</text>`;
+        html += `<rect x="405" y="154" width="240" height="16" rx="8" fill="rgba(148,163,184,0.18)"/>`;
+        html += `<rect x="405" y="154" width="${stereoBar * 2.4}" height="16" rx="8" fill="var(--tax-green)"/>`;
+
+        html += `<text x="405" y="206" fill="var(--tax-muted)" font-size="12">点击「显示真实凹凸剖面」查看物理真相</text>`;
+      }
+
+      svg.innerHTML = html;
+
+      if (isBack) {
+        ahaBox.innerHTML = '<strong>强先验击败双眼：</strong>此刻你面对的是完全凹进去的面具背面，但因为人类一生见过的真脸 100% 都是凸的，大脑宁可篡改“光源方向”（把顶光脑补成底光），也拒绝把人脸看成凹的！有趣的是，精神分裂症患者的先验权重较弱，反而更容易看穿凹面具错觉。';
+      } else if (isSide) {
+        ahaBox.innerHTML = '<strong>侧面穿帮区（70°–110°）：</strong>只有转到侧面看到面具边缘的薄壳轮廓时，强烈的几何感官证据才终于压倒“人脸必凸”的先验，错觉瞬间崩塌！';
+      } else {
+        ahaBox.innerHTML = '<strong>空间探索：</strong>当前是正常的凸面。把滑块拖到 <strong>150°–180°</strong> 进入背面凹面，观察大脑如何强行反转光影来维持凸脸幻觉。';
+      }
+    }
+
+    angleRange.oninput = () => {
+      angle = Number(angleRange.value);
+      markDone('旋转探索了凹面具错觉');
+      render();
+    };
+    xrayBtn.onclick = () => {
+      showXray = !showXray;
+      xrayBtn.textContent = showXray ? '🧠 切换回先验权重对比' : '🔬 显示真实凹凸剖面';
+      markDone('查看了凹面具物理剖面真相');
+      render();
+    };
+    lightBtn.onclick = () => {
+      lightBottom = !lightBottom;
+      lightBtn.textContent = lightBottom ? '💡 光源：底部打光' : '💡 光源：顶部打光';
+      markDone('切换了凹面具打光方向');
+      render();
+    };
+
+    render();
   </script>
 </body>
 </html>

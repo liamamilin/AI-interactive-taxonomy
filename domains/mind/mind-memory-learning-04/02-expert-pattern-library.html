@@ -1,70 +1,159 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📚 专家直觉 = 5 万个高质量组块</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>专家直觉 = 5 万个高质量组块</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .tab-btn { padding: 7px 12px; border-radius: 999px; border: 1px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 13px; cursor: pointer; }
+    .tab-btn.active { background: var(--tax-primary-soft); border-color: var(--tax-primary); color: var(--tax-primary); font-weight: 700; }
+    .ctrl { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .m-card { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .m-val { font-size: 20px; font-weight: 800; color: var(--tax-ink); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📚 专家直觉 = 5 万个高质量组块</h1><p>面对同一个复杂系统故障，新手需要占满 12 个工作记忆槽导致当场死机，专家却能把整个子系统折叠成 2 个组块从容应对。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>问题包含的底层零件数</span><span id="vPts">16 个</span></label><input type="range" id="sPts" min="4" max="24" value="16" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>单组块平均抽象压缩比</span><span id="vCmp">4:1</span></label><input type="range" id="sCmp" min="1" max="6" value="4" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>📚 专家直觉 = 5 万个高质量组块（模式识别模拟）</h1>
+      <p>诺奖得主赫伯特·西蒙指出：<strong>“直觉不过是模式识别。”</strong>专家一眼看穿复杂局势，不是因为算得比新手快 10 倍，而是长期刻意练习在长时记忆里存了约 <strong>50,000 个高质量组块</strong>，触发了毫秒级索引！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="tabs" id="domainTabs"></div>
+
+      <div class="ctrl">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>🧠 领域高质量组块库存量（刻意练习年限对应）</span>
+          <strong id="chunkLabel" style="color:var(--tax-primary);">500 组块（入门 0.5 年）</strong>
+        </div>
+        <input type="range" id="chunkRange" min="1" max="5" value="1" step="1" style="width:100%;" />
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">压缩后占用槽位</div><div class="k-val" id="kSlt">—</div></div>
-        <div class="kpi"><div class="k-lbl">留给战略推演的余量</div><div class="k-val" id="kFre">—</div></div>
+
+      <div style="margin-bottom:10px;">
+        <button class="toy-btn" id="fireBtn">⚡ 触发突发疑难病例 / 线上故障</button>
       </div>
+
+      <svg id="simSvg" viewBox="0 0 680 180" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="专家组块直觉检索模拟"></svg>
+
+      <div class="metrics">
+        <div class="m-card"><div style="font-size:12px;color:var(--tax-muted);">诊断 / 定位耗时</div><div class="m-val" id="timeVal">18.5 秒</div></div>
+        <div class="m-card"><div style="font-size:12px;color:var(--tax-muted);">一次命中概率</div><div class="m-val" id="hitVal">22%</div></div>
+        <div class="m-card"><div style="font-size:12px;color:var(--tax-muted);">大脑工作模式</div><div class="m-val" id="modeVal" style="font-size:16px;">慢速逐条排查</div></div>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>动手模拟：</strong>把「组块库存」从新手拉到专家（50,000 组块），点击「⚡ 触发突发疑难」，对比两种大脑路径的速度与准确率。
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const pts=+document.getElementById('sPts').value, cmp=+document.getElementById('sCmp').value;
-  document.getElementById('vPts').textContent=pts+' 个';
-  document.getElementById('vCmp').textContent=cmp+':1';
-  const slots=Math.ceil(pts/cmp);
-  const free=Math.max(0, 5 - slots);
-  document.getElementById('kSlt').textContent=slots+' 槽';
-  document.getElementById('kSlt').style.color=slots<=4?'#059669':'#ef4444';
-  document.getElementById('kFre').textContent=free>0?('剩余 '+free+' 槽可做全局创新'):'0 槽（深陷细节泥潭）';
-  const wRaw=Math.max(12, Math.min(340, pts*14));
-  const wCmp=Math.max(12, Math.min(340, slots*14));
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">抽象组块如何释放高层战略思考带宽</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">新手逐件处理</text>
-    <rect x="145" y="64" width="${wRaw}" height="28" rx="6" fill="#ef4444" opacity="0.8"/>
-    <text x="${153+wRaw}" y="83" font-size="12" font-weight="800" fill="#ef4444">${pts} 槽（严重爆表）</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">专家组块折叠</text>
-    <rect x="145" y="120" width="${wCmp}" height="28" rx="6" fill="${slots<=4?'#059669':'#f59e0b'}"/>
-    <text x="${153+wCmp}" y="139" font-size="12" font-weight="800" fill="${slots<=4?'#059669':'#d97706'}">${slots} 槽</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">每把底层细节打包成稳定组块，你就能多腾出一格工作记忆去思考更高维度的全局问题。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>学编程记设计模式、学写作背叙事结构、学医学背综合征——人类一切高阶学习的本质，都是不断把低层细节打包成高层组块。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const DOMAINS = [
+      { id: 'med', name: '🩺 急诊科医生', cue: '面色苍白 + 左肩放射痛 + 冷汗', match: '急性心梗典型组块 → 立刻心电图' },
+      { id: 'sre', name: '💻 架构师排障', cue: 'P99 飙升 + 连接池满 + GC 停顿', match: '慢 SQL 拖垮线程池组块 → 立刻查锁表' },
+      { id: 'fire', name: '🚒 消防指挥官', cue: '地板发烫 + 烟雾异常安静 + 无明火', match: '地下室隐燃轰燃前兆 → 立刻撤离！' }
+    ];
+
+    const LEVELS = [
+      { chunks: '500 组块（入门 0.5 年）', count: 500, sec: 18.5, hit: 22, mode: '逐条查手册', hops: 5 },
+      { chunks: '3,000 组块（熟练 2 年）', count: 3000, sec: 9.2, hit: 48, mode: '局部特征拼接', hops: 4 },
+      { chunks: '12,000 组块（资深 5 年）', count: 12000, sec: 3.4, hit: 74, mode: '跨症状联想', hops: 2 },
+      { chunks: '30,000 组块（专家 8 年）', count: 30000, sec: 1.1, hit: 89, mode: '快速模式匹配', hops: 1 },
+      { chunks: '50,000 组块（大师 10+ 年）', count: 50000, sec: 0.4, hit: 96, mode: '⚡ 毫秒级专家直觉', hops: 1 }
+    ];
+
+    let curDomain = DOMAINS[0];
+    let levelIdx = 0;
+    let pulse = 0;
+    let done = false;
+
+    const tabsEl = document.getElementById('domainTabs');
+    const chunkRange = document.getElementById('chunkRange');
+    const svg = document.getElementById('simSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function renderTabs() {
+      tabsEl.innerHTML = '';
+      DOMAINS.forEach(d => {
+        const b = document.createElement('button');
+        b.className = 'tab-btn' + (d.id === curDomain.id ? ' active' : '');
+        b.textContent = d.name;
+        b.onclick = () => { curDomain = d; markDone(`探索了${d.name}专家组块直觉`); render(); };
+        tabsEl.appendChild(b);
+      });
+    }
+
+    function render() {
+      renderTabs();
+      const lv = LEVELS[levelIdx];
+      document.getElementById('chunkLabel').textContent = lv.chunks;
+      document.getElementById('timeVal').textContent = lv.sec + ' 秒';
+      document.getElementById('hitVal').textContent = lv.hit + '%';
+      document.getElementById('modeVal').textContent = lv.mode;
+
+      const isExpert = levelIdx >= 3;
+      let html = '';
+
+      // Left node: Incoming Cue
+      html += `<rect x="20" y="54" width="165" height="72" rx="10" fill="rgba(245,158,11,0.16)" stroke="var(--tax-amber)" stroke-width="2"/>`;
+      html += `<text x="102" y="78" text-anchor="middle" fill="var(--tax-amber)" font-size="11" font-weight="700">突发感官线索</text>`;
+      html += `<text x="102" y="102" text-anchor="middle" fill="var(--tax-ink)" font-size="11">${curDomain.cue.slice(0, 13)}…</text>`;
+
+      // Middle: Pattern Library / Search hops
+      if (isExpert) {
+        // Direct fast highway
+        html += `<line x1="185" y1="90" x2="465" y2="90" stroke="var(--tax-green)" stroke-width="4" stroke-dasharray="${pulse ? 'none' : '8 4'}"/>`;
+        html += `<rect x="245" y="42" width="165" height="96" rx="12" fill="rgba(16,185,129,0.18)" stroke="var(--tax-green)" stroke-width="2"/>`;
+        html += `<text x="327" y="74" text-anchor="middle" fill="var(--tax-green)" font-size="13" font-weight="800">⚡ 直接命中索引</text>`;
+        html += `<text x="327" y="96" text-anchor="middle" fill="var(--tax-ink)" font-size="11">${lv.count.toLocaleString()} 个组块库</text>`;
+        html += `<text x="327" y="116" text-anchor="middle" fill="var(--tax-muted)" font-size="11">无需逐条穷举（${lv.sec}s）</text>`;
+      } else {
+        // Zig-zag slow conscious search
+        html += `<path d="M185 90 L235 46 L295 134 L355 46 L415 134 L465 90" fill="none" stroke="var(--tax-primary)" stroke-width="2.5" stroke-dasharray="5 4"/>`;
+        html += `<text x="325" y="28" text-anchor="middle" fill="var(--tax-primary)" font-size="12" font-weight="700">慢速串行推理（需 ${lv.hops} 步试错排查）</text>`;
+        html += `<text x="325" y="162" text-anchor="middle" fill="var(--tax-muted)" font-size="11">组块库太小，只能靠工作记忆逐条假设检验</text>`;
+      }
+
+      // Right node: Action decision
+      html += `<rect x="465" y="54" width="195" height="72" rx="10" fill="${isExpert ? 'rgba(16,185,129,0.18)' : 'rgba(59,130,246,0.14)'}" stroke="${isExpert ? 'var(--tax-green)' : 'var(--tax-primary)'}" stroke-width="2"/>`;
+      html += `<text x="562" y="78" text-anchor="middle" fill="${isExpert ? 'var(--tax-green)' : 'var(--tax-primary)'}" font-size="11" font-weight="700">${isExpert ? '直觉瞬间锁定方案' : '耗时推演后得出结论'}</text>`;
+      html += `<text x="562" y="102" text-anchor="middle" fill="var(--tax-ink)" font-size="11">${curDomain.match.slice(0, 15)}…</text>`;
+
+      svg.innerHTML = html;
+
+      if (levelIdx === 4) {
+        ahaBox.innerHTML = `<strong>大师直觉的本质（${lv.sec} 秒命中）：</strong>${curDomain.name}并不是拥有神秘第六感，而是「${curDomain.cue}」瞬间激活了长时记忆里的对应组块（${curDomain.match}）。真正靠谱的直觉，永远只存在于<strong>规律稳定 + 长期高反馈</strong>的领域！`;
+      } else {
+        ahaBox.innerHTML = `<strong>当前处于 ${lv.chunks}：</strong>面对「${curDomain.cue}」时，大脑需要 ${lv.sec} 秒做慢速推理。试着把滑块拉到最高档，感受组块库跨越临界点后的质变！`;
+      }
+    }
+
+    chunkRange.oninput = () => {
+      levelIdx = Number(chunkRange.value) - 1;
+      markDone('调节了专家组块库存规模');
+      render();
+    };
+
+    document.getElementById('fireBtn').onclick = () => {
+      markDone('触发了专家模式识别模拟');
+      pulse = 1;
+      render();
+      setTimeout(() => { pulse = 0; render(); }, 600);
+    };
+
+    render();
   </script>
 </body>
 </html>

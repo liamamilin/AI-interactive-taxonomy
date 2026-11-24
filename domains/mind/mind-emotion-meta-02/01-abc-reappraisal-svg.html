@@ -1,73 +1,131 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌈 情绪 ABC 模型：事件 → 解释 → 情绪（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>情绪 ABC 模型：事件 → 解释 → 情绪</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .event-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .e-tab { padding: 6px 11px; border-radius: 999px; border: 1px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 12.5px; cursor: pointer; }
+    .e-tab.active { border-color: var(--tax-primary); background: var(--tax-primary-soft); color: var(--tax-primary); font-weight: 700; }
+    .b-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    @media (max-width: 640px) { .b-grid { grid-template-columns: 1fr; } }
+    .b-btn {
+      text-align: left; padding: 10px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); font-size: 12.5px; line-height: 1.5; cursor: pointer;
+    }
+    .b-btn.sel { border-color: var(--tax-primary); background: var(--tax-primary-soft); font-weight: 600; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌈 情绪 ABC 模型：事件 → 解释 → 情绪（SVG）</h1><p>阿尔伯特·艾利斯 ABC 理论：让你崩溃的从来不是事件本身（A），而是你脑子里自动弹出的信念解释（B）！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🌈 情绪 ABC 模型：认知重评路由器（构建器）</h1>
+      <p>心理学家阿尔伯特·艾利斯指出：引发情绪（C）的从来不是客观事件（A）本身，而是你脑中插入的<strong>解释信念（B）</strong>！同一个客观事件，亲手拔插不同的 B 解释模块，看看情绪与行动如何瞬间改道！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="event-tabs" id="eventTabs"></div>
+
+      <div style="font-size:12px;color:var(--tax-muted);margin-bottom:6px;">② 为同一个客观事件（A）插上不同的解释模块（B）：</div>
+      <div class="b-grid" id="bGrid"></div>
+
+      <svg id="abcSvg" viewBox="0 0 680 185" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="情绪ABC模型动态路由图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>核心洞察：</strong>事件 A 已经发生无法改写，但 B（解释镜头）完全掌握在你手里。点击上方 3 种不同的 B 信念模块，观察 C 情绪温度计的剧烈变化！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>客观事件 A 挫折度（如方案被打回）</span><span id="vA">55 分</span></label><input type="range" id="sA" min="10" max="100" value="55" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>信念 B：灾难化/人身攻击解读比例</span><span id="vB">70%</span></label><input type="range" id="sB" min="0" max="100" value="70" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">最终情绪痛苦 C</div><div class="k-val" id="kC">—</div></div>
-        <div class="kpi"><div class="k-lbl">后续行动模式</div><div class="k-val" id="kAct">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const a=+document.getElementById('sA').value, b=+document.getElementById('sB').value;
-  document.getElementById('vA').textContent=a+' 分';
-  document.getElementById('vB').textContent=b+'%';
-  const c=Math.min(100, Math.round(a*0.35 + b*0.68));
-  const act=c>=65?'🔥 情绪内耗/防御反击':'🛠️ 冷静复盘改方案';
-  document.getElementById('kC').textContent=c+' 分';
-  document.getElementById('kC').style.color=c>=65?'#ef4444':'#059669';
-  document.getElementById('kAct').textContent=act;
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">认知重评介入点：在 B 处改写剧本，直接改写情绪结局 C</text>
-    <rect x="25" y="60" width="145" height="72" rx="10" fill="#3b82f6" opacity="0.15" stroke="#3b82f6" stroke-width="2"/>
-    <text x="97" y="88" text-anchor="middle" font-size="12.5" font-weight="800" fill="#2563eb">A 客观事件</text>
-    <text x="97" y="112" text-anchor="middle" font-size="13" font-weight="800" fill="var(--tax-text)">挫折 ${a} 分</text>
-    <text x="182" y="102" font-size="20" fill="var(--tax-muted)">→</text>
-    <rect x="210" y="60" width="165" height="72" rx="10" fill="#8b5cf6" opacity="0.16" stroke="#8b5cf6" stroke-width="2"/>
-    <text x="292" y="88" text-anchor="middle" font-size="12.5" font-weight="800" fill="#7c3aed">B 认知滤镜</text>
-    <text x="292" y="112" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-text)">${b>50?'“他针对我，我完了”':'“数据不够，正好改好”'}</text>
-    <text x="387" y="102" font-size="20" fill="var(--tax-muted)">→</text>
-    <rect x="415" y="60" width="160" height="72" rx="10" fill="${c>=65?'#ef4444':'#059669'}" opacity="0.16" stroke="${c>=65?'#ef4444':'#059669'}" stroke-width="2"/>
-    <text x="495" y="88" text-anchor="middle" font-size="12.5" font-weight="800" fill="${c>=65?'#ef4444':'#059669'}">C 情绪后果</text>
-    <text x="495" y="112" text-anchor="middle" font-size="16" font-weight="900" fill="${c>=65?'#ef4444':'#059669'}">痛苦 ${c} 分</text>
-    <text x="25" y="172" font-size="11.5" fill="var(--tax-muted)">试着把 B 调低：同一个挫折，把“全盘否定我”重评为“具体事可改进”，情绪立刻回落安全区！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>事件 A 已经发生无法倒流，但解释 B 的遥控器始终握在你自己手里。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const EVENTS = [
+      {
+        name: '📩 方案发给老板 4 小时已读未回',
+        aShort: '方案已读 4h 未回',
+        beliefs: [
+          { tag: '灾难化解读', text: '“完了，他肯定觉得我写得太烂，准备优化我了！”', emo: '😰 极度焦虑', temp: 92, act: '反复刷聊天框，整下午写不进一行字', col: 'var(--tax-red)', aha: '<strong>灾难化信念（92° 红温）：</strong>你把一个中性事实（4小时未回）强行脑补成了“即将被裁”，情绪瞬间爆表！' },
+          { tag: '客观中性重评', text: '“他今天可能连开三个评审会，晚上才统一回复。”', emo: '😌 平静专注', temp: 28, act: '正常推进下一项工作，18 点礼貌跟进', col: 'var(--tax-primary)', aha: '<strong>客观重评降温（28°）：</strong>不编造恶果、只陈述多种可能，杏仁核警报立刻解除！' },
+          { tag: '成长视角重评', text: '“正好趁他还没看，把第 3 页数据表补强一下！”', emo: '💪 主动掌控', temp: 18, act: '顺手优化出更惊艳的 v2 版本', col: 'var(--tax-green)', aha: '<strong>高阶认知重评（18°）：</strong>同一件“已读未回”，换个解释镜头不仅消除内耗，还把等待变成了加分窗口！' }
+        ]
+      },
+      {
+        name: '🗣️ 同事在评审会直接指出我的方案漏洞',
+        aShort: '评审会当众指漏洞',
+        beliefs: [
+          { tag: '人身攻击解读', text: '“他就是故意在领导面前让我下不来台！”', emo: '😡 愤怒防御', temp: 90, act: '情绪化反驳，拒绝采纳合理建议', col: 'var(--tax-red)', aha: '<strong>把“对事”读成“对人”（90°）：</strong>触发自尊防卫后，你忙着吵赢却错过了最宝贵的排雷机会！' },
+          { tag: '信息分离重评', text: '“语气虽然冲，但他指出的并发风险确实存在。”', emo: '🧐 冷静审视', temp: 32, act: '剥离语气，记录关键技术问题', col: 'var(--tax-primary)', aha: '<strong>事与人分离（32°）：</strong>把刺耳的包装纸撕掉，只收下里面有用的信息干货！' },
+          { tag: '免费排雷重评', text: '“太好了，上线前免费帮我抓出一个大 Bug！”', emo: '🙏 庆幸感谢', temp: 16, act: '当场致谢并迅速补齐方案短板', col: 'var(--tax-green)', aha: '<strong>顶级重评（16°）：</strong>同样一句尖锐批评，换上“免费测试员”镜头，你成了全场格局最大、收获最多的人！' }
+        ]
+      }
+    ];
+
+    let eIdx = 0, bIdx = 0, done = false;
+    const eventTabs = document.getElementById('eventTabs');
+    const bGrid = document.getElementById('bGrid');
+    const svg = document.getElementById('abcSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      eventTabs.innerHTML = '';
+      EVENTS.forEach((ev, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'e-tab' + (i === eIdx ? ' active' : '');
+        btn.textContent = ev.name;
+        btn.onclick = () => { eIdx = i; bIdx = 0; markDone('切换了情绪ABC客观事件'); render(); };
+        eventTabs.appendChild(btn);
+      });
+
+      const ev = EVENTS[eIdx];
+      const b = ev.beliefs[bIdx];
+
+      bGrid.innerHTML = '';
+      ev.beliefs.forEach((bl, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'b-btn' + (i === bIdx ? ' sel' : '');
+        btn.innerHTML = `<div style="font-size:11px;color:var(--tax-muted);margin-bottom:3px;">${bl.tag}</div>${bl.text}`;
+        btn.onclick = () => { bIdx = i; markDone(`测试了情绪ABC信念重评：${bl.tag}`); render(); };
+        bGrid.appendChild(btn);
+      });
+
+      let html = '';
+      // Box A
+      html += `<rect x="20" y="52" width="160" height="82" rx="12" fill="rgba(148,163,184,0.14)" stroke="var(--tax-border)" stroke-width="2"/>`;
+      html += `<text x="100" y="78" text-anchor="middle" fill="var(--tax-muted)" font-size="11" font-weight="700">A · 客观事件（不变）</text>`;
+      html += `<text x="100" y="106" text-anchor="middle" fill="var(--tax-ink)" font-size="13" font-weight="700">${ev.aShort}</text>`;
+
+      // Arrow A -> B
+      html += `<line x1="180" y1="93" x2="232" y2="93" stroke="var(--tax-border)" stroke-width="3"/>`;
+
+      // Box B (highlighted)
+      html += `<rect x="234" y="42" width="192" height="102" rx="12" fill="rgba(59,130,246,0.14)" stroke="${b.col}" stroke-width="2.5"/>`;
+      html += `<text x="330" y="68" text-anchor="middle" fill="${b.col}" font-size="11.5" font-weight="800">B · 解释信念（可重写）</text>`;
+      html += `<text x="330" y="96" text-anchor="middle" fill="var(--tax-ink)" font-size="13.5" font-weight="700">${b.tag}</text>`;
+      html += `<text x="330" y="122" text-anchor="middle" fill="var(--tax-muted)" font-size="11">情绪温度计：${b.temp}°</text>`;
+
+      // Arrow B -> C
+      html += `<line x1="426" y1="93" x2="478" y2="93" stroke="${b.col}" stroke-width="3"/>`;
+
+      // Box C
+      html += `<rect x="480" y="42" width="180" height="102" rx="12" fill="rgba(148,163,184,0.10)" stroke="${b.col}" stroke-width="2.5"/>`;
+      html += `<text x="570" y="68" text-anchor="middle" fill="var(--tax-muted)" font-size="11" font-weight="700">C · 情绪与行为后果</text>`;
+      html += `<text x="570" y="96" text-anchor="middle" fill="${b.col}" font-size="15" font-weight="800">${b.emo}</text>`;
+      html += `<text x="570" y="124" text-anchor="middle" fill="var(--tax-ink)" font-size="11">${b.act.slice(0, 14)}</text>`;
+
+      svg.innerHTML = html;
+      ahaBox.innerHTML = b.aha;
+    }
+
+    render();
   </script>
 </body>
 </html>

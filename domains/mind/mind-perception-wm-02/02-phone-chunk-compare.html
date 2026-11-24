@@ -1,75 +1,202 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📱 11 位数字裸记 vs 分段记忆</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>11 位数字裸记 vs 分段记忆</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .flash-box {
+      min-height: 112px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border-radius: 14px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border);
+      margin: 12px 0; padding: 16px; text-align: center;
+    }
+    .digit-display { font-size: 32px; font-weight: 800; letter-spacing: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--tax-ink); }
+    .countdown-bar { width: 100%; max-width: 360px; height: 6px; border-radius: 99px; background: var(--tax-border); overflow: hidden; margin-top: 12px; }
+    .countdown-fill { height: 100%; background: var(--tax-primary); width: 0%; transition: width .1s linear; }
+    .recall-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+    .recall-input {
+      padding: 10px 14px; font-size: 18px; letter-spacing: 2px; width: 240px; text-align: center;
+      border-radius: 10px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    .score-card { padding: 12px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .score-card h3 { margin: 0 0 6px; font-size: 14px; color: var(--tax-muted); }
+    .score-val { font-size: 24px; font-weight: 800; color: var(--tax-ink); }
+    .digit-diff { font-family: ui-monospace, monospace; font-size: 14px; margin-top: 6px; letter-spacing: 1px; }
+    .ok { color: var(--tax-green); font-weight: 700; }
+    .bad { color: var(--tax-red); text-decoration: underline; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📱 11 位数字裸记 vs 分段记忆</h1><p>槽位数量几乎无法通过训练扩大，但每个槽位里能装下的“打包体积”却可以成倍增长。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>原始离散字符长度</span><span id="vLen">11 位</span></label><input type="range" id="sLen" min="6" max="18" value="11" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>每组打包字符数（Chunk Size）</span><span id="vGrp">4 位/组</span></label><input type="range" id="sGrp" min="1" max="5" value="4" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>📱 11 位数字裸记 vs 分段记忆（盲测实验）</h1>
+      <p>同样是 11 位数字、同样只看 <strong>3.5 秒</strong>。先盲测裸串，再盲测分段组块，用你自己的真实成绩验证组块效应。</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button class="toy-btn" id="startBtn">▶ 开始第 1 轮：裸串盲测</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重新出题</button>
+        <span id="phaseLabel" style="font-size:13px;color:var(--tax-muted);">准备就绪：共 2 轮，每轮限时记忆 3.5 秒</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">裸记所需槽位</div><div class="k-val" id="kRaw">—</div></div>
-        <div class="kpi"><div class="k-lbl">分组后占用槽位</div><div class="k-val" id="kChk">—</div></div>
-        <div class="kpi"><div class="k-lbl">预估完整回忆率</div><div class="k-val" id="kAcc">—</div></div>
+
+      <div class="flash-box">
+        <div class="digit-display" id="digitDisplay">点击上方按钮开始</div>
+        <div class="countdown-bar"><div class="countdown-fill" id="barFill"></div></div>
       </div>
+
+      <div class="recall-row" id="recallRow" style="display:none;">
+        <input class="recall-input" id="recallInput" maxlength="15" placeholder="输入你记住的数字" autocomplete="off" />
+        <button class="toy-btn" id="submitBtn">提交回忆</button>
+      </div>
+
+      <div class="score-grid">
+        <div class="score-card">
+          <h3>第 1 轮 · 裸记（11 个独立槽位）</h3>
+          <div class="score-val" id="score1">—</div>
+          <div class="digit-diff" id="diff1">等待测试</div>
+        </div>
+        <div class="score-card">
+          <h3>第 2 轮 · 分段组块（3 个语义块）</h3>
+          <div class="score-val" id="score2">—</div>
+          <div class="digit-diff" id="diff2">等待测试</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>盲测说明：</strong>先别偷看规律，点击开始完成两轮 3.5 秒瞬时记忆挑战，再对比两轮正确率。
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const len=+document.getElementById('sLen').value, grp=+document.getElementById('sGrp').value;
-  document.getElementById('vLen').textContent=len+' 位';
-  document.getElementById('vGrp').textContent=grp+' 位/组';
-  const chunks=Math.ceil(len/grp);
-  const rawAcc=Math.max(8, Math.min(99, Math.round(100 - Math.max(0, len-5)*11)));
-  const chkAcc=Math.max(12, Math.min(99, Math.round(100 - Math.max(0, chunks-4)*14 - Math.max(0, grp-4)*10)));
-  document.getElementById('kRaw').textContent=len+' 槽';
-  document.getElementById('kChk').textContent=chunks+' 槽';
-  document.getElementById('kChk').style.color=chunks<=4?'#059669':'#f59e0b';
-  document.getElementById('kAcc').textContent=chkAcc+'% (裸记仅 '+rawAcc+'%)';
-  const w1=Math.max(10, Math.min(340, len*18));
-  const w2=Math.max(10, Math.min(340, chunks*18));
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">工作记忆槽位压力对比（安全红线：4 槽）</text>
-    <line x1="232" y1="45" x2="232" y2="165" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,3"/>
-    <text x="236" y="54" font-size="11" font-weight="800" fill="#ef4444">4 槽安全线</text>
-    <text x="20" y="86" font-size="12.5" font-weight="750" fill="var(--tax-text)">无分组裸记</text>
-    <rect x="160" y="68" width="${w1}" height="28" rx="6" fill="#ef4444" opacity="0.8"/>
-    <text x="${168+w1}" y="87" font-size="12" font-weight="800" fill="#ef4444">${len} 槽</text>
-    <text x="20" y="140" font-size="12.5" font-weight="750" fill="var(--tax-text)">${grp} 位一组编码</text>
-    <rect x="160" y="122" width="${w2}" height="28" rx="6" fill="${chunks<=4?'#059669':'#f59e0b'}"/>
-    <text x="${168+w2}" y="141" font-size="12" font-weight="800" fill="${chunks<=4?'#059669':'#d97706'}">${chunks} 槽</text>
-    <text x="20" y="186" font-size="11.5" fill="var(--tax-muted)">每组 3~4 位恰好落在“子槽位”舒适区，能把 11 位手机号压进 3 个工作记忆槽！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>手机号 138-0013-8000、银行卡每 4 位空格、代码缩进分块，全都是在向人类 4 槽位工作记忆“低头”的经典设计。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const RAW_SETS = ['74928153064', '83619472508', '59274083619'];
+    const CHUNK_SETS = [
+      { raw: '13820260520', show: '138 - 2026 - 0520' },
+      { raw: '13920251111', show: '139 - 2025 - 1111' },
+      { raw: '18619980808', show: '186 - 1998 - 0808' }
+    ];
+
+    let setIdx = 0;
+    let round = 1; // 1 = raw, 2 = chunk, 3 = done
+    let timer = null;
+    let res1 = null, res2 = null;
+    let done = false;
+
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const phaseLabel = document.getElementById('phaseLabel');
+    const digitDisplay = document.getElementById('digitDisplay');
+    const barFill = document.getElementById('barFill');
+    const recallRow = document.getElementById('recallRow');
+    const recallInput = document.getElementById('recallInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function startRound() {
+      clearInterval(timer);
+      recallRow.style.display = 'none';
+      recallInput.value = '';
+      startBtn.disabled = true;
+
+      const text = round === 1 ? RAW_SETS[setIdx] : CHUNK_SETS[setIdx].show;
+      digitDisplay.textContent = text;
+      phaseLabel.textContent = round === 1 ? '第 1 轮记忆中（裸串，3.5 秒）...' : '第 2 轮记忆中（3-4-4 分段，3.5 秒）...';
+
+      let elapsed = 0;
+      const total = 3500;
+      barFill.style.width = '100%';
+      timer = setInterval(() => {
+        elapsed += 100;
+        barFill.style.width = Math.max(0, 100 - (elapsed / total) * 100) + '%';
+        if (elapsed >= total) {
+          clearInterval(timer);
+          digitDisplay.textContent = '•••••••••••';
+          phaseLabel.textContent = '时间到！凭记忆输入刚才的 11 位数字（可忽略横杠）';
+          recallRow.style.display = 'flex';
+          recallInput.focus();
+        }
+      }, 100);
+    }
+
+    function grade(target, input) {
+      const clean = input.replace(/\D/g, '');
+      let correct = 0;
+      let html = '';
+      for (let i = 0; i < target.length; i++) {
+        const ch = clean[i] || '_';
+        if (ch === target[i]) {
+          correct++;
+          html += `<span class="ok">${ch}</span>`;
+        } else {
+          html += `<span class="bad">${ch}</span>`;
+        }
+      }
+      return { correct, html, target };
+    }
+
+    submitBtn.onclick = () => {
+      const target = round === 1 ? RAW_SETS[setIdx] : CHUNK_SETS[setIdx].raw;
+      const g = grade(target, recallInput.value);
+      recallRow.style.display = 'none';
+      startBtn.disabled = false;
+
+      if (round === 1) {
+        res1 = g.correct;
+        document.getElementById('score1').textContent = `${g.correct} / 11`;
+        document.getElementById('diff1').innerHTML = `你的回忆：${g.html}（原串 ${target}）`;
+        round = 2;
+        startBtn.textContent = '▶ 开始第 2 轮：分段组块盲测';
+        digitDisplay.textContent = '第 1 轮完成，点击开始第 2 轮';
+        phaseLabel.textContent = '接下来看同样 11 位数字，但按 3-4-4 分段呈现';
+        ahaBox.innerHTML = `<strong>第 1 轮结果：</strong>裸记 11 位数字你记对了 <strong>${res1}/11</strong> 位。超过 4~7 个槽位后，中后段数字极易丢失或串位。继续第 2 轮对比！`;
+      } else {
+        res2 = g.correct;
+        document.getElementById('score2').textContent = `${g.correct} / 11`;
+        document.getElementById('diff2').innerHTML = `你的回忆：${g.html}（原串 ${CHUNK_SETS[setIdx].show}）`;
+        round = 3;
+        startBtn.disabled = true;
+        startBtn.textContent = '✓ 两轮盲测已完成';
+        digitDisplay.textContent = `对比：${res1}/11 → ${res2}/11`;
+        phaseLabel.textContent = '实验完成，可点“重新出题”换一组数字再测';
+        markDone(`完成 11 位数字盲测：裸记 ${res1}/11 vs 分段 ${res2}/11`);
+        const gain = res2 - res1;
+        if (gain > 0) {
+          ahaBox.innerHTML = `<strong>组块碾压（+${gain} 位）：</strong>同样 11 位数字、同样 3.5 秒，分段把 11 个孤立数字折叠成了「号段 + 年份 + 日期」<strong>3 个语义组块</strong>，轻松装进 4 槽工作记忆！`;
+        } else {
+          ahaBox.innerHTML = `<strong>两轮均表现强劲（${res1} vs ${res2}）：</strong>你在第 1 轮可能已经下意识自己做了分段！分段（3-4-4）本质上是把 11 个独立单元压缩进 3 个工作记忆槽位。`;
+        }
+      }
+    };
+
+    recallInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitBtn.click(); });
+    startBtn.onclick = startRound;
+    resetBtn.onclick = () => {
+      clearInterval(timer);
+      setIdx = (setIdx + 1) % RAW_SETS.length;
+      round = 1; res1 = null; res2 = null;
+      startBtn.disabled = false;
+      startBtn.textContent = '▶ 开始第 1 轮：裸串盲测';
+      digitDisplay.textContent = '新题目已就绪，点击开始';
+      barFill.style.width = '0%';
+      recallRow.style.display = 'none';
+      document.getElementById('score1').textContent = '—';
+      document.getElementById('score2').textContent = '—';
+      document.getElementById('diff1').textContent = '等待测试';
+      document.getElementById('diff2').textContent = '等待测试';
+      phaseLabel.textContent = '准备就绪：共 2 轮，每轮限时记忆 3.5 秒';
+    };
   </script>
 </body>
 </html>

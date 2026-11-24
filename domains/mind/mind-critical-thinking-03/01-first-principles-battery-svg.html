@@ -1,73 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔋 电池成本拆解：类比报价 vs 第一性原理（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>电池成本拆解：类比报价 vs 第一性原理</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .layer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .layer-grid { grid-template-columns: 1fr; } }
+    .layer-btn {
+      text-align: left; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 12.5px; cursor: pointer;
+    }
+    .layer-btn.peeled { border-color: var(--tax-green); background: var(--tax-green-soft); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔋 电池成本拆解：类比报价 vs 第一性原理（SVG）</h1><p>类比思维说：“历史上电池一向卖 600 美元/度，我们努力优化也就降到 500”。第一性原理问：“电池里到底有哪些元素？碳、镍、铝、聚合物在伦敦金属交易所一共才值 80 美元！”</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔋 电池成本拆解：类比报价 vs 第一性原理（构建器）</h1>
+      <p>早期行业共识认为：“电池组历来卖 <strong>$600/kWh</strong>，未来最多降到 $500。”第一性原理拒绝按历史报价类比，而是直接拆到物理原子层：<strong>“伦敦金属交易所买钴、镍、铝、碳和隔膜到底多少钱？”</strong>点击下方按钮逐层剥掉行业溢价包袱！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="layer-grid" id="layerGrid"></div>
+
+      <svg id="costSvg" viewBox="0 0 680 190" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="电池成本第一性原理拆解条形图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>类比报价起点（$600/kWh）：</strong>如果只看“别人一直卖多少钱”，你永远走不出 10% 的微调。逐个点击上方拆解项，直抵 $82/kWh 的物理原材料底价！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>第一性原理拆解重构制造效率</span><span id="vEff">75%</span></label><input type="range" id="sEff" min="10" max="95" value="75" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>传统供应链层层加价/历史惯例</span><span id="vMrk">520 美元</span></label><input type="range" id="sMrk" min="150" max="600" step="30" value="520" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">类比微调报价</div><div class="k-val" id="kAna">—</div></div>
-        <div class="kpi"><div class="k-lbl">第一性原理重构成本</div><div class="k-val" id="kFp">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const eff=+document.getElementById('sEff').value, mrk=+document.getElementById('sMrk').value;
-  document.getElementById('vEff').textContent=eff+'%';
-  document.getElementById('vMrk').textContent=mrk+' 美元';
-  const raw=82;
-  const ana=Math.round((raw + mrk)*0.88);
-  const fp=Math.round(raw + mrk*(1 - eff/100)*0.45);
-  document.getElementById('kAna').textContent='$'+ana+' / kWh';
-  document.getElementById('kFp').textContent='$'+fp+' / kWh (降幅 '+Math.round((1-fp/ana)*100)+'%)';
-  document.getElementById('kFp').style.color='#059669';
-  const sc=350/700;
-  const wA=Math.max(15, ana*sc), wF=Math.max(15, fp*sc), wR=Math.max(15, raw*sc);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">三种成本标尺对比（单位：美元 / kWh）</text>
-    <text x="20" y="72" font-size="12" font-weight="750" fill="var(--tax-text)">类比微调报价</text>
-    <rect x="145" y="55" width="${wA.toFixed(0)}" height="24" rx="5" fill="#94a3b8"/>
-    <text x="${(153+wA).toFixed(0)}" y="72" font-size="12" font-weight="800" fill="var(--tax-muted)">$${ana}</text>
-    <text x="20" y="116" font-size="12" font-weight="750" fill="var(--tax-text)">第一性重构价</text>
-    <rect x="145" y="99" width="${wF.toFixed(0)}" height="24" rx="5" fill="#059669"/>
-    <text x="${(153+wF).toFixed(0)}" y="116" font-size="12" font-weight="800" fill="#059669">$${fp}</text>
-    <text x="20" y="160" font-size="12" font-weight="750" fill="var(--tax-text)">原子原料底价</text>
-    <rect x="145" y="143" width="${wR.toFixed(0)}" height="24" rx="5" fill="#3b82f6"/>
-    <text x="${(153+wR).toFixed(0)}" y="160" font-size="12" font-weight="800" fill="#2563eb">$${raw} (物理下限)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>类比思维只能带来 10% 的渐进改良，唯有剥掉历史惯例、直达物理与数学底线，才能看到 10 倍级重构空间！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const LAYERS = [
+      { id: 'l1', name: '✂️ 剥离 1：砍掉多级传统供应链与小批量溢价', cut: 180, peeled: false },
+      { id: 'l2', name: '✂️ 剥离 2：重构电芯封装（去掉冗余模组外壳）', cut: 135, peeled: false },
+      { id: 'l3', name: '✂️ 剥离 3：超级工厂垂直整合规模制造', cut: 125, peeled: false },
+      { id: 'l4', name: '⚛️ 核对底层：纯原材料（镍+铝+碳+锂+聚合物）现货价', cut: 78, peeled: false }
+    ];
+
+    let done = false;
+    const layerGrid = document.getElementById('layerGrid');
+    const svg = document.getElementById('costSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      layerGrid.innerHTML = '';
+      LAYERS.forEach(l => {
+        const b = document.createElement('button');
+        b.className = 'layer-btn' + (l.peeled ? ' peeled' : '');
+        b.innerHTML = `<strong>${l.peeled ? '✓ 已拆解：' : ''}${l.name}</strong><div style="font-size:11.5px;color:var(--tax-muted);margin-top:3px;">释放降本空间：−$${l.cut}/kWh</div>`;
+        b.onclick = () => {
+          l.peeled = !l.peeled;
+          markDone('使用第一性原理拆解了电池组成本结构');
+          render();
+        };
+        layerGrid.appendChild(b);
+      });
+
+      const saved = LAYERS.filter(l => l.peeled).reduce((s, l) => s + l.cut, 0);
+      const curCost = 600 - saved;
+      const pct = Math.round((curCost / 600) * 100);
+      const peeledCnt = LAYERS.filter(l => l.peeled).length;
+
+      let html = '';
+      // Reference analogy bar
+      html += `<text x="24" y="34" fill="var(--tax-muted)" font-size="12">行业类比历史报价（$600/kWh）</text>`;
+      html += `<rect x="24" y="42" width="600" height="26" rx="8" fill="rgba(239,68,68,0.22)" stroke="var(--tax-red)"/>`;
+      html += `<text x="614" y="60" text-anchor="end" fill="var(--tax-red)" font-size="12" font-weight="800">$600 / kWh</text>`;
+
+      // Current first-principles bar
+      const col = curCost <= 120 ? 'var(--tax-green)' : (curCost <= 320 ? 'var(--tax-primary)' : 'var(--tax-amber)');
+      html += `<text x="24" y="100" fill="var(--tax-ink)" font-size="13" font-weight="700">当前第一性原理拆解成本（已剥离 ${peeledCnt}/4 层）</text>`;
+      html += `<rect x="24" y="110" width="600" height="32" rx="8" fill="rgba(148,163,184,0.14)"/>`;
+      html += `<rect x="24" y="110" width="${Math.max(82, curCost)}" height="32" rx="8" fill="${col}"/>`;
+      html += `<text x="${Math.max(94, curCost + 10)}" y="131" fill="${col}" font-size="14" font-weight="800">$${curCost} / kWh（原价的 ${pct}%）</text>`;
+
+      // Physics floor line at $82
+      html += `<line x1="${24 + 82}" y1="92" x2="${24 + 82}" y2="156" stroke="var(--tax-green)" stroke-dasharray="4 3" stroke-width="2"/>`;
+      html += `<text x="${24 + 82}" y="174" text-anchor="middle" fill="var(--tax-green)" font-size="11" font-weight="700">$82 物理原料底价</text>`;
+      svg.innerHTML = html;
+
+      if (peeledCnt === 4) {
+        ahaBox.innerHTML = '<strong>直抵物理底价（$82/kWh，狂降 86%）！</strong>电池本身根本不贵，贵的是传统制造路径的历史包袱。第一性原理就是把问题一路拆到<strong>不可再分的物理/数学基本事实</strong>，然后从零重新组装出十倍级优势！';
+      } else if (peeledCnt > 0) {
+        ahaBox.innerHTML = `<strong>已压缩至 $${curCost}/kWh（省下 $${saved}）：</strong>继续拆解剩下的 ${4 - peeledCnt} 层，看看距离物理原材料底价还有多大鸿沟！`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

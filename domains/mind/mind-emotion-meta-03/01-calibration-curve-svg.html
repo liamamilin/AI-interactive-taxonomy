@@ -1,75 +1,175 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔭 信心校准曲线：你说 80% 把握时真的对 80% 吗？（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>信心校准曲线：你说 80% 把握时真的对 80% 吗？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .q-card { padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .ans-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+    .conf-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+    .conf-btn { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-ink); font-size: 13px; cursor: pointer; }
+    .conf-btn.sel { border-color: var(--tax-primary); background: var(--tax-primary-soft); color: var(--tax-primary); font-weight: 700; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔭 信心校准曲线：你说 80% 把握时真的对 80% 吗？（SVG）</h1><p>元认知最硬核的指标叫“校准度”：当你声称有 90% 把握时，历史统计下来你真的答对了 90% 吗？普通人往往只有 65%！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>人类默认过度自信偏差</span><span id="vOvr">25%</span></label><input type="range" id="sOvr" min="0" max="40" value="25" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>坚持写“决策预测日志”并复盘的月数</span><span id="vLog">6 个月</span></label><input type="range" id="sLog" min="0" max="24" value="6" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔭 信心校准曲线：5 题元认知盲测</h1>
+      <p>元认知的核心不是“全答对”，而是<strong>“你对自己把握程度的判断是否靠谱”</strong>。回答 5 道反直觉冷知识并押注你的信心（55% / 75% / 95%），最后在 45° 完美校准线上看你是否过度自信！</p>
+    </header>
+
+    <section class="toy-card">
+      <div id="quizArea" class="q-card">
+        <div style="font-size:12px;color:var(--tax-muted);" id="qNum">第 1 / 5 题</div>
+        <div style="font-size:16px;font-weight:700;margin:6px 0;" id="qText"></div>
+        <div class="ans-row">
+          <button class="toy-btn secondary" id="btnTrue">✓ 正确（True）</button>
+          <button class="toy-btn secondary" id="btnFalse">✕ 错误（False）</button>
+        </div>
+        <div class="conf-row">
+          <span style="font-size:12.5px;color:var(--tax-muted);">你有多大把握？</span>
+          <button class="conf-btn" data-c="55">55%（纯猜）</button>
+          <button class="conf-btn sel" data-c="75">75%（较有把握）</button>
+          <button class="conf-btn" data-c="95">95%（几乎确定）</button>
+        </div>
+        <div style="margin-top:12px;">
+          <button class="toy-btn" id="lockBtn" disabled>锁定答案进入下一题</button>
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 215"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">声称 90% 把握时真实命中</div><div class="k-val" id="kHit">—</div></div>
-        <div class="kpi"><div class="k-lbl">校准评级</div><div class="k-val" id="kGrd">—</div></div>
+
+      <svg id="calSvg" viewBox="0 0 680 215" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="元认知信心校准曲线"></svg>
+
+      <div id="resetWrap" style="margin-top:10px;display:none;">
+        <button class="toy-btn secondary" id="resetBtn">↺ 再测一轮</button>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>盲测规则：</strong>选定“正确/错误”和你的把握百分比后锁定。5 题全部答完后，系统会把你的“平均自信度”与“真实正确率”画在校准坐标图上！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const ovr=+document.getElementById('sOvr').value, log=+document.getElementById('sLog').value;
-  document.getElementById('vOvr').textContent=ovr+'%';
-  document.getElementById('vLog').textContent=log+' 个月';
-  const effOvr=ovr*Math.exp(-log/12);
-  function realAt(conf){ return Math.max(50, Math.min(99, conf - effOvr*(conf-50)/40)); }
-  const hit90=Math.round(realAt(90));
-  const err=90 - hit90;
-  document.getElementById('kHit').textContent=hit90+'%';
-  document.getElementById('kHit').style.color=err<=6?'#059669':'#ef4444';
-  document.getElementById('kGrd').textContent=err<=6?'🏆 超级预测者级校准':(err<=14?'📈 良好校准中':'⚠️ 严重过度自信');
-  let pts=[];
-  for(let c=50;c<=100;c+=5){
-    const x=80+(c-50)*8.8, y=180-(realAt(c)-50)*2.8;
-    pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="80" y="24" font-size="13" font-weight="800" fill="var(--tax-text)">主观信心 (50%~100%) vs 实际准确率（灰虚线 = 完美校准线）</text>
-    <line x1="80" y1="180" x2="520" y2="180" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <line x1="80" y1="40" x2="80" y2="180" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <line x1="80" y1="180" x2="520" y2="40" stroke="#94a3b8" stroke-dasharray="5,4" stroke-width="2"/>
-    <polyline points="${pts.join(' ')}" fill="none" stroke="${err<=6?'#059669':'#ef4444'}" stroke-width="3.5"/>
-    <text x="80" y="198" font-size="11" fill="var(--tax-muted)">信心 50%</text>
-    <text x="485" y="198" font-size="11" fill="var(--tax-muted)">信心 100%</text>
-    <text x="355" y="150" font-size="11.5" font-weight="750" fill="${err<=6?'#059669':'#ef4444'}">当前 90% 信心实测命中 ${hit90}%</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>气象预报员和扑克高手之所以校准度极高，是因为他们每天都写下明确概率并立刻接受现实打脸——给重要判断标个百分比，你也会迅速变准！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const QS = [
+      { q: '瑞士的首都就是日内瓦。', ans: false, exp: '瑞士事实首都是伯尔尼（Bern），不是日内瓦或苏黎世。' },
+      { q: '人类大脑在清醒静息状态下消耗了全身约 20% 的能量。', ans: true, exp: '大脑仅占体重 2%，却消耗约 20% 静息代谢能量。' },
+      { q: '牛津大学的建校时间早于阿兹特克帝国的建立。', ans: true, exp: '牛津约 1096 年开始教学，阿兹特克帝国建于 1428 年。' },
+      { q: '地球上最长的山脉是喜马拉雅山脉。', ans: false, exp: '陆地最长是安第斯山脉（约 7000 km），全球最长是洋中脊。' },
+      { q: '香蕉在植物学分类上属于浆果，而草莓反而严格来说不算浆果。', ans: true, exp: '香蕉由单个子房发育而成属真浆果，草莓是聚合果。' }
+    ];
+
+    let idx = 0, curAns = null, curConf = 75;
+    let records = [];
+    let done = false;
+
+    const btnTrue = document.getElementById('btnTrue');
+    const btnFalse = document.getElementById('btnFalse');
+    const lockBtn = document.getElementById('lockBtn');
+    const svg = document.getElementById('calSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function drawChart(finished) {
+      const x0 = 70, x1 = 420, y0 = 180, y1 = 28;
+      const xOf = c => x0 + ((c - 40) / 60) * (x1 - x0);
+      const yOf = a => y0 - (a / 100) * (y0 - y1);
+
+      let html = '';
+      // Overconfidence triangle below diagonal
+      html += `<polygon points="${xOf(40)},${yOf(40)} ${xOf(100)},${yOf(100)} ${xOf(100)},${yOf(0)} ${xOf(40)},${yOf(0)}" fill="rgba(239,68,68,0.10)"/>`;
+      // Perfect diagonal
+      html += `<line x1="${xOf(40)}" y1="${yOf(40)}" x2="${xOf(100)}" y2="${yOf(100)}" stroke="var(--tax-green)" stroke-width="2.5" stroke-dasharray="6 4"/>`;
+      html += `<text x="${xOf(76)}" y="${yOf(82)}" fill="var(--tax-green)" font-size="11" font-weight="700">45° 完美校准线</text>`;
+      html += `<text x="${xOf(82)}" y="${yOf(26)}" text-anchor="middle" fill="var(--tax-red)" font-size="11.5" font-weight="700">过度自信盲区（以为懂其实错）</text>`;
+
+      html += `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="var(--tax-border)"/>`;
+      html += `<line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y1}" stroke="var(--tax-border)"/>`;
+      [50, 75, 100].forEach(v => {
+        html += `<text x="${xOf(v)}" y="198" text-anchor="middle" fill="var(--tax-muted)" font-size="11">${v}% 自信</text>`;
+      });
+      [0, 50, 100].forEach(v => {
+        html += `<text x="${x0 - 8}" y="${yOf(v) + 4}" text-anchor="end" fill="var(--tax-muted)" font-size="11">${v}%</text>`;
+      });
+
+      // Right summary box
+      html += `<rect x="450" y="34" width="208" height="142" rx="12" fill="var(--tax-surface)" stroke="var(--tax-border)"/>`;
+      if (!finished) {
+        html += `<text x="554" y="96" text-anchor="middle" fill="var(--tax-muted)" font-size="13">已完成 ${records.length} / 5 题</text>`;
+        html += `<text x="554" y="120" text-anchor="middle" fill="var(--tax-muted)" font-size="11.5">答完 5 题后揭晓你的校准坐标</text>`;
+      } else {
+        const avgConf = Math.round(records.reduce((s, r) => s + r.conf, 0) / records.length);
+        const acc = Math.round((records.filter(r => r.ok).length / records.length) * 100);
+        const gap = avgConf - acc;
+        const col = Math.abs(gap) <= 12 ? 'var(--tax-green)' : (gap > 12 ? 'var(--tax-red)' : 'var(--tax-amber)');
+
+        html += `<circle cx="${xOf(Math.max(45, avgConf))}" cy="${yOf(acc)}" r="9" fill="${col}" stroke="#fff" stroke-width="2.5"/>`;
+        html += `<text x="${xOf(Math.max(45, avgConf))}" y="${yOf(acc) - 14}" text-anchor="middle" fill="${col}" font-size="12" font-weight="800">你的位置</text>`;
+
+        html += `<text x="554" y="64" text-anchor="middle" fill="var(--tax-muted)" font-size="12">平均主观自信：${avgConf}%</text>`;
+        html += `<text x="554" y="92" text-anchor="middle" fill="var(--tax-ink)" font-size="15" font-weight="800">真实正确率：${acc}%</text>`;
+        html += `<text x="554" y="124" text-anchor="middle" fill="${col}" font-size="13" font-weight="700">${Math.abs(gap) <= 12 ? '🎯 校准极佳！' : (gap > 12 ? `⚠️ 过度自信 +${gap}%` : `🌱 偏谦虚低估 ${gap}%`)}</text>`;
+        html += `<text x="554" y="152" text-anchor="middle" fill="var(--tax-muted)" font-size="11">答对 ${records.filter(r => r.ok).length} / 5 题</text>`;
+      }
+      svg.innerHTML = html;
+    }
+
+    function renderQ() {
+      const item = QS[idx];
+      curAns = null;
+      btnTrue.className = 'toy-btn secondary';
+      btnFalse.className = 'toy-btn secondary';
+      lockBtn.disabled = true;
+      document.getElementById('qNum').textContent = `第 ${idx + 1} / ${QS.length} 题`;
+      document.getElementById('qText').textContent = item.q;
+      drawChart(false);
+    }
+
+    btnTrue.onclick = () => { curAns = true; btnTrue.className = 'toy-btn'; btnFalse.className = 'toy-btn secondary'; lockBtn.disabled = false; };
+    btnFalse.onclick = () => { curAns = false; btnFalse.className = 'toy-btn'; btnTrue.className = 'toy-btn secondary'; lockBtn.disabled = false; };
+
+    document.querySelectorAll('.conf-btn').forEach(b => {
+      b.onclick = () => {
+        curConf = Number(b.dataset.c);
+        document.querySelectorAll('.conf-btn').forEach(x => x.classList.toggle('sel', x === b));
+      };
+    });
+
+    lockBtn.onclick = () => {
+      const item = QS[idx];
+      records.push({ ok: curAns === item.ans, conf: curConf, exp: item.exp });
+      idx++;
+      if (idx < QS.length) {
+        renderQ();
+      } else {
+        document.getElementById('quizArea').style.display = 'none';
+        document.getElementById('resetWrap').style.display = 'block';
+        drawChart(true);
+        const avgConf = Math.round(records.reduce((s, r) => s + r.conf, 0) / records.length);
+        const acc = Math.round((records.filter(r => r.ok).length / records.length) * 100);
+        markDone(`完成元认知校准盲测：自信 ${avgConf}% vs 正确率 ${acc}%`);
+        ahaBox.innerHTML = avgConf - acc > 12
+          ? `<strong>校准偏差 +${avgConf - acc}%（典型过度自信）：</strong>大多数人在声称“95% 确定”时，真实正确率往往只有 60%–75%。顶级预测者（Superforecasters）的秘诀不是全知全能，而是把不确定性诚实地标为 60% 而不是 95%！`
+          : `<strong>极佳的元认知校准（自信 ${avgConf}% vs 真实 ${acc}%）！</strong>你很清楚自己“知道什么”和“不确定什么”——这种“知道自己不知道”的校准感，比单纯背知识稀缺得多！`;
+      }
+    };
+
+    document.getElementById('resetBtn').onclick = () => {
+      idx = 0; records = [];
+      document.getElementById('quizArea').style.display = 'block';
+      document.getElementById('resetWrap').style.display = 'none';
+      renderQ();
+    };
+
+    renderQ();
   </script>
 </body>
 </html>

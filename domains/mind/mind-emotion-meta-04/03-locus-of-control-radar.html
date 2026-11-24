@@ -1,71 +1,115 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⭕ 控制圈 vs 关注圈：把精力收回可控处</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>控制圈 vs 关注圈：把精力收回可控处</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .item-chip {
+      padding: 7px 12px; border-radius: 999px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 12.5px; cursor: pointer;
+    }
+    .item-chip.in-ctrl { border-color: var(--tax-green); background: var(--tax-green-soft); color: var(--tax-green); font-weight: 700; }
+    .item-chip.in-conc { border-color: var(--tax-amber); background: var(--tax-amber-soft); color: var(--tax-amber); font-weight: 700; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⭕ 控制圈 vs 关注圈：把精力收回可控处</h1><p>斯多葛哲学与心理学共同的减压黄金律：把 80% 精力花在天气、别人脸色、大盘涨跌（不可控关注圈），只会越焦虑越无力；收回控制圈，掌控感立刻膨胀！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⭕ 控制圈 vs 关注圈：精力同心圆空间分拣器</h1>
+      <p>史蒂芬·柯维在《高效能人士的七个习惯》中提出：把精力砸在<strong>外圈“关注但不可控”</strong>的事上，控制圈会越来越萎缩；把精力收回<strong>内圈“直接可控”</strong>的事上，你的影响力反而会向外扩张！点击下方事项切换归属圈：</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="chip-row" id="chipRow"></div>
+
+      <svg id="circleSvg" viewBox="0 0 680 245" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="控制圈与关注圈同心圆空间图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>分拣挑战：</strong>点击上方 6 张焦虑卡片，把真正可控的 3 项放进绿色【核心控制圈】，把不可控的 3 项果断放手到外围【关注圈】！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>投入在“自身可控行动”的精力占比</span><span id="vCtl">70%</span></label><input type="range" id="sCtl" min="5" max="95" value="70" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>外界不确定噪音强度</span><span id="vNoi">65%</span></label><input type="range" id="sNoi" min="10" max="100" value="65" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">内心掌控感</div><div class="k-val" id="kMst">—</div></div>
-        <div class="kpi"><div class="k-lbl">无谓精神内耗</div><div class="k-val" id="kAnx">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const ctl=+document.getElementById('sCtl').value, noi=+document.getElementById('sNoi').value;
-  document.getElementById('vCtl').textContent=ctl+'%';
-  document.getElementById('vNoi').textContent=noi+'%';
-  const mst=Math.min(98, Math.round(ctl*0.92 + (100-noi)*0.1));
-  const anx=Math.max(5, Math.round((100-ctl)*(noi/100)));
-  document.getElementById('kMst').textContent=mst+'%';
-  document.getElementById('kMst').style.color=mst>=60?'#059669':'#f59e0b';
-  document.getElementById('kAnx').textContent=anx+'%';
-  document.getElementById('kAnx').style.color=anx>40?'#ef4444':'#059669';
-  const rIn=Math.max(18, 20 + ctl*0.55);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">同心圆可视化：内圈=你能直接控制的行动，外圈=不可控噪音</text>
-    <circle cx="170" cy="115" r="78" fill="#ef4444" opacity="0.14" stroke="#ef4444" stroke-dasharray="4,3"/>
-    <circle cx="170" cy="115" r="${rIn.toFixed(1)}" fill="#059669" opacity="0.78"/>
-    <text x="170" y="119" text-anchor="middle" font-size="12" font-weight="850" fill="#fff">控制圈 ${ctl}%</text>
-    <rect x="295" y="55" width="275" height="120" rx="12" fill="var(--tax-border)" opacity="0.18"/>
-    <text x="315" y="84" font-size="12.5" font-weight="800" fill="#059669">✅ 控制圈内（专注投入）：</text>
-    <text x="315" y="106" font-size="11.5" fill="var(--tax-muted)">今日作息、准备深度、回应态度</text>
-    <text x="315" y="136" font-size="12.5" font-weight="800" fill="#ef4444">❌ 关注圈外（果断放手）：</text>
-    <text x="315" y="158" font-size="11.5" fill="var(--tax-muted)">别人评价、已成过去、宏观黑天鹅</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当你把精力持续灌注进控制圈，你的控制圈本身会越变越大；相反，整天盯着不可控的事抱怨，只会让自己的影响力越缩越小。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const ITEMS = [
+      { id: 'i1', label: '🌧️ 明天户外活动下不下雨', controllable: false, placed: 'control' },
+      { id: 'i2', label: '📉 竞争对手突然降价', controllable: false, placed: 'control' },
+      { id: 'i3', label: '😠 同事今天莫名其妙摆臭脸', controllable: false, placed: 'control' },
+      { id: 'i4', label: '🛌 我今晚 11 点放下手机睡觉', controllable: true, placed: 'concern' },
+      { id: 'i5', label: '📑 我把答辩方案再打磨两遍', controllable: true, placed: 'concern' },
+      { id: 'i6', label: '🧘 面对批评先深呼吸 3 秒再回', controllable: true, placed: 'concern' }
+    ];
+
+    let done = false;
+    const chipRow = document.getElementById('chipRow');
+    const svg = document.getElementById('circleSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      chipRow.innerHTML = '';
+      ITEMS.forEach(it => {
+        const b = document.createElement('button');
+        b.className = 'item-chip ' + (it.placed === 'control' ? 'in-ctrl' : 'in-conc');
+        b.textContent = `${it.label} [${it.placed === 'control' ? '内·控制圈' : '外·关注圈'}]`;
+        b.onclick = () => {
+          it.placed = it.placed === 'control' ? 'concern' : 'control';
+          markDone('在控制圈与关注圈间分拣了精力事项');
+          render();
+        };
+        chipRow.appendChild(b);
+      });
+
+      const correct = ITEMS.filter(it => (it.controllable && it.placed === 'control') || (!it.controllable && it.placed === 'concern')).length;
+      const pct = Math.round((correct / ITEMS.length) * 100);
+      const innerR = 44 + correct * 7; // Inner circle expands as you focus on controllables!
+
+      let html = '';
+      // Outer Circle of Concern
+      html += `<circle cx="215" cy="126" r="102" fill="rgba(245,158,11,0.12)" stroke="var(--tax-amber)" stroke-width="2" stroke-dasharray="6 4"/>`;
+      html += `<text x="215" y="42" text-anchor="middle" fill="var(--tax-amber)" font-size="11.5" font-weight="700">外围关注圈（果断放手）</text>`;
+
+      // Inner Circle of Control (expands!)
+      html += `<circle cx="215" cy="126" r="${innerR}" fill="rgba(16,185,129,0.22)" stroke="var(--tax-green)" stroke-width="2.5"/>`;
+      html += `<text x="215" y="122" text-anchor="middle" fill="var(--tax-green)" font-size="13" font-weight="800">核心控制圈</text>`;
+      html += `<text x="215" y="142" text-anchor="middle" fill="var(--tax-ink)" font-size="12" font-weight="700">精力精准度 ${pct}%</text>`;
+
+      // Right side list breakdown
+      const inCtrl = ITEMS.filter(i => i.placed === 'control');
+      const inConc = ITEMS.filter(i => i.placed === 'concern');
+
+      html += `<text x="370" y="34" fill="var(--tax-green)" font-size="13" font-weight="800">🟢 你正在投入精力的控制圈（${inCtrl.length}项）</text>`;
+      inCtrl.forEach((it, idx) => {
+        const ok = it.controllable;
+        html += `<text x="370" y="${58 + idx * 20}" fill="${ok ? 'var(--tax-ink)' : 'var(--tax-red)'}" font-size="12">${ok ? '✓' : '⚠️ 内耗！'} ${it.label}</text>`;
+      });
+
+      html += `<text x="370" y="152" fill="var(--tax-amber)" font-size="13" font-weight="800">🟡 你选择放手的关注圈（${inConc.length}项）</text>`;
+      inConc.forEach((it, idx) => {
+        const ok = !it.controllable;
+        html += `<text x="370" y="${176 + idx * 20}" fill="${ok ? 'var(--tax-muted)' : 'var(--tax-red)'}" font-size="12">${ok ? '✓ 已放手' : '⚠️ 别放弃！'} ${it.label}</text>`;
+      });
+
+      svg.innerHTML = html;
+
+      if (correct === ITEMS.length) {
+        ahaBox.innerHTML = '<strong>控制圈扩张至最大（100% 精准聚焦）！</strong>斯多葛哲学家爱比克泰德说过：“困扰我们的不是无法控制的外界，而是妄图控制它们的执念。”把 100% 精力收回睡眠、方案与情绪回应上，焦虑自然消散！';
+      } else {
+        ahaBox.innerHTML = `<strong>当前精准度 ${pct}%（${correct}/6 归位正确）：</strong>右侧亮起红色 ⚠️ 的条目正在偷走你的能量！点击上方对应卡片把它们切换回正确圈层。`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

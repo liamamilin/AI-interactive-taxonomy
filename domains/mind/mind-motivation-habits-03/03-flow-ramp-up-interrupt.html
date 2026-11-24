@@ -1,67 +1,141 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⏱️ 心流爬坡期：15 分钟才入戏，1 秒被打断</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>心流爬坡期：15 分钟才入戏，1 秒被打断</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .stat-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .big-num { font-size: 24px; font-weight: 800; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⏱️ 心流爬坡期：15 分钟才入戏，1 秒被打断</h1><p>进入深度心流需要大约 15~20 分钟的“热机爬坡”，但只要中间插进来一条 30 秒的会议或消息，你就得从零重新爬坡！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>单段无打扰连续时长</span><span id="vBlk">45 分钟</span></label><input type="range" id="sBlk" min="10" max="90" step="5" value="45" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>心流热机启动耗时</span><span id="vWrm">15 分钟</span></label><input type="range" id="sWrm" min="10" max="25" value="15" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⏱️ 心流爬坡期：60 分钟深度工作竞速</h1>
+      <p>进入深度心流平均需要 <strong>15 分钟爬坡</strong>。对比两位同样工作 60 分钟的工程师：<strong>免打扰组（0 次弹窗）</strong> vs <strong>碎片回复组（每 15 分钟只回 1 条 30 秒消息）</strong>，看最终谁攒下了真正的心流时间！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="playBtn">▶ 播放 60 分钟竞速</button>
+        <button class="toy-btn secondary" id="jumpBtn">⏩ 直接看 60 分钟结局</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重置</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">单段有效心流净时长</div><div class="k-val" id="kNet">—</div></div>
-        <div class="kpi"><div class="k-lbl">2 小时总计心流产出</div><div class="k-val" id="kTwo">—</div></div>
+
+      <svg id="raceSvg" viewBox="0 0 680 220" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="心流爬坡期与打断归零竞速"></svg>
+
+      <div class="cards">
+        <div class="stat-card">
+          <div style="font-size:12px;color:var(--tax-muted);">🟢 深度勿扰组（0 次弹窗）</div>
+          <div class="big-num" id="deepVal" style="color:var(--tax-green);">0 分钟心流</div>
+        </div>
+        <div class="stat-card">
+          <div style="font-size:12px;color:var(--tax-muted);">🔴 每 15 分钟回 1 条消息（仅耗 1.5 分钟）</div>
+          <div class="big-num" id="fragVal" style="color:var(--tax-red);">0 分钟心流</div>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>竞速预告：</strong>点击「播放 60 分钟竞速」，亲眼见证只花 30 秒回消息如何让 60 分钟里<strong>一分钟心流都进不去</strong>！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const blk=+document.getElementById('sBlk').value, wrm=+document.getElementById('sWrm').value;
-  document.getElementById('vBlk').textContent=blk+' 分钟';
-  document.getElementById('vWrm').textContent=wrm+' 分钟';
-  const net=Math.max(0, blk - wrm);
-  const segs=Math.floor(120/blk);
-  const two=segs*net;
-  document.getElementById('kNet').textContent=net+' 分钟';
-  document.getElementById('kTwo').textContent=two+' / 120 分钟';
-  document.getElementById('kTwo').style.color=two>=70?'#059669':'#ef4444';
-  const wW=Math.max(8, Math.min(440, (Math.min(blk,wrm)/90)*440));
-  const wN=Math.max(0, Math.min(440-wW, (net/90)*440));
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="32" font-size="13" font-weight="800" fill="var(--tax-text)">单段 ${blk} 分钟结构：橙色=热机爬坡 (${wrm}m)，绿色=真正心流 (${net}m)</text>
-    <rect x="30" y="66" width="${wW.toFixed(0)}" height="42" rx="6" fill="#f59e0b"/>
-    ${wN>0?`<rect x="${(30+wW).toFixed(0)}" y="66" width="${wN.toFixed(0)}" height="42" rx="6" fill="#059669"/>`:''}
-    <text x="30" y="148" font-size="12" fill="var(--tax-muted)">${net===0?'⚠️ 碎片时长短于热机期，2 小时里你一直在原地反复预热，心流总产出为 0！':'连续 60~90 分钟的整块时间，只需付一次热机税，即可收割大段高效心流！'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>日历上被零星会议切碎的 4 个“半小时空隙”，加起来远不如一整块不受打扰的 2 小时！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let min = 0;
+    let playing = false;
+    let timer = null;
+    let done = false;
+
+    const svg = document.getElementById('raceSvg');
+    const playBtn = document.getElementById('playBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function depthClean(m) { return Math.min(100, (m / 15) * 80 + (m > 15 ? Math.min(20, (m - 15) * 0.8) : 0)); }
+    function depthFrag(m) {
+      const cycle = m % 15;
+      if (m > 0 && cycle === 0) return 8; // Pinged! Reset!
+      return Math.min(76, (cycle / 15) * 76);
+    }
+
+    function draw() {
+      const xOf = m => 48 + (m / 60) * 592;
+      const yOf = v => 185 - (v / 100) * 145;
+
+      let cPts = [], fPts = [];
+      let deepMins = 0, fragMins = 0;
+      for (let m = 0; m <= min; m++) {
+        const dc = depthClean(m);
+        const df = depthFrag(m);
+        if (dc >= 80) deepMins++;
+        if (df >= 80) fragMins++;
+        cPts.push(`${xOf(m).toFixed(1)},${yOf(dc).toFixed(1)}`);
+        fPts.push(`${xOf(m).toFixed(1)},${yOf(df).toFixed(1)}`);
+      }
+
+      document.getElementById('deepVal').textContent = `${deepMins} 分钟深度心流`;
+      document.getElementById('fragVal').textContent = `${fragMins} 分钟深度心流`;
+
+      let html = '';
+      // Flow threshold zone (>= 80)
+      html += `<rect x="48" y="${yOf(100)}" width="592" height="${yOf(80) - yOf(100)}" fill="rgba(16,185,129,0.16)"/>`;
+      html += `<line x1="48" y1="${yOf(80)}" x2="640" y2="${yOf(80)}" stroke="var(--tax-green)" stroke-dasharray="5 4" stroke-width="1.8"/>`;
+      html += `<text x="56" y="${yOf(80) - 6}" fill="var(--tax-green)" font-size="11" font-weight="700">🌊 深度心流门槛线（需连续专注 15 分钟爬坡）</text>`;
+
+      // Ping markers at 15, 30, 45
+      [15, 30, 45].forEach(p => {
+        html += `<line x1="${xOf(p)}" y1="40" x2="${xOf(p)}" y2="185" stroke="var(--tax-red)" stroke-dasharray="3 3" opacity="0.45"/>`;
+        html += `<text x="${xOf(p)}" y="26" text-anchor="middle" fill="var(--tax-red)" font-size="10">💬 弹窗</text>`;
+      });
+
+      [0, 15, 30, 45, 60].forEach(m => {
+        html += `<text x="${xOf(m)}" y="205" text-anchor="middle" fill="var(--tax-muted)" font-size="11">${m}m</text>`;
+      });
+
+      if (cPts.length > 1) {
+        html += `<polyline points="${cPts.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3"/>`;
+        html += `<polyline points="${fPts.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3"/>`;
+      }
+      html += `<circle cx="${xOf(min)}" cy="${yOf(depthClean(min))}" r="5.5" fill="var(--tax-green)"/>`;
+      html += `<circle cx="${xOf(min)}" cy="${yOf(depthFrag(min))}" r="5.5" fill="var(--tax-red)"/>`;
+      svg.innerHTML = html;
+
+      if (min >= 60) {
+        ahaBox.innerHTML = '<strong>60 分钟残酷结局（45 分钟心流 vs 0 分钟心流）！</strong>碎片组 1 小时里其实只花了 1.5 分钟回消息，但因为每次都在第 15 分钟爬坡临界点被打断清零，整整 1 小时<strong>一次都没跨进心流门槛</strong>！写核心工作前务必手机静音+关闭桌面弹窗至少 45 分钟。';
+      } else if (min >= 15) {
+        ahaBox.innerHTML = `<strong>第 ${min} 分钟：</strong>免打扰组已稳稳进入绿色心流区；碎片组刚爬到 15 分钟门口就被一条微信消息一脚踹回起点！`;
+      }
+    }
+
+    function stop() { playing = false; clearInterval(timer); playBtn.textContent = '▶ 播放 60 分钟竞速'; }
+
+    playBtn.onclick = () => {
+      markDone('播放了心流爬坡期与碎片打断60分钟竞速');
+      if (playing) { stop(); return; }
+      if (min >= 60) min = 0;
+      playing = true;
+      playBtn.textContent = '⏸ 暂停';
+      timer = setInterval(() => {
+        min++;
+        draw();
+        if (min >= 60) stop();
+      }, 90);
+    };
+    document.getElementById('jumpBtn').onclick = () => { stop(); min = 60; markDone('查看了心流爬坡60分钟结局'); draw(); };
+    document.getElementById('resetBtn').onclick = () => { stop(); min = 0; draw(); };
+    draw();
   </script>
 </body>
 </html>

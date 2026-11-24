@@ -1,75 +1,193 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔀 多任务切换税：注意残留计算器</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>多任务切换税：注意残留计算器</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .prompt-banner {
+      padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;
+    }
+    .target-pill { font-size: 22px; font-weight: 800; color: var(--tax-primary); }
+    .pad-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 14px; }
+    .pad-btn {
+      padding: 14px 8px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); font-size: 18px; font-weight: 700;
+      cursor: pointer; transition: transform .1s, background .12s;
+    }
+    .pad-btn:hover { border-color: var(--tax-primary); }
+    .pad-btn.hit { background: var(--tax-green-soft); border-color: var(--tax-green); color: var(--tax-green); }
+    .pad-btn.miss { background: var(--tax-red-soft); border-color: var(--tax-red); }
+    .race-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+    .race-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .race-val { font-size: 22px; font-weight: 800; color: var(--tax-ink); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔀 多任务切换税：注意残留计算器</h1><p>你以为回一条微信只花了 30 秒，但前一个任务的“注意残留”会让大脑多花十几分钟才能重新爬回深度专注态。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>每小时主动/被动切屏次数</span><span id="vSw">6 次/小时</span></label><input type="range" id="sSw" min="0" max="15" value="6" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>主任务思考深度（重入成本）</span><span id="vDep">6 分钟/次</span></label><input type="range" id="sDep" min="1" max="15" value="6" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔀 多任务切换税：双轨竞速实测</h1>
+      <p>同样的 10 次点击任务（A~E 与 1~5）：先跑<strong>单线程批处理</strong>（A→B→C→D→E→1→2→3→4→5），再跑<strong>多任务交替切换</strong>（A→1→B→2→C→3→D→4→E→5），亲手测出你大脑的“切换税”。</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="toy-btn" id="startBtn">▶ 开始第 1 轮：单线程批处理</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重置竞速</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">每小时有效深度时间</div><div class="k-val" id="kEff">—</div></div>
-        <div class="kpi"><div class="k-lbl">切换税损耗占比</div><div class="k-val" id="kTax">—</div></div>
+
+      <div class="prompt-banner">
+        <div>
+          <div style="font-size:12px;color:var(--tax-muted);" id="modeHint">点击开始按钮启动计时</div>
+          <div class="target-pill" id="nextTarget">下一个目标：—</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;color:var(--tax-muted);">实时用时 / 失误</div>
+          <div style="font-size:20px;font-weight:800;font-family:ui-monospace,monospace;" id="liveTimer">0.00 s · 0 错</div>
+        </div>
       </div>
+
+      <div class="pad-grid" id="padGrid"></div>
+
+      <div class="race-bars">
+        <div class="race-card">
+          <div style="font-size:12px;color:var(--tax-muted);">🟢 单线程批处理（0 次规则切换）</div>
+          <div class="race-val" id="tSingle">—</div>
+        </div>
+        <div class="race-card">
+          <div style="font-size:12px;color:var(--tax-muted);">🔴 交替多任务（9 次规则切换）</div>
+          <div class="race-val" id="tSwitch">—</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>竞速说明：</strong>完成两轮共 20 次点击，系统将计算你的真实切换耗时增幅与“注意残留”损耗。
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const sw=+document.getElementById('sSw').value, dep=+document.getElementById('sDep').value;
-  document.getElementById('vSw').textContent=sw+' 次/小时';
-  document.getElementById('vDep').textContent=dep+' 分钟/次';
-  const lost=Math.min(58, sw*(0.5 + dep*0.75));
-  const eff=Math.max(2, 60 - lost);
-  const tax=Math.round(lost/60*100);
-  document.getElementById('kEff').textContent=eff.toFixed(0)+' 分钟';
-  document.getElementById('kEff').style.color=eff<25?'#ef4444':'#059669';
-  document.getElementById('kTax').textContent=tax+'%';
-  let segs='';
-  const chunks=Math.max(1, sw+1);
-  const totalW=540;
-  const segW=totalW/chunks;
-  for(let i=0;i<chunks;i++){
-    const x=30+i*segW;
-    const taxW=i===0?0:Math.min(segW*0.92, (0.5+dep*0.75)/60*totalW);
-    const goodW=Math.max(2, segW - taxW);
-    if(taxW>0) segs+=`<rect x="${x.toFixed(1)}" y="68" width="${taxW.toFixed(1)}" height="52" fill="#ef4444" opacity="0.82"/>`;
-    segs+=`<rect x="${(x+taxW).toFixed(1)}" y="68" width="${goodW.toFixed(1)}" height="52" fill="#059669" opacity="0.88"/>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">60 分钟时间轴切碎示意（绿色=深度流，红色=注意残留恢复期）</text>
-    ${segs}
-    <text x="30" y="152" font-size="12" fill="var(--tax-muted)">每小时切屏 ${sw} 次 × 重入成本 ${dep} 分钟 → 实际深度产出仅剩 ${eff.toFixed(0)} 分钟（损耗 ${tax}%）</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>人类根本不会真正的“并行多任务”，只是在高速“上下文切换”。关闭弹窗、把消息集中到固定时段统一回复，是回报率最高的时间管理术。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const SEQ_SINGLE = ['A','B','C','D','E','1','2','3','4','5'];
+    const SEQ_SWITCH = ['A','1','B','2','C','3','D','4','E','5'];
+    const KEYS = ['C','3','A','5','E','1','D','2','B','4'];
+
+    let round = 1; // 1 single, 2 switch, 3 done
+    let running = false;
+    let step = 0;
+    let errors = 0;
+    let startMs = 0;
+    let raf = null;
+    let singleTime = null, switchTime = null;
+    let done = false;
+
+    const startBtn = document.getElementById('startBtn');
+    const padGrid = document.getElementById('padGrid');
+    const modeHint = document.getElementById('modeHint');
+    const nextTarget = document.getElementById('nextTarget');
+    const liveTimer = document.getElementById('liveTimer');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function buildPad() {
+      padGrid.innerHTML = '';
+      const shuffled = [...KEYS].sort(() => Math.random() - 0.5);
+      shuffled.forEach(k => {
+        const b = document.createElement('button');
+        b.className = 'pad-btn';
+        b.textContent = k;
+        b.onclick = () => onPress(k, b);
+        padGrid.appendChild(b);
+      });
+    }
+
+    function currentSeq() { return round === 1 ? SEQ_SINGLE : SEQ_SWITCH; }
+
+    function updateClock() {
+      if (!running) return;
+      const sec = (performance.now() - startMs) / 1000;
+      liveTimer.textContent = `${sec.toFixed(2)} s · ${errors} 错`;
+      raf = requestAnimationFrame(updateClock);
+    }
+
+    function startRace() {
+      buildPad();
+      running = true;
+      step = 0;
+      errors = 0;
+      startMs = performance.now();
+      startBtn.disabled = true;
+      modeHint.textContent = round === 1 ? '第 1 轮：先按完 A→E，再按 1→5' : '第 2 轮：在字母与数字之间交替（A→1→B→2…）';
+      nextTarget.textContent = `下一个目标：${currentSeq()[0]}`;
+      updateClock();
+    }
+
+    function onPress(key, btn) {
+      if (!running) return;
+      const seq = currentSeq();
+      if (key === seq[step]) {
+        btn.classList.add('hit');
+        btn.disabled = true;
+        step++;
+        if (step >= seq.length) {
+          running = false;
+          cancelAnimationFrame(raf);
+          const sec = (performance.now() - startMs) / 1000;
+          liveTimer.textContent = `${sec.toFixed(2)} s · ${errors} 错`;
+          if (round === 1) {
+            singleTime = sec;
+            document.getElementById('tSingle').textContent = `${sec.toFixed(2)} 秒（${errors} 错）`;
+            round = 2;
+            startBtn.disabled = false;
+            startBtn.textContent = '▶ 开始第 2 轮：交替多任务';
+            nextTarget.textContent = '第 1 轮完成！准备交替切换';
+            ahaBox.innerHTML = `<strong>基准速度已记录（${sec.toFixed(2)} 秒）：</strong>现在进入第 2 轮，同样 10 个键，但每次点击都要在“字母规则”和“数字规则”之间来回切换！`;
+          } else {
+            switchTime = sec;
+            document.getElementById('tSwitch').textContent = `${sec.toFixed(2)} 秒（${errors} 错）`;
+            round = 3;
+            startBtn.textContent = '✓ 双轨竞速已完成';
+            nextTarget.textContent = '测速结束';
+            markDone(`完成多任务切换竞速：单线程 ${singleTime.toFixed(2)}s vs 交替 ${switchTime.toFixed(2)}s`);
+            const pct = Math.round(((switchTime - singleTime) / singleTime) * 100);
+            ahaBox.innerHTML = pct > 5
+              ? `<strong>真实切换税 +${pct}%！</strong>同样 10 次点击，仅因为来回切换规则就多花了 <strong>${(switchTime - singleTime).toFixed(2)} 秒</strong>。在写代码/写文档时每回一条消息，大脑都要支付类似的“注意残留”重构成本。`
+              : `<strong>切换成本实测：</strong>单线程 ${singleTime.toFixed(2)}s vs 交替 ${switchTime.toFixed(2)}s。哪怕在最简单的 10 键任务里，大脑也需要不断抑制上一条规则；任务越复杂，切换税最高可达 40%！`;
+          }
+        } else {
+          nextTarget.textContent = `下一个目标：${seq[step]}`;
+        }
+      } else {
+        errors++;
+        btn.classList.add('miss');
+        setTimeout(() => btn.classList.remove('miss'), 220);
+      }
+    }
+
+    startBtn.onclick = startRace;
+    document.getElementById('resetBtn').onclick = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+      round = 1; singleTime = null; switchTime = null;
+      startBtn.disabled = false;
+      startBtn.textContent = '▶ 开始第 1 轮：单线程批处理';
+      document.getElementById('tSingle').textContent = '—';
+      document.getElementById('tSwitch').textContent = '—';
+      nextTarget.textContent = '下一个目标：—';
+      liveTimer.textContent = '0.00 s · 0 错';
+      modeHint.textContent = '点击开始按钮启动计时';
+      buildPad();
+    };
+
+    buildPad();
   </script>
 </body>
 </html>

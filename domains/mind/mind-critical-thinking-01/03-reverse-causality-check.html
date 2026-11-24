@@ -1,79 +1,132 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>↔️ 因果箭头反转：是鸡生蛋还是蛋生鸡？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>因果箭头反转：是鸡生蛋还是蛋生鸡？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .news-card { padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .choice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    @media (max-width: 640px) { .choice-grid { grid-template-columns: 1fr; } }
+    .opt-btn {
+      padding: 10px; border-radius: 9px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); font-size: 12.5px; font-weight: 700; cursor: pointer;
+    }
+    .opt-btn.ok { border-color: var(--tax-green); background: var(--tax-green-soft); color: var(--tax-green); }
+    .opt-btn.bad { border-color: var(--tax-red); background: var(--tax-red-soft); color: var(--tax-red); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>↔️ 因果箭头反转：是鸡生蛋还是蛋生鸡？</h1><p>调查显示“警力越多的街区犯罪率越高”、“住 ICU 的病人死亡率最高”——如果把因果箭头画反，就会得出“裁撤警察能降犯罪”的荒唐结论！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>↔️ 因果箭头反转：3 条爆款标题事实核查</h1>
+      <p>看到一条耸人听闻的“研究发现 A 与 B 强相关”时，千万别急着转发！为下面 3 条爆款标题画出<strong>真正的因果箭头方向</strong>：是正向（A→B）、反向（B→A），还是幕后混杂（Z→A&amp;B）？</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span id="roundTag" style="font-size:12.5px;color:var(--tax-muted);">头条核查 1 / 3</span>
+        <span id="scoreTag" style="font-size:13px;font-weight:700;color:var(--tax-primary);">识破：0 / 3</span>
+      </div>
+
+      <div class="news-card">
+        <div style="font-size:16px;font-weight:800;line-height:1.5;" id="headlineTxt"></div>
+        <div style="font-size:12.5px;color:var(--tax-muted);margin-top:6px;" id="subTxt"></div>
+        <div class="choice-grid" id="choiceGrid"></div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span id="fbLine" style="font-size:13px;color:var(--tax-muted);">点击判断真实因果结构</span>
+        <button class="toy-btn secondary" id="nextBtn" style="display:none;">下一条新闻 →</button>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>核查工具箱：</strong>面对任何相关报道，立刻反问两句：① 箭头会不会其实是反的（B 导致了 A）？② 有没有同时影响两者的隐藏因素 Z？
     </div>
-    <div class="tax-panel">
-      <div class="btn-row">
-        <button class="btn active" onclick="setCase(0,this)">案例 1：警力多 ↔ 犯罪高</button>
-        <button class="btn" onclick="setCase(1,this)">案例 2：住院久 ↔ 死亡高</button>
-        <button class="btn" onclick="setCase(2,this)">案例 3：成绩好 ↔ 自信高</button>
-      </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>时间先后追踪 + 随机对照实验严谨度</span><span id="vRig">75%</span></label><input type="range" id="sRig" min="10" max="100" value="75" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">常见倒果为因误判</div><div class="k-val" id="kBad">—</div></div>
-        <div class="kpi"><div class="k-lbl">真实因果机制</div><div class="k-val" id="kTru">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-const cases=[
-  {bad:'警察引发了犯罪', tru:'高犯罪率吸引了增派警力', a:'街区警力', b:'犯罪率'},
-  {bad:'医院让人病重', tru:'危重病人才会住进 ICU', a:'ICU 住院', b:'死亡率'},
-  {bad:'光靠夸自信就能拿高分', tru:'双向正反馈：好成绩首先建立自信', a:'高自信', b:'好成绩'}
-];
-let ci=0;
-function setCase(i,btn){ ci=i; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const rig=+document.getElementById('sRig').value;
-  document.getElementById('vRig').textContent=rig+'%';
-  const c=cases[ci];
-  document.getElementById('kBad').textContent='❌ '+c.bad;
-  document.getElementById('kTru').textContent='✅ '+c.tru;
-  document.getElementById('kTru').style.color='#059669';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">横截面相关系数 r = +0.85，但因果箭头方向完全相反！</text>
-    <rect x="45" y="68" width="165" height="58" rx="10" fill="#3b82f6" opacity="0.16" stroke="#3b82f6" stroke-width="2"/>
-    <text x="127" y="102" text-anchor="middle" font-size="13.5" font-weight="800" fill="#2563eb">${c.a}</text>
-    <rect x="390" y="68" width="165" height="58" rx="10" fill="#059669" opacity="0.16" stroke="#059669" stroke-width="2"/>
-    <text x="472" y="102" text-anchor="middle" font-size="13.5" font-weight="800" fill="#059669">${c.b}</text>
-    <line x1="220" y1="84" x2="380" y2="84" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4,3"/>
-    <text x="300" y="76" text-anchor="middle" font-size="11" font-weight="800" fill="#ef4444">误判方向 A → B ❌</text>
-    <line x1="380" y1="112" x2="220" y2="112" stroke="#059669" stroke-width="3"/>
-    <text x="300" y="132" text-anchor="middle" font-size="11.5" font-weight="850" fill="#059669">← 真实方向 B → A (实验确信度 ${rig}%)</text>
-    <text x="45" y="176" font-size="11.5" fill="var(--tax-muted)">要确认箭头方向，必须看“时间谁先发生”以及“人为干预 A 后 B 是否真的跟着变”。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只拍一张静态相关性快照，永远分不清 A 导致 B、B 导致 A 还是 C 同时导致了 A 和 B！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const CASES = [
+      {
+        headline: '📰 “震惊！数据显示：频繁去医院看病的人，死亡率比不去医院的高 5 倍！”',
+        sub: 'A = 频繁去医院，B = 死亡率高',
+        ans: 1,
+        labels: ['A → B（去医院导致死亡）', 'B → A（反向因果：生重病才去医院）', 'Z → A & B（纯巧合）'],
+        fb: '典型反向因果（B → A）！不是医院把人看死了，而是“已经身患重病”导致他们必须频繁去医院！'
+      },
+      {
+        headline: '📰 “警力越多越危险？统计发现：派驻警察最多的街区，犯罪率也最高！”',
+        sub: 'A = 警察数量多，B = 犯罪率高',
+        ans: 1,
+        labels: ['A → B（警察招来了罪犯）', 'B → A（反向因果：高发案区才增派警力）', '无任何关系'],
+        fb: '精准识破反向因果（B → A）！警方正是因为该区域原本犯罪率高，才把更多巡警调配过去！'
+      },
+      {
+        headline: '📰 “家里藏书超过 500 本的孩子，高考分数平均高出 65 分，快去买书摆满客厅！”',
+        sub: 'A = 家里藏书多，B = 孩子成绩高',
+        ans: 2,
+        labels: ['A → B（书架散发神秘辐射）', 'B → A（考高分后买书）', 'Z → A & B（混杂：家庭教育重视度与经济条件）'],
+        fb: '经典混杂变量（Z → A & B）！买 500 本书摆着并不能自动提分，真正起作用的是背后“爱读书、重教育、有资源”的家庭环境 Z！'
+      }
+    ];
+
+    let idx = 0, score = 0, locked = false, done = false;
+    const choiceGrid = document.getElementById('choiceGrid');
+    const fbLine = document.getElementById('fbLine');
+    const nextBtn = document.getElementById('nextBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const c = CASES[idx];
+      locked = false;
+      nextBtn.style.display = 'none';
+      document.getElementById('roundTag').textContent = `头条核查 ${idx + 1} / ${CASES.length}`;
+      document.getElementById('headlineTxt').textContent = c.headline;
+      document.getElementById('subTxt').textContent = c.sub;
+      fbLine.textContent = '选择你认为最合理的真实因果方向';
+      choiceGrid.innerHTML = '';
+
+      c.labels.forEach((lbl, i) => {
+        const b = document.createElement('button');
+        b.className = 'opt-btn';
+        b.textContent = lbl;
+        b.onclick = () => {
+          if (locked) return;
+          locked = true;
+          const ok = i === c.ans;
+          b.classList.add(ok ? 'ok' : 'bad');
+          if (ok) score++;
+          document.getElementById('scoreTag').textContent = `识破：${score} / ${CASES.length}`;
+          fbLine.textContent = ok ? '✓ 核查准确！' : '⚠️ 被标题党带偏了，看下方解析';
+          ahaBox.innerHTML = `<strong>${ok ? '✓ 因果侦探命中' : '🔍 因果反转解析'}：</strong>${c.fb}`;
+          if (idx === CASES.length - 1) {
+            markDone(`完成因果箭头反转事实核查（${score}/3）`);
+            nextBtn.textContent = '↺ 重新核查';
+          } else {
+            nextBtn.textContent = '下一条新闻 →';
+          }
+          nextBtn.style.display = 'inline-block';
+        };
+        choiceGrid.appendChild(b);
+      });
+    }
+
+    nextBtn.onclick = () => {
+      if (idx === CASES.length - 1) { idx = 0; score = 0; document.getElementById('scoreTag').textContent = '识破：0 / 3'; }
+      else idx++;
+      render();
+    };
+    render();
   </script>
 </body>
 </html>

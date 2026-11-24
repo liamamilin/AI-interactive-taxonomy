@@ -1,66 +1,118 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧭 归因风格 3P 诊断仪：悲观 vs 韧性</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>归因风格 3P 诊断仪：悲观 vs 韧性</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .p-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 10px; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    @media (max-width: 600px) { .pair { grid-template-columns: 1fr; } }
+    .opt {
+      text-align: left; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); font-size: 12.5px; cursor: pointer;
+    }
+    .opt.pess { border-color: var(--tax-red); background: var(--tax-red-soft); font-weight: 700; }
+    .opt.resi { border-color: var(--tax-green); background: var(--tax-green-soft); font-weight: 700; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🧭 归因风格 3P 诊断仪：悲观 vs 韧性</h1><p>面对一次失败，悲观归因会同时拉满三个毒维度：永久性（永远这样）、普遍性（干啥都不行）、个人化（全是我蠢）；韧性归因则把失败精准限缩在“这一次、这一件事、可改方法”。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🧭 归因风格 3P 诊断仪：悲观 vs 心理韧性（情景诊断）</h1>
+      <p>同样遭遇一次<strong>“核心项目答辩被否决”</strong>，塞利格曼发现决定你一蹶不振还是快速反弹的关键，在于解释挫折时的 <strong>3P 维度</strong>：个人化（Personal）、永久性（Permanent）、普遍性（Pervasive）。</p>
+    </header>
+
+    <section class="toy-card">
+      <div id="pList"></div>
+
+      <svg id="meterSvg" viewBox="0 0 680 120" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="心理韧性恢复力仪表盘"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>3P 调校实验：</strong>当前 3 个维度全落在红色“悲观归因”，极易滑向习得性无助！逐一点击右侧绿色“韧性归因”，观察心理恢复力如何瞬间飙升！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>永久化 + 泛化程度（“永远/一切都完了”）</span><span id="vPerm">70%</span></label><input type="range" id="sPerm" min="0" max="100" value="70" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>把具体方法失误升级成“人格否定”程度</span><span id="vPers">60%</span></label><input type="range" id="sPers" min="0" max="100" value="60" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">心理复原力得分</div><div class="k-val" id="kRes">—</div></div>
-        <div class="kpi"><div class="k-lbl">情绪恢复耗时</div><div class="k-val" id="kRec">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const perm=+document.getElementById('sPerm').value, pers=+document.getElementById('sPers').value;
-  document.getElementById('vPerm').textContent=perm+'%';
-  document.getElementById('vPers').textContent=pers+'%';
-  const res=Math.max(8, Math.round(100 - perm*0.55 - pers*0.38));
-  const rec=Math.max(1, Math.round(1 + (100-res)*0.22));
-  document.getElementById('kRes').textContent=res+' 分';
-  document.getElementById('kRes').style.color=res>=65?'#059669':'#ef4444';
-  document.getElementById('kRec').textContent='约 '+rec+' 天';
-  const w=Math.max(15, res*4.4);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">塞利格曼 3P 归因模型 → 心理复原力仪表盘</text>
-    <rect x="30" y="68" width="440" height="40" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${w.toFixed(0)}" height="40" rx="8" fill="${res>=65?'#059669':'#ef4444'}"/>
-    <text x="${Math.min(480, 38+w).toFixed(0)}" y="94" font-size="14" font-weight="850" fill="${res>=65?'#059669':'#ef4444'}">${res} 分</text>
-    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">把“我天生不是这块料”改写成“这次准备不够，下次换个模板”——精准隔离伤害，不让单点失败烧毁整片森林！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>允许自己犯错，但不允许把“一次失误”写成“终身判决书”。把归因限定在具体、暂时、可改进的方法上！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const DIMS = [
+      {
+        title: '1. 个人化（Personalization）：责任全归自己 vs 客观分担',
+        pess: '🔴 都是我太笨、能力不行才搞砸的',
+        resi: '🟢 我有准备不足的地方，同时预算收紧和需求变动也有客观影响'
+      },
+      {
+        title: '2. 永久性（Permanence）：一辈子完蛋 vs 暂时性问题',
+        pess: '🔴 我永远都做不好公开汇报了',
+        resi: '🟢 这次只是数据论证不够充分，下一版补齐就能过关'
+      },
+      {
+        title: '3. 普遍性（Pervasiveness）：人生全盘皆输 vs 局部止损',
+        pess: '🔴 连这都做不好，我整个职业生涯都没希望了',
+        resi: '🟢 只是这一个方案没过，我的工程交付和团队协作依然很稳'
+      }
+    ];
+
+    const state = [0, 0, 0]; // 0 = pessimistic, 1 = resilient
+    let done = false;
+
+    const pList = document.getElementById('pList');
+    const svg = document.getElementById('meterSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      pList.innerHTML = '';
+      DIMS.forEach((d, i) => {
+        const card = document.createElement('div');
+        card.className = 'p-card';
+        card.innerHTML = `<div style="font-size:13px;font-weight:700;">${d.title}</div>`;
+        const pair = document.createElement('div');
+        pair.className = 'pair';
+
+        const b0 = document.createElement('button');
+        b0.className = 'opt' + (state[i] === 0 ? ' pess' : '');
+        b0.textContent = d.pess;
+        b0.onclick = () => { state[i] = 0; markDone('测试了3P归因诊断仪'); render(); };
+
+        const b1 = document.createElement('button');
+        b1.className = 'opt' + (state[i] === 1 ? ' resi' : '');
+        b1.textContent = d.resi;
+        b1.onclick = () => { state[i] = 1; markDone('切换了3P韧性归因模式'); render(); };
+
+        pair.appendChild(b0);
+        pair.appendChild(b1);
+        card.appendChild(pair);
+        pList.appendChild(card);
+      });
+
+      const resiCnt = state.reduce((a, b) => a + b, 0);
+      const score = 16 + resiCnt * 26; // 16, 42, 68, 94
+      const col = score >= 85 ? 'var(--tax-green)' : (score >= 40 ? 'var(--tax-amber)' : 'var(--tax-red)');
+
+      let html = '';
+      html += `<text x="24" y="34" fill="var(--tax-ink)" font-size="14" font-weight="700">🛡️ 挫折后 48 小时反弹韧性指数：${score}%（已重塑 ${resiCnt}/3 个 P 维度）</text>`;
+      html += `<rect x="24" y="50" width="632" height="22" rx="11" fill="rgba(148,163,184,0.16)"/>`;
+      html += `<rect x="24" y="50" width="${(score / 100) * 632}" height="22" rx="11" fill="${col}"/>`;
+      html += `<text x="24" y="98" fill="var(--tax-muted)" font-size="12">${resiCnt === 3 ? '🎉 韧性归因达成！你把挫折精准锁死在“暂时、局部、可改进”的盒子里，绝不蔓延成自我否定！' : '提示：悲观归因最致命的杀伤力是把“一次失败”放大成“我这个人永远不行”。'}</text>`;
+      svg.innerHTML = html;
+
+      if (resiCnt === 3) {
+        ahaBox.innerHTML = '<strong>心理韧性拉满（94%）：</strong>高韧性者并非盲目乐观，而是严格遵守 3P 边界——对挫折坚持<strong>“外部因素 + 暂时性 + 局部性”</strong>，只修问题、不毁自我！';
+      } else {
+        ahaBox.innerHTML = `<strong>当前韧性 ${score}%：</strong>还有 ${3 - resiCnt} 个维度停留在悲观归因（全责/永久/泛化），试着全部切换为绿色韧性归因！`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

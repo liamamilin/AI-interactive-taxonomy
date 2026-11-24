@@ -1,76 +1,168 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📈 间隔重复锯齿曲线（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>间隔重复锯齿曲线</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .day-strip { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+    .day-btn {
+      width: 34px; height: 30px; border-radius: 7px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .day-btn.picked { background: var(--tax-primary); border-color: var(--tax-primary); color: #fff; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .m-card { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .m-label { font-size: 12px; color: var(--tax-muted); }
+    .m-val { font-size: 20px; font-weight: 800; color: var(--tax-ink); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📈 间隔重复锯齿曲线（SVG）</h1><p>每次在记忆即将跌破阈值时成功提取，记忆稳定性（半衰期 S）都会翻倍增长，曲线从陡峭悬崖变成平缓高原。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>30 天内复习次数</span><span id="vRev">4 次</span></label><input type="range" id="sRev" min="0" max="5" value="4" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>每次成功提取稳定性增幅</span><span id="vMul">2.2x</span></label><input type="range" id="sMul" min="1.2" max="3.0" step="0.2" value="2.2" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>📈 间隔重复锯齿曲线（排期构建器）</h1>
+      <p>你手里只有 <strong>4 次复习机会</strong>，要在第 30 天考试时保住最高记忆留存率！点击下方日期按钮自由安排复习日，观察每次复习如何拉平遗忘斜率。</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="toolbar">
+        <button class="toy-btn secondary" id="presetOpt">✨ 套用指数间隔（第 1, 4, 10, 20 天）</button>
+        <button class="toy-btn secondary" id="presetEarly">⚡ 套用前 4 天连刷（第 1, 2, 3, 4 天）</button>
+        <button class="toy-btn secondary" id="clearBtn">↺ 清空复习点</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 215"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">第 30 天记忆留存率</div><div class="k-val" id="kRet">—</div></div>
-        <div class="kpi"><div class="k-lbl">最终记忆稳定性</div><div class="k-val" id="kStb">—</div></div>
+
+      <div style="font-size:12px;color:var(--tax-muted);margin-bottom:6px;">点击日期放置/取消复习节点（最多 4 次，第 0 天为初次学习）：</div>
+      <div class="day-strip" id="dayStrip"></div>
+
+      <svg id="curveSvg" viewBox="0 0 680 230" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="艾宾浩斯遗忘曲线与间隔重复"></svg>
+
+      <div class="metrics">
+        <div class="m-card"><div class="m-label">已排复习次数</div><div class="m-val" id="cntVal">0 / 4</div></div>
+        <div class="m-card"><div class="m-label">第 30 天记忆留存</div><div class="m-val" id="endVal">11%</div></div>
+        <div class="m-card"><div class="m-label">30 天平均留存</div><div class="m-val" id="avgVal">26%</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>排期挑战：</strong>目前 0 次复习，30 天后记忆只剩 11%。试试先排「第 1, 2, 3, 4 天」再换成「拉长间隔」，感受“记忆稳定性倍增”的威力！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const rev=+document.getElementById('sRev').value, mul=+document.getElementById('sMul').value;
-  document.getElementById('vRev').textContent=rev+' 次';
-  document.getElementById('vMul').textContent=mul.toFixed(1)+'x';
-  const schedule=[1, 3, 7, 15, 24].slice(0, rev);
-  let stab=1.6, lastDay=0, pts=[];
-  let ret30=0;
-  for(let d=0;d<=30;d+=0.5){
-    if(schedule.includes(d)){ stab=stab*mul; lastDay=d; }
-    const r=100*Math.exp(-(d-lastDay)/stab);
-    if(d===30) ret30=Math.round(r);
-    const x=40+d*17.5, y=175-r*1.3;
-    pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
-  }
-  document.getElementById('kRet').textContent=ret30+'%';
-  document.getElementById('kRet').style.color=ret30>=65?'#059669':(ret30>=35?'#f59e0b':'#ef4444');
-  document.getElementById('kStb').textContent=stab.toFixed(1)+' 天半衰';
-  const markers=schedule.map(d=>`<line x1="${(40+d*17.5).toFixed(1)}" y1="40" x2="${(40+d*17.5).toFixed(1)}" y2="175" stroke="#059669" stroke-dasharray="3,3" opacity="0.6"/>`).join('');
-  document.getElementById('svg').innerHTML=`
-    <text x="40" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">30 天记忆留存锯齿曲线（绿虚线 = 复习节点）</text>
-    <line x1="40" y1="175" x2="568" y2="175" stroke="var(--tax-border)" stroke-width="1.5"/>
-    ${markers}
-    <polyline points="${pts.join(' ')}" fill="none" stroke="#3b82f6" stroke-width="3"/>
-    <text x="40" y="195" font-size="11" fill="var(--tax-muted)">第 0 天</text>
-    <text x="295" y="195" font-size="11" fill="var(--tax-muted)">第 15 天</text>
-    <text x="530" y="195" font-size="11" fill="var(--tax-muted)">第 30 天 (${ret30}%)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>遗忘不是记忆的敌人，而是间隔重复的触发器——每次“拉回”都在向海马体发信号：这条知识还会被用到，赶紧转存长期硬盘！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let reviews = [];
+    let done = false;
+
+    const dayStrip = document.getElementById('dayStrip');
+    const svg = document.getElementById('curveSvg');
+    const cntVal = document.getElementById('cntVal');
+    const endVal = document.getElementById('endVal');
+    const avgVal = document.getElementById('avgVal');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function simulate(revDays) {
+      const sorted = [...revDays].sort((a, b) => a - b);
+      const pts = [];
+      let stability = 2.6; // days
+      let lastDay = 0;
+      for (let d = 0; d <= 30; d += 0.25) {
+        const dt = d - lastDay;
+        let r = Math.exp(-dt / stability);
+        // Check if d hits a review day
+        const hit = sorted.find(rd => Math.abs(rd - d) < 0.01);
+        if (hit !== undefined) {
+          pts.push({ d, r }); // bottom of sawtooth
+          // Desirable difficulty bonus: reviewing when R is 0.4~0.85 boosts stability much more than at 0.98
+          const gain = r > 0.92 ? 1.25 : (r < 0.25 ? 1.65 : 2.35);
+          stability *= gain;
+          lastDay = d;
+          r = 1.0;
+        }
+        pts.push({ d, r });
+      }
+      return pts;
+    }
+
+    function render() {
+      dayStrip.innerHTML = '';
+      for (let d = 1; d <= 28; d++) {
+        const b = document.createElement('button');
+        b.className = 'day-btn' + (reviews.includes(d) ? ' picked' : '');
+        b.textContent = d;
+        b.onclick = () => {
+          markDone('自定义了间隔重复复习排期');
+          if (reviews.includes(d)) reviews = reviews.filter(x => x !== d);
+          else if (reviews.length < 4) reviews.push(d);
+          else { reviews.shift(); reviews.push(d); }
+          render();
+        };
+        dayStrip.appendChild(b);
+      }
+
+      const basePts = simulate([]);
+      const userPts = simulate(reviews);
+
+      const xOf = d => 46 + (d / 30) * 604;
+      const yOf = r => 195 - r * 155;
+
+      const toPath = pts => pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${xOf(p.d).toFixed(1)},${yOf(p.r).toFixed(1)}`).join(' ');
+
+      let html = '';
+      // Grid
+      [0.25, 0.5, 0.75, 1.0].forEach(v => {
+        const y = yOf(v);
+        html += `<line x1="46" y1="${y}" x2="650" y2="${y}" stroke="var(--tax-border)" stroke-dasharray="3 3"/>`;
+        html += `<text x="38" y="${y + 4}" text-anchor="end" fill="var(--tax-muted)" font-size="11">${Math.round(v * 100)}%</text>`;
+      });
+      [0, 5, 10, 15, 20, 25, 30].forEach(d => {
+        const x = xOf(d);
+        html += `<text x="${x}" y="214" text-anchor="middle" fill="var(--tax-muted)" font-size="11">D${d}</text>`;
+      });
+
+      // Baseline dashed curve
+      html += `<path d="${toPath(basePts)}" fill="none" stroke="var(--tax-muted)" stroke-width="1.8" stroke-dasharray="5 4" opacity="0.65"/>`;
+      // User sawtooth curve
+      html += `<path d="${toPath(userPts)}" fill="none" stroke="var(--tax-primary)" stroke-width="3"/>`;
+
+      // Review markers
+      reviews.forEach(d => {
+        const x = xOf(d);
+        html += `<circle cx="${x}" cy="${yOf(1)}" r="5" fill="var(--tax-green)"/>`;
+        html += `<text x="${x}" y="${yOf(1) - 10}" text-anchor="middle" fill="var(--tax-green)" font-size="11" font-weight="700">D${d}</text>`;
+      });
+
+      svg.innerHTML = html;
+
+      const endR = Math.round(userPts[userPts.length - 1].r * 100);
+      const avgR = Math.round((userPts.reduce((s, p) => s + p.r, 0) / userPts.length) * 100);
+      cntVal.textContent = `${reviews.length} / 4`;
+      endVal.textContent = `${endR}%`;
+      avgVal.textContent = `${avgR}%`;
+
+      if (reviews.length === 0) {
+        ahaBox.innerHTML = '<strong>自然遗忘（0 次复习）：</strong>第 30 天几乎忘光。点击上方日期放置复习点，或点预设方案对比差距！';
+      } else if (endR >= 75) {
+        ahaBox.innerHTML = `<strong>高效间隔达标（第 30 天留存 ${endR}%）！</strong>每次刚好在快要遗忘时提取一次，记忆稳定性就会成倍拉长，曲线越往后越平缓，仅用 4 次复习就实现了长期记忆固化。`;
+      } else if (reviews.length === 4 && Math.max(...reviews) <= 7) {
+        ahaBox.innerHTML = `<strong>密集堆砌陷阱（第 30 天仅剩 ${endR}%）：</strong>把 4 次复习全挤在第一周，每次复习时记忆还高达 95%，几乎没触发“稳定性翻倍”，后面 20 多天依然一路狂掉！`;
+      } else {
+        ahaBox.innerHTML = `<strong>当前排期第 30 天留存 ${endR}%：</strong>试着把 4 次复习拉成逐步递增的间隔（如 1 → 4 → 10 → 20 天），看看留存率能否突破 75%！`;
+      }
+    }
+
+    document.getElementById('presetOpt').onclick = () => { reviews = [1, 4, 10, 20]; markDone('测试了指数间隔重复排期'); render(); };
+    document.getElementById('presetEarly').onclick = () => { reviews = [1, 2, 3, 4]; markDone('测试了前四天密集刷题排期'); render(); };
+    document.getElementById('clearBtn').onclick = () => { reviews = []; render(); };
+    render();
   </script>
 </body>
 </html>

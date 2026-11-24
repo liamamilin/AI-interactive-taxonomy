@@ -1,66 +1,95 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔄 元认知三问刹车：计划 → 监控 → 复盘</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>元认知三问刹车：计划 → 监控 → 复盘</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .check-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 12px; }
+    .chk-btn {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      text-align: left; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); cursor: pointer;
+    }
+    .chk-btn.on { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .tag { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--tax-surface); border: 1px solid var(--tax-border); white-space: nowrap; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔄 元认知三问刹车：计划 → 监控 → 复盘</h1><p>数学家舍恩菲尔德研究发现：普通学生读完题立刻埋头狂算一条死路 20 分钟；专家每 3 分钟就抬头问一次“我现在的方向靠谱吗？”，发现不对立刻换路！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔄 元认知三问刹车：计划 → 监控 → 复盘（流程构建器）</h1>
+      <p>同样花 10 小时攻克一个新项目：低元认知者埋头狂写 10 小时结果跑偏返工；高元认知者只花 <strong>20 分钟</strong>在三个节点踩下刹车发问，反而提前完工！勾选装配你的元认知飞轮：</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="check-grid" id="checkGrid"></div>
+
+      <svg id="loopSvg" viewBox="0 0 680 145" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="元认知三问节省返工工时对比"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>埋头盲干基准：</strong>0 个元认知刹车时，10 小时里有 <strong>6.5 小时</strong>会浪费在走错方向、假性忙碌和重复踩坑上！点击上方 3 个刹车节点装配元认知闭环。
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>每隔多久抬头做一次元认知方向检查</span><span id="vChk">5 分钟</span></label><input type="range" id="sChk" min="2" max="30" value="5" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>初始思路踩中死胡同的概率</span><span id="vDed">65%</span></label><input type="range" id="sDed" min="10" max="90" value="65" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">在死胡同里白耗时间</div><div class="k-val" id="kWst">—</div></div>
-        <div class="kpi"><div class="k-lbl">规定时间内通关概率</div><div class="k-val" id="kSuc">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const chk=+document.getElementById('sChk').value, ded=+document.getElementById('sDed').value;
-  document.getElementById('vChk').textContent=chk+' 分钟';
-  document.getElementById('vDed').textContent=ded+'%';
-  const wst=Math.round(chk*(ded/100)*1.3);
-  const suc=Math.max(15, Math.min(96, Math.round(98 - wst*2.4 - (chk<3?8:0))));
-  document.getElementById('kWst').textContent=wst+' 分钟';
-  document.getElementById('kWst').style.color=wst>12?'#ef4444':'#059669';
-  document.getElementById('kSuc').textContent=suc+'%';
-  const wS=Math.max(15, suc*4.4);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">复杂问题按时攻克率（每 ${chk} 分钟抬头校准一次方向）</text>
-    <rect x="30" y="68" width="440" height="40" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${wS.toFixed(0)}" height="40" rx="8" fill="${suc>=70?'#059669':'#f59e0b'}"/>
-    <text x="${Math.min(480, 38+wS).toFixed(0)}" y="94" font-size="14" font-weight="850" fill="${suc>=70?'#059669':'#d97706'}">${suc}%</text>
-    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">定时停顿 15 秒问三句话：① 我现在在干嘛？② 它离目标更近了吗？③ 有没有更省力的路？</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“战术上的勤奋掩盖不了战略上的盲奔”。定期把自己从任务里拔出来看一眼全局，就是最高级的元认知能力。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const CHECKS = [
+      { id: 'plan', title: '🧭 阶段 1 · 计划刹车（开工前 5 分钟）', sub: '“这个任务的验收标准是什么？我最容易在哪一步跑偏？”', save: 2.2, on: false },
+      { id: 'mon',  title: '⏱️ 阶段 2 · 监控刹车（进行中每 45 分钟）', sub: '“我现在做的细节真能推进主目标，还是在用‘假忙’逃避难点？”', save: 2.3, on: false },
+      { id: 'eval', title: '📝 阶段 3 · 复盘刹车（结束后 5 分钟）', sub: '“刚才哪一步效率最高？下次遇到同类任务我该保留哪条模板？”', save: 1.5, on: false }
+    ];
+
+    let done = false;
+    const checkGrid = document.getElementById('checkGrid');
+    const svg = document.getElementById('loopSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      checkGrid.innerHTML = '';
+      CHECKS.forEach(c => {
+        const b = document.createElement('button');
+        b.className = 'chk-btn' + (c.on ? ' on' : '');
+        b.innerHTML = `<div><div style="font-weight:700;font-size:13.5px;">${c.title}</div><div style="font-size:12px;color:var(--tax-muted);margin-top:3px;">${c.sub}</div></div><span class="tag">${c.on ? '✓ 已装配' : '省 ' + c.save + 'h 返工'}</span>`;
+        b.onclick = () => { c.on = !c.on; markDone('装配了元认知三问刹车闭环'); render(); };
+        checkGrid.appendChild(b);
+      });
+
+      const saved = CHECKS.filter(c => c.on).reduce((s, c) => s + c.save, 0);
+      const waste = Math.max(0.5, Number((6.5 - saved).toFixed(1)));
+      const effective = Number((10 - waste).toFixed(1));
+      const cnt = CHECKS.filter(c => c.on).length;
+
+      let html = '';
+      html += `<text x="24" y="32" fill="var(--tax-ink)" font-size="14" font-weight="700">10 小时项目投入产出切分：有效推进 ${effective}h · 返工内耗 ${waste}h</text>`;
+      const barW = 632;
+      const effW = (effective / 10) * barW;
+      html += `<rect x="24" y="48" width="${effW}" height="32" rx="8" fill="rgba(16,185,129,0.82)"/>`;
+      html += `<rect x="${24 + effW}" y="48" width="${barW - effW}" height="32" rx="8" fill="rgba(239,68,68,0.65)"/>`;
+      html += `<text x="${24 + effW / 2}" y="69" text-anchor="middle" fill="#fff" font-size="12" font-weight="800">有效推进 ${effective}h</text>`;
+      if (barW - effW > 70) {
+        html += `<text x="${24 + effW + (barW - effW) / 2}" y="69" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">返工 ${waste}h</text>`;
+      }
+      html += `<text x="24" y="114" fill="var(--tax-muted)" font-size="12">${cnt === 3 ? '🏆 元认知三问闭环已满配！只花 15 分钟抬头看路，直接抢回 6 小时返工时间！' : '提示：元认知就是从低头拉车的视角里跳出来 2 分钟，站在屋顶俯瞰路线有没有走偏。'}</text>`;
+      svg.innerHTML = html;
+
+      if (cnt === 3) {
+        ahaBox.innerHTML = '<strong>元认知闭环满配（有效产出 9.5h / 10h）！</strong>区分新手与高手的往往不是敲键盘的手速，而是高手会在开工前、卡壳时、收尾后刻意停顿 2 分钟，用“计划→监控→复盘”三问持续校准方向。';
+      } else if (cnt > 0) {
+        ahaBox.innerHTML = `<strong>已抢回 ${saved.toFixed(1)} 小时返工：</strong>继续点亮剩下的 ${3 - cnt} 个阶段，把完整元认知飞轮闭合！`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

@@ -1,68 +1,172 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚾ 运动与乐器：随机变奏为何比死磕单动作稳？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>运动与乐器：随机变奏为何比死磕单动作稳？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .plan-grid { grid-template-columns: 1fr; } }
+    .plan-btn {
+      text-align: left; padding: 12px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); cursor: pointer;
+    }
+    .plan-btn:hover { border-color: var(--tax-primary); }
+    .plan-btn.active { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .m-card { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .m-val { font-size: 22px; font-weight: 800; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚾ 运动与乐器：随机变奏为何比死磕单动作稳？</h1><p>经典棒球实验：A 组连打 15 个直球再打 15 个曲球；B 组随机混打。结果比赛时随机组的打击率显著碾压分块组！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>训练球路/曲目随机切换率</span><span id="vRnd">80%</span></label><input type="range" id="sRnd" min="0" max="100" value="80" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>基础动作是否已入门</span><span id="vBas">75%</span></label><input type="range" id="sBas" min="15" max="100" value="75" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⚾ 运动与乐器：随机变奏教练决策</h1>
+      <p>Hall 等人 (1994) 对大学棒球队做过 6 周实验：同样每周额外击打 45 颗球（直球、曲球、变速球各 15 颗），你会作为教练为队员选择哪种排课方案？</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="font-size:13px;color:var(--tax-muted);margin-bottom:8px;">为接下来 3 个训练场景选择排课策略（共 3 轮）：</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:10px;" id="sceneTitle"></div>
+
+      <div class="plan-grid">
+        <button class="plan-btn" id="optBlocked">
+          <div style="font-weight:700;font-size:14px;" id="bTitle"></div>
+          <div style="font-size:12px;color:var(--tax-muted);margin-top:4px;" id="bDesc"></div>
+        </button>
+        <button class="plan-btn" id="optRandom">
+          <div style="font-weight:700;font-size:14px;" id="rTitle"></div>
+          <div style="font-size:12px;color:var(--tax-muted);margin-top:4px;" id="rDesc"></div>
+        </button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">正式比赛命中率</div><div class="k-val" id="kHit">—</div></div>
-        <div class="kpi"><div class="k-lbl">训练策略建议</div><div class="k-val" id="kAdv">—</div></div>
+
+      <svg id="chartSvg" viewBox="0 0 680 165" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="训练手感与比赛实战对比"></svg>
+
+      <div class="metrics">
+        <div class="m-card"><div style="font-size:12px;color:var(--tax-muted);">🏋️ 当日训练手感满意度</div><div class="m-val" id="feelVal">—</div></div>
+        <div class="m-card"><div style="font-size:12px;color:var(--tax-muted);">🏆 正式比赛 / 舞台实战表现</div><div class="m-val" id="matchVal">—</div></div>
       </div>
+
+      <div style="margin-top:10px;text-align:right;">
+        <button class="toy-btn secondary" id="nextBtn" style="display:none;">下一个训练场景 →</button>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>教练抉择：</strong>选定一种训练法，观察“训练场爽感”与“正式比赛提升幅度”之间的反向关系。
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const rnd=+document.getElementById('sRnd').value, bas=+document.getElementById('sBas').value;
-  document.getElementById('vRnd').textContent=rnd+'%';
-  document.getElementById('vBas').textContent=bas+'%';
-  const hit=bas<40
-    ? Math.max(15, Math.round(35 + bas*0.5 - rnd*0.18))
-    : Math.max(25, Math.min(95, Math.round(42 + bas*0.25 + rnd*0.32)));
-  const adv=bas<40?'🌱 零基础先适度分块定型':'🏆 已入门立刻切入随机交错';
-  document.getElementById('kHit').textContent=hit+'%';
-  document.getElementById('kHit').style.color=hit>=70?'#059669':'#f59e0b';
-  document.getElementById('kAdv').textContent=adv;
-  const w=Math.max(15, hit*4.2);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">正式比赛临场表现（基础 ${bas}% × 随机交错 ${rnd}%）</text>
-    <rect x="20" y="65" width="460" height="38" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="65" width="${Math.min(460,w).toFixed(0)}" height="38" rx="8" fill="${hit>=70?'#059669':'#f59e0b'}"/>
-    <text x="${Math.min(490, 28+w).toFixed(0)}" y="90" font-size="14" font-weight="850" fill="${hit>=70?'#059669':'#d97706'}">${hit}%</text>
-    <text x="20" y="145" font-size="12" fill="var(--tax-muted)">${bas<40?'新手连基本挥棒轨迹都没成型时，过早随机容易手忙脚乱；先小块定型！':'一旦掌握基础动作，随机混打强迫小脑每次重新提取运动程序，实战极稳！'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“先小块入门，再尽早交错”——每次被迫重新加载动作程序，看似别扭，实则在锻造真正的临场肌肉记忆。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const SCENES = [
+      {
+        title: '场景 1/3 · 棒球击球训练（直球 / 曲球 / 变速球，共 45 球）',
+        bTitle: '🧱 固定分组：15 直球 → 15 曲球 → 15 变速',
+        bDesc: '每颗球都知道下一次怎么挥棒，训练场安打声不断',
+        rTitle: '🎲 随机变奏：45 球完全随机发球',
+        rDesc: '每球都得重新读球路、重启发力程序，训练场频频挥空',
+        bFeel: 88, bMatch: 24, rFeel: 52, rMatch: 57,
+        note: 'Hall (1994) 实证结果：6 周后随机变奏组实战击球提升 +57%，远超固定分组的 +24%！'
+      },
+      {
+        title: '场景 2/3 · 钢琴音乐会备赛（3 个高难乐句，共练 30 分钟）',
+        bTitle: '🧱 死磕单句：每句连续重复弹 10 分钟',
+        bDesc: '第 8 分钟越弹越顺手，肌肉进入自动巡航',
+        rTitle: '🎲 交错切段：每 2 分钟随机切另一乐句并换速度',
+        rDesc: '刚顺手就被迫切换，大脑必须不断重新提取指法表征',
+        bFeel: 90, bMatch: 38, rFeel: 58, rMatch: 79,
+        note: '每次主动“遗忘并重建动作计划”，才会在运动皮层刻下抗紧张、抗干扰的稳固表征！'
+      },
+      {
+        title: '场景 3/3 · 羽毛球网前小球与后场杀球衔接',
+        bTitle: '🧱 定点喂球：先喂 30 个网前，再喂 30 个高远',
+        bDesc: '脚步不用重新启动，汗流浃背但动作很规整',
+        rTitle: '🎲 不定点混喂：前后左右随机喂球 60 拍',
+        rDesc: '失误率翻倍，但每拍都在练真实比赛里的“预判→步法→击球”',
+        bFeel: 85, bMatch: 32, rFeel: 50, rMatch: 82,
+        note: '运动科学称之为“情境干扰效应（Contextual Interference）”：只有在初学建构基本动作后的巩固期引入随机变奏，技能迁移才最稳！'
+      }
+    ];
+
+    let idx = 0;
+    let picked = null;
+    let done = false;
+
+    const svg = document.getElementById('chartSvg');
+    const nextBtn = document.getElementById('nextBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function drawBars(feel, match, label) {
+      let html = `<text x="24" y="28" fill="var(--tax-ink)" font-size="13" font-weight="700">${label}</text>`;
+      // Feel bar
+      html += `<text x="24" y="64" fill="var(--tax-muted)" font-size="12">训练场爽感</text>`;
+      html += `<rect x="115" y="48" width="500" height="22" rx="10" fill="rgba(148,163,184,0.16)"/>`;
+      html += `<rect x="115" y="48" width="${feel * 5}" height="22" rx="10" fill="rgba(245,158,11,0.78)"/>`;
+      html += `<text x="${123 + feel * 5}" y="64" fill="var(--tax-amber)" font-size="12" font-weight="700">${feel}%</text>`;
+
+      // Match bar
+      html += `<text x="24" y="114" fill="var(--tax-muted)" font-size="12">实战提升力</text>`;
+      html += `<rect x="115" y="98" width="500" height="22" rx="10" fill="rgba(148,163,184,0.16)"/>`;
+      html += `<rect x="115" y="98" width="${match * 5}" height="22" rx="10" fill="rgba(16,185,129,0.82)"/>`;
+      html += `<text x="${123 + match * 5}" y="114" fill="var(--tax-green)" font-size="12" font-weight="700">${match}%</text>`;
+
+      html += `<text x="24" y="148" fill="var(--tax-muted)" font-size="11">提示：点击另一个方案可以直接对比两种训练法的反差</text>`;
+      svg.innerHTML = html;
+    }
+
+    function renderScene() {
+      const s = SCENES[idx];
+      picked = null;
+      document.getElementById('sceneTitle').textContent = s.title;
+      document.getElementById('bTitle').textContent = s.bTitle;
+      document.getElementById('bDesc').textContent = s.bDesc;
+      document.getElementById('rTitle').textContent = s.rTitle;
+      document.getElementById('rDesc').textContent = s.rDesc;
+      document.getElementById('optBlocked').classList.remove('active');
+      document.getElementById('optRandom').classList.remove('active');
+      document.getElementById('feelVal').textContent = '—';
+      document.getElementById('matchVal').textContent = '—';
+      nextBtn.style.display = 'none';
+      svg.innerHTML = `<text x="340" y="88" text-anchor="middle" fill="var(--tax-muted)" font-size="13">请点击上方两种训练方案之一，查看训练手感 vs 实战迁移数据</text>`;
+    }
+
+    function choose(type) {
+      const s = SCENES[idx];
+      picked = type;
+      document.getElementById('optBlocked').classList.toggle('active', type === 'blocked');
+      document.getElementById('optRandom').classList.toggle('active', type === 'random');
+      const feel = type === 'blocked' ? s.bFeel : s.rFeel;
+      const match = type === 'blocked' ? s.bMatch : s.rMatch;
+      document.getElementById('feelVal').textContent = feel + '%';
+      document.getElementById('matchVal').textContent = match + '%';
+      drawBars(feel, match, type === 'blocked' ? '🧱 固定单动作连刷结果' : '🎲 随机变奏交错训练结果');
+      ahaBox.innerHTML = `<strong>${type === 'random' ? '✓ 选对实战利器' : '⚠️ 警惕训练场假象'}：</strong>${s.note}`;
+      if (idx === SCENES.length - 1) {
+        markDone('完成了运动与乐器随机变奏训练决策');
+        nextBtn.textContent = '↺ 重头体验 3 个场景';
+      } else {
+        nextBtn.textContent = '下一个训练场景 →';
+      }
+      nextBtn.style.display = 'inline-block';
+    }
+
+    document.getElementById('optBlocked').onclick = () => choose('blocked');
+    document.getElementById('optRandom').onclick = () => choose('random');
+    nextBtn.onclick = () => {
+      idx = (idx + 1) % SCENES.length;
+      renderScene();
+    };
+
+    renderScene();
   </script>
 </body>
 </html>

@@ -1,81 +1,124 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⏳ 双曲贴现偏好反转交叉点（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>双曲贴现偏好反转交叉点</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .ctrl-grid { grid-template-columns: 1fr; } }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .verdict { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); font-size: 13px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⏳ 双曲贴现偏好反转交叉点（SVG）</h1><p>人类对时间的打折不是均匀的指数曲线，而是“双曲线” V = A / (1 + k·D)：离得远时理智占优，一旦诱惑近在眼前，小甜头价值瞬间飙升反超！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⏳ 双曲贴现：偏好反转交叉点模拟器</h1>
+      <p>行为经济学公式 <strong>V = A / (1 + k·D)</strong> 解释了人类的“今朝有酒今朝醉”：离诱惑还远时，理性觉得大回报（早睡/150元）更值；可一旦逼近眼前，小诱惑（刷剧/100元）的主观价值会呈双曲线陡然飙升，瞬间反超！</p>
+    </header>
+
+    <section class="toy-card">
       <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>大脑急躁贴现率 k（越大越重眼前）</span><span id="vK">0.35</span></label><input type="range" id="sK" min="0.05" max="0.80" step="0.05" value="0.35" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>当前距离诱惑兑现的天数</span><span id="vD">2 天</span></label><input type="range" id="sD" min="0" max="14" value="2" oninput="draw()"></div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+            <span>🕒 距离“眼前诱惑”还有几天？</span>
+            <strong id="dayVal" style="color:var(--tax-primary);">6 天后（提前立 Flag 时）</strong>
+          </div>
+          <input type="range" id="dayRange" min="0" max="10" step="0.5" value="6" style="width:100%;" />
+        </div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+            <span>🔥 个人冲动贴现系数 k</span>
+            <strong id="kVal" style="color:var(--tax-amber);">0.60</strong>
+          </div>
+          <input type="range" id="kRange" min="0.15" max="1.2" step="0.05" value="0.6" style="width:100%;" />
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 215"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">眼前刷手机主观价值</div><div class="k-val" id="kS">—</div></div>
-        <div class="kpi"><div class="k-lbl">未来大目标主观价值</div><div class="k-val" id="kL">—</div></div>
-        <div class="kpi"><div class="k-lbl">此刻大脑最终选择</div><div class="k-val" id="kCh">—</div></div>
-      </div>
+
+      <svg id="hypSvg" viewBox="0 0 680 225" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="双曲贴现偏好反转曲线"></svg>
+
+      <div class="verdict" id="verdictBox"></div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>动手验证：</strong>把上方「距离眼前诱惑还有几天」从 6 天往左拖到 <strong>0 天（就是今晚！）</strong>，亲眼看红线如何一举冲破绿线，完成“白天发誓、晚上真香”的偏好反转！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const k=+document.getElementById('sK').value, d=+document.getElementById('sD').value;
-  document.getElementById('vK').textContent=k.toFixed(2);
-  document.getElementById('vD').textContent=d+' 天';
-  const vS=65/(1 + k*d);
-  const vL=100/(1 + k*(d+5));
-  const fold=vS>vL;
-  document.getElementById('kS').textContent=vS.toFixed(1);
-  document.getElementById('kL').textContent=vL.toFixed(1);
-  document.getElementById('kCh').textContent=fold?'📱 破功屈服于眼前诱惑!':'🏆 理性坚守长期目标';
-  document.getElementById('kCh').style.color=fold?'#ef4444':'#059669';
-  let ptsS=[], ptsL=[];
-  for(let t=0;t<=14;t+=0.5){
-    const x=540 - t*34;
-    const ys=178 - (65/(1+k*t))*1.35;
-    const yl=178 - (100/(1+k*(t+5)))*1.35;
-    ptsS.push(`${x.toFixed(1)},${ys.toFixed(1)}`);
-    ptsL.push(`${x.toFixed(1)},${yl.toFixed(1)}`);
-  }
-  const cx=540 - d*34;
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="24" font-size="13" font-weight="800" fill="var(--tax-text)">双曲贴现曲线（从左到右 = 越来越逼近诱惑时刻）</text>
-    <line x1="45" y1="178" x2="555" y2="178" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <polyline points="${ptsL.join(' ')}" fill="none" stroke="#059669" stroke-width="3"/>
-    <polyline points="${ptsS.join(' ')}" fill="none" stroke="#ef4444" stroke-width="3"/>
-    <line x1="${cx.toFixed(1)}" y1="36" x2="${cx.toFixed(1)}" y2="178" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,3"/>
-    <text x="60" y="50" font-size="11.5" font-weight="800" fill="#059669">绿线 = 延迟大目标 (100)</text>
-    <text x="240" y="50" font-size="11.5" font-weight="800" fill="#ef4444">红线 = 眼前小甜头 (65)</text>
-    <text x="45" y="196" font-size="11" fill="var(--tax-muted)">14 天前（理性计划）</text>
-    <text x="485" y="196" font-size="11" font-weight="750" fill="#ef4444">诱惑就在眼前!</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>昨晚的你和今早的你不是同一个人——远离诱惑时大目标胜出，贴近诱惑时双曲线交叉反转！这就是一切“间歇性踌躇满志，持续性躺平摆烂”的数学根源。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const dayRange = document.getElementById('dayRange');
+    const kRange = document.getElementById('kRange');
+    const svg = document.getElementById('hypSvg');
+    const verdictBox = document.getElementById('verdictBox');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function valHyper(amount, delay, k) {
+      return amount / (1 + k * delay);
+    }
+
+    function render() {
+      const d = Number(dayRange.value); // delay until small reward; large reward is at d + 3
+      const k = Number(kRange.value);
+
+      document.getElementById('dayVal').textContent = d === 0 ? '0 天（诱惑就在眼前！）' : `${d} 天后`;
+      document.getElementById('kVal').textContent = k.toFixed(2);
+
+      // Small-Sooner = 100 at delay d; Large-Later = 160 at delay d + 3
+      const vSmall = valHyper(100, d, k);
+      const vLarge = valHyper(160, d + 3, k);
+
+      const xOf = t => 54 + ((10 - t) / 10) * 586; // Left = 10 days away, Right = 0 days (NOW)
+      const yOf = v => 190 - (v / 120) * 150;
+
+      let sPts = [], lPts = [];
+      for (let t = 10; t >= 0; t -= 0.2) {
+        sPts.push(`${xOf(t).toFixed(1)},${yOf(valHyper(100, t, k)).toFixed(1)}`);
+        lPts.push(`${xOf(t).toFixed(1)},${yOf(valHyper(160, t + 3, k)).toFixed(1)}`);
+      }
+
+      let html = '';
+      html += `<line x1="54" y1="190" x2="640" y2="190" stroke="var(--tax-border)"/>`;
+      [10, 8, 6, 4, 2, 0].forEach(t => {
+        html += `<text x="${xOf(t)}" y="210" text-anchor="middle" fill="var(--tax-muted)" font-size="11">${t === 0 ? '此刻(诱惑到眼前)' : t + '天前'}</text>`;
+      });
+
+      html += `<polyline points="${lPts.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3"/>`;
+      html += `<polyline points="${sPts.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3"/>`;
+
+      // Current vertical line
+      const cx = xOf(d);
+      html += `<line x1="${cx}" y1="26" x2="${cx}" y2="190" stroke="var(--tax-primary)" stroke-dasharray="4 3" stroke-width="2"/>`;
+      html += `<circle cx="${cx}" cy="${yOf(vSmall)}" r="6" fill="var(--tax-red)"/>`;
+      html += `<circle cx="${cx}" cy="${yOf(vLarge)}" r="6" fill="var(--tax-green)"/>`;
+
+      html += `<text x="64" y="34" fill="var(--tax-green)" font-size="12" font-weight="700">🟢 长期大回报（价值 160，延迟+3天）：当前主观值 ${vLarge.toFixed(1)}</text>`;
+      html += `<text x="64" y="52" fill="var(--tax-red)" font-size="12" font-weight="700">🔴 即时小诱惑（价值 100）：当前主观值 ${vSmall.toFixed(1)}</text>`;
+
+      svg.innerHTML = html;
+
+      if (vSmall > vLarge) {
+        verdictBox.innerHTML = `🔥 <strong>偏好反转发生！</strong>此刻小诱惑的主观分（<strong>${vSmall.toFixed(1)}</strong>）已反超长期大回报（${vLarge.toFixed(1)}）——你决定“今晚先刷剧，明天再努力”！`;
+        ahaBox.innerHTML = '<strong>这就是拖延症的数学本质：</strong>双曲贴现让“此刻”被无限放大，而“明天”和“后天”在远处几乎一样廉价。所以你永远把痛苦推给“明天的自己”，却在明天变成“今天”时再次投降！';
+      } else {
+        verdictBox.innerHTML = `🧠 <strong>理性占上风：</strong>因为诱惑还在 ${d} 天之外，长期大回报（<strong>${vLarge.toFixed(1)}</strong>）轻松击败小诱惑（${vSmall.toFixed(1)}）——这是立 Flag 和签事前契约的黄金窗口！`;
+        ahaBox.innerHTML = '<strong>为什么白天计划总很完美？</strong>站在远距离视角看，双曲曲线很平缓，你能冷静看出 160 > 100。把滑块拖到 <strong>0 天</strong>，亲眼看理性在诱惑面前崩盘！';
+      }
+    }
+
+    dayRange.oninput = () => { markDone('拖动时间轴观察了双曲贴现偏好反转'); render(); };
+    kRange.oninput = () => { markDone('调节了双曲贴现冲动系数'); render(); };
+    render();
   </script>
 </body>
 </html>

@@ -1,72 +1,158 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚖️ 贝叶斯大脑：先验脑补 vs 感官输入（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>贝叶斯大脑：先验脑补 vs 感官输入</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .scene-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .scene-tab {
+      padding: 7px 12px; border-radius: 999px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 13px; cursor: pointer;
+    }
+    .scene-tab.active { background: var(--tax-primary-soft); border-color: var(--tax-primary); color: var(--tax-primary); font-weight: 700; }
+    .sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .sliders { grid-template-columns: 1fr; } }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .ctrl-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+    .verdict-bar { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); font-size: 13px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚖️ 贝叶斯大脑：先验脑补 vs 感官输入（SVG）</h1><p>现代神经科学认为：大脑是一台“预测机器”。它不断自上而下生成对世界的猜测（先验），只用眼睛传来的“预测误差”去微调它。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>大脑先验信念确信度（脑补权重）</span><span id="vPri">70%</span></label><input type="range" id="sPri" min="10" max="95" value="70" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>外界感官信号清晰度（光线/信噪比）</span><span id="vSen">40%</span></label><input type="range" id="sSen" min="10" max="95" value="40" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⚖️ 贝叶斯大脑：先验脑补 vs 感官输入</h1>
+      <p>大脑不是被动接收光线的照相机，而是不断把<strong>先验预期（自上而下）</strong>与<strong>感官证据（自下而上）</strong>按“精确度（置信度）”加权融合的预测机器。</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="scene-tabs" id="sceneTabs"></div>
+
+      <div class="sliders">
+        <div class="ctrl-box">
+          <div class="ctrl-head"><span>🧠 先验信念强度（脑补权重）</span><strong id="priorVal">70%</strong></div>
+          <input type="range" id="priorRange" min="15" max="95" value="70" style="width:100%;" />
+        </div>
+        <div class="ctrl-box">
+          <div class="ctrl-head"><span>👁️ 感官清晰度（信噪比）</span><strong id="senseVal">35%</strong></div>
+          <input type="range" id="senseRange" min="10" max="95" value="35" style="width:100%;" />
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">最终知觉偏向</div><div class="k-val" id="kPer">—</div></div>
-        <div class="kpi"><div class="k-lbl">预测误差修正力</div><div class="k-val" id="kErr">—</div></div>
-      </div>
+
+      <svg id="bayesSvg" viewBox="0 0 680 230" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="贝叶斯感知融合曲线"></svg>
+
+      <div class="verdict-bar" id="verdictBar"></div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>动手试试：</strong>试着把「感官清晰度」拉低（比如大雾天/暗夜），再拉高「先验强度」，观察蓝色“最终知觉”如何被紫色“脑补先验”强行拽走。
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const pri=+document.getElementById('sPri').value, sen=+document.getElementById('sSen').value;
-  document.getElementById('vPri').textContent=pri+'%';
-  document.getElementById('vSen').textContent=sen+'%';
-  const wSen=sen/(pri+sen);
-  const pos=Math.round(wSen*100);
-  document.getElementById('kPer').textContent=pos<40?'🔮 先验脑补主导':(pos>60?'👁️ 客观感官主导':'⚖️ 先验与现实平衡');
-  document.getElementById('kPer').style.color=pos<40?'#8b5cf6':(pos>60?'#059669':'#3b82f6');
-  document.getElementById('kErr').textContent=pos+'%';
-  const xPos=70 + pos*4.6;
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">主观知觉合成点 = 先验预测 × 精度 + 感官输入 × 清晰度</text>
-    <rect x="70" y="92" width="460" height="14" rx="7" fill="var(--tax-border)" opacity="0.4"/>
-    <circle cx="70" cy="99" r="14" fill="#8b5cf6"/>
-    <text x="70" y="72" text-anchor="middle" font-size="12" font-weight="800" fill="#8b5cf6">大脑先验 (0)</text>
-    <text x="70" y="135" text-anchor="middle" font-size="11" fill="var(--tax-muted)">比如“草丛里有蛇”</text>
-    <circle cx="530" cy="99" r="14" fill="#059669"/>
-    <text x="530" y="72" text-anchor="middle" font-size="12" font-weight="800" fill="#059669">真实感官 (100)</text>
-    <text x="530" y="135" text-anchor="middle" font-size="11" fill="var(--tax-muted)">实际只是麻绳</text>
-    <circle cx="${xPos.toFixed(1)}" cy="99" r="18" fill="#f59e0b" stroke="#fff" stroke-width="3"/>
-    <text x="${xPos.toFixed(1)}" y="148" text-anchor="middle" font-size="12.5" font-weight="850" fill="#d97706">你实际“看到”的结果 (${pos})</text>
-    <text x="30" y="188" font-size="11.5" fill="var(--tax-muted)">光线越暗（感官清晰度低）或恐惧越强（先验权重高），你就越容易“杯弓蛇影”！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>知觉本质上是“受控的幻觉”——当外界模糊不清时，大脑会自动把先验猜测当成现实直接投影到你的视野里。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const SCENES = [
+      { id: 'snake', name: '🌙 暗夜草丛（绳子 vs 蛇）', priorLabel: '先验：草丛里有蛇', senseLabel: '感官：其实是一段绳子', priorPos: 22, sensePos: 78, hallucination: '你被吓得跳起——大脑把绳子直接渲染成了毒蛇！', reality: '光线充足时，感官证据占上风，你看清它只是一段麻绳。' },
+      { id: 'vibe', name: '📱 手机震动幻觉', priorLabel: '先验：正等重要回复', senseLabel: '感官：裤袋里其实没震', priorPos: 24, sensePos: 76, hallucination: '“幻震综合征”触发！布料轻微摩擦被脑补成了手机来电。', reality: '你冷静确认裤袋静止，没有被焦虑先验骗到。' },
+      { id: 'voice', name: '🎧 嘈杂咖啡馆听名', priorLabel: '先验：有人在叫我名字', senseLabel: '感官：只是杯盘碰撞声', priorPos: 26, sensePos: 74, hallucination: '背景噪音太高，大脑强行把杂音拟合成了你的名字。', reality: '环境足够安静，你清楚听出只是吧台的声音。' }
+    ];
+
+    let cur = SCENES[0];
+    let done = false;
+
+    const tabsEl = document.getElementById('sceneTabs');
+    const priorRange = document.getElementById('priorRange');
+    const senseRange = document.getElementById('senseRange');
+    const priorVal = document.getElementById('priorVal');
+    const senseVal = document.getElementById('senseVal');
+    const svg = document.getElementById('bayesSvg');
+    const verdictBar = document.getElementById('verdictBar');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function gaussianPath(mean, sigma, scaleH) {
+      const pts = [];
+      for (let x = 0; x <= 100; x += 2) {
+        const px = 40 + x * 6;
+        const z = (x - mean) / sigma;
+        const y = 185 - Math.exp(-0.5 * z * z) * scaleH;
+        pts.push(`${px.toFixed(1)},${y.toFixed(1)}`);
+      }
+      return `M40,185 L${pts.join(' L')} L640,185 Z`;
+    }
+
+    function renderTabs() {
+      tabsEl.innerHTML = '';
+      SCENES.forEach(s => {
+        const b = document.createElement('button');
+        b.className = 'scene-tab' + (s.id === cur.id ? ' active' : '');
+        b.textContent = s.name;
+        b.onclick = () => {
+          cur = s;
+          markDone(`切换了预测加工场景：${s.name}`);
+          render();
+        };
+        tabsEl.appendChild(b);
+      });
+    }
+
+    function render() {
+      renderTabs();
+      const pStrength = Number(priorRange.value);
+      const sStrength = Number(senseRange.value);
+      priorVal.textContent = pStrength + '%';
+      senseVal.textContent = sStrength + '%';
+
+      // Precision weights
+      const pPrec = Math.pow(pStrength / 25, 2);
+      const sPrec = Math.pow(sStrength / 25, 2);
+      const postMean = (pPrec * cur.priorPos + sPrec * cur.sensePos) / (pPrec + sPrec);
+      const priorShare = Math.round((pPrec / (pPrec + sPrec)) * 100);
+
+      const pSigma = Math.max(5.5, 22 - pStrength * 0.17);
+      const sSigma = Math.max(5.5, 22 - sStrength * 0.17);
+      const postSigma = Math.max(4.5, 1 / Math.sqrt(1 / (pSigma * pSigma) + 1 / (sSigma * sSigma)));
+
+      let html = '';
+      html += `<line x1="40" y1="185" x2="640" y2="185" stroke="var(--tax-border)" stroke-width="1.5"/>`;
+      // Prior curve (purple/amber)
+      html += `<path d="${gaussianPath(cur.priorPos, pSigma, 95)}" fill="rgba(245,158,11,0.20)" stroke="var(--tax-amber)" stroke-width="2"/>`;
+      // Sensory curve (green)
+      html += `<path d="${gaussianPath(cur.sensePos, sSigma, 95)}" fill="rgba(16,185,129,0.20)" stroke="var(--tax-green)" stroke-width="2"/>`;
+      // Posterior curve (primary)
+      html += `<path d="${gaussianPath(postMean, postSigma, 130)}" fill="rgba(59,130,246,0.28)" stroke="var(--tax-primary)" stroke-width="3"/>`;
+
+      // Markers
+      const postX = 40 + postMean * 6;
+      html += `<line x1="${postX}" y1="36" x2="${postX}" y2="185" stroke="var(--tax-primary)" stroke-dasharray="4 3" stroke-width="2"/>`;
+      html += `<text x="${postX}" y="28" text-anchor="middle" fill="var(--tax-primary)" font-size="12" font-weight="700">最终主观知觉（先验占比 ${priorShare}%）</text>`;
+
+      html += `<text x="${40 + cur.priorPos * 6}" y="206" text-anchor="middle" fill="var(--tax-amber)" font-size="12" font-weight="600">${cur.priorLabel}</text>`;
+      html += `<text x="${40 + cur.sensePos * 6}" y="206" text-anchor="middle" fill="var(--tax-green)" font-size="12" font-weight="600">${cur.senseLabel}</text>`;
+      svg.innerHTML = html;
+
+      if (priorShare >= 65) {
+        verdictBar.innerHTML = `🔮 <strong>强先验主导（脑补占比 ${priorShare}%）：</strong>${cur.hallucination}`;
+        ahaBox.innerHTML = '<strong>为什么会“看错/听错”？</strong>当感官信噪比低、而大脑先验预期极强时，贝叶斯后验几乎完全贴近先验——你“看到”的其实是大脑提前画好的草图，而不是眼睛收到的原始像素。';
+      } else if (priorShare <= 35) {
+        verdictBar.innerHTML = `👁️ <strong>感官证据主导（感官占比 ${100 - priorShare}%）：</strong>${cur.reality}`;
+        ahaBox.innerHTML = '<strong>感官纠偏成功：</strong>清晰的高信噪比输入会产生强烈的“预测误差（Prediction Error）”，迫使大脑修正原本的脑补假设。';
+      } else {
+        verdictBar.innerHTML = `⚖️ <strong>拉锯融合态（先验 ${priorShare}% vs 感官 ${100 - priorShare}%）：</strong>你觉得“好像有点不对劲”，正处于怀疑与再确认的中间态。`;
+        ahaBox.innerHTML = '<strong>预测加工本质：</strong>知觉 = 受控的幻觉（Controlled Hallucination）。大脑平时靠先验省电，只在感官误差大到盖过先验时才更新认知。';
+      }
+    }
+
+    priorRange.oninput = () => { markDone('调节了贝叶斯先验权重'); render(); };
+    senseRange.oninput = () => { markDone('调节了感官清晰度'); render(); };
+    render();
   </script>
 </body>
 </html>

@@ -1,69 +1,159 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏀 关键时刻“掉链子”：监控过载机制</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>关键时刻“掉链子”：监控过载机制</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .arena {
+      padding: 16px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border);
+      text-align: center; margin: 12px 0;
+    }
+    .pressure-banner {
+      padding: 8px 12px; border-radius: 8px; background: var(--tax-red-soft); border: 1px solid var(--tax-red);
+      color: var(--tax-red); font-size: 13px; font-weight: 700; margin-bottom: 12px; display: none;
+    }
+    .keys-row { display: flex; justify-content: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    .seq-btn {
+      width: 58px; height: 58px; border-radius: 12px; border: 2px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); font-size: 20px; font-weight: 800; cursor: pointer;
+    }
+    .seq-btn.lit { border-color: var(--tax-primary); background: var(--tax-primary-soft); color: var(--tax-primary); }
+    .seq-btn.ok { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .seq-btn.err { border-color: var(--tax-red); background: var(--tax-red-soft); }
+    .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .res-card { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🏀 关键时刻“掉链子”：监控过载机制</h1><p>平时闭着眼进 90% 的罚球，到了总决赛最后 1 秒却投出三不沾——因为压力逼着你用慢吞吞的意识去“逐帧微操”本该自动化的肌肉记忆！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>比赛赌注/观众注视压力</span><span id="vPrs">80%</span></label><input type="range" id="sPrs" min="10" max="100" value="80" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>固定赛前仪式（阻断过度微操）</span><span id="vRit">40%</span></label><input type="range" id="sRit" min="0" max="100" value="40" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🏀 关键时刻“掉链子”：显式监控过载盲测</h1>
+      <p>为什么 NBA 球星训练罚球 95% 命中，总决赛最后 2 秒却两罚不中？因为高压会诱发<strong>“显式监控（Explicit Monitoring）”</strong>——大脑强行用慢速意识去接管原本由小脑自动执行的动作！亲测两轮节拍点击对比！</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button class="toy-btn" id="startBtn">▶ 第 1 轮：日常流畅训练（按亮灯顺序点）</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重置实验</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">前额叶过度微操干扰</div><div class="k-val" id="kInt">—</div></div>
-        <div class="kpi"><div class="k-lbl">关键球实际命中率</div><div class="k-val" id="kHit">—</div></div>
+
+      <div class="arena">
+        <div class="pressure-banner" id="pressureBanner">🚨 决胜局！全场 20,000 人盯着你！⚠️ 注意：每次点按钮前默念“手腕放松+别点错+奇数才有效”，超时扣分！</div>
+        <div id="statusText" style="font-size:15px;font-weight:700;color:var(--tax-ink);">点击上方开始，快速顺手点完 1 → 2 → 3 → 4 → 5</div>
+        <div class="keys-row" id="keysRow"></div>
       </div>
+
+      <div class="res-grid">
+        <div class="res-card"><div style="font-size:12px;color:var(--tax-muted);">🟢 第 1 轮 · 自动流畅模式</div><div style="font-size:20px;font-weight:800;" id="r1Val">—</div></div>
+        <div class="res-card"><div style="font-size:12px;color:var(--tax-muted);">🔴 第 2 轮 · 高压显式监控模式</div><div style="font-size:20px;font-weight:800;" id="r2Val">—</div></div>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>实验说明：</strong>第 1 轮顺手点 1→5；第 2 轮加入“高压围观+微观步骤自我监控”（必须一边核对按钮角标奇偶、一边防止超时），亲身感受动作卡壳！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const prs=+document.getElementById('sPrs').value, rit=+document.getElementById('sRit').value;
-  document.getElementById('vPrs').textContent=prs+'%';
-  document.getElementById('vRit').textContent=rit+'%';
-  const intr=Math.max(5, Math.round(prs*(1 - rit*0.0065)));
-  const hit=Math.max(35, Math.min(92, Math.round(92 - intr*0.52)));
-  document.getElementById('kInt').textContent=intr+'%';
-  document.getElementById('kInt').style.color=intr>50?'#ef4444':'#059669';
-  document.getElementById('kHit').textContent=hit+'% (平时 90%)';
-  const wI=Math.max(12, intr*3.6), wH=Math.max(12, hit*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">显性监控理论：压力下“想太多”如何毁掉肌肉记忆</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">意识微操干扰</text>
-    <rect x="145" y="64" width="${wI.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
-    <text x="${(153+wI).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#ef4444">${intr}%</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">临场发挥命中</text>
-    <rect x="145" y="120" width="${wH.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(153+wH).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${hit}%</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">顶级运动员都有固定赛前小仪式（拍球 3 下、深呼吸），用来把意识锚定在节奏上，别去瞎指挥手腕！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>关键时刻怕出错，越提醒自己“手腕别抖”，越容易把流畅动作拆碎。信任训练好的小脑，专注一个外部目标点即可！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let round = 1; // 1 = auto, 2 = choking
+    let running = false;
+    let step = 1;
+    let startMs = 0;
+    let t1 = null, t2 = null, errs = 0;
+    let done = false;
+
+    const startBtn = document.getElementById('startBtn');
+    const keysRow = document.getElementById('keysRow');
+    const statusText = document.getElementById('statusText');
+    const pressureBanner = document.getElementById('pressureBanner');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function buildKeys(choke) {
+      keysRow.innerHTML = '';
+      const order = choke ? [3, 1, 5, 2, 4] : [1, 2, 3, 4, 5];
+      order.forEach(n => {
+        const b = document.createElement('button');
+        b.className = 'seq-btn' + (n === step ? ' lit' : '');
+        b.innerHTML = choke ? `${n}<div style="font-size:10px;font-weight:400;color:var(--tax-muted);">${n % 2 ? '奇·稳住' : '偶·轻按'}</div>` : `${n}`;
+        b.onclick = () => onHit(n, b);
+        keysRow.appendChild(b);
+      });
+    }
+
+    function startRound() {
+      running = true;
+      step = 1;
+      errs = 0;
+      startMs = performance.now();
+      startBtn.disabled = true;
+      const choke = round === 2;
+      pressureBanner.style.display = choke ? 'block' : 'none';
+      statusText.textContent = choke ? '高压监控中！盯紧数字并按 1→5 顺序，绝对不能出错！' : '凭肌肉记忆顺手按 1 → 2 → 3 → 4 → 5';
+      buildKeys(choke);
+    }
+
+    function onHit(n, btn) {
+      if (!running) return;
+      if (n === step) {
+        btn.classList.remove('lit');
+        btn.classList.add('ok');
+        step++;
+        if (step > 5) {
+          running = false;
+          const sec = (performance.now() - startMs) / 1000;
+          if (round === 1) {
+            t1 = sec;
+            document.getElementById('r1Val').textContent = `${sec.toFixed(2)} 秒（${errs} 错）`;
+            round = 2;
+            startBtn.disabled = false;
+            startBtn.textContent = '▶ 第 2 轮：高压显式监控测试';
+            statusText.textContent = '第 1 轮丝滑完成！现在模拟总决赛高压监控…';
+          } else {
+            t2 = sec;
+            document.getElementById('r2Val').textContent = `${sec.toFixed(2)} 秒（${errs} 错）`;
+            round = 3;
+            startBtn.textContent = '✓ 两轮盲测已完成';
+            statusText.textContent = `实测对比：流畅 ${t1.toFixed(2)}s → 高压监控 ${t2.toFixed(2)}s`;
+            markDone(`完成关键时刻掉链子盲测：${t1.toFixed(2)}s vs ${t2.toFixed(2)}s`);
+            ahaBox.innerHTML = `<strong>“百足虫困境”实测（${t1.toFixed(2)}s → ${t2.toFixed(2)}s）！</strong>熟练技能（投篮、演奏、演讲）平时由小脑自动化打包执行；一旦高压逼你去逐帧检查“手腕怎么弯、下一步该怎么踩”，慢速前额叶反而拆散了流畅动作包，导致掉链子！解药是把注意力转向<strong>外部目标（篮筐/听众）</strong>而非自身动作细节。`;
+          }
+        } else {
+          // Highlight next button in round 1 only
+          if (round === 1) {
+            keysRow.querySelectorAll('.seq-btn').forEach(el => {
+              if (el.textContent.startsWith(String(step))) el.classList.add('lit');
+            });
+          }
+        }
+      } else {
+        errs++;
+        btn.classList.add('err');
+        setTimeout(() => btn.classList.remove('err'), 240);
+      }
+    }
+
+    startBtn.onclick = startRound;
+    document.getElementById('resetBtn').onclick = () => {
+      running = false; round = 1; t1 = null; t2 = null;
+      startBtn.disabled = false;
+      startBtn.textContent = '▶ 第 1 轮：日常流畅训练（按亮灯顺序点）';
+      pressureBanner.style.display = 'none';
+      document.getElementById('r1Val').textContent = '—';
+      document.getElementById('r2Val').textContent = '—';
+      statusText.textContent = '点击上方开始，快速顺手点完 1 → 2 → 3 → 4 → 5';
+      buildKeys(false);
+    };
+    buildKeys(false);
   </script>
 </body>
 </html>

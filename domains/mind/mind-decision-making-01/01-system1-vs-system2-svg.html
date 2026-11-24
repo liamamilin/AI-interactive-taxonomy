@@ -3,65 +3,90 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚡ 双系统能耗与接管开关（SVG）</title>
+  <title>⚡ 双系统能耗与接管开关</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .scen-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:9px; margin-bottom:14px; }
+    .s-btn { padding:10px 12px; border-radius:12px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); cursor:pointer; text-align:left; }
+    .s-btn.active { border-color:var(--tax-primary); background:var(--tax-primary-soft); }
+    .s-btn .t { font-size:13px; font-weight:800; }
+    .s-btn .s { font-size:11px; color:var(--tax-muted); margin-top:3px; }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⚡ 双系统能耗与接管开关（SVG）</h1><p>卡尼曼《思考，快与慢》：系统 1 自动高速且省电，系统 2 理性严谨但极耗电。只要你又累又赶时间，系统 2 就会直接罢工！</p></div>
+      <div>
+        <h1>⚡ 双系统能耗与接管开关</h1>
+        <p>误区：我是一个理性人，做决定时大脑默认都会冷静分析。真相：大脑是极其抠门的“认知吝啬鬼”——<strong>系统 2（理性慢思考）</strong>太耗电了，一遇上时间紧、熬夜疲惫或情绪激动，它就会立刻翘班，把方向盘全权交给冲动的<strong>系统 1</strong>！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>决策时间紧迫度</span><span id="vUrg">70%</span></label><input type="range" id="sUrg" min="10" max="100" value="70" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>大脑当前疲劳/缺觉程度</span><span id="vFat">60%</span></label><input type="range" id="sFat" min="0" max="100" value="60" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--tax-muted);">🎛️ 切换 4 个生活决策情景，观察「系统 1（快直觉）」与「系统 2（慢理性）」谁握着方向盘：</div>
+      <div class="scen-grid" id="grid"></div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 200"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">系统 2 介入验算概率</div><div class="k-val" id="kS2">—</div></div>
-        <div class="kpi"><div class="k-lbl">主导决策引擎</div><div class="k-val" id="kDom">—</div></div>
+        <div class="kpi"><div class="k-lbl">⚡ 系统 1 掌控权</div><div class="k-val" id="kS1" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🧠 系统 2 审查介入</div><div class="k-val" id="kS2" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">决策踩坑概率</div><div class="k-val" id="kErr">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const urg=+document.getElementById('sUrg').value, fat=+document.getElementById('sFat').value;
-  document.getElementById('vUrg').textContent=urg+'%';
-  document.getElementById('vFat').textContent=fat+'%';
-  const s2=Math.max(4, Math.min(96, Math.round(105 - urg*0.52 - fat*0.48)));
-  const s1=100 - s2;
-  document.getElementById('kS2').textContent=s2+'%';
-  document.getElementById('kS2').style.color=s2>=50?'#059669':'#ef4444';
-  document.getElementById('kDom').textContent=s2>=50?'🧠 系统 2 理性接管':'⚡ 系统 1 直觉拍板';
-  const w1=Math.max(10, s1*4.8), w2=Math.max(10, s2*4.8);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">双系统决策权实时拉锯条</text>
-    <rect x="30" y="64" width="${w1.toFixed(0)}" height="44" rx="6" fill="#f59e0b"/>
-    <rect x="${(30+w1).toFixed(0)}" y="64" width="${w2.toFixed(0)}" height="44" rx="6" fill="#3b82f6"/>
-    <text x="30" y="136" font-size="12.5" font-weight="800" fill="#d97706">⚡ 系统 1（快/省电/易偏误）：${s1}%</text>
-    <text x="320" y="136" font-size="12.5" font-weight="800" fill="#2563eb">🧠 系统 2（慢/耗电/严谨）：${s2}%</text>
-    <text x="30" y="176" font-size="11.5" fill="var(--tax-muted)">所有“限时 3 分钟秒杀”营销话术，本质都是在拉满紧迫度、强制踢走系统 2！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>重大决定前强制“睡一觉再签字”，不是拖延，而是把决策权从疲惫的系统 1 手里夺回给清醒的系统 2。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const SCENS = [
+      { id:'easy', icon:'🚗', name:'算 2+2 / 熟悉老路开车', desc:'低风险高频 · 完美自动驾驶', s1:94, s2:6, err:'极低 (3%) ✅', col:'var(--tax-green)',
+        aha:'💡 <strong>顿悟时刻：</strong>系统 1 并不是坏人！日常生活 95% 的动作（认人脸、躲车、2+2=4）全靠它毫秒级省电搞定，否则大脑早被耗电烧干了！' },
+      { id:'math', icon:'🧮', name:'心算 17 × 24', desc:'必须强行唤醒系统 2 接管', s1:12, s2:88, err:'低（但明显费脑）', col:'var(--tax-primary)',
+        aha:'💡 <strong>顿悟时刻：</strong>碰到 17×24，系统 1 瞬间摊手罢工，你必须手动唤醒高能耗的<strong>系统 2</strong>：瞳孔微微放大、心率微升、甚至停下脚步才能算出来！' },
+      { id:'live', icon:'🛍️', name:'深夜 12 点直播间倒计时', desc:'疲惫 + 限时紧迫 = 系统 2 翘班!', s1:92, s2:8, err:'极高 (78%) 🚨', col:'var(--tax-red)',
+        aha:'💡 <strong>顿悟时刻：</strong>直播间为什么最爱在<strong>深夜 + 321 上链接倒计时</strong>卖货？因为疲惫 + 时间压力专门用来精准瘫痪你昂贵的系统 2，逼你用冲动的系统 1 闭眼下单！' },
+      { id:'check', icon:'📋', name:'清晨清醒 + 写纸上核对清单', desc:'强制减速 · 唤醒系统 2 复核', s1:25, s2:75, err:'极低 (9%) 🏆', col:'var(--tax-green)',
+        aha:'💡 <strong>顿悟时刻：</strong>对抗冲动决策的秘诀不是指望自己“更聪明”，而是<strong>物理减速</strong>：睡一觉、写清单、延迟 24 小时付款，强行把方向盘交还给系统 2！' }
+    ];
+    let cur = 'live';
+
+    function pick(id){ cur = id; if(window.ToySDK) window.ToySDK.markCompleted(); draw(); }
+
+    function draw(){
+      document.getElementById('grid').innerHTML = SCENS.map(s => `
+        <button class="s-btn ${cur===s.id?'active':''}" onclick="pick('${s.id}')">
+          <div class="t">${s.icon} ${s.name}</div>
+          <div class="s">${s.desc}</div>
+        </button>
+      `).join('');
+
+      const s = SCENS.find(x=>x.id===cur);
+      const w1 = Math.round((s.s1 / 100) * 560);
+      const w2 = 560 - w1;
+
+      document.getElementById('svg').innerHTML = `
+        <text x="32" y="34" font-size="13.5" font-weight="900" fill="var(--tax-ink)">方向盘主导权分配：⚡ 系统 1（快直觉）vs 🧠 系统 2（慢理性）</text>
+        <rect x="32" y="54" width="${w1}" height="44" rx="8" fill="var(--tax-amber)"/>
+        ${w1 > 75 ? `<text x="${32+w1/2}" y="81" text-anchor="middle" font-size="13" font-weight="900" fill="#fff">⚡ 系统 1 (${s.s1}%)</text>` : ''}
+        <rect x="${32+w1+4}" y="54" width="${Math.max(0,w2-4)}" height="44" rx="8" fill="var(--tax-primary)"/>
+        ${w2 > 75 ? `<text x="${32+w1+4+(w2-4)/2}" y="81" text-anchor="middle" font-size="13" font-weight="900" fill="#fff">🧠 系统 2 (${s.s2}%)</text>` : ''}
+
+        <rect x="32" y="120" width="564" height="58" rx="12" fill="var(--tax-surface-alt)" stroke="${s.col}" stroke-width="2"/>
+        <text x="314" y="146" text-anchor="middle" font-size="13.5" font-weight="900" fill="${s.col}">当前状态：${s.name}</text>
+        <text x="314" y="168" text-anchor="middle" font-size="12" fill="var(--tax-muted)">${s.desc} · 踩坑风险：${s.err}</text>
+      `;
+
+      document.getElementById('kS1').textContent = s.s1 + '%';
+      document.getElementById('kS2').textContent = s.s2 + '%';
+      const kE = document.getElementById('kErr'); kE.textContent = s.err; kE.style.color = s.col;
+      document.getElementById('ahaBox').innerHTML = s.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

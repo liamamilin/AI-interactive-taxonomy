@@ -7,64 +7,101 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🔬 双重标准显微镜：严审反方，轻信己方</h1><p>面对支持自己的数据，我们问“我可以相信它吗？”；面对反对自己的数据，我们问“我必须相信它吗？”——这种双标让辩论越辩越分裂。</p></div>
+      <div>
+        <h1>🔬 双重标准显微镜：严审反方，轻信己方</h1>
+        <p>误区：只要把客观中立的数据摆到台面上，意见相反的双方自然会握手言和。真相：斯坦福经典实验表明，面对<strong>同一份有支持也有质疑的中立报告</strong>，双方都会开启“动机性推理”——对顺耳的数据免检放行，对逆耳的数据拿放大镜挑刺，看完后分歧反而更大！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>对己方有利证据的采信门槛</span><span id="vPro">20 分（极宽松）</span></label><input type="range" id="sPro" min="10" max="90" value="20" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>对反方不利证据的挑刺门槛</span><span id="vCon">85 分（极苛刻）</span></label><input type="range" id="sCon" min="10" max="95" value="85" oninput="draw()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="setLens('pro',this)">🔵 戴上“原支持者”滤镜读这份报告</button>
+        <button class="pill" onclick="setLens('con',this)">🔴 戴上“原反对者”滤镜读这份报告</button>
+        <button class="pill" onclick="setLens('sci',this)">⚖️ 戴上“盲审科学家”滤镜（去双标）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">双标不对称指数</div><div class="k-val" id="kAsy">—</div></div>
-        <div class="kpi"><div class="k-lbl">看完中立报告后的净偏移</div><div class="k-val" id="kShf">—</div></div>
+        <div class="kpi"><div class="k-lbl">对顺耳证据的采信度</div><div class="k-val" id="kYes" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">对逆耳证据的采信度</div><div class="k-val" id="kNo" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">读完报告后信念变化</div><div class="k-val" id="kShift" style="color:var(--tax-primary);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const pro=+document.getElementById('sPro').value, con=+document.getElementById('sCon').value;
-  document.getElementById('vPro').textContent=pro+' 分';
-  document.getElementById('vCon').textContent=con+' 分';
-  const asy=con - pro;
-  const passPro=Math.max(5, 100 - pro);
-  const passCon=Math.max(5, 100 - con);
-  document.getElementById('kAsy').textContent=(asy>=0?'+':'')+asy+' 分';
-  document.getElementById('kAsy').style.color=Math.abs(asy)>35?'#ef4444':'#059669';
-  document.getElementById('kShf').textContent=asy>15?'↗️ 反而更偏执':(asy<-15?'↙️ 过度自我怀疑':'⚖️ 客观对称更新');
-  const wP=Math.max(10, passPro*3.6), wC=Math.max(10, passCon*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">同等质量（60 分）的正反证据通过大脑滤网的比例</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">支持我的证据</text>
-    <rect x="145" y="64" width="${wP.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(153+wP).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#059669">放行 ${passPro}%</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">反对我的证据</text>
-    <rect x="145" y="120" width="${wC.toFixed(0)}" height="28" rx="6" fill="#ef4444" opacity="0.82"/>
-    <text x="${(153+wC).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#ef4444">放行 ${passCon}%</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">想检测自己有没有双标？做“反转测试”：如果这份数据的结论刚好相反，我还会用同样理由挑刺吗？</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>聪明人反而更容易陷入动机性推理——因为他们更擅长为自己想相信的结论找出精致的辩护理由。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const LENSES = {
+      pro: {
+        name:'原支持者视角',
+        evA:{ txt:'✅ 支持性研究（样本 N=200）', react:'“太扎实了！免检全盘采信！”', w:92, col:'var(--tax-green)' },
+        evB:{ txt:'⚠️ 反面研究（样本 N=200）', react:'“肯定有统计漏洞！全盘拒收！”', w:14, col:'var(--tax-red)' },
+        shift:'支持度 70% → 88%（更固执!）',
+        aha:'💡 <strong>顿悟时刻：</strong>支持者读完这份完全中立（50/50）的报告后，因为对己方证据“能信则信（92%）”、对反方证据“吹毛求疵（14%）”，反而更坚信自己原本就对了！'
+      },
+      con: {
+        name:'原反对者视角',
+        evA:{ txt:'✅ 支持性研究（样本 N=200）', react:'“背后一定有利益输送！拒收！”', w:14, col:'var(--tax-red)' },
+        evB:{ txt:'⚠️ 反面研究（样本 N=200）', react:'“铁证如山！果然我早就看穿了！”', w:92, col:'var(--tax-green)' },
+        shift:'反对度 70% → 88%（反向极化!）',
+        aha:'💡 <strong>顿悟时刻：</strong>反对者看的是<strong>逐字完全相同的报告</strong>，却得出截然相反的强化结论——这就是为什么网上“拿事实砸对方脸”往往越辩越撕裂！'
+      },
+      sci: {
+        name:'盲审科学家视角（先遮掉结论只看方法）',
+        evA:{ txt:'研究 A（样本 N=200 · 轻度局限）', react:'客观评分 62 分（适度采信）', w:62, col:'var(--tax-primary)' },
+        evB:{ txt:'研究 B（样本 N=200 · 轻度局限）', react:'客观评分 60 分（适度采信）', w:60, col:'var(--tax-primary)' },
+        shift:'收敛至中立 51%（保持开放）',
+        aha:'💡 <strong>顿悟时刻：</strong>破解双标最实用的心法叫<strong>“反演测试”</strong>：看到一条让你很爽的数据时，问自己“如果它得出相反结论，我会挑它什么毛病？”立刻就能识破自己的双标显微镜！'
+      }
+    };
+    let cur = 'pro';
+
+    function setLens(l, btn){
+      cur = l;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const d = LENSES[cur];
+      function box(y, ev){
+        return `
+          <rect x="24" y="${y}" width="592" height="68" rx="12" fill="var(--tax-surface-alt)" stroke="${ev.col}" stroke-width="2"/>
+          <text x="40" y="${y+26}" font-size="13" font-weight="850" fill="var(--tax-ink)">${ev.txt}</text>
+          <text x="40" y="${y+50}" font-size="12" font-weight="750" fill="${ev.col}">大脑内心戏：${ev.react}</text>
+          <rect x="420" y="${y+22}" width="176" height="22" rx="6" fill="var(--tax-border)"/>
+          <rect x="420" y="${y+22}" width="${Math.round(176*ev.w/100)}" height="22" rx="6" fill="${ev.col}"/>
+          <text x="508" y="${y+37}" text-anchor="middle" font-size="11.5" font-weight="900" fill="#fff">采信权重 ${ev.w}%</text>
+        `;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="24" font-size="12.5" font-weight="850" fill="var(--tax-primary)">同一份 50/50 客观报告 → 经过「${d.name}」过滤后的真实权重：</text>
+        ${box(38, d.evA)}
+        ${box(122, d.evB)}
+      `;
+
+      document.getElementById('kYes').textContent = Math.max(d.evA.w, d.evB.w) + '%';
+      document.getElementById('kNo').textContent = Math.min(d.evA.w, d.evB.w) + '%';
+      document.getElementById('kShift').textContent = d.shift;
+      document.getElementById('ahaBox').innerHTML = d.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

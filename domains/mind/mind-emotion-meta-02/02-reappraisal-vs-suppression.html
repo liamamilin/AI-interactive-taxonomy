@@ -1,69 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🫀 认知重评 vs 情绪压抑：身体暗伤对比</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>认知重评 vs 情绪压抑：身体暗伤对比</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .s-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🫀 认知重评 vs 情绪压抑：身体暗伤对比</h1><p>詹姆斯·格罗斯（Gross）研究发现：把怒火死命憋在脸上装没事（表达抑制），不仅没消气，还会让交感神经和血压飙升，并消耗大量记忆力！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>情绪冲击烈度</span><span id="vStm">75 分</span></label><input type="range" id="sStm" min="20" max="100" value="75" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>提前采用“认知重评”占比</span><span id="vRea">65%</span></label><input type="range" id="sRea" min="0" max="100" value="65" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🫀 认知重评 vs 情绪压抑：30 分钟身心代价对决</h1>
+      <p>斯坦福情绪学家 James Gross 发现：同样遭遇一次气人的冲突，<strong>情绪压抑（强装微笑憋在心里）</strong>虽然外表看不出来，却会让血压飙升、工作记忆暴跌；而<strong>认知重评（提前改写解读）</strong>能从源头卸压！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="playBtn">▶ 播放冲突后 30 分钟身心指标赛</button>
+        <button class="toy-btn secondary" id="jumpBtn">⏩ 直接看第 30 分钟结局</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重置</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">心血管交感负荷</div><div class="k-val" id="kCvd">—</div></div>
-        <div class="kpi"><div class="k-lbl">当下专注/记忆保留</div><div class="k-val" id="kMem">—</div></div>
+
+      <svg id="raceSvg" viewBox="0 0 680 215" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="认知重评与情绪压抑身心代价对比"></svg>
+
+      <div class="cards">
+        <div class="s-card">
+          <div style="font-size:12px;color:var(--tax-muted);">😶 情绪压抑组（面无表情硬憋）</div>
+          <div style="font-size:16px;font-weight:800;color:var(--tax-red);margin-top:4px;" id="supVal">交感神经负荷：55% · 剩余脑力：90%</div>
+        </div>
+        <div class="s-card">
+          <div style="font-size:12px;color:var(--tax-muted);">🌈 认知重评组（源头换框解读）</div>
+          <div style="font-size:16px;font-weight:800;color:var(--tax-green);margin-top:4px;" id="reaVal">交感神经负荷：55% · 剩余脑力：90%</div>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>对决预告：</strong>按下播放键，观察冲突发生后 30 分钟内，两组人的<strong>血压/交感负荷</strong>与<strong>工作记忆剩余脑力</strong>如何彻底分道扬镳！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const stm=+document.getElementById('sStm').value, rea=+document.getElementById('sRea').value;
-  document.getElementById('vStm').textContent=stm+' 分';
-  document.getElementById('vRea').textContent=rea+'%';
-  const cvd=Math.max(12, Math.round(stm*(1.05 - rea*0.0072)));
-  const mem=Math.max(25, Math.min(96, Math.round(45 + rea*0.48 - stm*0.15)));
-  document.getElementById('kCvd').textContent=cvd+' 分';
-  document.getElementById('kCvd').style.color=cvd>=60?'#ef4444':'#059669';
-  document.getElementById('kMem').textContent=mem+'%';
-  const wC=Math.max(12, cvd*3.6), wM=Math.max(12, mem*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">早期重评（改写意义）vs 晚期硬憋（死压表情）的生理代价</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">心血管暗伤负荷</text>
-    <rect x="155" y="64" width="${wC.toFixed(0)}" height="28" rx="6" fill="${cvd>=60?'#ef4444':'#f59e0b'}"/>
-    <text x="${(163+wC).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="${cvd>=60?'#ef4444':'#d97706'}">${cvd} 分</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">剩余认知带宽</text>
-    <rect x="155" y="120" width="${wM.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(163+wM).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${mem}%</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">硬憋就像用手堵住沸腾的高压锅气阀，表面风平浪静，内部压力爆表；重评是直接关小炉火！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>真正高情商的情绪调节不是“忍气吞声”，而是在情绪刚冒头时就用新视角关掉它的燃料开关。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let min = 0, playing = false, timer = null, done = false;
+    const svg = document.getElementById('raceSvg');
+    const playBtn = document.getElementById('playBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function supLoad(m) { return Math.min(92, Math.round(55 + 37 * (1 - Math.exp(-m / 10)))); }
+    function reaLoad(m) { return Math.max(18, Math.round(55 - 37 * (1 - Math.exp(-m / 9)))); }
+
+    function draw() {
+      const sl = supLoad(min), rl = reaLoad(min);
+      const sBrain = Math.max(32, 100 - Math.round(sl * 0.72));
+      const rBrain = Math.min(95, 100 - Math.round(rl * 0.45));
+
+      document.getElementById('supVal').textContent = `血压/交感负荷：${sl}% · 剩余脑力：${sBrain}%`;
+      document.getElementById('reaVal').textContent = `血压/交感负荷：${rl}% · 剩余脑力：${rBrain}%`;
+
+      const xOf = m => 50 + (m / 30) * 580;
+      const yOf = v => 180 - (v / 100) * 135;
+
+      let sPts = [], rPts = [];
+      for (let m = 0; m <= min; m++) {
+        sPts.push(`${xOf(m).toFixed(1)},${yOf(supLoad(m)).toFixed(1)}`);
+        rPts.push(`${xOf(m).toFixed(1)},${yOf(reaLoad(m)).toFixed(1)}`);
+      }
+
+      let html = '';
+      [25, 50, 75, 100].forEach(v => {
+        const y = yOf(v);
+        html += `<line x1="50" y1="${y}" x2="630" y2="${y}" stroke="var(--tax-border)" stroke-dasharray="3 3"/>`;
+        html += `<text x="42" y="${y + 4}" text-anchor="end" fill="var(--tax-muted)" font-size="11">${v}%</text>`;
+      });
+      [0, 5, 10, 15, 20, 25, 30].forEach(m => {
+        html += `<text x="${xOf(m)}" y="200" text-anchor="middle" fill="var(--tax-muted)" font-size="11">${m}m</text>`;
+      });
+
+      html += `<text x="340" y="24" text-anchor="middle" fill="var(--tax-ink)" font-size="13" font-weight="700">冲突后第 ${min} 分钟 · 交感神经/心血管暗伤曲线（越低越健康）</text>`;
+
+      if (sPts.length > 1) {
+        html += `<polyline points="${sPts.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3.5"/>`;
+        html += `<polyline points="${rPts.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3.5"/>`;
+      }
+      html += `<circle cx="${xOf(min)}" cy="${yOf(sl)}" r="6" fill="var(--tax-red)"/>`;
+      html += `<circle cx="${xOf(min)}" cy="${yOf(rl)}" r="6" fill="var(--tax-green)"/>`;
+      svg.innerHTML = html;
+
+      if (min >= 28) {
+        ahaBox.innerHTML = `<strong>30 分钟身心分水岭（暗伤 ${sl}% vs ${rl}%）：</strong>强行把委屈和愤怒“憋在表情下面”，就像一边踩油门一边拉手刹——不仅让交感神经持续高压、甚至会传染给对话对象导致对方血压也升高，还霸占了大量工作记忆！提前重评才是真正的省电卸载。`;
+      } else if (min >= 10) {
+        ahaBox.innerHTML = `<strong>第 ${min} 分钟：</strong>压抑组外表风平浪静，但体内交感负荷已经冲上 ${sl}%；重评组在源头改写解读后，心率与皮质醇正在快速回落！`;
+      }
+    }
+
+    function stop() { playing = false; clearInterval(timer); playBtn.textContent = '▶ 播放冲突后 30 分钟身心指标赛'; }
+
+    playBtn.onclick = () => {
+      markDone('播放了认知重评与情绪压抑30分钟对比');
+      if (playing) { stop(); return; }
+      if (min >= 30) min = 0;
+      playing = true;
+      playBtn.textContent = '⏸ 暂停';
+      timer = setInterval(() => {
+        min++;
+        draw();
+        if (min >= 30) stop();
+      }, 150);
+    };
+    document.getElementById('jumpBtn').onclick = () => { stop(); min = 30; markDone('查看了情绪压抑暗伤结局'); draw(); };
+    document.getElementById('resetBtn').onclick = () => { stop(); min = 0; draw(); };
+    draw();
   </script>
 </body>
 </html>

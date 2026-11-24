@@ -7,63 +7,98 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 12px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:12.5px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🏆 体育画报封面魔咒：巅峰后的必然回调</h1><p>谁能登上杂志封面？一定是本赛季“实力 + 爆棚运气”同时拉满的人。而下赛季运气回归正常，成绩自然回调——杂志可没下咒！</p></div>
+      <div>
+        <h1>🏆 体育画报封面魔咒：巅峰后的必然回调</h1>
+        <p>误区：运动员一登上《体育画报》封面，或者基金经理刚拿完“年度冠军”，下一年业绩准暴跌，肯定是“被毒奶诅咒了”或“飘了”。真相：任何年度第 1 名几乎都是<strong>“高实力 + 爆表运气”</strong>的极值产物——下一年实力没变，运气自然回归平均罢了！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>球员真实长期实力</span><span id="vSkl">80 分</span></label><input type="range" id="sSkl" min="60" max="95" value="80" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>本赛季超常运气加成</span><span id="vBon">+16 分</span></label><input type="range" id="sBon" min="0" max="20" value="16" oninput="draw()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="rollSeason()">🎲 模拟新一年冠军与次年回调</button>
+        <button class="pill active" onclick="setLuck('high',this)">🎰 高运气波动领域（股票基金/高尔夫）</button>
+        <button class="pill" onclick="setLuck('low',this)">♟️ 纯实力主导领域（国际象棋/举重）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">夺冠上封面赛季分</div><div class="k-val" id="kCur">—</div></div>
-        <div class="kpi"><div class="k-lbl">下赛季预期回落</div><div class="k-val" id="kDrop">—</div></div>
+        <div class="kpi"><div class="k-lbl">年度冠军上封面成绩</div><div class="k-val" id="kY1" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">其中真实实力 vs 运气成分</div><div class="k-val" id="kSplit" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">次年成绩变化（所谓魔咒）</div><div class="k-val" id="kY2">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const skl=+document.getElementById('sSkl').value, bon=+document.getElementById('sBon').value;
-  document.getElementById('vSkl').textContent=skl+' 分';
-  document.getElementById('vBon').textContent='+'+bon+' 分';
-  const cur=Math.min(100, skl+bon);
-  const wS=skl*3.2, wB=bon*3.2;
-  document.getElementById('kCur').textContent=cur+' 分';
-  document.getElementById('kDrop').textContent='-'+bon+' 分（运气归零）';
-  document.getElementById('kDrop').style.color=bon>=10?'#ef4444':'#059669';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">表现拆解 = 稳定实力（蓝）+ 不可复制的当季运气（金）</text>
-    <text x="20" y="84" font-size="12.5" font-weight="750" fill="var(--tax-text)">上封面赛季</text>
-    <rect x="135" y="66" width="${wS.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
-    ${wB>0?`<rect x="${(135+wS).toFixed(0)}" y="66" width="${wB.toFixed(0)}" height="28" rx="6" fill="#f59e0b"/>`:''}
-    <text x="${(143+wS+wB).toFixed(0)}" y="85" font-size="12" font-weight="800" fill="#d97706">${cur} 分</text>
-    <text x="20" y="140" font-size="12.5" font-weight="750" fill="var(--tax-text)">下赛季均值</text>
-    <rect x="135" y="122" width="${wS.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
-    <text x="${(143+wS).toFixed(0)}" y="141" font-size="12" font-weight="800" fill="#2563eb">${skl} 分</text>
-    <text x="20" y="182" font-size="11.5" fill="var(--tax-muted)">同理也适用于“年度冠军基金”——买去年的第一名，往往是在为不可持续的运气买单。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>任何“榜首魔咒”背后都没有超自然力量，只有极端高光时刻里必然掺杂的随机好运。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let luckMode = 'high';
+    let champ = { skill:82, luck1:16, luck2:-1 };
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setLuck(m, btn){
+      luckMode = m;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); rollSeason();
+    }
+    function rollSeason(){
+      const amp = luckMode === 'high' ? 18 : 4;
+      let best = { total:-999 };
+      for(let i=0; i<30; i++){
+        const sk = 68 + Math.round(Math.random() * 16);
+        const l1 = Math.round((Math.random()*2 - 1) * amp);
+        const l2 = Math.round((Math.random()*2 - 1) * amp);
+        if(sk + l1 > best.total) best = { skill:sk, luck1:l1, luck2:l2, total:sk+l1 };
+      }
+      champ = best;
+      markDone(); draw();
+    }
+
+    function draw(){
+      const y1 = champ.skill + champ.luck1;
+      const y2 = champ.skill + champ.luck2;
+      const diff = y2 - y1;
+      const scale = 4.6;
+
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="30" font-size="13" font-weight="850" fill="var(--tax-ink)">第 1 年：登顶封面冠军（总分 ${y1} = 实力 ${champ.skill} + 爆表好运 ${champ.luck1>=0?'+':''}${champ.luck1}）</text>
+        <rect x="24" y="42" width="${champ.skill*scale}" height="32" rx="6" fill="var(--tax-primary)"/>
+        <text x="${24+champ.skill*scale/2}" y="63" text-anchor="middle" font-size="11.5" font-weight="850" fill="#fff">真实实力 ${champ.skill}</text>
+        ${champ.luck1 > 0 ? `<rect x="${24+champ.skill*scale+3}" y="42" width="${champ.luck1*scale}" height="32" rx="6" fill="var(--tax-amber)"/><text x="${24+champ.skill*scale+3+champ.luck1*scale/2}" y="63" text-anchor="middle" font-size="11" font-weight="900" fill="#fff">+${champ.luck1}</text>` : ''}
+
+        <line x1="24" y1="98" x2="616" y2="98" stroke="var(--tax-border)" stroke-dasharray="4 4"/>
+
+        <text x="24" y="126" font-size="13" font-weight="850" fill="${diff<0?'var(--tax-red)':'var(--tax-green)'}">第 2 年：次年实绩（总分 ${y2} = 同一实力 ${champ.skill} + 回归普通运气 ${champ.luck2>=0?'+':''}${champ.luck2}）</text>
+        <rect x="24" y="138" width="${champ.skill*scale}" height="32" rx="6" fill="var(--tax-primary)"/>
+        <text x="${24+champ.skill*scale/2}" y="159" text-anchor="middle" font-size="11.5" font-weight="850" fill="#fff">实力丝毫没退步 (${champ.skill})</text>
+        ${champ.luck2 > 0 ? `<rect x="${24+champ.skill*scale+3}" y="138" width="${champ.luck2*scale}" height="32" rx="6" fill="var(--tax-green)"/>` : ''}
+        <text x="24" y="192" font-size="11.5" font-weight="750" fill="var(--tax-muted)">规律：运气占比越高的行业（如买去年冠军主动基金），“封面魔咒”就越灵验！</text>
+      `;
+
+      document.getElementById('kY1').textContent = y1 + ' 分 🏆';
+      document.getElementById('kSplit').textContent = `实力 ${champ.skill} + 运气 ${champ.luck1>=0?'+':''}${champ.luck1}`;
+      const k2 = document.getElementById('kY2');
+      k2.textContent = `${y2} 分 (${diff>=0?'+':''}${diff})`;
+      k2.style.color = diff < -4 ? 'var(--tax-red)' : 'var(--tax-green)';
+
+      document.getElementById('ahaBox').innerHTML = luckMode === 'high'
+        ? `💡 <strong>顿悟时刻：</strong>在高运气波动领域，冠军的真实实力一点没退步（稳在 ${champ.skill}），但第 1 年撞上的 <strong>+${champ.luck1} 分好运</strong>很难连中两年，所以第 2 年大概率掉回 <strong>${y2} 分</strong>——这就是为什么理财界常说“买去年第一名的冠军基金最容易亏钱”！`
+        : `💡 <strong>顿悟时刻：</strong>在国际象棋、举重这类<strong>纯实力主导、运气极小</strong>的领域里，封面魔咒几乎彻底消失（次年变动仅 ${diff} 分）——<strong>魔咒有多灵，只取决于这行运气成分有多大！</strong>`;
+    }
+
+    rollSeason();
   </script>
 </body>
 </html>

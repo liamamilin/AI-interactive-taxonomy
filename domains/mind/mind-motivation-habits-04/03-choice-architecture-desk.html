@@ -1,66 +1,112 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🖥️ 书桌选择架构：把好习惯放到伸手可及处</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>书桌选择架构：把好习惯放到伸手可及处</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .item-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .item-btn { padding: 7px 12px; border-radius: 999px; border: 1px solid var(--tax-border); background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 13px; cursor: pointer; }
+    .item-btn:hover { border-color: var(--tax-primary); }
+    svg .desk-item { cursor: pointer; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🖥️ 书桌选择架构：把好习惯放到伸手可及处</h1><p>谷歌办公室实验：仅仅把矿泉水放在视线平齐层、把含糖汽水藏到磨砂玻璃后面，员工喝水量暴涨 47%！你的书桌也是如此。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🖥️ 书桌选择架构：空间布局改造师</h1>
+      <p>点击下方房间平面图里的任意物品（或顶部按钮），把它在<strong>「书桌黄金伸手区（2 秒摩擦）」</strong>和<strong>「客厅高摩擦柜子（25 秒摩擦）」</strong>之间来回挪动，打造一套无需意志力的自动驾驶书桌！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="item-bar" id="itemBar"></div>
+
+      <svg id="roomSvg" viewBox="0 0 680 245" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="书桌与客厅空间选择架构"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>改造任务（当前环境分：25 / 100）：</strong>现在手机和薯片正霸占着你的书桌黄金区，而纸质书和水杯却被塞在客厅！点击物品把它们挪到正确的位置！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>手机距离书桌的物理距离</span><span id="vPh">0.3 米（手边）</span></label><input type="range" id="sPh" min="0" max="10" step="0.5" value="0.5" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>桌面待办/书本是否提前摊开就绪</span><span id="vRdy">60%</span></label><input type="range" id="sRdy" min="10" max="100" value="60" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">每晚有效深度专注占比</div><div class="k-val" id="kFoc">—</div></div>
-        <div class="kpi"><div class="k-lbl">无意识解锁手机次数</div><div class="k-val" id="kUnl">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const ph=+document.getElementById('sPh').value, rdy=+document.getElementById('sRdy').value;
-  document.getElementById('vPh').textContent=ph===0?'0 米（紧贴手边）':(ph>=5?ph.toFixed(1)+' 米（客厅/另室）':ph.toFixed(1)+' 米');
-  document.getElementById('vRdy').textContent=rdy+'%';
-  const foc=Math.min(95, Math.round(28 + Math.min(ph,6)*8.2 + rdy*0.24));
-  const unl=Math.max(1, Math.round(24*Math.exp(-ph*0.42)));
-  document.getElementById('kFoc').textContent=foc+'%';
-  document.getElementById('kFoc').style.color=foc>=70?'#059669':'#ef4444';
-  document.getElementById('kUnl').textContent=unl+' 次/晚';
-  const wF=Math.max(12, foc*4.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">物理空间改造带来的净专注率跃升（手机距你 ${ph.toFixed(1)} 米）</text>
-    <rect x="30" y="68" width="460" height="40" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="68" width="${wF.toFixed(0)}" height="40" rx="8" fill="${foc>=70?'#059669':'#f59e0b'}"/>
-    <text x="${Math.min(500, 38+wF).toFixed(0)}" y="94" font-size="14" font-weight="850" fill="${foc>=70?'#059669':'#d97706'}">${foc}%</text>
-    <text x="30" y="150" font-size="12" fill="var(--tax-muted)">研究证明：哪怕手机扣在桌上静音，只要留在视线范围内，就会持续占用大脑监控带宽！放到另屋最有效。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>成为自己生活空间的“建筑师”——把明晚想读的书提前翻开放在枕边，把手机充电器插在客厅，让环境替你自律！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const ITEMS = [
+      { id: 'phone', name: '📱 智能手机', good: false, onDesk: true, deskPos: [110, 120], farPos: [470, 110] },
+      { id: 'snack', name: '🍟 高糖零食盒', good: false, onDesk: true, deskPos: [235, 165], farPos: [580, 110] },
+      { id: 'book',  name: '📖 待读纸质书', good: true,  onDesk: false, deskPos: [110, 175], farPos: [470, 175] },
+      { id: 'water', name: '💧 大容量水壶', good: true,  onDesk: false, deskPos: [235, 110], farPos: [580, 175] }
+    ];
+
+    let done = false;
+    const itemBar = document.getElementById('itemBar');
+    const svg = document.getElementById('roomSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function toggleItem(id) {
+      const it = ITEMS.find(x => x.id === id);
+      it.onDesk = !it.onDesk;
+      markDone('调整了书桌与客厅空间选择架构');
+      render();
+    }
+
+    function render() {
+      itemBar.innerHTML = '';
+      ITEMS.forEach(it => {
+        const b = document.createElement('button');
+        b.className = 'item-btn';
+        b.textContent = `${it.name}：${it.onDesk ? '在书桌 → 挪去客厅' : '在客厅 → 放回书桌'}`;
+        b.onclick = () => toggleItem(it.id);
+        itemBar.appendChild(b);
+      });
+
+      const rightCount = ITEMS.filter(it => (it.good && it.onDesk) || (!it.good && !it.onDesk)).length;
+      const score = Math.round((rightCount / ITEMS.length) * 100);
+
+      let html = '';
+      // Left Zone: Study Desk (Low Friction 2s)
+      html += `<rect x="24" y="42" width="300" height="180" rx="14" fill="rgba(59,130,246,0.10)" stroke="var(--tax-primary)" stroke-width="2"/>`;
+      html += `<text x="174" y="68" text-anchor="middle" fill="var(--tax-primary)" font-size="13" font-weight="800">🖥️ 书桌黄金伸手区（摩擦 2 秒）</text>`;
+
+      // Right Zone: Living Room Cabinet (High Friction 25s)
+      html += `<rect x="372" y="42" width="284" height="180" rx="14" fill="rgba(148,163,184,0.10)" stroke="var(--tax-border)" stroke-width="2" stroke-dasharray="6 4"/>`;
+      html += `<text x="514" y="68" text-anchor="middle" fill="var(--tax-muted)" font-size="13" font-weight="800">🚪 客厅高摩擦柜子（摩擦 25 秒）</text>`;
+
+      // Top score bar
+      html += `<text x="340" y="25" text-anchor="middle" fill="${score === 100 ? 'var(--tax-green)' : 'var(--tax-ink)'}" font-size="14" font-weight="800">环境选择架构得分：${score} / 100（${rightCount}/4 归位正确）</text>`;
+
+      ITEMS.forEach(it => {
+        const [x, y] = it.onDesk ? it.deskPos : it.farPos;
+        const ok = (it.good && it.onDesk) || (!it.good && !it.onDesk);
+        const fill = ok ? 'rgba(16,185,129,0.22)' : 'rgba(239,68,68,0.20)';
+        const stroke = ok ? 'var(--tax-green)' : 'var(--tax-red)';
+        html += `<g class="desk-item" data-id="${it.id}">`;
+        html += `<rect x="${x - 62}" y="${y - 22}" width="124" height="44" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
+        html += `<text x="${x}" y="${y + 4}" text-anchor="middle" fill="var(--tax-ink)" font-size="12.5" font-weight="700">${it.name}</text>`;
+        html += `</g>`;
+      });
+
+      svg.innerHTML = html;
+      svg.querySelectorAll('.desk-item').forEach(g => {
+        g.onclick = () => toggleItem(g.dataset.id);
+      });
+
+      if (score === 100) {
+        ahaBox.innerHTML = '<strong>完美选择架构（100 分）！</strong>你把书和水壶放在 2 秒伸手区，把手机和零食放逐到 25 秒客厅区。塞勒《助推》的核心就是：<strong>重新设计默认环境</strong>，让最省力的动作恰好就是对你最好的动作！';
+      } else {
+        ahaBox.innerHTML = `<strong>当前得分 ${score} / 100：</strong>还有 ${4 - rightCount} 件物品亮着红框！点击红框物品把它们挪到能放大或阻断对应习惯的空间里。`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

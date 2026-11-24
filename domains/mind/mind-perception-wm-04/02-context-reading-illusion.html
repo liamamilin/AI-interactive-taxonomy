@@ -1,69 +1,122 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔤 语境劫持：为什么乱序汉字也能秒读？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>语境劫持：为什么乱序汉字也能秒读？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .trial-card { padding: 16px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .big-quote { font-size: 22px; font-weight: 800; letter-spacing: 1px; line-height: 1.6; color: var(--tax-ink); text-align: center; padding: 14px 10px; }
+    .choice-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+    .ambig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+    .ambig-box { padding: 16px; border-radius: 10px; background: var(--tax-surface); border: 1px solid var(--tax-border); text-align: center; font-size: 28px; font-weight: 800; letter-spacing: 6px; }
+    .glyph { display: inline-block; padding: 2px 6px; border-radius: 6px; background: var(--tax-primary-soft); color: var(--tax-primary); font-family: ui-sans-serif, system-ui, sans-serif; }
+    .reveal-box { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--tax-green-soft); border: 1px solid var(--tax-green); font-size: 13px; display: none; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔤 语境劫持：为什么乱序汉字也能秒读？</h1><p>“研表究明，汉字的序顺并不定一能影阅响读。”当你读这句话毫不费力时，正是自上而下的语言模型在自动纠错。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>语境熟悉度（高频成语/常识）</span><span id="vFam">85%</span></label><input type="range" id="sFam" min="15" max="100" value="85" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>局部字序错乱比例</span><span id="vScr">30%</span></label><input type="range" id="sScr" min="0" max="80" value="30" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔤 语境劫持：自上而下阅读盲测</h1>
+      <p>下面有 3 个 10 秒小实验，亲手抓包你的大脑是如何“跳过真实文字、直接用语境脑补”的！</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button class="toy-btn" id="t1Btn">实验 1：乱序汉字</button>
+        <button class="toy-btn secondary" id="t2Btn">实验 2：字符变形</button>
+        <button class="toy-btn secondary" id="t3Btn">实验 3：隐形错别字</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">阅读流畅度</div><div class="k-val" id="kFlu">—</div></div>
-        <div class="kpi"><div class="k-lbl">自己校对漏掉错字率</div><div class="k-val" id="kMiss">—</div></div>
-      </div>
+
+      <div class="trial-card" id="trialStage"></div>
+      <div class="reveal-box" id="revealBox"></div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>盲测进度（0/3）：</strong>先凭直觉快速回答每个实验，别逐字慢查——我们要抓的就是大脑毫秒级的“自动补全”。
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const fam=+document.getElementById('sFam').value, scr=+document.getElementById('sScr').value;
-  document.getElementById('vFam').textContent=fam+'%';
-  document.getElementById('vScr').textContent=scr+'%';
-  const flu=Math.max(10, Math.min(99, Math.round(fam*0.95 - scr*0.55 + 15)));
-  const miss=Math.max(5, Math.min(95, Math.round(fam*0.85 - scr*0.25)));
-  document.getElementById('kFlu').textContent=flu+'%';
-  document.getElementById('kMiss').textContent=miss+'%';
-  document.getElementById('kMiss').style.color=miss>60?'#ef4444':'#059669';
-  const wFlu=Math.max(10, flu*3.4), wMiss=Math.max(10, miss*3.4);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">自上而下自动补全的双刃剑：读得快 vs 校对瞎</text>
-    <text x="20" y="80" font-size="12.5" font-weight="750" fill="var(--tax-text)">顺畅理解度</text>
-    <rect x="165" y="62" width="${wFlu.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
-    <text x="${(173+wFlu).toFixed(0)}" y="81" font-size="12" font-weight="800" fill="#3b82f6">${flu}%</text>
-    <text x="20" y="134" font-size="12.5" font-weight="750" fill="var(--tax-text)">校对漏错率</text>
-    <rect x="165" y="116" width="${wMiss.toFixed(0)}" height="28" rx="6" fill="#ef4444" opacity="0.82"/>
-    <text x="${(173+wMiss).toFixed(0)}" y="135" font-size="12" font-weight="800" fill="#ef4444">${miss}%</text>
-    <text x="20" y="178" font-size="11.5" fill="var(--tax-muted)">文章越是自己刚写完的（熟悉度极高），大脑越会直接播放“预期原句”，让你死活看不出错别字！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>想抓出自己文章里的错别字？倒着读、换字体、或放一天再看——本质都是在故意削弱大脑的“自上而下先验”，逼迫眼睛重新逐字扫描。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let current = 1;
+    const solved = new Set();
+    let done = false;
+
+    const stage = document.getElementById('trialStage');
+    const revealBox = document.getElementById('revealBox');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function setTabStyle() {
+      [1, 2, 3].forEach(i => {
+        const b = document.getElementById(`t${i}Btn`);
+        b.className = i === current ? 'toy-btn' : 'toy-btn secondary';
+      });
+    }
+
+    function recordSolve(id, msg) {
+      solved.add(id);
+      revealBox.style.display = 'block';
+      revealBox.innerHTML = msg;
+      if (solved.size >= 2) markDone('完成了语境劫持与自上而下阅读盲测');
+      if (solved.size === 3) {
+        ahaBox.innerHTML = '<strong>全部抓包成功（3/3）！</strong>无论是乱序汉字、同形符号还是重复漏看，都证明了阅读不是“逐字扫描”，而是大脑根据上下文先猜词组，再抽检几个笔画确认。校对重要文档时“倒着读”或“大声念出来”才能破除脑补！';
+      } else {
+        ahaBox.innerHTML = `<strong>盲测进度（${solved.size}/3）：</strong>刚刚抓到了大脑自动脑补的现行！切换上方按钮继续测完剩下 ${3 - solved.size} 项。`;
+      }
+    }
+
+    function renderTrial() {
+      setTabStyle();
+      revealBox.style.display = 'none';
+      if (current === 1) {
+        stage.innerHTML = `
+          <div style="font-size:13px;color:var(--tax-muted);text-align:center;">快速扫读下面这句话，你一眼看懂了吗？</div>
+          <div class="big-quote">研表究明，汉字的序顺并不定一能影阅响读。</div>
+          <div class="choice-row">
+            <button class="toy-btn" id="c1a">秒懂！几乎没卡顿</button>
+            <button class="toy-btn secondary" id="c1b">卡住了，发现语序全乱</button>
+          </div>`;
+        document.getElementById('c1a').onclick = () => recordSolve(1, '🎯 <strong>你被语境劫持了！</strong>这句话里共有 <strong>5 处倒装</strong>（研表究明、序顺、定一、影阅响读），但大脑靠高频词组先验直接把它们“自动纠错”成了通顺句子。');
+        document.getElementById('c1b').onclick = () => recordSolve(1, '🔍 <strong>你开启了自下而上精读模式！</strong>大多数人第一眼能流畅读完这句含 5 处倒装的句子——因为中文词汇的语境先验极强。');
+      } else if (current === 2) {
+        stage.innerHTML = `
+          <div style="font-size:13px;color:var(--tax-muted);text-align:center;">看下面左右两张卡片里高亮的中间符号，你分别把它读成什么？</div>
+          <div class="ambig-grid">
+            <div class="ambig-box">A <span class="glyph">I3</span> C</div>
+            <div class="ambig-box">12 <span class="glyph">I3</span> 14</div>
+          </div>
+          <div class="choice-row">
+            <button class="toy-btn" id="c2a">左边读 B，右边读 13</button>
+            <button class="toy-btn secondary" id="c2b">它们明明一模一样！</button>
+          </div>`;
+        document.getElementById('c2a').onclick = () => recordSolve(2, '⚡ <strong>完全相同的像素，两种截然不同的知觉！</strong>左右两个高亮字符都是同一串 <code>I3</code>，但左侧字母语境把它压成了 B，右侧数字语境把它压成了 13。');
+        document.getElementById('c2b').onclick = () => recordSolve(2, '👁️ <strong>火眼金睛！</strong>它们确实是完全相同的像素（<code>I3</code>）。但在真实快速阅读中，周围语境会在 150 毫秒内强制改写大脑对中间符号的分类。');
+      } else {
+        stage.innerHTML = `
+          <div style="font-size:13px;color:var(--tax-muted);text-align:center;">快速读完下面标语，判断里面有没有错字或多余的字：</div>
+          <div class="big-quote">春天的<br/>的西湖特别美</div>
+          <div class="choice-row">
+            <button class="toy-btn" id="c3a">没问题，很通顺</button>
+            <button class="toy-btn secondary" id="c3b">有两个“的”！</button>
+          </div>`;
+        document.getElementById('c3a').onclick = () => recordSolve(3, '🤯 <strong>经典“换行重复盲视”！</strong>第一行末尾和第二行开头各有一个<strong>“的”</strong>（春天的 / 的西湖），但大脑的语法预测模型认为不会连续出现两个“的”，于是直接替你删掉了一个！');
+        document.getElementById('c3b').onclick = () => recordSolve(3, '👏 <strong>成功识破！</strong>超过 70% 的人第一眼会漏掉跨行的第二个“的”。这正是写完自己写的文章总查不出低级笔误的原因——你的大脑读的是你“以为自己写了什么”。');
+      }
+    }
+
+    document.getElementById('t1Btn').onclick = () => { current = 1; renderTrial(); };
+    document.getElementById('t2Btn').onclick = () => { current = 2; renderTrial(); };
+    document.getElementById('t3Btn').onclick = () => { current = 3; renderTrial(); };
+    renderTrial();
   </script>
 </body>
 </html>

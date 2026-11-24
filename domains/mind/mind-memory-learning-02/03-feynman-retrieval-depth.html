@@ -1,72 +1,120 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎤 费曼输出法：教别人是最强提取</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>费曼输出法：教别人是最强提取</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .step-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 10px; }
+    .step-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--tax-ink); }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    @media (max-width: 600px) { .pair { grid-template-columns: 1fr; } }
+    .pick-btn {
+      text-align: left; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); font-size: 12.5px; line-height: 1.5; cursor: pointer;
+    }
+    .pick-btn.sel-good { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .pick-btn.sel-jargon { border-color: var(--tax-red); background: var(--tax-red-soft); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎤 费曼输出法：教别人是最强提取</h1><p>试着不看资料，把一个复杂概念用大白话讲给外行听——凡是你卡壳或被迫用专业术语糊弄的地方，就是真正的知识漏洞。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🎤 费曼输出法：把术语翻译成大白话（讲解构建器）</h1>
+      <p>你的任务是向一名 <strong>10 岁小学生</strong>讲明白“为什么冰块能浮在水面上”。在每一步挑选你的讲解话术，看看是真理解了因果链，还是在用“专业术语掩盖知识漏洞”！</p>
+    </header>
+
+    <section class="toy-card">
+      <div id="builderList"></div>
+
+      <svg id="meterSvg" viewBox="0 0 680 120" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);margin-top:10px;" aria-label="费曼理解深度仪表盘"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>构建指南：</strong>为下面 3 个讲解环节各选一句最通俗的表达。每当你忍不住塞进“反常膨胀”“氢键晶格”等没解释的黑话，听众就会立刻亮起问号！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>概念抽象链条长度</span><span id="vDep">6 环</span></label><input type="range" id="sDep" min="3" max="10" value="6" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>费曼白话转述迭代轮次</span><span id="vRnd">2 轮</span></label><input type="range" id="sRnd" min="0" max="5" value="2" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">暴露并修补的盲区</div><div class="k-val" id="kFix">—</div></div>
-        <div class="kpi"><div class="k-lbl">迁移应用能力</div><div class="k-val" id="kTr">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const dep=+document.getElementById('sDep').value, rnd=+document.getElementById('sRnd').value;
-  document.getElementById('vDep').textContent=dep+' 环';
-  document.getElementById('vRnd').textContent=rnd+' 轮';
-  const solid=Math.min(dep, Math.max(1, Math.round(dep*(0.28 + rnd*0.16))));
-  const tr=Math.min(98, Math.round(25 + (solid/dep)*72));
-  document.getElementById('kFix').textContent=solid+' / '+dep+' 环打通';
-  document.getElementById('kTr').textContent=tr+'%';
-  document.getElementById('kTr').style.color=tr>=75?'#059669':'#f59e0b';
-  let nodes='';
-  const step=500/dep;
-  for(let i=0;i<dep;i++){
-    const cx=55+i*step+step/2;
-    const ok=i<solid;
-    if(i>0) nodes+=`<line x1="${(cx-step).toFixed(1)}" y1="100" x2="${cx.toFixed(1)}" y2="100" stroke="${ok?'#059669':'#ef4444'}" stroke-width="3" stroke-dasharray="${ok?'':'4,3'}"/>`;
-    nodes+=`<circle cx="${cx.toFixed(1)}" cy="100" r="18" fill="${ok?'#059669':'#ef4444'}" opacity="${ok?'0.9':'0.25'}" stroke="${ok?'#059669':'#ef4444'}" stroke-width="2"/>
-      <text x="${cx.toFixed(1)}" y="104" text-anchor="middle" font-size="11" font-weight="800" fill="${ok?'#fff':'#ef4444'}">${ok?'通':'缺'}</text>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">概念因果链完整度（红色空心 = 靠术语糊弄过去的黑洞）</text>
-    ${nodes}
-    <text x="20" y="168" font-size="11.5" fill="var(--tax-muted)">每多一轮“禁用术语、举生活类比”的费曼讲解，就能逼出并修补隐藏的逻辑断点。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>如果你不能用简单的话把它讲清楚，说明你还没有真正理解它。输出不是学习的终点，而是最高效的纠错雷达。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const STEPS = [
+      {
+        q: '第 1 步 · 核心现象：为什么同样重的东西，有的浮、有的沉？',
+        a: { text: '“因为浮力等于排开液体的重力，冰的密度小于水。”', good: false, tag: '术语复读' },
+        b: { text: '“同样大小的盒子，里面装得越轻越松散，水就能把它托起来。”', good: true, tag: '大白话因果' }
+      },
+      {
+        q: '第 2 步 · 微观机制：水结成冰时，水分子到底发生了什么？',
+        a: { text: '“水在 4℃ 以下存在反常膨胀效应，形成六方晶系氢键。”', good: false, tag: '黑话糊弄' },
+        b: { text: '“液态水像挤在地铁里的人；结冰时大家必须手拉手排成大圆圈，中间留出很多空隙。”', good: true, tag: '具象类比' }
+      },
+      {
+        q: '第 3 步 · 闭环验证：空隙变大为什么就能浮起来？',
+        a: { text: '“因为分子间距增大导致宏观体积膨胀，进而改变了相变密度比。”', good: false, tag: '循环定义' },
+        b: { text: '“人数没变但占地变大了，所以同样大小的一块冰比水更轻，自然就浮在水面上！”', good: true, tag: '因果闭环' }
+      }
+    ];
+
+    const choices = [null, null, null];
+    let done = false;
+
+    const listEl = document.getElementById('builderList');
+    const svg = document.getElementById('meterSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      listEl.innerHTML = '';
+      STEPS.forEach((s, i) => {
+        const card = document.createElement('div');
+        card.className = 'step-card';
+        card.innerHTML = `<div class="step-title">${s.q}</div>`;
+        const pair = document.createElement('div');
+        pair.className = 'pair';
+
+        [s.a, s.b].forEach((opt, j) => {
+          const btn = document.createElement('button');
+          const picked = choices[i] === j;
+          btn.className = 'pick-btn' + (picked ? (opt.good ? ' sel-good' : ' sel-jargon') : '');
+          btn.innerHTML = `${opt.text}${picked ? ` <strong style="display:block;margin-top:4px;">[${opt.good ? '✓ ' + opt.tag : '⚠️ ' + opt.tag}]</strong>` : ''}`;
+          btn.onclick = () => {
+            choices[i] = j;
+            if (choices.filter(x => x !== null).length >= 2) markDone('完成了费曼大白话讲解构建');
+            render();
+          };
+          pair.appendChild(btn);
+        });
+        card.appendChild(pair);
+        listEl.appendChild(card);
+      });
+
+      const pickedCount = choices.filter(x => x !== null).length;
+      const goodCount = choices.reduce((acc, c, i) => acc + (c !== null && (c === 0 ? STEPS[i].a.good : STEPS[i].b.good) ? 1 : 0), 0);
+      const pct = Math.round((goodCount / 3) * 100);
+
+      let html = '';
+      html += `<text x="24" y="34" fill="var(--tax-ink)" font-size="14" font-weight="700">👧 10 岁听众理解度：${pct}%（已完成 ${pickedCount}/3 步）</text>`;
+      html += `<rect x="24" y="50" width="632" height="22" rx="11" fill="rgba(148,163,184,0.16)"/>`;
+      const barCol = pct === 100 ? 'var(--tax-green)' : (pct >= 60 ? 'var(--tax-primary)' : 'var(--tax-amber)');
+      html += `<rect x="24" y="50" width="${(pct / 100) * 632}" height="22" rx="11" fill="${barCol}"/>`;
+      html += `<text x="24" y="98" fill="var(--tax-muted)" font-size="12">${pct === 100 ? '🎉 听众秒懂！没有任何术语黑箱，你的提取深度已达最高级。' : (pickedCount === 3 ? '❓ 听众一脸困惑：“什么叫反常膨胀和密度比呀？”——术语正是你自己的理解盲区！' : '请选择全部 3 步话术，检测你的解释里藏了多少“黑话补丁”。')}</text>`;
+      svg.innerHTML = html;
+
+      if (pickedCount === 3 && goodCount === 3) {
+        ahaBox.innerHTML = '<strong>费曼输出闭环达成！</strong>能够不借助任何专业黑话、用日常类比把因果链讲通，说明你已经完成了最高强度的主动提取与知识重构。';
+      } else if (pickedCount === 3) {
+        ahaBox.innerHTML = `<strong>发现 ${3 - goodCount} 处“术语挡箭牌”：</strong>每当我们在解释卡壳时脱口而出专业名词，往往说明那里存在理解断层。把红色选项替换成大白话再试一次！`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

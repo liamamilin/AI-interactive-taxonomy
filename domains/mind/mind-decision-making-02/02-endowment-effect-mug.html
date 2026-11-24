@@ -7,64 +7,85 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>☕ 禀赋效应：一旦拥有，身价翻倍</h1><p>经典马克杯实验：刚拿到免费印校徽水杯的学生，平均要价 7 美元才肯卖；而没拿到杯子的同班同学，最高只愿出 3 美元买！</p></div>
+      <div>
+        <h1>☕ 禀赋效应：一旦拥有，身价翻倍</h1>
+        <p>康奈尔大学著名马克杯实验：把完全相同的普通学校马克杯随机分给一半学生（卖家），另一半没拿到（买家）。传统经济学预测成交率应为 50%——结果真实成交率跌到可怜的 <strong>10%</strong>，因为卖家要价竟是买家愿付价的 <strong>2.5 倍</strong>！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>物品市场客观公允价</span><span id="vVal">50 元</span></label><input type="range" id="sVal" min="20" max="200" step="10" value="50" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>持有时间与心理情感依恋</span><span id="vAtt">70%</span></label><input type="range" id="sAtt" min="10" max="100" value="70" oninput="draw()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="setExp('mug',this)">☕ 经典康奈尔马克杯实验</button>
+        <button class="pill" onclick="setExp('trial',this)">🚗 商家套路：“免费试驾/30天无理由退货”</button>
+        <button class="pill" onclick="setExp('house',this)">🏠 二手房/旧物断舍离僵局</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">买家最高愿付 (WTP)</div><div class="k-val" id="kWtp">—</div></div>
-        <div class="kpi"><div class="k-lbl">卖家最低愿售 (WTA)</div><div class="k-val" id="kWta">—</div></div>
+        <div class="kpi"><div class="k-lbl">🛒 买家最高愿付 (WTP)</div><div class="k-val" id="kBuy" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🤲 卖家最低愿卖 (WTA)</div><div class="k-val" id="kSell" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">心理所有权溢价倍数</div><div class="k-val" id="kMul" style="color:var(--tax-red);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const val=+document.getElementById('sVal').value, att=+document.getElementById('sAtt').value;
-  document.getElementById('vVal').textContent=val+' 元';
-  document.getElementById('vAtt').textContent=att+'%';
-  const wtp=Math.round(val*0.85);
-  const wta=Math.round(val*(1.15 + att*0.011));
-  document.getElementById('kWtp').textContent=wtp+' 元';
-  document.getElementById('kWta').textContent=wta+' 元 ('+(wta/wtp).toFixed(1)+'x)';
-  document.getElementById('kWta').style.color='#ef4444';
-  const sc=340/Math.max(wta, 250);
-  const w1=Math.max(15, wtp*sc), w2=Math.max(15, wta*sc);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">同一件物品的心理定价撕裂（市场价 ${val} 元）</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">买家出价 WTP</text>
-    <rect x="145" y="64" width="${w1.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
-    <text x="${(153+w1).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#2563eb">${wtp} 元</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">卖家要价 WTA</text>
-    <rect x="145" y="120" width="${w2.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
-    <text x="${(153+w2).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#ef4444">${wta} 元</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">“免费试用 30 天”之所以转化率极高，正是因为第 10 天起你的大脑已把它算成“我的东西”！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>检验禀赋效应的灵魂拷问：如果我现在手里没这件东西，而是握着等额现金，我还愿意花原价把它买回来吗？`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const EXPS = {
+      mug: { buy:2.87, sell:7.12, unit:'美元', max:9, title:'同一只校徽马克杯：刚白拿到手里 5 分钟，身价瞬间飙升 2.5 倍！',
+        aha:'💡 <strong>顿悟时刻：</strong>一旦贴上“这是我的”标签，卖掉它就不再是“换回现金”，而是触发了剧烈的<strong>损失厌恶</strong>！买家把杯子当“收益”估价 $2.87，卖家把失去杯子当“损失”痛恨，要价飙到 $7.12！' },
+      trial: { buy:1800, sell:3600, unit:'元心理估值', max:4200, title:'为什么床垫、汽车、SaaS 会员抢着送你“14 天免费试用”？',
+        aha:'💡 <strong>顿悟时刻：</strong>“免费试用”是商界最顶级的禀赋效应陷阱！你把东西抱回家用满 14 天，大脑早已把它划入“我的财产”——到期让你退货或降级，瞬间变成难以忍受的“失去痛苦”，于是乖乖掏钱买单！' },
+      house: { buy:300, sell:380, unit:'万元', max:420, title:'二手房买卖拉锯 & 衣柜里三年没穿却舍不得扔的旧衣服',
+        aha:'💡 <strong>顿悟时刻：</strong>破解禀赋效应的一句神级灵魂拷问：<strong>“如果我现在手里没有这件东西，我愿意按这个价钱花现金把它买回来吗？”</strong>如果不愿意，立刻卖掉/断舍离！' }
+    };
+    let cur = 'mug';
+
+    function setExp(e, btn){
+      cur = e;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const d = EXPS[cur];
+      const mul = (d.sell / d.buy).toFixed(2);
+      const wB = Math.round((d.buy / d.max) * 440);
+      const wS = Math.round((d.sell / d.max) * 440);
+
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="28" font-size="13" font-weight="850" fill="var(--tax-ink)">${d.title}</text>
+        <text x="24" y="66" font-size="12.5" font-weight="800" fill="var(--tax-primary)">🛒 买家视角（获得收益 → 最高愿付 WTP）：${d.buy} ${d.unit}</text>
+        <rect x="24" y="76" width="${wB}" height="28" rx="6" fill="var(--tax-primary)"/>
+
+        <text x="24" y="136" font-size="12.5" font-weight="800" fill="var(--tax-amber)">🤲 拥有者视角（失去财产 → 最低愿卖 WTA）：${d.sell} ${d.unit}</text>
+        <rect x="24" y="146" width="${wS}" height="28" rx="6" fill="var(--tax-amber)"/>
+
+        <line x1="${24+wB}" y1="106" x2="${24+wS}" y2="106" stroke="var(--tax-red)" stroke-width="2.4" stroke-dasharray="4 3"/>
+        <text x="${24+(wB+wS)/2}" y="122" text-anchor="middle" font-size="11.5" font-weight="900" fill="var(--tax-red)">← 禀赋效应裂谷 (${mul}×) →</text>
+      `;
+
+      document.getElementById('kBuy').textContent = `${d.buy} ${d.unit}`;
+      document.getElementById('kSell').textContent = `${d.sell} ${d.unit}`;
+      document.getElementById('kMul').textContent = `${mul} 倍`;
+      document.getElementById('ahaBox').innerHTML = d.aha;
+    }
+
+    draw();
   </script>
 </body>
 </html>

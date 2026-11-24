@@ -1,70 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏷️ 情绪命名刹车：说出感受即可降温杏仁核</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>情绪命名刹车：说出感受即可降温杏仁核</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .opt-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 12px; }
+    .opt-btn {
+      text-align: left; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 13px; cursor: pointer;
+    }
+    .opt-btn:hover { border-color: var(--tax-primary); }
+    .opt-btn.picked { border-color: var(--tax-primary); background: var(--tax-primary-soft); font-weight: 700; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🏷️ 情绪命名刹车：说出感受即可降温杏仁核</h1><p>脑成像研究（Lieberman）发现：仅仅是用精准的词汇把此刻的感受说出来或写下来（如“我此刻感到挫败和尴尬”），就能直接激活右腹外侧前额叶，让杏仁核立刻降温！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🏷️ 情绪命名刹车：给感受贴标签即可降温杏仁核</h1>
+      <p>UCLA 神经科学家 Matthew Lieberman 的 fMRI 脑成像研究发现（<strong>Name it to tame it</strong>）：当你用精确语言说出“我现在感到……”，右腹外侧前额叶（rVLPFC）会立刻亮起，像刹车片一样直接给过热的杏仁核降温！</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px;">🚨 触发情境：辛苦准备两周的提案被一句话否决，你胸口发紧、火气直冲脑门！选择你的内心回应：</div>
+
+      <div class="opt-grid" id="optGrid"></div>
+
+      <svg id="brainSvg" viewBox="0 0 680 185" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="杏仁核与前额叶刹车脑区示意"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>神经刹车实验：</strong>依次点击上方 3 种不同颗粒度的回应，观察右侧“前额叶刹车片（rVLPFC）”如何压低左侧过热的红色杏仁核！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>原始杏仁核情绪警报强度</span><span id="vAmy">85 分</span></label><input type="range" id="sAmy" min="20" max="100" value="85" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>情绪命名颗粒度（1=好烦，5=精准拆解）</span><span id="vGrn">4 级</span></label><input type="range" id="sGrn" min="1" max="5" value="4" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">命名后杏仁核残余热度</div><div class="k-val" id="kRem">—</div></div>
-        <div class="kpi"><div class="k-lbl">当前表达示例</div><div class="k-val" id="kEx">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const amy=+document.getElementById('sAmy').value, grn=+document.getElementById('sGrn').value;
-  document.getElementById('vAmy').textContent=amy+' 分';
-  document.getElementById('vGrn').textContent=grn+' 级';
-  const drop=grn*9;
-  const rem=Math.max(12, amy - drop);
-  const exs=['“气死了/好烦”','“我很焦虑”','“我有点委屈和担心”','“感到付出未被看见后的失落”','“精准拆分：担忧失控 + 渴望被认可”'];
-  document.getElementById('kRem').textContent=rem+' 分 (降温 -'+drop+')';
-  document.getElementById('kRem').style.color=rem<55?'#059669':'#f59e0b';
-  document.getElementById('kEx').textContent=exs[grn-1];
-  const wA=Math.max(12, amy*3.6), wR=Math.max(12, rem*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">Name It to Tame It：把抽象风暴贴上精准标签后的降温效果</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">命名之前杏仁核</text>
-    <rect x="155" y="64" width="${wA.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
-    <text x="${(163+wA).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#ef4444">${amy} 分</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">精准命名之后</text>
-    <rect x="155" y="120" width="${wR.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(163+wR).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${rem} 分</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">从“我很愤怒”改成“我注意到自己正在经历愤怒”，能瞬间把你从情绪里抽离成冷静观察者！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>情绪粒度越高（能区分委屈、嫉妒、疲惫与恐惧），前额叶的刹车力越强——能准确命名的怪兽，就不再可怕。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const OPTIONS = [
+      {
+        label: '🔥 情绪反刍（不命名，直接卷入）：“太不公平了！他凭什么这么武断，我真是倒了八辈子霉！”',
+        amyg: 94, pfc: 18,
+        aha: '<strong>杏仁核火上浇油（94% 红温）：</strong>沉浸在指责和反刍里时，前额叶几乎处于离线状态，杏仁核只会越烧越旺！'
+      },
+      {
+        label: '🏷️ 粗糙贴标签：“我现在很不爽 / 很烦。”',
+        amyg: 68, pfc: 54,
+        aha: '<strong>初步启动刹车（降温至 68%）：</strong>哪怕只说出“我很烦”，语言加工区也已经开始从杏仁核手里抢回部分控制权。试试更精细的颗粒度！'
+      },
+      {
+        label: '🎯 高颗粒度情绪命名：“我此刻感到的是——努力未被看见的【失落】，加上对后续返工的【焦虑】。”',
+        amyg: 38, pfc: 88,
+        aha: '<strong>精准命名刹车生效（杏仁核直降 56% → 38%）！</strong>心理学称之为“情绪颗粒度（Emotional Granularity）”。把一团模糊的火拆解成精确的词汇（失落+焦虑），能最大化激活 rVLPFC 抑制回路，让你从“情绪本身”抽离成“观察情绪的人”！'
+      }
+    ];
+
+    let pickedIdx = -1, done = false;
+    const optGrid = document.getElementById('optGrid');
+    const svg = document.getElementById('brainSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      optGrid.innerHTML = '';
+      OPTIONS.forEach((o, i) => {
+        const b = document.createElement('button');
+        b.className = 'opt-btn' + (i === pickedIdx ? ' picked' : '');
+        b.textContent = o.label;
+        b.onclick = () => {
+          pickedIdx = i;
+          markDone(`测试了情绪命名刹车等级 ${i + 1}`);
+          ahaBox.innerHTML = o.aha;
+          render();
+        };
+        optGrid.appendChild(b);
+      });
+
+      const amyg = pickedIdx >= 0 ? OPTIONS[pickedIdx].amyg : 92;
+      const pfc  = pickedIdx >= 0 ? OPTIONS[pickedIdx].pfc  : 15;
+
+      let html = '';
+      // Left: Amygdala heat gauge
+      const amygCol = amyg > 75 ? 'var(--tax-red)' : (amyg > 50 ? 'var(--tax-amber)' : 'var(--tax-green)');
+      html += `<circle cx="170" cy="94" r="${26 + amyg * 0.32}" fill="${amygCol}" opacity="0.22"/>`;
+      html += `<circle cx="170" cy="94" r="30" fill="${amygCol}" opacity="0.85"/>`;
+      html += `<text x="170" y="90" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">杏仁核</text>`;
+      html += `<text x="170" y="108" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">${amyg}%</text>`;
+      html += `<text x="170" y="164" text-anchor="middle" fill="var(--tax-muted)" font-size="12">情绪警报中心（越低越冷静）</text>`;
+
+      // Inhibitory arrow from PFC to Amygdala
+      html += `<line x1="450" y1="94" x2="236" y2="94" stroke="var(--tax-primary)" stroke-width="${2 + pfc / 25}" stroke-dasharray="${pfc > 40 ? '' : '5 4'}"/>`;
+      html += `<text x="342" y="82" text-anchor="middle" fill="var(--tax-primary)" font-size="12" font-weight="700">← 神经抑制刹车信号（${pfc}%）</text>`;
+
+      // Right: rVLPFC Language Brake
+      html += `<rect x="454" y="54" width="190" height="80" rx="14" fill="rgba(59,130,246,${0.12 + pfc / 220})" stroke="var(--tax-primary)" stroke-width="2.5"/>`;
+      html += `<text x="549" y="86" text-anchor="middle" fill="var(--tax-ink)" font-size="13" font-weight="800">前额叶语言区 rVLPFC</text>`;
+      html += `<text x="549" y="110" text-anchor="middle" fill="var(--tax-primary)" font-size="14" font-weight="800">活跃度 ${pfc}%</text>`;
+      html += `<text x="549" y="164" text-anchor="middle" fill="var(--tax-muted)" font-size="12">词汇越精准，刹车力越强</text>`;
+
+      svg.innerHTML = html;
+    }
+
+    render();
   </script>
 </body>
 </html>

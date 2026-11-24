@@ -7,63 +7,93 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📊 基金排行榜里的“清盘隐身术”</h1><p>金融数据库如果自动剔除那些亏到清盘关门的基金，剩下基金的平均历史年化收益率就会凭空虚高好几个百分点！</p></div>
+      <div>
+        <h1>📊 基金排行榜里的“清盘隐身术”</h1>
+        <p>误区：理财 App 上显示“本平台现存主动基金近 5 年平均年化 +14%”，说明随便买都能躺赢大盘！真相：亏得最惨的 40% 基金早就被悄悄<strong>清盘合并抹掉历史记录</strong>了，榜单上只留着幸存者撑门面！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>10 年间因亏损清盘的基金比例</span><span id="vDie">40%</span></label><input type="range" id="sDie" min="0" max="70" value="40" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>全市场真实平均年化收益</span><span id="vTrue">5.0%</span></label><input type="range" id="sTrue" min="1" max="12" step="0.5" value="5" oninput="draw()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="togglePurge()">🧹 切换：一键清盘抹掉亏钱垫底基金</button>
+        <span style="font-size:12.5px;font-weight:750;color:var(--tax-muted);" id="lblSt">当前状态：全样本 10 只基金完整展示</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">排行榜显示“现存平均”</div><div class="k-val" id="kShow">—</div></div>
-        <div class="kpi"><div class="k-lbl">幸存者偏差虚增水分</div><div class="k-val" id="kInf">—</div></div>
+        <div class="kpi"><div class="k-lbl">🧾 全样本真实平均收益</div><div class="k-val" style="color:var(--tax-primary);">+4.2% / 年</div></div>
+        <div class="kpi"><div class="k-lbl">📢 榜单宣传平均收益</div><div class="k-val" id="kShow">—</div></div>
+        <div class="kpi"><div class="k-lbl">清盘虚增“注水收益率”</div><div class="k-val" id="kInf" style="color:var(--tax-red);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const die=+document.getElementById('sDie').value, tr=+document.getElementById('sTrue').value;
-  document.getElementById('vDie').textContent=die+'%';
-  document.getElementById('vTrue').textContent=tr.toFixed(1)+'%';
-  const inf=die*0.075;
-  const shown=tr + inf;
-  document.getElementById('kShow').textContent=shown.toFixed(1)+'%';
-  document.getElementById('kInf').textContent='+'+inf.toFixed(1)+'% 水分';
-  document.getElementById('kInf').style.color=inf>2?'#ef4444':'#f59e0b';
-  const wT=Math.max(12, Math.min(280, tr*15)), wS=Math.max(12, Math.min(280, shown*15));
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">10 年年化收益率：全样本真相 vs 剔除清盘后的榜单</text>
-    <text x="20" y="84" font-size="12.5" font-weight="750" fill="var(--tax-text)">全样本真实平均</text>
-    <rect x="160" y="66" width="${wT.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(168+wT).toFixed(0)}" y="85" font-size="12" font-weight="800" fill="#059669">${tr.toFixed(1)}%</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">现存榜单平均</text>
-    <rect x="160" y="120" width="${wS.toFixed(0)}" height="28" rx="6" fill="#ef4444" opacity="0.82"/>
-    <text x="${(168+wS).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#ef4444">${shown.toFixed(1)}% (虚高 +${inf.toFixed(1)}%)</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">亏钱的基金悄悄合并清盘从榜单消失，活下来的基金把平均线强行拉高。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>看任何历史回测或行业平均回报时，第一件事就是检查数据库里有没有“已退市/已清盘”样本。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const FUNDS = [
+      { name:'A', ret:22 }, { name:'B', ret:18 }, { name:'C', ret:14 }, { name:'D', ret:11 }, { name:'E', ret:8 },
+      { name:'F', ret:4 },  { name:'G', ret:-3 }, { name:'H', ret:-8 }, { name:'I', ret:-11 }, { name:'J', ret:-13 }
+    ]; // avg = 42/10 = +4.2%; if G,H,I,J liquidated -> top 6 avg = 77/6 = +12.8%
+    let purged = false;
+
+    function togglePurge(){
+      purged = !purged;
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      document.getElementById('lblSt').textContent = purged ? '⚠️ 已清盘隐藏 4 只亏钱基金（榜单瞬间美颜！）' : '🧾 当前状态：全样本 10 只基金完整展示';
+      draw();
+    }
+
+    function draw(){
+      const yZero = 132;
+      const scale = 3.6; // px per %
+      let bars = '';
+      FUNDS.forEach((f, i) => {
+        const x = 42 + i * 58;
+        const dead = purged && f.ret < 0;
+        const h = Math.abs(f.ret) * scale;
+        const y = f.ret >= 0 ? (yZero - h) : yZero;
+        const col = f.ret >= 0 ? 'var(--tax-green)' : 'var(--tax-red)';
+        bars += `
+          <g opacity="${dead ? 0.14 : 1}">
+            <rect x="${x}" y="${y}" width="38" height="${h}" rx="5" fill="${col}"/>
+            <text x="${x+19}" y="${f.ret>=0?y-6:y+h+14}" text-anchor="middle" font-size="11" font-weight="850" fill="${col}">${f.ret>0?'+':''}${f.ret}%</text>
+            <text x="${x+19}" y="198" text-anchor="middle" font-size="11" font-weight="800" fill="var(--tax-muted)">基金${f.name}</text>
+            ${dead ? `<text x="${x+19}" y="${yZero+22}" text-anchor="middle" font-size="10" font-weight="900" fill="var(--tax-red)">已清盘</text>` : ''}
+          </g>
+        `;
+      });
+
+      const shownAvg = purged ? 12.8 : 4.2;
+      const infl = +(shownAvg - 4.2).toFixed(1);
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="28" y1="${yZero}" x2="616" y2="${yZero}" stroke="var(--tax-muted)" stroke-width="1.5"/>
+        <line x1="28" y1="${yZero - shownAvg*scale}" x2="616" y2="${yZero - shownAvg*scale}" stroke="${purged?'var(--tax-amber)':'var(--tax-primary)'}" stroke-width="2.4" stroke-dasharray="6 4"/>
+        <text x="612" y="${yZero - shownAvg*scale - 6}" text-anchor="end" font-size="11.5" font-weight="900" fill="${purged?'var(--tax-amber)':'var(--tax-primary)'}">榜单均值：+${shownAvg}%</text>
+        ${bars}
+      `;
+
+      const kS = document.getElementById('kShow'); kS.textContent = `+${shownAvg}% / 年`; kS.style.color = purged ? 'var(--tax-amber)' : 'var(--tax-primary)';
+      document.getElementById('kInf').textContent = infl > 0 ? `+${infl}% 凭空注水!` : '0%（真实全样本）';
+
+      document.getElementById('ahaBox').innerHTML = purged
+        ? `💡 <strong>顿悟时刻：</strong>一只基金都没变好，仅仅把亏钱的 G/H/I/J 四只清盘踢出榜单，平台宣传的“平均年化收益率”就凭空从 <strong>+4.2%</strong> 暴涨到了 <strong>+12.8%（虚增 +8.6%）</strong>！这就是金融界著名的“基金幸存者偏差”！`
+        : `💡 <strong>顿悟时刻：</strong>全样本 10 只基金真实平均年化只有 <strong>+4.2%</strong>。点击上方 <strong>🧹 一键清盘抹掉亏钱基金</strong>，亲眼看看排行榜是如何瞬间变魔术的！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

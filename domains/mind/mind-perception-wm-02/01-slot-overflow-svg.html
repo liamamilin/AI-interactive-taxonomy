@@ -1,85 +1,266 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📦 工作记忆槽位溢出器（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>工作记忆槽位溢出器</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .chip-pool { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .mem-chip {
+      padding: 7px 12px; border-radius: 999px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 13px;
+      cursor: pointer; transition: transform .15s, border-color .15s, background .15s;
+    }
+    .mem-chip:hover { border-color: var(--tax-primary); transform: translateY(-1px); }
+    .mem-chip.in-slot { background: var(--tax-primary-soft); border-color: var(--tax-primary); color: var(--tax-primary); font-weight: 600; }
+    .mem-chip.evicted { opacity: .55; text-decoration: line-through; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .evict-log { margin-top: 10px; font-size: 13px; color: var(--tax-muted); min-height: 22px; }
+    .evict-log strong { color: var(--tax-red); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📦 工作记忆槽位溢出器（SVG）</h1><p>现代认知心理学（Cowan 模型）发现：在无法默念复述的情况下，人类纯工作记忆的核心容量其实只有大约 4 个活跃槽位。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>待同时记住的新信息项</span><span id="vItems">7 项</span></label><input type="range" id="sItems" min="2" max="12" value="7" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>大脑后台挂起的焦虑/打断任务</span><span id="vBg">1 项</span></label><input type="range" id="sBg" min="0" max="3" value="1" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>📦 工作记忆槽位溢出器</h1>
+      <p>点击下方信息碎片塞进大脑工作记忆槽。现代认知科学（Cowan）表明，无组块时人脑核心焦点只有 <strong>4 个槽位</strong>——塞进第 5 个时，最老的记忆就会被挤出！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="toolbar">
+        <button class="toy-btn" id="modeBtn">当前容量：4 槽（Cowan 焦点）</button>
+        <button class="toy-btn secondary" id="chunkBtn">🧩 一键组块打包（合并同类）</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 清空槽位</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">可用核心槽位</div><div class="k-val" id="kCap">—</div></div>
-        <div class="kpi"><div class="k-lbl">被挤出遗忘项</div><div class="k-val" id="kDrop">—</div></div>
-        <div class="kpi"><div class="k-lbl">瞬时保留率</div><div class="k-val" id="kRate">—</div></div>
-      </div>
+
+      <div class="chip-pool" id="chipPool"></div>
+
+      <svg id="stage" viewBox="0 0 680 230" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="工作记忆槽位图">
+        <g id="slotsLayer"></g>
+        <g id="trashLayer"></g>
+      </svg>
+
+      <div class="evict-log" id="evictLog">提示：依次点击 5 个以上信息碎片，观察槽位如何发生“先进先出”溢出。</div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>核心洞察：</strong>工作记忆不是无限容量的硬盘，而是极窄的“桌面”。点击上方碎片把桌面塞满，亲自体验信息被挤掉的瞬间。
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const items=+document.getElementById('sItems').value, bg=+document.getElementById('sBg').value;
-  document.getElementById('vItems').textContent=items+' 项';
-  document.getElementById('vBg').textContent=bg+' 项';
-  const cap=Math.max(1, 5 - bg);
-  const kept=Math.min(items, cap);
-  const drop=Math.max(0, items - cap);
-  const rate=Math.round(kept/items*100);
-  document.getElementById('kCap').textContent=cap+' 槽';
-  document.getElementById('kDrop').textContent=drop+' 项';
-  document.getElementById('kDrop').style.color=drop>0?'#ef4444':'#059669';
-  document.getElementById('kRate').textContent=rate+'%';
-  let boxes='';
-  for(let i=0;i<5;i++){
-    const x=30+i*108;
-    const isBg=i>=cap;
-    const filled=!isBg && i<kept;
-    const fill=isBg?'#f59e0b':(filled?'#3b82f6':'var(--tax-border)');
-    const op=isBg?'0.28':(filled?'0.9':'0.25');
-    const lbl=isBg?'后台打断占用':(filled?('信息 #'+(items-kept+i+1)):'空闲槽位');
-    boxes+=`<rect x="${x}" y="52" width="96" height="62" rx="10" fill="${fill}" opacity="${op}" stroke="${isBg?'#d97706':(filled?'#2563eb':'var(--tax-border)')}" stroke-width="2"/>
-      <text x="${x+48}" y="88" text-anchor="middle" font-size="11.5" font-weight="800" fill="${filled?'#fff':'var(--tax-text)'}">${lbl}</text>`;
-  }
-  let dropped='';
-  for(let i=0;i<Math.min(drop,7);i++){
-    const x=30+i*76;
-    dropped+=`<rect x="${x}" y="148" width="66" height="30" rx="6" fill="#ef4444" opacity="0.18" stroke="#ef4444" stroke-dasharray="3,2"/>
-      <text x="${x+33}" y="167" text-anchor="middle" font-size="11" font-weight="750" fill="#ef4444">溢出 #${i+1}</text>`;
-  }
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">大脑工作记忆核心槽位（总计 5 槽，后台占用 ${bg} 槽）</text>
-    ${boxes}
-    <text x="30" y="138" font-size="12" font-weight="750" fill="${drop>0?'#ef4444':'#059669'}">${drop>0?'以下早期信息已被新输入无情挤出内存：':'当前信息完全装得下，无溢出丢失。'}</text>
-    ${dropped}`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>工作记忆就是人类大脑的“超小号 L1 缓存”。把待办事项记在脑子里（后台占用）会直接偷走你思考当下问题的槽位，写到纸上才是最便宜的内存扩容。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const ITEMS = [
+      { id: 'c1', label: '验证码 8392', cat: '数字' },
+      { id: 'c2', label: '会议室 402B', cat: '日程' },
+      { id: 'c3', label: '取件码 7-2-19', cat: '数字' },
+      { id: 'c4', label: '买全脂牛奶', cat: '清单' },
+      { id: 'c5', label: '回林总监邮件', cat: '日程' },
+      { id: 'c6', label: '门禁 6610#', cat: '数字' },
+      { id: 'c7', label: '买燕麦与鸡蛋', cat: '清单' },
+      { id: 'c8', label: '下午3点评审', cat: '日程' }
+    ];
+
+    let capacity = 4;
+    let slots = [];
+    let evicted = [];
+    let chunked = false;
+    let done = false;
+
+    const poolEl = document.getElementById('chipPool');
+    const slotsLayer = document.getElementById('slotsLayer');
+    const trashLayer = document.getElementById('trashLayer');
+    const evictLog = document.getElementById('evictLog');
+    const ahaBox = document.getElementById('ahaBox');
+    const modeBtn = document.getElementById('modeBtn');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function renderChips() {
+      poolEl.innerHTML = '';
+      ITEMS.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'mem-chip';
+        const inSlot = slots.some(s => s.ids.includes(item.id));
+        const isEvicted = evicted.some(e => e.ids.includes(item.id));
+        if (inSlot) btn.classList.add('in-slot');
+        else if (isEvicted) btn.classList.add('evicted');
+        btn.textContent = `${item.label} · ${item.cat}`;
+        btn.onclick = () => addItem(item);
+        poolEl.appendChild(btn);
+      });
+    }
+
+    function addItem(item) {
+      markDone('探索了工作记忆槽位溢出机制');
+      if (slots.some(s => s.ids.includes(item.id))) return;
+      slots.push({ title: item.label, cat: item.cat, ids: [item.id], count: 1 });
+      if (slots.length > capacity) {
+        const dropped = slots.shift();
+        evicted.unshift(dropped);
+        evictLog.innerHTML = `⚠️ 槽位已满！<strong>「${dropped.title}」</strong>被挤出工作记忆并丢失。`;
+      } else {
+        evictLog.textContent = `已载入「${item.label}」，当前占用 ${slots.length} / ${capacity} 槽。`;
+      }
+      render();
+    }
+
+    function chunkSlots() {
+      if (slots.length < 2) return;
+      markDone('使用组块打包释放了工作记忆槽位');
+      const groups = {};
+      slots.forEach(s => {
+        if (!groups[s.cat]) groups[s.cat] = { title: '', cat: s.cat, ids: [], labels: [] };
+        groups[s.cat].ids.push(...s.ids);
+        groups[s.cat].labels.push(s.title);
+      });
+      const before = slots.length;
+      slots = Object.values(groups).map(g => ({
+        title: g.labels.length > 1 ? `[${g.cat}组块×${g.labels.length}]` : g.labels[0],
+        cat: g.cat,
+        ids: g.ids,
+        count: g.labels.length
+      }));
+      chunked = true;
+      evictLog.textContent = `🧩 组块打包完成！${before} 条零散信息被压缩进 ${slots.length} 个槽位，腾出 ${capacity - slots.length} 个空槽。`;
+      render();
+    }
+
+    function renderSVG() {
+      slotsLayer.innerHTML = '';
+      trashLayer.innerHTML = '';
+
+      const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      title.setAttribute('x', 24);
+      title.setAttribute('y', 28);
+      title.setAttribute('fill', 'var(--tax-muted)');
+      title.setAttribute('font-size', '13');
+      title.textContent = `工作记忆活跃区（容量 ${capacity} 槽，已用 ${slots.length} 槽）`;
+      slotsLayer.appendChild(title);
+
+      const gap = 12;
+      const areaW = 632;
+      const slotW = (areaW - gap * (capacity - 1)) / capacity;
+
+      for (let i = 0; i < capacity; i++) {
+        const x = 24 + i * (slotW + gap);
+        const y = 44;
+        const h = 92;
+        const item = slots[i];
+
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', x);
+        rect.setAttribute('y', y);
+        rect.setAttribute('width', slotW);
+        rect.setAttribute('height', h);
+        rect.setAttribute('rx', 10);
+        rect.setAttribute('fill', item ? (item.count > 1 ? 'rgba(16,185,129,0.18)' : 'rgba(59,130,246,0.16)') : 'rgba(148,163,184,0.08)');
+        rect.setAttribute('stroke', item ? (item.count > 1 ? 'var(--tax-green)' : 'var(--tax-primary)') : 'var(--tax-border)');
+        rect.setAttribute('stroke-width', item ? '2' : '1.5');
+        rect.setAttribute('stroke-dasharray', item ? '' : '5 4');
+        slotsLayer.appendChild(rect);
+
+        const idx = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        idx.setAttribute('x', x + 10);
+        idx.setAttribute('y', y + 20);
+        idx.setAttribute('fill', 'var(--tax-muted)');
+        idx.setAttribute('font-size', '11');
+        idx.textContent = `槽位 #${i + 1}`;
+        slotsLayer.appendChild(idx);
+
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('x', x + slotW / 2);
+        txt.setAttribute('y', y + 54);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('fill', item ? 'var(--tax-ink)' : 'var(--tax-muted)');
+        txt.setAttribute('font-size', capacity > 5 ? '11' : '13');
+        txt.setAttribute('font-weight', item ? '700' : '400');
+        txt.textContent = item ? (item.title.length > 9 && capacity > 5 ? item.title.slice(0, 8) + '…' : item.title) : '空闲';
+        slotsLayer.appendChild(txt);
+
+        if (item) {
+          const sub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          sub.setAttribute('x', x + slotW / 2);
+          sub.setAttribute('y', y + 76);
+          sub.setAttribute('text-anchor', 'middle');
+          sub.setAttribute('fill', item.count > 1 ? 'var(--tax-green)' : 'var(--tax-primary)');
+          sub.setAttribute('font-size', '11');
+          sub.textContent = item.count > 1 ? `已压缩 ${item.count} 项` : item.cat;
+          slotsLayer.appendChild(sub);
+        }
+      }
+
+      // Evicted zone
+      const trashRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      trashRect.setAttribute('x', 24);
+      trashRect.setAttribute('y', 154);
+      trashRect.setAttribute('width', 632);
+      trashRect.setAttribute('height', 58);
+      trashRect.setAttribute('rx', 10);
+      trashRect.setAttribute('fill', evicted.length ? 'rgba(239,68,68,0.12)' : 'rgba(148,163,184,0.06)');
+      trashRect.setAttribute('stroke', evicted.length ? 'var(--tax-red)' : 'var(--tax-border)');
+      trashLayer.appendChild(trashRect);
+
+      const tLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      tLabel.setAttribute('x', 38);
+      tLabel.setAttribute('y', 176);
+      tLabel.setAttribute('fill', evicted.length ? 'var(--tax-red)' : 'var(--tax-muted)');
+      tLabel.setAttribute('font-size', '12');
+      tLabel.setAttribute('font-weight', '600');
+      tLabel.textContent = `溢出遗忘区（已丢失 ${evicted.length} 项）`;
+      trashLayer.appendChild(tLabel);
+
+      const tList = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      tList.setAttribute('x', 38);
+      tList.setAttribute('y', 198);
+      tList.setAttribute('fill', 'var(--tax-muted)');
+      tList.setAttribute('font-size', '12');
+      tList.textContent = evicted.length ? evicted.slice(0, 4).map(e => e.title).join('  ·  ') + (evicted.length > 4 ? ' …' : '') : '尚未发生溢出——继续往槽位里塞入碎片试试';
+      trashLayer.appendChild(tList);
+    }
+
+    function updateAha() {
+      if (chunked) {
+        ahaBox.innerHTML = '<strong>组块破局：</strong>你并没有把大脑扩容，而是把同类别的多条碎片“压成一个组块”，只占 1 个槽位。这就是专家和记电话号码的高手突破 4 槽瓶颈的秘密。';
+      } else if (evicted.length >= 2) {
+        ahaBox.innerHTML = `<strong>溢出警报：</strong>已经挤掉了 ${evicted.length} 条信息！当你一边听别人说验证码、一边记会议室号时，大脑就会像这样静默丢弃旧信息。试试点击「一键组块打包」看看如何扩容。`;
+      } else if (slots.length === capacity) {
+        ahaBox.innerHTML = '<strong>临界满载：</strong>所有槽位都已占满！此时再进入任何 1 条新信息（哪怕是一条微信弹窗），都会把最前面的记忆直接踢出去。';
+      } else {
+        ahaBox.innerHTML = '<strong>核心洞察：</strong>工作记忆不是无限容量的硬盘，而是极窄的“桌面”。继续点击上方碎片把桌面塞满，亲自体验信息被挤掉的瞬间。';
+      }
+    }
+
+    function render() {
+      renderChips();
+      renderSVG();
+      updateAha();
+    }
+
+    modeBtn.onclick = () => {
+      markDone('切换了工作记忆槽位容量模型');
+      capacity = capacity === 4 ? 7 : 4;
+      modeBtn.textContent = capacity === 4 ? '当前容量：4 槽（Cowan 焦点）' : '当前容量：7 槽（Miller 经典上限）';
+      while (slots.length > capacity) evicted.unshift(slots.shift());
+      render();
+    };
+
+    document.getElementById('chunkBtn').onclick = chunkSlots;
+    document.getElementById('resetBtn').onclick = () => {
+      slots = [];
+      evicted = [];
+      chunked = false;
+      evictLog.textContent = '槽位已清空。重新点击碎片测试溢出临界点。';
+      render();
+    };
+
+    render();
   </script>
 </body>
 </html>

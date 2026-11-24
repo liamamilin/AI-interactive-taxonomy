@@ -7,66 +7,83 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🍵 感冒偏方为何总显得“吃一次就好”？</h1><p>普通感冒会在第 3 天达到难受峰值，第 4~7 天靠免疫系统自然好转——而你偏偏总是在最难受的第 3 天才去喝偏方！</p></div>
+      <div>
+        <h1>🍵 感冒偏方为何总显得“吃一次就好”？</h1>
+        <p>误区：我感冒第 3 天难受到极点，喝了一碗神秘偏方，第 4 天立刻大幅好转，所以偏方有奇效！真相：普通感冒是 7 天自限性疾病，你偏偏在<strong>症状山顶</strong>才喝偏方——把“只喝白开水”的对照组叠上去，两条线竟然 100% 重合！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>忍到第几天才喝“神奇偏方”</span><span id="vDay">第 3 天（最难受）</span></label><input type="range" id="sDay" min="1" max="6" value="3" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>偏方真实药理有效率</span><span id="vEff">0%（纯安慰剂）</span></label><input type="range" id="sEff" min="0" max="40" value="0" oninput="draw()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="toggleControl()">👁️ 叠加上帝视角对照组：只喝温白开水</button>
+        <button class="pill active" onclick="setTakeDay(3,this)">🤒 第 3 天最难受时喝偏方</button>
+        <button class="pill" onclick="setTakeDay(1,this)">🤧 第 1 天刚流鼻涕就喝</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 220"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">喝完次日症状变化</div><div class="k-val" id="kChg">—</div></div>
-        <div class="kpi"><div class="k-lbl">大脑主观印象</div><div class="k-val" id="kImp">—</div></div>
+        <div class="kpi"><div class="k-lbl">喝偏方次日症状变化</div><div class="k-val" id="kNext">—</div></div>
+        <div class="kpi"><div class="k-lbl">白开水对照组次日变化</div><div class="k-val" id="kCtrl" style="color:var(--tax-primary);">—</div></div>
+        <div class="kpi"><div class="k-lbl">偏方真实净功劳</div><div class="k-val" style="color:var(--tax-red);">0%（完全重合）</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const day=+document.getElementById('sDay').value, eff=+document.getElementById('sEff').value;
-  document.getElementById('vDay').textContent='第 '+day+' 天';
-  document.getElementById('vEff').textContent=eff+'%';
-  const curve=[15, 48, 82, 95, 68, 40, 18, 8];
-  const cur=curve[day], nxt=Math.max(5, Math.round(curve[day+1]*(1 - eff/100)));
-  const diff=nxt - cur;
-  document.getElementById('kChg').textContent=(diff<0?'骤降 ':'上升 ')+diff+' 分';
-  document.getElementById('kChg').style.color=diff<0?'#059669':'#ef4444';
-  document.getElementById('kImp').textContent=diff<-15?'✨ 哇，这偏方神了!':'😐 好像没啥用';
-  let pts=[];
-  for(let i=0;i<curve.length;i++) pts.push(`${(50+i*70).toFixed(0)},${(172-curve[i]*1.3).toFixed(0)}`);
-  const cx=50+day*70, cy=172-cur*1.3;
-  document.getElementById('svg').innerHTML=`
-    <text x="50" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">自限性感冒自然病程（纵轴 = 症状难受度）</text>
-    <line x1="50" y1="172" x2="555" y2="172" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <polyline points="${pts.join(' ')}" fill="none" stroke="#3b82f6" stroke-width="3"/>
-    <circle cx="${cx}" cy="${cy.toFixed(0)}" r="9" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
-    <text x="${Math.min(460,cx+12)}" y="${Math.max(48,cy-8).toFixed(0)}" font-size="12" font-weight="800" fill="#d97706">第 ${day} 天喝偏方</text>
-    <text x="50" y="192" font-size="11" fill="var(--tax-muted)">Day 0</text>
-    <text x="255" y="192" font-size="11" font-weight="750" fill="#ef4444">Day 3 症状峰值</text>
-    <text x="520" y="192" font-size="11" fill="var(--tax-muted)">Day 7 痊愈</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只要我们在症状最痛的峰值才出手干预，哪怕干预物是零药效的糖水，次日也必定好转——这就是没有对照组的个人经验极不可靠的原因！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let takeDay = 3, showCtrl = false;
+    const SYM = [15, 48, 82, 95, 62, 34, 16, 5]; // Day 0..7 natural cold curve
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setTakeDay(d, btn){
+      takeDay = d;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); draw();
+    }
+    function toggleControl(){ showCtrl = !showCtrl; markDone(); draw(); }
+
+    function draw(){
+      const x0=54, x1=612, yMin=28, yMax=188;
+      const toX = d => x0 + (d/7)*(x1-x0);
+      const toY = v => yMax - (v/105)*(yMax-yMin);
+
+      const pts = SYM.map((v,i)=>`${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(' ');
+      const diff = SYM[takeDay+1] - SYM[takeDay];
+
+      document.getElementById('svg').innerHTML = `
+        ${[0,1,2,3,4,5,6,7].map(d=>`<text x="${toX(d)}" y="208" text-anchor="middle" font-size="11" fill="var(--tax-muted)">第${d}天</text>`).join('')}
+        ${showCtrl ? `<polyline points="${pts}" fill="none" stroke="var(--tax-primary)" stroke-width="8" opacity="0.35" stroke-linecap="round"/>` : ''}
+        <polyline points="${pts}" fill="none" stroke="var(--tax-amber)" stroke-width="3.2" stroke-linecap="round"/>
+        <circle cx="${toX(takeDay)}" cy="${toY(SYM[takeDay])}" r="7" fill="var(--tax-red)"/>
+        <text x="${toX(takeDay)}" y="${toY(SYM[takeDay])-12}" text-anchor="middle" font-size="11.5" font-weight="900" fill="var(--tax-red)">🍵 第${takeDay}天喝偏方</text>
+        <circle cx="${toX(takeDay+1)}" cy="${toY(SYM[takeDay+1])}" r="6" fill="${diff<0?'var(--tax-green)':'var(--tax-red)'}"/>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-amber)">● 喝偏方后的病程轨迹 ${showCtrl?'（粗蓝线 = 只喝白开水对照组：100% 重合！）':''}</text>
+      `;
+
+      const kN = document.getElementById('kNext');
+      kN.textContent = diff < 0 ? `暴降 ${diff} 分（显灵错觉!）` : `反而加重 +${diff} 分!`;
+      kN.style.color = diff < 0 ? 'var(--tax-green)' : 'var(--tax-red)';
+      document.getElementById('kCtrl').textContent = showCtrl ? `${diff >= 0 ? '+' : ''}${diff} 分（一模一样）` : '点击上方蓝色按钮叠加对比';
+
+      document.getElementById('ahaBox').innerHTML = takeDay === 3
+        ? `💡 <strong>顿悟时刻：</strong>第 3 天正好是普通感冒的<strong>症状最高峰（95 分）</strong>！你在这天喝偏方，第 4 天免疫系统本来就会把症状打到 62 分（-33 分），结果大脑把免疫系统的功劳全记在了偏方头上——<strong>“发生在其后 ≠ 由其导致”！</strong>`
+        : `💡 <strong>顿悟时刻：</strong>如果你在第 1 天刚流鼻涕就喝同一碗偏方，第 2 天症状照样冲上 82 分，你会立刻大骂这偏方没用！同一碗零效偏方，<strong>仅仅因为你习惯拖到最难受那天再喝，就成了“神药”！</strong>`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

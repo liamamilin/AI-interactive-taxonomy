@@ -1,70 +1,152 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧠 测试效应：合上书本默写的威力（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>测试效应：合上书本默写的威力</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .stat-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .big-num { font-size: 26px; font-weight: 800; margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🧠 测试效应：合上书本默写的威力（SVG）</h1><p>Roediger & Karpicke 经典实验：重复阅读 4 遍的学生在 5 分钟后略微领先，但 1 周后合书自测组的留存率反超 50% 以上！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>复习时间中“合书自测”占比</span><span id="vRet">60%</span></label><input type="range" id="sRet" min="0" max="100" value="60" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>距离正式测试的天数</span><span id="vDay">7 天</span></label><input type="range" id="sDay" min="1" max="30" value="7" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🧠 测试效应：重复阅读 vs 闭卷提取对决</h1>
+      <p>基于 Roediger &amp; Karpicke (2006) 经典实验：同样 4 轮学习时段，<strong>SSSS 组</strong>连续精读 4 遍，<strong>STTT 组</strong>只读 1 遍然后闭卷默写 3 遍。切换考场时间点，见证令人震惊的成绩大反转！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="m5Btn">⏱️ 5 分钟后立刻考试</button>
+        <button class="toy-btn secondary" id="d7Btn">📅 7 天后延迟大考</button>
+        <button class="toy-btn secondary" id="animBtn">▶ 播放 7 天遗忘反转</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">纯重复阅读组得分</div><div class="k-val" id="kRead">—</div></div>
-        <div class="kpi"><div class="k-lbl">你的提取练习策略得分</div><div class="k-val" id="kTest">—</div></div>
+
+      <svg id="raceSvg" viewBox="0 0 680 225" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="测试效应成绩反转对比"></svg>
+
+      <div class="cards">
+        <div class="stat-card">
+          <div style="font-size:12px;color:var(--tax-muted);">📖 重复阅读组（SSSS · 读 4 遍）</div>
+          <div class="big-num" id="sScore" style="color:var(--tax-amber);">81%</div>
+          <div style="font-size:12px;color:var(--tax-muted);" id="sSub">5 分钟后看似领先</div>
+        </div>
+        <div class="stat-card">
+          <div style="font-size:12px;color:var(--tax-muted);">✍️ 提取练习组（STTT · 1 读 + 3 默写）</div>
+          <div class="big-num" id="tScore" style="color:var(--tax-green);">75%</div>
+          <div style="font-size:12px;color:var(--tax-muted);" id="tSub">前期费力，但提取路径极深</div>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>反转预告：</strong>在「5 分钟后立考」里，重复阅读组甚至反超 6%——这就是为什么大多数学生沉迷划重点和反复翻书。点击「7 天后延迟大考」看看一周后发生了什么！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const ret=+document.getElementById('sRet').value, day=+document.getElementById('sDay').value;
-  document.getElementById('vRet').textContent=ret+'%';
-  document.getElementById('vDay').textContent=day+' 天';
-  const readScore=Math.max(12, Math.round(82*Math.exp(-day/9)));
-  const effRet=Math.min(85, ret);
-  const testScore=Math.max(15, Math.min(96, Math.round((74 + effRet*0.14)*Math.exp(-day/(9 + effRet*0.35)))));
-  document.getElementById('kRead').textContent=readScore+' 分';
-  document.getElementById('kTest').textContent=testScore+' 分';
-  document.getElementById('kTest').style.color=testScore>readScore?'#059669':'#3b82f6';
-  const wR=Math.max(12, readScore*3.6), wT=Math.max(12, testScore*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">第 ${day} 天闭卷测试成绩对比（满 100 分）</text>
-    <text x="20" y="84" font-size="12.5" font-weight="750" fill="var(--tax-text)">纯重复阅读</text>
-    <rect x="145" y="66" width="${wR.toFixed(0)}" height="30" rx="6" fill="#94a3b8"/>
-    <text x="${(153+wR).toFixed(0)}" y="86" font-size="12.5" font-weight="800" fill="var(--tax-muted)">${readScore} 分</text>
-    <text x="20" y="140" font-size="12.5" font-weight="750" fill="var(--tax-text)">提取占比 ${ret}%</text>
-    <rect x="145" y="122" width="${wT.toFixed(0)}" height="30" rx="6" fill="#059669"/>
-    <text x="${(153+wT).toFixed(0)}" y="142" font-size="12.5" font-weight="800" fill="#059669">${testScore} 分</text>
-    <text x="20" y="184" font-size="11.5" fill="var(--tax-muted)">注：把书合上强迫自己回忆，是在修筑“提取高速公路”；只用眼睛看书只是在给大脑制造“眼熟”的错觉。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>测试不只是用来“打分”的，测试本身就是最强的学习动作！合上书默写 10 分钟，胜过划荧光笔重读 1 小时。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let t = 0; // 0 = 5 min, 1 = 7 days
+    let raf = null;
+    let done = false;
+
+    const svg = document.getElementById('raceSvg');
+    const m5Btn = document.getElementById('m5Btn');
+    const d7Btn = document.getElementById('d7Btn');
+    const sScore = document.getElementById('sScore');
+    const tScore = document.getElementById('tScore');
+    const sSub = document.getElementById('sSub');
+    const tSub = document.getElementById('tSub');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function draw() {
+      const sVal = Math.round(81 - 41 * t); // 81% -> 40%
+      const tVal = Math.round(75 - 14 * t); // 75% -> 61%
+      const dayText = t < 0.05 ? '5 分钟后' : (t > 0.95 ? '7 天后' : `第 ${(t * 7).toFixed(1)} 天`);
+
+      sScore.textContent = sVal + '%';
+      tScore.textContent = tVal + '%';
+      sSub.textContent = t > 0.5 ? '7 天遗忘率高达 51%（断崖跌落）' : '5 分钟后略微领先，带来虚假自信';
+      tSub.textContent = t > 0.5 ? '7 天遗忘率仅 19%（反超 +21%）' : '提取时费劲，但正在加固长期突触';
+
+      m5Btn.className = t < 0.5 ? 'toy-btn' : 'toy-btn secondary';
+      d7Btn.className = t >= 0.5 ? 'toy-btn' : 'toy-btn secondary';
+
+      const x0 = 60, x1 = 360;
+      const yOf = v => 190 - (v / 100) * 145;
+      const curX = x0 + t * (x1 - x0);
+
+      let html = '';
+      // Left: slope chart
+      [20, 40, 60, 80, 100].forEach(v => {
+        const y = yOf(v);
+        html += `<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(--tax-border)" stroke-dasharray="3 3"/>`;
+        html += `<text x="${x0 - 8}" y="${y + 4}" text-anchor="end" fill="var(--tax-muted)" font-size="11">${v}%</text>`;
+      });
+      html += `<text x="${x0}" y="210" text-anchor="middle" fill="var(--tax-muted)" font-size="11">5 分钟后</text>`;
+      html += `<text x="${x1}" y="210" text-anchor="middle" fill="var(--tax-muted)" font-size="11">7 天后</text>`;
+
+      // Full lines
+      html += `<line x1="${x0}" y1="${yOf(81)}" x2="${x1}" y2="${yOf(40)}" stroke="var(--tax-amber)" stroke-width="3" opacity="0.4"/>`;
+      html += `<line x1="${x0}" y1="${yOf(75)}" x2="${x1}" y2="${yOf(61)}" stroke="var(--tax-green)" stroke-width="3" opacity="0.4"/>`;
+
+      // Active progress lines
+      html += `<line x1="${x0}" y1="${yOf(81)}" x2="${curX}" y2="${yOf(sVal)}" stroke="var(--tax-amber)" stroke-width="3.5"/>`;
+      html += `<line x1="${x0}" y1="${yOf(75)}" x2="${curX}" y2="${yOf(tVal)}" stroke="var(--tax-green)" stroke-width="3.5"/>`;
+      html += `<circle cx="${curX}" cy="${yOf(sVal)}" r="6" fill="var(--tax-amber)"/>`;
+      html += `<circle cx="${curX}" cy="${yOf(tVal)}" r="6" fill="var(--tax-green)"/>`;
+
+      // Right: Current snapshot bars
+      html += `<text x="530" y="34" text-anchor="middle" fill="var(--tax-ink)" font-size="13" font-weight="700">考场快照：${dayText}</text>`;
+      const barBase = 190;
+      const hS = (sVal / 100) * 135;
+      const hT = (tVal / 100) * 135;
+      html += `<rect x="445" y="${barBase - hS}" width="64" height="${hS}" rx="8" fill="rgba(245,158,11,0.75)"/>`;
+      html += `<text x="477" y="${barBase - hS - 8}" text-anchor="middle" fill="var(--tax-amber)" font-size="14" font-weight="800">${sVal}%</text>`;
+      html += `<text x="477" y="210" text-anchor="middle" fill="var(--tax-muted)" font-size="11">重复读 4 遍</text>`;
+
+      html += `<rect x="545" y="${barBase - hT}" width="64" height="${hT}" rx="8" fill="rgba(16,185,129,0.8)"/>`;
+      html += `<text x="577" y="${barBase - hT - 8}" text-anchor="middle" fill="var(--tax-green)" font-size="14" font-weight="800">${tVal}%</text>`;
+      html += `<text x="577" y="210" text-anchor="middle" fill="var(--tax-muted)" font-size="11">1读+3默写</text>`;
+
+      svg.innerHTML = html;
+
+      if (t >= 0.85) {
+        ahaBox.innerHTML = '<strong>测试效应大反转（61% vs 40%）！</strong>“测试”不只是用来打分的尺子，它本身就是最强的学习发动机。合上书本硬想的过程会重建检索线索，让 7 天后的遗忘率直降一大半！';
+      } else if (t <= 0.1) {
+        ahaBox.innerHTML = '<strong>短期陷阱（81% vs 75%）：</strong>如果只在学完 5 分钟后测，重复阅读组略微占优，而且自己感觉“全懂了”。点「7 天后延迟大考」看真正决定长期掌握的分水岭！';
+      }
+    }
+
+    function animateTo(target) {
+      cancelAnimationFrame(raf);
+      const start = t;
+      const startMs = performance.now();
+      const dur = 1100;
+      function step(now) {
+        const p = Math.min(1, (now - startMs) / dur);
+        const ease = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+        t = start + (target - start) * ease;
+        draw();
+        if (p < 1) raf = requestAnimationFrame(step);
+      }
+      raf = requestAnimationFrame(step);
+    }
+
+    m5Btn.onclick = () => { markDone('对比了测试效应短期成绩'); animateTo(0); };
+    d7Btn.onclick = () => { markDone('对比了测试效应7天延迟大反转'); animateTo(1); };
+    document.getElementById('animBtn').onclick = () => { markDone('播放了测试效应7天反转动画'); t = 0; animateTo(1); };
+    draw();
   </script>
 </body>
 </html>

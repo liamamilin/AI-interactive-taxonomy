@@ -1755,11 +1755,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-biases-prob-01/01-wald-airplane-svg.html",
               "file": "01-wald-airplane-svg.html",
               "path": "./domains/mind/mind-biases-prob-01/01-wald-airplane-svg.html",
-              "title": "沃尔德弹孔飞机：看见的 vs 坠毁的（SVG）",
+              "title": "沃尔德弹孔飞机：看见的 vs 坠毁的",
               "icon": "✈️",
-              "archetype": "simulation",
+              "archetype": "spatial",
               "concept": "幸存者偏差 · 缺失数据 · 瓦尔德反推",
-              "summary": "调节装甲分配在机翼与引擎的比例及出击架次，对比两种直觉下轰炸机的真实生还率！"
+              "summary": "点击轰炸机机翼或空白引擎分配装甲并模拟 100 架次出击，亲历沃尔德看透沉默数据的奇迹！"
             },
             {
               "id": "mind/mind-biases-prob-01/02-startup-graveyard-bias.html",
@@ -1767,9 +1767,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-biases-prob-01/02-startup-graveyard-bias.html",
               "title": "创业成功学幻觉：沉默的墓碑",
               "icon": "🪦",
-              "archetype": "simulation",
+              "archetype": "blind-lab",
               "concept": "样本截断 · 沉默证据 · 成功学失真",
-              "summary": "调节创业者总基数与“高风险豪赌”的真实存活率，看媒体聚光灯如何把 2% 幸存者放大成普遍规律！"
+              "summary": "关掉媒体热搜聚光灯，瞬间显影地下 47 座同样“辍学豪赌”却破产的沉默墓碑！"
             },
             {
               "id": "mind/mind-biases-prob-01/03-fund-survivorship-inflate.html",
@@ -1777,9 +1777,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-biases-prob-01/03-fund-survivorship-inflate.html",
               "title": "基金排行榜里的“清盘隐身术”",
               "icon": "📊",
-              "archetype": "comparison",
+              "archetype": "race",
               "concept": "基金幸存者偏差 · 业绩虚高 · 全样本回测",
-              "summary": "调节市场淘汰清盘率与初始基金数量，对比“只看现存基金平均收益”与“包含清盘基金真实收益”的落差！"
+              "summary": "一键清盘隐藏 4 只垫底基金，亲眼看平台宣传的平均年化收益率如何凭空暴涨 +8.6%！"
             }
           ]
         },
@@ -1793,7 +1793,7 @@ window.TAXONOMY_DATA = {
           "icon": "🍦",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么冰淇淋销量越高、溺水人数越多？为什么每一组都胜出的新药，合并统计后反而输了？",
+          "subtitle": "为什么冰淇淋销量和溺水率高度同步？两家医院分组全胜合并居然全输？",
           "difficulty": "进阶",
           "related": [
             "mind/mind-biases-prob-02",
@@ -1804,11 +1804,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-critical-thinking-01/01-confounder-icecream-svg.html",
               "file": "01-confounder-icecream-svg.html",
               "path": "./domains/mind/mind-critical-thinking-01/01-confounder-icecream-svg.html",
-              "title": "混杂变量幕后黑手：冰淇淋与溺水（SVG）",
+              "title": "混杂变量幕后黑手：冰淇淋与溺水",
               "icon": "🍦",
-              "archetype": "simulation",
-              "concept": "混杂变量 · 伪相关 · 控制变量",
-              "summary": "调节夏日气温与冰淇淋广告投入，直观拆穿“吃冰淇淋导致溺水”的因果幻觉！"
+              "archetype": "spatial",
+              "concept": "混杂变量 · 因果 DAG · 控制变量法",
+              "summary": "在因果图上揪出“夏季高温”幕后黑手，并锁定气温见证虚假相关性瞬间归零。"
             },
             {
               "id": "mind/mind-critical-thinking-01/02-simpsons-paradox-hospital.html",
@@ -1816,9 +1816,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-critical-thinking-01/02-simpsons-paradox-hospital.html",
               "title": "辛普森悖论：分组全胜，合并全输！",
               "icon": "🏥",
-              "archetype": "comparison",
-              "concept": "辛普森悖论 · 权重混杂 · 分层统计",
-              "summary": "调节名院接诊重症患者的比例，看为何救治率在轻症、重症两组都更高的名院，总治愈率却更低！"
+              "archetype": "blind-lab",
+              "concept": "辛普森悖论 · 分层切分 · 样本权重陷阱",
+              "summary": "先凭总存活率盲选医院，再按轻重症拆分同一份数据，亲历统计学最震撼的结论大反转。"
             },
             {
               "id": "mind/mind-critical-thinking-01/03-reverse-causality-check.html",
@@ -1826,9 +1826,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-critical-thinking-01/03-reverse-causality-check.html",
               "title": "因果箭头反转：是鸡生蛋还是蛋生鸡？",
               "icon": "↔️",
-              "archetype": "simulation",
-              "concept": "反向因果 · 时间先后 · 随机对照实验",
-              "summary": "调节双向因果权重与观测研究混杂度，体验为什么单看横截面相关系数永远分不清谁导致谁！"
+              "archetype": "scenario",
+              "concept": "反向因果 · 标题党拆解 · 因果方向核查",
+              "summary": "对三条误导性爆款标题进行事实核查，区分正向因果、反向因果与幕后混杂变量。"
             }
           ]
         },
@@ -1853,11 +1853,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-decision-making-01/01-system1-vs-system2-svg.html",
               "file": "01-system1-vs-system2-svg.html",
               "path": "./domains/mind/mind-decision-making-01/01-system1-vs-system2-svg.html",
-              "title": "双系统能耗与接管开关（SVG）",
+              "title": "双系统能耗与接管开关",
               "icon": "⚡",
-              "archetype": "simulation",
+              "archetype": "scenario",
               "concept": "系统1快思考 · 系统2慢思考 · 认知吝啬鬼",
-              "summary": "调节时间紧迫度与大脑疲劳度，看懒惰的系统 2 何时放任直觉系统 1 直接替你拍板！"
+              "summary": "在深夜直播倒计时、心算乘法与清晨清单等 4 个情景中，观察系统 1 与系统 2 谁握着方向盘！"
             },
             {
               "id": "mind/mind-decision-making-01/02-bat-and-ball-trap.html",
@@ -1865,9 +1865,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-decision-making-01/02-bat-and-ball-trap.html",
               "title": "球拍与球陷阱：直觉抢答验算器",
               "icon": "🏓",
-              "archetype": "comparison",
+              "archetype": "blind-lab",
               "concept": "认知反射测试 CRT · 直觉抢答 · 代数验算",
-              "summary": "调节总价与差价参数，直观对比系统 1 的错误“减法直觉”与系统 2 的正确“二元方程”！"
+              "summary": "先做 3 秒直觉抢答测试，再展开天平验算看系统 2 为何放行了 0.10 元的经典错误！"
             },
             {
               "id": "mind/mind-decision-making-01/03-cognitive-ease-trust.html",
@@ -1875,9 +1875,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-decision-making-01/03-cognitive-ease-trust.html",
               "title": "认知流畅度陷阱：排版顺眼就等于真实？",
               "icon": "✨",
-              "archetype": "simulation",
+              "archetype": "race",
               "concept": "认知放松 · 押韵效应 · 系统2休眠",
-              "summary": "调节陈述押韵度与视觉字体清晰度，看系统 1 的“轻松感”如何让系统 2 停止质疑真伪！"
+              "summary": "双栏对比押韵金句、精美排版与生涩文字，实测认知流畅度如何凭空抬高 +25% 轻信率！"
             }
           ]
         },
@@ -1891,7 +1891,7 @@ window.TAXONOMY_DATA = {
           "icon": "🔔",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么一点点紧张能让你超常发挥，压力再高一点却会大脑一片空白？",
+          "subtitle": "为什么一点点压力让你超常发挥，压力太大却在关键时刻彻底掉链子？",
           "difficulty": "入门",
           "related": [
             "mind/mind-motivation-habits-03",
@@ -1902,11 +1902,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-emotion-meta-01/01-yerkes-dodson-svg.html",
               "file": "01-yerkes-dodson-svg.html",
               "path": "./domains/mind/mind-emotion-meta-01/01-yerkes-dodson-svg.html",
-              "title": "压力-表现倒 U 曲线与任务难度偏移（SVG）",
+              "title": "压力-表现倒 U 曲线与任务难度偏移",
               "icon": "🔔",
               "archetype": "simulation",
-              "concept": "耶克斯-多德森定律 · 唤醒水平 · 最佳压力峰值",
-              "summary": "调节生理紧张唤醒度与任务复杂程度，观察高难度创意任务为何比简单体力活更怕过度施压！"
+              "concept": "耶克斯-多德森定律 · 倒 U 曲线 · 任务难度偏移",
+              "summary": "切换简单体能与高难创造任务并调节压力唤醒水平，观察最佳压力峰值如何大幅左移。"
             },
             {
               "id": "mind/mind-emotion-meta-01/02-choking-under-pressure.html",
@@ -1914,9 +1914,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-emotion-meta-01/02-choking-under-pressure.html",
               "title": "关键时刻“掉链子”：监控过载机制",
               "icon": "🏀",
-              "archetype": "simulation",
-              "concept": "高压失常 · 显性监控 · 前额叶接管干扰",
-              "summary": "调节比赛赌注压力与动作自动化熟练度，看紧张时“过度用脑去管肌肉动作”如何毁掉罚球！"
+              "archetype": "blind-lab",
+              "concept": "显式监控 · 百足虫困境 · 高压失常",
+              "summary": "两轮节奏点击盲测，亲身体验高压下逐帧自我监控如何拆散原本丝滑的自动化动作。"
             },
             {
               "id": "mind/mind-emotion-meta-01/03-stress-reappraisal-fuel.html",
@@ -1924,9 +1924,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-emotion-meta-01/03-stress-reappraisal-fuel.html",
               "title": "把紧张当成兴奋：心跳加速的重新归因",
               "icon": "💓",
-              "archetype": "comparison",
-              "concept": "压力心态 · 威胁反应 vs 挑战反应 · 心流助力",
-              "summary": "调节上台前的心率唤醒度，对比“告诉自己冷静别怕”与“告诉自己我很兴奋”两种话术的表现差距！"
+              "archetype": "scenario",
+              "concept": "焦虑重评 · 高唤醒顺势横移 · 机遇心态",
+              "summary": "在演讲、面试与大考前对比“强行冷静”与“把心跳解读为兴奋”，实测高唤醒顺势转舵。"
             }
           ]
         },
@@ -1940,7 +1940,7 @@ window.TAXONOMY_DATA = {
           "icon": "📉",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么考前通宵背 5 遍一周就忘光，而分散在 30 天里背 5 遍能记住一年？",
+          "subtitle": "为什么考前通宵背完 3 天就忘光，而拆成 4 次短复习能记半年？",
           "difficulty": "入门",
           "related": [
             "mind/mind-memory-learning-02",
@@ -1951,11 +1951,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-memory-learning-01/01-forgetting-curve-svg.html",
               "file": "01-forgetting-curve-svg.html",
               "path": "./domains/mind/mind-memory-learning-01/01-forgetting-curve-svg.html",
-              "title": "间隔重复锯齿曲线（SVG）",
+              "title": "间隔重复锯齿曲线",
               "icon": "📈",
-              "archetype": "simulation",
-              "concept": "艾宾浩斯遗忘曲线 · 记忆稳定性 S · 间隔扩张",
-              "summary": "调节复习次数与间隔拉长倍率，观察每次恰好在快忘时复习如何把记忆半衰期指数级拉平！"
+              "archetype": "builder",
+              "concept": "遗忘曲线 · 间隔重复 · 稳定性倍增",
+              "summary": "在 30 天日历上亲手摆放 4 个复习节点，实时对比密集堆砌与指数间隔的留存曲线。"
             },
             {
               "id": "mind/mind-memory-learning-01/02-cramming-vs-spacing.html",
@@ -1963,9 +1963,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-memory-learning-01/02-cramming-vs-spacing.html",
               "title": "考前突击 vs 间隔复习：30 天留存对决",
               "icon": "⚔️",
-              "archetype": "comparison",
-              "concept": "集中学习 · 分散效应 · 长期记忆留存",
-              "summary": "投入完全相同的总学习小时数，对比一次性突击与分散 4 次复习在 1 天后与 30 天后的成绩！"
+              "archetype": "race",
+              "concept": "集中突击 · 间隔效应 · 30 天留存反转",
+              "summary": "同样投入 6 小时，播放 30 天动态竞速，见证突击党第 2 天领先却在第 30 天崩盘。"
             },
             {
               "id": "mind/mind-memory-learning-01/03-optimal-review-window.html",
@@ -1973,9 +1973,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-memory-learning-01/03-optimal-review-window.html",
               "title": "最佳复习点：太早无效，太晚重学",
               "icon": "🎯",
-              "archetype": "simulation",
-              "concept": "必要难度 · 提取阈值 · 复习效率峰值",
-              "summary": "调节触发复习时的记忆剩余比例与材料难度，找到“快忘但还能想起来”的黄金复习甜点区！"
+              "archetype": "scenario",
+              "concept": "合意难度 · 黄金复习窗 · FSRS 原则",
+              "summary": "三组真实复习排期抉择，在倒 U 形收益曲线上定位 55%–80% 的黄金合意难度窗。"
             }
           ]
         },
@@ -1989,7 +1989,7 @@ window.TAXONOMY_DATA = {
           "icon": "🔁",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么你根本没想刷手机，手却像有独立意识一样自己解锁点开了短视频？",
+          "subtitle": "为什么坏习惯越想硬戒越容易反弹，而好习惯挂在旧习惯后面就丝滑？",
           "difficulty": "入门",
           "related": [
             "mind/mind-motivation-habits-04",
@@ -2000,11 +2000,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-motivation-habits-01/01-habit-loop-cycle-svg.html",
               "file": "01-habit-loop-cycle-svg.html",
               "path": "./domains/mind/mind-motivation-habits-01/01-habit-loop-cycle-svg.html",
-              "title": "四步习惯飞轮：从刻意到自动化（SVG）",
+              "title": "四步习惯飞轮：从刻意到自动化",
               "icon": "🔁",
               "archetype": "simulation",
-              "concept": "提示-渴求-反应-奖赏 · 基底神经节 · 习惯固化",
-              "summary": "调节触发提示显眼度与即时奖赏延迟，看一条行为回路如何在 66 天内交由大脑自动巡航！"
+              "concept": "习惯回路 · 多巴胺前移 · 基底神经节",
+              "summary": "模拟 66 天习惯飞轮运转，观察意志力消耗暴跌与多巴胺峰值前移到“提示”的瞬间。"
             },
             {
               "id": "mind/mind-motivation-habits-01/02-habit-substitution-hack.html",
@@ -2012,9 +2012,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-motivation-habits-01/02-habit-substitution-hack.html",
               "title": "戒除坏习惯密码：保留提示与奖赏，替换反应",
               "icon": "🔧",
-              "archetype": "comparison",
-              "concept": "黄金法则 · 习惯替换 · 抑制反弹",
-              "summary": "对比“硬靠意志力硬扛压抑”与“保留触发提示但替换健康反应”两种策略的 30 天破戒率！"
+              "archetype": "scenario",
+              "concept": "习惯改写黄金法则 · 真实奖赏 · 替换动作",
+              "summary": "在奶茶、熬夜刷手机和工作切屏三个情景中，对比硬戒与保留奖赏替换反应的 30 天成功率。"
             },
             {
               "id": "mind/mind-motivation-habits-01/03-habit-stacking-chain.html",
@@ -2022,9 +2022,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-motivation-habits-01/03-habit-stacking-chain.html",
               "title": "习惯叠加链：把新习惯挂在旧习惯尾巴上",
               "icon": "⛓️",
-              "archetype": "simulation",
-              "concept": "习惯叠加 · 稳定锚点 · 执行意图",
-              "summary": "调节锚点习惯的稳定度与新习惯的起步微缩门槛，计算新习惯连续打卡 21 天的成功率！"
+              "archetype": "builder",
+              "concept": "习惯叠加 · 执行意图 · 微习惯锚点",
+              "summary": "挑选高稳定日常旧锚点并挂载 2 分钟新微习惯，亲手焊接高执行率的专属习惯链。"
             }
           ]
         },
@@ -2049,11 +2049,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-perception-wm-01/01-spotlight-gorilla-svg.html",
               "file": "01-spotlight-gorilla-svg.html",
               "path": "./domains/mind/mind-perception-wm-01/01-spotlight-gorilla-svg.html",
-              "title": "注意聚光灯与无意视盲（SVG）",
+              "title": "注意聚光灯与无意视盲",
               "icon": "🔦",
-              "archetype": "simulation",
+              "archetype": "spatial",
               "concept": "选择性注意 · 无意视盲 · 聚光灯半径",
-              "summary": "调节任务专注强度与注意聚光灯半径，看视野边缘的意外目标是如何从意识中“隐身”的！"
+              "summary": "点击移动球场上的注意聚光灯或切全景模式，亲眼看清正中央的大猩猩为何会从意识隐身！"
             },
             {
               "id": "mind/mind-perception-wm-01/02-cocktail-party-filter.html",
@@ -2061,9 +2061,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-perception-wm-01/02-cocktail-party-filter.html",
               "title": "鸡尾酒会效应：双耳分听过滤器",
               "icon": "🍸",
-              "archetype": "simulation",
+              "archetype": "scenario",
               "concept": "鸡尾酒会效应 · 衰减过滤模型 · 关键唤醒词",
-              "summary": "调节环境背景噪音与目标对话聚焦度，观察名字等高优先级信号如何击穿注意力屏障！"
+              "summary": "在嘈杂派对背景中触发普通闲聊、喊你名字与着火警报，直观体验大脑衰减过滤器的低阈值击穿！"
             },
             {
               "id": "mind/mind-perception-wm-01/03-change-blindness-flicker.html",
@@ -2071,9 +2071,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-perception-wm-01/03-change-blindness-flicker.html",
               "title": "变化盲视：一次眨眼如何抹掉剧变？",
               "icon": "👁️",
-              "archetype": "comparison",
+              "archetype": "blind-lab",
               "concept": "变化盲视 · 视觉暂留中断 · 局部细节编码",
-              "summary": "调节画面闪烁遮挡间隔与场景复杂度，对比有无视觉中断时大脑察觉画面剧变的概率！"
+              "summary": "亲身体验带 250ms 眨眼闪烁与无闪烁直接切换的街景找茬，感受视觉暂留中断的盲视震撼！"
             }
           ]
         },
@@ -2098,11 +2098,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-biases-prob-02/01-bayes-base-rate-svg.html",
               "file": "01-bayes-base-rate-svg.html",
               "path": "./domains/mind/mind-biases-prob-02/01-bayes-base-rate-svg.html",
-              "title": "万人自然频率方块阵：贝叶斯直觉（SVG）",
+              "title": "万人自然频率方块阵：贝叶斯直觉",
               "icon": "🧮",
-              "archetype": "simulation",
+              "archetype": "spatial",
               "concept": "基础比率谬误 · 贝叶斯定理 · 自然频率",
-              "summary": "调节人群真实患病率（基础比率）与检测误报率，看“假阳性大军”是如何淹没真阳性的！"
+              "summary": "用 100 人自然频率方块矩阵直接数红/橙人头，三秒秒懂为何罕见病阳性大多是假警报！"
             },
             {
               "id": "mind/mind-biases-prob-02/02-taxi-cab-problem.html",
@@ -2110,9 +2110,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-biases-prob-02/02-taxi-cab-problem.html",
               "title": "卡尼曼蓝绿出租车难题",
               "icon": "🚕",
-              "archetype": "simulation",
+              "archetype": "blind-lab",
               "concept": "目击者可靠性 · 城市车辆基数 · 后验概率",
-              "summary": "调节绿车/蓝车全城占比与目击者夜间辨色准确率，算出肇事车真是蓝车的贝叶斯概率！"
+              "summary": "先凭直觉盲猜肇事车是蓝车的概率，再展开 100 辆车贝叶斯拆解树揭晓 41.4% 的震撼真相！"
             },
             {
               "id": "mind/mind-biases-prob-02/03-stereotype-vs-baserate.html",
@@ -2120,9 +2120,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-biases-prob-02/03-stereotype-vs-baserate.html",
               "title": "性格画像 vs 职业人数基数陷阱",
               "icon": "📚",
-              "archetype": "comparison",
+              "archetype": "race",
               "concept": "代表性启发式 · 忽视先验基数 · 图书管理员悖论",
-              "summary": "调节“内向爱看书”在两类人群中的匹配度与人群总数比，看直觉为何总猜错他的职业！"
+              "summary": "在不同社区人数基数下对比“腼腆爱整理”的农民与图书管理员，看穿生动画像的障眼法！"
             }
           ]
         },
@@ -2136,7 +2136,7 @@ window.TAXONOMY_DATA = {
           "icon": "🪒",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么“怎么解释都能自圆其说”的理论不是真理，反而是最典型的伪科学？",
+          "subtitle": "为什么“怎么解释都对”反而是伪科学？假设越多的模型为何预测越烂？",
           "difficulty": "进阶",
           "related": [
             "mind/mind-biases-prob-03",
@@ -2147,11 +2147,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-critical-thinking-02/01-popper-falsifiability-svg.html",
               "file": "01-popper-falsifiability-svg.html",
               "path": "./domains/mind/mind-critical-thinking-02/01-popper-falsifiability-svg.html",
-              "title": "波普尔可证伪性雷达：科学 vs 算命（SVG）",
+              "title": "波普尔可证伪性雷达：科学 vs 算命",
               "icon": "🔭",
-              "archetype": "simulation",
-              "concept": "可证伪性 · 风险预言 · 事后打补丁",
-              "summary": "调节理论做出“可被打脸预言”的精确度与事后强行找补丁的频率，看科学理论与伪科学的本质分水岭！"
+              "archetype": "blind-lab",
+              "concept": "波普尔可证伪性 · 划界标准 · 巴纳姆效应",
+              "summary": "鉴定四条论断，区分敢给出被打脸预言的科学命题与正反包圆的万能圆场话术。"
             },
             {
               "id": "mind/mind-critical-thinking-02/02-occams-razor-overfit.html",
@@ -2160,8 +2160,8 @@ window.TAXONOMY_DATA = {
               "title": "奥卡姆剃刀：假设越多，翻车越惨",
               "icon": "🪒",
               "archetype": "simulation",
-              "concept": "奥卡姆剃刀 · 简约原则 · 模型过拟合",
-              "summary": "调节为了解释现象额外堆叠的阴谋/特设假设条数，看联合概率如何断崖下跌、泛化预测如何崩盘！"
+              "concept": "奥卡姆剃刀 · 过度拟合 · 泛化预测",
+              "summary": "对比简洁直线与高阶曲线，投放全新未来测试点见证把噪音当规律背下来的惨烈翻车。"
             },
             {
               "id": "mind/mind-critical-thinking-02/03-invisible-dragon-garage.html",
@@ -2169,9 +2169,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-critical-thinking-02/03-invisible-dragon-garage.html",
               "title": "萨根“车库里的喷火龙”检验器",
               "icon": "🐉",
-              "archetype": "comparison",
-              "concept": "不可检验假设 · 举证责任 · 萨根法则",
-              "summary": "调节检验手段（拍照、红外、撒面粉）与辩护者追加免责借口的数量，拆穿“无法证伪的空话”！"
+              "archetype": "scenario",
+              "concept": "特设假设 · 车库里的喷火龙 · 举证责任",
+              "summary": "依次用手电、面粉、热像仪与油漆质询车库喷火龙，拆解层层叠补丁的不可证伪话术。"
             }
           ]
         },
@@ -2196,11 +2196,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-decision-making-02/01-prospect-value-curve-svg.html",
               "file": "01-prospect-value-curve-svg.html",
               "path": "./domains/mind/mind-decision-making-02/01-prospect-value-curve-svg.html",
-              "title": "前景理论 S 形价值函数（SVG）",
+              "title": "前景理论 S 形价值函数",
               "icon": "📉",
               "archetype": "simulation",
               "concept": "前景理论 · 损失厌恶系数 λ · 参照点依赖",
-              "summary": "调节损益金额与损失厌恶系数 λ，直观看到亏钱一侧为何比赚钱一侧陡峭 2.25 倍！"
+              "summary": "在抛硬币赌局中调节赢钱赔率，在 S 形价值曲线上直观看亏损悬崖为何比盈利陡峭 2.25 倍！"
             },
             {
               "id": "mind/mind-decision-making-02/02-endowment-effect-mug.html",
@@ -2208,9 +2208,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-decision-making-02/02-endowment-effect-mug.html",
               "title": "禀赋效应：一旦拥有，身价翻倍",
               "icon": "☕",
-              "archetype": "comparison",
+              "archetype": "blind-lab",
               "concept": "禀赋效应 · WTA vs WTP · 心理所有权",
-              "summary": "调节持有时长与情感投入度，对比买家的最高愿付价与卖家的最低愿售价之间的裂谷！"
+              "summary": "复现康奈尔马克杯、14 天免费试用与二手房僵局，直观拆解心理所有权 2.5 倍溢价裂谷！"
             },
             {
               "id": "mind/mind-decision-making-02/03-disposition-effect-stocks.html",
@@ -2218,9 +2218,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-decision-making-02/03-disposition-effect-stocks.html",
               "title": "处置效应：为何散户总爱卖盈留亏？",
               "icon": "📊",
-              "archetype": "simulation",
+              "archetype": "scenario",
               "concept": "处置效应 · 盈利求稳 · 亏损豪赌",
-              "summary": "调节持仓浮盈/浮亏幅度，观察前景理论如何在盈利时逼你落袋为安、亏损时诱你死扛加仓！"
+              "summary": "在急需用钱时二选一卖出浮盈牛股或浮亏烂股，亲身体验前景理论如何诱发“卖盈留亏”！"
             }
           ]
         },
@@ -2234,7 +2234,7 @@ window.TAXONOMY_DATA = {
           "icon": "🌈",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么同一件倒霉事，有人气到失眠三天，有人却能十分钟内笑着翻篇？",
+          "subtitle": "为什么强行憋住情绪反而更伤身，换个解释或精准说出感受却能瞬间降温？",
           "difficulty": "入门",
           "related": [
             "mind/mind-emotion-meta-01",
@@ -2245,11 +2245,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-emotion-meta-02/01-abc-reappraisal-svg.html",
               "file": "01-abc-reappraisal-svg.html",
               "path": "./domains/mind/mind-emotion-meta-02/01-abc-reappraisal-svg.html",
-              "title": "情绪 ABC 模型：事件 → 解释 → 情绪（SVG）",
+              "title": "情绪 ABC 模型：事件 → 解释 → 情绪",
               "icon": "🌈",
-              "archetype": "simulation",
-              "concept": "ABC 情绪模型 · 认知重评 · 灾难化扭曲",
-              "summary": "调节客观挫折严重度与主观“灾难化解释”程度，直观看到决定痛苦的往往不是 A，而是你的滤镜 B！"
+              "archetype": "builder",
+              "concept": "ABC 模型 · 认知重评 · 灾难化纠偏",
+              "summary": "为同一件“已读未回”或“当众挑刺”拔插三种解释信念模块，实时观察情绪温度计改道。"
             },
             {
               "id": "mind/mind-emotion-meta-02/02-reappraisal-vs-suppression.html",
@@ -2257,9 +2257,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-emotion-meta-02/02-reappraisal-vs-suppression.html",
               "title": "认知重评 vs 情绪压抑：身体暗伤对比",
               "icon": "🫀",
-              "archetype": "comparison",
-              "concept": "认知重评 · 表达抑制 · 交感神经代价",
-              "summary": "调节情绪刺激强度，对比“死命憋住装没事（压抑）”与“换视角重新解读（重评）”的血压负荷与记忆损耗！"
+              "archetype": "race",
+              "concept": "情绪压抑 · 交感神经暗伤 · 工作记忆损耗",
+              "summary": "播放冲突后 30 分钟身心指标赛，揭穿“表面憋住不发火”背后的血压飙升与脑力暴跌。"
             },
             {
               "id": "mind/mind-emotion-meta-02/03-affect-labeling-brake.html",
@@ -2267,9 +2267,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-emotion-meta-02/03-affect-labeling-brake.html",
               "title": "情绪命名刹车：说出感受即可降温杏仁核",
               "icon": "🏷️",
-              "archetype": "simulation",
-              "concept": "情绪粒度 · 情感标注 · 前额叶抑制",
-              "summary": "调节情绪风暴强度与精准命名颗粒度（从“好烦”到“感到被忽视后的委屈”），看杏仁核火势如何回落！"
+              "archetype": "scenario",
+              "concept": "情绪命名 · 情绪颗粒度 · rVLPFC 刹车",
+              "summary": "对比情绪反刍、粗糙贴标签与高颗粒度命名，直观观察前额叶语言区如何给杏仁核降温。"
             }
           ]
         },
@@ -2283,7 +2283,7 @@ window.TAXONOMY_DATA = {
           "icon": "📝",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么把书划满荧光笔读 4 遍，考试依然一片空白？",
+          "subtitle": "为什么划荧光笔读 5 遍一考就忘，合上书痛苦默写 1 遍却记得牢？",
           "difficulty": "入门",
           "related": [
             "mind/mind-memory-learning-01",
@@ -2294,11 +2294,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-memory-learning-02/01-testing-effect-svg.html",
               "file": "01-testing-effect-svg.html",
               "path": "./domains/mind/mind-memory-learning-02/01-testing-effect-svg.html",
-              "title": "测试效应：合上书本默写的威力（SVG）",
+              "title": "测试效应：合上书本默写的威力",
               "icon": "🧠",
-              "archetype": "comparison",
-              "concept": "测试效应 · 主动提取 · 熟悉感错觉",
-              "summary": "调节复习中“主动合书自测”的比例与延迟天数，看重复阅读的短期假象如何在 1 周后彻底崩塌！"
+              "archetype": "race",
+              "concept": "测试效应 · 提取练习 · 7 天延迟反转",
+              "summary": "复现 Roediger 经典实验，在 5 分钟与 7 天后切换考场，见证重复阅读与闭卷提取的大反转。"
             },
             {
               "id": "mind/mind-memory-learning-02/02-fluency-illusion-gap.html",
@@ -2306,9 +2306,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-memory-learning-02/02-fluency-illusion-gap.html",
               "title": "流畅感错觉：预测成绩 vs 真实成绩",
               "icon": "🪞",
-              "archetype": "simulation",
-              "concept": "能力错觉 · 识别 vs 回忆 · 元认知偏差",
-              "summary": "调节荧光笔重读遍数与闭卷自测次数，对比大脑自我感觉的“掌握度”和闭卷考场的真实得分！"
+              "archetype": "blind-lab",
+              "concept": "加工流畅感 · 能力错觉 · 闭卷自测",
+              "summary": "先读短文并预测自己的闭卷得分，再接受突击填空测试，亲手抓包主观高估落差。"
             },
             {
               "id": "mind/mind-memory-learning-02/03-feynman-retrieval-depth.html",
@@ -2316,9 +2316,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-memory-learning-02/03-feynman-retrieval-depth.html",
               "title": "费曼输出法：教别人是最强提取",
               "icon": "🎤",
-              "archetype": "simulation",
-              "concept": "费曼技巧 · 概念漏洞暴露 · 语义网络",
-              "summary": "调节知识结构复杂度与“用大白话讲清楚”的迭代轮次，看隐藏的概念黑洞如何被逐一揪出！"
+              "archetype": "builder",
+              "concept": "费曼技巧 · 剥离黑话 · 因果闭环",
+              "summary": "向 10 岁小学生组装“冰块为何浮水”的讲解脚本，实时识别专业黑话里的理解盲区。"
             }
           ]
         },
@@ -2332,7 +2332,7 @@ window.TAXONOMY_DATA = {
           "icon": "⏳",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么你昨晚信誓旦旦决定明天早起健身，早上闹钟一响却瞬间倒戈按了贪睡键？",
+          "subtitle": "为什么白天信誓旦旦要早睡学习，一到晚上就疯狂刷剧到凌晨？",
           "difficulty": "进阶",
           "related": [
             "mind/mind-motivation-habits-01",
@@ -2343,11 +2343,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-motivation-habits-02/01-hyperbolic-discounting-svg.html",
               "file": "01-hyperbolic-discounting-svg.html",
               "path": "./domains/mind/mind-motivation-habits-02/01-hyperbolic-discounting-svg.html",
-              "title": "双曲贴现偏好反转交叉点（SVG）",
+              "title": "双曲贴现偏好反转交叉点",
               "icon": "⏳",
               "archetype": "simulation",
-              "concept": "双曲贴现 · 偏好反转 · 现时偏误",
-              "summary": "调节冲动贴现率 k 与大目标价值，看“眼前小甜头”曲线如何在临近诱惑时瞬间反超“未来大回报”！"
+              "concept": "双曲贴现 · 偏好反转 · 即时满足",
+              "summary": "拖动距离诱惑的时间轴与冲动系数 k，亲眼见证小诱惑在眼前瞬间反超长期大回报。"
             },
             {
               "id": "mind/mind-motivation-habits-02/02-deadline-panic-monster.html",
@@ -2355,9 +2355,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-motivation-habits-02/02-deadline-panic-monster.html",
               "title": "死线恐慌怪：为什么拖到最后一晚才开工？",
               "icon": "👹",
-              "archetype": "simulation",
-              "concept": "拖延方程 · 延迟惩罚陡增 · 恐慌接管",
-              "summary": "调节任务厌恶度与距离截止日期剩余天数，看动机曲线如何在最后 24 小时垂直飙升突破开工线！"
+              "archetype": "race",
+              "concept": "死线恐慌怪 · 微死线拆分 · 熬夜质量折损",
+              "summary": "播放 10 天交稿竞速，对比单一死线通宵救火与 3 个微死线稳步交付的分数差距。"
             },
             {
               "id": "mind/mind-motivation-habits-02/03-ulysses-commitment-device.html",
@@ -2365,9 +2365,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-motivation-habits-02/03-ulysses-commitment-device.html",
               "title": "奥德修斯契约：用事前锁定战胜未来的自己",
               "icon": "⚓",
-              "archetype": "comparison",
-              "concept": "承诺机制 · 自我约束 · 跨期博弈",
-              "summary": "调节违约惩罚金/公开承诺强度与诱惑强度，看理性“现在的我”如何帮冲动“明天的我”锁定胜局！"
+              "archetype": "builder",
+              "concept": "奥德修斯契约 · 承诺装置 · 物理隔离",
+              "summary": "趁清醒时装配定时盒、经济对赌与社交绑定盾牌，实战抵挡今晚 22:00 塞壬诱惑波。"
             }
           ]
         },
@@ -2381,7 +2381,7 @@ window.TAXONOMY_DATA = {
           "icon": "🧠",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么电话号码超过 7 位就记不住，而加上横杠分成 3 段就瞬间轻松？",
+          "subtitle": "为什么记 11 位手机号必须分段，超过 4 个同时变量大脑就宕机？",
           "difficulty": "入门",
           "related": [
             "mind/mind-perception-wm-03",
@@ -2392,11 +2392,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-perception-wm-02/01-slot-overflow-svg.html",
               "file": "01-slot-overflow-svg.html",
               "path": "./domains/mind/mind-perception-wm-02/01-slot-overflow-svg.html",
-              "title": "工作记忆槽位溢出器（SVG）",
+              "title": "工作记忆槽位溢出器",
               "icon": "📦",
-              "archetype": "simulation",
-              "concept": "米勒定律 7±2 · 考恩 4 槽位 · 先进先出覆盖",
-              "summary": "调节同时塞入脑中的信息块数量与并发干扰任务，直观看到第 5 个以后槽位如何把旧记忆挤掉！"
+              "archetype": "builder",
+              "concept": "工作记忆容量 · 4 槽焦点 · 组块压缩",
+              "summary": "亲手往 4/7 个槽位里塞入信息碎片，观察溢出淘汰并用一键组块腾出空间。"
             },
             {
               "id": "mind/mind-perception-wm-02/02-phone-chunk-compare.html",
@@ -2404,9 +2404,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-perception-wm-02/02-phone-chunk-compare.html",
               "title": "11 位数字裸记 vs 分段记忆",
               "icon": "📱",
-              "archetype": "comparison",
-              "concept": "信息压缩 · 有效槽位占用 · 召回准确率",
-              "summary": "调节信息总长度与每组打包粒度，对比零散裸记和分组编码的工作记忆占用率与回忆准确率！"
+              "archetype": "blind-lab",
+              "concept": "3-4-4 分段 · 瞬时回忆 · 组块效应",
+              "summary": "两轮 3.5 秒瞬时记忆盲测，用自己的真实成绩验证 3-4-4 分段如何突破容量上限。"
             },
             {
               "id": "mind/mind-perception-wm-02/03-articulatory-loop-decay.html",
@@ -2415,8 +2415,8 @@ window.TAXONOMY_DATA = {
               "title": "语音回路：2 秒不默念就消散",
               "icon": "🔊",
               "archetype": "simulation",
-              "concept": "语音回路 · 复述刷新周期 · 信息衰减",
-              "summary": "调节语速与中途被打断的静音时长，观察工作记忆里的临时数字如何在 2 秒内迅速挥发！"
+              "concept": "语音回路 · 默念复述 · 语音抑制",
+              "summary": "实时模拟 2 秒语音衰减环，体验默念抢救与语音干扰锁死的鲜明反差。"
             }
           ]
         },
@@ -2441,11 +2441,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-biases-prob-03/01-echo-chamber-svg.html",
               "file": "01-echo-chamber-svg.html",
               "path": "./domains/mind/mind-biases-prob-03/01-echo-chamber-svg.html",
-              "title": "确认偏误与回音室极化器（SVG）",
+              "title": "确认偏误与回音室极化器",
               "icon": "📢",
               "archetype": "simulation",
               "concept": "确认偏误 · 选择性接触 · 信念极化",
-              "summary": "调节算法迎合度与人对反面证据的排斥度，看温和观点如何在 10 轮信息喂养后演变成极端偏见！"
+              "summary": "播放 10 轮算法喂养与破壁信息流对比，看温和观点如何被同温层推向极端撕裂！"
             },
             {
               "id": "mind/mind-biases-prob-03/02-wason-246-rule.html",
@@ -2453,9 +2453,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-biases-prob-03/02-wason-246-rule.html",
               "title": "沃森 2-4-6 实验：证实 vs 证伪",
               "icon": "🧪",
-              "archetype": "simulation",
+              "archetype": "blind-lab",
               "concept": "沃森选择任务 · 正向检验偏差 · 主动证伪",
-              "summary": "调节测试中“专挑符合猜想的例子”与“故意构造反例”的比例，看最快锁定真实规则需要几步！"
+              "summary": "亲手提交数字三元组检验隐藏规则，体验为何只测证实案例猜不出真相、反例才能一剑封喉！"
             },
             {
               "id": "mind/mind-biases-prob-03/03-biased-assimilation.html",
@@ -2463,9 +2463,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-biases-prob-03/03-biased-assimilation.html",
               "title": "双重标准显微镜：严审反方，轻信己方",
               "icon": "🔬",
-              "archetype": "comparison",
+              "archetype": "scenario",
               "concept": "动机性推理 · 证据审查双标 · 事实免疫",
-              "summary": "调节对己方证据的宽松度与对反方证据的苛刻度，看客观事实被过滤后如何变成失真的信念更新！"
+              "summary": "戴上支持者、反对者与盲审科学家三种滤镜读同一份中立报告，看穿动机性推理双标！"
             }
           ]
         },
@@ -2479,7 +2479,7 @@ window.TAXONOMY_DATA = {
           "icon": "⚛️",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么大家都在照抄同行卖 600 美元/度的电池包时，马斯克拆到金属原料发现成本只要 80 美元？",
+          "subtitle": "为什么大多数创新只是 10% 微调，而拆到物理底层却能暴降 86% 成本？",
           "difficulty": "进阶",
           "related": [
             "mind/mind-memory-learning-04",
@@ -2490,11 +2490,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-critical-thinking-03/01-first-principles-battery-svg.html",
               "file": "01-first-principles-battery-svg.html",
               "path": "./domains/mind/mind-critical-thinking-03/01-first-principles-battery-svg.html",
-              "title": "电池成本拆解：类比报价 vs 第一性原理（SVG）",
+              "title": "电池成本拆解：类比报价 vs 第一性原理",
               "icon": "🔋",
-              "archetype": "comparison",
-              "concept": "第一性原理 · 物理底线拆解 · 行业惯例溢价",
-              "summary": "调节行业惯例加价与原料重组效率，直观对比“按历史报价微调”和“拆到物理原子重算”的十倍价差！"
+              "archetype": "builder",
+              "concept": "第一性原理 · 原材料底价 · 剥离供应链溢价",
+              "summary": "从 $600/kWh 的行业历史报价出发，逐层剥离溢价包袱，直抵 $82/kWh 物理原材料底价。"
             },
             {
               "id": "mind/mind-critical-thinking-03/02-analogy-vs-first-tradeoff.html",
@@ -2502,9 +2502,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-critical-thinking-03/02-analogy-vs-first-tradeoff.html",
               "title": "何时用类比？何时用第一性原理？",
               "icon": "⚖️",
-              "archetype": "simulation",
-              "concept": "决策能耗 · 渐进优化 · 范式颠覆",
-              "summary": "调节问题创新收益上限与思考时间预算，找到“省电类比”和“高耗能第一性原理”的最佳切换边界！"
+              "archetype": "scenario",
+              "concept": "思维算力分配 · 类比迁移 · 避免过度设计",
+              "summary": "在吃午饭、造火箭与写内部后台三个场景中权衡算力，学会把第一性原理留给核心瓶颈。"
             },
             {
               "id": "mind/mind-critical-thinking-03/03-assumption-peeler.html",
@@ -2512,9 +2512,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-critical-thinking-03/03-assumption-peeler.html",
               "title": "隐含假设剥洋葱：物理定律 vs 历史包袱",
               "icon": "🧅",
-              "archetype": "simulation",
-              "concept": "隐含前提 · 物理约束 · 社会惯例",
-              "summary": "调节逐层剥离行业潜规则的深度，看真正不可违背的“硬物理边界”其实只占多大一块！"
+              "archetype": "blind-lab",
+              "concept": "隐含假设 · 物理硬约束 · 历史惯性包袱",
+              "summary": "鉴定四条行业“常识”，剥离伪装成自然法则的历史习惯，定位颠覆式创新入口。"
             }
           ]
         },
@@ -2539,11 +2539,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-decision-making-03/01-anchoring-pull-svg.html",
               "file": "01-anchoring-pull-svg.html",
               "path": "./domains/mind/mind-decision-making-03/01-anchoring-pull-svg.html",
-              "title": "数字锚点引力场（SVG）",
+              "title": "数字锚点引力场",
               "icon": "⚓",
-              "archetype": "simulation",
+              "archetype": "blind-lab",
               "concept": "锚定与调整启发式 · 调整不足 · 随机锚污染",
-              "summary": "调节商家先抛出的高价锚点与个人对该商品的熟悉度，看你的心理估价是如何被无形拉偏的！"
+              "summary": "复现卡尼曼随机转盘（10 vs 65）与商场标价锚点实验，亲眼看无关数字如何拽偏心理估价！"
             },
             {
               "id": "mind/mind-decision-making-03/02-mental-accounting-ticket.html",
@@ -2551,9 +2551,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-decision-making-03/02-mental-accounting-ticket.html",
               "title": "心理账户：丢电影票 vs 丢现金悖论",
               "icon": "🎟️",
-              "archetype": "comparison",
+              "archetype": "scenario",
               "concept": "心理账户 · 资金不可替代错觉 · 塞勒实验",
-              "summary": "调节票价金额与预算紧张度，对比“丢了一张 100 元票”与“丢了一张 100 元钞票”时人们重买意愿的巨大鸿沟！"
+              "summary": "对比丢 100 元电影票与丢 100 元钞票两个数学等价情景，拆解大脑“心理抽屉”记账奥秘！"
             },
             {
               "id": "mind/mind-decision-making-03/03-windfall-spending-bias.html",
@@ -2561,9 +2561,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-decision-making-03/03-windfall-spending-bias.html",
               "title": "意外之财效应：奖金为何比工资花得快？",
               "icon": "🎁",
-              "archetype": "simulation",
+              "archetype": "builder",
               "concept": "心理账户分类 · 意外之财边际消费倾向 · 资金同质性",
-              "summary": "调节资金来源标签（血汗工资 vs 退税/年终奖）与消费冲动度，看同样 1000 元为何被花出截然不同的命运！"
+              "summary": "给同一张 1000 元贴上月薪、退税或抽奖标签，直观观察它流入储蓄与冲动挥霍的惊人差异！"
             }
           ]
         },
@@ -2577,7 +2577,7 @@ window.TAXONOMY_DATA = {
           "icon": "🔭",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么顶级学习者和决策者都会在脑子里装一个“上帝视角监控器”？",
+          "subtitle": "为什么有人自信满满却频频翻车，而高手总能提前嗅出自己的知识盲区？",
           "difficulty": "进阶",
           "related": [
             "mind/mind-biases-prob-04",
@@ -2588,11 +2588,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-emotion-meta-03/01-calibration-curve-svg.html",
               "file": "01-calibration-curve-svg.html",
               "path": "./domains/mind/mind-emotion-meta-03/01-calibration-curve-svg.html",
-              "title": "信心校准曲线：你说 80% 把握时真的对 80% 吗？（SVG）",
+              "title": "信心校准曲线：你说 80% 把握时真的对 80% 吗？",
               "icon": "🔭",
-              "archetype": "simulation",
-              "concept": "元认知校准 · 过度自信 · 校准误差",
-              "summary": "调节预测过度自信偏移与决策日志复盘频率，观察你的信心曲线如何向 45° 完美校准对角线靠拢！"
+              "archetype": "blind-lab",
+              "concept": "信心校准 · 过度自信盲区 · 超级预测者",
+              "summary": "作答 5 道反直觉冷知识并押注把握度，在 45° 校准线上实测你的元认知偏差。"
             },
             {
               "id": "mind/mind-emotion-meta-03/02-johari-known-unknowns.html",
@@ -2600,9 +2600,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-emotion-meta-03/02-johari-known-unknowns.html",
               "title": "知识四象限：已知未知 vs 未知的未知",
               "icon": "🧭",
-              "archetype": "simulation",
-              "concept": "拉姆斯菲尔德矩阵 · 盲区探索 · 外部反馈",
-              "summary": "调节跨界阅读探索度与主动求批评意愿，把最致命的“不知道自己不知道”压缩进可控边界！"
+              "archetype": "spatial",
+              "concept": "知识四象限 · 未知的未知 · 外部探针",
+              "summary": "点击探索 2×2 知识空间矩阵，开启同行盲审、事前验尸与灰度探针压缩致命红区。"
             },
             {
               "id": "mind/mind-emotion-meta-03/03-metacognitive-pause-loop.html",
@@ -2610,9 +2610,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-emotion-meta-03/03-metacognitive-pause-loop.html",
               "title": "元认知三问刹车：计划 → 监控 → 复盘",
               "icon": "🔄",
-              "archetype": "comparison",
-              "concept": "元认知循环 · 策略中途纠偏 · 盲目蛮干",
-              "summary": "调节解题中途停下来检查方向的频率，对比“闷头死算到底”与“元认知动态调舵”的成功率！"
+              "archetype": "builder",
+              "concept": "元认知闭环 · 计划监控复盘 · 避免假忙",
+              "summary": "为 10 小时项目装配开工前、进行中与收尾后三道刹车，实时抢回 6 小时返工内耗。"
             }
           ]
         },
@@ -2626,7 +2626,7 @@ window.TAXONOMY_DATA = {
           "icon": "🔀",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么按章节刷 50 道同类型题越做越顺，一到综合考场却连该用哪个公式都判不出来？",
+          "subtitle": "为什么连续刷 50 道同类型题当时超顺手，上考场却瞬间懵圈？",
           "difficulty": "进阶",
           "related": [
             "mind/mind-memory-learning-01",
@@ -2637,11 +2637,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-memory-learning-03/01-interleaving-vs-blocked-svg.html",
               "file": "01-interleaving-vs-blocked-svg.html",
               "path": "./domains/mind/mind-memory-learning-03/01-interleaving-vs-blocked-svg.html",
-              "title": "练习期顺手 vs 考场识别率反转（SVG）",
+              "title": "练习期顺手 vs 考场识别率反转",
               "icon": "🔄",
-              "archetype": "comparison",
-              "concept": "交错练习 · 题型辨别力 · 练习-表现悖论",
-              "summary": "调节题型混合交错程度与题目种类数，观察为什么练习时感觉更痛苦的交错组，考场正确率反而暴涨！"
+              "archetype": "race",
+              "concept": "交错练习 · 集中刷题 · 考场 3 倍反转",
+              "summary": "复现 Rohrer 几何实验，对比集中刷题与交错混刷从练习期到一周后考场的 3 倍反转。"
             },
             {
               "id": "mind/mind-memory-learning-03/02-strategy-selection-tax.html",
@@ -2649,9 +2649,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-memory-learning-03/02-strategy-selection-tax.html",
               "title": "解题两步：选对工具 vs 算对步骤",
               "icon": "🧰",
-              "archetype": "simulation",
-              "concept": "策略选择 · 执行自动化 · 真实场景迁移",
-              "summary": "调节“纯套路连刷”与“随机混编”的题量分配，看真实综合测验中哪一步才是真正的丢分黑洞！"
+              "archetype": "blind-lab",
+              "concept": "策略判别 · 章节标签依赖 · 混合抽测",
+              "summary": "先做带章节剧透的集中题，再做撕掉标签的交错混测，亲身体验自主判别工具的难度。"
             },
             {
               "id": "mind/mind-memory-learning-03/03-motor-skill-interleaving.html",
@@ -2659,9 +2659,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-memory-learning-03/03-motor-skill-interleaving.html",
               "title": "运动与乐器：随机变奏为何比死磕单动作稳？",
               "icon": "⚾",
-              "archetype": "simulation",
-              "concept": "情境干扰效应 · 运动程序重建 · 抗压稳定性",
-              "summary": "调节棒球挥棒/投篮训练中的球路随机度，看大脑每次“重建动作程序”带来的比赛抗压红利！"
+              "archetype": "scenario",
+              "concept": "情境干扰效应 · 运动技能迁移 · 动作计划重建",
+              "summary": "化身棒球、钢琴与羽毛球教练排课，观察“训练场爽感”与“比赛实战提升”的反向定律。"
             }
           ]
         },
@@ -2675,7 +2675,7 @@ window.TAXONOMY_DATA = {
           "icon": "🌊",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么打游戏一转眼就过了 3 小时，而做太简单的表或太难的题 5 分钟就想放弃？",
+          "subtitle": "为什么打游戏能连玩 5 小时不累，写报告 10 分钟就想摸鱼？",
           "difficulty": "入门",
           "related": [
             "mind/mind-emotion-meta-01",
@@ -2686,11 +2686,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-motivation-habits-03/01-flow-channel-map-svg.html",
               "file": "01-flow-channel-map-svg.html",
               "path": "./domains/mind/mind-motivation-habits-03/01-flow-channel-map-svg.html",
-              "title": "契克森米哈赖心流通道图（SVG）",
+              "title": "契克森米哈赖心流通道图",
               "icon": "🌊",
-              "archetype": "simulation",
-              "concept": "心流通道 · 焦虑区 · 厌倦区",
-              "summary": "调节任务挑战难度与自身技能水平，在二维坐标系中实时移动状态点，精准落入黄金心流走廊！"
+              "archetype": "spatial",
+              "concept": "心流通道 · 挑战技能平衡 · +4% 黄金张力",
+              "summary": "在技能 × 挑战二维空间中自由点击，探索焦虑、心流、无聊与淡漠四区的即时调校法。"
             },
             {
               "id": "mind/mind-motivation-habits-03/02-feedback-clarity-flow.html",
@@ -2698,9 +2698,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-motivation-habits-03/02-feedback-clarity-flow.html",
               "title": "心流三要素：目标清晰 + 即时反馈",
               "icon": "🎯",
-              "archetype": "simulation",
-              "concept": "清晰目标 · 即时反馈 · 沉浸深度",
-              "summary": "调节目标明确度与反馈延迟，解释为何游戏和写代码极易进入心流、而模糊的“写个大方案”让人痛苦！"
+              "archetype": "builder",
+              "concept": "清晰目标 · 即时反馈 · 工作游戏化",
+              "summary": "给枯燥的季度报告装配微目标、实时反馈与难度校准件，将心流概率从 18% 拉到 94%。"
             },
             {
               "id": "mind/mind-motivation-habits-03/03-flow-ramp-up-interrupt.html",
@@ -2708,9 +2708,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-motivation-habits-03/03-flow-ramp-up-interrupt.html",
               "title": "心流爬坡期：15 分钟才入戏，1 秒被打断",
               "icon": "⏱️",
-              "archetype": "comparison",
-              "concept": "心流进入门槛 · 深度沉浸保护 · 碎片时间陷阱",
-              "summary": "调节单次无打扰整块时间长度，看碎片化 15 分钟切片为何永远进不了真正的心流高峰！"
+              "archetype": "race",
+              "concept": "15 分钟爬坡期 · 碎片打断清零 · 深度工作",
+              "summary": "播放 60 分钟深度工作竞速，看每 15 分钟回 1 条消息如何把全小时心流时间直接归零。"
             }
           ]
         },
@@ -2724,7 +2724,7 @@ window.TAXONOMY_DATA = {
           "icon": "🤯",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么花哨的 PPT 动画和杂乱排版反而让你听不懂原本不难的知识？",
+          "subtitle": "为什么信息一多脑子就转不动，一边回消息一边写代码效率暴跌？",
           "difficulty": "入门",
           "related": [
             "mind/mind-perception-wm-02",
@@ -2735,11 +2735,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-perception-wm-03/01-cognitive-load-stack-svg.html",
               "file": "01-cognitive-load-stack-svg.html",
               "path": "./domains/mind/mind-perception-wm-03/01-cognitive-load-stack-svg.html",
-              "title": "三类认知负荷堆叠槽（SVG）",
+              "title": "三类认知负荷堆叠槽",
               "icon": "🧱",
-              "archetype": "simulation",
+              "archetype": "builder",
               "concept": "内在负荷 · 外在负荷 · 相关负荷",
-              "summary": "调节知识本身难度与页面冗余噪音，看杂乱设计（外在负荷）如何把留给深度理解的空间彻底挤爆！"
+              "summary": "亲手开关内在、外在与相关负荷模块，把爆表的教学页面重构成高转化设计。"
             },
             {
               "id": "mind/mind-perception-wm-03/02-multitasking-switch-tax.html",
@@ -2747,9 +2747,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-perception-wm-03/02-multitasking-switch-tax.html",
               "title": "多任务切换税：注意残留计算器",
               "icon": "🔀",
-              "archetype": "simulation",
-              "concept": "任务切换成本 · 注意残留 · 深度工作损耗",
-              "summary": "调节每小时切去看消息的次数与任务复杂度，计算你一天真正用于有效思考的净时间还剩多少！"
+              "archetype": "race",
+              "concept": "多任务切换税 · 注意残留 · 单线程批处理",
+              "summary": "单线程批处理 vs 交替多任务双轨实测，用你的真实秒表测出大脑切换税。"
             },
             {
               "id": "mind/mind-perception-wm-03/03-split-attention-effect.html",
@@ -2757,9 +2757,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-perception-wm-03/03-split-attention-effect.html",
               "title": "注意分散效应：图注分离 vs 原位标注",
               "icon": "🗺️",
-              "archetype": "comparison",
-              "concept": "注意分散效应 · 空间邻近原则 · 视觉搜索税",
-              "summary": "调节图表信息点数量与图文分离距离，对比“看图再翻文字找图例”和“原位标注”的认知能耗！"
+              "archetype": "blind-lab",
+              "concept": "注意分散效应 · 空间邻近原则 · 眼球跳转",
+              "summary": "两轮结构图寻物盲测，直观感受眼球在图表与图例间来回扫视的时间代价。"
             }
           ]
         },
@@ -2784,11 +2784,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-biases-prob-04/01-dunning-kruger-curve-svg.html",
               "file": "01-dunning-kruger-curve-svg.html",
               "path": "./domains/mind/mind-biases-prob-04/01-dunning-kruger-curve-svg.html",
-              "title": "达克效应“愚昧之山”曲线（SVG）",
+              "title": "达克效应“愚昧之山”曲线",
               "icon": "🏔️",
               "archetype": "simulation",
               "concept": "达克效应 · 愚昧之山 · 绝望之谷",
-              "summary": "拖动领域真实能力值与外部反馈频率，看自信心如何先飙上山顶、再摔进绝望谷，最终稳步爬坡！"
+              "summary": "播放从零基础到宗师的成长轨迹，体验自信心冲上愚昧之山顶再摔进绝望之谷的反转！"
             },
             {
               "id": "mind/mind-biases-prob-04/02-double-burden-metacognition.html",
@@ -2796,9 +2796,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-biases-prob-04/02-double-burden-metacognition.html",
               "title": "双重诅咒：能力差所以测不出自己差",
               "icon": "🎯",
-              "archetype": "simulation",
+              "archetype": "blind-lab",
               "concept": "元认知双重负担 · 能力与自知同源 · 错位校准",
-              "summary": "调节真实技能分与客观评分标准透明度，观察为何低分群体最容易严重高估自己的排名！"
+              "summary": "复现 1999 年达宁-克鲁格原论文四分位数据，对比垫底群体高估 +50% 与顶尖群体反低估！"
             },
             {
               "id": "mind/mind-biases-prob-04/03-expert-impostor-syndrome.html",
@@ -2806,9 +2806,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-biases-prob-04/03-expert-impostor-syndrome.html",
               "title": "专家的反向错觉：错误共识与冒充者感",
               "icon": "🎭",
-              "archetype": "comparison",
+              "archetype": "scenario",
               "concept": "错误共识效应 · 冒充者综合征 · 知识诅咒",
-              "summary": "调节专家真实水平与圈子均值参照系，看为何高手总觉得“这不是很常识吗，别人肯定也会”！"
+              "summary": "在顶尖同行圈与全人群全局参照系之间一键切换，瞬间看破冒充者综合征的心理根源！"
             }
           ]
         },
@@ -2822,7 +2822,7 @@ window.TAXONOMY_DATA = {
           "icon": "🩺",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么开工前问“可能出啥问题”没人敢说真话，改成“假设一年后项目惨败了，请写死因”却能救命？",
+          "subtitle": "为什么开工前假设“项目已经彻底惨败”，反而能让成功率暴涨？",
           "difficulty": "入门",
           "related": [
             "mind/mind-biases-prob-03",
@@ -2833,11 +2833,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-critical-thinking-04/01-premortem-vs-planning-svg.html",
               "file": "01-premortem-vs-planning-svg.html",
               "path": "./domains/mind/mind-critical-thinking-04/01-premortem-vs-planning-svg.html",
-              "title": "事前验尸 vs 乐观计划谬误（SVG）",
+              "title": "事前验尸 vs 乐观计划谬误",
               "icon": "🩺",
-              "archetype": "comparison",
-              "concept": "事前验尸 · 计划谬误 · 预期后见之明",
-              "summary": "调节团队盲目乐观度与事前验尸盲点挖掘率，对比普通评审会与事前验尸的项目存活率差距！"
+              "archetype": "race",
+              "concept": "事前验尸 · 前瞻性后见之明 · 计划谬误",
+              "summary": "播放 90 天上线竞速，看开工前提前排雷如何避开第 50 天暗雷爆发并准时通关。"
             },
             {
               "id": "mind/mind-critical-thinking-04/02-psychological-safety-dissent.html",
@@ -2845,9 +2845,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-critical-thinking-04/02-psychological-safety-dissent.html",
               "title": "为什么“假设已失败”能打破群体迷思？",
               "icon": "🗣️",
-              "archetype": "simulation",
-              "concept": "群体迷思 · 反对合法化 · 沉默螺旋",
-              "summary": "调节领导拍板强势度，对比常规讨论和事前验尸匿名写死因下，一线员工敢于说出致命隐患的比例！"
+              "archetype": "scenario",
+              "concept": "群体迷思 · 心理安全感 · 合法异见",
+              "summary": "切换传统评审提问与事前验尸指令，偷听团队内心真话与异见暴露率从 18% 到 86% 的翻转。"
             },
             {
               "id": "mind/mind-critical-thinking-04/03-kill-criteria-tripwire.html",
@@ -2855,9 +2855,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-critical-thinking-04/03-kill-criteria-tripwire.html",
               "title": "给未来埋好“熔断绊线”：防沉没成本",
               "icon": "⚡",
-              "archetype": "simulation",
-              "concept": "事前止损线 · 风险预案 · 熔断触发器",
-              "summary": "调节事前写死的止损触发指标清晰度与危机爆发强度，看预设绊线能替项目挽回多少惨重损失！"
+              "archetype": "builder",
+              "concept": "熔断绊线 · 量化止损 · 沉没成本防御",
+              "summary": "在开工前埋下留存、预算与时间三道量化红线，模拟 6 个月遇冷危机抢救 70% 弹药。"
             }
           ]
         },
@@ -2882,11 +2882,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-decision-making-04/01-sunk-cost-spiral-svg.html",
               "file": "01-sunk-cost-spiral-svg.html",
               "path": "./domains/mind/mind-decision-making-04/01-sunk-cost-spiral-svg.html",
-              "title": "沉没成本黑洞：止损 vs 死扛对比（SVG）",
+              "title": "沉没成本黑洞：止损 vs 死扛对比",
               "icon": "🕳️",
-              "archetype": "comparison",
+              "archetype": "race",
               "concept": "沉没成本 · 协和谬误 · 边际未来净值",
-              "summary": "调节前期已砸沉没成本与后续真实翻盘胜率，对比“果断止损”与“为了回本硬撑”的最终净亏损！"
+              "summary": "对比立刻止损与为了回本继续追加投资的双轨账本，一眼看穿不可逆灰块与新增红块！"
             },
             {
               "id": "mind/mind-decision-making-04/02-bad-movie-walkout.html",
@@ -2894,9 +2894,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-decision-making-04/02-bad-movie-walkout.html",
               "title": "烂片离场计算器：别拿未来时间陪葬",
               "icon": "🎬",
-              "archetype": "simulation",
+              "archetype": "scenario",
               "concept": "不可逆成本 · 机会成本 · 时间止损",
-              "summary": "调节已花票价与电影剩余折磨时长，看理性决策为何永远与“已经花掉的票钱”彻底无关！"
+              "summary": "在 80 元烂片情景下对比硬坐回本与果断离场，学会绝不拿未来 90 分钟给过去陪葬！"
             },
             {
               "id": "mind/mind-decision-making-04/03-concorde-escalation.html",
@@ -2904,9 +2904,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-decision-making-04/03-concorde-escalation.html",
               "title": "协和式飞机效应：承诺升级陷阱",
               "icon": "🛫",
-              "archetype": "simulation",
+              "archetype": "blind-lab",
               "concept": "承诺升级 · 面子成本 · 外部接班人视角",
-              "summary": "调节决策者个人声誉绑定度与已投入年数，看为何“换一个新 CEO”往往能瞬间砍掉烂尾项目！"
+              "summary": "切换原 CEO 与新空降 CEO 视角审视同一份烂尾财报，掌握英特尔格鲁夫“旋转门止损法”！"
             }
           ]
         },
@@ -2920,7 +2920,7 @@ window.TAXONOMY_DATA = {
           "icon": "🕊️",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么笼门明明已经打开了，曾经屡次受挫的人却连迈出一步都不敢试？",
+          "subtitle": "为什么连续受挫几次后，明明出路近在眼前却连尝试的力气都没了？",
           "difficulty": "入门",
           "related": [
             "mind/mind-emotion-meta-02",
@@ -2931,11 +2931,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-emotion-meta-04/01-learned-helplessness-svg.html",
               "file": "01-learned-helplessness-svg.html",
               "path": "./domains/mind/mind-emotion-meta-04/01-learned-helplessness-svg.html",
-              "title": "习得性无助形成与“小胜破冰”器（SVG）",
+              "title": "习得性无助形成与“小胜破冰”器",
               "icon": "🕊️",
               "archetype": "simulation",
-              "concept": "习得性无助 · 塞利格曼实验 · 掌控感重建",
-              "summary": "调节早期不可控受挫次数与后续“微胜利”积累数，看大脑如何从彻底躺平重新点亮主动尝试！"
+              "concept": "习得性无助 · 主观掌控感 · 小胜破冰",
+              "summary": "模拟连续不可控挫败如何让人在出口打开后仍僵立不动，再用 3 次可控小胜重启引擎。"
             },
             {
               "id": "mind/mind-emotion-meta-04/02-explanatory-style-3p.html",
@@ -2943,9 +2943,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-emotion-meta-04/02-explanatory-style-3p.html",
               "title": "归因风格 3P 诊断仪：悲观 vs 韧性",
               "icon": "🧭",
-              "archetype": "simulation",
-              "concept": "永久性 · 普遍性 · 个人化归因",
-              "summary": "调节面对失败时的永久化、泛化与自我全盘否定程度，看同样的挫折如何分化出崩溃与反脆弱！"
+              "archetype": "scenario",
+              "concept": "3P 归因风格 · 悲观 vs 韧性 · 局部止损",
+              "summary": "围绕项目被否情境调校个人化、永久性与普遍性三道开关，直观见证心理反弹力飙升。"
             },
             {
               "id": "mind/mind-emotion-meta-04/03-locus-of-control-radar.html",
@@ -2953,9 +2953,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-emotion-meta-04/03-locus-of-control-radar.html",
               "title": "控制圈 vs 关注圈：把精力收回可控处",
               "icon": "⭕",
-              "archetype": "comparison",
-              "concept": "内控点 · 控制二分法 · 焦虑消解",
-              "summary": "调节投入在“不可控外界噪音”与“自身可控行动”的精力比例，看掌控感与行动力如何同步回升！"
+              "archetype": "spatial",
+              "concept": "控制圈 · 关注圈 · 斯多葛二分法",
+              "summary": "在同心圆空间中分拣 6 件日常焦虑事项，放手不可控外圈让绿色核心控制圈向外扩张。"
             }
           ]
         },
@@ -2969,7 +2969,7 @@ window.TAXONOMY_DATA = {
           "icon": "♟️",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么象棋大师瞄一眼棋盘就能记住 25 颗棋子，但换成随机乱摆的棋盘就和新手一样记不住？",
+          "subtitle": "为什么象棋大师扫一眼能记住整盘棋，但把棋子乱摆就立刻变回普通人？",
           "difficulty": "进阶",
           "related": [
             "mind/mind-perception-wm-02",
@@ -2980,11 +2980,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-memory-learning-04/01-chess-chunking-svg.html",
               "file": "01-chess-chunking-svg.html",
               "path": "./domains/mind/mind-memory-learning-04/01-chess-chunking-svg.html",
-              "title": "象棋大师的“作弊器”：真实棋局 vs 乱摆棋盘（SVG）",
+              "title": "象棋大师的“作弊器”：真实棋局 vs 乱摆棋盘",
               "icon": "♟️",
-              "archetype": "comparison",
-              "concept": "组块化 · 长期工作记忆 · 领域模式库",
-              "summary": "调节棋手经验等级与棋盘局面合理度，复现切斯与西蒙经典实验，看大师记忆神技如何瞬间失灵！"
+              "archetype": "spatial",
+              "concept": "组块化 · 真实棋局 vs 随机棋盘 · 工作记忆压缩",
+              "summary": "在 8×8 棋盘上切换真实棋局与随机乱摆，开启大师组块透视，看清 16 子如何压缩进 4 槽。"
             },
             {
               "id": "mind/mind-memory-learning-04/02-expert-pattern-library.html",
@@ -2993,8 +2993,8 @@ window.TAXONOMY_DATA = {
               "title": "专家直觉 = 5 万个高质量组块",
               "icon": "📚",
               "archetype": "simulation",
-              "concept": "模式识别 · 刻意练习 · 组块压缩比",
-              "summary": "调节大脑积累的领域模式库规模与问题复杂度，看新手和专家处理同一难题所需的工作记忆槽位数！"
+              "concept": "专家直觉 · 模式识别 · 长时记忆索引",
+              "summary": "在急诊、排障与消防场景调节组块库存规模，模拟新手慢速排查到大师 0.4 秒直觉命中的质变。"
             },
             {
               "id": "mind/mind-memory-learning-04/03-chunk-transfer-trap.html",
@@ -3002,9 +3002,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-memory-learning-04/03-chunk-transfer-trap.html",
               "title": "组块的双刃剑：定势思维陷阱",
               "icon": "🧱",
-              "archetype": "simulation",
-              "concept": "心理定势 · 功能固着 · 打破旧组块",
-              "summary": "调节过往套路熟练度与新问题规则变异度，观察老手有时反而比新手更难跳出旧模式的原因！"
+              "archetype": "blind-lab",
+              "concept": "定势效应 · Luchins 量水实验 · 初学者心态",
+              "summary": "亲历 Luchins 经典三关量水实验，测试自己是否会被刚形成的解题组块蒙蔽而错过一步捷径。"
             }
           ]
         },
@@ -3018,7 +3018,7 @@ window.TAXONOMY_DATA = {
           "icon": "🧲",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "为什么看起来最自律的人，往往不是意志力更强，而是他们把好习惯变近、把诱惑变远了？",
+          "subtitle": "为什么自控力最强的人从不靠硬扛，而是把手机放进隔壁房间？",
           "difficulty": "入门",
           "related": [
             "mind/mind-motivation-habits-01",
@@ -3029,11 +3029,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-motivation-habits-04/01-20-second-rule-svg.html",
               "file": "01-20-second-rule-svg.html",
               "path": "./domains/mind/mind-motivation-habits-04/01-20-second-rule-svg.html",
-              "title": "20 秒法则：环境摩擦如何决定行为（SVG）",
+              "title": "20 秒法则：环境摩擦如何决定行为",
               "icon": "⏱️",
               "archetype": "simulation",
-              "concept": "20秒法则 · 激活能量 · 环境设计",
-              "summary": "调节好习惯与坏习惯各自的启动耗时（秒），看哪怕只差 20 秒的物理阻力如何彻底扭转每日行动！"
+              "concept": "20 秒法则 · 行为活化能 · 最小阻力路径",
+              "summary": "调节好坏习惯的启动摩擦秒数，观察跨过 20 秒阻力悬崖后每周执行率的断崖式反转。"
             },
             {
               "id": "mind/mind-motivation-habits-04/02-willpower-vs-environment.html",
@@ -3041,9 +3041,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-motivation-habits-04/02-willpower-vs-environment.html",
               "title": "意志力硬扛 vs 屏蔽诱惑：全天胜率曲线",
               "icon": "🔋",
-              "archetype": "comparison",
-              "concept": "自我损耗 · 环境隔离 · 诱惑暴露次数",
-              "summary": "调节一天中直面诱惑的暴露次数与晚间疲劳度，对比“靠克制硬扛”与“直接藏起诱惑”的守约率！"
+              "archetype": "race",
+              "concept": "意志力损耗 · 诱惑隔离 · 深夜破防",
+              "summary": "播放 8:00 至 23:00 全天耐力赛，对比硬扛诱惑晚间清零与视线外隔离的稳健曲线。"
             },
             {
               "id": "mind/mind-motivation-habits-04/03-choice-architecture-desk.html",
@@ -3051,9 +3051,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-motivation-habits-04/03-choice-architecture-desk.html",
               "title": "书桌选择架构：把好习惯放到伸手可及处",
               "icon": "🖥️",
-              "archetype": "simulation",
-              "concept": "选择架构 · 视觉触发 · 默认路径",
-              "summary": "调节手机离书桌的物理距离与书本/水杯的摆放步数，实时计算一晚上的有效学习与分心比例！"
+              "archetype": "spatial",
+              "concept": "选择架构 · 助推设计 · 物理摩擦分区",
+              "summary": "在书桌与客厅平面图上点击挪动手机、零食、书本与水壶，打造零意志力自动驾驶空间。"
             }
           ]
         },
@@ -3067,7 +3067,7 @@ window.TAXONOMY_DATA = {
           "icon": "🔮",
           "color": "#7c3aed",
           "soft": "#f5f3ff",
-          "subtitle": "你看到的不是纯粹的客观世界，而是“大脑先验脑补”与“感官误差”的加权混合！",
+          "subtitle": "为什么你看到的不是眼睛接收的画面，而是大脑的“脑补”？",
           "difficulty": "进阶",
           "related": [
             "mind/mind-perception-wm-01",
@@ -3078,11 +3078,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-perception-wm-04/01-predictive-processing-svg.html",
               "file": "01-predictive-processing-svg.html",
               "path": "./domains/mind/mind-perception-wm-04/01-predictive-processing-svg.html",
-              "title": "贝叶斯大脑：先验脑补 vs 感官输入（SVG）",
+              "title": "贝叶斯大脑：先验脑补 vs 感官输入",
               "icon": "⚖️",
               "archetype": "simulation",
-              "concept": "预测加工 · 先验信念 · 预测误差",
-              "summary": "调节大脑先验信念强度与外界光线清晰度，看最终“你以为你看见的东西”偏向脑补还是客观现实！"
+              "concept": "预测加工 · 贝叶斯融合 · 预测误差",
+              "summary": "调节先验置信度与感官清晰度，观察大脑如何在绳子/蛇、幻震等场景里合成主观知觉。"
             },
             {
               "id": "mind/mind-perception-wm-04/02-context-reading-illusion.html",
@@ -3090,9 +3090,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-perception-wm-04/02-context-reading-illusion.html",
               "title": "语境劫持：为什么乱序汉字也能秒读？",
               "icon": "🔤",
-              "archetype": "simulation",
-              "concept": "自上而下补全 · 语境先验 · 错别字盲区",
-              "summary": "调节句子熟悉度与字序打乱程度，体验大脑如何自动忽略错别字直接吐出“预期语义”！"
+              "archetype": "blind-lab",
+              "concept": "自上而下阅读 · 语境先验 · 换行盲视",
+              "summary": "三关快速阅读盲测，亲手抓包大脑自动纠错乱序汉字、改写模糊字符与漏看重复字。"
             },
             {
               "id": "mind/mind-perception-wm-04/03-hollow-mask-prior.html",
@@ -3100,9 +3100,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-perception-wm-04/03-hollow-mask-prior.html",
               "title": "凹面具错觉：强先验如何击败双眼立体感？",
               "icon": "🎭",
-              "archetype": "comparison",
-              "concept": "强先验主导 · 视觉错觉 · 误差抑制",
-              "summary": "调节光线阴影线索与“人脸必定凸出”的先验权重，观察为何凹进去的面具仍被看成凸出来的脸！"
+              "archetype": "spatial",
+              "concept": "凹面具错觉 · 强先验 · 光影反转",
+              "summary": "3D 旋转面具并切换光源与物理剖面，体验“人脸必凸”先验如何强行篡改立体知觉。"
             }
           ]
         },
@@ -3127,11 +3127,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-biases-prob-05/01-praise-punish-regression-svg.html",
               "file": "01-praise-punish-regression-svg.html",
               "path": "./domains/mind/mind-biases-prob-05/01-praise-punish-regression-svg.html",
-              "title": "飞行教官错觉：骂完进步的数学真相（SVG）",
+              "title": "飞行教官错觉：骂完进步的数学真相",
               "icon": "✈️",
-              "archetype": "simulation",
+              "archetype": "blind-lab",
               "concept": "回归均值 · 运气噪音 · 因果误归因",
-              "summary": "调节单次表现中的随机运气成分与极端成绩阈值，看没有任何赏罚干预时下一次成绩如何自动回落！"
+              "summary": "模拟 24 名飞行员零赏罚效果的两次着陆，亲眼看“骂完进步、夸完退步”的纯数学幻觉！"
             },
             {
               "id": "mind/mind-biases-prob-05/02-si-cover-jinx.html",
@@ -3141,7 +3141,7 @@ window.TAXONOMY_DATA = {
               "icon": "🏆",
               "archetype": "simulation",
               "concept": "封面魔咒 · 极端值采样 · 实力 vs 运气",
-              "summary": "调节球员真实实力与单赛季运气波动幅度，复现“刚拿 MVP 上封面，下赛季就数据下滑”的魔咒！"
+              "summary": "拆解年度冠军的“实力 + 爆表运气”，对比高运气股市与纯实力象棋里的封面魔咒强弱！"
             },
             {
               "id": "mind/mind-biases-prob-05/03-cold-remedy-illusion.html",
@@ -3149,9 +3149,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-biases-prob-05/03-cold-remedy-illusion.html",
               "title": "感冒偏方为何总显得“吃一次就好”？",
               "icon": "🍵",
-              "archetype": "comparison",
+              "archetype": "race",
               "concept": "自限性疾病 · 峰值就医 · 伪因果体验",
-              "summary": "调节生病最难受时采取偏方的时机，对比“喝偏方”与“只喝白开水”在自然病程曲线上的重合度！"
+              "summary": "叠加只喝白开水对照组并切换第 1 天与第 3 天喝偏方，一键拆穿峰值就医的伪因果体验！"
             }
           ]
         },
@@ -3176,11 +3176,11 @@ window.TAXONOMY_DATA = {
               "id": "mind/mind-decision-making-05/01-asian-disease-framing-svg.html",
               "file": "01-asian-disease-framing-svg.html",
               "path": "./domains/mind/mind-decision-making-05/01-asian-disease-framing-svg.html",
-              "title": "经典疾病决策框架翻转器（SVG）",
+              "title": "经典疾病决策框架翻转器",
               "icon": "🖼️",
-              "archetype": "comparison",
+              "archetype": "blind-lab",
               "concept": "框架效应 · 收益框架求稳 · 损失框架冒险",
-              "summary": "切换“救活人数（收益框架）”与“死亡人数（损失框架）”并调节风险厌恶度，复现偏好 180° 大反转！"
+              "summary": "在 600 人疫情收益框架与损失框架间一键切换，亲眼见证数学等价却 180° 翻转的群体选择！"
             },
             {
               "id": "mind/mind-decision-making-05/02-fat-free-marketing-frame.html",
@@ -3188,9 +3188,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-decision-making-05/02-fat-free-marketing-frame.html",
               "title": "“90% 无脂” vs “含 10% 脂肪”营销框架",
               "icon": "🥛",
-              "archetype": "comparison",
+              "archetype": "race",
               "concept": "属性框架 · 正向标签联想 · 购买转化",
-              "summary": "调节真实脂肪含量与标签正面包装度，看同一盒酸奶换个说法如何让消费者健康评分暴涨！"
+              "summary": "对比酸奶无脂、手术存活率与现金折扣三组正负包装，揭秘措辞如何直接改写好感度！"
             },
             {
               "id": "mind/mind-decision-making-05/03-default-optin-optout.html",
@@ -3198,9 +3198,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/mind/mind-decision-making-05/03-default-optin-optout.html",
               "title": "默认选项框架：器官捐献率 12% vs 99%",
               "icon": "☑️",
-              "archetype": "simulation",
+              "archetype": "scenario",
               "concept": "现状偏差 · 默认勾选框架 · 助推设计",
-              "summary": "切换“主动勾选加入”与“默认加入可退出”两种表单框架并调节填写摩擦，看社会参与率如何天壤之别！"
+              "summary": "切换主动勾选与默认加入两种驾照表单文案，看欧洲同源邻国器官捐献率如何相差 8 倍！"
             }
           ]
         }

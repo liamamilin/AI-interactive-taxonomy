@@ -7,68 +7,80 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .quiz { padding:14px 16px; border-radius:12px; border:1.5px solid var(--tax-primary); background:var(--tax-primary-soft); margin-bottom:14px; }
+    .quiz p { font-size:14px; margin-bottom:10px; }
+    .opts { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; }
+    .opt { padding:10px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface); color:var(--tax-ink); font-size:14px; font-weight:900; cursor:pointer; }
+    .opt.sel { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🏓 球拍与球陷阱：直觉抢答验算器</h1><p>球拍和球一共 1.10 元，球拍比球贵 1.00 元，球多少钱？系统 1 瞬间算出 0.10 元，但验证一下：0.10 + 1.10 = 1.20 元，错了！</p></div>
+      <div>
+        <h1>🏓 球拍与球陷阱：直觉抢答验算器</h1>
+        <p>全世界最著名的“认知反射测试（CRT）”第 1 题：在哈佛、麻省理工和普林斯顿的学生中，竟然有超过 <strong>50%</strong> 的人答错这道小学算术题！来测测你的系统 2 有没有及时拉住系统 1！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>球拍 + 球总价</span><span id="vTot">1.10 元</span></label><input type="range" id="sTot" min="1.1" max="5.0" step="0.1" value="1.1" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>球拍比球贵多少</span><span id="vDif">1.00 元</span></label><input type="range" id="sDif" min="0.2" max="4.0" step="0.1" value="1.0" oninput="draw()"></div>
+      <div class="quiz">
+        <p><strong>⏱️ 3 秒抢答：</strong>一支球拍和一个球总共 <strong>1.10 元</strong>，球拍比球贵 <strong>1.00 元</strong>。请问<strong>球多少钱？</strong></p>
+        <div class="opts">
+          <button class="opt" onclick="ans(0.10,this)">A. 0.10 元</button>
+          <button class="opt" onclick="ans(0.05,this)">B. 0.05 元</button>
+          <button class="opt" onclick="ans(0.15,this)">C. 0.15 元</button>
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">系统 1 抢答误算</div><div class="k-val" id="kS1">—</div></div>
-        <div class="kpi"><div class="k-lbl">系统 2 正确解</div><div class="k-val" id="kS2">—</div></div>
-      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const tot=+document.getElementById('sTot').value, rawDif=+document.getElementById('sDif').value;
-  const dif=Math.min(rawDif, +(tot-0.1).toFixed(2));
-  document.getElementById('vTot').textContent=tot.toFixed(2)+' 元';
-  document.getElementById('vDif').textContent=dif.toFixed(2)+' 元';
-  const s1=Math.max(0.01, tot - dif);
-  const s2=(tot - dif)/2;
-  const s1Check=s1 + (s1+dif);
-  document.getElementById('kS1').textContent=s1.toFixed(2)+' 元 (验算总价 '+s1Check.toFixed(2)+')';
-  document.getElementById('kS1').style.color='#ef4444';
-  document.getElementById('kS2').textContent=s2.toFixed(2)+' 元 (球拍 '+(s2+dif).toFixed(2)+')';
-  document.getElementById('kS2').style.color='#059669';
-  const sc=360/Math.max(tot, s1Check);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">价格拆解对照：为什么直觉会多算出一份球价？</text>
-    <text x="20" y="82" font-size="12" font-weight="750" fill="#ef4444">系统 1 抢答</text>
-    <rect x="130" y="64" width="${Math.max(8,s1*sc).toFixed(0)}" height="28" rx="4" fill="#ef4444"/>
-    <rect x="${(132+s1*sc).toFixed(0)}" y="64" width="${Math.max(8,(s1+dif)*sc).toFixed(0)}" height="28" rx="4" fill="#fca5a5"/>
-    <text x="515" y="83" font-size="11.5" font-weight="800" fill="#ef4444">合 ${s1Check.toFixed(2)} ❌</text>
-    <text x="20" y="138" font-size="12" font-weight="750" fill="#059669">系统 2 正解</text>
-    <rect x="130" y="120" width="${Math.max(8,s2*sc).toFixed(0)}" height="28" rx="4" fill="#059669"/>
-    <rect x="${(132+s2*sc).toFixed(0)}" y="120" width="${Math.max(8,(s2+dif)*sc).toFixed(0)}" height="28" rx="4" fill="#6ee7b7"/>
-    <text x="515" y="139" font-size="11.5" font-weight="800" fill="#059669">合 ${tot.toFixed(2)} ✅</text>
-    <text x="20" y="182" font-size="11.5" fill="var(--tax-muted)">只要花 1 秒把直觉答案代回原题验算，就能立刻唤醒沉睡的系统 2。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>连名校高材生也有超半数掉进这题的坑——高智商不等于不犯错，缺乏“随手复核直觉”的习惯一样中招。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let picked = null;
+    function ans(v, btn){
+      picked = v;
+      document.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));
+      if(btn) btn.classList.add('sel');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      if(picked === null){
+        document.getElementById('svg').innerHTML = `
+          <rect x="40" y="34" width="560" height="136" rx="14" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-dasharray="6 4"/>
+          <text x="320" y="96" text-anchor="middle" font-size="16" font-weight="900" fill="var(--tax-primary)">🏓 请先凭第一反应点选 A / B / C！</text>
+          <text x="320" y="126" text-anchor="middle" font-size="12.5" fill="var(--tax-muted)">提交后立刻展开系统 1 直觉陷阱 vs 系统 2 代数验算对比</text>
+        `;
+        document.getElementById('ahaBox').innerHTML = `💡 <strong>实验提示：</strong>别急着动笔，感受一下你脑海里第一个蹦出来的数字是不是 <strong>0.10 元</strong>！`;
+        return;
+      }
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="24" y="24" width="282" height="156" rx="14" fill="var(--tax-red-soft)" stroke="var(--tax-red)" stroke-width="2"/>
+        <text x="165" y="52" text-anchor="middle" font-size="14" font-weight="900" fill="var(--tax-red)">⚡ 系统 1 抢答：0.10 元 ❌</text>
+        <text x="165" y="84" text-anchor="middle" font-size="12.5" fill="var(--tax-ink)">若球 = 0.10 元</text>
+        <text x="165" y="108" text-anchor="middle" font-size="12.5" fill="var(--tax-ink)">球拍比球贵 1.00 → 球拍 = 1.10 元</text>
+        <text x="165" y="142" text-anchor="middle" font-size="14" font-weight="900" fill="var(--tax-red)">总价 = 1.10 + 0.10 = 1.20 元！</text>
+        <text x="165" y="164" text-anchor="middle" font-size="11" fill="var(--tax-muted)">直接撞墙！系统 2 偷懒没验算！</text>
+
+        <rect x="334" y="24" width="282" height="156" rx="14" fill="var(--tax-green-soft)" stroke="var(--tax-green)" stroke-width="2.4"/>
+        <text x="475" y="52" text-anchor="middle" font-size="14" font-weight="900" fill="var(--tax-green)">🧠 系统 2 验算：0.05 元 ✅</text>
+        <text x="475" y="84" text-anchor="middle" font-size="12.5" fill="var(--tax-ink)">设球 = 0.05 元</text>
+        <text x="475" y="108" text-anchor="middle" font-size="12.5" fill="var(--tax-ink)">球拍比球贵 1.00 → 球拍 = 1.05 元</text>
+        <text x="475" y="142" text-anchor="middle" font-size="14" font-weight="900" fill="var(--tax-green)">总价 = 1.05 + 0.05 = 1.10 元！</text>
+        <text x="475" y="164" text-anchor="middle" font-size="11" fill="var(--tax-muted)">差价 1.00 元 · 总价 1.10 元 · 严丝合缝！</text>
+      `;
+
+      document.getElementById('ahaBox').innerHTML = picked === 0.05
+        ? `🎉 <strong>精彩！你的系统 2 成功踩住了刹车！</strong>连 MIT 都有一半学生答错，不是因为不会解一元一次方程，而是因为 <strong>0.10 元来得太快、太顺口</strong>，让懒惰的系统 2 直接批准放行了！`
+        : `💡 <strong>掉进经典直觉坑（你选了 ${picked.toFixed(2)} 元，正解 0.05 元）！</strong>哪怕数学再好，只要系统 1 甩出一个“看起来很顺眼”的答案（1.10 − 1.00 = 0.10），偷懒的系统 2 就不会多花 1 秒验算——<strong>越是脱口而出的“显而易见”，越值得停顿 2 秒反手验算！</strong>`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

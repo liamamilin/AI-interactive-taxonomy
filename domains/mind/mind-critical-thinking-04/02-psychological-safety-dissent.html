@@ -1,69 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🗣️ 为什么“假设已失败”能打破群体迷思？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>为什么“假设已失败”能打破群体迷思？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .btn-pair { grid-template-columns: 1fr; } }
+    .mode-btn {
+      text-align: left; padding: 12px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); cursor: pointer;
+    }
+    .mode-btn.active { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .chat-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    @media (max-width: 600px) { .chat-list { grid-template-columns: 1fr; } }
+    .bubble { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); font-size: 12.5px; line-height: 1.5; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🗣️ 为什么“假设已失败”能打破群体迷思？</h1><p>老板满腔热血拍板的项目，你当众泼冷水会显得“不合群”；但事前验尸把“找死因”变成每个人的 KPI，谁找到最致命的坑谁立大功！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>团队权威压迫/一言堂程度</span><span id="vAut">75%</span></label><input type="range" id="sAut" min="10" max="100" value="75" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>采用“匿名独立写死因”机制</span><span id="vAn">85%</span></label><input type="range" id="sAn" min="0" max="100" value="85" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🗣️ 为什么“假设已失败”能打破群体迷思？（会议室情景）</h1>
+      <p>老板刚激情澎湃讲完一个有隐患的新项目，全场鼓掌。切换下面两种<strong>会议提问方式</strong>，偷听 4 位核心成员内心真正想说的话 vs 敢不敢当场说出口！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-pair">
+        <button class="mode-btn active" id="normalBtn">
+          <div style="font-weight:800;font-size:14px;">😬 传统问法：“大家觉得这个方案有什么问题吗？”</div>
+          <div style="font-size:12px;color:var(--tax-muted);margin-top:3px;">此时唱反调 = 质疑老板、破坏团结、显得不合群</div>
+        </button>
+        <button class="mode-btn" id="preBtn">
+          <div style="font-weight:800;font-size:14px;">🩺 事前验尸指令：“假设 1 年后已惨败，每人必须写 2 条死因！”</div>
+          <div style="font-size:12px;color:var(--tax-muted);margin-top:3px;">唱反调瞬间变成“帮团队排雷的聪明贡献”！</div>
+        </button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">常规会议说出真话比例</div><div class="k-val" id="kOpn">—</div></div>
-        <div class="kpi"><div class="k-lbl">事前验尸挖出真隐患比例</div><div class="k-val" id="kDig">—</div></div>
-      </div>
+
+      <svg id="meterSvg" viewBox="0 0 680 95" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="会议室心理安全感与真实风险暴露率"></svg>
+
+      <div class="chat-list" id="chatList"></div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>群体迷思现场：</strong>在传统问法下，4 个人心里都看见了隐患，但为了避免当“扫兴的人”，真话暴露率只有 <strong>18%</strong>！点击右侧「事前验尸指令」看心理安全感瞬间翻转！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const aut=+document.getElementById('sAut').value, an=+document.getElementById('sAn').value;
-  document.getElementById('vAut').textContent=aut+'%';
-  document.getElementById('vAn').textContent=an+'%';
-  const opn=Math.max(8, Math.round(88 - aut*0.76));
-  const dig=Math.min(96, Math.round(opn + (100-opn)*(an/100)*0.82));
-  document.getElementById('kOpn').textContent=opn+'%';
-  document.getElementById('kDig').textContent=dig+'%';
-  document.getElementById('kDig').style.color='#059669';
-  const wO=Math.max(12, opn*3.6), wD=Math.max(12, dig*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">一线员工敢把致命隐患摆上桌面的比例</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">常规当众讨论</text>
-    <rect x="145" y="64" width="${wO.toFixed(0)}" height="28" rx="6" fill="#ef4444" opacity="0.8"/>
-    <text x="${(153+wO).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#ef4444">${opn}%（怕泼冷水背锅）</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">事前验尸匿名写</text>
-    <rect x="145" y="120" width="${wD.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(153+wD).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${dig}%（反对完全合法化）</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">关键细节：必须先各自静默写 5 分钟再亮卡片，避免第一个发言的高管锚定全场！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>事前验尸最绝的地方在于“把唱反调变成政治正确”——给潜伏在团队里的清醒者发了一张免死金牌。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const MEMBERS = [
+      { role: '🧑‍💻 后端架构师', normal: '（心里：数据库扛不住峰值…）嘴上：“挺好的，我们尽力配合！”', pre: '🗣️ 公开写出：“死因 1：大促峰值写入会锁表宕机，必须提前做读写分离！”' },
+      { role: '📊 产品经理', normal: '（心里：老用户根本不会迁移…）嘴上：“方向很赞，期待上线！”', pre: '🗣️ 公开写出：“死因 2：老客户迁移成本太高，留存可能掉 40%！”' },
+      { role: '⚖️ 法务合规', normal: '（心里：跨境数据审批要 3 个月…）嘴上：“后续我们再评估一下。”', pre: '🗣️ 公开写出：“死因 3：跨境数据合规审批至少卡 90 天，排期必爆！”' },
+      { role: '📣 市场负责人', normal: '（心里：获客成本比预算高 3 倍…）嘴上：“没问题，全力冲刺！”', pre: '🗣️ 公开写出：“死因 4：冷启动获客单价超预算 3 倍，推广两周就会烧光！”' }
+    ];
+
+    let mode = 'normal';
+    let done = false;
+
+    const svg = document.getElementById('meterSvg');
+    const chatList = document.getElementById('chatList');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      document.getElementById('normalBtn').classList.toggle('active', mode === 'normal');
+      document.getElementById('preBtn').classList.toggle('active', mode === 'pre');
+
+      const rate = mode === 'pre' ? 86 : 18;
+      const col = mode === 'pre' ? 'var(--tax-green)' : 'var(--tax-red)';
+
+      let html = '';
+      html += `<text x="24" y="30" fill="var(--tax-ink)" font-size="13.5" font-weight="800">🛡️ 真实异见与暗雷暴露率：${rate}%（${mode === 'pre' ? '心理安全感拉满' : '严重群体迷思沉默'}）</text>`;
+      html += `<rect x="24" y="46" width="632" height="22" rx="11" fill="rgba(148,163,184,0.16)"/>`;
+      html += `<rect x="24" y="46" width="${(rate / 100) * 632}" height="22" rx="11" fill="${col}"/>`;
+      svg.innerHTML = html;
+
+      chatList.innerHTML = '';
+      MEMBERS.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'bubble';
+        div.style.borderColor = mode === 'pre' ? 'var(--tax-green)' : 'var(--tax-border)';
+        div.innerHTML = `<strong style="display:block;margin-bottom:4px;color:${mode === 'pre' ? 'var(--tax-green)' : 'var(--tax-muted)'};">${m.role}</strong>${mode === 'pre' ? m.pre : m.normal}`;
+        chatList.appendChild(div);
+      });
+
+      ahaBox.innerHTML = mode === 'pre'
+        ? '<strong>事前验尸的社交魔力（暴露率 86%）：</strong>它给批评披上了“合法外衣”——团队不再争论“老板对不对”，而是比拼“谁能帮已失败的未来找出最隐蔽的死因”。当提反对意见变成展示专业度的竞赛，群体迷思瞬间瓦解！'
+        : '<strong>群体迷思陷阱（暴露率仅 18%）：</strong>当领导已经表达了热情，直接问“有没有问题”会让每个人都觉得自己是在唱反调。点击右侧「事前验尸指令」切换会议机制！';
+    }
+
+    document.getElementById('normalBtn').onclick = () => { mode = 'normal'; markDone('对比了传统评审的群体迷思'); render(); };
+    document.getElementById('preBtn').onclick = () => { mode = 'pre'; markDone('体验了事前验尸打破群体迷思的心理安全感'); render(); };
+    render();
   </script>
 </body>
 </html>

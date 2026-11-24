@@ -1,78 +1,184 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔊 语音回路：2 秒不默念就消散</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>语音回路：2 秒不默念就消散</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .stat-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .stat-label { font-size: 12px; color: var(--tax-muted); }
+    .stat-num { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔊 语音回路：2 秒不默念就消散</h1><p>巴德利模型指出，大脑靠“内心默念（语音回路）”不断刷新临时信息，而语音回路的保鲜期只有约 2 秒。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>单次默念完整耗时（词长影响）</span><span id="vSpk">1.8 秒</span></label><input type="range" id="sSpk" min="0.8" max="4.0" step="0.2" value="1.8" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>中途被打断停止默念时长</span><span id="vInt">1.0 秒</span></label><input type="range" id="sInt" min="0" max="4.0" step="0.2" value="1.0" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔊 语音回路：2 秒不默念就消散</h1>
+      <p>Baddeley 工作记忆模型中的<strong>语音回路（Phonological Loop）</strong>就像一条只有 2 秒长的磁带：不靠内心默念（复述）持续刷新，记忆痕迹就会迅速衰减；一旦开口说话或听别人念数字（语音抑制），回路立刻锁死！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="controls">
+        <button class="toy-btn" id="rehearseBtn">🗣️ 默念刷新（点击抢救）</button>
+        <button class="toy-btn secondary" id="autoBtn">🔁 自动默念：关</button>
+        <button class="toy-btn secondary" id="suppressBtn">📢 开启语音干扰（边听边说）</button>
+        <button class="toy-btn secondary" id="resetBtn">↺ 重新载入 4 个词</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">信息衰减周期</div><div class="k-val" id="kCyc">—</div></div>
-        <div class="kpi"><div class="k-lbl">验证码存活概率</div><div class="k-val" id="kSurv">—</div></div>
+
+      <svg id="loopSvg" viewBox="0 0 680 220" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="语音回路衰减模拟"></svg>
+
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-label">存活记忆词</div><div class="stat-num" id="aliveVal">4 / 4</div></div>
+        <div class="stat-box"><div class="stat-label">语音回路状态</div><div class="stat-num" id="stateVal">自然衰减中</div></div>
+        <div class="stat-box"><div class="stat-label">累计默念次数</div><div class="stat-num" id="revVal">0</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>动手试试：</strong>观察 4 个词的记忆强度条正在快速下滑！试着快速点击「默念刷新」保住它们，再点「开启语音干扰」看看为什么背验证码时千万别回别人话。
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const spk=+document.getElementById('sSpk').value, intr=+document.getElementById('sInt').value;
-  document.getElementById('vSpk').textContent=spk.toFixed(1)+' 秒';
-  document.getElementById('vInt').textContent=intr.toFixed(1)+' 秒';
-  const total=spk+intr;
-  const surv=Math.max(4, Math.min(99, Math.round(100*Math.exp(-Math.max(0, total-1.6)*0.72))));
-  document.getElementById('kCyc').textContent=total.toFixed(1)+' 秒';
-  document.getElementById('kSurv').textContent=surv+'%';
-  document.getElementById('kSurv').style.color=surv<50?'#ef4444':'#059669';
-  let pts=[];
-  for(let t=0;t<=60;t++){
-    const sec=t*0.1;
-    const rem=sec<=0.4?100:100*Math.exp(-Math.max(0,sec-0.4)/2.0);
-    const x=45+sec*85, y=170-rem*1.25;
-    pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
-  }
-  const cx=Math.min(555, 45+total*85);
-  const cy=170 - surv*1.25;
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">语音痕量自然衰减曲线（无复述 2 秒半衰期）</text>
-    <line x1="45" y1="170" x2="560" y2="170" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <polyline points="${pts.join(' ')}" fill="none" stroke="#6366f1" stroke-width="3"/>
-    <line x1="${cx.toFixed(1)}" y1="40" x2="${cx.toFixed(1)}" y2="170" stroke="${surv<50?'#ef4444':'#059669'}" stroke-dasharray="4,3" stroke-width="2"/>
-    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="7" fill="${surv<50?'#ef4444':'#059669'}"/>
-    <text x="${Math.min(460,cx+10).toFixed(1)}" y="${Math.max(55,cy-8).toFixed(1)}" font-size="12" font-weight="800" fill="${surv<50?'#ef4444':'#059669'}">存活 ${surv}%</text>
-    <text x="45" y="190" font-size="11" fill="var(--tax-muted)">0s</text>
-    <text x="215" y="190" font-size="11" fill="var(--tax-muted)">2s（语音回路极限）</text>
-    <text x="520" y="190" font-size="11" fill="var(--tax-muted)">6s</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>这就是为什么中文单音节数字比多音节英文数字更好记（2 秒内能默念更多位），也解释了为什么刚背完 6 位验证码被别人问一句“午饭吃啥”就瞬间清零！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const WORDS = ['验证码 49', '三楼会议', '带充电器', '买蓝莓'];
+    let levels = [100, 92, 85, 78];
+    let focusIdx = 0;
+    let autoRehearse = false;
+    let suppressed = false;
+    let rehearseCount = 0;
+    let done = false;
+    let lastTime = performance.now();
+    let autoAccum = 0;
+
+    const svg = document.getElementById('loopSvg');
+    const rehearseBtn = document.getElementById('rehearseBtn');
+    const autoBtn = document.getElementById('autoBtn');
+    const suppressBtn = document.getElementById('suppressBtn');
+    const aliveVal = document.getElementById('aliveVal');
+    const stateVal = document.getElementById('stateVal');
+    const revVal = document.getElementById('revVal');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function doRehearse() {
+      markDone('操作了语音回路默念刷新与语音抑制模拟');
+      if (suppressed) {
+        ahaBox.innerHTML = '<strong>语音抑制生效！</strong>你的发声通道正被干扰占用（比如边背号码边跟同事答话），默念刷新被完全阻断，所有词将在 2 秒内归零！';
+        return;
+      }
+      // Refresh lowest alive word
+      let target = -1, minVal = 101;
+      for (let i = 0; i < levels.length; i++) {
+        if (levels[i] > 0 && levels[i] < minVal) {
+          minVal = levels[i];
+          target = i;
+        }
+      }
+      if (target >= 0) {
+        levels[target] = 100;
+        focusIdx = target;
+        rehearseCount++;
+        revVal.textContent = rehearseCount;
+      }
+    }
+
+    function draw() {
+      const alive = levels.filter(v => v > 0).length;
+      aliveVal.textContent = `${alive} / 4`;
+      if (suppressed) stateVal.textContent = '⛔ 干扰锁死';
+      else if (autoRehearse) stateVal.textContent = '🔁 循环维持';
+      else if (alive === 0) stateVal.textContent = '💨 全部消散';
+      else stateVal.textContent = '⏳ 2秒衰减中';
+
+      let html = '';
+      // Left: loop ring
+      const cx = 125, cy = 112, r = 68;
+      html += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--tax-border)" stroke-width="10"/>`;
+      const ringColor = suppressed ? 'var(--tax-red)' : (autoRehearse ? 'var(--tax-green)' : 'var(--tax-primary)');
+      html += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${ringColor}" stroke-width="10" stroke-dasharray="105 325" transform="rotate(${(performance.now()/12)%360} ${cx} ${cy})" stroke-linecap="round"/>`;
+      html += `<text x="${cx}" y="${cy - 6}" text-anchor="middle" fill="var(--tax-ink)" font-size="14" font-weight="700">${suppressed ? '回路被占用' : '2 秒语音环'}</text>`;
+      html += `<text x="${cx}" y="${cy + 16}" text-anchor="middle" fill="var(--tax-muted)" font-size="11">${suppressed ? '无法默念复述' : '持续默念可续命'}</text>`;
+
+      // Right: 4 memory bars
+      WORDS.forEach((w, i) => {
+        const y = 32 + i * 44;
+        const val = Math.max(0, Math.min(100, levels[i]));
+        const barW = 360;
+        const fillW = (val / 100) * barW;
+        const col = val <= 0 ? 'var(--tax-muted)' : (val < 30 ? 'var(--tax-red)' : (val < 60 ? 'var(--tax-amber)' : 'var(--tax-green)'));
+
+        html += `<text x="240" y="${y + 16}" fill="${val > 0 ? 'var(--tax-ink)' : 'var(--tax-muted)'}" font-size="13" font-weight="${i === focusIdx && val > 0 ? '700' : '500'}">${w}</text>`;
+        html += `<rect x="330" y="${y + 4}" width="${barW}" height="18" rx="9" fill="rgba(148,163,184,0.16)"/>`;
+        html += `<rect x="330" y="${y + 4}" width="${fillW}" height="18" rx="9" fill="${col}"/>`;
+        html += `<text x="698" y="${y + 17}" text-anchor="end" fill="var(--tax-muted)" font-size="11"></text>`;
+        html += `<text x="${330 + barW - 8}" y="${y + 17}" text-anchor="end" fill="var(--tax-ink)" font-size="11" font-weight="700">${val > 0 ? Math.round(val) + '%' : '已遗忘'}</text>`;
+      });
+
+      svg.innerHTML = html;
+    }
+
+    function tick(now) {
+      const dt = Math.min(0.1, (now - lastTime) / 1000);
+      lastTime = now;
+
+      // Decay rate: ~36%/sec (decays in ~2.5s; faster under suppression)
+      const rate = suppressed ? 48 : 26;
+      for (let i = 0; i < levels.length; i++) {
+        if (levels[i] > 0) levels[i] = Math.max(0, levels[i] - rate * dt);
+      }
+
+      if (autoRehearse && !suppressed) {
+        autoAccum += dt;
+        if (autoAccum >= 0.42) {
+          autoAccum = 0;
+          doRehearse();
+        }
+      }
+
+      const alive = levels.filter(v => v > 0).length;
+      if (alive === 0 && !suppressed) {
+        ahaBox.innerHTML = '<strong>全部消散：</strong>不到 3 秒没有默念，4 个词的语音痕迹就彻底清空了！点击「重新载入」再试试开启「自动默念」。';
+      } else if (autoRehearse && !suppressed && alive === 4) {
+        ahaBox.innerHTML = '<strong>循环稳态：</strong>只要默念一遍 4 个词的耗时短于 2 秒，语音回路就能无限续命。这就是为什么短词（如中文单音节数字）比长英文词更容易背下来！';
+      }
+
+      draw();
+      requestAnimationFrame(tick);
+    }
+
+    rehearseBtn.onclick = doRehearse;
+    autoBtn.onclick = () => {
+      markDone('切换了语音回路自动默念模式');
+      autoRehearse = !autoRehearse;
+      autoBtn.textContent = autoRehearse ? '🔁 自动默念：开' : '🔁 自动默念：关';
+    };
+    suppressBtn.onclick = () => {
+      markDone('测试了语音抑制干扰效应');
+      suppressed = !suppressed;
+      suppressBtn.textContent = suppressed ? '🔇 关闭语音干扰' : '📢 开启语音干扰（边听边说）';
+      if (suppressed) {
+        ahaBox.innerHTML = '<strong>语音抑制开启！</strong>哪怕只是嘴里反复念叨“啦啦啦”，也会彻底霸占语音回路，让正在背的数字瞬间蒸发。';
+      }
+    };
+    document.getElementById('resetBtn').onclick = () => {
+      levels = [100, 92, 85, 78];
+      rehearseCount = 0;
+      revVal.textContent = '0';
+      suppressed = false;
+      suppressBtn.textContent = '📢 开启语音干扰（边听边说）';
+    };
+
+    requestAnimationFrame(tick);
   </script>
 </body>
 </html>

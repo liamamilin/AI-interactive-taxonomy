@@ -1,73 +1,86 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏥 辛普森悖论：分组全胜，合并全输！</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>辛普森悖论：分组全胜，合并全输！</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .hosp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .h-card { padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; }
+    .h-rate { font-size: 30px; font-weight: 800; margin: 6px 0; }
+    .tbl { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+    .tbl th, .tbl td { padding: 9px 10px; border-bottom: 1px solid var(--tax-border); text-align: center; }
+    .tbl th { color: var(--tax-muted); font-weight: 700; }
+    .win { color: var(--tax-green); font-weight: 800; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🏥 辛普森悖论：分组全胜，合并全输！</h1><p>名院 A 在轻症和重症两个分组的治愈率都碾压社区医院 B，但因为重症病人都往名院送，汇总后的总治愈率反而显得名院更差！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>名院 A 接诊“重症患者”占比</span><span id="vSevA">80%</span></label><input type="range" id="sSevA" min="10" max="90" value="80" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>社区院 B 接诊“重症患者”占比</span><span id="vSevB">20%</span></label><input type="range" id="sSevB" min="10" max="90" value="20" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🏥 辛普森悖论：分组全胜，合并全输（盲测选院）</h1>
+      <p>假如你的家人需要做手术，面前有两家医院的年度真实统计数据。<strong>先凭总成功率做决定</strong>，再揭开“按病情轻重拆分的底层数据”，准备迎接统计学最震撼的反转！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="hosp-grid">
+        <div class="h-card">
+          <div style="font-size:14px;font-weight:700;">🏥 社区医院 A</div>
+          <div class="h-rate" style="color:var(--tax-green);">90.0%</div>
+          <div style="font-size:12px;color:var(--tax-muted);">900 / 1,000 例存活</div>
+          <button class="toy-btn" id="pickA" style="margin-top:10px;width:100%;">选医院 A 做手术</button>
+        </div>
+        <div class="h-card">
+          <div style="font-size:14px;font-weight:700;">🏥 三甲医院 B</div>
+          <div class="h-rate" style="color:var(--tax-amber);">81.0%</div>
+          <div style="font-size:12px;color:var(--tax-muted);">810 / 1,000 例存活</div>
+          <button class="toy-btn secondary" id="pickB" style="margin-top:10px;width:100%;">选医院 B 做手术</button>
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">名院 A 合并总治愈率</div><div class="k-val" id="kA">—</div></div>
-        <div class="kpi"><div class="k-lbl">社区院 B 合并总治愈率</div><div class="k-val" id="kB">—</div></div>
-        <div class="kpi"><div class="k-lbl">是否触发辛普森反转</div><div class="k-val" id="kPar">—</div></div>
+
+      <div id="revealPanel" style="display:none;">
+        <div style="font-size:13.5px;font-weight:700;color:var(--tax-primary);margin-bottom:6px;">🔬 揭晓真相：按“轻症 vs 危重症”拆分同一份 2,000 例数据！</div>
+        <table class="tbl">
+          <thead>
+            <tr><th>患者病情分组</th><th>🏥 社区医院 A</th><th>🏥 三甲医院 B</th><th>本组胜出</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>轻症患者</td><td>830 / 900（92.2%）</td><td class="win">190 / 200（95.0%）</td><td class="win">医院 B 胜！</td></tr>
+            <tr><td>危重症患者</td><td>70 / 100（70.0%）</td><td class="win">620 / 800（77.5%）</td><td class="win">医院 B 胜！</td></tr>
+            <tr style="background:rgba(239,68,68,0.08);"><td><strong>合并总计（陷阱！）</strong></td><td style="color:var(--tax-red);font-weight:800;">900 / 1000（90.0%）</td><td>810 / 1000（81.0%）</td><td style="color:var(--tax-red);font-weight:800;">居然反转为 A 胜！</td></tr>
+          </tbody>
+        </table>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>盲测抉择：</strong>90% vs 81%，看起来社区医院 A 完胜对吗？点击上方按钮选出你的医院，立刻拆解底层数据！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const sevA=+document.getElementById('sSevA').value, sevB=+document.getElementById('sSevB').value;
-  document.getElementById('vSevA').textContent=sevA+'%';
-  document.getElementById('vSevB').textContent=sevB+'%';
-  // Fixed subgroup rates: A beats B in BOTH mild (96% vs 92%) and severe (65% vs 55%)
-  const totA=Math.round((100-sevA)*0.96 + sevA*0.65);
-  const totB=Math.round((100-sevB)*0.92 + sevB*0.55);
-  const para=totA < totB;
-  document.getElementById('kA').textContent=totA+'%';
-  document.getElementById('kB').textContent=totB+'%';
-  document.getElementById('kPar').textContent=para?'🤯 触发辛普森悖论反转!':'✅ 合并与分组方向一致';
-  document.getElementById('kPar').style.color=para?'#ef4444':'#059669';
-  const wA=Math.max(12, totA*3.6), wB=Math.max(12, totB*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="28" font-size="13" font-weight="800" fill="var(--tax-text)">分组真相：轻症 A(96%)>B(92%)；重症 A(65%)>B(55%) —— 但合并后呢？</text>
-    <text x="20" y="84" font-size="12.5" font-weight="750" fill="var(--tax-text)">名院 A 总治愈率</text>
-    <rect x="160" y="66" width="${wA.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
-    <text x="${(168+wA).toFixed(0)}" y="85" font-size="12" font-weight="800" fill="#2563eb">${totA}% (重症 ${sevA}%)</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">社区 B 总治愈率</text>
-    <rect x="160" y="120" width="${wB.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(168+wB).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${totB}% (重症 ${sevB}%)</text>
-    <text x="20" y="182" font-size="11.5" fill="var(--tax-muted)">${para?'荒谬吧？名院不管治轻症还是重症都更强，但直接看“总平均值”却得出完全相反的结论！':'当两院接诊难度分布接近时，总平均值才会反映真实水平。'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>永远警惕“合并大盘平均值”！当不同渠道/医院/班级的样本结构不均衡时，必须先按关键混杂因子分层再比较。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let done = false;
+    const revealPanel = document.getElementById('revealPanel');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function reveal(choice) {
+      revealPanel.style.display = 'block';
+      markDone(`完成辛普森悖论选院盲测（初选：医院 ${choice}）`);
+      ahaBox.innerHTML = choice === 'A'
+        ? '<strong>震撼反转！你选了医院 A，但无论轻症还是重症，医院 B 的救治率其实都更高！</strong>为什么合并总数反而 A 赢了？因为三甲医院 B 收治了 <strong>80% 的危重症</strong>，而社区医院 A 90% 都是轻症！这就是<strong>辛普森悖论</strong>：忽略样本权重（混杂变量）直接看汇总均值，会得出与事实 100% 相反的结论！'
+        : '<strong>慧眼识破陷阱！</strong>即使总成功率 A（90%）高于 B（81%），拆开一看：轻症组 B（95%）> A（92.2%），重症组 B（77.5%）> A（70%）。三甲医院因为接诊了大量危重病人拉低了总均值——看任何业务大盘或临床数据时，务必先按核心混杂维度做分层切分！';
+    }
+
+    document.getElementById('pickA').onclick = () => reveal('A');
+    document.getElementById('pickB').onclick = () => reveal('B');
   </script>
 </body>
 </html>

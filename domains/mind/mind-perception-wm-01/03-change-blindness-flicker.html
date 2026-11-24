@@ -7,64 +7,85 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>👁️ 变化盲视：一次眨眼如何抹掉剧变？</h1><p>只要在两张图之间插入不到 0.1 秒的空白闪烁（或眨眼、扫视），哪怕画面里整栋大楼消失，大脑也要花几十秒才能发现。</p></div>
+      <div>
+        <h1>👁️ 变化盲视：一次眨眼如何抹掉剧变？</h1>
+        <p>心理学震撼实验：两张街景图之间有一处<strong>非常巨大的变化</strong>！如果没有间隔直接切换，你 0.1 秒就能看到闪动；可一旦在中间插入 <strong>250 毫秒的短暂空白（模拟眨眼/转头）</strong>，很多人盯 15 秒都找不出来！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>画面间空白中断时长</span><span id="vGap">120 ms</span></label><input type="range" id="sGap" min="0" max="400" step="20" value="120" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>场景视觉元素数量</span><span id="vObj">18 个</span></label><input type="range" id="sObj" min="4" max="36" value="18" oninput="draw()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="setMode('flicker',this)">⚡ 开启 250ms 眨眼闪烁（难找！）</button>
+        <button class="pill" onclick="setMode('direct',this)">👁️ 关闭闪烁直接切换（0.1秒秒看！）</button>
+        <button class="tax-btn" style="padding:7px 14px;font-size:12.5px;" onclick="toggleHint()">🔍 高亮揭晓变化处</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">瞬时运动信号保留</div><div class="k-val" id="kMot">—</div></div>
-        <div class="kpi"><div class="k-lbl">发现变化平均耗时</div><div class="k-val" id="kSec">—</div></div>
-      </div>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const gap=+document.getElementById('sGap').value, obj=+document.getElementById('sObj').value;
-  document.getElementById('vGap').textContent=gap+' ms';
-  document.getElementById('vObj').textContent=obj+' 个';
-  const hasGap=gap>=60;
-  const sec=hasGap ? (1.2 + obj*0.42 + gap*0.015).toFixed(1) : (0.3 + obj*0.02).toFixed(1);
-  document.getElementById('kMot').textContent=hasGap?'❌ 被全局闪烁淹没':'✅ 局部突变直接触发';
-  document.getElementById('kMot').style.color=hasGap?'#ef4444':'#059669';
-  document.getElementById('kSec').textContent=sec+' 秒';
-  const barNoGap=Math.max(8, Math.min(340, (0.3+obj*0.02)*16));
-  const barGap=Math.max(8, Math.min(340, parseFloat(sec)*16));
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">发现显著变化所需时间对比（场景含 ${obj} 个物体）</text>
-    <text x="20" y="80" font-size="12.5" font-weight="750" fill="var(--tax-text)">无中断直接切换</text>
-    <rect x="160" y="62" width="${barNoGap.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(168+barNoGap).toFixed(0)}" y="81" font-size="12" font-weight="800" fill="#059669">${(0.3+obj*0.02).toFixed(1)}s</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">插入 ${gap}ms 闪烁</text>
-    <rect x="160" y="120" width="${barGap.toFixed(0)}" height="28" rx="6" fill="${hasGap?'#ef4444':'#3b82f6'}"/>
-    <text x="${(168+barGap).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="${hasGap?'#ef4444':'#3b82f6'}">${sec}s</text>
-    <text x="20" y="182" font-size="11.5" fill="var(--tax-muted)">${hasGap?'由于空白中断覆盖了局部运动信号，大脑被迫退化为“逐个物体慢速扫描”！':'无中断时，变化瞬间的局部亮度跃变会自动拉住注意力。'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>我们以为脑子里存了一张完整高清照片，其实大脑只存了稀疏的“语义草图”。只要打断瞬时运动信号，我们对未聚焦区域的变化几乎是瞎的。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let mode = 'flicker', showHint = false, frame = 0, timer = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setMode(m, btn){
+      mode = m;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); startLoop();
+    }
+    function toggleHint(){ showHint = !showHint; markDone(); draw(); }
+
+    function startLoop(){
+      if(timer) clearInterval(timer);
+      frame = 0;
+      timer = setInterval(()=>{
+        frame = (frame + 1) % (mode === 'flicker' ? 4 : 2);
+        draw();
+      }, mode === 'flicker' ? 320 : 520);
+      draw();
+    }
+
+    function draw(){
+      const isBlank = mode === 'flicker' && (frame === 1 || frame === 3);
+      const isAlt = (mode === 'flicker' && frame === 2) || (mode === 'direct' && frame === 1);
+
+      if(isBlank){
+        document.getElementById('svg').innerHTML = `<rect x="0" y="0" width="640" height="205" fill="var(--tax-surface-alt)"/><text x="320" y="108" text-anchor="middle" font-size="13" font-weight="800" fill="var(--tax-muted)">（250ms 短暂眨眼/视线遮挡空白）</text>`;
+        return;
+      }
+
+      // Scene with subtle-but-huge change: the middle tower window/roof disappears or engine bar shifts
+      document.getElementById('svg').innerHTML = `
+        <rect x="20" y="20" width="600" height="165" rx="12" fill="var(--tax-primary-soft)" opacity="0.35"/>
+        <circle cx="96" cy="56" r="20" fill="var(--tax-amber)"/>
+        <rect x="64" y="110" width="76" height="75" rx="4" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-width="2"/>
+        <rect x="160" y="72" width="88" height="113" rx="4" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-width="2"/>
+        <rect x="272" y="92" width="96" height="93" rx="4" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-width="2"/>
+        ${!isAlt ? `<rect x="298" y="48" width="44" height="44" rx="6" fill="var(--tax-primary)" opacity="0.85"/>` : ''}
+        ${showHint ? `<circle cx="320" cy="70" r="34" fill="none" stroke="var(--tax-red)" stroke-width="3" stroke-dasharray="5 4"/><text x="320" y="34" text-anchor="middle" font-size="11.5" font-weight="900" fill="var(--tax-red)">👇 中央蓝楼顶在不断消失/出现！</text>` : ''}
+        <rect x="392" y="64" width="82" height="121" rx="4" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-width="2"/>
+        <rect x="494" y="102" width="92" height="83" rx="4" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-width="2"/>
+        <circle cx="195" cy="145" r="14" fill="var(--tax-green)"/>
+        <circle cx="430" cy="145" r="14" fill="var(--tax-green)"/>
+        <text x="32" y="198" font-size="11.5" font-weight="800" fill="var(--tax-muted)">当前模式：${mode==='flicker'?'⚡ 带眨眼空白闪烁（打断视觉运动检测器）':'👁️ 无闪烁直接切换（局部运动瞬间抓眼！）'}</text>
+      `;
+
+      document.getElementById('ahaBox').innerHTML = mode === 'direct'
+        ? `💡 <strong>顿悟时刻：</strong>撤掉中间的空白闪烁后，中央那块蓝色楼顶的跳动简直显眼到 0.1 秒就被眼角余光抓到！因为连续画面激活了大脑低级的<strong>局部瞬态运动检测器</strong>！`
+        : `💡 <strong>顿悟时刻：</strong>仅仅插入一次 250ms 的眨眼空白，就把视觉运动检测器彻底清空重启了——由于大脑根本不会把整张画面的像素全存进记忆，只要没把注意力精准扫到那块楼顶，它就能在你眼皮底下反复消失！`;
+    }
+
+    startLoop();
   </script>
 </body>
 </html>

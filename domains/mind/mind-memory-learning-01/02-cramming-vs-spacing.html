@@ -1,70 +1,160 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚔️ 考前突击 vs 间隔复习：30 天留存对决</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>考前突击 vs 间隔复习：30 天留存对决</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .score-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .racer-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .racer-val { font-size: 24px; font-weight: 800; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚔️ 考前突击 vs 间隔复习：30 天留存对决</h1><p>同样花 4 小时学习，一次性连学 4 小时只能在明天考场救急；拆成 4 天各 1 小时，30 天后依然牢记。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>总学习投入时间（两组完全相同）</span><span id="vHrs">4 小时</span></label><input type="range" id="sHrs" min="2" max="10" value="4" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>考试/应用距今时间</span><span id="vDay">30 天后</span></label><input type="range" id="sDay" min="1" max="60" value="30" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⚔️ 考前突击 vs 间隔复习：30 天留存对决</h1>
+      <p>两位学习者投入<strong>完全相同的 6 小时</strong>：突击党把 6 小时全砸在第 1 天通宵；间隔党拆成 6 次 × 1 小时（第 1, 3, 7, 12, 18, 25 天）。按下播放键，看谁赢了第 2 天，谁赢了第 30 天！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="controls">
+        <button class="toy-btn" id="playBtn">▶ 播放 30 天对决</button>
+        <button class="toy-btn secondary" id="jump2Btn">跳到第 2 天（突击考场）</button>
+        <button class="toy-btn secondary" id="jump30Btn">跳到第 30 天（期末大考）</button>
+        <span style="font-size:13px;color:var(--tax-muted);">当前进度：<strong id="dayLabel">第 1 天</strong></span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">集中突击留存率</div><div class="k-val" id="kCram">—</div></div>
-        <div class="kpi"><div class="k-lbl">分散间隔留存率</div><div class="k-val" id="kSpac">—</div></div>
+
+      <svg id="raceSvg" viewBox="0 0 680 215" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="突击与间隔复习30天留存竞速"></svg>
+
+      <div class="score-pair">
+        <div class="racer-card">
+          <div style="font-size:12px;color:var(--tax-muted);">🔥 考前突击党（D1 连学 6 小时）</div>
+          <div class="racer-val" id="cramVal" style="color:var(--tax-red);">98%</div>
+        </div>
+        <div class="racer-card">
+          <div style="font-size:12px;color:var(--tax-muted);">🌱 间隔复习党（6 次 × 1 小时）</div>
+          <div class="racer-val" id="spaceVal" style="color:var(--tax-green);">78%</div>
+        </div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>对决说明：</strong>点击「播放 30 天对决」或直接跳转第 2 天与第 30 天，看清“短期考分假象”与“长期真掌握”的交叉反转点！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const hrs=+document.getElementById('sHrs').value, day=+document.getElementById('sDay').value;
-  document.getElementById('vHrs').textContent=hrs+' 小时';
-  document.getElementById('vDay').textContent=day+' 天后';
-  const cram=Math.max(4, Math.min(96, Math.round((68+hrs*3)*Math.exp(-day/(2.8+hrs*0.4)))));
-  const spac=Math.max(12, Math.min(98, Math.round((72+hrs*2.6)*Math.exp(-day/(18+hrs*4.5)))));
-  document.getElementById('kCram').textContent=cram+'%';
-  document.getElementById('kCram').style.color=cram<40?'#ef4444':'#f59e0b';
-  document.getElementById('kSpac').textContent=spac+'%';
-  document.getElementById('kSpac').style.color='#059669';
-  const w1=Math.max(10, cram*3.6), w2=Math.max(10, spac*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">投入相同 ${hrs} 小时，在 ${day} 天后的知识留存对比</text>
-    <text x="20" y="84" font-size="12.5" font-weight="750" fill="var(--tax-text)">一次性突击</text>
-    <rect x="145" y="66" width="${w1.toFixed(0)}" height="30" rx="6" fill="#f59e0b"/>
-    <text x="${(153+w1).toFixed(0)}" y="86" font-size="12.5" font-weight="800" fill="#d97706">${cram}%</text>
-    <text x="20" y="140" font-size="12.5" font-weight="750" fill="var(--tax-text)">间隔分散学习</text>
-    <rect x="145" y="122" width="${w2.toFixed(0)}" height="30" rx="6" fill="#059669"/>
-    <text x="${(153+w2).toFixed(0)}" y="142" font-size="12.5" font-weight="800" fill="#059669">${spac}%</text>
-    <text x="20" y="184" font-size="11.5" fill="var(--tax-muted)">${day<=2?'极短期（1~2天）突击看起来和分散差不多，这就是“突击有效”的最大错觉！':'拉长时间维度后，间隔学习以零额外时间成本碾压突击！'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>如果你只是为了明天上午考完就忘，突击确实能混过去；但凡是你想带走一辈子的技能，分散学习才是唯一解。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const SPACE_DAYS = [1, 3, 7, 12, 18, 25];
+    let curDay = 1;
+    let playing = false;
+    let timer = null;
+    let done = false;
+
+    const svg = document.getElementById('raceSvg');
+    const playBtn = document.getElementById('playBtn');
+    const dayLabel = document.getElementById('dayLabel');
+    const cramVal = document.getElementById('cramVal');
+    const spaceVal = document.getElementById('spaceVal');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function cramAt(d) {
+      if (d <= 1) return 98;
+      return Math.max(8, Math.round(98 * Math.exp(-(d - 1) / 4.2)));
+    }
+
+    function spaceAt(d) {
+      let stab = 2.4;
+      let last = 1;
+      let peak = 78;
+      for (const sd of SPACE_DAYS) {
+        if (sd > 1 && sd <= d) {
+          stab *= 1.85;
+          last = sd;
+          peak = Math.min(97, peak + 4);
+        }
+      }
+      const r = peak * Math.exp(-(d - last) / stab);
+      return Math.max(12, Math.round(r));
+    }
+
+    function draw() {
+      const c = cramAt(curDay);
+      const s = spaceAt(curDay);
+      dayLabel.textContent = `第 ${curDay} 天`;
+      cramVal.textContent = `${c}%`;
+      spaceVal.textContent = `${s}%`;
+
+      const xOf = d => 44 + ((d - 1) / 29) * 604;
+      const yOf = v => 185 - (v / 100) * 145;
+
+      let cPts = [], sPts = [];
+      for (let d = 1; d <= curDay; d++) {
+        cPts.push(`${xOf(d).toFixed(1)},${yOf(cramAt(d)).toFixed(1)}`);
+        sPts.push(`${xOf(d).toFixed(1)},${yOf(spaceAt(d)).toFixed(1)}`);
+      }
+
+      let html = '';
+      [25, 50, 75, 100].forEach(v => {
+        const y = yOf(v);
+        html += `<line x1="44" y1="${y}" x2="648" y2="${y}" stroke="var(--tax-border)" stroke-dasharray="3 3"/>`;
+        html += `<text x="36" y="${y + 4}" text-anchor="end" fill="var(--tax-muted)" font-size="11">${v}%</text>`;
+      });
+      [1, 5, 10, 15, 20, 25, 30].forEach(d => {
+        html += `<text x="${xOf(d)}" y="204" text-anchor="middle" fill="var(--tax-muted)" font-size="11">D${d}</text>`;
+      });
+
+      if (cPts.length > 1) {
+        html += `<polyline points="${cPts.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3"/>`;
+        html += `<polyline points="${sPts.join(' ')}" fill="none" stroke="var(--tax-green)" stroke-width="3"/>`;
+      }
+
+      html += `<circle cx="${xOf(curDay)}" cy="${yOf(c)}" r="5.5" fill="var(--tax-red)"/>`;
+      html += `<circle cx="${xOf(curDay)}" cy="${yOf(s)}" r="5.5" fill="var(--tax-green)"/>`;
+      svg.innerHTML = html;
+
+      if (curDay <= 3) {
+        ahaBox.innerHTML = `<strong>第 ${curDay} 天（突击领先 ${c}% vs ${s}%）：</strong>这就是为什么大家迷信考前通宵——如果明天就考、考完就忘，突击党确实分数更高。但接着往第 30 天看！`;
+      } else if (curDay < 15) {
+        ahaBox.innerHTML = `<strong>第 ${curDay} 天（交叉反超！${s}% vs ${c}%）：</strong>突击党的短期记忆像雪崩一样塌方，而间隔党每次复习都在加固突触连接，已经彻底反超。`;
+      } else {
+        ahaBox.innerHTML = `<strong>第 ${curDay} 天（长期碾压：${s}% vs ${c}%）：</strong>总投入同样是 6 小时，间隔党在第 30 天依然留存 <strong>${s}%</strong>，突击党只剩 <strong>${c}%</strong>。时间切分方式决定了你是在“租借知识”还是“拥有知识”。`;
+      }
+    }
+
+    function stop() {
+      playing = false;
+      clearInterval(timer);
+      playBtn.textContent = '▶ 播放 30 天对决';
+    }
+
+    playBtn.onclick = () => {
+      markDone('播放了考前突击与间隔复习30天对决');
+      if (playing) { stop(); return; }
+      if (curDay >= 30) curDay = 1;
+      playing = true;
+      playBtn.textContent = '⏸ 暂停';
+      timer = setInterval(() => {
+        curDay++;
+        draw();
+        if (curDay >= 30) stop();
+      }, 170);
+    };
+
+    document.getElementById('jump2Btn').onclick = () => { stop(); curDay = 2; markDone('对比了第2天突击优势'); draw(); };
+    document.getElementById('jump30Btn').onclick = () => { stop(); curDay = 30; markDone('对比了第30天间隔碾压'); draw(); };
+
+    draw();
   </script>
 </body>
 </html>

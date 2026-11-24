@@ -7,64 +7,81 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:9px 14px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🛫 协和式飞机效应：承诺升级陷阱</h1><p>英法两国早就知道协和超音速客机商业上必定血亏，但因为前任和现任领导人已投入几十亿、谁砍项目谁背锅，结果硬生生又烧了十年钱。</p></div>
+      <div>
+        <h1>🛫 协和式飞机效应：承诺升级陷阱</h1>
+        <p>历史真实惨案：英法政府早就在研发明确得知协和超音速客机<strong>永远不可能收回成本</strong>，却因为“已经砸了十几亿英镑、怕被骂失败”，硬生生又烧了十年巨款！为什么大公司砍烂尾项目，往往必须靠<strong>空降一位新 CEO</strong>？</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>决策者个人面子/政治声誉绑定度</span><span id="vEgo">85%</span></label><input type="range" id="sEgo" min="0" max="100" value="85" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>项目已被证明无望的证据强度</span><span id="vEv">75%</span></label><input type="range" id="sEv" min="20" max="100" value="75" oninput="draw()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="setRole('old',this)">😰 身份 A：亲手立项 5 年的原 CEO（面子绑死）</button>
+        <button class="pill" onclick="setRole('new',this)">🧊 身份 B：今天刚上任的新空降 CEO（零包袱）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">原发起人叫停概率</div><div class="k-val" id="kOrg">—</div></div>
-        <div class="kpi"><div class="k-lbl">新接任者叫停概率</div><div class="k-val" id="kNew">—</div></div>
+        <div class="kpi"><div class="k-lbl">个人声誉与面子成本</div><div class="k-val" id="kEgo">—</div></div>
+        <div class="kpi"><div class="k-lbl">继续砸钱概率</div><div class="k-val" id="kProb">—</div></div>
+        <div class="kpi"><div class="k-lbl">最终决策动作</div><div class="k-val" id="kAct">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const ego=+document.getElementById('sEgo').value, ev=+document.getElementById('sEv').value;
-  document.getElementById('vEgo').textContent=ego+'%';
-  document.getElementById('vEv').textContent=ev+'%';
-  const org=Math.max(5, Math.min(95, Math.round(ev*0.85 - ego*0.65 + 15)));
-  const nw=Math.max(20, Math.min(98, Math.round(ev*0.95 + 4)));
-  document.getElementById('kOrg').textContent=org+'%';
-  document.getElementById('kOrg').style.color=org<40?'#ef4444':'#f59e0b';
-  document.getElementById('kNew').textContent=nw+'%';
-  document.getElementById('kNew').style.color='#059669';
-  const wO=Math.max(12, org*2.7), wN=Math.max(12, nw*2.7);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">面对相同铁证（${ev}% 无望），两类决策者果断砍项目的概率</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">原项目发起人</text>
-    <rect x="145" y="64" width="${wO.toFixed(0)}" height="28" rx="6" fill="#ef4444"/>
-    <text x="${(153+wO).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#ef4444">${org}%（怕承认自己当初错了）</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">空降新接班人</text>
-    <rect x="145" y="120" width="${wN.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(153+wN).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${nw}%（无历史面子包袱）</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">英特尔前 CEO 格鲁夫的经典自救法：“如果董事会今天炒掉我们换个新 CEO，他会怎么做？”</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>打破沉没成本的终极技巧是“假装自己今天刚入职接手这个烂摊子”——剥离面子包袱，答案瞬间清晰。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let role = 'old';
+    function setRole(r, btn){
+      role = r;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const isOld = role === 'old';
+      const prob = isOld ? 84 : 11;
+      const col = isOld ? 'var(--tax-red)' : 'var(--tax-green)';
+
+      document.getElementById('svg').innerHTML = `
+        <rect x="24" y="24" width="276" height="156" rx="14" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-width="1.8"/>
+        <text x="162" y="52" text-anchor="middle" font-size="13.5" font-weight="900" fill="var(--tax-ink)">📄 摆在桌上的同一份财务真相</text>
+        <text x="42" y="84" font-size="12" fill="var(--tax-muted)">• 过去 5 年已投入：12 亿元</text>
+        <text x="42" y="108" font-size="12" fill="var(--tax-muted)">• 未来完工还需烧：6 亿元</text>
+        <text x="42" y="132" font-size="12" font-weight="800" fill="var(--tax-red)">• 市场总回报预期：仅 2 亿元</text>
+        <text x="42" y="160" font-size="12" font-weight="900" fill="var(--tax-primary)">客观净现值：继续干 = 净亏 4 亿</text>
+
+        <rect x="328" y="24" width="288" height="156" rx="14" fill="${isOld?'var(--tax-red-soft)':'var(--tax-green-soft)'}" stroke="${col}" stroke-width="2.4"/>
+        <text x="472" y="54" text-anchor="middle" font-size="14" font-weight="900" fill="${col}">${isOld?'😰 原 CEO 内心戏（承诺升级）':'🧊 新 CEO 视角（英特尔格鲁夫法则）'}</text>
+        <text x="472" y="88" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-ink)">${isOld?'“这是我亲手推的项目，砍掉等于承认我蠢！”':'“那是前任砸的钱，跟我面子无关！”'}</text>
+        <text x="472" y="114" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-ink)">${isOld?'“再赌 6 亿，万一奇迹翻盘呢？”':'“继续烧 6 亿只赚 2 亿？立刻砍掉！”'}</text>
+        <rect x="364" y="136" width="216" height="24" rx="7" fill="${col}"/>
+        <text x="472" y="153" text-anchor="middle" font-size="12" font-weight="900" fill="#fff">${isOld?'84% 概率继续追加烧钱 🔥':'89% 概率第 1 天果断砍停 ✂️'}</text>
+      `;
+
+      document.getElementById('kEgo').textContent = isOld ? '极高（与个人自尊绑定）' : '零面子包袱 🧊';
+      const kP = document.getElementById('kProb'); kP.textContent = prob + '% 继续烧钱'; kP.style.color = col;
+      const kA = document.getElementById('kAct'); kA.textContent = isOld ? '继续加注烂尾 🔥' : '当天砍停止损 ✂️'; kA.style.color = col;
+
+      document.getElementById('ahaBox').innerHTML = isOld
+        ? `💡 <strong>顿悟时刻：</strong>这就是比金钱更可怕的<strong>“面子沉没成本（承诺升级）”</strong>！原决策者为了维护“我一贯英明”的自我形象，宁可拖着公司多亏 4 亿也不肯承认当初看走眼！点击切换到 <strong>🧊 新空降 CEO</strong> 体验瞬间破局！`
+        : `💡 <strong>顿悟时刻：</strong>1985 年英特尔深陷存储芯片泥潭，CEO 安迪·格鲁夫问搭档摩尔：<strong>“如果我们俩今天被董事会炒了，新来的 CEO 会怎么做？”</strong>摩尔说：“他会立刻砍掉存储业务。”格鲁夫说：“那我们何不走出这道门再走进来，自己当那个新 CEO！”——这就是破除承诺升级的<strong>“旋转门法则”</strong>！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

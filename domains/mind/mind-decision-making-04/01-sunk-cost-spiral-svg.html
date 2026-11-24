@@ -3,71 +3,79 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🕳️ 沉没成本黑洞：止损 vs 死扛对比（SVG）</title>
+  <title>🕳️ 沉没成本黑洞：止损 vs 死扛对比</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🕳️ 沉没成本黑洞：止损 vs 死扛对比（SVG）</h1><p>已经花掉且收不回来的钱是“沉没成本”。理性决策只看未来的增量成本与增量收益，但损失厌恶常逼着我们拿更多好钱去救坏钱！</p></div>
+      <div>
+        <h1>🕳️ 沉没成本黑洞：止损 vs 死扛对比</h1>
+        <p>误区：这个烂尾项目已经投了 500 万，现在停下来那 500 万就全打水漂了，必须咬牙再追加 300 万拼一把！真相：<strong>那 500 万在昨天就已经打水漂了</strong>——继续追加只会把总亏损从 500 万扩大成 700 万！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>前期已砸沉没成本（收不回）</span><span id="vSnk">100 万</span></label><input type="range" id="sSnk" min="20" max="300" step="20" value="100" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>继续追加投入 60 万的真实翻盘胜率</span><span id="vWin">15%</span></label><input type="range" id="sWin" min="5" max="80" step="5" value="15" oninput="draw()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="setSunk(500,this)">已沉没 500 万（追加 300 万仅回 100 万）</button>
+        <button class="pill" onclick="setSunk(1000,this)">已沉没 1000 万（情感越难割舍！）</button>
+        <button class="pill" onclick="setSunk(100,this)">仅沉没 100 万（较易抽身）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">立刻止损总净值</div><div class="k-val" id="kStop">—</div></div>
-        <div class="kpi"><div class="k-lbl">继续硬扛期望总净值</div><div class="k-val" id="kCont">—</div></div>
+        <div class="kpi"><div class="k-lbl">✂️ 立刻止损：最终总亏损</div><div class="k-val" id="kCut" style="color:var(--tax-green);">—</div></div>
+        <div class="kpi"><div class="k-lbl">🕳️ 继续砸钱：最终总亏损</div><div class="k-val" id="kDig" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">理性决策唯一应看</div><div class="k-val" style="color:var(--tax-primary);font-size:15px;">未来净增量 (-200万)</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const snk=+document.getElementById('sSnk').value, win=+document.getElementById('sWin').value;
-  document.getElementById('vSnk').textContent=snk+' 万';
-  document.getElementById('vWin').textContent=win+'%';
-  const stopNet=-snk;
-  const contDelta=(win/100)*150 - 60;
-  const contNet=Math.round(-snk + contDelta);
-  const betterStop=contDelta<0;
-  document.getElementById('kStop').textContent=stopNet+' 万';
-  document.getElementById('kCont').textContent=contNet+' 万 (增量 '+(contDelta>=0?'+':'')+contDelta.toFixed(0)+'万)';
-  document.getElementById('kCont').style.color=betterStop?'#ef4444':'#059669';
-  const sc=1.1;
-  const w1=Math.max(16, Math.min(360, Math.abs(stopNet)*sc));
-  const w2=Math.max(16, Math.min(360, Math.abs(contNet)*sc));
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">最终总亏损额对比（增量期望收益 = ${win}% × 150万 - 60万 = ${contDelta.toFixed(0)}万）</text>
-    <text x="20" y="84" font-size="12.5" font-weight="750" fill="var(--tax-text)">立刻止损总亏</text>
-    <rect x="145" y="66" width="${w1.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
-    <text x="${(153+w1).toFixed(0)}" y="85" font-size="12" font-weight="800" fill="#2563eb">${stopNet} 万</text>
-    <text x="20" y="140" font-size="12.5" font-weight="750" fill="var(--tax-text)">追加硬扛总亏</text>
-    <rect x="145" y="122" width="${w2.toFixed(0)}" height="28" rx="6" fill="${betterStop?'#ef4444':'#059669'}"/>
-    <text x="${(153+w2).toFixed(0)}" y="141" font-size="12" font-weight="800" fill="${betterStop?'#ef4444':'#059669'}">${contNet} 万</text>
-    <text x="20" y="182" font-size="11.5" fill="var(--tax-muted)">注意：无论前期砸了 20 万还是 300 万，决策正负号只取决于未来增量 (${contDelta.toFixed(0)}万)！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“已经投入太多了不能白费”是商业和人生中最昂贵的一句话。过去的钱已经走了，别再把未来的钱和时间也送进去陪葬。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let sunk = 500;
+    function setSunk(s, btn){
+      sunk = s;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const addLoss = 200; // spend 300 more, recover only 100 -> net -200
+      const totCut = sunk, totDig = sunk + addLoss;
+      const scale = 420 / 1250;
+
+      document.getElementById('svg').innerHTML = `
+        <text x="24" y="28" font-size="13" font-weight="850" fill="var(--tax-ink)">无论前期已沉没多少，灰色块都已彻底不可逆（无法收回）：</text>
+        <text x="24" y="66" font-size="12.5" font-weight="800" fill="var(--tax-green)">✂️ 路线 A：立刻止损撤退（保住未来 300 万现金）→ 总亏 ${totCut} 万</text>
+        <rect x="24" y="76" width="${Math.round(sunk*scale)}" height="28" rx="6" fill="var(--tax-muted)"/>
+        <text x="${24+Math.round(sunk*scale)+8}" y="95" font-size="12" font-weight="850" fill="var(--tax-green)">止血成功！</text>
+
+        <text x="24" y="136" font-size="12.5" font-weight="800" fill="var(--tax-red)">🕳️ 路线 B：舍不得前功尽弃再砸 300 万（仅回 100 万）→ 总亏 ${totDig} 万</text>
+        <rect x="24" y="146" width="${Math.round(sunk*scale)}" height="28" rx="6" fill="var(--tax-muted)"/>
+        <rect x="${24+Math.round(sunk*scale)+3}" y="146" width="${Math.round(addLoss*scale)}" height="28" rx="6" fill="var(--tax-red)"/>
+        <text x="${24+Math.round(totDig*scale)+10}" y="165" font-size="12" font-weight="900" fill="var(--tax-red)">多白亏 200 万!</text>
+      `;
+
+      document.getElementById('kCut').textContent = `-${totCut} 万`;
+      document.getElementById('kDig').textContent = `-${totDig} 万`;
+
+      document.getElementById('ahaBox').innerHTML = `💡 <strong>顿悟时刻：</strong>无论灰色沉没块是 100 万、500 万还是 1000 万，<strong>两条路线都要同样背负它</strong>！真正受你今天决定影响的，只有红色的新增亏损（-200 万）——<strong>别因为打翻了一杯牛奶，再砸掉整个冰箱！</strong>`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

@@ -3,70 +3,115 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📢 确认偏误与回音室极化器（SVG）</title>
+  <title>📢 确认偏误与回音室极化器</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📢 确认偏误与回音室极化器（SVG）</h1><p>人类天生喜欢搜寻支持自己观点的证据，而现代推荐算法又专门投你所好，两者叠加构成飞轮般的“回音室极化”。</p></div>
+      <div>
+        <h1>📢 确认偏误与回音室极化器</h1>
+        <p>误区：互联网信息这么发达，只要每天多刷新闻就能越来越客观。真相：人类天生爱点赞支持自己观点的帖子，推荐算法又拼命投喂同类内容——原本只有轻微差异的温和派，刷完 10 轮信息流就会被撕裂成水火不容的极端派！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>个人对反面证据的过滤排斥度</span><span id="vRej">75%</span></label><input type="range" id="sRej" min="0" max="95" value="75" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>推荐算法同温层喂养强度</span><span id="vAlg">70%</span></label><input type="range" id="sAlg" min="0" max="95" value="70" oninput="draw()"></div>
+      <div class="bar">
+        <button class="tax-btn" onclick="playFeed()">▶ 播放 10 轮信息流喂养演化</button>
+        <button class="pill active" onclick="setMode('algo',this)">📱 算法迎合回音室（只推同温层）</button>
+        <button class="pill" onclick="setMode('diverse',this)">🧭 主动破壁（引入 35% 理性反方）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 215"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">10 轮后的观点极端度</div><div class="k-val" id="kExt">—</div></div>
-        <div class="kpi"><div class="k-lbl">信息茧房状态</div><div class="k-val" id="kSt">—</div></div>
+        <div class="kpi"><div class="k-lbl">第 10 轮双方立场鸿沟</div><div class="k-val" id="kGap" style="color:var(--tax-red);">—</div></div>
+        <div class="kpi"><div class="k-lbl">信息茧房封闭度</div><div class="k-val" id="kCoc" style="color:var(--tax-amber);">—</div></div>
+        <div class="kpi"><div class="k-lbl">理性对话可能性</div><div class="k-val" id="kTalk" style="color:var(--tax-green);">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const rej=+document.getElementById('sRej').value, alg=+document.getElementById('sAlg').value;
-  document.getElementById('vRej').textContent=rej+'%';
-  document.getElementById('vAlg').textContent=alg+'%';
-  let b=55, pts=[];
-  for(let i=0;i<=10;i++){
-    const x=45+i*50, y=175 - b*1.3;
-    pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
-    const proRatio=0.5 + (alg/200);
-    const conAccept=(1 - proRatio)*(1 - rej/100);
-    b=Math.min(99, Math.max(50, b + (proRatio*0.65 - conAccept*0.8)*11));
-  }
-  const fin=Math.round(b);
-  document.getElementById('kExt').textContent=fin+'% 确信';
-  document.getElementById('kExt').style.color=fin>=85?'#ef4444':'#059669';
-  document.getElementById('kSt').textContent=fin>=85?'🚨 深度信息茧房':'✅ 保持开放校准';
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="26" font-size="13" font-weight="800" fill="var(--tax-text)">初始 55% 轻微倾向，经过 10 轮信息流后的极化轨迹</text>
-    <line x1="45" y1="175" x2="555" y2="175" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <polyline points="${pts.join(' ')}" fill="none" stroke="${fin>=85?'#ef4444':'#3b82f6'}" stroke-width="3"/>
-    <text x="45" y="194" font-size="11" fill="var(--tax-muted)">第 0 轮 (55%)</text>
-    <text x="485" y="194" font-size="11" font-weight="800" fill="${fin>=85?'#ef4444':'#3b82f6'}">第 10 轮 (${fin}%)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>确认偏误 + 推荐算法会把“轻微偏好”滚雪球成“绝对真理”。打破茧房的唯一办法是主动订阅高质量的反方观点。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let mode = 'algo', step = 10, timer = null;
+
+    function markDone(){ if(window.ToySDK) window.ToySDK.markCompleted(); }
+    function setMode(m, btn){
+      mode = m;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      markDone(); playFeed();
+    }
+    function playFeed(){
+      if(timer) clearInterval(timer);
+      markDone();
+      step = 0;
+      timer = setInterval(()=>{
+        step++;
+        draw();
+        if(step >= 10){ clearInterval(timer); timer=null; }
+      }, 120);
+      draw();
+    }
+
+    function posAt(r){
+      // Start mild: A=45, B=55
+      if(mode === 'algo'){
+        const a = Math.max(5, Math.round(45 - r * 4.0));
+        const b = Math.min(95, Math.round(55 + r * 4.0));
+        return { a, b };
+      }
+      const a = Math.round(45 - r * 0.6);
+      const b = Math.round(55 + r * 0.6);
+      return { a, b };
+    }
+
+    function draw(){
+      const x0=54, x1=612, yMin=28, yMax=188;
+      const toX = r => x0 + (r/10)*(x1-x0);
+      const toY = v => yMax - (v/100)*(yMax-yMin);
+
+      let pA=[], pB=[];
+      for(let r=0; r<=step; r++){
+        const v = posAt(r);
+        pA.push(`${toX(r).toFixed(1)},${toY(v.a).toFixed(1)}`);
+        pB.push(`${toX(r).toFixed(1)},${toY(v.b).toFixed(1)}`);
+      }
+      const now = posAt(step);
+      const gap = now.b - now.a;
+
+      document.getElementById('svg').innerHTML = `
+        <line x1="${x0}" y1="${toY(50)}" x2="${x1}" y2="${toY(50)}" stroke="var(--tax-muted)" stroke-dasharray="4 4"/>
+        <text x="${x0-6}" y="${toY(50)+4}" text-anchor="end" font-size="10.5" fill="var(--tax-muted)">中立</text>
+        ${[0,2,4,6,8,10].map(r=>`<text x="${toX(r)}" y="206" text-anchor="middle" font-size="11" fill="var(--tax-muted)">第${r}轮</text>`).join('')}
+        <polyline points="${pA.join(' ')}" fill="none" stroke="var(--tax-primary)" stroke-width="3.4"/>
+        <polyline points="${pB.join(' ')}" fill="none" stroke="var(--tax-red)" stroke-width="3.4"/>
+        <circle cx="${toX(step)}" cy="${toY(now.a)}" r="6" fill="var(--tax-primary)"/>
+        <circle cx="${toX(step)}" cy="${toY(now.b)}" r="6" fill="var(--tax-red)"/>
+        <text x="${x0}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-primary)">● 蓝方温和派 (${now.a})</text>
+        <text x="${x0+150}" y="18" font-size="11.5" font-weight="800" fill="var(--tax-red)">● 红方温和派 (${now.b}) · 当前撕裂鸿沟：${gap} 分</text>
+      `;
+
+      document.getElementById('kGap').textContent = `${gap} 分` + (gap>=60?' 🔥 严重极化':' ✅ 温和可控');
+      document.getElementById('kCoc').textContent = mode==='algo' ? '92% 密闭茧房' : '35% 开放通风';
+      document.getElementById('kTalk').textContent = gap>=60 ? '几乎为零（互相拉黑）' : '高度可对话 🤝';
+
+      document.getElementById('ahaBox').innerHTML = mode === 'algo'
+        ? `💡 <strong>顿悟时刻：</strong>开局两人只差 10 分，完全可以坐下来聊天；但“人性确认偏误 × 算法投其所好”连刷 10 轮后，双方被推向 <strong>${now.a} vs ${now.b}</strong> 的极端两极——你以为自己越来越清醒，其实只是在回音室里反复听自己的回声！`
+        : `💡 <strong>顿悟时刻：</strong>主动在信息源里混入 <strong>35% 高质量反方观点</strong>，就像给密闭房间开了一扇窗，10 轮后双方分歧始终稳在 <strong>${gap} 分</strong>的理性区间，免于被算法推向极端！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

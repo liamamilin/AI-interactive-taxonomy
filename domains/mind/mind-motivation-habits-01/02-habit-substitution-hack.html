@@ -1,69 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔧 戒除坏习惯密码：保留提示与奖赏，替换反应</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>戒除坏习惯密码：保留提示与奖赏，替换反应</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .loop-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .loop-box { padding: 10px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; }
+    .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 600px) { .opt-grid { grid-template-columns: 1fr; } }
+    .opt-btn {
+      text-align: left; padding: 12px; border-radius: 10px; border: 1px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); cursor: pointer;
+    }
+    .opt-btn:hover { border-color: var(--tax-primary); }
+    .opt-btn.good { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .opt-btn.bad { border-color: var(--tax-red); background: var(--tax-red-soft); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔧 戒除坏习惯密码：保留提示与奖赏，替换反应</h1><p>查尔斯·杜希格《习惯的力量》：坏习惯的神经印记永远不会彻底抹除，硬憋只会报复性反弹；唯一有效的改法是保留旧提示和旧奖赏，只偷换中间的行为！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>新替代动作满足同一底层渴求的匹配度</span><span id="vFit">80%</span></label><input type="range" id="sFit" min="15" max="100" value="80" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>日常压力/疲劳触发频率</span><span id="vStr">60%</span></label><input type="range" id="sStr" min="10" max="100" value="60" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔧 戒除坏习惯密码：黄金替换法则（情景改写）</h1>
+      <p>杜希格《习惯的力量》指出：坏习惯的神经回路<strong>永远无法彻底删除</strong>，只能改写！保留原来的「提示」和真实「奖赏」，只替换中间的「反应动作」，看看 30 天戒断成功率相差多少！</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <strong id="caseTitle" style="font-size:15px;">案例 1 / 3</strong>
+        <span id="scoreBadge" style="font-size:13px;color:var(--tax-muted);">成功改写：0 / 3</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">硬扛压抑 30 天成功率</div><div class="k-val" id="kWil">—</div></div>
-        <div class="kpi"><div class="k-lbl">习惯替换 30 天成功率</div><div class="k-val" id="kSub">—</div></div>
+
+      <div class="loop-bar">
+        <div class="loop-box"><div style="font-size:11px;color:var(--tax-muted);">触发提示（Cue）</div><strong id="cueTxt" style="font-size:13px;"></strong></div>
+        <div class="loop-box" style="border-color:var(--tax-red);"><div style="font-size:11px;color:var(--tax-red);">旧反应（坏习惯）</div><strong id="oldTxt" style="font-size:13px;"></strong></div>
+        <div class="loop-box"><div style="font-size:11px;color:var(--tax-muted);">真实奖赏（Reward）</div><strong id="rewTxt" style="font-size:13px;"></strong></div>
       </div>
+
+      <div style="font-size:13px;color:var(--tax-muted);margin-bottom:8px;">选择你的干预方案：</div>
+      <div class="opt-grid" id="optGrid"></div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">
+        <span id="resLine" style="font-size:13px;color:var(--tax-muted);">点击方案查看 30 天留存率</span>
+        <button class="toy-btn secondary" id="nextBtn" style="display:none;">下一个坏习惯 →</button>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>改写原则：</strong>先看清你真正渴求的“奖赏”是什么（解闷？换气？减压？），再用健康动作精准兑现同一份奖赏！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const fit=+document.getElementById('sFit').value, str=+document.getElementById('sStr').value;
-  document.getElementById('vFit').textContent=fit+'%';
-  document.getElementById('vStr').textContent=str+'%';
-  const wil=Math.max(8, Math.round(48 - str*0.38));
-  const sub=Math.max(20, Math.min(94, Math.round(28 + fit*0.68 - str*0.12)));
-  document.getElementById('kWil').textContent=wil+'%';
-  document.getElementById('kSub').textContent=sub+'%';
-  document.getElementById('kSub').style.color='#059669';
-  const w1=Math.max(12, wil*3.6), w2=Math.max(12, sub*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">高压状态下 30 天不破戒成功率对比</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">纯靠意志力硬憋</text>
-    <rect x="155" y="64" width="${w1.toFixed(0)}" height="28" rx="6" fill="#ef4444" opacity="0.8"/>
-    <text x="${(163+w1).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#ef4444">${wil}%</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">偷换中间动作</text>
-    <rect x="155" y="120" width="${w2.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(163+w2).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#059669">${sub}%</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">例：下午 3 点想吃高糖零食（提示=无聊疲劳），换成“泡杯气泡茶 + 站起走 5 分钟”满足同一放松奖赏！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>先找出坏习惯背后到底在满足什么情绪奖赏（解压、社交还是逃避无聊），再用无害动作精准接盘！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const CASES = [
+      {
+        title: '案例 1/3 · 下午 3 点必点高糖奶茶',
+        cue: '下午 3 点大脑发懵、倦怠',
+        old: '外卖点一杯全糖珍珠奶茶',
+        rew: '短暂起身社交 + 恢复清醒',
+        options: [
+          { title: '😤 硬靠意志力忍着不动', sub: '发誓“再喝剁手”，死盯电脑干扛', ok: false, rate: '14%', fb: '30 天成功率仅 14%！下午 3 点的困倦提示和社交渴求都没被满足，第 4 天必然报复性连点两杯。' },
+          { title: '🔄 替换为：去茶水间泡冰气泡水 + 聊 3 分钟', sub: '同样 3 点触发，同样获得起身换气与清醒', ok: true, rate: '78%', fb: '30 天成功率 78%！你精准识别了真实奖赏不是“糖”，而是“起身休息+微刺激”，替换后回路无缝接管！' }
+        ]
+      },
+      {
+        title: '案例 2/3 · 睡前躺床刷短视频到凌晨 2 点',
+        cue: '关灯躺平，一天压力涌上心头',
+        old: '打开短视频无限下滑',
+        rew: '逃离焦虑 + 低脑力放松',
+        options: [
+          { title: '🔄 替换为：手机放客厅 + 听 15 分钟有声书/白噪音', sub: '保留“低脑力转移焦虑”的奖赏，切断蓝光与算法流', ok: true, rate: '74%', fb: '30 天成功率 74%！同样兑现了“不费脑放松”的奖赏，同时用定时关闭避免了无限下滑。' },
+          { title: '😤 硬扛干躺着数羊', sub: '要求自己 10 点一闭眼就立刻睡着', ok: false, rate: '18%', fb: '30 天成功率仅 18%！压力和焦虑没出口，越躺越烦躁，最终还是爬起来摸手机。' }
+        ]
+      },
+      {
+        title: '案例 3/3 · 写难任务卡壳时忍不住切回聊天软件',
+        cue: '遇到棘手问题产生轻微挫败感',
+        old: '切屏刷群聊 / 逛热搜逃避',
+        rew: '立刻获得微小掌控感与多巴胺',
+        options: [
+          { title: '😤 责怪自己不自律，发誓绝不切屏', sub: '卡壳时死磕屏幕发呆', ok: false, rate: '16%', fb: '30 天成功率仅 16%！大脑遇到挫败会自动寻找逃生阀，纯压抑只会越憋越焦躁。' },
+          { title: '🔄 替换为：草稿纸写下“卡点 1 句话”+ 喝一口水', sub: '用 30 秒微动作兑现“掌控感”，再切回主线', ok: true, rate: '81%', fb: '30 天成功率 81%！把“刷群聊”替换成“纸上写卡点”，既释放了挫败张力又保住了专注流！' }
+        ]
+      }
+    ];
+
+    let idx = 0, wins = 0, locked = false, done = false;
+    const optGrid = document.getElementById('optGrid');
+    const resLine = document.getElementById('resLine');
+    const nextBtn = document.getElementById('nextBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const c = CASES[idx];
+      locked = false;
+      nextBtn.style.display = 'none';
+      document.getElementById('caseTitle').textContent = c.title;
+      document.getElementById('cueTxt').textContent = c.cue;
+      document.getElementById('oldTxt').textContent = c.old;
+      document.getElementById('rewTxt').textContent = c.rew;
+      resLine.textContent = '请选择一种干预策略';
+      optGrid.innerHTML = '';
+
+      c.options.forEach(o => {
+        const b = document.createElement('button');
+        b.className = 'opt-btn';
+        b.innerHTML = `<div style="font-weight:700;font-size:14px;">${o.title}</div><div style="font-size:12px;color:var(--tax-muted);margin-top:4px;">${o.sub}</div>`;
+        b.onclick = () => {
+          if (locked) return;
+          locked = true;
+          b.classList.add(o.ok ? 'good' : 'bad');
+          if (o.ok) wins++;
+          document.getElementById('scoreBadge').textContent = `成功改写：${wins} / 3`;
+          resLine.innerHTML = `<strong>30 天成功率：${o.rate}</strong>`;
+          ahaBox.innerHTML = `<strong>${o.ok ? '✓ 黄金替换生效' : '⚠️ 硬戒复发警告'}：</strong>${o.fb}`;
+          if (idx === CASES.length - 1) {
+            markDone(`完成坏习惯替换情景挑战（${wins}/3）`);
+            nextBtn.textContent = '↺ 重新挑战';
+          } else {
+            nextBtn.textContent = '下一个坏习惯 →';
+          }
+          nextBtn.style.display = 'inline-block';
+        };
+        optGrid.appendChild(b);
+      });
+    }
+
+    nextBtn.onclick = () => {
+      if (idx === CASES.length - 1) { idx = 0; wins = 0; document.getElementById('scoreBadge').textContent = '成功改写：0 / 3'; }
+      else idx++;
+      render();
+    };
+    render();
   </script>
 </body>
 </html>

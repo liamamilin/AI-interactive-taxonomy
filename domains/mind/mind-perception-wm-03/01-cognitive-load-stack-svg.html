@@ -1,73 +1,155 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧱 三类认知负荷堆叠槽（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>三类认知负荷堆叠槽</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .grid-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+    @media (max-width: 640px) { .grid-cols { grid-template-columns: 1fr; } }
+    .col-card { padding: 10px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .col-card h3 { margin: 0 0 8px; font-size: 13px; }
+    .toggle-chip {
+      display: block; width: 100%; text-align: left; margin-bottom: 6px; padding: 7px 10px;
+      border-radius: 8px; border: 1px solid var(--tax-border); background: var(--tax-surface);
+      color: var(--tax-ink); font-size: 12px; cursor: pointer;
+    }
+    .toggle-chip.active-in { border-color: var(--tax-primary); background: var(--tax-primary-soft); font-weight: 600; }
+    .toggle-chip.active-ex { border-color: var(--tax-red); background: var(--tax-red-soft); font-weight: 600; }
+    .toggle-chip.active-ge { border-color: var(--tax-green); background: var(--tax-green-soft); font-weight: 600; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🧱 三类认知负荷堆叠槽（SVG）</h1><p>斯韦勒（Sweller）认知负荷理论：总带宽固定为 100%。杂乱的排版和术语堆砌（外在负荷）一旦膨胀，留给真正建构知识（相关负荷）的空间就归零了。</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🧱 三类认知负荷堆叠槽</h1>
+      <p>Sweller 认知负荷理论把大脑带宽分为三块：<strong>内在负荷</strong>（知识本身难度）、<strong>外在负荷</strong>（糟糕排版/弹窗/废话）、<strong>相关负荷</strong>（真正建构图式的深度思考）。试着重构一页教学材料，让总负荷不爆表且相关负荷最大化！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="grid-cols" id="controlsGrid"></div>
+
+      <svg id="stackSvg" viewBox="0 0 680 190" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="三类认知负荷堆叠图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>目标挑战：</strong>当前页面塞满了“外在负荷”，大脑已经超载宕机！试着关掉红色外在干扰，为绿色“相关负荷（深度理解）”腾出带宽。
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>知识本身难度（内在负荷）</span><span id="vInt">45%</span></label><input type="range" id="sInt" min="15" max="75" value="45" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>排版杂乱/术语噪音（外在负荷）</span><span id="vExt">35%</span></label><input type="range" id="sExt" min="5" max="65" value="35" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">剩余“深度理解”带宽</div><div class="k-val" id="kGer">—</div></div>
-        <div class="kpi"><div class="k-lbl">大脑当前状态</div><div class="k-val" id="kSt">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const intr=+document.getElementById('sInt').value, ext=+document.getElementById('sExt').value;
-  document.getElementById('vInt').textContent=intr+'%';
-  document.getElementById('vExt').textContent=ext+'%';
-  const total=intr+ext;
-  const germane=Math.max(0, 100-total);
-  const over=Math.max(0, total-100);
-  document.getElementById('kGer').textContent=germane+'%';
-  document.getElementById('kGer').style.color=over>0?'#ef4444':(germane>=25?'#059669':'#f59e0b');
-  document.getElementById('kSt').textContent=over>0?'🤯 认知过载宕机 (+'+over+'%)':(germane>=25?'✅ 高效内化吸收':'⚠️ 勉强听懂难记忆');
-  const scale=4.4;
-  const wI=Math.max(4, intr*scale), wE=Math.max(4, ext*scale), wG=Math.max(0, germane*scale);
-  document.getElementById('svg').innerHTML=`
-    <text x="30" y="32" font-size="13" font-weight="800" fill="var(--tax-text)">工作记忆 100% 带宽分配条</text>
-    <rect x="30" y="55" width="440" height="44" rx="8" fill="var(--tax-border)" opacity="0.25"/>
-    <rect x="30" y="55" width="${Math.min(540,wI).toFixed(0)}" height="44" rx="6" fill="#3b82f6"/>
-    <rect x="${(30+wI).toFixed(0)}" y="55" width="${Math.min(540-wI,wE).toFixed(0)}" height="44" fill="#ef4444"/>
-    ${wG>0?`<rect x="${(30+wI+wE).toFixed(0)}" y="55" width="${wG.toFixed(0)}" height="44" rx="6" fill="#059669"/>`:''}
-    <line x1="470" y1="42" x2="470" y2="115" stroke="#1e293b" stroke-width="2.5" stroke-dasharray="4,3"/>
-    <text x="470" y="38" text-anchor="middle" font-size="11" font-weight="850" fill="var(--tax-text)">100% 上限</text>
-    <rect x="30" y="135" width="14" height="14" rx="3" fill="#3b82f6"/><text x="50" y="147" font-size="12" fill="var(--tax-text)">内在负荷 ${intr}%</text>
-    <rect x="175" y="135" width="14" height="14" rx="3" fill="#ef4444"/><text x="195" y="147" font-size="12" fill="var(--tax-text)">外在噪音 ${ext}%</text>
-    <rect x="320" y="135" width="14" height="14" rx="3" fill="#059669"/><text x="340" y="147" font-size="12" fill="var(--tax-text)">深度建构(相关负荷) ${germane}%</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>好老师和好产品经理的核心工作，不是把知识变浅，而是拼命削减“外在负荷”——省出来的每一分带宽，都会直接转化为用户的深度顿悟。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const GROUPS = [
+      {
+        key: 'intrinsic', title: '🔵 内在负荷（内容复杂度）', cls: 'active-in',
+        items: [
+          { id: 'i1', label: '核心概念原理 (+30)', val: 30, on: true },
+          { id: 'i2', label: '多变量交互公式 (+20)', val: 20, on: true },
+          { id: 'i3', label: '拆分为前后两步 (-15)', val: -15, on: false }
+        ]
+      },
+      {
+        key: 'extraneous', title: '🔴 外在负荷（设计噪音）', cls: 'active-ex',
+        items: [
+          { id: 'e1', label: '花哨动画与闪烁弹窗 (+25)', val: 25, on: true },
+          { id: 'e2', label: '图注分离来回翻页 (+20)', val: 20, on: true },
+          { id: 'e3', label: '未解释的专业黑话 (+15)', val: 15, on: true }
+        ]
+      },
+      {
+        key: 'germane', title: '🟢 相关负荷（深度建构）', cls: 'active-ge',
+        items: [
+          { id: 'g1', label: '类比迁移与心智模型 (+20)', val: 20, on: false },
+          { id: 'g2', label: '正反例对比练习 (+20)', val: 20, on: false },
+          { id: 'g3', label: '合书自测提取 (+15)', val: 15, on: false }
+        ]
+      }
+    ];
+
+    let done = false;
+    const grid = document.getElementById('controlsGrid');
+    const svg = document.getElementById('stackSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function sumGroup(key) {
+      const g = GROUPS.find(x => x.key === key);
+      return Math.max(0, g.items.filter(i => i.on).reduce((a, b) => a + b.val, 0));
+    }
+
+    function render() {
+      grid.innerHTML = '';
+      GROUPS.forEach(g => {
+        const card = document.createElement('div');
+        card.className = 'col-card';
+        card.innerHTML = `<h3>${g.title}</h3>`;
+        g.items.forEach(it => {
+          const btn = document.createElement('button');
+          btn.className = 'toggle-chip' + (it.on ? ' ' + g.cls : '');
+          btn.textContent = (it.on ? '✓ ' : '○ ') + it.label;
+          btn.onclick = () => {
+            it.on = !it.on;
+            markDone('调整了三类认知负荷结构');
+            render();
+          };
+          card.appendChild(btn);
+        });
+        grid.appendChild(card);
+      });
+
+      const inVal = sumGroup('intrinsic');
+      const exVal = sumGroup('extraneous');
+      const geVal = sumGroup('germane');
+      const total = inVal + exVal + geVal;
+      const overload = total > 100;
+
+      const barX = 40, barY = 72, barW = 560, barH = 44;
+      const scale = barW / 120; // 100% mark at x = 40 + 100*scale
+      const capX = barX + 100 * scale;
+
+      const wIn = inVal * scale;
+      const wEx = exVal * scale;
+      const wGe = geVal * scale;
+
+      let html = '';
+      html += `<text x="40" y="34" fill="var(--tax-ink)" font-size="14" font-weight="700">当前工作记忆总占用：${total}% ${overload ? '⚠️ 已超载（发生理解崩塌）' : '✓ 安全区间'}</text>`;
+      html += `<text x="40" y="54" fill="var(--tax-muted)" font-size="12">内在 ${inVal}% · 外在 ${exVal}% · 相关 ${geVal}%</text>`;
+
+      // Background track
+      html += `<rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="10" fill="rgba(148,163,184,0.12)" stroke="var(--tax-border)"/>`;
+
+      // Stacked segments
+      if (wIn > 0) html += `<rect x="${barX}" y="${barY}" width="${Math.min(barW, wIn)}" height="${barH}" rx="8" fill="rgba(59,130,246,0.75)"/>`;
+      if (wEx > 0) html += `<rect x="${barX + wIn}" y="${barY}" width="${Math.min(barW - wIn, wEx)}" height="${barH}" fill="rgba(239,68,68,0.78)"/>`;
+      if (wGe > 0) html += `<rect x="${barX + wIn + wEx}" y="${barY}" width="${Math.min(Math.max(0, barW - wIn - wEx), wGe)}" height="${barH}" rx="4" fill="rgba(16,185,129,0.8)"/>`;
+
+      // 100% capacity line
+      html += `<line x1="${capX}" y1="56" x2="${capX}" y2="132" stroke="var(--tax-amber)" stroke-width="2.5" stroke-dasharray="5 4"/>`;
+      html += `<text x="${capX}" y="150" text-anchor="middle" fill="var(--tax-amber)" font-size="12" font-weight="700">100% 认知天花板</text>`;
+
+      // Legend
+      html += `<text x="40" y="175" fill="var(--tax-muted)" font-size="12">有效学习转化率 = 相关负荷在未超载时的占比：${overload ? '0%（超载阻断）' : Math.round((geVal / 55) * 100) + '%'}</text>`;
+      svg.innerHTML = html;
+
+      if (overload) {
+        ahaBox.innerHTML = `<strong>认知超载（${total}%）：</strong>一旦总负荷冲破 100% 天花板，最先被挤掉的就是深度理解（相关负荷）。关掉红色“外在负荷”噪音，或勾选“拆分为前后两步”降低内在负荷！`;
+      } else if (exVal === 0 && geVal >= 35) {
+        ahaBox.innerHTML = `<strong>黄金教学区！</strong>你把外在负荷降到 0%，腾出宝贵带宽全部投入到相关负荷（${geVal}%）。好设计不是把内容变浅，而是砍掉无关噪音，让大脑专注建构模型。`;
+      } else if (geVal === 0) {
+        ahaBox.innerHTML = '<strong>没有超载，但也没学会：</strong>虽然外在负荷降下来了，但你还没开启绿色“相关负荷”（类比、对比、自测）。勾选 2 项相关负荷试试！';
+      } else {
+        ahaBox.innerHTML = `<strong>平衡状态（${total}%）：</strong>当前仍有 ${exVal}% 带宽被外在噪音吃掉，试着彻底清零外在负荷，看看能多塞进多少深度思考。`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

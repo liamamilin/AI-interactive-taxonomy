@@ -7,62 +7,83 @@
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
   <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
+    .bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .pill { padding:8px 13px; border-radius:10px; border:1.5px solid var(--tax-border); background:var(--tax-surface-alt); color:var(--tax-ink); font-size:13px; font-weight:800; cursor:pointer; }
+    .pill.active { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
     .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface-alt); }
+    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
+    .kpi .k-val { font-size:18px; font-weight:850; margin-top:2px; }
   </style>
 </head>
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🎭 专家的反向错觉：错误共识与冒充者感</h1><p>达克效应的另一端常被忽视：顶尖高手因为自己觉得任务太容易，会误以为“别人也能轻松做到”，从而低估自己、产生冒充者综合征。</p></div>
+      <div>
+        <h1>🎭 专家的反向错觉：错误共识与冒充者感</h1>
+        <p>误区：觉得自己很水、怕被别人拆穿（冒充者综合征），说明你真的水平很差。真相：越优秀的人越容易陷入<strong>“参照系切换”</strong>——你把全球前 5% 的自己扔进全员大佬的顶级圈子里，又把早已内化的绝活当成“人人都懂的常识”！</p>
+      </div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
+
     <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>个人真实专业水平</span><span id="vLvl">90 分</span></label><input type="range" id="sLvl" min="50" max="99" value="90" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>身边参照圈子平均水平</span><span id="vPeer">88 分（顶尖圈层）</span></label><input type="range" id="sPeer" min="40" max="98" value="88" oninput="draw()"></div>
+      <div class="bar">
+        <button class="pill active" onclick="setRef('elite',this)">🏛️ 高手日常视角：只盯着顶尖 1% 同行圈</button>
+        <button class="pill" onclick="setRef('public',this)">🌍 客观全局视角：放回全行业/全人群分布</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
+      <svg id="svg" class="svg-box" viewBox="0 0 640 205"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">全行业真实排位</div><div class="k-val" id="kAll">—</div></div>
-        <div class="kpi"><div class="k-lbl">局域参照引发的冒充者感</div><div class="k-val" id="kImp">—</div></div>
+        <div class="kpi"><div class="k-lbl">你的真实行业实力</div><div class="k-val" style="color:var(--tax-green);">前 6%（资深专家）</div></div>
+        <div class="kpi"><div class="k-lbl">你眼中自己的相对位置</div><div class="k-val" id="kFeel">—</div></div>
+        <div class="kpi"><div class="k-lbl">引发的典型心理错觉</div><div class="k-val" id="kBias" style="font-size:15px;">—</div></div>
       </div>
     </div>
     <div class="tax-aha" id="ahaBox"></div>
   </div>
   <script>
-function draw(){
-  const lvl=+document.getElementById('sLvl').value, peer=+document.getElementById('sPeer').value;
-  document.getElementById('vLvl').textContent=lvl+' 分';
-  document.getElementById('vPeer').textContent=peer+' 分';
-  const imp=Math.max(5, Math.min(95, Math.round(50 + (peer - lvl)*3 + (peer-60)*0.6)));
-  document.getElementById('kAll').textContent='超越全行业 '+lvl+'% 的人';
-  document.getElementById('kImp').textContent=imp+'%'+(imp>=65?'（强冒充者感）':'（自我定位平和）');
-  document.getElementById('kImp').style.color=imp>=65?'#8b5cf6':'#059669';
-  const wL=Math.max(12, lvl*3.6), wP=Math.max(12, peer*3.6);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="30" font-size="13" font-weight="800" fill="var(--tax-text)">你的水平 vs 身边高频对比圈层</text>
-    <text x="20" y="82" font-size="12.5" font-weight="750" fill="var(--tax-text)">你的真实能力</text>
-    <rect x="145" y="64" width="${wL.toFixed(0)}" height="28" rx="6" fill="#059669"/>
-    <text x="${(153+wL).toFixed(0)}" y="83" font-size="12" font-weight="800" fill="#059669">${lvl} 分</text>
-    <text x="20" y="138" font-size="12.5" font-weight="750" fill="var(--tax-text)">身边参照圈子</text>
-    <rect x="145" y="120" width="${wP.toFixed(0)}" height="28" rx="6" fill="#3b82f6"/>
-    <text x="${(153+wP).toFixed(0)}" y="139" font-size="12" font-weight="800" fill="#3b82f6">${peer} 分</text>
-    <text x="20" y="180" font-size="11.5" fill="var(--tax-muted)">常年待在顶尖圈子里，会让你误把“前 10% 的硬实力”当成人人都会的普通水准。</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>如果你常觉得自己“只是运气好、随时会被拆穿”，试着去教一次新人，你立刻会重新校准自己的真实价值。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let ref = 'elite';
+    function setRef(r, btn){
+      ref = r;
+      document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+      if(window.ToySDK) window.ToySDK.markCompleted();
+      draw();
+    }
+
+    function draw(){
+      const isElite = ref === 'elite';
+      const x0=44, x1=596;
+      const myX = isElite ? 220 : 542;
+
+      document.getElementById('svg').innerHTML = `
+        <text x="44" y="28" font-size="13" font-weight="850" fill="var(--tax-ink)">
+          ${isElite ? '🔎 狭隘参照系：只拿自己跟全行业最顶尖 10% 的超级大牛比' : '🌍 全局参照系：放回 100% 行业从业者真实分布'}
+        </text>
+        <rect x="${x0}" y="68" width="${x1-x0}" height="38" rx="10" fill="var(--tax-surface-alt)" stroke="var(--tax-border)" stroke-width="2"/>
+        <rect x="${x0}" y="68" width="${myX-x0}" height="38" rx="10" fill="${isElite?'var(--tax-amber-soft)':'var(--tax-green-soft)'}"/>
+        <circle cx="${myX}" cy="87" r="12" fill="${isElite?'var(--tax-amber)':'var(--tax-green)'}" stroke="#fff" stroke-width="2.5"/>
+        <text x="${myX}" y="56" text-anchor="middle" font-size="12" font-weight="900" fill="${isElite?'var(--tax-amber)':'var(--tax-green)'}">▼ 你（实力其实 1 分没变！）</text>
+        <text x="${x0}" y="128" font-size="11.5" fill="var(--tax-muted)">${isElite?'顶尖圈门槛 (前 10%)':'行业新手 (0%)'}</text>
+        <text x="${x1}" y="128" text-anchor="end" font-size="11.5" fill="var(--tax-muted)">${isElite?'诺奖/宗师级 (前 0.1%)':'行业宗师 (100%)'}</text>
+        <text x="320" y="174" text-anchor="middle" font-size="12.5" font-weight="800" fill="${isElite?'var(--tax-amber)':'var(--tax-green)'}">
+          ${isElite ? '😰 错觉产生：“我怎么排在后面？大家肯定都会，只有我是混进来的水货！”' : '✨ 真相还原：你其实已经超过 94% 的人！只是你忘了新手根本不懂你眼里的“常识”！'}
+        </text>
+      `;
+
+      const kF = document.getElementById('kFeel');
+      kF.textContent = isElite ? '圈内中下游（焦虑!）' : '妥妥前 6% 高手 ✅';
+      kF.style.color = isElite ? 'var(--tax-amber)' : 'var(--tax-green)';
+      const kB = document.getElementById('kBias');
+      kB.textContent = isElite ? '冒充者综合征 + 知识诅咒' : '客观准确自我校准';
+      kB.style.color = isElite ? 'var(--tax-red)' : 'var(--tax-green)';
+
+      document.getElementById('ahaBox').innerHTML = isElite
+        ? `💡 <strong>顿悟时刻：</strong>爱因斯坦和无数诺奖得主都曾深受<strong>冒充者综合征</strong>困扰！当你升入更高圈层，你的参照系会自动缩放成“只剩顶尖高手”，于是实力没退步，自我评价却暴跌！试着切回 <strong>🌍 全局视角</strong> 找回锚点！`
+        : `💡 <strong>顿悟时刻：</strong>高手的另一面叫<strong>“知识诅咒”</strong>：因为你太熟练了，再也记不起当初不懂时的感受，所以常错估“别人肯定也会”。偶尔去教一次新手，既能治愈冒充者感，又能打破知识诅咒！`;
+    }
+
+    draw();
   </script>
 </body>
 </html>

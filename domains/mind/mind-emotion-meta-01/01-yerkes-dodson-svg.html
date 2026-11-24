@@ -1,73 +1,141 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔔 压力-表现倒 U 曲线与任务难度偏移（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>压力-表现倒 U 曲线与任务难度偏移</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .m-card { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
+    .m-val { font-size: 20px; font-weight: 800; color: var(--tax-ink); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔔 压力-表现倒 U 曲线与任务难度偏移（SVG）</h1><p>零压力时大脑昏昏欲睡，适度压力激发肾上腺素达到巅峰，过高压力则让前额叶宕机——且任务越复杂，最佳压力峰值越靠左！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>当前生理唤醒/紧张压力</span><span id="vAr">55 分</span></label><input type="range" id="sAr" min="5" max="100" value="55" oninput="draw()"></div>
-        <div class="ctrl-box"><label><span>任务认知复杂度（低=搬砖，高=解题/创意）</span><span id="vCmp">65%</span></label><input type="range" id="sCmp" min="10" max="100" value="65" oninput="draw()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔔 耶克斯-多德森倒 U 曲线：压力与任务难度偏移</h1>
+      <p>压力并不是越低越好，也不是越高越强：<strong>简单体能任务</strong>需要较高肾上腺素才能拉满；但<strong>复杂思考任务</strong>的最佳唤醒点会大幅左移——稍微焦虑过度，大脑就会一片空白！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="simpleBtn">🏋️ 简单 / 体能任务（冲刺举重）</button>
+        <button class="toy-btn secondary" id="midBtn">💼 中等熟练任务（常规汇报）</button>
+        <button class="toy-btn secondary" id="hardBtn">🧠 高难创造任务（架构设计 / 竞赛）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">该任务最佳压力峰值</div><div class="k-val" id="kOpt">—</div></div>
-        <div class="kpi"><div class="k-lbl">当前临场表现得分</div><div class="k-val" id="kPrf">—</div></div>
+
+      <div class="ctrl-box">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>⚡ 当前生理唤醒 / 压力水平</span>
+          <strong id="arousalVal" style="color:var(--tax-primary);">50%</strong>
+        </div>
+        <input type="range" id="arousalRange" min="5" max="95" value="50" style="width:100%;" />
       </div>
+
+      <svg id="ydSvg" viewBox="0 0 680 215" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="耶克斯多德森倒U曲线"></svg>
+
+      <div class="metrics">
+        <div class="m-card"><div style="font-size:12px;color:var(--tax-muted);">当前表现分</div><div class="m-val" id="perfVal">—</div></div>
+        <div class="m-card"><div style="font-size:12px;color:var(--tax-muted);">该任务最佳压力点</div><div class="m-val" id="optVal" style="color:var(--tax-green);">—</div></div>
+        <div class="m-card"><div style="font-size:12px;color:var(--tax-muted);">当前心理区间</div><div class="m-val" id="zoneVal" style="font-size:16px;">—</div></div>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>动手验证：</strong>把压力拉到 <strong>75%</strong>，先看「简单体能任务」（正值巅峰！），再一键切到「高难创造任务」，看同样的压力如何瞬间把表现砸到谷底！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function draw(){
-  const ar=+document.getElementById('sAr').value, cmp=+document.getElementById('sCmp').value;
-  document.getElementById('vAr').textContent=ar+' 分';
-  document.getElementById('vCmp').textContent=cmp+'%';
-  const opt=Math.round(80 - cmp*0.42);
-  const spread=36 - cmp*0.14;
-  function perfAt(x){ return Math.max(10, Math.round(96*Math.exp(-Math.pow((x-opt)/spread, 2)))); }
-  const prf=perfAt(ar);
-  document.getElementById('kOpt').textContent=opt+' 分';
-  document.getElementById('kPrf').textContent=prf+' 分';
-  document.getElementById('kPrf').style.color=prf>=75?'#059669':(ar>opt?'#ef4444':'#f59e0b');
-  let pts=[];
-  for(let x=5;x<=100;x+=2) pts.push(`${(45+x*5.1).toFixed(1)},${(175-perfAt(x)*1.32).toFixed(1)}`);
-  const cx=45+ar*5.1, cy=175-prf*1.32;
-  document.getElementById('svg').innerHTML=`
-    <text x="45" y="24" font-size="13" font-weight="800" fill="var(--tax-text)">耶克斯-多德森倒 U 曲线（复杂度越高，耐压上限越低）</text>
-    <line x1="45" y1="175" x2="555" y2="175" stroke="var(--tax-border)" stroke-width="1.5"/>
-    <polyline points="${pts.join(' ')}" fill="none" stroke="#3b82f6" stroke-width="3"/>
-    <line x1="${(45+opt*5.1).toFixed(1)}" y1="40" x2="${(45+opt*5.1).toFixed(1)}" y2="175" stroke="#059669" stroke-dasharray="4,3"/>
-    <circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="${ar>opt+15?'#ef4444':'#f59e0b'}" stroke="#fff" stroke-width="2"/>
-    <text x="45" y="194" font-size="11" fill="var(--tax-muted)">松懈犯困</text>
-    <text x="${(45+opt*5.1).toFixed(1)}" y="194" text-anchor="middle" font-size="11" font-weight="800" fill="#059669">最佳峰值 ${opt}</text>
-    <text x="510" y="194" font-size="11" fill="#ef4444">高压崩盘</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>重赏和严厉催逼只对简单重复劳动有效；面对创意、编程和精密决策，高压反而把人推下右侧悬崖！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const TASKS = {
+      simple: { name: '简单/体能任务', peak: 76, spread: 28, col: 'var(--tax-green)' },
+      mid:    { name: '中等熟练任务', peak: 55, spread: 24, col: 'var(--tax-primary)' },
+      hard:   { name: '高难创造任务', peak: 38, spread: 19, col: 'var(--tax-amber)' }
+    };
+
+    let taskKey = 'simple';
+    let done = false;
+
+    const arousalRange = document.getElementById('arousalRange');
+    const svg = document.getElementById('ydSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function perf(x, t) {
+      const z = (x - t.peak) / t.spread;
+      return Math.max(8, Math.round(98 * Math.exp(-0.5 * z * z)));
+    }
+
+    function render() {
+      ['simple', 'mid', 'hard'].forEach(k => {
+        document.getElementById(k + 'Btn').className = k === taskKey ? 'toy-btn' : 'toy-btn secondary';
+      });
+
+      const t = TASKS[taskKey];
+      const a = Number(arousalRange.value);
+      const p = perf(a, t);
+
+      document.getElementById('arousalVal').textContent = a + '%';
+      document.getElementById('perfVal').textContent = p + ' 分';
+      document.getElementById('optVal').textContent = t.peak + '% 压力';
+
+      let zone = '🎯 黄金巅峰区';
+      if (a < t.peak - 18) zone = '😴 唤醒不足（犯困摸鱼）';
+      else if (a > t.peak + 18) zone = '🤯 压力过载（大脑宕机）';
+      document.getElementById('zoneVal').textContent = zone;
+
+      const xOf = v => 50 + (v / 100) * 580;
+      const yOf = v => 180 - (v / 100) * 140;
+
+      let html = '';
+      // Draw ghost reference curves for all tasks
+      Object.entries(TASKS).forEach(([k, tk]) => {
+        let pts = [];
+        for (let x = 0; x <= 100; x += 2) pts.push(`${xOf(x).toFixed(1)},${yOf(perf(x, tk)).toFixed(1)}`);
+        const active = k === taskKey;
+        html += `<polyline points="${pts.join(' ')}" fill="none" stroke="${tk.col}" stroke-width="${active ? 3.5 : 1.5}" opacity="${active ? 1 : 0.28}" stroke-dasharray="${active ? '' : '4 4'}"/>`;
+      });
+
+      // Optimal band
+      html += `<rect x="${xOf(t.peak - 12)}" y="34" width="${xOf(t.peak + 12) - xOf(t.peak - 12)}" height="146" fill="rgba(16,185,129,0.12)"/>`;
+      html += `<line x1="50" y1="180" x2="630" y2="180" stroke="var(--tax-border)"/>`;
+      html += `<text x="50" y="200" fill="var(--tax-muted)" font-size="11">0% 昏昏欲睡</text>`;
+      html += `<text x="340" y="200" text-anchor="middle" fill="var(--tax-muted)" font-size="11">50% 适度警觉</text>`;
+      html += `<text x="630" y="200" text-anchor="end" fill="var(--tax-muted)" font-size="11">100% 极度恐慌</text>`;
+
+      // Current dot
+      const cx = xOf(a), cy = yOf(p);
+      html += `<line x1="${cx}" y1="${cy}" x2="${cx}" y2="180" stroke="${t.col}" stroke-dasharray="4 3" stroke-width="2"/>`;
+      html += `<circle cx="${cx}" cy="${cy}" r="7.5" fill="${t.col}" stroke="#fff" stroke-width="2"/>`;
+      html += `<text x="${cx}" y="${cy - 12}" text-anchor="middle" fill="var(--tax-ink)" font-size="12" font-weight="800">${p} 分</text>`;
+      svg.innerHTML = html;
+
+      if (taskKey === 'hard' && a >= 65) {
+        ahaBox.innerHTML = `<strong>高难任务遇高压（仅 ${p} 分）！</strong>这就是为什么老板在背后盯着写代码、或高额奖金悬赏解难题时，人反而发挥失常——高压力会让前额叶工作记忆变窄，越复杂的工作越需要<strong>较低且平稳</strong>的压力环境！`;
+      } else if (taskKey === 'simple' && a >= 65) {
+        ahaBox.innerHTML = `<strong>简单任务借高压起飞（${p} 分）！</strong>冲刺、搬重物或机械体力活不需要精细前额叶思考，高肾上腺素反而能榨出巅峰表现！`;
+      } else if (a <= 20) {
+        ahaBox.innerHTML = `<strong>唤醒不足（${p} 分）：</strong>完全零压力、没有死线时，大脑连多巴胺都懒得分泌。给自己加一点点适度紧迫感（如 25 分钟倒计时），表现会立刻爬坡！`;
+      } else {
+        ahaBox.innerHTML = `<strong>${t.name}（当前 ${p} 分）：</strong>它的黄金压力峰值在 <strong>${t.peak}%</strong> 附近。切换不同任务难度，观察倒 U 峰值如何左右漂移！`;
+      }
+    }
+
+    ['simple', 'mid', 'hard'].forEach(k => {
+      document.getElementById(k + 'Btn').onclick = () => { taskKey = k; markDone(`切换了耶克斯多德森任务难度：${k}`); render(); };
+    });
+    arousalRange.oninput = () => { markDone('调节了耶克斯多德森压力唤醒滑块'); render(); };
+    render();
   </script>
 </body>
 </html>
