@@ -28,8 +28,8 @@
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-      <button class="btn active" onclick="setMode(true,this)">开启年度再平衡（守住 50/50）</button>
-      <button class="btn" onclick="setMode(false,this)">放任漂移（牛市后半程变 80/20）</button>
+      <button class="btn active" onclick="window.__userActed=true;setMode(true,this)">开启年度再平衡（守住 50/50）</button>
+      <button class="btn" onclick="window.__userActed=true;setMode(false,this)">放任漂移（牛市后半程变 80/20）</button>
     </div>
     <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
     <div class="kpi-row">
@@ -58,7 +58,7 @@
       document.getElementById('svg').innerHTML=`
         <line x1="55" y1="${y(100).toFixed(1)}" x2="565" y2="${y(100).toFixed(1)}" stroke="var(--tax-muted)" stroke-dasharray="4,4"/>
         <path d="${p}" fill="none" stroke="${reb?'#10b981':'#ef4444'}" stroke-width="3.5"/>
-        ${arr.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v).toFixed(1)}" r="4.5" fill="${reb?'#10b981':'#ef4444'}"/><text x="${x(i)}" y="${(y(v)-9).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="750" fill="var(--tax-text)">${v.toFixed(0)}</text>`).join('')}
+        ${arr.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v).toFixed(1)}" r="4.5" fill="${reb?'#10b981':'#ef4444'}"/><text x="${x(i)}" y="${(y(v)-9).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="750" fill="var(--tax-ink)">${v.toFixed(0)}</text>`).join('')}
       `;
       const dd=(arr[4]-arr[5])/arr[4]*100;
       document.getElementById('kPeak').textContent=arr[4].toFixed(1);
@@ -67,7 +67,7 @@
       document.getElementById('ahaBox').innerHTML=reb
         ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>每年再平衡把牛市利润锁进债券，第 5 年股灾回撤仅 <strong>-${dd.toFixed(1)}%</strong>，大跌后净值仍稳在 ${arr[5].toFixed(1)}！`
         : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>连续 4 年牛市后，股票占比漂移到 <strong>${stPct[4].toFixed(0)}%</strong>！第 5 年股灾一口气暴跌 <strong>-${dd.toFixed(1)}%</strong>，远超原始风控底线！`;
-      if(window.ToySDK) window.ToySDK.markCompleted();
+      if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
     }
     setMode(true, document.querySelector('.btn.active'));</script>
 </body>

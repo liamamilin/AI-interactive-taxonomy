@@ -28,9 +28,9 @@
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-      <button class="btn active" onclick="pick(0,this)">90~180 天等待期</button>
-      <button class="btn" onclick="pick(1,this)">如实健康告知</button>
-      <button class="btn" onclick="pick(2,this)">1 万元免赔额</button>
+      <button class="btn active" onclick="window.__userActed=true;pick(0,this)">90~180 天等待期</button>
+      <button class="btn" onclick="window.__userActed=true;pick(1,this)">如实健康告知</button>
+      <button class="btn" onclick="window.__userActed=true;pick(2,this)">1 万元免赔额</button>
     </div>
     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
     <div class="kpi-row">
@@ -49,7 +49,7 @@
       if(btn) btn.classList.add('active');
       const d=ITEMS[i];
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="58" font-size="13" font-weight="800" fill="var(--tax-text)">风控拦截效率</text>
+        <text x="20" y="58" font-size="13" font-weight="800" fill="var(--tax-ink)">风控拦截效率</text>
         <rect x="150" y="38" width="${(d.pct*3.8).toFixed(1)}" height="28" rx="6" fill="#10b981"/>
         <text x="${(158+d.pct*3.8).toFixed(1)}" y="57" font-size="12.5" font-weight="800" fill="#10b981">${d.pct}% 风险拦截</text>
         <text x="20" y="122" font-size="12.5" fill="var(--tax-muted)">核心作用：${d.b}</text>
@@ -57,7 +57,7 @@
       document.getElementById('kType').textContent=d.t;
       document.getElementById('kBen').textContent='保费降低 40%~70%';
       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>${d.t}——看似严格的条款，其实是在保护绝大多数健康守约的投保人不为少数骗保者买单！`;
-      if(window.ToySDK) window.ToySDK.markCompleted();
+      if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
     }
     pick(0, document.querySelector('.btn.active'));</script>
 </body>

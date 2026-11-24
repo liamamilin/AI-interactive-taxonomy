@@ -43,7 +43,7 @@
       const beat=Math.max(8, Math.round(52*Math.exp(-0.095*Y)));
       const lose=100-beat;
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">${Y} 年战绩分布</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">${Y} 年战绩分布</text>
         <rect x="140" y="34" width="${(beat*4).toFixed(1)}" height="32" rx="6" fill="#10b981"/>
         <rect x="${(140+beat*4).toFixed(1)}" y="34" width="${(lose*4).toFixed(1)}" height="32" rx="6" fill="#ef4444" opacity="0.85"/>
         <text x="${(140+beat*2).toFixed(1)}" y="55" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${beat}% 赢</text>

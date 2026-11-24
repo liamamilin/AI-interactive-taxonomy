@@ -57,10 +57,10 @@
       const vol=30*Math.sqrt((1+(n-1)*rho)/n);
       const col=vol>24?'#ef4444':vol>16?'#f59e0b':'#10b981';
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="52" font-size="12" font-weight="750" fill="var(--tax-text)">单只股票风险</text>
+        <text x="20" y="52" font-size="12" font-weight="750" fill="var(--tax-ink)">单只股票风险</text>
         <rect x="140" y="34" width="360" height="26" rx="6" fill="#94a3b8" opacity="0.5"/>
         <text x="508" y="52" font-size="12" font-weight="750" fill="var(--tax-muted)">30.0%</text>
-        <text x="20" y="112" font-size="12" font-weight="750" fill="var(--tax-text)">${n}只组合风险</text>
+        <text x="20" y="112" font-size="12" font-weight="750" fill="var(--tax-ink)">${n}只组合风险</text>
         <rect x="140" y="94" width="${(vol/30*360).toFixed(1)}" height="26" rx="6" fill="${col}"/>
         <text x="${(148+vol/30*360).toFixed(1)}" y="112" font-size="12" font-weight="800" fill="${col}">${vol.toFixed(1)}%</text>
       `;

@@ -50,10 +50,10 @@
       const pct=add/(afterDip+add)*100;
       const imp=pct*(dip/100);
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">存量市值（跌后）</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">存量市值（跌后）</text>
         <rect x="160" y="36" width="${Math.min(360, afterDip*3.5).toFixed(1)}" height="28" rx="6" fill="#2563eb"/>
         <text x="${(168+Math.min(360, afterDip*3.5)).toFixed(1)}" y="55" font-size="12" font-weight="750" fill="#2563eb">${afterDip.toFixed(1)} 万</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">本月新投 0.5 万</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">本月新投 0.5 万</text>
         <rect x="160" y="96" width="${Math.max(4, 0.5*3.5).toFixed(1)}" height="28" rx="3" fill="#10b981"/>
         <text x="172" y="115" font-size="12" font-weight="750" fill="#10b981">仅占 ${pct.toFixed(2)}%</text>
       `;

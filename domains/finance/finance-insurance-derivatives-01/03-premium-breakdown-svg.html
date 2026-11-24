@@ -24,12 +24,12 @@
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🍰 保费去哪儿了：纯风险保费 vs 运营佣金（SVG）</h1><p>误区：既能保重疾、到期又能全额返还本金的保险最划算。真相：返还型保险不过是多收了你一倍保费，再把你的钱拿去低息理财返给你！</p></div>
+      <div><h1>🍰 保费去哪儿了：纯风险保费 vs 运营佣金</h1><p>误区：既能保重疾、到期又能全额返还本金的保险最划算。真相：返还型保险不过是多收了你一倍保费，再把你的钱拿去低息理财返给你！</p></div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-      <button class="btn active" onclick="show(0,this)">纯消费型重疾险（年交 4000 元）</button>
-      <button class="btn" onclick="show(1,this)">返还型重疾险（年交 11000 元）</button>
+      <button class="btn active" onclick="window.__userActed=true;show(0,this)">纯消费型重疾险（年交 4000 元）</button>
+      <button class="btn" onclick="window.__userActed=true;show(1,this)">返还型重疾险（年交 11000 元）</button>
     </div>
     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
     <div class="kpi-row">
@@ -48,12 +48,12 @@
         <rect x="60" y="55" width="${(pure*scale).toFixed(1)}" height="36" rx="4" fill="#10b981"/>
         <rect x="${(60+pure*scale).toFixed(1)}" y="55" width="${(fee*scale).toFixed(1)}" height="36" rx="4" fill="#f59e0b"/>
         ${inv>0?`<rect x="${(60+(pure+fee)*scale).toFixed(1)}" y="55" width="${(inv*scale).toFixed(1)}" height="36" rx="4" fill="#ef4444"/>`:''}
-        <text x="60" y="122" font-size="12" font-weight="750" fill="var(--tax-text)">总保费 ${total} 元 = 纯保障 3000 + 运营佣金 ${fee}${inv>0?' + 强制低息储蓄 '+inv:''}</text>
+        <text x="60" y="122" font-size="12" font-weight="750" fill="var(--tax-ink)">总保费 ${total} 元 = 纯保障 3000 + 运营佣金 ${fee}${inv>0?' + 强制低息储蓄 '+inv:''}</text>
       `;
       document.getElementById('kPure').textContent='3,000 元';
       document.getElementById('kExtra').textContent=(total-3000).toLocaleString()+' 元/年';
       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>保障归保障，理财归理财！把返还型多交的那 7000 元/年自己买国债或指数基金，收益往往远超“返还本金”！`;
-      if(window.ToySDK) window.ToySDK.markCompleted();
+      if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
     }
     show(0, document.querySelector('.btn.active'));</script>
 </body>

@@ -24,7 +24,7 @@
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🌾 农场主套保锁价器：现货盈亏 + 期货对冲 = 利润纹丝不动（SVG）</h1><p>误区：做期货套保如果在期货账户上亏钱了，说明套保失败。真相：期货亏的时候现货正大赚！两者相加刚好把总利润死死锁住！</p></div>
+      <div><h1>🌾 农场主套保锁价器：现货盈亏 + 期货对冲 = 利润纹丝不动</h1><p>误区：做期货套保如果在期货账户上亏钱了，说明套保失败。真相：期货亏的时候现货正大赚！两者相加刚好把总利润死死锁住！</p></div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="ctrl-grid">
@@ -43,10 +43,10 @@
       document.getElementById('vP').textContent=p+' 元/吨';
       const fut=2600-p;
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="50" font-size="12" font-weight="750" fill="var(--tax-text)">现货卖粮收入</text>
+        <text x="20" y="50" font-size="12" font-weight="750" fill="var(--tax-ink)">现货卖粮收入</text>
         <rect x="140" y="33" width="${(p/3600*360).toFixed(1)}" height="24" rx="5" fill="#2563eb"/>
         <text x="${(148+p/3600*360).toFixed(1)}" y="50" font-size="12" font-weight="750" fill="#2563eb">${p} 元</text>
-        <text x="20" y="100" font-size="12" font-weight="750" fill="var(--tax-text)">期货空单对冲</text>
+        <text x="20" y="100" font-size="12" font-weight="750" fill="var(--tax-ink)">期货空单对冲</text>
         <rect x="140" y="83" width="${(Math.abs(fut)/3600*360).toFixed(1)}" height="24" rx="5" fill="${fut>=0?'#10b981':'#ef4444'}"/>
         <text x="${(148+Math.abs(fut)/3600*360).toFixed(1)}" y="100" font-size="12" font-weight="750" fill="${fut>=0?'#10b981':'#ef4444'}">${fut>=0?'+':''}${fut} 元</text>
         <text x="20" y="150" font-size="12" font-weight="800" fill="#10b981">合计数锁死</text>

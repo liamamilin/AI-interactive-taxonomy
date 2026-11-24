@@ -28,8 +28,8 @@
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-      <button class="btn" onclick="pick(true,this)">盯着当下看（等物价跌了再停加息）</button>
-      <button class="btn active" onclick="pick(false,this)">预判滞后效应（提前踩刹车停手）</button>
+      <button class="btn" onclick="window.__userActed=true;pick(true,this)">盯着当下看（等物价跌了再停加息）</button>
+      <button class="btn active" onclick="window.__userActed=true;pick(false,this)">预判滞后效应（提前踩刹车停手）</button>
     </div>
     <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
     <div class="kpi-row">
@@ -52,7 +52,7 @@
       document.getElementById('kLand').textContent=overhike?'💥 硬着陆严重衰退 (-2.8%)':'✅ 软着陆 (+2.0%)';
       document.getElementById('kLand').style.color=overhike?'#ef4444':'#10b981';
       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>就像开远洋巨轮或调淋浴水温，货币政策有 12 个月以上的延迟！盯着后视镜猛加息，一定会把经济推入衰退！`;
-      if(window.ToySDK) window.ToySDK.markCompleted();
+      if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
     }
     pick(false, document.querySelector('.btn.active'));</script>
 </body>

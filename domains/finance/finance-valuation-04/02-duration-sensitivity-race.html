@@ -24,7 +24,7 @@
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>📏 久期敏感度竞速：1 年短债 vs 30 年超长债谁跌得狠？（SVG）</h1><p>误区：同样是美国国债，1 年期和 30 年期风险差不多。真相：加息 2%，1 年短债只跌 2%，30 年超长债价格直接腰斩级别的跌！</p></div>
+      <div><h1>📏 久期敏感度竞速：1 年短债 vs 30 年超长债谁跌得狠？</h1><p>误区：同样是美国国债，1 年期和 30 年期风险差不多。真相：加息 2%，1 年短债只跌 2%，30 年超长债价格直接腰斩级别的跌！</p></div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="ctrl-grid">
@@ -42,14 +42,14 @@
       const dr=+document.getElementById('dr').value;
       document.getElementById('vR').textContent=(dr>=0?'+':'')+dr.toFixed(2)+'%';
       const items=[{lbl:'1 年短债 (D≈1)', d:1},{lbl:'5 年期 (D≈4.5)', d:4.5},{lbl:'10 年中债 (D≈8.5)', d:8.5},{lbl:'30 年超长债 (D≈20)', d:20}];
-      let html=`<line x1="280" y1="18" x2="280" y2="165" stroke="var(--tax-text)" stroke-width="1.5"/>`;
+      let html=`<line x1="280" y1="18" x2="280" y2="165" stroke="var(--tax-ink)" stroke-width="1.5"/>`;
       items.forEach((it,i)=>{
         const chg=-it.d*dr;
         const w=Math.min(230, Math.abs(chg)*4.5);
         const x=chg>=0 ? 280 : 280-w;
         const col=chg>=0?'#10b981':'#ef4444';
         const y=32+i*34;
-        html+=`<text x="18" y="${y+16}" font-size="11.5" font-weight="750" fill="var(--tax-text)">${it.lbl}</text>
+        html+=`<text x="18" y="${y+16}" font-size="11.5" font-weight="750" fill="var(--tax-ink)">${it.lbl}</text>
         <rect x="${x.toFixed(1)}" y="${y}" width="${w.toFixed(1)}" height="22" rx="5" fill="${col}"/>
         <text x="${(chg>=0?288+w:x-8).toFixed(1)}" y="${y+15}" text-anchor="${chg>=0?'start':'end'}" font-size="11.5" font-weight="800" fill="${col}">${chg>=0?'+':''}${chg.toFixed(1)}%</text>`;
       });

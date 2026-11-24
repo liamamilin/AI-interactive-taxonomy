@@ -24,13 +24,13 @@
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>😊 定投微笑曲线 vs 倒霉哭脸曲线（SVG）</h1><p>误区：定投只要坚持就一定赚钱，跌了最稳。真相：定投最怕先涨后跌（倒V哭脸），最爱先跌后涨（微笑曲线）！</p></div>
+      <div><h1>😊 定投微笑曲线 vs 倒霉哭脸曲线</h1><p>误区：定投只要坚持就一定赚钱，跌了最稳。真相：定投最怕先涨后跌（倒V哭脸），最爱先跌后涨（微笑曲线）！</p></div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-      <button class="btn active" onclick="setShape('smile',this)">😊 微笑曲线（先跌后涨）</button>
-      <button class="btn" onclick="setShape('frown',this)">😭 哭脸曲线（先涨后跌）</button>
-      <button class="btn" onclick="setShape('up',this)">📈 单边慢牛</button>
+      <button class="btn active" onclick="window.__userActed=true;setShape('smile',this)">😊 微笑曲线（先跌后涨）</button>
+      <button class="btn" onclick="window.__userActed=true;setShape('frown',this)">😭 哭脸曲线（先涨后跌）</button>
+      <button class="btn" onclick="window.__userActed=true;setShape('up',this)">📈 单边慢牛</button>
     </div>
     <svg id="svg" class="svg-box" viewBox="0 0 600 205"></svg>
     <div class="kpi-row">
@@ -67,7 +67,7 @@
         : sh==='frown'
         ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>同样回到起点 1.00，先涨后跌让你在山顶买了一堆高价筹码，平均成本高达 <strong>${avg.toFixed(2)}</strong>，最终反亏 <strong>${ret.toFixed(1)}%</strong>！`
         : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>单边慢牛虽然赚钱，但成本一路被抬高到 ${avg.toFixed(2)}，不如微笑曲线在底部吸筹效率高！`;
-      if(window.ToySDK) window.ToySDK.markCompleted();
+      if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
     }
     setShape('smile', document.querySelector('.btn.active'));</script>
 </body>

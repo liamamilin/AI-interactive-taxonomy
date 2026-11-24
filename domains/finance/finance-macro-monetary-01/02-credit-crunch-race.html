@@ -42,9 +42,9 @@
       document.getElementById('vW').textContent=(w*100).toFixed(0)+'%';
       const effMult = 1 / (1 - 0.95*w);
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">理论上限 (20x)</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">理论上限 (20x)</text>
         <rect x="150" y="36" width="380" height="26" rx="6" fill="#94a3b8" opacity="0.4"/>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">实际派生乘数</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">实际派生乘数</text>
         <rect x="150" y="96" width="${(effMult/20*380).toFixed(1)}" height="26" rx="6" fill="${effMult<4?'#ef4444':'#2563eb'}"/>
         <text x="${(158+effMult/20*380).toFixed(1)}" y="114" font-size="12.5" font-weight="800" fill="${effMult<4?'#ef4444':'#2563eb'}">${effMult.toFixed(1)}x</text>
       `;

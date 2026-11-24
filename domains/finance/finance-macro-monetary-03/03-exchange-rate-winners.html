@@ -43,11 +43,11 @@
       const expChg=-fx*1.4;
       const impChg=-fx;
       document.getElementById('svg').innerHTML=`
-        <line x1="300" y1="20" x2="300" y2="155" stroke="var(--tax-text)"/>
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">外贸出口商盈利</text>
+        <line x1="300" y1="20" x2="300" y2="155" stroke="var(--tax-ink)"/>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">外贸出口商盈利</text>
         <rect x="${expChg>=0?300:300+expChg*4}" y="36" width="${Math.abs(expChg*4).toFixed(1)}" height="26" rx="5" fill="${expChg>=0?'#10b981':'#ef4444'}"/>
         <text x="${expChg>=0?308+expChg*4:292+expChg*4}" y="54" text-anchor="${expChg>=0?'start':'end'}" font-size="12" font-weight="800" fill="${expChg>=0?'#10b981':'#ef4444'}">${expChg>=0?'+':''}${expChg.toFixed(0)}%</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">留学/海淘钱包压力</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">留学/海淘钱包压力</text>
         <rect x="${impChg>=0?300:300+impChg*4}" y="96" width="${Math.abs(impChg*4).toFixed(1)}" height="26" rx="5" fill="${impChg>=0?'#ef4444':'#10b981'}"/>
         <text x="${impChg>=0?308+impChg*4:292+impChg*4}" y="114" text-anchor="${impChg>=0?'start':'end'}" font-size="12" font-weight="800" fill="${impChg>=0?'#ef4444':'#10b981'}">${impChg>=0?'多花 +':'省下 '}${Math.abs(impChg).toFixed(0)}%</text>
       `;

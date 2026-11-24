@@ -42,10 +42,10 @@
       document.getElementById('vR').textContent=r+'%';
       const busted=r>10;
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">金库现货储备</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">金库现货储备</text>
         <rect x="150" y="36" width="80" height="26" rx="5" fill="#10b981"/>
         <text x="238" y="54" font-size="12" font-weight="750" fill="#10b981">10%（其余 90% 已放贷）</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">今日取款需求</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">今日取款需求</text>
         <rect x="150" y="96" width="${(r*8).toFixed(1)}" height="26" rx="5" fill="${busted?'#ef4444':'#2563eb'}"/>
         <text x="${(158+r*8).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${busted?'#ef4444':'#2563eb'}">${r}% ${busted?'💥 击穿现金储备！':''}</text>
       `;

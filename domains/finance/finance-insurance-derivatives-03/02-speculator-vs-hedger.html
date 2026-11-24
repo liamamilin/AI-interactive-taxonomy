@@ -28,8 +28,8 @@
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-      <button class="btn active" onclick="pick(true,this)">有投机者提供流动性（正常市场）</button>
-      <button class="btn" onclick="pick(false,this)">禁止所有投机者（纯套保孤岛）</button>
+      <button class="btn active" onclick="window.__userActed=true;pick(true,this)">有投机者提供流动性（正常市场）</button>
+      <button class="btn" onclick="window.__userActed=true;pick(false,this)">禁止所有投机者（纯套保孤岛）</button>
     </div>
     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg>
     <div class="kpi-row">
@@ -61,7 +61,7 @@
       document.getElementById('kSlip').textContent=hasSpec?'0.05%（极低）':'无法成交 / 滑点 >8%';
       document.getElementById('kOk').textContent=hasSpec?'99.8%':'不足 15%';
       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>实体企业的买和卖时间上永远错位，正是投机者靠承担价格波动风险赚取价差，才撑起了整个套期保值生态！`;
-      if(window.ToySDK) window.ToySDK.markCompleted();
+      if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
     }
     pick(true, document.querySelector('.btn.active'));</script>
 </body>

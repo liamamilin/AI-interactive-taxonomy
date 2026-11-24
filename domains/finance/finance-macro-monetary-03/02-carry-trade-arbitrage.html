@@ -47,10 +47,10 @@
       const broken=hot>=500;
       const prof=hot*(sp/100);
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">央行外汇储备</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">央行外汇储备</text>
         <rect x="140" y="36" width="250" height="26" rx="5" fill="#10b981"/>
         <text x="398" y="54" font-size="12" font-weight="750" fill="#10b981">500 亿</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">热钱抽血冲击</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">热钱抽血冲击</text>
         <rect x="140" y="96" width="${(hot/800*400).toFixed(1)}" height="26" rx="5" fill="${broken?'#ef4444':'#f59e0b'}"/>
         <text x="${(148+hot/800*400).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${broken?'#ef4444':'#f59e0b'}">${hot} 亿 ${broken?'💥 击穿防线！':''}</text>
       `;

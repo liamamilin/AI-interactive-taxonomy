@@ -24,7 +24,7 @@
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>🛡️ 期权就是股票的“车险”：用看跌期权锁死暴跌下限（SVG）</h1><p>误区：期权只是赌博工具。真相：持有股票的同时买入看跌期权（Protective Put），就像给爱车买盗抢险，再大暴跌也绝不伤及底线！</p></div>
+      <div><h1>🛡️ 期权就是股票的“车险”：用看跌期权锁死暴跌下限</h1><p>误区：期权只是赌博工具。真相：持有股票的同时买入看跌期权（Protective Put），就像给爱车买盗抢险，再大暴跌也绝不伤及底线！</p></div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="ctrl-grid">
@@ -43,10 +43,10 @@
       const naked=100+chg;
       const ins=Math.max(90, 100+chg)-4;
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">裸奔股票市值</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">裸奔股票市值</text>
         <rect x="140" y="36" width="${(naked*2.8).toFixed(1)}" height="28" rx="6" fill="${naked<90?'#ef4444':'#2563eb'}"/>
         <text x="${(148+naked*2.8).toFixed(1)}" y="55" font-size="12" font-weight="800" fill="${naked<90?'#ef4444':'#2563eb'}">${naked} 万</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">加装 Put 保险</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">加装 Put 保险</text>
         <rect x="140" y="96" width="${(ins*2.8).toFixed(1)}" height="28" rx="6" fill="#10b981"/>
         <text x="${(148+ins*2.8).toFixed(1)}" y="115" font-size="12" font-weight="800" fill="#10b981">${ins} 万（锁死底线 86万）</text>
       `;

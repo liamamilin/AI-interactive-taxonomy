@@ -57,10 +57,10 @@
       const netCost = oil - futGain;
       const col = Math.abs(netCost-80)<5 ? '#10b981' : netCost>95 ? '#ef4444' : '#f59e0b';
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">现货航油市场价</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">现货航油市场价</text>
         <rect x="150" y="36" width="${(oil*2.8).toFixed(1)}" height="26" rx="5" fill="#94a3b8"/>
-        <text x="${(158+oil*2.8).toFixed(1)}" y="54" font-size="12" font-weight="750" fill="var(--tax-text)">${oil} 美元</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">套保后净成本</text>
+        <text x="${(158+oil*2.8).toFixed(1)}" y="54" font-size="12" font-weight="750" fill="var(--tax-ink)">${oil} 美元</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">套保后净成本</text>
         <rect x="150" y="96" width="${Math.max(10,netCost*2.8).toFixed(1)}" height="26" rx="5" fill="${col}"/>
         <text x="${(158+Math.max(10,netCost*2.8)).toFixed(1)}" y="114" font-size="12" font-weight="800" fill="${col}">${netCost.toFixed(0)} 美元/桶</text>
       `;

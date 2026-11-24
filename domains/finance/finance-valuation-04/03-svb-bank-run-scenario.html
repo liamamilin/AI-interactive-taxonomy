@@ -28,9 +28,9 @@
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-      <button class="btn active" onclick="step(0,this)">1. 2021低息期：买满 10 年国债</button>
-      <button class="btn" onclick="step(1,this)">2. 2022暴力加息：国债市值浮亏</button>
-      <button class="btn" onclick="step(2,this)">3. 储户恐慌挤兑：被迫割肉清盘</button>
+      <button class="btn active" onclick="window.__userActed=true;step(0,this)">1. 2021低息期：买满 10 年国债</button>
+      <button class="btn" onclick="window.__userActed=true;step(1,this)">2. 2022暴力加息：国债市值浮亏</button>
+      <button class="btn" onclick="window.__userActed=true;step(2,this)">3. 储户恐慌挤兑：被迫割肉清盘</button>
     </div>
     <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
     <div class="kpi-row">
@@ -50,10 +50,10 @@
       if(btn) btn.classList.add('active');
       const s=ST[i];
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">国债资产现值</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">国债资产现值</text>
         <rect x="140" y="36" width="${(s.ast/1200*400).toFixed(1)}" height="28" rx="6" fill="${s.col}"/>
         <text x="${(148+s.ast/1200*400).toFixed(1)}" y="55" font-size="12" font-weight="800" fill="${s.col}">${s.ast} 亿</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">储户存款负债</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">储户存款负债</text>
         <rect x="140" y="96" width="${(1000/1200*400).toFixed(1)}" height="28" rx="6" fill="#2563eb"/>
         <text x="${(148+1000/1200*400).toFixed(1)}" y="115" font-size="12" font-weight="800" fill="#2563eb">1000 亿</text>
       `;
@@ -61,7 +61,7 @@
       document.getElementById('kEq').textContent=(s.eq>=0?'+':'')+s.eq+' 亿';
       document.getElementById('kEq').style.color=s.col;
       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>${s.msg}`;
-      if(window.ToySDK) window.ToySDK.markCompleted();
+      if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
     }
     step(0, document.querySelector('.btn.active'));</script>
 </body>

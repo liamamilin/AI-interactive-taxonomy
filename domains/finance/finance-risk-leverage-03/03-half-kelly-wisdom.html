@@ -56,10 +56,10 @@
       const volPct = (k*k)*100;
       const safe = k<=0.6?'极高':k<=1.05?'中等':'危险（模型高估即爆）';
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">复利增长保留率</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">复利增长保留率</text>
         <rect x="160" y="38" width="${(retPct*3.5).toFixed(1)}" height="24" rx="5" fill="#10b981"/>
         <text x="${(168+retPct*3.5).toFixed(1)}" y="55" font-size="12" font-weight="750" fill="#10b981">${retPct.toFixed(0)}%</text>
-        <text x="20" y="110" font-size="12" font-weight="750" fill="var(--tax-text)">净值剧烈波动</text>
+        <text x="20" y="110" font-size="12" font-weight="750" fill="var(--tax-ink)">净值剧烈波动</text>
         <rect x="160" y="93" width="${Math.min(380,volPct*1.2).toFixed(1)}" height="24" rx="5" fill="${k>1?'#ef4444':'#f59e0b'}"/>
         <text x="${(168+Math.min(380,volPct*1.2)).toFixed(1)}" y="110" font-size="12" font-weight="750" fill="${k>1?'#ef4444':'#f59e0b'}">${volPct.toFixed(0)}%</text>
       `;

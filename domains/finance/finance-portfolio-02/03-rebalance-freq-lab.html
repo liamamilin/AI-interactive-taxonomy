@@ -28,9 +28,9 @@
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-      <button class="btn" onclick="pick(250,this)">每日调仓（250次/年）</button>
-      <button class="btn" onclick="pick(12,this)">每月调仓（12次/年）</button>
-      <button class="btn active" onclick="pick(1,this)">每年调仓（1次/年）</button>
+      <button class="btn" onclick="window.__userActed=true;pick(250,this)">每日调仓（250次/年）</button>
+      <button class="btn" onclick="window.__userActed=true;pick(12,this)">每月调仓（12次/年）</button>
+      <button class="btn active" onclick="window.__userActed=true;pick(1,this)">每年调仓（1次/年）</button>
     </div>
     <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
     <div class="kpi-row">
@@ -47,10 +47,10 @@
       const feeLoss = freq===250 ? 28.5 : freq===12 ? 4.2 : 0.8;
       const net = freq===250 ? 1.88 : freq===12 ? 2.18 : 2.24;
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-text)">十年净终值</text>
+        <text x="20" y="55" font-size="12" font-weight="750" fill="var(--tax-ink)">十年净终值</text>
         <rect x="140" y="38" width="${(net*160).toFixed(1)}" height="24" rx="6" fill="#10b981"/>
         <text x="${(148+net*160).toFixed(1)}" y="55" font-size="12" font-weight="800" fill="#10b981">${net.toFixed(2)}x 本金</text>
-        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-text)">交易滑点与税费</text>
+        <text x="20" y="115" font-size="12" font-weight="750" fill="var(--tax-ink)">交易滑点与税费</text>
         <rect x="140" y="98" width="${(feeLoss*11).toFixed(1)}" height="24" rx="6" fill="#ef4444"/>
         <text x="${(148+feeLoss*11).toFixed(1)}" y="115" font-size="12" font-weight="800" fill="#ef4444">-${feeLoss.toFixed(1)}%</text>
       `;
@@ -58,7 +58,7 @@
       document.getElementById('kFee').textContent='-'+feeLoss.toFixed(1)+'%';
       document.getElementById('kNet').textContent=net.toFixed(2)+' 倍';
       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>实证研究表明，<strong>每年调仓 1 次</strong>（或偏离 ±5% 阈值再调）不仅省下大量交易费用，还能顺便吃到动量趋势！`;
-      if(window.ToySDK) window.ToySDK.markCompleted();
+      if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
     }
     pick(1, document.querySelector('.btn.active'));</script>
 </body>

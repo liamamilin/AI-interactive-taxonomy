@@ -66,7 +66,7 @@
       let dots='';
       arr.forEach((v,i)=>{
         dots+=`<circle cx="${x(i)}" cy="${y(v).toFixed(1)}" r="5" fill="${i===3?'#ef4444':'#2563eb'}"/>
-        <text x="${x(i)}" y="${(y(v)-10).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="750" fill="var(--tax-text)">${v.toFixed(0)}</text>
+        <text x="${x(i)}" y="${(y(v)-10).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="750" fill="var(--tax-ink)">${v.toFixed(0)}</text>
         <text x="${x(i)}" y="184" text-anchor="middle" font-size="10.5" fill="var(--tax-muted)">${labels[i]}</text>`;
       });
       document.getElementById('svg').innerHTML=`<line x1="40" y1="${y(100).toFixed(1)}" x2="570" y2="${y(100).toFixed(1)}" stroke="var(--tax-muted)" stroke-dasharray="4,4"/><path d="${p}" fill="none" stroke="#2563eb" stroke-width="3"/>${dots}`;

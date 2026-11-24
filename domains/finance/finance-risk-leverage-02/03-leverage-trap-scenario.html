@@ -28,9 +28,9 @@
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-      <button class="btn active" onclick="pick(0,this)">30 年低息自住房贷（稳健）</button>
-      <button class="btn" onclick="pick(1,this)">券商两融满仓股票（中危）</button>
-      <button class="btn" onclick="pick(2,this)">网贷/信用卡炒加密货币（绝命）</button>
+      <button class="btn active" onclick="window.__userActed=true;pick(0,this)">30 年低息自住房贷（稳健）</button>
+      <button class="btn" onclick="window.__userActed=true;pick(1,this)">券商两融满仓股票（中危）</button>
+      <button class="btn" onclick="window.__userActed=true;pick(2,this)">网贷/信用卡炒加密货币（绝命）</button>
     </div>
     <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
     <div class="kpi-row">
@@ -50,13 +50,13 @@
       if(btn) btn.classList.add('active');
       const d=DATA[i];
       document.getElementById('svg').innerHTML=`
-        <text x="20" y="45" font-size="12" font-weight="750" fill="var(--tax-text)">资产价格波动</text>
+        <text x="20" y="45" font-size="12" font-weight="750" fill="var(--tax-ink)">资产价格波动</text>
         <rect x="140" y="28" width="${(d.vol*3.8).toFixed(1)}" height="22" rx="5" fill="${d.col}"/>
         <text x="${(148+d.vol*3.8).toFixed(1)}" y="44" font-size="11.5" font-weight="750" fill="${d.col}">${d.vol}/100</text>
-        <text x="20" y="95" font-size="12" font-weight="750" fill="var(--tax-text)">中途强平压力</text>
+        <text x="20" y="95" font-size="12" font-weight="750" fill="var(--tax-ink)">中途强平压力</text>
         <rect x="140" y="78" width="${(d.call*3.8).toFixed(1)}" height="22" rx="5" fill="${d.col}"/>
         <text x="${(148+d.call*3.8).toFixed(1)}" y="94" font-size="11.5" font-weight="750" fill="${d.col}">${d.call}/100</text>
-        <text x="20" y="145" font-size="12" font-weight="750" fill="var(--tax-text)">资金利息成本</text>
+        <text x="20" y="145" font-size="12" font-weight="750" fill="var(--tax-ink)">资金利息成本</text>
         <rect x="140" y="128" width="${(d.rate*3.8).toFixed(1)}" height="22" rx="5" fill="${d.col}"/>
         <text x="${(148+d.rate*3.8).toFixed(1)}" y="144" font-size="11.5" font-weight="750" fill="${d.col}">${d.rate}/100</text>
       `;
@@ -65,7 +65,7 @@
       document.getElementById('kRisk').textContent=d.risk;
       document.getElementById('kRisk').style.color=d.col;
       document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>${d.tip}`;
-      if(window.ToySDK) window.ToySDK.markCompleted();
+      if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
     }
     pick(0, document.querySelector('.btn.active'));</script>
 </body>

@@ -24,12 +24,12 @@
 <body class="tax-toy">
   <div class="tax-wrap">
     <div class="tax-topbar">
-      <div><h1>⛓️ 货币政策多米诺传导链：加息 vs 降息全景图（SVG）</h1><p>误区：央行加息只影响银行存款利息。真相：基准利率是所有资产定价的“地心引力”，它会层层传导至企业借贷、消费、股市估值与通胀！</p></div>
+      <div><h1>⛓️ 货币政策多米诺传导链：加息 vs 降息全景图</h1><p>误区：央行加息只影响银行存款利息。真相：基准利率是所有资产定价的“地心引力”，它会层层传导至企业借贷、消费、股市估值与通胀！</p></div>
       <a class="tax-back" href="./index.html">← 返回主题目录</a>
     </div>
     <div class="tax-panel"><div class="btn-row">
-      <button class="btn active" onclick="setDir(1,this)">🔥 央行加息（紧缩踩刹车）</button>
-      <button class="btn" onclick="setDir(-1,this)">💧 央行降息（宽松踩油门）</button>
+      <button class="btn active" onclick="window.__userActed=true;setDir(1,this)">🔥 央行加息（紧缩踩刹车）</button>
+      <button class="btn" onclick="window.__userActed=true;setDir(-1,this)">💧 央行降息（宽松踩油门）</button>
     </div>
     <svg id="svg" class="svg-box" viewBox="0 0 600 175"></svg></div>
     <div class="tax-aha" id="ahaBox"></div>
@@ -50,7 +50,7 @@
       document.getElementById('ahaBox').innerHTML=dir>0
         ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>加息就像给过热的经济踩刹车：借钱成本变贵，企业缩减扩张、资金流回银行，最终给通胀降温但会压低股市估值！`
         : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>降息就像给冰冷的经济踩油门：借钱更便宜，资金从低息存款流向消费与投资，推升资产价格！`;
-      if(window.ToySDK) window.ToySDK.markCompleted();
+      if(window.__userActed && window.ToySDK) window.ToySDK.markCompleted();
     }
     setDir(1, document.querySelector('.btn.active'));</script>
 </body>
