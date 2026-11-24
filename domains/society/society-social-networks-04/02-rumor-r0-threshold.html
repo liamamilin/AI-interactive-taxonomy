@@ -1,69 +1,161 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔥 谣言传播 R0 与黄金辟谣窗口期</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>谣言传播 R0 与黄金辟谣窗口期</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .viz-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .kpi { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
+    svg text { fill: var(--tax-muted); font-family: inherit; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔥 谣言传播 R0 与黄金辟谣窗口期</h1><p>误区：只要最终把真相发出来辟谣，什么时候发效果都差不多。真相：谣言传播呈指数级 SIR 爆发，在引爆点前介入能瞬间掐灭；过了拐点才发通告，辟谣声量会被淹没在指数洪流里！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>谣言传染再生数 R0</span><span id="vR0">2.6</span></label><input type="range" id="sR0" min="11" max="40" value="26" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>强力辟谣介入时刻</span><span id="vT">第 5 小时</span></label><input type="range" id="sT" min="1" max="11" value="5" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🔥 谣言传播 R0 与黄金辟谣窗口期</h1>
+      <p>一条极具情绪煽动性的谣言在 100 万人的网络里引爆。调节「基础传染数 R0」与「官方辟谣延迟时间」，看晚发 6 小时辟谣会多出多少倍的轻信人群！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="control-group">
+        <label>谣言基础传播数 R0：<strong id="r0Val">2.6</strong></label>
+        <input id="r0Slider" type="range" min="0.8" max="4.0" step="0.2" value="2.6">
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">累计误信谣言峰值</div><div class="k-val" id="kPeak" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">辟谣控制效果</div><div class="k-val" id="kEff">—</div></div>
+      <div class="control-group">
+        <label>辟谣响应延迟：<strong id="delayVal">6 小时</strong></label>
+        <input id="delaySlider" type="range" min="1" max="24" step="1" value="6">
+      </div>
+      <div class="control-group">
+        <label>辟谣信息触达强度：<strong id="reachVal">60%</strong></label>
+        <input id="reachSlider" type="range" min="20" max="100" step="10" value="60">
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="viz-card">
+      <svg id="sirSvg" viewBox="0 0 640 245" style="width:100%;height:auto;display:block;"></svg>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-l">累计轻信谣言人数</div>
+          <div class="kpi-v" id="peakVal">24.8 万</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">辟谣成功拦截人数</div>
+          <div class="kpi-v" id="savedVal">61.2 万</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">危机处置评级</div>
+          <div class="kpi-v" id="gradeVal">良</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 传播动力学提示：</strong>试着把「辟谣响应延迟」从 2 小时拖到 14 小时，感受一下“造谣一张嘴，辟谣跑断腿”背后的指数级时间差。
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const r0=+document.getElementById('sR0').value/10, tDeb=+document.getElementById('sT').value;
-  document.getElementById('vR0').textContent=r0.toFixed(1); document.getElementById('vT').textContent='第 '+tDeb+' 小时';
-  let inf=2, peak=2, pts='40,158 ';
-  for(let t=1;t<=12;t++){
-    const effR=t>=tDeb?r0*0.32:r0;
-    inf=Math.min(100, Math.max(0.5, inf*(0.55+effR*0.32)));
-    if(inf>peak) peak=inf;
-    pts+=`${40+t*43},${158-inf*1.3} `;
-  }
-  document.getElementById('kPeak').textContent=Math.round(peak)+'% 网民';
-  document.getElementById('kEff').textContent=peak<30?'黄金窗口期掐灭':(peak<65?'半程压制':'错失窗口 (全网刷屏)');
-  document.getElementById('kEff').style.color=peak<30?'#10b981':(peak<65?'#f59e0b':'#ef4444');
-  const dx=40+tDeb*43;
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="158" x2="560" y2="158" stroke="#94a3b8"/>
-    <line x1="${dx}" y1="20" x2="${dx}" y2="158" stroke="#0284c7" stroke-width="2" stroke-dasharray="4 3"/>
-    <text x="${dx+5}" y="32" font-size="11.5" font-weight="800" fill="#0284c7">辟谣介入 (${tDeb}h)</text>
-    <polyline fill="none" stroke="#ef4444" stroke-width="3" points="${pts}"/>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当 R0=${r0.toFixed(1)} 时，把辟谣从第 8 小时提前到第 3 小时，谣言峰值能从全网刷屏直降到 <strong>${Math.round(peak)}%</strong>——快半步胜过千言万语！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const r0Slider = document.getElementById('r0Slider');
+    const delaySlider = document.getElementById('delaySlider');
+    const reachSlider = document.getElementById('reachSlider');
+    const svg = document.getElementById('sirSvg');
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function runSir(r0, delayH, reachFrac, withDebunk) {
+      const pop = 100; // in 10k units (100 = 100万)
+      let S = 99.8, I = 0.2, R = 0;
+      const gamma = 0.14;
+      const baseBeta = (r0 * gamma) / pop;
+      const series = [I];
+      let everInfected = I;
+
+      for (let h = 1; h <= 36; h++) {
+        const debunkActive = withDebunk && h >= delayH;
+        const beta = debunkActive ? baseBeta * (1 - 0.72 * reachFrac) : baseBeta;
+        const extraRecover = debunkActive ? 0.28 * reachFrac : 0;
+        const dI_in = beta * S * I;
+        const dI_out = (gamma + extraRecover) * I;
+        S = Math.max(0, S - dI_in);
+        I = Math.max(0, I + dI_in - dI_out);
+        R = pop - S - I;
+        everInfected += dI_in;
+        series.push(I);
+      }
+      return { series, everInfected: Math.min(100, everInfected) };
+    }
+
+    function render() {
+      const r0 = Number(r0Slider.value);
+      const delay = Number(delaySlider.value);
+      const reach = Number(reachSlider.value) / 100;
+
+      document.getElementById('r0Val').textContent = r0.toFixed(1);
+      document.getElementById('delayVal').textContent = delay + ' 小时';
+      document.getElementById('reachVal').textContent = Math.round(reach * 100) + '%';
+
+      const noDebunk = runSir(r0, delay, reach, false);
+      const withDebunk = runSir(r0, delay, reach, true);
+
+      const W = 640, H = 245, padL = 48, padR = 20, padT = 22, padB = 34;
+      const maxY = Math.max(25, ...noDebunk.series, ...withDebunk.series) * 1.12;
+      const xScale = h => padL + (h / 36) * (W - padL - padR);
+      const yScale = v => H - padB - (v / maxY) * (H - padT - padB);
+
+      const toPath = arr => arr.map((v, i) => (i === 0 ? 'M' : 'L') + xScale(i).toFixed(1) + ',' + yScale(v).toFixed(1)).join(' ');
+      const dx = xScale(delay);
+
+      svg.innerHTML = `
+        <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="var(--tax-muted)"/>
+        <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="var(--tax-muted)"/>
+        <path d="${toPath(noDebunk.series)}" fill="none" stroke="var(--tax-red)" stroke-width="2.4" stroke-dasharray="6,4" opacity="0.7"/>
+        <path d="${toPath(withDebunk.series)}" fill="none" stroke="var(--tax-primary)" stroke-width="3.2"/>
+        <line x1="${dx.toFixed(1)}" y1="${padT}" x2="${dx.toFixed(1)}" y2="${H - padB}" stroke="var(--tax-green)" stroke-width="2" stroke-dasharray="4,3"/>
+        <text x="${Math.min(W - 95, dx + 6).toFixed(1)}" y="${padT + 14}" font-size="11" font-weight="700" fill="var(--tax-green)">第 ${delay}h 发布辟谣</text>
+        <text x="${W - padR - 6}" y="${padT + 14}" text-anchor="end" font-size="11" fill="var(--tax-red)">--- 无辟谣自然爆发</text>
+        <text x="${W - padR - 6}" y="${padT + 30}" text-anchor="end" font-size="11" font-weight="700" fill="var(--tax-primary)">━━ 辟谣后活跃传播</text>
+        ${[0, 6, 12, 18, 24, 30, 36].map(h => `<text x="${xScale(h).toFixed(1)}" y="${H - padB + 17}" text-anchor="middle" font-size="11">${h}h</text>`).join('')}
+      `;
+
+      const infected = withDebunk.everInfected;
+      const saved = Math.max(0, noDebunk.everInfected - infected);
+      document.getElementById('peakVal').textContent = infected.toFixed(1) + ' 万';
+      document.getElementById('savedVal').textContent = saved.toFixed(1) + ' 万';
+
+      const gradeEl = document.getElementById('gradeVal');
+      const aha = document.getElementById('ahaBox');
+
+      if (r0 <= 1.0) {
+        gradeEl.textContent = '自然熄灭';
+        aha.innerHTML = `<strong>🧊 R0 = ${r0.toFixed(1)} ≤ 1.0：</strong>每名受众平均转发不足 1 人，谣言缺乏自我维持能力，即使不大规模干预也会自然衰减。`;
+      } else if (infected <= 12) {
+        gradeEl.textContent = 'S 级黄金拦截';
+        aha.innerHTML = `<strong>🏆 抓住黄金窗口期！</strong>在爆发第 <strong>${delay} 小时</strong>快速辟谣，将累计轻信人数死死按在 <strong>${infected.toFixed(1)} 万</strong>以内，成功替 <strong>${saved.toFixed(1)} 万人</strong>筑起免疫屏障。`;
+      } else if (infected <= 45) {
+        gradeEl.textContent = '局部扩散';
+        aha.innerHTML = `<strong>⚠️ 窗口正在收窄：</strong>延迟 <strong>${delay} 小时</strong>后，谣言已感染 <strong>${infected.toFixed(1)} 万人</strong>。试着提前 3 小时响应，看看拦截效果会翻多少倍！`;
+      } else {
+        gradeEl.textContent = '失控刷屏';
+        aha.innerHTML = `<strong>🔥 错过黄金辟谣期！</strong>虽然辟谣触达率有 ${Math.round(reach * 100)}%，但延迟 <strong>${delay} 小时</strong>后谣言已完成指数爬坡，高达 <strong>${infected.toFixed(1)} 万人</strong>已被先入为主地影响——辟谣的速度永远比完美的措辞更重要。`;
+      }
+    }
+
+    [r0Slider, delaySlider, reachSlider].forEach(el => {
+      el.addEventListener('input', () => { markDone('模拟了谣言 R0 与黄金辟谣窗口'); render(); });
+    });
+    render();
   </script>
 </body>
 </html>

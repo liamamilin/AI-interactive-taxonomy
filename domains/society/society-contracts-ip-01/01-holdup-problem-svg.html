@@ -1,65 +1,137 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔧 专用性投资与“敲竹杠”困境（SVG）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>专用性投资与“敲竹杠”困境</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 680px) { .opt-grid { grid-template-columns: 1fr; } }
+    .gov-card { background: var(--tax-surface-alt); border: 2px solid var(--tax-border); border-radius: 12px; padding: 13px; cursor: pointer; text-align: left; transition: border-color .2s, background .2s; }
+    .gov-card.active { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .g-title { font-weight: 800; font-size: 14px; color: var(--tax-ink); }
+    .g-sub { font-size: 12px; color: var(--tax-muted); margin-top: 4px; line-height: 1.45; }
+    .outcome-card { margin-top: 14px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+    .kpi { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 19px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
+    .story-box { background: var(--tax-surface); border-left: 4px solid var(--tax-primary); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--tax-ink); line-height: 1.55; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔧 专用性投资与“敲竹杠”困境（SVG）</h1><p>误区：只要双方事先口头谈好了长期合作价格，供应商就会放心花大钱为你建专属产线。真相：一旦产线除了卖给你之外一文不值，你在事后随时能逼他降价，导致他事前根本不敢投！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>设备专用性锁定程度</span><span id="vSpec">80%</span></label><input type="range" id="sSpec" min="10" max="100" value="80" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>违约惩罚与声誉约束力度</span><span id="vRep">30%</span></label><input type="range" id="sRep" min="0" max="100" value="30" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🔧 专用性投资与“敲竹杠”困境</h1>
+      <p>大车企请你投资 <strong>500 万</strong>定制一条「只适配它家专属车型」的模具产线（若不卖给它，废铁残值仅 50 万），原本谈好订单毛利 700 万。但合同写不完所有市场波动——你会选哪种治理结构来防止建厂后被对方趁火打劫“敲竹杠”？</p>
+    </header>
+
+    <div class="opt-grid" id="optGrid"></div>
+
+    <div class="outcome-card">
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-l">你的最终净利润</div>
+          <div class="kpi-v" id="profitVal">--</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">遭遇“敲竹杠”风险</div>
+          <div class="kpi-v" id="riskVal">--</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">制度交易成本</div>
+          <div class="kpi-v" id="costVal">--</div>
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">事后被敲竹杠风险</div><div class="k-val" id="kHold" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">供应商实际投资意愿</div><div class="k-val" id="kInv" style="color:#0284c7;">—</div></div>
-      </div>
+      <div class="story-box" id="storyBox">👆 点击上方任意一种契约治理结构，推演建厂半年后的真实结局！</div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 威廉姆森交易成本理论：</strong>当资产高度专用（退路几乎为零）且契约必然不完全时，光靠口头信任极易引发“敲竹杠”。这正是企业边界诞生的秘密——为什么有些环节要签长约，有些干脆直接并购！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const spec=+document.getElementById('sSpec').value, rep=+document.getElementById('sRep').value;
-  document.getElementById('vSpec').textContent=spec+'%'; document.getElementById('vRep').textContent=rep+'%';
-  const hold=Math.max(0, Math.round(spec*(1-rep/110)));
-  const inv=Math.max(10, Math.round(100 - hold*0.85));
-  document.getElementById('kHold').textContent=hold+'%';
-  document.getElementById('kInv').textContent=inv+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">被事后压价敲竹杠风险: ${hold}%</text>
-    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${hold*5.4}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">供应商事前专属投资意愿: ${inv}%</text>
-    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${inv*5.4}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">${hold>50?'⚠️ 锁定越深越容易被逼降价，双方陷入投资不足死局':'✅ 制度约束或低专用性保护了双方合作'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>契约永远写不完未来所有细节！当资产专用性高到 ${spec}% 而违约约束只有 ${rep}% 时，下游合并上游（纵向一体化）往往成了唯一的解局之道。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const options = [
+      {
+        id: 'verbal',
+        title: '🤝 A. 口头承诺 + 短期按批下单',
+        sub: '签约成本几乎为零，全凭大客户“战略合作”口头背书。',
+        profit: '-220 万（血亏）',
+        risk: '95% 极高',
+        cost: '极低',
+        story: '半年后你的 500 万专用产线刚建成，车企突然以“市场下行”为由单方面把采购价砍掉一半！因为产线卖给别人只值 50 万废铁，你进退维谷，只能含泪亏本接单被死死“敲竹杠”！',
+        aha: '🚨 经典“敲竹杠（Hold-up）”陷阱！一旦沉没成本锁死在专用资产上，谈判筹码瞬间逆转——理性供应商预见到这一步，干脆一开始就不敢投资，导致全社会创新萎缩。'
+      },
+      {
+        id: 'refuse',
+        title: '🧱 B. 拒绝专用产线，改用通用低效设备',
+        sub: '绝不赌命，买通用机床随时能转给别的客户，但模具精度差、成本高。',
+        profit: '+40 万（微利）',
+        risk: '10% 很低',
+        cost: '低',
+        story: '你保住了退路不怕被敲竹杠，但通用设备生产效率低、良品率差，车企最终转向了竞争对手，双方白白错失了原本 200 万的共赢增量。',
+        aha: '📉 “投资不足”次优解：为了防御事后敲竹杠而放弃专用技术，是无数供应链效率低下的隐形元凶！'
+      },
+      {
+        id: 'hostage',
+        title: '🔐 C. 双向抵押长约（客户先付 50% 模具专款 + 最低采购量）',
+        sub: '用“人质抵押”绑定双方利益，并约定原材料涨跌调价公式。',
+        profit: '+180 万（稳赚）',
+        risk: '20% 可控',
+        cost: '中等',
+        story: '车企提前出资一半模具费并签下“照付不议”保底条款。现在如果它想违约压价，自己也要承受巨额沉没损失，双方风险对称，合作顺利跑通！',
+        aha: '🏆 威廉姆森推崇的“互换人质（Credible Commitment）”机制！既然合同写不完所有意外，就用前置专款和保底条款把双方的命运对称锁在一起。'
+      },
+      {
+        id: 'merge',
+        title: '🏢 D. 纵向一体化（由车企直接收购/合资建厂）',
+        sub: '彻底消除甲乙双方利益对立，变成同一家公司的内部车间（如通用收购费雪车身）。',
+        profit: '+155 万（共享）',
+        risk: '5% 极低',
+        cost: '高（管理官僚成本）',
+        story: '双方合并为同一主体后，“敲竹杠”动机彻底消失，专用产线放心满负荷投入！唯一代价是公司变大后内部层级和审批成本略有上升。',
+        aha: '🏛️ 诺奖级洞察（科斯 & 哈特）：企业之所以存在、而不是所有事都靠市场外包，正是因为当资产专用性高到普通合同锁不住时，“直接收购变自己人”比天天防敲竹杠更省钱！'
+      }
+    ];
+
+    let curId = null;
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const grid = document.getElementById('optGrid');
+      grid.innerHTML = '';
+      options.forEach(o => {
+        const btn = document.createElement('button');
+        btn.className = 'gov-card' + (curId === o.id ? ' active' : '');
+        btn.innerHTML = `<div class="g-title">${o.title}</div><div class="g-sub">${o.sub}</div>`;
+        btn.addEventListener('click', () => {
+          curId = o.id;
+          markDone('推演了专用性投资敲竹杠治理方案');
+          render();
+        });
+        grid.appendChild(btn);
+      });
+
+      const cur = options.find(o => o.id === curId);
+      if (!cur) return;
+      document.getElementById('profitVal').textContent = cur.profit;
+      document.getElementById('riskVal').textContent = cur.risk;
+      document.getElementById('costVal').textContent = cur.cost;
+      document.getElementById('storyBox').textContent = cur.story;
+      document.getElementById('ahaBox').innerHTML = `<strong>💡 制度经济学解析：</strong>${cur.aha}`;
+    }
+
+    render();
   </script>
 </body>
 </html>

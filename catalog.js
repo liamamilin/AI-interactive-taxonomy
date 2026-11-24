@@ -4586,7 +4586,7 @@ window.TAXONOMY_DATA = {
           "icon": "🗳️",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "为什么每个人都很理性，群体投出来的偏好却像“石头剪刀布”一样自相矛盾？",
+          "subtitle": "为什么 3 个理性人能投出石头剪刀布循环？掌握表决顺序就能操控全场？",
           "difficulty": "进阶",
           "related": [
             "society/society-collective-voting-02",
@@ -4597,11 +4597,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-collective-voting-01/01-condorcet-cycle-svg.html",
               "file": "01-condorcet-cycle-svg.html",
               "path": "./domains/society/society-collective-voting-01/01-condorcet-cycle-svg.html",
-              "title": "孔多塞循环透视镜（SVG）",
+              "title": "孔多塞循环透视镜",
               "icon": "🔄",
               "archetype": "spatial",
-              "concept": "投票悖论 · 非传递性 · 孔多塞循环",
-              "summary": "调节三派选民的人数比例，观察群体偏好如何陷入 A > B > C > A 的死循环！"
+              "concept": "孔多塞悖论 · 非传递循环 · 群体非理性",
+              "summary": "依次点击三场一对一单挑投票，亲眼见证理性个体加总成 A>B>C>A 死循环。"
             },
             {
               "id": "society/society-collective-voting-01/02-agenda-setter-power.html",
@@ -4609,9 +4609,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-collective-voting-01/02-agenda-setter-power.html",
               "title": "议程操纵者的隐形权力",
               "icon": "🎯",
-              "archetype": "tradeoff",
-              "concept": "议程控制 · 淘汰顺序 · 路径依赖",
-              "summary": "在循环偏好下切换“第一轮先让谁和谁 PK”，亲眼看见议长如何指哪打哪！"
+              "archetype": "scenario",
+              "concept": "议程设置权 · 两轮淘汰顺序 · 守擂优势",
+              "summary": "化身委员会主席，在不改一票的前提下仅靠安排表决顺序，随意保送 A、B 或 C 夺冠。"
             },
             {
               "id": "society/society-collective-voting-01/03-arrow-criteria-tradeoff.html",
@@ -4619,9 +4619,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-collective-voting-01/03-arrow-criteria-tradeoff.html",
               "title": "阿罗不可能定理四公理权衡仪",
               "icon": "⚖️",
-              "archetype": "sandbox",
-              "concept": "阿罗不可能定理 · IIA无关选项独立性 · 非独裁",
-              "summary": "拉动制度偏重滑块，看为什么没有任何投票规则能同时满足帕累托、非独裁、无限制域与 IIA！"
+              "archetype": "builder",
+              "concept": "阿罗不可能定理 · 无关选项独立 · 制度权衡",
+              "summary": "尝试同时点亮非独裁、一致性、IIA 与无循环四开关，亲历第 4 条必把另一条弹飞的数学铁律。"
             }
           ]
         },
@@ -4635,7 +4635,7 @@ window.TAXONOMY_DATA = {
           "icon": "📝",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "为什么合同签得再厚也写不尽所有意外？“有效违约”在经济学里竟然是好事？",
+          "subtitle": "合同永远写不完所有意外，为什么有时候“赔钱毁约”反而对大家更好？",
           "difficulty": "进阶",
           "related": [
             "society/society-contracts-ip-02",
@@ -4646,11 +4646,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-contracts-ip-01/01-holdup-problem-svg.html",
               "file": "01-holdup-problem-svg.html",
               "path": "./domains/society/society-contracts-ip-01/01-holdup-problem-svg.html",
-              "title": "专用性投资与“敲竹杠”困境（SVG）",
+              "title": "专用性投资与“敲竹杠”困境",
               "icon": "🔧",
-              "archetype": "tradeoff",
-              "concept": "不完全契约 · 资产专用性 · 敲竹杠 (Hold-up)",
-              "summary": "调节定制模具的专用性程度与事后毁约砍价压力，看为什么供应商不敢为你全力投入研发！"
+              "archetype": "scenario",
+              "concept": "资产专用性与事后机会主义（敲竹杠）",
+              "summary": "化身定制模具供应商，在 4 种契约治理结构中决策，体验专用产线建成后如何防范大客户事后压价敲竹杠。"
             },
             {
               "id": "society/society-contracts-ip-01/02-efficient-breach-lab.html",
@@ -4658,9 +4658,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-contracts-ip-01/02-efficient-breach-lab.html",
               "title": "有效违约算盘：什么时候“宁愿赔钱也要毁约”？",
               "icon": "🧮",
-              "archetype": "comparison",
-              "concept": "有效违约 (Efficient Breach) · 期望赔偿",
-              "summary": "调节新买家加价幅度与原合同利润，算清楚为什么赔偿对方全部损失后违约还能让双方净赚！"
+              "archetype": "simulation",
+              "concept": "有效违约理论与期待利益赔偿",
+              "summary": "调节新买家报价与赔偿规则，实时核算三方净收益与社会总剩余，亲眼见证赔钱毁约如何实现帕累托改进。"
             },
             {
               "id": "society/society-contracts-ip-01/03-liquidated-damages.html",
@@ -4668,9 +4668,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-contracts-ip-01/03-liquidated-damages.html",
               "title": "违约金过高 vs 过低的双重失衡",
               "icon": "⚠️",
-              "archetype": "tradeoff",
-              "concept": "违约金条款 · 惩罚性违约金 · 机会成本僵化",
-              "summary": "调节违约金倍数，观察“违约金太低人人乱毁约”与“违约金太高逼大家做亏本买卖”两个极端！"
+              "archetype": "builder",
+              "concept": "违约金补偿性原则与司法酌减红线",
+              "summary": "拖动合同违约金倍率设计条款，直观诊断过低纵容违约、黄金补偿区与过高扼杀交易及碰瓷风险的三重区间。"
             }
           ]
         },
@@ -4684,7 +4684,7 @@ window.TAXONOMY_DATA = {
           "icon": "🎭",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "假如出生前你完全不知道自己会投胎成首富还是底层残障者，你会投票赞成哪种社会规则？",
+          "subtitle": "如果你不知道自己出生在首富家还是贫困村，你会投票赞成怎样的社会规则？",
           "difficulty": "入门",
           "related": [
             "society/society-fairness-contract-02",
@@ -4695,11 +4695,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-fairness-contract-01/01-veil-of-ignorance-svg.html",
               "file": "01-veil-of-ignorance-svg.html",
               "path": "./domains/society/society-fairness-contract-01/01-veil-of-ignorance-svg.html",
-              "title": "无知之幕社会契约投票器（SVG）",
+              "title": "无知之幕社会契约投票器",
               "icon": "⚖️",
-              "archetype": "tradeoff",
-              "concept": "无知之幕 · 最大化最小值 (Maximin)",
-              "summary": "调节你的风险厌恶度与底层保障税率，看“不知道自己投胎到哪层”如何逼你主动保护最弱者！"
+              "archetype": "blind-lab",
+              "concept": "无知之幕与极小极大原则（Maximin）",
+              "summary": "在不知道自己出生阶层的盲态下先投票选定社会制度，再揭开幕布抽取人生盲盒，亲身体验罗尔斯契约思维。"
             },
             {
               "id": "society/society-fairness-contract-01/02-difference-principle.html",
@@ -4708,8 +4708,8 @@ window.TAXONOMY_DATA = {
               "title": "差异原则：什么样的贫富差距是正义的？",
               "icon": "📈",
               "archetype": "simulation",
-              "concept": "罗尔斯差异原则 · 激励相容与底层最大化",
-              "summary": "调节再分配税率，看为什么“绝对平均”和“放任不管”都会让底层更穷，只有中间峰值能让底层过得最好！"
+              "concept": "罗尔斯差异原则 vs 功利主义最大化",
+              "summary": "调节激励梯度，对比不同分配体制下的社会总蛋糕与最弱势群体绝对收入，找到兼顾效率与底线的正义最优解。"
             },
             {
               "id": "society/society-fairness-contract-01/03-talent-lottery-sim.html",
@@ -4717,9 +4717,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-fairness-contract-01/03-talent-lottery-sim.html",
               "title": "天赋彩票与起跑线重置实验",
               "icon": "🎟️",
-              "archetype": "comparison",
-              "concept": "先天禀赋偶然性 · 教育机会均等",
-              "summary": "调节家庭出身权重与公共教育均等化投入，看社会阶层流动性是如何被锁死或激活的！"
+              "archetype": "race",
+              "concept": "自然彩票与机会公平兜底",
+              "summary": "在“放任起跑”与“公共兜底重置”两条赛道上让不同出身选手同场竞速，直观量化运气与制度对人生终点的权重。"
             }
           ]
         },
@@ -4733,7 +4733,7 @@ window.TAXONOMY_DATA = {
           "icon": "⚖️",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "为什么刑事定罪要求“排除合理怀疑”而不是“51% 像坏人”？",
+          "subtitle": "为什么刑事定罪要求“排除合理怀疑”，而民事官司只需“大概率如此”？",
           "difficulty": "入门",
           "related": [
             "society/society-legal-procedure-02",
@@ -4744,11 +4744,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-legal-procedure-01/01-blackstone-ratio-svg.html",
               "file": "01-blackstone-ratio-svg.html",
               "path": "./domains/society/society-legal-procedure-01/01-blackstone-ratio-svg.html",
-              "title": "布莱克斯通比率：定罪阈值分布透视镜（SVG）",
+              "title": "布莱克斯通比率：定罪阈值分布透视镜",
               "icon": "🔔",
-              "archetype": "tradeoff",
-              "concept": "无罪推定 · 第一类错误 vs 第二类错误",
-              "summary": "左右拖动定罪证据阈值线，观察“冤枉无辜者”和“放跑真凶”两块阴影面积此消彼长！"
+              "archetype": "simulation",
+              "concept": "布莱克斯通比率与两类司法错误权衡",
+              "summary": "在清白者与真凶的证据强度双分布图上拖动定罪阈值，实时量化冤案率（FP）与漏网率（FN）的此消彼长。"
             },
             {
               "id": "society/society-legal-procedure-01/02-standard-of-proof-bar.html",
@@ -4756,9 +4756,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-legal-procedure-01/02-standard-of-proof-bar.html",
               "title": "三级证明标准实验室（民事 vs 行政 vs 刑事）",
               "icon": "📏",
-              "archetype": "comparison",
-              "concept": "优势证据 · 清晰确信 · 排除合理怀疑",
-              "summary": "切换三类法庭并调节原告证据可信度，感受同一份证据在民事法庭能赢、在刑事法庭却必须放人！"
+              "archetype": "scenario",
+              "concept": "优势证据、清晰说服力与排除合理怀疑",
+              "summary": "化身主审法官审理 4 宗不同性质案件，根据法定证明标准精准作出支持/驳回或有罪/无罪判决。"
             },
             {
               "id": "society/society-legal-procedure-01/03-burden-shift-impact.html",
@@ -4766,9 +4766,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-legal-procedure-01/03-burden-shift-impact.html",
               "title": "举证责任倒置：当“自证清白”成本高到离谱",
               "icon": "🎒",
-              "archetype": "simulation",
-              "concept": "举证责任分配 · 谁主张谁举证 · 信息不对称",
-              "summary": "调节被告自证清白的成本与案件复杂度，看“让弱势方证明自己没做过”如何制造不公！"
+              "archetype": "race",
+              "concept": "举证责任分配与信息不对称纠偏",
+              "summary": "让“谁主张谁举证”与“举证责任倒置”在环境污染维权赛道同台竞速，直观对比弱势当事人的取证胜算。"
             }
           ]
         },
@@ -4782,7 +4782,7 @@ window.TAXONOMY_DATA = {
           "icon": "🐑",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "为什么人人都爱护公共草地，最后草地却被大家一起啃光了？",
+          "subtitle": "为什么每个牧民都很理性，却合力把公共草地吃成荒漠？奥斯特罗姆如何破局？",
           "difficulty": "入门",
           "related": [
             "society/society-public-incentives-02",
@@ -4793,11 +4793,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-public-incentives-01/01-commons-grazing-svg.html",
               "file": "01-commons-grazing-svg.html",
               "path": "./domains/society/society-public-incentives-01/01-commons-grazing-svg.html",
-              "title": "公共牧场放牧过度模拟器（SVG）",
+              "title": "公共牧场放牧过度模拟器",
               "icon": "🌿",
               "archetype": "simulation",
-              "concept": "公地悲剧 · 边际私人收益 vs 社会成本",
-              "summary": "调节牧民人数与每头牛成本，观察个体理性多养牛如何把整片牧场总收益拖到归零！"
+              "concept": "公地悲剧 · 收益独享成本平摊 · 过度放牧",
+              "summary": "不断往公共牧场加羊，亲眼见证草场从 12 只羊最优绿洲一步步沙化归零。"
             },
             {
               "id": "society/society-public-incentives-01/02-freerider-contribution.html",
@@ -4805,9 +4805,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-public-incentives-01/02-freerider-contribution.html",
               "title": "公共品众筹与搭便车困境",
               "icon": "🚌",
-              "archetype": "tradeoff",
-              "concept": "搭便车 (Free-Rider) · 公共品乘数",
-              "summary": "调节公共项目回报乘数与搭便车人数比例，看为什么大家都指望别人出钱！"
+              "archetype": "scenario",
+              "concept": "搭便车 · 非排他性 · 公共品供给不足",
+              "summary": "在 4 人路灯众筹匿名博弈中抉择捐款额，看懂为何个人占优策略让全村摸黑。"
             },
             {
               "id": "society/society-public-incentives-01/03-ostrom-governance-lab.html",
@@ -4815,9 +4815,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-public-incentives-01/03-ostrom-governance-lab.html",
               "title": "奥斯特罗姆自治制度 20 年演化沙盘",
               "icon": "🏛️",
-              "archetype": "simulation",
-              "concept": "多中心治理 · 社区监督 · 梯度惩罚",
-              "summary": "调节社区监督强度与违规罚金，验证“没有政府私有化也能走出公地悲剧”的诺贝尔奖方案！"
+              "archetype": "builder",
+              "concept": "奥斯特罗姆原则 · 社区自治 · 分级处罚",
+              "summary": "为公共渔场装配清晰边界、互助监督与分级处罚，逆转 20 年鱼群枯竭曲线。"
             }
           ]
         },
@@ -4831,7 +4831,7 @@ window.TAXONOMY_DATA = {
           "icon": "🏘️",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "明明每个人都很包容、只希望“至少有 1/3 邻居像自己”，为什么城市最后却变成了 90% 的彻底隔离？",
+          "subtitle": "每个人只需 35% 同类邻居，为何社区仍会演变成 85% 彻底隔离？",
           "difficulty": "入门",
           "related": [
             "society/society-social-networks-02",
@@ -4842,11 +4842,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-social-networks-01/01-schelling-grid-svg.html",
               "file": "01-schelling-grid-svg.html",
               "path": "./domains/society/society-social-networks-01/01-schelling-grid-svg.html",
-              "title": "谢林隔离棋盘实时演化（SVG）",
+              "title": "谢林隔离棋盘实时演化",
               "icon": "🧩",
-              "archetype": "simulation",
-              "concept": "谢林模型 · 微观包容与宏观隔离涌现",
-              "summary": "调节“同类邻居最低容忍比例”并点击演化，看温和的 35% 同类偏好如何引发全城大搬家！"
+              "archetype": "spatial",
+              "concept": "微观温和偏好与宏观涌现隔离",
+              "summary": "在 10×10 交互社区棋盘上点击改建住户、调节同类偏好阈值，亲眼见证温和偏好如何触发连锁搬迁。"
             },
             {
               "id": "society/society-social-networks-01/02-tipping-point-curve.html",
@@ -4855,8 +4855,8 @@ window.TAXONOMY_DATA = {
               "title": "谢林相变曲线：30% 容忍度临界跳变",
               "icon": "📉",
               "archetype": "simulation",
-              "concept": "相变临界点 · 非线性跃迁",
-              "summary": "调节个体同质偏好与城市流动性，观察隔离度在 30%~40% 之间如何突然断崖式飙升！"
+              "concept": "非线性相变与隔离临界点",
+              "summary": "扫描容忍度阈值与社区空置率，观察最终隔离度在 30%~40% 区间出现的陡峭相变悬崖。"
             },
             {
               "id": "society/society-social-networks-01/03-integration-nudge.html",
@@ -4864,9 +4864,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-social-networks-01/03-integration-nudge.html",
               "title": "破冰助推：如何低成本打破自我隔离？",
               "icon": "🌈",
-              "archetype": "tradeoff",
-              "concept": "制度助推 · 多样性偏好 · 社区混合",
-              "summary": "调节“少数派包容奖励”与“跨群公共空间密度”，看只要微调谁的激励就能瓦解隔离墙！"
+              "archetype": "builder",
+              "concept": "制度助推与多元社区设计",
+              "summary": "自由组合公共公园锚点、混合学区与先锋家庭等低成本助推方案，用有限预算打破隔离均衡。"
             }
           ]
         },
@@ -4880,7 +4880,7 @@ window.TAXONOMY_DATA = {
           "icon": "📊",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "为什么“一人一票选最爱”经常选出大家最讨厌的人？换一种计票规则会怎样？",
+          "subtitle": "为什么同阵营多出一个小众候选人反而导致惨败？排序复选和批准投票如何破解？",
           "difficulty": "入门",
           "related": [
             "society/society-collective-voting-01",
@@ -4891,11 +4891,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-collective-voting-02/01-spoiler-effect-svg.html",
               "file": "01-spoiler-effect-svg.html",
               "path": "./domains/society/society-collective-voting-02/01-spoiler-effect-svg.html",
-              "title": "剧透效应与分票陷阱（SVG）",
+              "title": "剧透效应与分票陷阱",
               "icon": "🍌",
-              "archetype": "comparison",
-              "concept": "剧透效应 (Spoiler Effect) · 简单多数决缺陷",
-              "summary": "调节相似候选人的分流比例与保守派基本盘，看中间派如何因为内讧把宝座拱手让人！"
+              "archetype": "blind-lab",
+              "concept": "剧透效应 · 同阵营分票 · 杜维格定律",
+              "summary": "向两强对决放入一名同阵营小众候选人，见证 55% 多数民意如何被撕裂让 45% 渔翁得利。"
             },
             {
               "id": "society/society-collective-voting-02/02-irv-elimination-race.html",
@@ -4904,8 +4904,8 @@ window.TAXONOMY_DATA = {
               "title": "排序复选 (IRV) 选票转移流向图",
               "icon": "🔁",
               "archetype": "race",
-              "concept": "排序复选 (IRV) · 二选偏好转移",
-              "summary": "调节 C 选民的第二顺位偏好转移率，对比“第一轮淘汰 vs 第二轮逆转”！"
+              "concept": "排序复选 IRV · 末位淘汰 · 第二志愿转移",
+              "summary": "推进两轮 IRV 计票，看垫底候选人的选票流向第二志愿完成 53% 逆转。"
             },
             {
               "id": "society/society-collective-voting-02/03-approval-vs-borda.html",
@@ -4913,9 +4913,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-collective-voting-02/03-approval-vs-borda.html",
               "title": "批准投票 vs 波达计分策略战",
               "icon": "✅",
-              "archetype": "tradeoff",
-              "concept": "批准投票 · 波达计数 (Borda) · 策略性夸大",
-              "summary": "调节“策略性踩低对手”的选民比例，看波达计数和批准投票谁更能抗住策略投票！"
+              "archetype": "builder",
+              "concept": "批准投票 · 波达计分 · 最大公约数共识",
+              "summary": "同一群选民切换三套计票规则，观察多数决选出极端派而批准投票选出 100% 共识派。"
             }
           ]
         },
@@ -4929,7 +4929,7 @@ window.TAXONOMY_DATA = {
           "icon": "🛡️",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "为什么说“公司赔光了也不用股东拿房子抵债”是人类最伟大的商业发明之一？",
+          "subtitle": "为什么历史学家说“有限责任公司”是比蒸汽机更伟大的商业发明？",
           "difficulty": "入门",
           "related": [
             "society/society-contracts-ip-01",
@@ -4940,11 +4940,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-contracts-ip-02/01-limited-liability-svg.html",
               "file": "01-limited-liability-svg.html",
               "path": "./domains/society/society-contracts-ip-02/01-limited-liability-svg.html",
-              "title": "无限责任 vs 有限责任创业意愿对比（SVG）",
+              "title": "无限责任 vs 有限责任创业意愿对比",
               "icon": "🚀",
-              "archetype": "comparison",
-              "concept": "有限责任 · 风险上限锁定 · 创新激励",
-              "summary": "调节科技创业项目的成功率与潜在爆款回报，看没有“有限责任”保护时人们为何不敢投资创新！"
+              "archetype": "race",
+              "concept": "有限责任风险封顶与创新资本孵化",
+              "summary": "让“无限连带责任”与“有限责任制”两条创业生态赛道同台竞速，直观见证风险隔离如何释放社会创新活力。"
             },
             {
               "id": "society/society-contracts-ip-02/02-moral-hazard-debt.html",
@@ -4952,9 +4952,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-contracts-ip-02/02-moral-hazard-debt.html",
               "title": "有限责任的阴暗面：高杠杆“赌一把”道德风险",
               "icon": "🎲",
-              "archetype": "tradeoff",
-              "concept": "道德风险 · 股东债权人冲突 · 期权式收益",
-              "summary": "调节公司负债杠杆率与激进赌博波动率，看股东如何用“赚了归我、亏了破产甩给债权人”空手套白狼！"
+              "archetype": "simulation",
+              "concept": "风险转移（Risk Shifting）与股东-债权人利益背离",
+              "summary": "调节企业资产负债率与孤注一掷项目波动率，实时核算股东为何在高杠杆濒危时会选择毁灭总价值的豪赌。"
             },
             {
               "id": "society/society-contracts-ip-02/03-piercing-corporate-veil.html",
@@ -4962,9 +4962,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-contracts-ip-02/03-piercing-corporate-veil.html",
               "title": "刺破公司面纱风险雷达（连带责任测试）",
               "icon": "🗡️",
-              "archetype": "sandbox",
-              "concept": "法人格否认 · 刺破公司面纱 · 财产混同",
-              "summary": "调节个人与公司账目混同度、注册资本充足度，看老板何时失去有限责任保护伞变成个人连带还债！"
+              "archetype": "blind-lab",
+              "concept": "法人人格否认与股东连带责任红线",
+              "summary": "盲测审查 4 家欠债公司的财务运营档案，判断法院何时依法“刺破公司面纱”穿透追责老板个人财产。"
             }
           ]
         },
@@ -4978,7 +4978,7 @@ window.TAXONOMY_DATA = {
           "icon": "📐",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "新闻里常说的“基尼系数 0.4 警戒线”，在几何图形上到底是怎么算出来的？",
+          "subtitle": "为什么“人均收入很高”时，普通人依然可能感觉囊中羞涩？",
           "difficulty": "入门",
           "related": [
             "society/society-fairness-contract-01",
@@ -4989,11 +4989,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-fairness-contract-02/01-lorenz-gini-svg.html",
               "file": "01-lorenz-gini-svg.html",
               "path": "./domains/society/society-fairness-contract-02/01-lorenz-gini-svg.html",
-              "title": "洛伦兹曲线与基尼系数实时绘测（SVG）",
+              "title": "洛伦兹曲线与基尼系数实时绘测",
               "icon": "📊",
-              "archetype": "spatial",
-              "concept": "洛伦兹曲线 · 基尼系数 · 面积比计算",
-              "summary": "拖动最富 20% 与最穷 40% 人群的收入占比，亲眼看见弓形面积如何实时算出基尼系数！"
+              "archetype": "builder",
+              "concept": "洛伦兹曲线与基尼系数几何面积",
+              "summary": "自由调节五个收入阶层的财富分配权重或加载典型国家预设，实时绘制洛伦兹曲线并计算基尼系数。"
             },
             {
               "id": "society/society-fairness-contract-02/02-tax-redistribution-shift.html",
@@ -5001,9 +5001,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-fairness-contract-02/02-tax-redistribution-shift.html",
               "title": "税前 vs 税后基尼系数回弹模拟",
               "icon": "🔄",
-              "archetype": "comparison",
-              "concept": "初次分配 · 税收再分配 · 转移支付",
-              "summary": "调节高收入边际税率与全民基本收入 (UBI)，看税收和补贴如何把弯掉的洛伦兹曲线往上拉！"
+              "archetype": "simulation",
+              "concept": "初次分配与二次再分配调节效应",
+              "summary": "调节累进税率斜率与转移支付力度，在同一坐标系中对比税前与税后洛伦兹曲线的回弹幅度。"
             },
             {
               "id": "society/society-fairness-contract-02/03-pareto-20-80-power.html",
@@ -5011,9 +5011,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-fairness-contract-02/03-pareto-20-80-power.html",
               "title": "帕累托 80/20 法则与财富马太效应",
               "icon": "🌋",
-              "archetype": "simulation",
-              "concept": "幂律分布 · 复利马太效应 · 头部集中",
-              "summary": "调节资本复利优势与随机运气波动率，看为什么初始完全均等的 100 个人最终会演化出二八定律！"
+              "archetype": "race",
+              "concept": "随机交换模型与马太效应涌现",
+              "summary": "让 100 位初始财富完全相同的人进行百轮完全公平的随机交易，亲眼见证 20% 赢家自发聚拢 80% 财富。"
             }
           ]
         },
@@ -5027,7 +5027,7 @@ window.TAXONOMY_DATA = {
           "icon": "🧬",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "DNA 随机撞脸概率只有百万分之一，为什么这个人依然有 90% 可能是无辜的？",
+          "subtitle": "DNA 误匹配率只有十万分之一，为什么中标的人依然 90% 可能是无辜的？",
           "difficulty": "进阶",
           "related": [
             "society/society-legal-procedure-01",
@@ -5038,11 +5038,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-legal-procedure-02/01-base-rate-bayes-svg.html",
               "file": "01-base-rate-bayes-svg.html",
               "path": "./domains/society/society-legal-procedure-02/01-base-rate-bayes-svg.html",
-              "title": "贝叶斯 DNA 匹配面积透视镜（SVG）",
+              "title": "贝叶斯 DNA 匹配面积透视镜",
               "icon": "🔬",
               "archetype": "spatial",
-              "concept": "检察官谬误 · 基础概率忽视 · 贝叶斯定理",
-              "summary": "调节城市人口基数与 DNA 误配率，直观看见千万人口城市里“百万分之一巧合”能抓出多少无辜替罪羊！"
+              "concept": "基础比率忽略与贝叶斯后验概率",
+              "summary": "调节城市搜查人口基数与 DNA 误匹配率，用可视化人数点阵直观对比“1 个真凶”与“成群偶然撞脸的无辜者”。"
             },
             {
               "id": "society/society-legal-procedure-02/02-prosecutor-vs-defense.html",
@@ -5050,9 +5050,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-legal-procedure-02/02-prosecutor-vs-defense.html",
               "title": "检察官谬误 vs 辩护人谬误话术解码",
               "icon": "🎭",
-              "archetype": "comparison",
-              "concept": "条件概率偷换 · 基准率对比",
-              "summary": "调节特征在人群中的流行度与作案嫌疑规模，拆穿控辩双方最爱用的两种数学魔术！"
+              "archetype": "blind-lab",
+              "concept": "条件概率倒置与基础比率操纵",
+              "summary": "盲测拆解 4 段高能法庭辩论话术，揪出控方“倒置条件概率”与辩方“隐匿辅助线索”的双重概率陷阱。"
             },
             {
               "id": "society/society-legal-procedure-02/03-multiple-evidence-chain.html",
@@ -5060,9 +5060,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-legal-procedure-02/03-multiple-evidence-chain.html",
               "title": "独立证据链叠加 vs 同一证据重复计分",
               "icon": "⛓️",
-              "archetype": "simulation",
-              "concept": "条件独立性 · 证据相关性重复计算",
-              "summary": "调节辅助证据的数量与它们之间的关联度，看“5 个互相抄袭的目击证人”能有多虚高！"
+              "archetype": "builder",
+              "concept": "条件独立性假设与证据重复计分谬误",
+              "summary": "自由勾选组合多条法庭线索，实时对比“天真连乘”制造的虚假 99.9% 与剔除相关性后的真实定罪概率。"
             }
           ]
         },
@@ -5076,7 +5076,7 @@ window.TAXONOMY_DATA = {
           "icon": "🏭",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "工厂赚钱、下游居民吸雾霾——如何用一笔精准的税把社会代价算回账本里？",
+          "subtitle": "为什么污染工厂要征庇古税、疫苗科研要补贴？碳交易如何比一刀切省 60% 成本？",
           "difficulty": "入门",
           "related": [
             "society/society-public-incentives-01",
@@ -5087,11 +5087,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-public-incentives-02/01-pigouvian-tax-svg.html",
               "file": "01-pigouvian-tax-svg.html",
               "path": "./domains/society/society-public-incentives-02/01-pigouvian-tax-svg.html",
-              "title": "庇古税校准：消除负外部性无谓损失（SVG）",
+              "title": "庇古税校准：消除负外部性无谓损失",
               "icon": "📉",
-              "archetype": "tradeoff",
-              "concept": "负外部性 · 边际社会成本 MSC · 庇古税",
-              "summary": "调节每吨产品的环境污染外溢成本与征收的庇古税率，观察无谓损失三角形如何消失！"
+              "archetype": "simulation",
+              "concept": "庇古税 · 外部性内部化 · 无谓损失清零",
+              "summary": "调节环保税额至边际污染损失 ¥30/吨，亲眼看红色社会无谓损失三角形彻底归零。"
             },
             {
               "id": "society/society-public-incentives-02/02-cap-and-trade-market.html",
@@ -5099,9 +5099,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-public-incentives-02/02-cap-and-trade-market.html",
               "title": "碳排放权交易：总量控制 vs 一刀切",
               "icon": "🎟️",
-              "archetype": "comparison",
-              "concept": "总量控制与交易 (Cap & Trade) · 边际减排成本",
-              "summary": "调节两家工厂的减排成本差距，看允许交易排污权如何帮全社会省下巨额治污费！"
+              "archetype": "race",
+              "concept": "碳配额交易 · Cap and Trade · 边际减排成本",
+              "summary": "对比行政一刀切与两厂碳权交易，同等减排 100 吨下将社会总成本从 ¥5,000 压至 ¥2,000。"
             },
             {
               "id": "society/society-public-incentives-02/03-subsidy-vs-tax.html",
@@ -5109,9 +5109,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-public-incentives-02/03-subsidy-vs-tax.html",
               "title": "正外部性补贴：为什么疫苗和基础科研要补贴？",
               "icon": "💉",
-              "archetype": "simulation",
-              "concept": "正外部性 · 庇古补贴 · 边际社会收益 MSB",
-              "summary": "调节外部溢出价值与政府补贴力度，看为什么纯靠市场会严重低估公共疫苗和基础科学！"
+              "archetype": "scenario",
+              "concept": "正外部性 · 群体免疫 · 庇古补贴",
+              "summary": "化身经济部长为疫苗、基础科研与早高峰拥堵开出庇古补贴或拥堵税的精准处方。"
             }
           ]
         },
@@ -5125,7 +5125,7 @@ window.TAXONOMY_DATA = {
           "icon": "🫧",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "为什么算法只给你推你爱看的内容，几年后整个网络却分裂成互相仇恨的两半？",
+          "subtitle": "为什么大家每天都在刷手机，观点却越来越水火不容？",
           "difficulty": "入门",
           "related": [
             "society/society-social-networks-01",
@@ -5136,11 +5136,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-social-networks-02/01-echo-chamber-svg.html",
               "file": "01-echo-chamber-svg.html",
               "path": "./domains/society/society-social-networks-02/01-echo-chamber-svg.html",
-              "title": "算法喂养与双峰极化直方图（SVG）",
+              "title": "算法喂养与双峰极化直方图",
               "icon": "📊",
               "archetype": "simulation",
-              "concept": "信息茧房 · 同质过滤 · 双峰极化",
-              "summary": "调节算法推荐同质强度与确认偏误，看中间温和派如何消失、人群裂变成左右两个极端尖峰！"
+              "concept": "协同过滤与双峰极化",
+              "summary": "调节推荐算法同质化强度与情绪权重，实时观察正态分布的大众观点如何裂变为中间空心的双峰极化。"
             },
             {
               "id": "society/society-social-networks-02/02-bounded-confidence.html",
@@ -5148,9 +5148,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-social-networks-02/02-bounded-confidence.html",
               "title": "有界信任模型：观点何时收敛、何时彻底分裂？",
               "icon": "🔀",
-              "archetype": "simulation",
-              "concept": "有界信任 (Bounded Confidence) · 观点动力学",
-              "summary": "调节每个人愿意倾听的观点容忍半径 ε，看 20 个人的讨论群是达成共识还是裂成几个小圈子！"
+              "archetype": "race",
+              "concept": "有界信任半径与共识/分裂相变",
+              "summary": "让狭隘、温和、开放三条不同信任半径的群体赛道同步竞演，直观对比观点收敛与彻底分裂的演化轨迹。"
             },
             {
               "id": "society/society-social-networks-02/03-diversity-injection.html",
@@ -5158,9 +5158,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-social-networks-02/03-diversity-injection.html",
               "title": "破茧实验：推荐系统里的“探索率 vs 留存率”",
               "icon": "🌱",
-              "archetype": "tradeoff",
-              "concept": "探索与利用 (Explore-Exploit) · 算法破茧",
-              "summary": "调节信息流里强制穿插“异质/跨圈层内容”的比例，观察平台留存率与社会极化度的残酷权衡！"
+              "archetype": "scenario",
+              "concept": "探索-利用权衡与信息流破茧",
+              "summary": "化身推荐产品经理，在 4 个真实内容场景中抉择算法策略，权衡短期留存与长期观点健康度。"
             }
           ]
         },
@@ -5174,7 +5174,7 @@ window.TAXONOMY_DATA = {
           "icon": "🗺️",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "一模一样的 25 个选民分布，为什么仅靠重画选区边界，少数派就能拿走 60% 的议席？",
+          "subtitle": "如何不改一张选票，仅靠画歪选区边界就让 40% 少数派反杀赢得多数席位？",
           "difficulty": "进阶",
           "related": [
             "society/society-collective-voting-01",
@@ -5188,8 +5188,8 @@ window.TAXONOMY_DATA = {
               "title": "集中与打散 (Pack & Crack) 网格实验室",
               "icon": "✂️",
               "archetype": "spatial",
-              "concept": "杰利蝾螈 (Gerrymandering) · Pack & Crack",
-              "summary": "在 5×5 选民棋盘上切换“公平网格 / 蓝党操刀 / 红党操刀”，观察边界魔术如何反转议席！"
+              "concept": "杰利蝾螈 · 集中 Packing · 打散 Cracking",
+              "summary": "在 25 选民网格上切换三种划区线，见证 40% 少数派如何靠打包打散反杀 3:2 席位。"
             },
             {
               "id": "society/society-collective-voting-03/02-efficiency-gap-meter.html",
@@ -5198,8 +5198,8 @@ window.TAXONOMY_DATA = {
               "title": "浪费选票与效率差距检测仪",
               "icon": "📏",
               "archetype": "simulation",
-              "concept": "效率差距 (Efficiency Gap) · 浪费选票",
-              "summary": "调节各选区的胜选余量与集中度，实时计算“被浪费的选票”是否突破 7% 违宪红线！"
+              "concept": "效率差距 · 浪费选票 · 7% 违宪红线",
+              "summary": "调节划区倾斜度并实时统计双方浪费选票，亲手触发司法审查的 7% 效率差距红灯。"
             },
             {
               "id": "society/society-collective-voting-03/03-compactness-vs-fairness.html",
@@ -5207,9 +5207,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-collective-voting-03/03-compactness-vs-fairness.html",
               "title": "紧致度 vs 比例代表性权衡仪",
               "icon": "🧭",
-              "archetype": "tradeoff",
-              "concept": "波尔斯比-波普紧致度 · 席位比例偏离",
-              "summary": "调节“几何形状规整要求”与“族群聚居偏态”，看为什么死守方正格子有时反而损害比例公平！"
+              "archetype": "scenario",
+              "concept": "天然地理打包 · 独立委员会 · 比例代表制",
+              "summary": "对比紧凑方块、无党派委员会与多席位比例代表制，看懂为何换掉单席位才能彻底治本。"
             }
           ]
         },
@@ -5223,7 +5223,7 @@ window.TAXONOMY_DATA = {
           "icon": "💡",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "为什么专利只保护 20 年，而不是像房子一样永久私有，或者干脆 0 年免费共享？",
+          "subtitle": "为什么发明专利只保护 20 年，而不是永远垄断或彻底免费？",
           "difficulty": "进阶",
           "related": [
             "society/society-contracts-ip-04",
@@ -5234,11 +5234,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-contracts-ip-03/01-patent-term-tradeoff.html",
               "file": "01-patent-term-tradeoff.html",
               "path": "./domains/society/society-contracts-ip-03/01-patent-term-tradeoff.html",
-              "title": "专利保护年限倒 U 型福利曲线（SVG）",
+              "title": "专利保护年限倒 U 型福利曲线",
               "icon": "📈",
-              "archetype": "tradeoff",
-              "concept": "专利期限权衡 · 研发激励 vs 垄断无谓损失",
-              "summary": "拖动专利保护年限（0~35年）与新药研发成本，寻找社会总福利的倒 U 型最优峰值！"
+              "archetype": "simulation",
+              "concept": "动态创新激励与静态垄断无谓损失权衡",
+              "summary": "调节专利保护年限与行业研发周期，观察倒 U 型社会总福利曲线如何锁定最优保护年限。"
             },
             {
               "id": "society/society-contracts-ip-03/02-patent-thicket-gridlock.html",
@@ -5246,9 +5246,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-contracts-ip-03/02-patent-thicket-gridlock.html",
               "title": "专利丛林与反公地悲剧（芯片/手机授权僵局）",
               "icon": "🕸️",
-              "archetype": "simulation",
-              "concept": "反公地悲剧 · 专利丛林 · 互补专利叠加",
-              "summary": "调节造一部手机所需的分散专利方数量与每家许可费，看碎裂的产权如何把创新卡死在摇篮里！"
+              "archetype": "spatial",
+              "concept": "反公地悲剧、权利叠加与 FRAND 专利池",
+              "summary": "在 6 大智能手机专利模块依赖图上逐一博弈谈判，体验“专利叠加”如何卡死产品上市，并用 FRAND 专利池破局。"
             },
             {
               "id": "society/society-contracts-ip-03/03-trade-secret-vs-patent.html",
@@ -5256,9 +5256,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-contracts-ip-03/03-trade-secret-vs-patent.html",
               "title": "商业秘密 vs 申请专利：可口可乐配方怎么选？",
               "icon": "🔐",
-              "archetype": "comparison",
-              "concept": "商业秘密 · 公开换保护 · 逆向工程难度",
-              "summary": "调节竞争对手逆向破解配方的时间与技术迭代速度，决定该“申请公开专利”还是“锁进保险箱”！"
+              "archetype": "scenario",
+              "concept": "公开换保护（专利）vs 永久保密（商业秘密）",
+              "summary": "扮演首席知产官，针对配方、硬件结构、算法与新药 4 大真实发明，权衡反向工程难度并选出最优保护路径。"
             }
           ]
         },
@@ -5272,7 +5272,7 @@ window.TAXONOMY_DATA = {
           "icon": "🍰",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "一块一半草莓一半巧克力的蛋糕，怎么切才能让两个互相嫉妒的人都觉得“自己拿到的不吃亏”？",
+          "subtitle": "两个人口味完全不同，如何切一刀让谁也不嫉妒谁？",
           "difficulty": "入门",
           "related": [
             "society/society-fairness-contract-01",
@@ -5283,11 +5283,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-fairness-contract-03/01-cut-and-choose-svg.html",
               "file": "01-cut-and-choose-svg.html",
               "path": "./domains/society/society-fairness-contract-03/01-cut-and-choose-svg.html",
-              "title": "你切我选：无嫉妒切分实验室（SVG）",
+              "title": "你切我选：无嫉妒切分实验室",
               "icon": "🔪",
               "archetype": "spatial",
-              "concept": "你切我选 (Cut-and-Choose) · 无嫉妒公平 (Envy-Free)",
-              "summary": "调节切刀位置与两人对“草莓半边/巧克力半边”的不同偏好，看为什么切蛋糕的人必须切到自己心里刚好 50% 的位置！"
+              "concept": "你切我选协议与无嫉妒公平（Envy-Free）",
+              "summary": "在巧克力与草莓混拼蛋糕上拖动切刀位置，让对手先挑并实时检验双方主观满足度与无嫉妒均衡。"
             },
             {
               "id": "society/society-fairness-contract-03/02-moving-knife-n-players.html",
@@ -5295,9 +5295,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-fairness-contract-03/02-moving-knife-n-players.html",
               "title": "多人分蛋糕：移动刀法 (Moving Knife)",
               "icon": "🔪",
-              "archetype": "simulation",
-              "concept": "三人公平分配 · 移动刀法 · 喊停即得",
-              "summary": "调节 3 位参与者对蛋糕各段的偏好，拖动缓缓右移的切刀，看谁会在哪个位置第一个喊“停”！"
+              "archetype": "race",
+              "concept": "杜宾斯-斯帕尼尔多人移动刀法",
+              "summary": "看切刀从左向右匀速滑过蛋糕，4 位口味不同的玩家在各自达到 25% 估值瞬间喊停，公平拿走专属切片。"
             },
             {
               "id": "society/society-fairness-contract-03/03-adjusted-winner-split.html",
@@ -5305,9 +5305,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-fairness-contract-03/03-adjusted-winner-split.html",
               "title": "调整赢家算法：分房分车分股权怎么才不打架？",
               "icon": "🏠",
-              "archetype": "tradeoff",
-              "concept": "调整赢家 (Adjusted Winner) · 不可分物品配平",
-              "summary": "调节双方对“房子”和“股票”的主观打分权重，看算法如何先把物品分给最想要的人再精准切分最后一项！"
+              "archetype": "builder",
+              "concept": "布拉姆斯-泰勒调整赢家（Adjusted Winner）",
+              "summary": "为双方分配 100 分资产偏好权重，运行调整赢家算法实现无嫉妒、帕累托最优且双方得分相等的精准切分。"
             }
           ]
         },
@@ -5321,7 +5321,7 @@ window.TAXONOMY_DATA = {
           "icon": "🌳",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "明明搜出了铁证如山的凶器，为什么法庭有时宁可当场放人也不采信？",
+          "subtitle": "如果警察通过非法搜查找到了铁证，法庭为什么宁可放人也要扔掉证据？",
           "difficulty": "入门",
           "related": [
             "society/society-legal-procedure-01",
@@ -5332,11 +5332,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-legal-procedure-03/01-exclusionary-rule-svg.html",
               "file": "01-exclusionary-rule-svg.html",
               "path": "./domains/society/society-legal-procedure-03/01-exclusionary-rule-svg.html",
-              "title": "非法证据排除法则：威慑力模拟器（SVG）",
+              "title": "非法证据排除法则：威慑力模拟器",
               "icon": "🚫",
-              "archetype": "tradeoff",
-              "concept": "毒树之果 · 排除法则 · 制度威慑",
-              "summary": "调节非法搜查破案收益与被法庭排除的比率，看执法者何时才会彻底放弃违规取证！"
+              "archetype": "simulation",
+              "concept": "非法证据排除法则与长期行为威慑",
+              "summary": "调节非法证据排除严格度与违规追责力度，模拟五年内非法搜查率、合法破案率与公民安全感的动态演进。"
             },
             {
               "id": "society/society-legal-procedure-03/02-fruit-of-poisonous-tree.html",
@@ -5345,8 +5345,8 @@ window.TAXONOMY_DATA = {
               "title": "毒树之果证据链条追溯树",
               "icon": "🌿",
               "archetype": "spatial",
-              "concept": "毒树与毒果 · 必然发现例外 · 独立来源",
-              "summary": "切换“无证窃听”开关与“独立发现例外”权重，看整棵证据树是如何一损俱损或被合法切断的！"
+              "concept": "毒树之果原则及独立来源/必然发现例外",
+              "summary": "在交互式证据因果树上点击切换树根合法性与各分支节点，直观分辨哪些衍生证据会被污染、哪些可依法豁免。"
             },
             {
               "id": "society/society-legal-procedure-03/03-procedural-trust-curve.html",
@@ -5354,9 +5354,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-legal-procedure-03/03-procedural-trust-curve.html",
               "title": "程序正义 vs 实体结果：司法公信力双驱动",
               "icon": "🏛️",
-              "archetype": "simulation",
-              "concept": "程序正义 (Procedural Justice) · 制度合法性",
-              "summary": "调节“程序透明尊重度”与“实体判罚合意度”，看为什么让输官司的人心服口服主要靠程序！"
+              "archetype": "scenario",
+              "concept": "泰勒程序正义理论与服判公信力",
+              "summary": "在 4 个真实执法与审判情景中对比程序透明度与实体结果，验证“被公平倾听”为何比单纯赢官司更能建立长期信任。"
             }
           ]
         },
@@ -5370,7 +5370,7 @@ window.TAXONOMY_DATA = {
           "icon": "🐍",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "为什么殖民政府悬赏杀毒蛇，最后满大街的毒蛇反而暴增了三倍？",
+          "subtitle": "为什么抓毒蛇赏金反而催生了养蛇场？维克里拍卖为何让所有人乖乖报实价？",
           "difficulty": "入门",
           "related": [
             "business/business-org-operations-01",
@@ -5381,11 +5381,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-public-incentives-03/01-cobra-effect-sim.html",
               "file": "01-cobra-effect-sim.html",
               "path": "./domains/society/society-public-incentives-03/01-cobra-effect-sim.html",
-              "title": "眼镜蛇赏金实验（SVG 12期演化）",
+              "title": "眼镜蛇赏金实验（12 期反噬演化）",
               "icon": "🐍",
               "archetype": "simulation",
-              "concept": "眼镜蛇效应 · 反向激励 · 制度反噬",
-              "summary": "调节政府杀蛇赏金与养蛇成本，看当赏金高于养蛇成本时，城市如何被人工养殖的毒蛇淹没！"
+              "concept": "眼镜蛇效应 · 逆向激励 · 政策反噬",
+              "summary": "播放 12 个月德里赏金演化曲线，亲眼见证养蛇产业链爆发与取消赏金后的 3 倍蛇灾。"
             },
             {
               "id": "society/society-public-incentives-03/02-kpi-distortion-lab.html",
@@ -5393,9 +5393,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-public-incentives-03/02-kpi-distortion-lab.html",
               "title": "激励相容失灵：代理指标与真实目标背离",
               "icon": "🎯",
-              "archetype": "tradeoff",
-              "concept": "古德哈特定律 · 代理指标异化",
-              "summary": "调节短期考核指标权重与作弊成本，看代理指标飙升时真实质量是如何坍塌的！"
+              "archetype": "scenario",
+              "concept": "古德哈特定律 · 代理指标扭曲 · 双指标制衡",
+              "summary": "预测代码行数、客服时长与铁钉吨数三大荒诞 KPI 的钻空子操作，并替换为激励相容指标。"
             },
             {
               "id": "society/society-public-incentives-03/03-vickrey-truth-telling.html",
@@ -5403,9 +5403,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-public-incentives-03/03-vickrey-truth-telling.html",
               "title": "维克里机制：为什么“报实价”才是唯一最优解？",
               "icon": "🏷️",
-              "archetype": "tradeoff",
-              "concept": "激励相容 (Incentive Compatibility) · 维克里第二价格",
-              "summary": "调节你心里真实的物品估值与故意压低/抬高的报价，看第二价格机制如何让诚实成为占优策略！"
+              "archetype": "blind-lab",
+              "concept": "维克里二价拍卖 · 激励相容 · 赢家诅咒",
+              "summary": "拖动秘密出价对比压价、虚报与报实价在所有对手报价下的收益表，验证说真话严格占优。"
             }
           ]
         },
@@ -5419,7 +5419,7 @@ window.TAXONOMY_DATA = {
           "icon": "🕸️",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "为什么找工作、找机会帮上大忙的往往不是天天一起吃饭的死党，而是“一面之缘”的普通熟人？",
+          "subtitle": "为什么帮到你最多的，往往不是铁哥们，而是“点头之交”？",
           "difficulty": "入门",
           "related": [
             "society/society-social-networks-04",
@@ -5430,11 +5430,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-social-networks-03/01-small-world-rewire.html",
               "file": "01-small-world-rewire.html",
               "path": "./domains/society/society-social-networks-03/01-small-world-rewire.html",
-              "title": "小世界网络重连器：几根跨圈弦线缩短全世界（SVG）",
+              "title": "小世界网络重连器：几根跨圈弦线缩短全世界",
               "icon": "🌐",
               "archetype": "spatial",
-              "concept": "瓦茨-斯特罗加茨小世界模型 · 远距离捷径",
-              "summary": "调节随机跨圈连线比例 p，亲眼看见只需要 5% 的弱连接捷径，环形社交网的平均距离如何断崖暴跌！"
+              "concept": "瓦茨-斯特罗加茨小世界网络",
+              "summary": "在 20 人环形社交圈里拖动重连概率或直接点击添加跨圈弦线，实时见证平均最短路径如何暴跌一半。"
             },
             {
               "id": "society/society-social-networks-03/02-weak-ties-job-hunt.html",
@@ -5442,9 +5442,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-social-networks-03/02-weak-ties-job-hunt.html",
               "title": "强连接 vs 弱连接：谁带来真正的新机会？",
               "icon": "💼",
-              "archetype": "comparison",
-              "concept": "格兰诺维特弱连接优势 · 信息冗余度",
-              "summary": "调节强关系圈的“信息重叠率”与弱关系数量，算一算谁能给你带来最多不重样的新职位情报！"
+              "archetype": "race",
+              "concept": "格兰诺维特弱连接优势与信息冗余",
+              "summary": "让“铁哥们强连接”与“校友前同事弱连接”同台竞速找工作，直观对比熟人圈信息冗余与跨圈新信息爆发。"
             },
             {
               "id": "society/society-social-networks-03/03-six-degrees-reach.html",
@@ -5453,8 +5453,8 @@ window.TAXONOMY_DATA = {
               "title": "六度分隔指数覆盖半径计算器",
               "icon": "📡",
               "archetype": "simulation",
-              "concept": "指数级扩散 · 六度分隔 (6 Degrees)",
-              "summary": "调节每人平均有效熟人数与跨圈折损率，看 6 步转发是如何覆盖几十亿地球人口的！"
+              "concept": "指数级扩散与六度分隔定律",
+              "summary": "调节每人有效熟人数与朋友圈重叠率，观察 1 到 6 度去重人脉覆盖何时突破 80 亿全球人口。"
             }
           ]
         },
@@ -5468,7 +5468,7 @@ window.TAXONOMY_DATA = {
           "icon": "👩‍⚖️",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "为什么 12 个普通人凑在一起投票，判断力竟能吊打单个顶级专家——但前提是什么？",
+          "subtitle": "为什么群体投票既能放大智慧逼近 100%，也能放大愚蠢跌向 0%？",
           "difficulty": "入门",
           "related": [
             "society/society-collective-voting-01",
@@ -5479,11 +5479,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-collective-voting-04/01-jury-accuracy-curve.html",
               "file": "01-jury-accuracy-curve.html",
               "path": "./domains/society/society-collective-voting-04/01-jury-accuracy-curve.html",
-              "title": "群体智慧放大曲线（SVG）",
+              "title": "群体智慧放大曲线",
               "icon": "📈",
               "archetype": "simulation",
-              "concept": "孔多塞陪审团定理 · 二项分布 · 0.5 相变阈值",
-              "summary": "调节单个陪审员的判断准确率 p 与人数 N，观察群体准确率如何向 100% 或 0% 两极分化！"
+              "concept": "孔多塞陪审团定理 · 50% 相变 · 集成学习",
+              "summary": "拖动单人正确率跨过 50% 分水岭，实时见证扩大人数如何把群体推向 100% 或 0%。"
             },
             {
               "id": "society/society-collective-voting-04/02-correlation-echo-trap.html",
@@ -5491,9 +5491,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-collective-voting-04/02-correlation-echo-trap.html",
               "title": "独立性崩塌：当陪审员开始互相抄作业",
               "icon": "🐑",
-              "archetype": "tradeoff",
-              "concept": "统计独立性 · 相关性衰减 · 群体盲从",
-              "summary": "调节陪审员之间的“互相抄作业（相关性）”程度，看原本 99% 准的陪审团如何瞬间退化成 1 个人！"
+              "archetype": "race",
+              "concept": "判断独立性 · 意见领袖盲从 · 有效样本崩塌",
+              "summary": "增加盲从大嗓门的陪审员人数，观察 15 人群体智慧如何瞬间退化为 1 人独裁。"
             },
             {
               "id": "society/society-collective-voting-04/03-unanimity-vs-majority.html",
@@ -5501,9 +5501,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-collective-voting-04/03-unanimity-vs-majority.html",
               "title": "一致同意 vs 简单多数：定罪门槛的双刃剑",
               "icon": "⚖️",
-              "archetype": "tradeoff",
-              "concept": "一致同意规则 · 假阳性 vs 假阴性",
-              "summary": "调节定罪所需赞成票数（6/12 到 12/12 全票），权衡“冤枉好人”和“放跑坏人”的代价！"
+              "archetype": "blind-lab",
+              "concept": "一致同意 · 假阳性与假阴性权衡 · 宁纵勿枉",
+              "summary": "切换 7/12、10/12 与 12/12 定罪门槛，权衡冤枉无辜者、放走真凶与流审率的跷跷板。"
             }
           ]
         },
@@ -5517,7 +5517,7 @@ window.TAXONOMY_DATA = {
           "icon": "📜",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "代码开源就等于免费随便商用吗？为什么引入一块 GPL 代码可能让整套商业软件被迫开源？",
+          "subtitle": "免费开源代码都能随便拿去商用闭源吗？一不小心整个项目都会被“传染”！",
           "difficulty": "入门",
           "related": [
             "society/society-contracts-ip-03",
@@ -5528,11 +5528,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-contracts-ip-04/01-license-contagion-svg.html",
               "file": "01-license-contagion-svg.html",
               "path": "./domains/society/society-contracts-ip-04/01-license-contagion-svg.html",
-              "title": "开源协议“传染性”依赖树检测器（SVG）",
+              "title": "开源协议“传染性”依赖树检测器",
               "icon": "🧬",
               "archetype": "spatial",
-              "concept": "Copyleft 传染性 · MIT · Apache 2.0 · GPLv3",
-              "summary": "切换上游库协议并调节项目耦合度，直观看见“闭源商业代码”会不会被 GPL 传染要求全量开源！"
+              "concept": "宽松协议（MIT/Apache）vs 强传染 Copyleft（GPL/AGPL）",
+              "summary": "在交互式项目依赖树中点击切换各底层组件协议与分发形态（客户端/云端 SaaS），实时追踪 Copyleft 传染路径。"
             },
             {
               "id": "society/society-contracts-ip-04/02-patent-retaliation-sim.html",
@@ -5540,9 +5540,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-contracts-ip-04/02-patent-retaliation-sim.html",
               "title": "Apache 2.0 专利反制盾牌模拟",
               "icon": "🛡️",
-              "archetype": "tradeoff",
-              "concept": "专利授权 · 专利反制条款 (Retaliation)",
-              "summary": "调节企业对上游开源社区发起专利诉讼的概率，看 Apache 2.0 如何自动吊销白眼狼的授权！"
+              "archetype": "scenario",
+              "concept": "显式专利授权与专利反制终止条款",
+              "summary": "对比 MIT 与 Apache 2.0 在巨头发动专利突袭时的法律攻防推演，亲身体验 Apache 2.0 专利反制盾牌的威慑力。"
             },
             {
               "id": "society/society-contracts-ip-04/03-open-core-business.html",
@@ -5550,9 +5550,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-contracts-ip-04/03-open-core-business.html",
               "title": "Open Core 商业化边界权衡仪",
               "icon": "💎",
-              "archetype": "tradeoff",
-              "concept": "Open Core 模式 · 免费生态 vs 付费企业版",
-              "summary": "调节免费开源核心的功能占比与企业版安全/集群功能溢价，寻找社区口碑与营收的最佳平衡点！"
+              "archetype": "builder",
+              "concept": "Open Core 开源内核与企业级付费边界设计",
+              "summary": "将 6 项产品能力自由划归开源社区版或付费企业版，实时平衡开发者生态热度与商业年营收 ARR。"
             }
           ]
         },
@@ -5566,7 +5566,7 @@ window.TAXONOMY_DATA = {
           "icon": "🕵️",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "明明把姓名和身份证号全删掉了，为什么黑客还是能从“脱敏公开数据”里精准认出你？",
+          "subtitle": "删掉姓名和手机号，你的医疗记录就真的匿名了吗？",
           "difficulty": "进阶",
           "related": [
             "ai/ai-infra-safety-01",
@@ -5577,11 +5577,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-fairness-contract-04/01-k-anonymity-reid.html",
               "file": "01-k-anonymity-reid.html",
               "path": "./domains/society/society-fairness-contract-04/01-k-anonymity-reid.html",
-              "title": "K-匿名重识别攻击透视镜（SVG）",
+              "title": "K-匿名重识别攻击透视镜",
               "icon": "🔍",
-              "archetype": "spatial",
-              "concept": "准标识符 · K-匿名性 · 重识别攻击",
-              "summary": "调节公开表里的“年龄段粒度”和“邮编精确位数”，亲眼看见只需 3 个无害字段就能把你从人群里唯一揪出来！"
+              "archetype": "blind-lab",
+              "concept": "准标识符链接攻击与 K-匿名脱敏",
+              "summary": "扮演数据侦探，尝试仅用邮编、出生年份和性别从“匿名病历表”中精准揪出目标人物，再开启 K-匿名泛化验证防御。"
             },
             {
               "id": "society/society-fairness-contract-04/02-differential-privacy-eps.html",
@@ -5589,9 +5589,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-fairness-contract-04/02-differential-privacy-eps.html",
               "title": "差分隐私预算 ε：加多少噪声才安全？",
               "icon": "🌫️",
-              "archetype": "tradeoff",
-              "concept": "差分隐私 (Differential Privacy) · 隐私预算 ε",
-              "summary": "调节隐私预算 ε 与查询样本量 N，观察加噪声后“黑客能否猜出你在不在数据集里”与统计误差的权衡！"
+              "archetype": "simulation",
+              "concept": "拉普拉斯机制与隐私预算 ε 权衡",
+              "summary": "调节隐私预算 ε，对比“含/不含个人记录”两条噪声分布的重叠度，直观掌握隐私保护与数据精度的黄金平衡。"
             },
             {
               "id": "society/society-fairness-contract-04/03-randomized-response.html",
@@ -5599,9 +5599,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-fairness-contract-04/03-randomized-response.html",
               "title": "随机回答法：如何让受访者放心承认尴尬秘密？",
               "icon": "🪙",
-              "archetype": "simulation",
-              "concept": "随机回答法 (Randomized Response) · 合理推诿",
-              "summary": "调节抛硬币说真话的概率与真实敏感行为比例，看统计学如何在保护“每个人都能矢口否认”的同时算出群体真相！"
+              "archetype": "scenario",
+              "concept": "华纳随机回答法与本地差分隐私",
+              "summary": "亲身体验双硬币“合理推诿”保护机制，再模拟千人群体调研，见证如何从加噪答案中精准反推真实敏感比例。"
             }
           ]
         },
@@ -5615,7 +5615,7 @@ window.TAXONOMY_DATA = {
           "icon": "📐",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "法庭怎么用一道小学乘法公式判定“你到底算不算过失”？公权力边界在哪？",
+          "subtitle": "怎样用一道数学公式判断“粗心大意”，又为何不能用大炮打蚊子？",
           "difficulty": "入门",
           "related": [
             "society/society-legal-procedure-01",
@@ -5628,9 +5628,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-legal-procedure-04/01-learned-hand-rule.html",
               "title": "汉德公式天平：B < P × L 过失判定器",
               "icon": "⚖️",
-              "archetype": "tradeoff",
-              "concept": "汉德公式 (Learned Hand Rule) · 注意义务",
-              "summary": "调节安全预防成本 B、出事概率 P 与事故损失 L，看天平何时倾斜为“构成法律过失”！"
+              "archetype": "builder",
+              "concept": "汉德公式（B < P × L）与过失侵权认定",
+              "summary": "自由调节预防成本 B、事故概率 P 与预期损失 L，看可视化天平如何精准裁定行为人是否构成法律过失。"
             },
             {
               "id": "society/society-legal-procedure-04/02-proportionality-test.html",
@@ -5638,9 +5638,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-legal-procedure-04/02-proportionality-test.html",
               "title": "比例原则审查仪：不能用大炮打蚊子",
               "icon": "🎯",
-              "archetype": "tradeoff",
-              "concept": "比例原则 · 适当性 · 必要性 · 狭义比例性",
-              "summary": "调节执法手段严厉度与公共目标收益，检查是否通过行政法“禁止用大炮打蚊子”的三阶审查！"
+              "archetype": "scenario",
+              "concept": "公法三阶比例原则（适当/必要/均衡）",
+              "summary": "化身行政审查官，用适当性、最小侵害必要性与狭义均衡三道关卡，逐案筛查 4 起公权力执法是否越界。"
             },
             {
               "id": "society/society-legal-procedure-04/03-strict-vs-negligence.html",
@@ -5649,8 +5649,8 @@ window.TAXONOMY_DATA = {
               "title": "严格责任 vs 过失责任：社会总成本曲线",
               "icon": "🚗",
               "archetype": "simulation",
-              "concept": "严格责任 · 过失责任 · 行为水平 (Activity Level)",
-              "summary": "调节企业生产危险品时的谨慎投入水平，看为什么核电站/烟花厂必须适用“不管有没有错都要赔”的严格责任！"
+              "concept": "社会总事故成本最小化与归责机制对比",
+              "summary": "拖动企业安全投入水平，观察预防成本与事故损失叠加出的 U 型社会总成本曲线，对比严格责任与过失责任的激励差异。"
             }
           ]
         },
@@ -5664,7 +5664,7 @@ window.TAXONOMY_DATA = {
           "icon": "📜",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "养牛场踩烂隔壁麦田，到底该判给谁？为什么只要交易成本为零，判给谁结果都一样？",
+          "subtitle": "为什么零交易成本下产权判给谁效率都一样？现实中交易成本高墙如何改写法律规则？",
           "difficulty": "进阶",
           "related": [
             "society/society-public-incentives-02",
@@ -5675,11 +5675,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-public-incentives-04/01-coase-bargaining-svg.html",
               "file": "01-coase-bargaining-svg.html",
               "path": "./domains/society/society-public-incentives-04/01-coase-bargaining-svg.html",
-              "title": "牛群与麦田：科斯谈判效率沙盘（SVG）",
+              "title": "牛群与麦田：科斯谈判效率沙盘",
               "icon": "🐄",
-              "archetype": "tradeoff",
-              "concept": "科斯定理 · 产权归属 vs 资源配置效率",
-              "summary": "切换“牛有吃麦权”或“麦有不被踩权”，调节围栏成本，看双方如何通过私下掏钱达成同一最优解！"
+              "archetype": "builder",
+              "concept": "科斯定理 · 产权与效率分离 · 零交易成本",
+              "summary": "切换法律判给农民或牧场主，亲眼见证两种判法都会自动修起 ¥40 篱笆保住 ¥100 麦田。"
             },
             {
               "id": "society/society-public-incentives-04/02-transaction-cost-wall.html",
@@ -5687,9 +5687,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-public-incentives-04/02-transaction-cost-wall.html",
               "title": "交易成本高墙：为什么科斯定理在现实会失灵？",
               "icon": "🧱",
-              "archetype": "tradeoff",
-              "concept": "交易成本 · 多方协调摩擦 · 产权配置关键性",
-              "summary": "调节需要协调的邻居人数与律师沟通成本，看交易成本如何吞噬掉全部合作剩余！"
+              "archetype": "simulation",
+              "concept": "交易成本 · 集体行动困境 · 钉子户摩擦",
+              "summary": "把谈判户数从 1 户拉到 500 户，观察组织协调成本如何吞噬全部 ¥70,000 合作红利。"
             },
             {
               "id": "society/society-public-incentives-04/03-liability-rule-sim.html",
@@ -5697,9 +5697,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-public-incentives-04/03-liability-rule-sim.html",
               "title": "产权规则 vs 责任规则：卡拉布雷西大教堂",
               "icon": "🏛️",
-              "archetype": "comparison",
-              "concept": "产权规则 (Property Rule) · 责任规则 (Liability Rule)",
-              "summary": "调节双方估值信息透明度与法院定损误差，看什么时候该“不准强买”什么时候该“先用后赔”！"
+              "archetype": "scenario",
+              "concept": "财产规则 · 责任规则 · 紧急避险法经济学",
+              "summary": "审理台风靠岸避险、传家宝买卖与交通事故三起判例，掌握大教堂交易成本裁判准则。"
             }
           ]
         },
@@ -5713,7 +5713,7 @@ window.TAXONOMY_DATA = {
           "icon": "📢",
           "color": "#0284c7",
           "soft": "#f0f9ff",
-          "subtitle": "为什么只要最前面 2 个人不小心选错了，后面 100 个聪明人会明知不对却跟着一起错？",
+          "subtitle": "为什么一群理智的聪明人，也会集体踩进荒唐的盲从陷阱？",
           "difficulty": "进阶",
           "related": [
             "society/society-social-networks-02",
@@ -5724,11 +5724,11 @@ window.TAXONOMY_DATA = {
               "id": "society/society-social-networks-04/01-info-cascade-urn.html",
               "file": "01-info-cascade-urn.html",
               "path": "./domains/society/society-social-networks-04/01-info-cascade-urn.html",
-              "title": "信息级联：盲从锁死模拟器（SVG）",
+              "title": "信息级联：盲从锁死模拟器",
               "icon": "🌊",
-              "archetype": "simulation",
-              "concept": "信息级联 (Information Cascade) · 羊群效应",
-              "summary": "调节个体私人信号准确率与从众观察权重，看前 2 人定调后，后面的人如何集体抛弃自己的判断！"
+              "archetype": "blind-lab",
+              "concept": "贝叶斯理性从众与信息级联",
+              "summary": "亲身参与经典双色盲盒实验：结合前人公开选择与你的私有信号做出猜测，体验信息级联如何理性地集体选错。"
             },
             {
               "id": "society/society-social-networks-04/02-rumor-r0-threshold.html",
@@ -5737,8 +5737,8 @@ window.TAXONOMY_DATA = {
               "title": "谣言传播 R0 与黄金辟谣窗口期",
               "icon": "🔥",
               "archetype": "simulation",
-              "concept": "基本再生数 R0 · 辟谣介入时机",
-              "summary": "调节谣言感染系数与官方辟谣介入时刻，看晚介入 3 小时如何让谣言传播量翻十倍！"
+              "concept": "传染病 SIR 模型与辟谣时间窗口",
+              "summary": "调节谣言传染指数 R0 与辟谣延迟小时数，观察错过黄金辟谣窗口后谣言如何呈指数级失控。"
             },
             {
               "id": "society/society-social-networks-04/03-pluralistic-ignorance.html",
@@ -5746,9 +5746,9 @@ window.TAXONOMY_DATA = {
               "path": "./domains/society/society-social-networks-04/03-pluralistic-ignorance.html",
               "title": "多元无知与“皇帝的新衣”破局点",
               "icon": "👑",
-              "archetype": "simulation",
-              "concept": "多元无知 · 偏好伪装 · 临界叛逆阈值",
-              "summary": "调节大家“私下真实反对率”与“敢于公开说真话的勇气门槛”，看一个小孩喊出真相如何瞬间推翻全场假话！"
+              "archetype": "spatial",
+              "concept": "多元无知、沉默螺旋与阈值崩塌",
+              "summary": "在 25 人圆桌会场中点击率先发声的“小男孩”，见证沉默螺旋如何瞬间瓦解并触发全场跟进。"
             }
           ]
         }

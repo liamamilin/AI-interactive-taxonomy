@@ -1,64 +1,115 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧮 有效违约算盘：什么时候“宁愿赔钱也要毁约”？</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>有效违约算盘：什么时候“宁愿赔钱也要毁约”？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .board { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 16px; }
+    .cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 680px) { .cmp-grid { grid-template-columns: 1fr; } }
+    .plan-card { background: var(--tax-surface); border: 2px solid var(--tax-border); border-radius: 12px; padding: 13px; }
+    .plan-card.win { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .p-head { font-weight: 800; font-size: 14.5px; color: var(--tax-ink); margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .line { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; color: var(--tax-muted); border-bottom: 1px dashed var(--tax-border); }
+    .line:last-child { border-bottom: none; font-weight: 800; color: var(--tax-ink); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🧮 有效违约算盘：什么时候“宁愿赔钱也要毁约”？</h1><p>误区：道德和法律应当在任何情况下都强迫违约方按原合同把货交出来。真相：如果新买家出价高出原买家利润，赔足原买家全部期待利益再把货卖给新买家，全社会总财富反而净增！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>新买家 B 愿出的高价</span><span id="vB">180 元</span></label><input type="range" id="sB" min="110" max="240" value="180" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>原买家 A 对货物的心理估值</span><span id="vA">130 元</span></label><input type="range" id="sA" min="110" max="200" value="130" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🧮 有效违约算盘：什么时候“宁愿赔钱也要毁约”？</h1>
+      <p>你（卖家，生产成本 <strong>80 万</strong>）与原买家甲签了 <strong>100 万</strong>供货合同（甲对这批货的最高心理估值是 <strong>130 万</strong>，期待利润 30 万）。突然，急缺货的新买家乙上门出价！拖动乙的报价，看看什么时候「毁约卖给乙 + 全额赔偿甲 30 万期待利润」竟然让三方全部更赚！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="control-group">
+        <label>新买家乙的紧急报价：<strong id="bidVal">160 万</strong>（乙心理估值 180 万）</label>
+        <input id="bidSlider" type="range" min="105" max="180" step="5" value="160">
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">原合同价 / 卖方成本</div><div class="k-val">100 / 80 元</div></div>
-        <div class="kpi"><div class="k-lbl">需赔 A 的期待利润</div><div class="k-val" id="kDam">—</div></div>
-        <div class="kpi"><div class="k-lbl">违约后卖方净赚</div><div class="k-val" id="kNet" style="color:#10b981;">—</div></div>
+      <div class="control-group">
+        <label>法律判定的违约赔偿金：<strong id="damVal">30 万（期待利益赔偿）</strong></label>
+        <input id="damSlider" type="range" min="10" max="90" step="5" value="30">
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="board">
+      <div class="cmp-grid">
+        <div class="plan-card" id="keepCard">
+          <div class="p-head"><span>📜 方案 1：坚持履约卖给甲</span><span id="keepTag"></span></div>
+          <div class="line"><span>卖家（你）净赚</span><strong>+20 万</strong></div>
+          <div class="line"><span>原买家甲净赚（130-100）</span><strong>+30 万</strong></div>
+          <div class="line"><span>新买家乙净赚</span><strong>0 万</strong></div>
+          <div class="line"><span>全社会总剩余</span><strong>+50 万</strong></div>
+        </div>
+
+        <div class="plan-card" id="breachCard">
+          <div class="p-head"><span>⚡ 方案 2：违约卖给乙并赔付甲</span><span id="breachTag"></span></div>
+          <div class="line"><span>卖家（你）净赚</span><strong id="sNet">--</strong></div>
+          <div class="line"><span>原买家甲净赚（获赔）</span><strong id="aNet">--</strong></div>
+          <div class="line"><span>新买家乙净赚（180-报价）</span><strong id="bNet">--</strong></div>
+          <div class="line"><span>全社会总剩余</span><strong id="totNet">--</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 有效违约法则：</strong>拖动新买家报价和违约赔偿金，观察当赔偿金刚好等于原买家期待利润（30 万）时，为什么市场能自动把稀缺资源流向估值最高的人，且不伤害任何人！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const b=+document.getElementById('sB').value, a=+document.getElementById('sA').value;
-  document.getElementById('vB').textContent=b+' 元'; document.getElementById('vA').textContent=a+' 元';
-  const dam=a-100, keepNet=100-80, breachNet=(b-80)-dam, eff=b>a;
-  document.getElementById('kDam').textContent=dam+' 元';
-  document.getElementById('kNet').textContent=breachNet+' 元';
-  document.getElementById('kNet').style.color=eff?'#10b981':'#ef4444';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#64748b">老实履约卖给 A 净赚: ${keepNet} 元 (A 也净赚 ${dam} 元)</text>
-    <rect x="20" y="44" width="${keepNet*3}" height="24" rx="6" fill="#64748b"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="${eff?'#10b981':'#ef4444'}">违约改卖 B 并赔足 A (${dam}元) 后卖方净赚: ${breachNet} 元</text>
-    <rect x="20" y="112" width="${Math.max(8,breachNet*3)}" height="24" rx="6" fill="${eff?'#10b981':'#ef4444'}"/>
-    <text x="20" y="166" font-size="13" font-weight="800" fill="${eff?'#10b981':'#ef4444'}">${eff?'✅ 有效违约：A 没亏，你多赚 '+(breachNet-keepNet)+' 元，货到了更需要它的 B 手里！':'❌ 无效违约：新价不如 A 的估值高，赔完反而亏了'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>期待利益赔偿（只赔 A 原本能赚的 ${dam} 元，而不判天价惩罚金）是精妙的筛选器：只有当货对 B 的价值真的高于 A 时，违约才会发生！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const bidSlider = document.getElementById('bidSlider');
+    const damSlider = document.getElementById('damSlider');
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const bid = Number(bidSlider.value);
+      const dam = Number(damSlider.value);
+      document.getElementById('bidVal').textContent = bid + ' 万';
+      document.getElementById('damVal').textContent = dam + ' 万' + (dam === 30 ? '（精准期待利益）' : dam < 30 ? '（赔偿不足）' : '（超额惩罚性）');
+
+      const sellerKeep = 20;
+      const sellerBreach = (bid - 80) - dam;
+      const aBreach = dam;
+      const bBreach = 180 - bid;
+      const totalBreach = sellerBreach + aBreach + bBreach; // always 180 - 80 = 100!
+
+      document.getElementById('sNet').textContent = (sellerBreach >= 0 ? '+' : '') + sellerBreach + ' 万';
+      document.getElementById('aNet').textContent = '+' + aBreach + ' 万';
+      document.getElementById('bNet').textContent = '+' + bBreach + ' 万';
+      document.getElementById('totNet').textContent = '+' + totalBreach + ' 万';
+
+      const sellerWillBreach = sellerBreach > sellerKeep;
+      document.getElementById('keepCard').classList.toggle('win', !sellerWillBreach);
+      document.getElementById('breachCard').classList.toggle('win', sellerWillBreach);
+      document.getElementById('keepTag').textContent = !sellerWillBreach ? '✅ 卖家会选此项' : '';
+      document.getElementById('breachTag').textContent = sellerWillBreach ? '✅ 卖家会选此项' : '';
+
+      const aha = document.getElementById('ahaBox');
+      if (sellerWillBreach && dam >= 30) {
+        aha.innerHTML = `<strong>🏆 完美“有效违约（帕累托改进）”达成！</strong>你卖给乙并赔给甲 <strong>${dam} 万</strong>后：你多赚了 <strong>+${sellerBreach - 20} 万</strong>，原买家甲拿到 ${dam} 万（丝毫不亏！），新买家乙也赚了 ${bBreach} 万，全社会总财富从 50 万暴涨到 <strong>100 万</strong>！`;
+      } else if (sellerWillBreach && dam < 30) {
+        aha.innerHTML = `<strong>⚠️ 恶意低价违约风险（赔偿仅 ${dam} 万 &lt; 30 万）：</strong>虽然你选择违约，但原买家甲本应赚 30 万现在只拿到 ${dam} 万，惨遭坑害！因此违约赔偿绝不能低于期待利益（30 万）。`;
+      } else if (!sellerWillBreach && bid > 130 && dam > 30) {
+        aha.innerHTML = `<strong>🔒 天价惩罚性违约金（${dam} 万）锁死了有效交易！</strong>明明新买家乙出价 <strong>${bid} 万</strong>远超原买家估值（130 万），违约本可创造双倍社会财富，但过高的惩罚性违约金把你吓得不敢毁约，全社会白白损失 50 万剩余！`;
+      } else {
+        aha.innerHTML = `<strong>📜 此时应当继续履约：</strong>新买家报价（${bid} 万）不足以覆盖原买家的期待利润，违约既亏钱又没提升资源配置效率，老实履约卖给甲才是正道！`;
+      }
+    }
+
+    bidSlider.addEventListener('input', () => { markDone('调节了有效违约新买家报价'); render(); });
+    damSlider.addEventListener('input', () => { markDone('调节了违约赔偿金标准'); render(); });
+    render();
   </script>
 </body>
 </html>

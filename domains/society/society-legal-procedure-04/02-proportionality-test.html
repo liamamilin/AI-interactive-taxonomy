@@ -1,68 +1,156 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎯 比例原则审查仪：不能用大炮打蚊子</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>比例原则审查仪：不能用大炮打蚊子</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .review-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 16px; }
+    .case-box { background: var(--tax-surface); border-left: 4px solid var(--tax-amber); border-radius: 8px; padding: 12px 14px; margin: 10px 0 14px; }
+    .c-title { font-weight: 800; font-size: 15.5px; color: var(--tax-ink); margin-bottom: 4px; }
+    .c-body { font-size: 13.5px; color: var(--tax-muted); line-height: 1.55; }
+    .gate-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    @media (max-width: 640px) { .gate-grid { grid-template-columns: 1fr; } }
+    .gate-btn { padding: 11px 12px; border-radius: 10px; border: 2px solid var(--tax-border); background: var(--tax-surface); cursor: pointer; text-align: left; color: var(--tax-ink); transition: border-color .2s, background .2s; }
+    .gate-btn:hover { border-color: var(--tax-primary); }
+    .gate-btn.ok { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .gate-btn.bad { border-color: var(--tax-red); background: var(--tax-red-soft); }
+    .g-t { font-weight: 800; font-size: 13.5px; }
+    .g-s { font-size: 11.5px; color: var(--tax-muted); margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎯 比例原则审查仪：不能用大炮打蚊子</h1><p>误区：只要执法目的是为了公共利益，采取再严厉、再一刀切的手段都是合法的。真相：即使目标正当，如果存在更温和的替代手段，或者造成的权利伤害远超收益，依然违背比例原则！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🎯 比例原则审查仪：不能用大炮打蚊子</h1>
+      <p>公法皇冠上的明珠——「比例原则」有三道逐级关卡：<strong>① 适当性</strong>（手段真能达成目的吗？）→ <strong>② 必要性</strong>（有没有更温和的替代手段？）→ <strong>③ 狭义比例性</strong>（代价是否远远大过收益？）。化身审查官，逐案找出越界的那一道关！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row" id="tabsRow"></div>
+      <span style="font-size:13px;color:var(--tax-muted);">已审查：<strong id="progVal" style="color:var(--tax-ink);">0 / 4</strong></span>
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>行政处罚/限制手段严厉度</span><span id="vS">75 分</span></label><input type="range" id="sS" min="10" max="100" value="75" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>实际新增公共利益</span><span id="vG">45 分</span></label><input type="range" id="sG" min="10" max="100" value="45" oninput="upd()"></div>
+
+    <div class="review-card">
+      <div class="case-box">
+        <div class="c-title" id="cTitle"></div>
+        <div class="c-body" id="cBody"></div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">公民权利受损</div><div class="k-val" id="kH" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">净社会平衡值</div><div class="k-val" id="kNet">—</div></div>
-        <div class="kpi"><div class="k-lbl">审查结论</div><div class="k-val" id="kRes">—</div></div>
+
+      <div class="gate-grid" id="gateGrid">
+        <button class="gate-btn" data-g="suitability">
+          <div class="g-t">❌ 卡在第一关：违反适当性</div>
+          <div class="g-s">手段与目的风马牛不相及，根本帮不到目标</div>
+        </button>
+        <button class="gate-btn" data-g="necessity">
+          <div class="g-t">❌ 卡在第二关：违反必要性（最小侵害）</div>
+          <div class="g-s">虽有效，但明明有更温和、代价更小的替代方案</div>
+        </button>
+        <button class="gate-btn" data-g="balancing">
+          <div class="g-t">❌ 卡在第三关：违反狭义比例性</div>
+          <div class="g-s">“大炮打蚊子”，造成的伤害远大于公共收益</div>
+        </button>
+        <button class="gate-btn" data-g="pass">
+          <div class="g-t">✅ 三关全过：符合比例原则</div>
+          <div class="g-s">手段有效、侵害最小且损益均衡</div>
+        </button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 审查提示：</strong>阅读上方行政执法案例，判断它最核心的毛病卡在比例原则的哪一道关卡（或者是否合法合规）！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const sev=+document.getElementById('sS').value, gain=+document.getElementById('sG').value;
-  document.getElementById('vS').textContent=sev+' 分'; document.getElementById('vG').textContent=gain+' 分';
-  const harm=Math.round(sev*0.9), net=gain-harm;
-  const ok=net>=0 && sev<=gain+15;
-  document.getElementById('kH').textContent=harm+' 分';
-  document.getElementById('kNet').textContent=(net>0?'+':'')+net+' 分';
-  document.getElementById('kRes').textContent=ok?'符合比例原则':'大炮打蚊子 (越界)';
-  document.getElementById('kRes').style.color=ok?'#10b981':'#ef4444';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#10b981">公共利益增量: +${gain} 分</text>
-    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${gain*5.4}" height="24" rx="6" fill="#10b981"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#ef4444">手段造成的权利损害: -${harm} 分</text>
-    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${harm*5.4}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="166" font-size="13" font-weight="800" fill="${ok?'#10b981':'#ef4444'}">${ok?'✅ 手段与目的相称':'❌ 损害大于收益，违反狭义比例性'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>比例原则是公权力的紧箍咒：手段必须有效（适当性）、必须是损害最小的（必要性），且绝不能为了赚 ${gain} 分公益去毁掉 ${harm} 分公民基本权利！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const cases = [
+      {
+        tab: '芹菜罚 6 万',
+        title: '案例 1：个体户卖 5 斤不合格芹菜（货值 20 元），被罚款 6.6 万元',
+        body: '老夫妇首次经营小菜摊，误购 5 斤农残略超标的芹菜（获利 14 元），监管部门机械套用高额罚款下限，直接开出 6.6 万元罚单，足以让小店破产。',
+        ans: 'balancing',
+        explain: '典型卡在第三关「狭义比例性（过罚相当）」！罚款确实能起警示作用，但为 20 元初犯小过错施以 6.6 万元毁灭性重罚，损害与公共利益严重失衡——典型的“大炮打蚊子”。'
+      },
+      {
+        tab: '全城禁行电瓶车',
+        title: '案例 2：为整治夜间非法改装飙车，宣布全城 24 小时禁行所有电动自行车',
+        body: '市里几百辆改装电摩夜间炸街扰民，有关部门为图省事，决定禁止全市 100 万通勤市民骑行合法合规的电动自行车。',
+        ans: 'necessity',
+        explain: '卡在第二关「必要性（最小侵害原则）」！明明可以采取“夜间定点查扣改装车 + 源头查处改装店”等精准温和手段，却搞“一刀切”误伤百万无辜市民！'
+      },
+      {
+        tab: '查封无关店铺',
+        title: '案例 3：为治理大气污染，强制要求室内静音图书馆每周停业三天',
+        body: '当地空气质量未达标，某乡镇下发文件要求辖区内包括纯室内书店、图书馆在内的所有场所轮流停业减排。',
+        ans: 'suitability',
+        explain: '直接卡死在第一关「适当性原则」！图书馆几乎不排放大气污染物，让它关门对改善空气质量毫无帮助，手段与目的之间缺乏因果关联。'
+      },
+      {
+        tab: '酒驾暂扣驾照',
+        title: '案例 4：对初犯饮酒驾驶者暂扣驾照 6 个月 + 罚款 1500 元 + 强制安全学习',
+        body: '司机血液酒精超标上路，交警依法当场约束至酒醒、暂扣驾照半年并安排交通安全课程，未采取终身禁驾或没收车辆等极端措施。',
+        ans: 'pass',
+        explain: '三关全过，完美符合比例原则！既有效制止公共安全风险（适当），又没有过度剥夺生计（必要），且处罚力度与公共危险程度高度匹配（均衡）。'
+      }
+    ];
+
+    let cur = 0;
+    const answers = {};
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const tabs = document.getElementById('tabsRow');
+      tabs.innerHTML = '';
+      cases.forEach((c, i) => {
+        const b = document.createElement('button');
+        b.className = 'toy-btn' + (i === cur ? ' primary' : '');
+        const mark = answers[i] ? (answers[i] === c.ans ? '✅ ' : '❌ ') : '';
+        b.textContent = mark + c.tab;
+        b.addEventListener('click', () => { cur = i; render(); });
+        tabs.appendChild(b);
+      });
+
+      const c = cases[cur];
+      document.getElementById('cTitle').textContent = c.title;
+      document.getElementById('cBody').textContent = c.body;
+
+      const picked = answers[cur];
+      document.querySelectorAll('.gate-btn').forEach(btn => {
+        btn.classList.remove('ok', 'bad');
+        if (picked) {
+          if (btn.dataset.g === c.ans) btn.classList.add('ok');
+          else if (btn.dataset.g === picked) btn.classList.add('bad');
+        }
+      });
+
+      document.getElementById('progVal').textContent = `${Object.keys(answers).length} / ${cases.length}`;
+      const aha = document.getElementById('ahaBox');
+      if (!picked) {
+        aha.innerHTML = `<strong>💡 审查提示：</strong>用“适当性 → 必要性 → 狭义比例性”三道尺子量一量本案执法措施！`;
+      } else {
+        const ok = picked === c.ans;
+        aha.innerHTML = `<strong>${ok ? '🎯 审查精准命中！' : '🧩 审查角度偏差：'}</strong>${c.explain}`;
+      }
+    }
+
+    document.querySelectorAll('.gate-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        answers[cur] = btn.dataset.g;
+        markDone('完成了三阶比例原则行政审查');
+        render();
+      });
+    });
+
+    render();
   </script>
 </body>
 </html>

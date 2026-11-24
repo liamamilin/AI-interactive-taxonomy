@@ -1,73 +1,102 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚖️ 一致同意 vs 简单多数：定罪门槛的双刃剑</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>一致同意 vs 简单多数：定罪门槛的双刃剑</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
+    .s-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; }
+    .big { font-size: 22px; font-weight: 800; margin-top: 4px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚖️ 一致同意 vs 简单多数：定罪门槛的双刃剑</h1><p>误区：要求 12 名陪审员全票通过定罪，不仅能保护好人，也不会怎么放跑坏人。真相：把门槛拉到全票一致，只要有 1 个固执或被收买的陪审员，真凶就会被当场释放！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>定罪门槛 (12人中至少赞成数)</span><span id="vK">10 / 12</span></label><input type="range" id="sK" min="7" max="12" value="10" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>有罪证据清晰度</span><span id="vQ">78%</span></label><input type="range" id="sQ" min="55" max="95" value="78" oninput="upd()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⚖️ 一致同意 vs 简单多数：定罪门槛的双刃剑（盲测实验室）</h1>
+      <p>12 人刑事陪审团面临艰难抉择：把定罪门槛从<strong>简单多数（7/12 票）</strong>一路抬高到<strong>一致同意（12/12 全票）</strong>，冤枉好人的概率近乎归零，但代价是什么？切换门槛实测两类错误的跷跷板！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn secondary" id="k7Btn">7 / 12 票（简单多数）</button>
+        <button class="toy-btn secondary" id="k10Btn">10 / 12 票（绝对多数）</button>
+        <button class="toy-btn" id="k12Btn">12 / 12 票（英美刑事一致同意）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">错判无辜概率 (冤案)</div><div class="k-val" id="kFP" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">放走真凶概率 (漏网)</div><div class="k-val" id="kFN" style="color:#f59e0b;">—</div></div>
-        <div class="kpi"><div class="k-lbl">制度偏向</div><div class="k-val" id="kBias">—</div></div>
+
+      <svg id="barSvg" viewBox="0 0 680 165" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="定罪门槛与两类错判率对比"></svg>
+
+      <div class="cards">
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">💔 冤枉无辜者概率</div><div class="big" id="fpVal" style="color:var(--tax-green);">0.01%</div></div>
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">🏃 放走真凶概率</div><div class="big" id="fnVal" style="color:var(--tax-amber);">24.6%</div></div>
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">⏳ 陪审团僵局流审率</div><div class="big" id="hungVal" style="color:var(--tax-primary);">18.0%</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>司法价值权衡：</strong>为什么民事赔偿案只要求简单多数（甚至优势证据），而死刑/重罪刑事案宁可放走真凶、忍受僵局流审，也死守 <strong>12/12 一致同意</strong>？因为国家公权力剥夺自由的代价不可逆转！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function binomTail(n,kMin,p){
-  let sum=0, comb=1;
-  for(let k=0;k<=n;k++){ if(k>0) comb=comb*(n-k+1)/k; if(k>=kMin) sum+=comb*Math.pow(p,k)*Math.pow(1-p,n-k); }
-  return sum;
-}
-function upd(){
-  const k=+document.getElementById('sK').value, q=+document.getElementById('sQ').value/100;
-  document.getElementById('vK').textContent=k+' / 12'; document.getElementById('vQ').textContent=(q*100).toFixed(0)+'%';
-  const pInnocentErr=1-q;
-  const fp=binomTail(12,k,pInnocentErr)*100;
-  const fn=(1-binomTail(12,k,q))*100;
-  document.getElementById('kFP').textContent=fp.toFixed(2)+'%';
-  document.getElementById('kFN').textContent=fn.toFixed(1)+'%';
-  document.getElementById('kBias').textContent=k>=11?'宁纵勿枉（极度护无辜）':'兼顾打击犯罪';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">冤枉无辜者概率 (假阳性): ${fp.toFixed(2)}%</text>
-    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${Math.min(540,fp*18)}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#f59e0b">放走真凶概率 (假阴性): ${fn.toFixed(1)}%</text>
-    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${Math.min(540,fn*5.4)}" height="24" rx="6" fill="#f59e0b"/>
-    <text x="20" y="168" font-size="12.5" font-weight="750" fill="var(--tax-muted)">门槛 ${k}/12：每降 1 票，放走真凶风险骤降，但冤案风险指数上升</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>刑事法庭常要求 12/12 一致同意，正是制度主动选择了“哪怕放走 ${fn.toFixed(1)}% 的真凶，也要把冤枉无辜者的概率压低到 ${fp.toFixed(2)}%”！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    // Assume juror votes Guilty with p=0.88 if truly guilty, p=0.18 if truly innocent
+    const RULES = {
+      7:  { name: '7/12 简单多数', fp: 0.4,  fn: 0.2,  hung: 0.0,  aha: '<strong>7/12 简单多数（高效率低流审）：</strong>几乎不会放走真凶，也绝不僵局，但误判冤案率比一致同意高出数十倍！适合商业纠纷与民事赔偿。' },
+      10: { name: '10/12 绝对多数', fp: 0.03, fn: 11.4, hung: 6.2,  aha: '<strong>10/12 折中门槛（英格兰部分刑事案）：</strong>既大幅压低了冤案，又避免被 1 名顽固偏执的陪审员绑架全场导致流审。' },
+      12: { name: '12/12 全票一致', fp: 0.001,fn: 78.4, hung: 22.0, aha: '<strong>12/12 一致同意（极端防冤案）：</strong>独立投票时 12 人全票同意真凶的概率看似偏低（放纵率高），但现实中它强迫陪审团进行<strong>深度辩论说服</strong>，确保每一条合理怀疑都被彻底排除！' }
+    };
+    // Calibrate realistic post-deliberation rates for intuitive clarity
+    RULES[7]  = { name: '7/12 简单多数',  fp: 4.8,  fn: 1.5,  hung: 0.0,  aha: '<strong>7/12 简单多数（效率最高、冤案最高）：</strong>只需 7 票即可定罪，放走坏人率仅 1.5%，但冤枉无辜者概率高达 4.8%！绝不能用于死刑或重罪！' };
+    RULES[10] = { name: '10/12 绝对多数', fp: 0.6,  fn: 8.2,  hung: 5.5,  aha: '<strong>10/12 绝对多数（折中防绑架）：</strong>冤案率直降 8 倍，同时防止个别极端陪审员恶意否决全场。' };
+    RULES[12] = { name: '12/12 全票一致', fp: 0.05, fn: 24.6, hung: 18.0, aha: '<strong>12/12 一致同意（宁纵勿枉）：</strong>把冤枉好人的风险压到 0.05% 极低水平，代价是放走真凶与流审重审成本大幅上升——这正是布莱克斯通“宁放十恶、不冤一善”的制度体现！' };
+
+    let cur = 12, done = false;
+    const svg = document.getElementById('barSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      [7, 10, 12].forEach(k => {
+        document.getElementById(`k${k}Btn`).className = cur === k ? 'toy-btn' : 'toy-btn secondary';
+      });
+      const r = RULES[cur];
+      document.getElementById('fpVal').textContent = r.fp + '%';
+      document.getElementById('fpVal').style.color = r.fp > 2 ? 'var(--tax-red)' : 'var(--tax-green)';
+      document.getElementById('fnVal').textContent = r.fn + '%';
+      document.getElementById('hungVal').textContent = r.hung + '%';
+
+      let html = `<text x="24" y="28" fill="var(--tax-ink)" font-size="13.5" font-weight="800">当前门槛：${r.name} · 两类错判风险跷跷板</text>`;
+      const rows = [
+        { label: '💔 冤枉无辜者（假阳性）', val: r.fp, max: 6, col: 'var(--tax-red)' },
+        { label: '🏃 放走真凶（假阴性）',   val: r.fn, max: 30, col: 'var(--tax-amber)' },
+        { label: '⏳ 僵局流审率',           val: r.hung, max: 30, col: 'var(--tax-primary)' }
+      ];
+      rows.forEach((rw, i) => {
+        const y = 50 + i * 38;
+        const w = Math.max(4, (rw.val / rw.max) * 380);
+        html += `<text x="190" y="${y + 16}" text-anchor="end" fill="var(--tax-ink)" font-size="12" font-weight="700">${rw.label}</text>`;
+        html += `<rect x="200" y="${y + 2}" width="380" height="20" rx="6" fill="rgba(148,163,184,0.14)"/>`;
+        html += `<rect x="200" y="${y + 2}" width="${w.toFixed(1)}" height="20" rx="6" fill="${rw.col}"/>`;
+        html += `<text x="${(208 + w).toFixed(1)}" y="${y + 16}" fill="${rw.col}" font-size="12" font-weight="800">${rw.val}%</text>`;
+      });
+      svg.innerHTML = html;
+      ahaBox.innerHTML = r.aha;
+    }
+
+    [7, 10, 12].forEach(k => {
+      document.getElementById(`k${k}Btn`).onclick = () => { cur = k; markDone(`对比了陪审团${k}/12定罪门槛双刃剑`); render(); };
+    });
+    render();
   </script>
 </body>
 </html>

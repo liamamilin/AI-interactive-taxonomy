@@ -1,65 +1,123 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏛️ 程序正义 vs 实体结果：司法公信力双驱动</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>程序正义 vs 实体结果：司法公信力双驱动</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .case-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 680px) { .case-grid { grid-template-columns: 1fr; } }
+    .c-card { background: var(--tax-surface-alt); border: 2px solid var(--tax-border); border-radius: 12px; padding: 14px; cursor: pointer; text-align: left; transition: border-color .2s, background .2s; }
+    .c-card.active { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .c-head { font-weight: 800; font-size: 14px; color: var(--tax-ink); margin-bottom: 6px; }
+    .c-desc { font-size: 12.5px; color: var(--tax-muted); line-height: 1.5; }
+    .bar-card { margin-top: 14px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .m-row { margin-bottom: 10px; }
+    .m-lbl { display: flex; justify-content: space-between; font-size: 13px; color: var(--tax-ink); font-weight: 700; margin-bottom: 4px; }
+    .m-bg { height: 14px; border-radius: 99px; background: var(--tax-surface); border: 1px solid var(--tax-border); overflow: hidden; }
+    .m-fg { height: 100%; transition: width .35s ease; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🏛️ 程序正义 vs 实体结果：司法公信力双驱动</h1><p>误区：老百姓只在乎最后判得重不重、赔得多不多，走过场快点判完就行。真相：心理学与法学实验反复证明，即使输了官司，只要程序公正公开、充分听证，民众对法律的服从度依然极高！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>程序公开透明与听证尊重度</span><span id="vProc">80%</span></label><input type="range" id="sProc" min="10" max="100" value="80" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>实体结果符合个人预期度</span><span id="vOut">35%</span></label><input type="range" id="sOut" min="10" max="100" value="35" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🏛️ 程序正义 vs 实体结果：司法公信力双驱动</h1>
+      <p>耶鲁法学家汤姆·泰勒（Tom Tyler）对数千名当事人跟踪调查后发现了一个反直觉真相：<strong>哪怕输了官司，只要程序公正透明，人们依然愿意服判守法；反之，黑箱操作哪怕判对了也会摧毁信任！</strong>点击 4 种真实情景对比公信力数据。</p>
+    </header>
+
+    <div class="case-grid" id="caseGrid"></div>
+
+    <div class="bar-card">
+      <div class="m-row">
+        <div class="m-lbl"><span>当场短期满意度</span><strong id="satVal">--</strong></div>
+        <div class="m-bg"><div class="m-fg" id="satBar" style="width:0%;background:var(--tax-primary);"></div></div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">司法公信力指数</div><div class="k-val" id="kTr" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">长期自觉守法意愿</div><div class="k-val" id="kOb">—</div></div>
+      <div class="m-row">
+        <div class="m-lbl"><span>自愿服判率（不上诉/不闹访）</span><strong id="compVal">--</strong></div>
+        <div class="m-bg"><div class="m-fg" id="compBar" style="width:0%;background:var(--tax-green);"></div></div>
+      </div>
+      <div class="m-row" style="margin-bottom:0;">
+        <div class="m-lbl"><span>未来 5 年对法治系统的信任度</span><strong id="trustVal">--</strong></div>
+        <div class="m-bg"><div class="m-fg" id="trustBar" style="width:0%;background:var(--tax-amber);"></div></div>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 情景对比提示：</strong>重点对比「情景 B（败诉但程序公正）」与「情景 C（胜诉但程序黑箱）」，看看哪一种对法治系统的长期信任更高！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const proc=+document.getElementById('sProc').value, out=+document.getElementById('sOut').value;
-  document.getElementById('vProc').textContent=proc+'%'; document.getElementById('vOut').textContent=out+'%';
-  const trust=Math.round(proc*0.68 + out*0.32);
-  const obey=Math.round(proc*0.75 + out*0.25);
-  document.getElementById('kTr').textContent=trust+' 分';
-  document.getElementById('kOb').textContent=obey+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">程序正义贡献权重 (68%): ${Math.round(proc*0.68)} 分</text>
-    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${proc*0.68*5.4}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#10b981">总公信力与自觉守法率: ${trust} 分 / ${obey}%</text>
-    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${trust*5.4}" height="24" rx="6" fill="#10b981"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">看得见的正义才能让败诉方也承认裁决合法性</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕实体结果只有 ${out}% 符合某一方的利益，只要程序正义达到 ${proc}%，社会整体对法律的信任度依然高达 <strong>${trust} 分</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const scenarios = [
+      {
+        id: 'A',
+        title: '🌟 情景 A：胜诉 + 程序透明公正',
+        desc: '法官耐心听完双方陈述，逐条展示证据链与法条依据，最终你赢得官司。',
+        sat: 94, comp: 96, trust: 92,
+        insight: '黄金理想象限：实体正义与程序正义双丰收，既解决了个案纠纷，又强化了全社会的规则信仰。'
+      },
+      {
+        id: 'B',
+        title: '⚖️ 情景 B：败诉 + 程序公开听证',
+        desc: '虽然你最终败诉被罚 500 元，但听证官完整听取了你的申辩，中立解释了违章录像和裁量标准，态度尊重。',
+        sat: 54, comp: 82, trust: 81,
+        insight: '泰勒定律的核心奇迹！虽然实体结果对你不利（满意度仅 54%），但高达 82% 的人依然心服口服、不闹不缠，且对法治的长期信任度高达 81%——因为“看得见的正义”让人觉得输得明白！'
+      },
+      {
+        id: 'C',
+        title: '🕶️ 情景 C：胜诉 + 程序粗暴黑箱',
+        desc: '虽然最终结果偏袒了你，但裁决全程不公开理由、不让对方说话，全靠熟人打招呼走后门敲定。',
+        sat: 76, comp: 58, trust: 34,
+        insight: '惊人的信任塌方！哪怕你这次占了便宜，心里也清楚“下次对手关系更硬时倒霉的就是我”。黑箱胜诉把长期法治信任度直接砸穿至 34%！'
+      },
+      {
+        id: 'D',
+        title: '🔥 情景 D：败诉 + 程序敷衍霸道',
+        desc: '你不被允许完整发言，裁决书只有一句“依法驳回”，没有任何说理与申诉指引。',
+        sat: 12, comp: 18, trust: 14,
+        insight: '最危险的冲突温床：程序傲慢会把普通的利益分歧激化为对整个制度的敌意，服判率跌至 18%，大幅推高社会治理成本。'
+      }
+    ];
+
+    let pickedId = 'B';
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const grid = document.getElementById('caseGrid');
+      grid.innerHTML = '';
+      scenarios.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'c-card' + (s.id === pickedId ? ' active' : '');
+        btn.innerHTML = `<div class="c-head">${s.title}</div><div class="c-desc">${s.desc}</div>`;
+        btn.addEventListener('click', () => {
+          pickedId = s.id;
+          markDone('对比了程序正义与实体结果情景');
+          render();
+        });
+        grid.appendChild(btn);
+      });
+
+      const cur = scenarios.find(s => s.id === pickedId);
+      document.getElementById('satVal').textContent = cur.sat + '%';
+      document.getElementById('compVal').textContent = cur.comp + '%';
+      document.getElementById('trustVal').textContent = cur.trust + '%';
+      document.getElementById('satBar').style.width = cur.sat + '%';
+      document.getElementById('compBar').style.width = cur.comp + '%';
+      document.getElementById('trustBar').style.width = cur.trust + '%';
+
+      document.getElementById('ahaBox').innerHTML = `<strong>🏛️ 情景 ${cur.id} 深度解析：</strong>${cur.insight}`;
+    }
+
+    render();
   </script>
 </body>
 </html>

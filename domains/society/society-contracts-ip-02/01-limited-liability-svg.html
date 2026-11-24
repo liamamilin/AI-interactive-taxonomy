@@ -1,65 +1,145 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🚀 无限责任 vs 有限责任创业意愿对比（SVG）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>无限责任 vs 有限责任创业意愿对比</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .race-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 700px) { .race-grid { grid-template-columns: 1fr; } }
+    .lane { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .l-head { display: flex; justify-content: space-between; font-weight: 800; color: var(--tax-ink); margin-bottom: 10px; font-size: 14px; }
+    .bar-row { margin-bottom: 10px; }
+    .bar-lbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--tax-muted); margin-bottom: 4px; }
+    .bar-bg { height: 14px; border-radius: 99px; background: var(--tax-surface); border: 1px solid var(--tax-border); overflow: hidden; }
+    .bar-fg { height: 100%; transition: width .35s ease; }
+    .log { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--tax-muted); min-height: 76px; line-height: 1.5; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🚀 无限责任 vs 有限责任创业意愿对比（SVG）</h1><p>误区：有限责任制度只是为了保护资本家赖账，对社会发展有害无益。真相：如果投 10 万块买股票失败了还要连累你赔光全部身家，就再也没有人敢投资修铁路、造火箭和做芯片了！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>项目成功概率</span><span id="vP">25%</span></label><input type="range" id="sP" min="5" max="60" value="25" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>失败时超出出资的连带债务</span><span id="vDebt">300 万元</span></label><input type="range" id="sDebt" min="50" max="600" step="50" value="300" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🚀 无限责任 vs 有限责任创业意愿对比</h1>
+      <p>有一批高科技项目：<strong>30% 概率暴赚 5 倍，70% 概率研发失败破产</strong>（期望回报率极高！）。按下开跑，对比在「无限连带责任（赔光全家房产）」与「有限责任制（亏完出资额封顶）」下，5 年后两个经济体的创新产出差距！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="runBtn">🏁 开启 5 年创业生态竞速</button>
+        <button class="toy-btn" id="resetBtn">重置赛道</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">个人投 100 万无限责任期望</div><div class="k-val" id="kUnl">—</div></div>
-        <div class="kpi"><div class="k-lbl">有限责任期望 (上限亏100万)</div><div class="k-val" id="kLim" style="color:#10b981;">—</div></div>
+      <span style="font-size:13px;color:var(--tax-muted);">演化年份：<strong id="yrVal" style="color:var(--tax-ink);">第 0 / 5 年</strong></span>
+    </div>
+
+    <div class="race-grid">
+      <div class="lane">
+        <div class="l-head"><span>⛓️ 赛道 A：无限连带责任</span><span style="color:var(--tax-red);font-size:12px;">失败连累全家房产</span></div>
+        <div class="bar-row">
+          <div class="bar-lbl"><span>敢于立项的高新企业数</span><strong id="uFirms">0 家</strong></div>
+          <div class="bar-bg"><div class="bar-fg" id="uFirmsBar" style="width:0%;background:var(--tax-amber);"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-lbl"><span>累计社会创新 GDP 增量</span><strong id="uGdp">0 亿</strong></div>
+          <div class="bar-bg"><div class="bar-fg" id="uGdpBar" style="width:0%;background:var(--tax-red);"></div></div>
+        </div>
+        <div class="log" id="uLog">等待开跑...</div>
+      </div>
+
+      <div class="lane">
+        <div class="l-head"><span>🛡️ 赛道 B：现代有限责任制</span><span style="color:var(--tax-green);font-size:12px;">风险严格隔离于出资额</span></div>
+        <div class="bar-row">
+          <div class="bar-lbl"><span>敢于立项的高新企业数</span><strong id="lFirms">0 家</strong></div>
+          <div class="bar-bg"><div class="bar-fg" id="lFirmsBar" style="width:0%;background:var(--tax-primary);"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-lbl"><span>累计社会创新 GDP 增量</span><strong id="lGdp">0 亿</strong></div>
+          <div class="bar-bg"><div class="bar-fg" id="lGdpBar" style="width:0%;background:var(--tax-green);"></div></div>
+        </div>
+        <div class="log" id="lLog">等待开跑...</div>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 现代商业基石：</strong>如果投资 10 万元入股陌生人的火车公司，公司倒闭却可能拍卖你的祖宅，还有人敢做天使投资吗？点击开跑见证有限责任如何撬动资本市场！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const p=+document.getElementById('sP').value/100, debt=+document.getElementById('sDebt').value;
-  document.getElementById('vP').textContent=(p*100).toFixed(0)+'%'; document.getElementById('vDebt').textContent=debt+' 万元';
-  const winPay=450;
-  const eUnl=Math.round(p*winPay - (1-p)*(100+debt));
-  const eLim=Math.round(p*winPay - (1-p)*100);
-  document.getElementById('kUnl').textContent=(eUnl>0?'+':'')+eUnl+' 万';
-  document.getElementById('kUnl').style.color=eUnl>0?'#0284c7':'#ef4444';
-  document.getElementById('kLim').textContent=(eLim>0?'+':'')+eLim+' 万';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="36" font-size="13" font-weight="800" fill="${eUnl>0?'#0284c7':'#ef4444'}">无限连带责任期望收益: ${eUnl} 万元 ${eUnl<=0?'(不敢投!)':''}</text>
-    <rect x="20" y="46" width="${Math.max(10,Math.min(540,eUnl+250))}" height="24" rx="6" fill="${eUnl>0?'#0284c7':'#ef4444'}"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#10b981">有限责任公司期望收益: +${eLim} 万元 (最高只亏本金 100 万)</text>
-    <rect x="20" y="112" width="${Math.max(10,Math.min(540,eLim+250))}" height="24" rx="6" fill="#10b981"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">风险隔离让“失败成本封顶、成功收益不封顶”，资本市场才得以诞生</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>同样一个好项目，在无限责任下期望值暴跌到 <strong>${eUnl} 万</strong> 没人敢碰；加上“有限责任”防火墙后，投资者立刻敢于支持高风险创新！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const years = [
+      { uF: 3, uG: 4, uM: '第1年：绝大多数中产怕连累家人房产，只敢存银行买地，仅 3 家小作坊开工。',
+        lF: 20, lG: 18, lM: '第1年：风险锁死在出资额内！20 支硬科技团队迅速融到天使轮启动研发。' },
+      { uF: 5, uG: 9, uM: '第2年：1 家作坊研发失败，老板全家破产背债，彻底吓退观望的外部投资人。',
+        lF: 44, lG: 48, lM: '第2年：虽有 12 家失败清算，但投资人分散下注 10 家，凭 3 家成功就赚回双倍！' },
+      { uF: 7, uG: 15, uM: '第3年：外部融资几乎断绝，只能靠家族自有资金缓慢滚雪球。',
+        lF: 72, lG: 105, lM: '第3年：陌生人放心购买公开股票，现代风投（VC）与资本市场全面起飞！' },
+      { uF: 9, uG: 22, uM: '第4年：无一家企业敢碰需要亿级投入的芯片、航运或新药研发。',
+        lF: 105, lG: 190, lM: '第4年：首次失败的创业者未被打入人生谷底，带着经验二次创业诞生独角兽！' },
+      { uF: 11, uG: 30, uM: '第5年结局：累计仅 11 家低风险作坊，社会 GDP 增量 30 亿，技术停滞。',
+        lF: 140, lG: 310, lM: '第5年结局：孵化 140 家创新企业，GDP 增量暴涨至 310 亿（超过对手 10 倍）！' }
+    ];
+
+    let yr = 0, timer = null, interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      document.getElementById('yrVal').textContent = `第 ${yr} / 5 年`;
+      if (yr === 0) {
+        ['uFirms', 'lFirms'].forEach(id => document.getElementById(id).textContent = '0 家');
+        ['uGdp', 'lGdp'].forEach(id => document.getElementById(id).textContent = '0 亿');
+        ['uFirmsBar', 'lFirmsBar', 'uGdpBar', 'lGdpBar'].forEach(id => document.getElementById(id).style.width = '0%');
+        document.getElementById('uLog').textContent = '等待开跑...';
+        document.getElementById('lLog').textContent = '等待开跑...';
+        return;
+      }
+      const d = years[yr - 1];
+      document.getElementById('uFirms').textContent = d.uF + ' 家';
+      document.getElementById('uGdp').textContent = d.uG + ' 亿';
+      document.getElementById('lFirms').textContent = d.lF + ' 家';
+      document.getElementById('lGdp').textContent = d.lG + ' 亿';
+
+      document.getElementById('uFirmsBar').style.width = (d.uF / 150 * 100) + '%';
+      document.getElementById('uGdpBar').style.width = (d.uG / 320 * 100) + '%';
+      document.getElementById('lFirmsBar').style.width = (d.lF / 150 * 100) + '%';
+      document.getElementById('lGdpBar').style.width = (d.lG / 320 * 100) + '%';
+
+      document.getElementById('uLog').innerHTML = years.slice(0, yr).slice(-2).map(x => `<div>• ${x.uM}</div>`).join('');
+      document.getElementById('lLog').innerHTML = years.slice(0, yr).slice(-2).map(x => `<div>• ${x.lM}</div>`).join('');
+
+      const aha = document.getElementById('ahaBox');
+      if (yr < 5) {
+        aha.innerHTML = `<strong>🏃 第 ${yr} 年竞速中：</strong>有限责任让投资人可以把风险装进“防水隔舱”里——单个项目沉没不会拉沉整艘家庭资产之船！`;
+      } else {
+        aha.innerHTML = `<strong>🏆 有限责任 10 倍完胜（310 亿 vs 30 亿）！</strong>哥伦比亚大学校长巴特勒曾说：“有限责任公司是现代最伟大的单项发明，连蒸汽机与电力若没有它，也会大为逊色。”它让陌生人敢于共同集资冒险，催生了整个现代股票与风投文明。`;
+      }
+    }
+
+    document.getElementById('runBtn').addEventListener('click', () => {
+      markDone('运行了有限责任与无限责任创业竞速');
+      if (yr >= 5) yr = 0;
+      if (timer) clearInterval(timer);
+      timer = setInterval(() => {
+        yr++;
+        render();
+        if (yr >= 5) { clearInterval(timer); timer = null; }
+      }, 750);
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (timer) { clearInterval(timer); timer = null; }
+      yr = 0;
+      markDone('重置了有限责任创业竞速');
+      render();
+    });
+
+    render();
   </script>
 </body>
 </html>

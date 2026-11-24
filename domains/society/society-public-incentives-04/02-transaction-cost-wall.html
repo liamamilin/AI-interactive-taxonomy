@@ -1,64 +1,101 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧱 交易成本高墙：为什么科斯定理在现实会失灵？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>交易成本高墙：为什么科斯定理在现实会失灵？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+    .m-card { padding: 10px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; }
+    .m-val { font-size: 19px; font-weight: 800; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🧱 交易成本高墙：为什么科斯定理在现实会失灵？</h1><p>误区：现实中只要把空气产权分给市民，市民自然会和工厂谈判解决问题。真相：10 万个市民找工厂谈判的组织成本高达数千万元，交易成本高墙直接堵死了合作！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>需协调的利益相关方人数 N</span><span id="vN">15 人</span></label><input type="range" id="sN" min="2" max="50" value="15" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>单人谈判沟通摩擦成本</span><span id="vF">12 元</span></label><input type="range" id="sF" min="2" max="25" value="12" oninput="upd()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🧱 交易成本高墙：科斯定理何时在现实中失灵？（模拟器）</h1>
+      <p>工厂装一台除尘器只需 <strong>¥50,000</strong>，能帮下风口居民省下 <strong>¥120,000</strong> 健康损失（净赚 ¥70,000！）。但拖动下方「受影响居民人数」，看人数一多<strong>组织谈判 + 钉子户扯皮的交易成本</strong>如何一举撞毁科斯谈判！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="ctrl-box">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>👥 需要签字谈判的受影响户数 N</span>
+          <strong id="nVal" style="color:var(--tax-primary);">2 户（面对面喝茶谈妥）</strong>
+        </div>
+        <input type="range" id="nRange" min="1" max="500" value="2" style="width:100%;" />
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">潜在合作总收益</div><div class="k-val">300 元</div></div>
-        <div class="kpi"><div class="k-lbl">总交易成本</div><div class="k-val" id="kTC" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">能否达成协议</div><div class="k-val" id="kDeal">—</div></div>
+
+      <svg id="wallSvg" viewBox="0 0 680 165" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="交易成本高墙与合作红利对比"></svg>
+
+      <div class="metrics">
+        <div class="m-card"><div style="font-size:11.5px;color:var(--tax-muted);">合作净红利蛋糕</div><div class="m-val" style="color:var(--tax-green);">¥70,000</div></div>
+        <div class="m-card"><div style="font-size:11.5px;color:var(--tax-muted);">组织谈判+律师交易成本</div><div class="m-val" id="tcVal" style="color:var(--tax-primary);">¥1,200</div></div>
+        <div class="m-card"><div style="font-size:11.5px;color:var(--tax-muted);">私下科斯谈判结果</div><div class="m-val" id="resVal" style="font-size:15px;color:var(--tax-green);">✅ 顺利成交</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>科斯的真实遗言：</strong>科斯提出科斯定理恰恰是为了告诉世人——<strong>现实世界的交易成本绝不为零</strong>！把户数拉到 <strong>150 户以上</strong>，看交易成本吞噬全部红利，此时法律界定产权与政府环保税就变得至关重要！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const n=+document.getElementById('sN').value, f=+document.getElementById('sF').value;
-  document.getElementById('vN').textContent=n+' 人'; document.getElementById('vF').textContent=f+' 元';
-  const tc=Math.round(n*f*1.4), deal=tc<300;
-  document.getElementById('kTC').textContent=tc+' 元';
-  document.getElementById('kDeal').textContent=deal?'可以谈成':'谈判流产';
-  document.getElementById('kDeal').style.color=deal?'#10b981':'#ef4444';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#10b981">合作改善总蛋糕: 300 元</text>
-    <rect x="20" y="44" width="300" height="26" rx="6" fill="#10b981"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#ef4444">交易与协调成本 (${n}方): ${tc} 元</text>
-    <rect x="20" y="112" width="${Math.min(540,tc)}" height="26" rx="6" fill="#ef4444"/>
-    <text x="20" y="168" font-size="13" font-weight="800" fill="${deal?'#10b981':'#ef4444'}">${deal?'净剩余 +'+(300-tc)+' 元，科斯谈判生效':'交易成本吞噬了全部蛋糕，法律必须直接判给高效方！'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>科斯定理真正的下半句是：<strong>现实中交易成本永远不为零</strong>！一旦参与人数多到交易成本 (${tc} 元) 超过合作收益 (300 元)，法律把初始产权判给谁就决定了一切！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const nRange = document.getElementById('nRange');
+    const svg = document.getElementById('wallSvg');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const n = Number(nRange.value);
+      // Transaction cost scales super-linearly with coordination & holdout friction
+      const tc = Math.round(500 + n * 420 + Math.pow(n, 1.32) * 35);
+      const surplus = 70000;
+      const failed = tc >= surplus;
+
+      document.getElementById('nVal').textContent = n <= 10 ? `${n} 户（邻里直接谈妥）` : (n <= 120 ? `${n} 户（需请律师协调）` : `${n} 户（严重搭便车与钉子户！）`);
+      document.getElementById('tcVal').textContent = `¥${tc.toLocaleString()}`;
+      document.getElementById('tcVal').style.color = failed ? 'var(--tax-red)' : 'var(--tax-primary)';
+      document.getElementById('resVal').textContent = failed ? '💥 谈判彻底流产！' : '✅ 顺利私下成交';
+      document.getElementById('resVal').style.color = failed ? 'var(--tax-red)' : 'var(--tax-green)';
+
+      const maxV = Math.max(140000, tc * 1.05);
+      const wSur = (surplus / maxV) * 480;
+      const wTc  = Math.min(480, (tc / maxV) * 480);
+
+      let html = '';
+      html += `<text x="24" y="28" fill="var(--tax-ink)" font-size="13" font-weight="800">合作红利 vs 交易成本高墙（${failed ? '💥 交易成本已压垮合作红利！' : '✅ 红利大于交易成本，市场可自发解决'}）</text>`;
+
+      html += `<text x="24" y="68" fill="var(--tax-green)" font-size="12" font-weight="700">💰 合作净红利</text>`;
+      html += `<rect x="130" y="52" width="480" height="24" rx="7" fill="rgba(148,163,184,0.14)"/>`;
+      html += `<rect x="130" y="52" width="${wSur.toFixed(1)}" height="24" rx="7" fill="var(--tax-green)"/>`;
+      html += `<text x="${(138 + wSur).toFixed(1)}" y="69" fill="var(--tax-green)" font-size="12" font-weight="800">¥70,000</text>`;
+
+      html += `<text x="24" y="114" fill="${failed ? 'var(--tax-red)' : 'var(--tax-amber)'}" font-size="12" font-weight="700">🧱 交易成本</text>`;
+      html += `<rect x="130" y="98" width="480" height="24" rx="7" fill="rgba(148,163,184,0.14)"/>`;
+      html += `<rect x="130" y="98" width="${wTc.toFixed(1)}" height="24" rx="7" fill="${failed ? 'var(--tax-red)' : 'var(--tax-amber)'}"/>`;
+      html += `<text x="${Math.min(540, 138 + wTc).toFixed(1)}" y="115" fill="${failed ? 'var(--tax-red)' : 'var(--tax-amber)'}" font-size="12" font-weight="800">¥${tc.toLocaleString()}</text>`;
+
+      html += `<text x="24" y="150" fill="var(--tax-muted)" font-size="11.5">当交易成本 > ¥70,000 时，私下谈判无利可图，必须由法律直接把权利判给减损成本更低的一方！</text>`;
+      svg.innerHTML = html;
+
+      ahaBox.innerHTML = failed
+        ? `<strong>科斯定理在 ${n} 户下彻底失灵（交易成本 ¥${tc.toLocaleString()} > 红利 ¥70,000）！</strong>让几百户居民凑钱去和化工厂谈判，光收齐签字、防搭便车和请律师的成本就超过除尘器本身！所以现实中<strong>法律的使命就是模拟“零交易成本下本该达成的最优结果”</strong>！`
+        : `<strong>低交易成本区（${n} 户 · 成本仅 ¥${tc.toLocaleString()}）：</strong>两三个邻居喝杯茶就能签好协议，完全不需要政府介入。继续把户数拉大到 120 户以上，见证高墙崩塌！`;
+    }
+
+    nRange.oninput = () => { markDone('拖动谈判户数验证了交易成本高墙'); render(); };
+    render();
   </script>
 </body>
 </html>

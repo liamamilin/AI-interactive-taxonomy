@@ -1,72 +1,204 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔀 有界信任模型：观点何时收敛、何时彻底分裂？</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>有界信任模型：观点何时收敛、何时彻底分裂？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .lanes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 760px) { .lanes { grid-template-columns: 1fr; } }
+    .lane { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 12px; }
+    .lane-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .lane-title { font-weight: 800; font-size: 14px; color: var(--tax-ink); }
+    .badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 700; }
+    .b-red { background: var(--tax-red-soft); color: var(--tax-red); }
+    .b-amber { background: var(--tax-amber-soft); color: var(--tax-amber); }
+    .b-green { background: var(--tax-green-soft); color: var(--tax-green); }
+    .lane-foot { font-size: 12px; color: var(--tax-muted); margin-top: 6px; display: flex; justify-content: space-between; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔀 有界信任模型：观点何时收敛、何时彻底分裂？</h1><p>误区：只要把所有不同观点的人拉到一个广场上自由交流，大家最终一定会越聊越近。真相：人们只愿意听和自己相差不太远的观点（有界信任 ε）；ε 太小时，讨论只会加速分裂成互不搭理的孤岛！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>倾听异见的容忍半径 ε</span><span id="vEps">0.22</span></label><input type="range" id="sEps" min="8" max="45" value="22" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>社交讨论轮次</span><span id="vStep">10 轮</span></label><input type="range" id="sStep" min="2" max="20" value="10" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🔀 有界信任模型：观点何时收敛、何时彻底分裂？</h1>
+      <p>赫格塞尔曼-克劳斯（Hegselmann-Krause）定律：人们只愿意听取与自己观点差距小于「信任半径 ε」的意见。按下发令枪，看三条不同 ε 的赛道谁先达成共识、谁彻底分裂！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="startBtn">🏁 开始三赛道竞演</button>
+        <button class="toy-btn" id="stepBtn">单步推进</button>
+        <button class="toy-btn" id="resetBtn">重置初始分布</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">最终形成派系数量</div><div class="k-val" id="kClus">—</div></div>
-        <div class="kpi"><div class="k-lbl">群体结局</div><div class="k-val" id="kOut">—</div></div>
+      <span style="font-size:13px;color:var(--tax-muted);">当前步数：<strong id="stepVal" style="color:var(--tax-ink);">0 / 15</strong></span>
+    </div>
+
+    <div class="lanes">
+      <div class="lane">
+        <div class="lane-head">
+          <span class="lane-title">赛道 A：狭隘型 (ε = 0.12)</span>
+          <span class="badge b-red" id="tagA">待起跑</span>
+        </div>
+        <svg id="svgA" viewBox="0 0 220 170" style="width:100%;height:auto;display:block;"></svg>
+        <div class="lane-foot"><span>最终观点簇：</span><strong id="clusA">-</strong></div>
+      </div>
+
+      <div class="lane">
+        <div class="lane-head">
+          <span class="lane-title">赛道 B：温和型 (ε = 0.22)</span>
+          <span class="badge b-amber" id="tagB">待起跑</span>
+        </div>
+        <svg id="svgB" viewBox="0 0 220 170" style="width:100%;height:auto;display:block;"></svg>
+        <div class="lane-foot"><span>最终观点簇：</span><strong id="clusB">-</strong></div>
+      </div>
+
+      <div class="lane">
+        <div class="lane-head">
+          <span class="lane-title">赛道 C：开放型 (ε = 0.36)</span>
+          <span class="badge b-green" id="tagC">待起跑</span>
+        </div>
+        <svg id="svgC" viewBox="0 0 220 170" style="width:100%;height:auto;display:block;"></svg>
+        <div class="lane-foot"><span>最终观点簇：</span><strong id="clusC">-</strong></div>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 竞演看点：</strong>三条赛道出发时的 18 个人观点分布完全一模一样（均匀分布在 0 到 1）。点击「开始三赛道竞演」，看看仅仅改变“愿意倾听的容差半径”，结局差异有多大！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const eps=+document.getElementById('sEps').value/100, steps=+document.getElementById('sStep').value;
-  document.getElementById('vEps').textContent=eps.toFixed(2); document.getElementById('vStep').textContent=steps+' 轮';
-  let ops=Array.from({length:16},(_,i)=>i/15);
-  let paths=ops.map(v=>[v]);
-  for(let s=0;s<steps;s++){
-    ops=ops.map(x=>{
-      const nbrs=ops.filter(y=>Math.abs(x-y)<=eps);
-      return nbrs.reduce((a,b)=>a+b,0)/nbrs.length;
+    const N = 18;
+    const MAX_STEPS = 15;
+    const configs = [
+      { key: 'A', eps: 0.12, svgId: 'svgA', tagId: 'tagA', clusId: 'clusA', color: '#ef4444' },
+      { key: 'B', eps: 0.22, svgId: 'svgB', tagId: 'tagB', clusId: 'clusB', color: '#f59e0b' },
+      { key: 'C', eps: 0.36, svgId: 'svgC', tagId: 'tagC', clusId: 'clusC', color: '#10b981' }
+    ];
+
+    let histories = {};
+    let curStep = 0;
+    let timer = null;
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function initRace() {
+      if (timer) { clearInterval(timer); timer = null; }
+      const init = [];
+      for (let i = 0; i < N; i++) {
+        init.push(0.04 + (i / (N - 1)) * 0.92 + (Math.random() - 0.5) * 0.03);
+      }
+      histories = {};
+      configs.forEach(c => { histories[c.key] = [init.slice()]; });
+      curStep = 0;
+      render();
+    }
+
+    function advanceOne() {
+      if (curStep >= MAX_STEPS) {
+        if (timer) { clearInterval(timer); timer = null; }
+        return;
+      }
+      configs.forEach(c => {
+        const prev = histories[c.key][curStep];
+        const next = prev.map(val => {
+          let sum = 0, cnt = 0;
+          for (let j = 0; j < prev.length; j++) {
+            if (Math.abs(prev[j] - val) <= c.eps) { sum += prev[j]; cnt++; }
+          }
+          return sum / cnt;
+        });
+        histories[c.key].push(next);
+      });
+      curStep++;
+      render();
+    }
+
+    function countClusters(arr) {
+      const sorted = arr.slice().sort((a, b) => a - b);
+      let clusters = 1;
+      for (let i = 1; i < sorted.length; i++) {
+        if (sorted[i] - sorted[i - 1] > 0.04) clusters++;
+      }
+      return clusters;
+    }
+
+    function render() {
+      document.getElementById('stepVal').textContent = `${curStep} / ${MAX_STEPS}`;
+      const W = 220, H = 170, pad = 16;
+
+      configs.forEach(c => {
+        const hist = histories[c.key];
+        const latest = hist[hist.length - 1];
+        const clus = countClusters(latest);
+        document.getElementById(c.clusId).textContent = clus + ' 个阵营';
+        const tag = document.getElementById(c.tagId);
+        if (curStep === 0) tag.textContent = '待起跑';
+        else if (clus === 1) tag.textContent = '达成大共识';
+        else if (clus === 2) tag.textContent = '两极分裂';
+        else tag.textContent = `碎片化 (${clus} 派)`;
+
+        let paths = '';
+        for (let i = 0; i < N; i++) {
+          let d = '';
+          for (let s = 0; s < hist.length; s++) {
+            const x = pad + (s / MAX_STEPS) * (W - pad * 2);
+            const y = H - pad - hist[s][i] * (H - pad * 2);
+            d += (s === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+          }
+          const ly = H - pad - latest[i] * (H - pad * 2);
+          const lx = pad + (curStep / MAX_STEPS) * (W - pad * 2);
+          paths += `<path d="${d}" fill="none" stroke="${c.color}" stroke-width="1.6" opacity="0.72"/>`;
+          paths += `<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="2.6" fill="${c.color}"/>`;
+        }
+
+        document.getElementById(c.svgId).innerHTML = `
+          <rect x="${pad}" y="${pad}" width="${W - pad * 2}" height="${H - pad * 2}" fill="var(--tax-surface)" stroke="var(--tax-border)" rx="6"/>
+          <line x1="${pad}" y1="${H / 2}" x2="${W - pad}" y2="${H / 2}" stroke="var(--tax-border)" stroke-dasharray="3,3"/>
+          ${paths}
+        `;
+      });
+
+      const aha = document.getElementById('ahaBox');
+      if (curStep === 0) {
+        aha.innerHTML = `<strong>💡 竞演看点：</strong>三条赛道出发时完全相同。点击「开始三赛道竞演」，看看信任半径 ε 从 0.12 → 0.22 → 0.36 如何决定群体命运！`;
+      } else if (curStep < MAX_STEPS) {
+        aha.innerHTML = `<strong>🏃 演化进行中（第 ${curStep} 轮）：</strong>注意观察赛道 C 的边缘人群如何被中间派逐步“拉回共识”，而赛道 A 的人只听身边极窄范围，迅速锁死成彼此失联的小圈子。`;
+      } else {
+        const cA = countClusters(histories.A[MAX_STEPS]);
+        const cB = countClusters(histories.B[MAX_STEPS]);
+        const cC = countClusters(histories.C[MAX_STEPS]);
+        aha.innerHTML = `<strong>🏁 竞演终点揭晓：</strong>狭隘赛道分裂成 <strong>${cA} 个孤立阵营</strong>，温和赛道收敛为 <strong>${cB} 派</strong>，而开放赛道（ε=0.36）最终汇合成 <strong>${cC} 个统一共识</strong>！一旦信任半径跌破约 0.25 临界线，社会就失去了自我弥合能力。`;
+      }
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      markDone('运行了有界信任模型三赛道竞演');
+      if (curStep >= MAX_STEPS) initRace();
+      if (timer) clearInterval(timer);
+      timer = setInterval(advanceOne, 240);
     });
-    ops.forEach((v,i)=>paths[i].push(v));
-  }
-  const uniq=[];
-  ops.forEach(v=>{ if(!uniq.some(u=>Math.abs(u-v)<0.03)) uniq.push(v); });
-  document.getElementById('kClus').textContent=uniq.length+' 个派系';
-  document.getElementById('kOut').textContent=uniq.length===1?'达成全员共识':(uniq.length===2?'双极对立':'多派系碎裂');
-  let svg='';
-  paths.forEach((p,idx)=>{
-    let pts=p.map((v,t)=>`${35+t/steps*525},${160-v*135}`).join(' ');
-    svg+=`<polyline fill="none" stroke="hsl(${idx*20},75%,48%)" stroke-width="2" opacity="0.8" points="${pts}"/>`;
-  });
-  document.getElementById('svg').innerHTML=svg;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当容忍半径 ε ≥ 0.30 时，人群会神奇地合并成 <strong>1 条共识线</strong>；一旦容忍度缩水到 ${eps.toFixed(2)}，人群就会迅速聚拢并锁死成 <strong>${uniq.length} 个互不相通的派系</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+
+    document.getElementById('stepBtn').addEventListener('click', () => {
+      markDone('单步推进了有界信任演化');
+      if (timer) { clearInterval(timer); timer = null; }
+      advanceOne();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      markDone('重置了有界信任赛道');
+      initRace();
+    });
+
+    initRace();
   </script>
 </body>
 </html>

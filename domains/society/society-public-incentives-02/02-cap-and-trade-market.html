@@ -1,66 +1,96 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎟️ 碳排放权交易：总量控制 vs 一刀切</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>碳排放权交易：总量控制 vs 一刀切</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+    .s-card { padding: 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎟️ 碳排放权交易：总量控制 vs 一刀切</h1><p>误区：环保减排最公平的办法是要求每家工厂减排同样的比例。真相：让减排便宜的工厂多减、再把富余配额卖给减排昂贵的工厂，总环保目标不变，总成本却能暴跌！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>老钢厂减排 1 吨成本</span><span id="vA">90 元</span></label><input type="range" id="sA" min="40" max="150" value="90" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>新电厂减排 1 吨成本</span><span id="vB">25 元</span></label><input type="range" id="sB" min="10" max="60" value="25" oninput="upd()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🎟️ 碳排放权交易（Cap &amp; Trade）：总量控制 vs 一刀切对决</h1>
+      <p>政府要求 A、B 两家工厂合计减排 <strong>100 吨 CO₂</strong>：新厂 A 减排很便宜（<strong>¥20/吨</strong>），老厂 B 改造极贵（<strong>¥80/吨</strong>）。对比「❌ 行政一刀切（各减 50 吨）」与「✅ 允许买卖碳配额」，看全社会如何省下 60% 减排成本！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="flatBtn">❌ 行政一刀切（强制各减 50 吨）</button>
+        <button class="toy-btn secondary" id="tradeBtn">✅ 碳市场交易（A 减 100 吨，卖 50 吨配额给 B）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">各减一半总成本</div><div class="k-val" id="kEq" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">碳交易后总成本</div><div class="k-val" id="kTr" style="color:#10b981;">—</div></div>
-        <div class="kpi"><div class="k-lbl">净省治理成本</div><div class="k-val" id="kSav">—</div></div>
+
+      <svg id="capSvg" viewBox="0 0 680 185" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="碳排放权交易与一刀切成本对决"></svg>
+
+      <div class="cards">
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">🌍 全社会总减排量</div><strong style="font-size:20px;color:var(--tax-green);">严格达标 100 吨 CO₂</strong></div>
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">💰 全社会总减排成本</div><strong id="costVal" style="font-size:22px;color:var(--tax-red);">¥5,000</strong></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>一刀切的低效（总成本 ¥5,000）：</strong>逼着改造成本高达 ¥80/吨的老厂 B 硬减 50 吨，白白花掉 ¥4,000！点击「✅ 碳市场交易」看市场机制如何让两家工厂双赢、全社会直省 ¥3,000！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const cA=+document.getElementById('sA').value, cB=+document.getElementById('sB').value;
-  document.getElementById('vA').textContent=cA+' 元'; document.getElementById('vB').textContent=cB+' 元';
-  const eqCost=50*cA+50*cB, trCost=100*Math.min(cA,cB), sav=eqCost-trCost;
-  document.getElementById('kEq').textContent=eqCost+' 元';
-  document.getElementById('kTr').textContent=trCost+' 元';
-  document.getElementById('kSav').textContent=sav+' 元';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">一刀切各减 50 吨总花费: ${eqCost} 元</text>
-    <rect x="20" y="44" width="540" height="26" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${Math.min(540,eqCost/11000*540)}" height="26" rx="6" fill="#ef4444"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#10b981">碳交易后 (低成本方减 100 吨): ${trCost} 元</text>
-    <rect x="20" y="112" width="540" height="26" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${Math.min(540,trCost/11000*540)}" height="26" rx="6" fill="#10b981"/>
-    <text x="20" y="168" font-size="13" font-weight="800" fill="#0284c7">成交价区间: ${Math.min(cA,cB)} ~ ${Math.max(cA,cB)} 元/吨，双赢省下 ${sav} 元</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>碳排放总量同样减少 100 吨，允许配额交易却凭空省下了 <strong>${sav} 元</strong> 社会资源——市场定价天然把减排任务分配给了成本最低的人！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let trading = false, done = false;
+    const svg = document.getElementById('capSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      document.getElementById('flatBtn').className = !trading ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('tradeBtn').className = trading ? 'toy-btn' : 'toy-btn secondary';
+
+      const costEl = document.getElementById('costVal');
+      costEl.textContent = trading ? '¥2,000（直省 60%！）' : '¥5,000（严重浪费）';
+      costEl.style.color = trading ? 'var(--tax-green)' : 'var(--tax-red)';
+
+      let html = '';
+      // Factory A box
+      html += `<rect x="30" y="34" width="250" height="118" rx="12" fill="rgba(16,185,129,0.14)" stroke="var(--tax-green)" stroke-width="2"/>`;
+      html += `<text x="155" y="60" text-anchor="middle" fill="var(--tax-green)" font-size="14" font-weight="800">🌿 新锐绿厂 A（减排 ¥20/吨）</text>`;
+      html += `<text x="155" y="88" text-anchor="middle" fill="var(--tax-ink)" font-size="13" font-weight="700">${trading ? '实际减排：100 吨（耗资 ¥2,000）' : '实际减排：50 吨（耗资 ¥1,000）'}</text>`;
+      html += `<text x="155" y="114" text-anchor="middle" fill="var(--tax-muted)" font-size="12">${trading ? '卖出 50 吨配额收 ¥2,500 → 净赚 ¥500！' : '虽还有廉价减排空间，但无动力多减'}</text>`;
+
+      // Factory B box
+      html += `<rect x="400" y="34" width="250" height="118" rx="12" fill="rgba(245,158,11,0.14)" stroke="var(--tax-amber)" stroke-width="2"/>`;
+      html += `<text x="525" y="60" text-anchor="middle" fill="var(--tax-amber)" font-size="14" font-weight="800">🏭 传统老厂 B（减排 ¥80/吨）</text>`;
+      html += `<text x="525" y="88" text-anchor="middle" fill="var(--tax-ink)" font-size="13" font-weight="700">${trading ? '实际减排：0 吨（买配额花 ¥2,500）' : '实际减排：50 吨（耗资 ¥4,000！）'}</text>`;
+      html += `<text x="525" y="114" text-anchor="middle" fill="var(--tax-muted)" font-size="12">${trading ? '比硬改造少花 ¥1,500，轻松省钱！' : '被迫天价改造，濒临倒闭'}</text>`;
+
+      // Middle trade arrow
+      if (trading) {
+        html += `<line x1="282" y1="84" x2="398" y2="84" stroke="var(--tax-primary)" stroke-width="3"/>`;
+        html += `<text x="340" y="74" text-anchor="middle" fill="var(--tax-primary)" font-size="11.5" font-weight="800">🎟️ 50 吨碳配额 →</text>`;
+        html += `<text x="340" y="106" text-anchor="middle" fill="var(--tax-green)" font-size="11.5" font-weight="800">← 💰 ¥2,500 (¥50/吨)</text>`;
+      } else {
+        html += `<text x="340" y="96" text-anchor="middle" fill="var(--tax-muted)" font-size="12">🚫 禁止交易</text>`;
+      }
+
+      html += `<text x="340" y="172" text-anchor="middle" fill="${trading ? 'var(--tax-green)' : 'var(--tax-red)'}" font-size="12.5" font-weight="800">${trading ? '🏆 同等减排 100 吨：A 厂净赚 ¥500，B 厂省 ¥1,500，社会总成本直降 60%！' : '❌ 同等减排 100 吨，社会总计烧掉 ¥5,000 真实资源！'}</text>`;
+      svg.innerHTML = html;
+
+      ahaBox.innerHTML = trading
+        ? '<strong>总量控制 + 自由交易（帕累托改进）：</strong>政府只需锁死总排放上限（Cap），把“谁去减排”交给市场交易（Trade）——减排最便宜的工厂自然主动多减并靠卖碳权赚钱！这就是欧盟碳市场与特斯拉靠卖碳积分狂赚数十亿美元的原理！'
+        : '<strong>一刀切的无谓浪费（¥5,000 vs ¥2,000）：</strong>监管部门不可能知道每家工厂真实的边际减排成本，强行平摊任务必然效率极低。点击「✅ 碳市场交易」体验双赢魔力！';
+    }
+
+    document.getElementById('flatBtn').onclick = () => { trading = false; render(); };
+    document.getElementById('tradeBtn').onclick = () => { trading = true; markDone('对比了碳排放权交易与行政一刀切成本对决'); render(); };
+    render();
   </script>
 </body>
 </html>

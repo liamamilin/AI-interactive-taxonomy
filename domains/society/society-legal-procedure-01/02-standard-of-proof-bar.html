@@ -1,70 +1,183 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📏 三级证明标准实验室（民事 vs 行政 vs 刑事）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>三级证明标准实验室（民事 vs 行政 vs 刑事）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .court-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 16px; }
+    .case-badge { display: inline-block; font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 99px; margin-bottom: 8px; }
+    .b-civil { background: var(--tax-primary-soft); color: var(--tax-primary); }
+    .b-admin { background: var(--tax-amber-soft); color: var(--tax-amber); }
+    .b-crim { background: var(--tax-red-soft); color: var(--tax-red); }
+    .meter-wrap { margin: 14px 0; }
+    .meter-bar { height: 22px; background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 99px; position: relative; overflow: hidden; }
+    .meter-fill { height: 100%; background: linear-gradient(90deg, var(--tax-primary), var(--tax-amber)); transition: width .35s ease; }
+    .thresh-marks { display: flex; justify-content: space-between; font-size: 11px; color: var(--tax-muted); margin-top: 6px; }
+    .verdict-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .score-line { display: flex; justify-content: space-between; font-size: 13px; color: var(--tax-muted); margin-top: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📏 三级证明标准实验室（民事 vs 行政 vs 刑事）</h1><p>误区：只要证据有 60% 把握证明他干了，法院就应该判他坐牢。真相：51% 的“优势证据”只够赔钱（民事）；要剥夺人身自由，必须跨过 90%+ 的“排除合理怀疑”高墙！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>📏 三级证明标准实验室（民事 vs 行政 vs 刑事）</h1>
+      <p>同样是“心里有 82% 把握”，在民事案里足以胜诉，在刑事案里却必须当庭释放！化身主审法官，依据三级法定证明标准（<strong>民事 &gt;50%</strong>、<strong>行政/特殊民事 ≥75%</strong>、<strong>刑事排除合理怀疑 ≥95%</strong>）审理以下 4 宗案件。</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row" id="caseTabs"></div>
     </div>
-    <div class="tax-panel">
-      <div class="btn-row">
-        <button class="btn active" onclick="setStd(51,'民事诉讼 · 优势证据',this)">民事 (51%)</button>
-        <button class="btn" onclick="setStd(75,'重大剥夺 · 清晰确信',this)">行政/监护 (75%)</button>
-        <button class="btn" onclick="setStd(92,'刑事重罪 · 排除合理怀疑',this)">刑事 (92%)</button>
+
+    <div class="court-card">
+      <span class="case-badge" id="caseBadge"></span>
+      <h2 id="caseTitle" style="margin:0 0 6px;font-size:17px;color:var(--tax-ink);"></h2>
+      <p id="caseDesc" style="margin:0;font-size:13.5px;color:var(--tax-muted);line-height:1.55;"></p>
+
+      <div class="meter-wrap">
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;">
+          <span style="color:var(--tax-muted);">当前庭审证据确信度</span>
+          <strong id="confVal" style="color:var(--tax-ink);">62%</strong>
+        </div>
+        <div class="meter-bar"><div class="meter-fill" id="meterFill" style="width:62%;"></div></div>
+        <div class="thresh-marks">
+          <span>0%</span>
+          <span>50% 民事优势证据</span>
+          <span>75% 清晰说服力</span>
+          <span>95% 排除合理怀疑</span>
+        </div>
       </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>控方/原告证据链说服力</span><span id="vEv">68%</span></label><input type="range" id="sEv" min="10" max="99" value="68" oninput="draw()"></div>
+
+      <div class="verdict-row">
+        <button class="toy-btn primary" id="yesBtn"></button>
+        <button class="toy-btn" id="noBtn"></button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 170"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">当前法庭门槛</div><div class="k-val" id="kStd">—</div></div>
-        <div class="kpi"><div class="k-lbl">判决结果</div><div class="k-val" id="kRes">—</div></div>
+
+      <div class="score-line">
+        <span>已审理：<strong id="doneVal">0 / 4</strong></span>
+        <span>法理准确：<strong id="rightVal">0 宗</strong></span>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 法官提示：</strong>先看清本案属于民事、行政还是刑事，再对比“当前证据确信度”是否跨过了对应门槛，敲下你的法槌！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-let std=51, sName='民事诉讼 · 优势证据';
-function setStd(v,nm,btn){ std=v; sName=nm; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const ev=+document.getElementById('sEv').value; document.getElementById('vEv').textContent=ev+'%';
-  const pass=ev>=std;
-  document.getElementById('kStd').textContent=sName;
-  document.getElementById('kRes').textContent=pass?'胜诉 / 定罪成立':'证据不足 / 判无罪';
-  document.getElementById('kRes').style.color=pass?'#0284c7':'#10b981';
-  const col=pass?'#0284c7':'#94a3b8';
-  document.getElementById('svg').innerHTML=`
-    <rect x="30" y="60" width="540" height="36" rx="8" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="30" y="60" width="${ev*5.4}" height="36" rx="8" fill="${col}"/>
-    <line x1="${30+std*5.4}" y1="30" x2="${30+std*5.4}" y2="120" stroke="#ef4444" stroke-width="3"/>
-    <text x="${30+std*5.4}" y="22" text-anchor="middle" font-size="12.5" font-weight="850" fill="#ef4444">门槛 ${std}%</text>
-    <text x="${35+ev*5.4}" y="83" font-size="13" font-weight="850" fill="#fff">${ev}%</text>
-    <text x="30" y="146" font-size="13" font-weight="800" fill="var(--tax-text)">结果：${pass?'跨过门槛，支持指控':'未达门槛，疑罪从无'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>著名辛普森案正是如此——同一份 ${ev}% 的证据，在刑事法庭跨不过 92% 的红线（判无罪），在民事赔偿法庭却轻松跨过 51%（判巨额赔偿）！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    const cases = [
+      {
+        tab: '民事借贷',
+        type: '民事诉讼 · 优势证据标准（>50%）',
+        badgeCls: 'b-civil',
+        title: '案件 1：老友 10 万元口头借款纠纷',
+        desc: '原告出示了银行转账记录与模糊的微信催款聊天，被告辩称那是“共同投资亏损”。综合双方证词，你内心认为原告说的是真话的概率为 62%。',
+        conf: 62,
+        yesLabel: '🔨 判原告胜诉（被告还钱）',
+        noLabel: '🔨 驳回起诉（证据不足）',
+        correct: 'yes',
+        explain: '民事纠纷双方地位平等、错判损失对称（只是钱归谁），采用「高度盖然性 / 优势证据标准（>50%）」。62% 已超过 50%，应判原告胜诉！'
+      },
+      {
+        tab: '行政吊销',
+        type: '重大行政处罚 · 清晰且具说服力标准（≥75%）',
+        badgeCls: 'b-admin',
+        title: '案件 2：拟永久吊销某医生执业执照',
+        desc: '监管部门指控该医生伪造病历，但关键监控已覆盖，仅凭两名同行证言与间接记录，你的内心确信度为 68%。',
+        conf: 68,
+        yesLabel: '🔨 支持吊销执照',
+        noLabel: '🔨 撤销处罚（未达清晰标准）',
+        correct: 'no',
+        explain: '永久吊销执业资格关乎终身生计，证明标准高于普通民事（需达到约 ≥75% 的“清晰且极具说服力”）。68% 尚存明显疑点，应撤销重罚！'
+      },
+      {
+        tab: '刑事盗窃',
+        type: '刑事公诉 · 排除合理怀疑（≥95%）',
+        badgeCls: 'b-crim',
+        title: '案件 3：珠宝店深夜失窃案（重大嫌疑）',
+        desc: '被告案发时恰好路过附近，且家中搜出同款手套，但无指纹、无监控正脸，且有半小时不在场证人。你心里 84% 觉得就是他干的！',
+        conf: 84,
+        yesLabel: '🔨 判处有罪入狱',
+        noLabel: '🔨 疑罪从无（当庭释放）',
+        correct: 'no',
+        explain: '刑事定罪剥夺人身自由甚至生命，必须跨过「排除合理怀疑（≥95%）」的最高门槛！哪怕你 84% 觉得他像凶手，只要仍存在合理怀疑，就必须坚决判无罪！'
+      },
+      {
+        tab: '刑事铁证',
+        type: '刑事公诉 · 排除合理怀疑（≥95%）',
+        badgeCls: 'b-crim',
+        title: '案件 4：完整闭环证据链的入室抢劫案',
+        desc: '现场 DNA 匹配、高清监控拍到正脸、赃物在被告租屋起获且与受害人描述完全一致，多项独立证据形成 98% 闭环确信。',
+        conf: 98,
+        yesLabel: '🔨 判处有罪',
+        noLabel: '🔨 判处无罪',
+        correct: 'yes',
+        explain: '独立证据链相互印证，确信度达 98%，已成功跨过「排除合理怀疑」红线，依法定罪量刑！'
+      }
+    ];
+
+    let cur = 0;
+    const picked = {};
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const tabs = document.getElementById('caseTabs');
+      tabs.innerHTML = '';
+      cases.forEach((c, i) => {
+        const b = document.createElement('button');
+        b.className = 'toy-btn' + (i === cur ? ' primary' : '');
+        const mark = picked[i] ? (picked[i] === c.correct ? '✅ ' : '❌ ') : '';
+        b.textContent = mark + c.tab;
+        b.addEventListener('click', () => { cur = i; render(); });
+        tabs.appendChild(b);
+      });
+
+      const c = cases[cur];
+      const badge = document.getElementById('caseBadge');
+      badge.className = 'case-badge ' + c.badgeCls;
+      badge.textContent = c.type;
+      document.getElementById('caseTitle').textContent = c.title;
+      document.getElementById('caseDesc').textContent = c.desc;
+      document.getElementById('confVal').textContent = c.conf + '%';
+      document.getElementById('meterFill').style.width = c.conf + '%';
+      document.getElementById('yesBtn').textContent = c.yesLabel;
+      document.getElementById('noBtn').textContent = c.noLabel;
+
+      const doneCnt = Object.keys(picked).length;
+      const rightCnt = Object.keys(picked).filter(k => picked[k] === cases[k].correct).length;
+      document.getElementById('doneVal').textContent = `${doneCnt} / ${cases.length}`;
+      document.getElementById('rightVal').textContent = `${rightCnt} 宗`;
+
+      const aha = document.getElementById('ahaBox');
+      if (!picked[cur]) {
+        aha.innerHTML = `<strong>💡 法官提示：</strong>当前证据确信度为 <strong>${c.conf}%</strong>。请结合本案的【${c.type}】作出判决！`;
+      } else {
+        const ok = picked[cur] === c.correct;
+        aha.innerHTML = `<strong>${ok ? '✅ 判决精准符合法理！' : '⚠️ 证明标准适用偏差：'}</strong>${c.explain}`;
+      }
+    }
+
+    document.getElementById('yesBtn').addEventListener('click', () => {
+      picked[cur] = 'yes';
+      markDone('完成了三级证明标准法庭裁决');
+      render();
+    });
+    document.getElementById('noBtn').addEventListener('click', () => {
+      picked[cur] = 'no';
+      markDone('完成了三级证明标准法庭裁决');
+      render();
+    });
+
+    render();
   </script>
 </body>
 </html>

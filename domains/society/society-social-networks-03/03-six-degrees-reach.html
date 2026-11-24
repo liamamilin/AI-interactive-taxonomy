@@ -1,66 +1,134 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📡 六度分隔指数覆盖半径计算器</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>六度分隔指数覆盖半径计算器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .chart-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .deg-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 12px; }
+    @media (max-width: 680px) { .deg-grid { grid-template-columns: repeat(3, 1fr); } }
+    .deg-card { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 8px; text-align: center; }
+    .deg-card.world { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .deg-n { font-size: 11px; color: var(--tax-muted); }
+    .deg-v { font-size: 15px; font-weight: 800; color: var(--tax-ink); margin-top: 3px; }
+    svg text { fill: var(--tax-muted); font-family: inherit; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📡 六度分隔指数覆盖半径计算器</h1><p>误区：地球有 80 亿人，哪怕每个人都认识 50 个人，随便找一个陌生人也要转几十次才能联系上。真相：指数级树状扩散下，只要人均 45 个跨圈好友，5~6 跳就足以触达全人类！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>人均有效社交好友数 d</span><span id="vD">45 人</span></label><input type="range" id="sD" min="10" max="100" value="45" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>每跳共同好友重复折损率</span><span id="vO">20%</span></label><input type="range" id="sO" min="0" max="60" value="20" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>📡 六度分隔指数覆盖半径计算器</h1>
+      <p>地球上有 80 亿人，为什么平均只需要 6 个中间人就能联系到世界上任何一个人？调节「每人有效熟人数」与「朋友圈重叠率」，直观感受指数爆炸的恐怖威力。</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="control-group">
+        <label>每人平均有效熟人数 (k)：<strong id="kVal">60 人</strong></label>
+        <input id="kSlider" type="range" min="15" max="150" step="5" value="60">
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">3 跳触达人数</div><div class="k-val" id="k3">—</div></div>
-        <div class="kpi"><div class="k-lbl">6 跳触达人数</div><div class="k-val" id="k6" style="color:#0284c7;">—</div></div>
+      <div class="control-group">
+        <label>好友圈重叠率（重复熟人比例）：<strong id="ovVal">30%</strong></label>
+        <input id="ovSlider" type="range" min="0" max="75" step="5" value="30">
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="chart-box">
+      <svg id="expSvg" viewBox="0 0 640 230" style="width:100%;height:auto;display:block;"></svg>
+      <div class="deg-grid" id="degGrid"></div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 指数直觉：</strong>人类大脑天生习惯线性思维，总是低估 <code>k^6</code> 的增长速度。拖动滑块，看看当朋友圈重叠率高达 70%（纯封闭小圈子）时，需要几度才能覆盖全球！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function fmt(n){ if(n>=1e8) return (n/1e8).toFixed(1)+' 亿'; if(n>=1e4) return (n/1e4).toFixed(1)+' 万'; return Math.round(n)+' 人'; }
-function upd(){
-  const d=+document.getElementById('sD').value, ov=+document.getElementById('sO').value/100;
-  document.getElementById('vD').textContent=d+' 人'; document.getElementById('vO').textContent=(ov*100).toFixed(0)+'%';
-  const eff=d*(1-ov);
-  const hops=[1,2,3,4,5,6].map(h=>Math.min(8e9, Math.pow(eff,h)));
-  document.getElementById('k3').textContent=fmt(hops[2]);
-  document.getElementById('k6').textContent=fmt(hops[5]);
-  let svg='';
-  hops.forEach((v,i)=>{
-    const logW=Math.log10(Math.max(10,v))/10*430, y=18+i*26;
-    svg+=`<text x="16" y="${y+16}" font-size="12" font-weight="800" fill="var(--tax-text)">第 ${i+1} 跳</text>
-    <rect x="75" y="${y}" width="${logW}" height="18" rx="5" fill="${i===5?'#10b981':'#0284c7'}"/>
-    <text x="${82+logW}" y="${y+14}" font-size="11.5" font-weight="800" fill="var(--tax-muted)">${fmt(v)}</text>`;
-  });
-  document.getElementById('svg').innerHTML=svg;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>人类大脑最不擅长直觉感受指数增长！即使扣除 ${(ov*100).toFixed(0)}% 的圈内重复，每人平均 ${d} 个熟人只要经过 6 次扩散，覆盖半径就高达 <strong>${fmt(hops[5])}</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const WORLD = 8e9;
+    const kSlider = document.getElementById('kSlider');
+    const ovSlider = document.getElementById('ovSlider');
+    const svg = document.getElementById('expSvg');
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function fmtNum(n) {
+      if (n >= 1e8) return (n / 1e8).toFixed(1) + ' 亿';
+      if (n >= 1e4) return (n / 1e4).toFixed(1) + ' 万';
+      return Math.round(n).toLocaleString();
+    }
+
+    function render() {
+      const k = Number(kSlider.value);
+      const ov = Number(ovSlider.value) / 100;
+      document.getElementById('kVal').textContent = k + ' 人';
+      document.getElementById('ovVal').textContent = Math.round(ov * 100) + '%';
+
+      const effK = Math.max(2, k * (1 - ov));
+      const counts = [];
+      let reachWorldDeg = null;
+      for (let d = 1; d <= 6; d++) {
+        const raw = Math.pow(effK, d);
+        const capped = Math.min(WORLD, raw);
+        counts.push({ d, raw, capped });
+        if (reachWorldDeg === null && raw >= WORLD) reachWorldDeg = d;
+      }
+
+      // Log-scale bar chart (10^1 to 10^10)
+      const W = 640, H = 230, padL = 56, padR = 24, padT = 22, padB = 34;
+      const barW = (W - padL - padR) / 6;
+      const worldY = H - padB - (Math.log10(WORLD) / 10.2) * (H - padT - padB);
+
+      let bars = '';
+      counts.forEach((c, i) => {
+        const logV = Math.min(10.1, Math.log10(Math.max(10, c.raw)));
+        const bh = (logV / 10.2) * (H - padT - padB);
+        const x = padL + i * barW + 14;
+        const y = H - padB - bh;
+        const reached = c.raw >= WORLD;
+        bars += `
+          <rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(barW - 28).toFixed(1)}" height="${bh.toFixed(1)}" rx="6" fill="${reached ? 'var(--tax-green)' : 'var(--tax-primary)'}" opacity="0.88"/>
+          <text x="${(x + (barW - 28) / 2).toFixed(1)}" y="${(y - 6).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700">${reached ? '≥80亿' : fmtNum(c.raw)}</text>
+          <text x="${(x + (barW - 28) / 2).toFixed(1)}" y="${H - padB + 18}" text-anchor="middle" font-size="12" font-weight="700">${c.d} 度人脉</text>
+        `;
+      });
+
+      svg.innerHTML = `
+        <line x1="${padL}" y1="${worldY.toFixed(1)}" x2="${W - padR}" y2="${worldY.toFixed(1)}" stroke="var(--tax-red)" stroke-dasharray="5,4" stroke-width="1.6"/>
+        <text x="${W - padR - 4}" y="${(worldY - 6).toFixed(1)}" text-anchor="end" font-size="11" font-weight="700" fill="var(--tax-red)">地球总人口 80 亿红线（对数坐标）</text>
+        <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="var(--tax-muted)"/>
+        ${bars}
+      `;
+
+      const grid = document.getElementById('degGrid');
+      grid.innerHTML = counts.map(c => `
+        <div class="deg-card ${c.raw >= WORLD ? 'world' : ''}">
+          <div class="deg-n">第 ${c.d} 度</div>
+          <div class="deg-v">${c.raw >= WORLD ? '覆盖全球' : fmtNum(c.raw)}</div>
+        </div>
+      `).join('');
+
+      const aha = document.getElementById('ahaBox');
+      if (reachWorldDeg !== null && reachWorldDeg <= 5) {
+        aha.innerHTML = `<strong>🚀 仅需 ${reachWorldDeg} 度覆盖全球！</strong>去重后每人净扩展 <strong>${effK.toFixed(1)} 位新熟人</strong>，指数爆炸在第 ${reachWorldDeg} 层就轻松冲破 80 亿人口上限！`;
+      } else if (reachWorldDeg === 6) {
+        aha.innerHTML = `<strong>🌍 精准命中“六度分隔”！</strong>有效净扩展人数为 <strong>${effK.toFixed(1)} 人</strong>时，刚好在第 6 度触达全人类。这就是现代社交网络平均路径约 4~6 步的数学底座。`;
+      } else {
+        const sixPct = ((counts[5].raw / WORLD) * 100).toFixed(2);
+        aha.innerHTML = `<strong>🧱 圈层锁死警报：</strong>当熟人数过少或朋友圈重叠率高达 <strong>${Math.round(ov * 100)}%</strong> 时，每人净扩展仅 ${effK.toFixed(1)} 人，6 度内仅覆盖全球 <strong>${sixPct}%</strong>——过度同质化的小圈子会切断你与世界的通道！`;
+      }
+    }
+
+    kSlider.addEventListener('input', () => { markDone('调整了六度分隔熟人数'); render(); });
+    ovSlider.addEventListener('input', () => { markDone('调整了朋友圈重叠率'); render(); });
+    render();
   </script>
 </body>
 </html>

@@ -1,78 +1,98 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏷️ 维克里机制：为什么“报实价”才是唯一最优解？</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>维克里机制：为什么“报实价”才是唯一最优解？</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .tbl { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+    .tbl th, .tbl td { padding: 8px 10px; border-bottom: 1px solid var(--tax-border); text-align: center; }
+    .tbl th { color: var(--tax-muted); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🏷️ 维克里机制：为什么“报实价”才是唯一最优解？</h1><p>误区：无论什么拍卖，买家想多赚钱就一定要故意把报价压得比心里价低。真相：在“最高价中标、只付第二高价”的维克里机制下，虚报任何价格都只能让你亏钱或错失宝贝！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>你心里真实估值 V</span><span id="vV">70 元</span></label><input type="range" id="sV" min="30" max="95" value="70" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>你提交的报价 B</span><span id="vB">55 元</span></label><input type="range" id="sB" min="10" max="100" value="55" oninput="upd()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🏷️ 维克里二价密封拍卖：为什么“老实报底价”绝对最赚？（盲测）</h1>
+      <p>谷歌广告竞价与诺奖得主维克里设计的机制：<strong>出价最高者中标，但只需支付“第二高价（对手的出价）”</strong>！假设一件藏品对你真实值 <strong>¥100</strong>，拖动你的密封出价，测试所有可能的对手出价！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="ctrl-box">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>✍️ 你的秘密出价（你心里真实估值 = ¥100）</span>
+          <strong id="bidVal" style="color:var(--tax-primary);">¥100（如实报价）</strong>
+        </div>
+        <input type="range" id="bidRange" min="60" max="140" step="10" value="100" style="width:100%;" />
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">真实估值期望净赚</div><div class="k-val" id="kTrue" style="color:#10b981;">—</div></div>
-        <div class="kpi"><div class="k-lbl">当前报价期望净赚</div><div class="k-val" id="kCur">—</div></div>
-        <div class="kpi"><div class="k-lbl">策略损益</div><div class="k-val" id="kDiff">—</div></div>
-      </div>
+
+      <table class="tbl">
+        <thead>
+          <tr><th>假设对手最高出价</th><th>结果（二价规则）</th><th>你的净赚收益（100 − 实付）</th><th>相比报实价 ¥100</th></tr>
+        </thead>
+        <tbody id="tblBody"></tbody>
+      </table>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>激励相容巅峰（说真话即占优策略）：</strong>试着把出价往左拉（故意压价想捡漏）或往右拉（故意虚报想必赢）——你会发现无论对手出多少，<strong>报实价 ¥100 永远不吃亏，任何撒谎都只会让自己亏钱或错失好机会！</strong>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function expPay(V,B){
-  let sum=0;
-  for(let r=1;r<=100;r++){ if(B>=r) sum+=(V-r); }
-  return sum/100;
-}
-function upd(){
-  const V=+document.getElementById('sV').value, B=+document.getElementById('sB').value;
-  document.getElementById('vV').textContent=V+' 元'; document.getElementById('vB').textContent=B+' 元';
-  const eTrue=expPay(V,V), eCur=expPay(V,B), diff=eCur-eTrue;
-  document.getElementById('kTrue').textContent=eTrue.toFixed(2)+' 元';
-  document.getElementById('kCur').textContent=eCur.toFixed(2)+' 元';
-  document.getElementById('kDiff').textContent=(diff>=0?'+':'')+diff.toFixed(2)+' 元';
-  let pts='';
-  for(let b=10;b<=100;b+=2){
-    const x=40+(b-10)/90*520, y=155-Math.max(-2,expPay(V,b))/45*120;
-    pts+=`${x.toFixed(1)},${y.toFixed(1)} `;
-  }
-  const tx=40+(V-10)/90*520, ty=155-eTrue/45*120;
-  const cx=40+(B-10)/90*520, cy=155-Math.max(-2,eCur)/45*120;
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="155" x2="560" y2="155" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${pts}"/>
-    <circle cx="${tx}" cy="${ty}" r="5.5" fill="#10b981"/>
-    <text x="${tx}" y="${ty-10}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#10b981">诚实点 B=V=${V}</text>
-    <circle cx="${cx}" cy="${cy}" r="6" fill="${Math.abs(B-V)<=1?'#10b981':'#ef4444'}"/>`;
-  document.getElementById('ahaBox').innerHTML=Math.abs(B-V)<=1
-    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>刚好踩在曲线最高点！因为中标付的是别人出的价，你唯一决定的是“在哪些价位上愿意买”，把报价直接设成心里价 <strong>${V} 元</strong> 就永远不会买贵也不错过便宜！`
-    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>无论往左压价还是往右抬价，期望净收益都低于“说真话”（损失 ${Math.abs(diff).toFixed(2)} 元）——这就是制度设计的皇冠：<strong>激励相容</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const RIVALS = [70, 90, 110, 130];
+    const bidRange = document.getElementById('bidRange');
+    const bidVal = document.getElementById('bidVal');
+    const tblBody = document.getElementById('tblBody');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function payoff(bid, rival) {
+      if (bid > rival) return 100 - rival; // Win and pay rival's bid!
+      return 0;
+    }
+
+    function render() {
+      const bid = Number(bidRange.value);
+      bidVal.textContent = bid === 100 ? '¥100（✅ 如实报价）' : (bid < 100 ? `¥${bid}（🦊 故意压低想捡漏）` : `¥${bid}（🔥 虚高乱喊想强赢）`);
+      bidVal.style.color = bid === 100 ? 'var(--tax-green)' : 'var(--tax-amber)';
+
+      tblBody.innerHTML = RIVALS.map(r => {
+        const win = bid > r;
+        const p = payoff(bid, r);
+        const truthP = payoff(100, r);
+        const diff = p - truthP;
+        const diffTxt = diff === 0 ? '打平' : (diff < 0 ? `<span style="color:var(--tax-red);font-weight:800;">亏了 ¥${Math.abs(diff)}！</span>` : `+¥${diff}`);
+        const pCol = p > 0 ? 'var(--tax-green)' : (p < 0 ? 'var(--tax-red)' : 'var(--tax-muted)');
+        return `<tr>
+          <td><strong>¥${r}</strong></td>
+          <td>${win ? `🏆 中标（只需付 ¥${r}）` : '落选（付 ¥0）'}</td>
+          <td style="color:${pCol};font-weight:800;">${p >= 0 ? '+¥' + p : '−¥' + Math.abs(p)}</td>
+          <td>${diffTxt}</td>
+        </tr>`;
+      }).join('');
+
+      if (bid < 100) {
+        ahaBox.innerHTML = `<strong>压价失算（出价 ¥${bid}）：</strong>在二价机制里，你付的是“对手的价”而不是自己的价，压价一分钱都省不了！反而当对手出 ¥90 时，你白白错过了原本能净赚 ¥10 的好交易！`;
+      } else if (bid > 100) {
+        ahaBox.innerHTML = `<strong>虚报中招（出价 ¥${bid} · 赢家诅咒）：</strong>当对手出 ¥110 时，你虚报 ¥${bid} 虽然抢赢了，却被迫掏 ¥110 买一件只值 ¥100 的东西，净亏 −¥10！`;
+      } else {
+        ahaBox.innerHTML = '<strong>完美占优策略（报实价 ¥100）：</strong>因为你的出价只决定“赢不赢”，不决定“付多少钱”，所以<strong>讲真话</strong>在所有可能世界里都拿到理论最高收益！这就是激励相容的数学魔法！';
+      }
+    }
+
+    bidRange.oninput = () => { markDone('实测了维克里二价拍卖的报实价占优策略'); render(); };
+    render();
   </script>
 </body>
 </html>

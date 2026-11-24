@@ -1,62 +1,160 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔄 税前 vs 税后基尼系数回弹模拟</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>税前 vs 税后基尼系数回弹模拟</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .viz-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .kpi { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
+    svg text { fill: var(--tax-muted); font-family: inherit; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔄 税前 vs 税后基尼系数回弹模拟</h1><p>误区：北欧等低基尼系数国家，是因为大家工资从一开始就几乎一样高。真相：很多高福利国家的“税前市场基尼系数”和美国差不多高（~0.48），全靠税后转移支付硬生生拉回到 0.28！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>市场初次分配极化度 (税前)</span><span id="vPre">0.48</span></label><input type="range" id="sPre" min="30" max="65" value="48" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>累进税+转移支付再分配力度</span><span id="vRed">42%</span></label><input type="range" id="sRed" min="0" max="70" value="42" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🔄 税前 vs 税后基尼系数回弹模拟</h1>
+      <p>市场初次分配往往天然偏向马太效应（许多发达国家税前基尼高达 0.48~0.52）。调节「累进所得税力度」与「定向转移支付比例」，看看二次再分配如何把弯曲的洛伦兹曲线拉回平等线！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="control-group">
+        <label>高收入累进税率力度：<strong id="taxVal">35%</strong></label>
+        <input id="taxSlider" type="range" min="0" max="65" step="5" value="35">
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
+      <div class="control-group">
+        <label>定向底层转移支付（社保/教育/医疗）：<strong id="trVal">60%</strong></label>
+        <input id="trSlider" type="range" min="0" max="100" step="10" value="60">
+      </div>
+    </div>
+
+    <div class="viz-box">
+      <svg id="shiftSvg" viewBox="0 0 600 260" style="width:100%;height:auto;display:block;"></svg>
       <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">税前市场基尼</div><div class="k-val" id="kPre" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">税后可支配基尼</div><div class="k-val" id="kPost" style="color:#10b981;">—</div></div>
+        <div class="kpi">
+          <div class="kpi-l">税前基尼（市场初次分配）</div>
+          <div class="kpi-v" id="preVal" style="color:var(--tax-red);">0.50</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">税后基尼（再分配回弹）</div>
+          <div class="kpi-v" id="postVal" style="color:var(--tax-green);">0.33</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">经济效率留存率</div>
+          <div class="kpi-v" id="effVal">94%</div>
+        </div>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 再分配杠杆：</strong>拖动上方两个滑块，注意观察——“只收高税但不做定向转移支付”与“中等累进税 + 精准定向兜底”的回弹效果有何天壤之别！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const pre=+document.getElementById('sPre').value/100, red=+document.getElementById('sRed').value/100;
-  document.getElementById('vPre').textContent=pre.toFixed(2); document.getElementById('vRed').textContent=(red*100).toFixed(0)+'%';
-  const post=pre*(1-red);
-  document.getElementById('kPre').textContent=pre.toFixed(3);
-  document.getElementById('kPost').textContent=post.toFixed(3);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">税前市场基尼系数: ${pre.toFixed(3)}</text>
-    <rect x="20" y="44" width="${pre*750}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#10b981">税后转移支付基尼系数: ${post.toFixed(3)} (降幅 ${((pre-post)/pre*100).toFixed(0)}%)</text>
-    <rect x="20" y="112" width="${post*750}" height="24" rx="6" fill="#10b981"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">初次分配讲效率拉开差距，二次分配靠税收与公共服务托底</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只看税前工资，市场天然趋向集中（${pre.toFixed(2)}）；现代福利国家的秘密武器正是二次分配——通过 ${(red*100).toFixed(0)}% 的累进调节直接把可支配差距压回 <strong>${post.toFixed(3)}</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    // Fixed market pre-tax 5 quintiles summing to 100 (Gini ~0.50)
+    const preIncome = [3, 7, 13, 22, 55];
+    const taxSlider = document.getElementById('taxSlider');
+    const trSlider = document.getElementById('trSlider');
+    const svg = document.getElementById('shiftSvg');
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function calcGini(arr) {
+      const sum = arr.reduce((a, b) => a + b, 0);
+      const shares = arr.map(v => v / sum);
+      let cum = 0, areaB = 0;
+      let prev = 0;
+      for (let i = 0; i < 5; i++) {
+        cum += shares[i];
+        areaB += 0.5 * (prev + cum) * 0.2;
+        prev = cum;
+      }
+      return { gini: Math.max(0, 1 - 2 * areaB), shares };
+    }
+
+    function render() {
+      const taxRate = Number(taxSlider.value) / 100;
+      const trRatio = Number(trSlider.value) / 100;
+      document.getElementById('taxVal').textContent = Math.round(taxRate * 100) + '%';
+      document.getElementById('trVal').textContent = Math.round(trRatio * 100) + '%';
+
+      // Progressive tax schedule across 5 quintiles
+      const mult = [0.05, 0.15, 0.35, 0.65, 1.0];
+      let pool = 0;
+      const afterTax = preIncome.map((inc, i) => {
+        const t = inc * taxRate * mult[i];
+        pool += t;
+        return inc - t;
+      });
+
+      // Transfer pool: trRatio targeted to bottom 2 quintiles (65% / 35%), remainder distributed evenly
+      const targeted = pool * trRatio;
+      const universal = pool * (1 - trRatio);
+      const postIncome = afterTax.map((inc, i) => {
+        let bonus = universal / 5;
+        if (i === 0) bonus += targeted * 0.65;
+        if (i === 1) bonus += targeted * 0.35;
+        return inc + bonus;
+      });
+
+      const pre = calcGini(preIncome);
+      const post = calcGini(postIncome);
+      // Laffer-style efficiency retention drops faster above 45% top tax
+      const eff = Math.max(68, Math.round(100 - Math.pow(taxRate * 100 / 16, 2.1)));
+
+      document.getElementById('preVal').textContent = pre.gini.toFixed(2);
+      document.getElementById('postVal').textContent = post.gini.toFixed(2);
+      document.getElementById('effVal').textContent = eff + '%';
+
+      const W = 600, H = 260, padL = 52, padR = 30, padT = 20, padB = 34;
+      const sx = x => padL + x * (W - padL - padR);
+      const sy = y => H - padB - y * (H - padT - padB);
+
+      const toCurve = shares => {
+        let cum = 0;
+        const pts = [{ x: 0, y: 0 }];
+        shares.forEach((s, i) => { cum += s; pts.push({ x: (i + 1) * 0.2, y: cum }); });
+        return pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(' ');
+      };
+
+      svg.innerHTML = `
+        <rect x="${padL}" y="${padT}" width="${W - padL - padR}" height="${H - padT - padB}" fill="var(--tax-surface)" stroke="var(--tax-border)"/>
+        <line x1="${sx(0)}" y1="${sy(0)}" x2="${sx(1)}" y2="${sy(1)}" stroke="var(--tax-muted)" stroke-dasharray="5,4"/>
+        <path d="${toCurve(pre.shares)}" fill="none" stroke="var(--tax-red)" stroke-width="2.6" stroke-dasharray="6,4"/>
+        <path d="${toCurve(post.shares)}" fill="none" stroke="var(--tax-green)" stroke-width="3.4"/>
+        <text x="${W - padR - 10}" y="${padT + 18}" text-anchor="end" font-size="11" fill="var(--tax-red)">--- 税前市场分配 (G=${pre.gini.toFixed(2)})</text>
+        <text x="${W - padR - 10}" y="${padT + 34}" text-anchor="end" font-size="11" font-weight="700" fill="var(--tax-green)">━━ 税后再分配 (G=${post.gini.toFixed(2)})</text>
+        <text x="${W / 2}" y="${H - 8}" text-anchor="middle" font-size="11">累计人口比例（0% → 100%）</text>
+      `;
+
+      const drop = (pre.gini - post.gini).toFixed(2);
+      const aha = document.getElementById('ahaBox');
+      if (taxRate === 0) {
+        aha.innerHTML = `<strong>🚧 零再分配状态：</strong>完全放任市场初次分配，基尼系数停留在 <strong>${pre.gini.toFixed(2)}</strong> 的高位。试着调高累进税与转移支付，看绿线如何向上回弹！`;
+      } else if (taxRate >= 0.55) {
+        aha.innerHTML = `<strong>⚠️ 拉弗曲线效率警报：</strong>虽然税后基尼被压低了 <strong>-${drop}</strong>（降至 ${post.gini.toFixed(2)}），但超高边际税率导致经济效率留存跌至 <strong>${eff}%</strong>，容易引发资本外逃与创新躺平。`;
+      } else if (post.gini <= 0.34 && eff >= 90) {
+        aha.innerHTML = `<strong>🏆 高效再分配黄金带！</strong>中等累进税（${Math.round(taxRate * 100)}%）配合精准定向转移支付，把基尼系数硬生生拉回 <strong>-${drop}</strong> 至 <strong>${post.gini.toFixed(2)}</strong>，同时保持了 <strong>${eff}%</strong> 的经济活力！`;
+      } else {
+        aha.innerHTML = `<strong>🔄 再分配回弹 -${drop}：</strong>税后基尼从 ${pre.gini.toFixed(2)} 降至 <strong>${post.gini.toFixed(2)}</strong>。注意：把税收精准投向底层教育与医疗（提高定向比例），往往比盲目加税更有效。`;
+      }
+    }
+
+    taxSlider.addEventListener('input', () => { markDone('调节了累进所得税税率'); render(); });
+    trSlider.addEventListener('input', () => { markDone('调节了定向转移支付比例'); render(); });
+    render();
   </script>
 </body>
 </html>

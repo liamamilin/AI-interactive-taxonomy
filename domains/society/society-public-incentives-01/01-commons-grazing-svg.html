@@ -1,77 +1,98 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌿 公共牧场放牧过度模拟器（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>公共牧场放牧过度模拟器</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+    .s-card { padding: 10px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; }
+    .s-val { font-size: 20px; font-weight: 800; margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌿 公共牧场放牧过度模拟器（SVG）</h1><p>误区：公共草地被啃光是因为牧民太愚蠢或道德败坏。真相：多养一头牛的好处全归自己，草地退化的代价却由全村人平摊，个体理性必然导致集体崩溃！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>总放牧牛数 C</span><span id="vC">18 头</span></label><input type="range" id="sC" min="2" max="40" value="18" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>单头牛饲养成本</span><span id="vK">12 元</span></label><input type="range" id="sK" min="4" max="24" value="12" oninput="upd()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🌿 公共牧场放牧过度模拟器（公地悲剧）</h1>
+      <p>一片无主公共草地最适宜养 <strong>12 只羊</strong>（此时全村总收益最高）。但只要草地免费开放，每个牧民多放 1 只羊，<strong>利润 100% 归自己，草场退化却由全村平摊</strong>！亲手不断往里加羊，见证理性个体如何一起把绿洲吃成荒漠！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="addBtn">🐑 我再多放 2 只羊（个人多赚！）</button>
+        <button class="toy-btn secondary" id="optBtn">✨ 回到最优 12 只羊</button>
+        <button class="toy-btn secondary" id="crashBtn">💥 模拟全村理性抢放（24 只羊）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">草场总净利润</div><div class="k-val" id="kProf">—</div></div>
-        <div class="kpi"><div class="k-lbl">社会最优牛数</div><div class="k-val" id="kOpt" style="color:#10b981;">—</div></div>
-        <div class="kpi"><div class="k-lbl">自由放牧均衡牛数</div><div class="k-val" id="kNash" style="color:#ef4444;">—</div></div>
+
+      <svg id="grassSvg" viewBox="0 0 680 190" width="100%" style="display:block;border-radius:12px;border:1px solid var(--tax-border);" aria-label="公共牧场放牧过度与沙化模拟"></svg>
+
+      <div class="stats">
+        <div class="s-card"><div style="font-size:11.5px;color:var(--tax-muted);">当前总羊群数</div><div class="s-val" id="nVal">12 只</div></div>
+        <div class="s-card"><div style="font-size:11.5px;color:var(--tax-muted);">每只羊产肉收益</div><div class="s-val" id="perVal" style="color:var(--tax-green);">¥120</div></div>
+        <div class="s-card"><div style="font-size:11.5px;color:var(--tax-muted);">全村牧场总收益</div><div class="s-val" id="totVal" style="color:var(--tax-primary);">¥1,440</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>最优可持续点（12 只羊）：</strong>此时全村总收益达到顶峰 ¥1,440！试着点「🐑 我再多放 2 只羊」——你会发现每只羊收益虽降了，但加羊的牧民个人依然净赚，于是没人肯停手，直到草地彻底荒漠化！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const c=+document.getElementById('sC').value, k=+document.getElementById('sK').value;
-  document.getElementById('vC').textContent=c+' 头'; document.getElementById('vK').textContent=k+' 元';
-  const prof=n=>Math.max(-200, n*(48-n) - n*k);
-  const opt=Math.max(1, Math.round((48-k)/2));
-  const nash=Math.max(1, 48-k);
-  const cur=prof(c);
-  document.getElementById('kProf').textContent=cur+' 元';
-  document.getElementById('kOpt').textContent=opt+' 头';
-  document.getElementById('kNash').textContent=nash+' 头';
-  let pts='';
-  const maxP=Math.max(50, prof(opt));
-  for(let n=1;n<=40;n++){
-    const x=35+(n-1)/39*530;
-    const y=150 - Math.max(-0.2, prof(n)/maxP)*115;
-    pts+=`${x.toFixed(1)},${y.toFixed(1)} `;
-  }
-  const cx=35+(c-1)/39*530, cy=150 - Math.max(-0.2, cur/maxP)*115;
-  const ox=35+(opt-1)/39*530, oy=150 - 115;
-  document.getElementById('svg').innerHTML=`
-    <line x1="35" y1="150" x2="565" y2="150" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${pts}"/>
-    <circle cx="${ox}" cy="${oy}" r="5" fill="#10b981"/>
-    <text x="${ox}" y="${oy-10}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#10b981">最优 ${opt}头</text>
-    <circle cx="${cx}" cy="${cy}" r="6.5" fill="${c>opt?'#ef4444':'#0284c7'}"/>
-    <text x="${Math.min(520,cx+8)}" y="${Math.max(22,cy+15)}" font-size="12" font-weight="800" fill="var(--tax-text)">当前 ${c}头 (${cur}元)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>社会总收益最高在 <strong>${opt} 头</strong>，但只要单头牛还赚 1 块钱，就会一直有人往里塞牛直到 <strong>${nash} 头</strong>，把全部超额利润啃成 0！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let sheep = 12, done = false;
+    const svg = document.getElementById('grassSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      // Yield per sheep = max(0, 240 - 10 * sheep) -> Total = sheep * (240 - 10*sheep), peaks at sheep = 12 (Total=1440), crashes to 0 at sheep = 24!
+      const per = Math.max(0, 240 - 10 * sheep);
+      const total = sheep * per;
+      const health = Math.max(0, Math.min(100, Math.round((24 - sheep) / 14 * 100)));
+
+      document.getElementById('nVal').textContent = `${sheep} 只`;
+      document.getElementById('perVal').textContent = `¥${per}`;
+      document.getElementById('perVal').style.color = per >= 100 ? 'var(--tax-green)' : (per > 30 ? 'var(--tax-amber)' : 'var(--tax-red)');
+      document.getElementById('totVal').textContent = `¥${total.toLocaleString()}`;
+
+      const bgCol = health >= 65 ? 'rgba(16,185,129,0.22)' : (health >= 25 ? 'rgba(245,158,11,0.22)' : 'rgba(239,68,68,0.20)');
+      let html = `<rect x="0" y="0" width="680" height="190" fill="${bgCol}"/>`;
+      html += `<text x="24" y="28" fill="var(--tax-ink)" font-size="13.5" font-weight="800">草场健康度：${health}% · ${sheep <= 12 ? '🌱 丰美可持续绿洲' : (sheep < 22 ? '⚠️ 过度放牧退化中' : '🏜️ 公地彻底沙化崩盘！')}</text>`;
+
+      // Render sheep icons in neat rows
+      for (let i = 0; i < sheep; i++) {
+        const col = i % 8;
+        const row = Math.floor(i / 8);
+        const x = 58 + col * 78;
+        const y = 66 + row * 40;
+        html += `<text x="${x}" y="${y}" text-anchor="middle" font-size="24">🐑</text>`;
+      }
+
+      html += `<text x="340" y="176" text-anchor="middle" fill="var(--tax-ink)" font-size="12" font-weight="700">${sheep >= 24 ? '💥 所有羊饿死，全村收益归零！这就是“公地悲剧”！' : '每多加 1 只羊：加羊者独享收益，草场退化却摊给全村！'}</text>`;
+      svg.innerHTML = html;
+
+      if (sheep >= 22) {
+        ahaBox.innerHTML = `<strong>公地悲剧爆发（${sheep} 只羊，全村总收益跌至 ¥${total}）！</strong>没有任何一个牧民是傻瓜或坏人，恰恰因为每个人都极其理性地算个人小账，最终却合力毁掉了全村的公共草地！公海过度捕捞、碳排放和道路拥堵都是同一套数学机制。`;
+      } else if (sheep > 12) {
+        ahaBox.innerHTML = `<strong>开始透支草场（${sheep} 只羊，总收益已从 ¥1,440 跌至 ¥${total}）：</strong>注意虽然全村总盘子在缩水，但单个牧民只要每只羊收益 > 0，个人依然有冲动继续加羊！再点加羊看看结局！`;
+      } else {
+        ahaBox.innerHTML = '<strong>社会最优平衡点（12 只羊 · 总收益 ¥1,440）：</strong>此时草场长势与放牧量完美平衡。试着不断点「🐑 我再多放 2 只羊」，亲眼见证个人理性如何摧毁集体利益！';
+      }
+    }
+
+    document.getElementById('addBtn').onclick = () => { sheep = Math.min(24, sheep + 2); markDone('模拟了公共牧场过度放牧沙化'); render(); };
+    document.getElementById('optBtn').onclick = () => { sheep = 12; render(); };
+    document.getElementById('crashBtn').onclick = () => { sheep = 24; markDone('触发了公地悲剧24只羊崩盘'); render(); };
+    render();
   </script>
 </body>
 </html>

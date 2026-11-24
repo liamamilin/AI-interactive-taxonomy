@@ -1,75 +1,85 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🍌 剧透效应与分票陷阱（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>剧透效应与分票陷阱</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🍌 剧透效应与分票陷阱（SVG）</h1><p>误区：多一个理念相近的候选人参选，只是给大家多一个选择，不会伤害自己阵营。真相：在简单多数决中，两个相似候选人互相分票，反而会让对立面渔翁得利！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>改革派总基本盘</span><span id="vBase">58%</span></label><input type="range" id="sBase" min="40" max="75" value="58" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>新锐候补 C 从改革派分流比例</span><span id="vSp">45%</span></label><input type="range" id="sSp" min="0" max="60" value="45" oninput="upd()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🍌 剧透效应（Spoiler Effect）：小众候选人如何毁掉同阵营大哥？（盲测）</h1>
+      <p>一座城市 55% 的选民支持建公园（绿营），45% 支持建停车场（红营）。原本绿营稳赢——点击下方按钮把一位<strong>同样主张建公园的激进环保新星 B</strong> 放进选票，看一场惊天大惨案如何发生！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="btn-row">
+        <button class="toy-btn" id="twoBtn">① 两强对决：温和公园派 A vs 停车场派 C</button>
+        <button class="toy-btn secondary" id="threeBtn">🍌 ② 放入分票搅局者：极客公园派 B 参选！</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">改革派 A 得票</div><div class="k-val" id="kA">—</div></div>
-        <div class="kpi"><div class="k-lbl">新锐派 C 得票</div><div class="k-val" id="kC">—</div></div>
-        <div class="kpi"><div class="k-lbl">保守派 B 得票</div><div class="k-val" id="kB">—</div></div>
-        <div class="kpi"><div class="k-lbl">多数决当选</div><div class="k-val" id="kW">—</div></div>
-      </div>
+
+      <svg id="voteSvg" viewBox="0 0 680 200" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="剧透效应分票惨案柱状图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>多数决的致命漏洞：</strong>现在 A 以 55% 轻松击败 C（45%）。点击「🍌 放入分票搅局者 B」，看看一个只拿 24% 的配角如何直接把冠军拱手让给 55% 人最讨厌的 C！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const base=+document.getElementById('sBase').value, sp=+document.getElementById('sSp').value;
-  document.getElementById('vBase').textContent=base+'%'; document.getElementById('vSp').textContent=sp+'%';
-  const c=Math.round(base*sp/100), a=base-c, b=100-base;
-  const maxV=Math.max(a,b,c);
-  const win=a===maxV?'改革派 A':(b===maxV?'保守派 B':'新锐派 C');
-  document.getElementById('kA').textContent=a+'%';
-  document.getElementById('kC').textContent=c+'%';
-  document.getElementById('kB').textContent=b+'%';
-  document.getElementById('kW').textContent=win;
-  document.getElementById('kW').style.color=win==='保守派 B'?'#ef4444':'#0284c7';
-  const rows=[['改革派 A',a,'#0284c7'],['新锐派 C (分票者)',c,'#38bdf8'],['保守派 B (对立阵营)',b,'#f59e0b']];
-  let svg='';
-  rows.forEach(([nm,val,col],i)=>{
-    const y=26+i*48, w=val*5.2;
-    svg+=`<text x="16" y="${y+16}" font-size="13" font-weight="750" fill="var(--tax-text)">${nm}</text>
-    <rect x="16" y="${y+22}" width="520" height="18" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="16" y="${y+22}" width="${w}" height="18" rx="6" fill="${col}"/>
-    <text x="${24+w}" y="${y+35}" font-size="12.5" font-weight="850" fill="${col}">${val}%</text>`;
-  });
-  document.getElementById('svg').innerHTML=svg;
-  document.getElementById('ahaBox').innerHTML=win==='保守派 B'
-    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>明明 <strong>${base}%</strong> 的选民都偏向改革派，却因为 C 分走了 ${c}% 的选票，让仅获 ${b}% 支持的保守派 B 渔翁得利——这就是“剧透效应”！`
-    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>当分流足够小时，A 仍能守住第一；试试向右拉高 C 的分流比例，看多数决如何瞬间反转结局！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let hasSpoiler = false, done = false;
+    const svg = document.getElementById('voteSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      document.getElementById('twoBtn').className = !hasSpoiler ? 'toy-btn' : 'toy-btn secondary';
+      document.getElementById('threeBtn').className = hasSpoiler ? 'toy-btn' : 'toy-btn secondary';
+
+      const rows = hasSpoiler
+        ? [
+            { name: '🟢 温和公园派 A', pct: 31, col: 'var(--tax-green)', win: false },
+            { name: '🍌 激进公园派 B（搅局）', pct: 24, col: 'var(--tax-amber)', win: false },
+            { name: '🔴 停车场派 C', pct: 45, col: 'var(--tax-red)', win: true }
+          ]
+        : [
+            { name: '🟢 温和公园派 A', pct: 55, col: 'var(--tax-green)', win: true },
+            { name: '🔴 停车场派 C', pct: 45, col: 'var(--tax-red)', win: false }
+          ];
+
+      let html = '';
+      html += `<text x="24" y="28" fill="var(--tax-ink)" font-size="13.5" font-weight="800">${hasSpoiler ? '💥 剧透分票惨案：绿营合计 55%，却被 45% 的红营渔翁得利！' : '✅ 正常两强对决：55% 公园民意顺利胜出！'}</text>`;
+
+      rows.forEach((r, i) => {
+        const y = 52 + i * 44;
+        const w = (r.pct / 60) * 380;
+        html += `<text x="180" y="${y + 18}" text-anchor="end" fill="var(--tax-ink)" font-size="12.5" font-weight="700">${r.name}</text>`;
+        html += `<rect x="192" y="${y + 2}" width="380" height="24" rx="7" fill="rgba(148,163,184,0.14)"/>`;
+        html += `<rect x="192" y="${y + 2}" width="${w.toFixed(1)}" height="24" rx="7" fill="${r.col}"/>`;
+        html += `<text x="${(200 + w).toFixed(1)}" y="${y + 19}" fill="${r.col}" font-size="13" font-weight="900">${r.pct}% ${r.win ? '🏆 当选' : ''}</text>`;
+      });
+
+      svg.innerHTML = html;
+
+      ahaBox.innerHTML = hasSpoiler
+        ? '<strong>剧透效应爆发（Duverger 两党制铁律）：</strong>B 的加入丝毫没抢走 C 的票，却把原本 55% 的公园派撕成了 31% + 24%，让 55% 选民最反对的 C 仅凭 45% 相对多数当选！这就是“单票简单多数决”最终总会逼死第三党、固化为两极对立的数学根源！'
+        : '<strong>基准局面（A 55% 胜 C 45%）：</strong>点击「🍌 放入分票搅局者 B」，亲眼看一名同阵营小众候选人如何引发灾难性分票！';
+    }
+
+    document.getElementById('twoBtn').onclick = () => { hasSpoiler = false; render(); };
+    document.getElementById('threeBtn').onclick = () => { hasSpoiler = true; markDone('触发并验证了剧透效应分票惨案'); render(); };
+    render();
   </script>
 </body>
 </html>

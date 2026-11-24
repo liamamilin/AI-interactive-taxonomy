@@ -1,67 +1,121 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚠️ 违约金过高 vs 过低的双重失衡</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>违约金过高 vs 过低的双重失衡</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .panel { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 16px; }
+    .zone-bar { display: grid; grid-template-columns: 2fr 1.5fr 2.5fr; height: 26px; border-radius: 99px; overflow: hidden; margin: 12px 0; border: 1px solid var(--tax-border); }
+    .z-low { background: rgba(245,158,11,0.35); display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--tax-ink); }
+    .z-ok { background: rgba(16,185,129,0.35); display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--tax-ink); }
+    .z-hi { background: rgba(239,68,68,0.35); display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--tax-ink); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .kpi { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 19px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚠️ 违约金过高 vs 过低的双重失衡</h1><p>误区：为了确保合同执行，违约金写得越高越好（比如十倍赔偿）。真相：天价违约金不仅常被法院调减，还会把资源死锁在低效交易里，吓跑本想签约的理性商业伙伴！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>约定违约金占损失比例</span><span id="vMul">100%</span></label><input type="range" id="sMul" min="10" max="300" step="10" value="100" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>外部市场价格波动率</span><span id="vVol">50%</span></label><input type="range" id="sVol" min="10" max="100" value="50" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>⚠️ 违约金过高 vs 过低的双重失衡</h1>
+      <p>起草商业合同时，很多人以为“违约金写得越高越有威慑力”。但《民法典》规定违约金以<strong>“补偿实际损失为主、惩罚为辅”</strong>，超过实际损失 30% 一般可请求法院酌减！拖动倍率设计你的合同违约金条款。</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="control-group">
+        <label>约定违约金 / 实际预期损失倍率：<strong id="multVal">1.2×（违约金 12 万 / 损失 10 万）</strong></label>
+        <input id="multSlider" type="range" min="0.2" max="3.5" step="0.1" value="1.2">
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">投机性毁约率</div><div class="k-val" id="kCh" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">签约吓阻/僵化损耗</div><div class="k-val" id="kFr" style="color:#f59e0b;">—</div></div>
-        <div class="kpi"><div class="k-lbl">合同综合效率</div><div class="k-val" id="kEff" style="color:#10b981;">—</div></div>
+      <div class="toy-btn-row">
+        <button class="toy-btn" data-m="0.3">0.3× 过低纵容</button>
+        <button class="toy-btn primary" data-m="1.2">1.2× 黄金合规区</button>
+        <button class="toy-btn" data-m="3.0">3.0× 天价惩罚</button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="panel">
+      <div class="zone-bar">
+        <div class="z-low">0.2× ~ 0.8× 过低纵容区</div>
+        <div class="z-ok">0.9× ~ 1.3× 补偿黄金区</div>
+        <div class="z-hi">1.4× ~ 3.5× 司法酌减 / 碰瓷区</div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-l">法院大概率支持金额</div>
+          <div class="kpi-v" id="courtVal">12.0 万</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">签约阻力 / 谈判僵局</div>
+          <div class="kpi-v" id="fricVal">低</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">合同条款健康度</div>
+          <div class="kpi-v" id="healthVal" style="color:var(--tax-green);">S 级稳健</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 合同起草法则：</strong>违约金不是吓唬人的大棒，而是精准的价格锚。试着把倍率分别拉到 0.3× 和 3.0×，看看合同在现实商业与法庭上会踩中哪些暗礁！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const mul=+document.getElementById('sMul').value, vol=+document.getElementById('sVol').value;
-  document.getElementById('vMul').textContent=mul+'%'; document.getElementById('vVol').textContent=vol+'%';
-  const cheat=Math.max(0, Math.round((100-mul)*vol/100));
-  const freeze=Math.max(0, Math.round((mul-100)*vol/250));
-  const eff=Math.max(10, 100-cheat-freeze);
-  document.getElementById('kCh').textContent=cheat+'%';
-  document.getElementById('kFr').textContent=freeze+'%';
-  document.getElementById('kEff').textContent=eff+' 分';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">违约金过低导致的投机毁约: ${cheat}%</text>
-    <rect x="20" y="44" width="${cheat*5}" height="22" rx="6" fill="#ef4444"/>
-    <text x="20" y="96" font-size="13" font-weight="800" fill="#f59e0b">惩罚过高导致的锁死与拒签: ${freeze}%</text>
-    <rect x="20" y="106" width="${freeze*5}" height="22" rx="6" fill="#f59e0b"/>
-    <text x="20" y="156" font-size="13" font-weight="800" fill="#10b981">综合契约效率: ${eff} 分 (100% 补偿实际损失处最优)</text>
-    <rect x="20" y="164" width="${eff*5.2}" height="14" rx="4" fill="#10b981"/>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>违约金恰好等于实际损失（100%）时效率最高！过低助长白嫖违约（${cheat}%），过高吓死合理改约（${freeze}%）！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const slider = document.getElementById('multSlider');
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const m = Number(slider.value);
+      const agreed = (m * 10).toFixed(1);
+      document.getElementById('multVal').textContent = `${m.toFixed(1)}×（约定违约金 ${agreed} 万 / 实际损失 10 万）`;
+
+      // Courts typically cap liquidated damages around 1.3x actual loss upon request
+      const courtSupport = m > 1.3 ? 13.0 : Number(agreed);
+      document.getElementById('courtVal').textContent = courtSupport.toFixed(1) + ' 万' + (m > 1.3 ? '（被酌减）' : '');
+
+      const fricEl = document.getElementById('fricVal');
+      const healthEl = document.getElementById('healthVal');
+      const aha = document.getElementById('ahaBox');
+
+      if (m < 0.85) {
+        fricEl.textContent = '极低（对方暗喜）';
+        healthEl.textContent = '⚠️ 保护不足';
+        healthEl.style.color = 'var(--tax-amber)';
+        aha.innerHTML = `<strong>⚠️ 违约金过低（${m.toFixed(1)}×）：</strong>违约成本只有 ${agreed} 万，远低于你实际承受的 10 万损失！对方只要外部报价稍微涨一点就会果断毁约，等于把合同变成了单方面的免费看涨期权。`;
+      } else if (m <= 1.35) {
+        fricEl.textContent = '低（易于成交）';
+        healthEl.textContent = '✅ S 级黄金区间';
+        healthEl.style.color = 'var(--tax-green)';
+        aha.innerHTML = `<strong>🏆 精准补偿黄金区（${m.toFixed(1)}×）：</strong>既完整覆盖了 10 万实际损失和维权摩擦成本，又在《民法典》司法解释“不超过实际损失 30%”的安全红线内，法庭几乎 100% 全额支持，且不会吓跑诚实合作伙伴！`;
+      } else {
+        fricEl.textContent = '极高（吓跑良商）';
+        healthEl.textContent = '🚨 失衡高危';
+        healthEl.style.color = 'var(--tax-red)';
+        aha.innerHTML = `<strong>🚨 天价违约金的三重反噬（${m.toFixed(1)}×）：</strong>① 真打官司会被法院依法调减回 ~13 万，写 30 万只是心理安慰；② 吓跑诚信守约的优质企业，只留下压根不打算履约的骗子；③ 甚至诱发合同相对方故意设套“诱导你违约”来反向碰瓷赚暴利！`;
+      }
+    }
+
+    slider.addEventListener('input', () => { markDone('设计了合同违约金倍率条款'); render(); });
+    document.querySelectorAll('[data-m]').forEach(b => {
+      b.addEventListener('click', () => {
+        slider.value = b.dataset.m;
+        markDone('切换了违约金典型区间预设');
+        render();
+      });
+    });
+    render();
   </script>
 </body>
 </html>

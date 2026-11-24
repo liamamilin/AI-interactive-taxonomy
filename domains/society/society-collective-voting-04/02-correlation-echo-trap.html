@@ -1,73 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🐑 独立性崩塌：当陪审员开始互相抄作业</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>独立性崩塌：当陪审员开始互相抄作业</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .s-card { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🐑 独立性崩塌：当陪审员开始互相抄作业</h1><p>误区：只要把 100 个人拉进同一个微信群讨论再投票，准确率一定会比 1 个人高。真相：一旦大家互相看脸色抄作业，100 个高度相关的投票者等价于只有 2 个人！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>个体正确率 p</span><span id="vP">65%</span></label><input type="range" id="sP" min="52" max="80" value="65" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>意见跟风相关性 ρ</span><span id="vR">55%</span></label><input type="range" id="sR" min="0" max="95" value="55" oninput="upd()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🐑 独立性崩塌：当陪审员开始互相抄作业（对决）</h1>
+      <p>孔多塞定理有一个致命前提：<strong>每个人必须独立判断</strong>！当 15 位陪审员（每人正确率 65%）里越来越多人开始盲从“嗓门最大的意见领袖”，看看有效大脑数与群体正确率如何雪崩！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="ctrl-box">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>🐑 盲从抄作业的陪审员比例（0% 独立 → 93% 跟风）</span>
+          <strong id="herdVal" style="color:var(--tax-amber);">0%（15 个独立大脑）</strong>
+        </div>
+        <input type="range" id="herdRange" min="0" max="14" value="0" style="width:100%;" />
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">名义人数</div><div class="k-val">31 人</div></div>
-        <div class="kpi"><div class="k-lbl">等效独立人数</div><div class="k-val" id="kEff" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">实际准确率</div><div class="k-val" id="kAcc">—</div></div>
+
+      <svg id="herdSvg" viewBox="0 0 680 175" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="独立思考与盲从抄作业对决图"></svg>
+
+      <div class="cards">
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">🟢 全员独立判断基准（15 脑）</div><strong style="font-size:20px;color:var(--tax-green);">88.7% 正确率</strong></div>
+        <div class="s-card"><div style="font-size:12px;color:var(--tax-muted);">🔴 当前实际群体正确率</div><strong id="curAcc" style="font-size:20px;color:var(--tax-green);">88.7%（有效 15 脑）</strong></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>开会防跟风铁律：</strong>为什么亚马逊和顶级评审会要求“开会前先静默写下各自判断、再亮牌”？把上方盲从滑块拖到 <strong>8 人以上</strong>，看看一旦超过半数跟着大嗓门走，15 人会议瞬间退化成 1 人独裁！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function majProb(n,p){
-  let sum=0, comb=1, kMin=Math.floor(n/2)+1;
-  for(let k=0;k<=n;k++){ if(k>0) comb=comb*(n-k+1)/k; if(k>=kMin) sum+=comb*Math.pow(p,k)*Math.pow(1-p,n-k); }
-  return sum;
-}
-function upd(){
-  const p=+document.getElementById('sP').value/100, rho=+document.getElementById('sR').value/100;
-  document.getElementById('vP').textContent=(p*100).toFixed(0)+'%'; document.getElementById('vR').textContent=(rho*100).toFixed(0)+'%';
-  const N=31;
-  const eff=Math.max(1, Math.round(N/(1+(N-1)*rho)));
-  const effOdd=eff%2===0?eff+1:eff;
-  const accIdeal=majProb(N,p), accReal=majProb(effOdd,p);
-  document.getElementById('kEff').textContent=effOdd+' 人';
-  document.getElementById('kAcc').textContent=(accReal*100).toFixed(1)+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#10b981">完全独立 (31人): ${(accIdeal*100).toFixed(1)}%</text>
-    <rect x="20" y="44" width="540" height="26" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${accIdeal*540}" height="26" rx="6" fill="#10b981"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">含跟风 ρ=${(rho*100).toFixed(0)}% (等效 ${effOdd} 人): ${(accReal*100).toFixed(1)}%</text>
-    <rect x="20" y="112" width="540" height="26" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${accReal*540}" height="26" rx="6" fill="#0284c7"/>
-    <text x="20" y="168" font-size="12.5" font-weight="750" fill="var(--tax-muted)">有效独立样本缩水比例: ${(100-effOdd/N*100).toFixed(0)}%</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>孔多塞定理的隐含前提是<strong>独立判断</strong>！当跟风度达到 ${(rho*100).toFixed(0)}% 时，31 个人瞬间缩水成 <strong>${effOdd} 个独立大脑</strong>，群体智慧彻底失效！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const herdRange = document.getElementById('herdRange');
+    const svg = document.getElementById('herdSvg');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function maj(n, p) {
+      const kMin = Math.floor(n / 2) + 1;
+      let sum = 0, c = 1;
+      for (let k = 0; k <= n; k++) {
+        if (k > 0) c = c * (n - k + 1) / k;
+        if (k >= kMin) sum += c * Math.pow(p, k) * Math.pow(1 - p, n - k);
+      }
+      return sum;
+    }
+
+    function render() {
+      const followers = Number(herdRange.value); // 0..14 follow Leader #1
+      const indep = 15 - followers;
+      // If Leader + followers >= 8 (i.e. followers >= 7), Leader's bloc ALONE decides the vote -> accuracy collapses to 65.0%!
+      let acc;
+      if (followers >= 7) {
+        acc = 65.0;
+      } else {
+        // Leader has weight (1 + followers), remaining (14 - followers) independent voters have weight 1 each
+        const rem = 14 - followers;
+        // Exact probability: Leader right (0.65) needs >= 8 - (1+followers) from rem; Leader wrong (0.35) needs >= 8 from rem
+        const probAtLeast = (m, need) => {
+          if (need <= 0) return 1;
+          if (need > m) return 0;
+          let s = 0, c = 1;
+          for (let k = 0; k <= m; k++) {
+            if (k > 0) c = c * (m - k + 1) / k;
+            if (k >= need) s += c * Math.pow(0.65, k) * Math.pow(0.35, m - k);
+          }
+          return s;
+        };
+        acc = (0.65 * probAtLeast(rem, 8 - (1 + followers)) + 0.35 * probAtLeast(rem, 8)) * 100;
+      }
+
+      document.getElementById('herdVal').textContent = `${followers} 人抄大嗓门作业（剩余独立脑：${indep} 个）`;
+      const curAcc = document.getElementById('curAcc');
+      curAcc.textContent = `${acc.toFixed(1)}%（${followers >= 7 ? '💥 已退化为 1 人独裁！' : '有效 ' + indep + ' 脑'}）`;
+      curAcc.style.color = followers >= 7 ? 'var(--tax-red)' : (followers >= 3 ? 'var(--tax-amber)' : 'var(--tax-green)');
+
+      let html = '';
+      // Draw 15 juror nodes
+      for (let i = 0; i < 15; i++) {
+        const x = 44 + i * 42;
+        const isLeader = i === 0;
+        const isFollower = i > 0 && i <= followers;
+        const col = isLeader ? 'var(--tax-red)' : (isFollower ? 'var(--tax-amber)' : 'var(--tax-green)');
+        if (isFollower) {
+          html += `<path d="M ${x} 66 Q ${(x + 44) / 2} 22 44 66" fill="none" stroke="var(--tax-amber)" stroke-width="1.5" opacity="0.55"/>`;
+        }
+        html += `<circle cx="${x}" cy="76" r="14" fill="${col}" opacity="0.24" stroke="${col}" stroke-width="2"/>`;
+        html += `<text x="${x}" y="80" text-anchor="middle" fill="var(--tax-ink)" font-size="11" font-weight="800">${isLeader ? '📢' : (isFollower ? '🐑' : '🧠')}</text>`;
+      }
+
+      // Accuracy comparison bar
+      html += `<text x="34" y="128" fill="var(--tax-ink)" font-size="12.5" font-weight="700">当前集体决策准确率：${acc.toFixed(1)}%（全独立基准 88.7%）</text>`;
+      html += `<rect x="34" y="138" width="612" height="20" rx="10" fill="rgba(148,163,184,0.16)"/>`;
+      html += `<rect x="34" y="138" width="${(acc / 100) * 612}" height="20" rx="10" fill="${followers >= 7 ? 'var(--tax-red)' : 'var(--tax-green)'}"/>`;
+      svg.innerHTML = html;
+
+      if (followers >= 7) {
+        ahaBox.innerHTML = '<strong>独立性彻底崩塌（正确率暴跌至 65.0%）：</strong>只要有 7 个人跟着大嗓门举手，其余独立思考者的声音就会被票数彻底淹没——15 个大脑瞬间退化成 <strong>1 个大脑的回声室</strong>！';
+      } else if (followers > 0) {
+        ahaBox.innerHTML = `<strong>群体智慧缩水中（88.7% → ${acc.toFixed(1)}%）：</strong>每多 1 个人放弃独立思考去抄作业，集体的纠错能力就削弱一截！拖到 7 人看断崖崩塌！`;
+      }
+    }
+
+    herdRange.oninput = () => { markDone('模拟了陪审员盲从导致独立性崩塌'); render(); };
+    render();
   </script>
 </body>
 </html>

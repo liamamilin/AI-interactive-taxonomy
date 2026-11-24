@@ -1,64 +1,112 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🛡️ Apache 2.0 专利反制盾牌模拟</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apache 2.0 专利反制盾牌模拟</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .arena { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 16px; }
+    .scene-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    @media (max-width: 680px) { .scene-row { grid-template-columns: 1fr; } }
+    .side-card { background: var(--tax-surface); border: 2px solid var(--tax-border); border-radius: 12px; padding: 13px; }
+    .side-card.hit { border-color: var(--tax-red); background: var(--tax-red-soft); }
+    .side-card.shield { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .s-head { font-weight: 800; font-size: 14px; color: var(--tax-ink); margin-bottom: 6px; }
+    .s-body { font-size: 12.5px; color: var(--tax-muted); line-height: 1.55; }
+    .event-box { background: var(--tax-surface); border-left: 4px solid var(--tax-amber); border-radius: 8px; padding: 12px; font-size: 13.5px; color: var(--tax-ink); line-height: 1.6; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🛡️ Apache 2.0 专利反制盾牌模拟</h1><p>误区：MIT 和 Apache 2.0 差不多，随便选一个就行。真相：MIT 没提专利——某巨头可能让你免费用它的代码，等你做大后再告你侵权；Apache 2.0 则自带“谁告我我就立刻收回你的免费使用权”的反制核武器！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>商业公司生态依赖深度</span><span id="vDep">85%</span></label><input type="range" id="sDep" min="10" max="100" value="85" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>提起专利侵权诉讼攻击度</span><span id="vAtk">70%</span></label><input type="range" id="sAtk" min="0" max="100" value="70" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">Apache 2.0 授权状态</div><div class="k-val" id="kSt">—</div></div>
-        <div class="kpi"><div class="k-lbl">攻击者自身业务瘫痪风险</div><div class="k-val" id="kPar" style="color:#ef4444;">—</div></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🛡️ Apache 2.0 专利反制盾牌模拟</h1>
+      <p>既然 MIT 和 Apache 2.0 都允许免费商用闭源，为什么硅谷大厂（Google、Meta、CNCF 基金会）做大型基础设施时几乎清一色选 <strong>Apache 2.0</strong>？点击下方攻防事件，看看专利流氓或竞争对手起诉你时会发生什么！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="evNormal">🕊️ 情景 1：和平使用开源项目</button>
+        <button class="toy-btn" id="evSubmarine">🦈 情景 2：贡献者暗埋“潜水艇专利”</button>
+        <button class="toy-btn" id="evAttack">⚔️ 情景 3：巨头反手发起专利诉讼</button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="arena">
+      <div class="event-box" id="eventBox"></div>
+
+      <div class="scene-row" style="margin-top:12px;">
+        <div class="side-card" id="mitCard">
+          <div class="s-head">📄 若项目采用 MIT 协议</div>
+          <div class="s-body" id="mitBody"></div>
+        </div>
+        <div class="side-card" id="apCard">
+          <div class="s-head">🛡️ 若项目采用 Apache 2.0 协议</div>
+          <div class="s-body" id="apBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 协议隐藏杀招：</strong>MIT 协议全文只有短短 170 个英文单词，压根没提“专利（Patent）”二字！点击「情景 2」和「情景 3」，看看 Apache 2.0 的第 3 条如何像核威慑盾牌一样自动反杀！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const dep=+document.getElementById('sDep').value, atk=+document.getElementById('sAtk').value;
-  document.getElementById('vDep').textContent=dep+'%'; document.getElementById('vAtk').textContent=atk+'%';
-  const trig=atk>=50;
-  const par=trig?dep:0;
-  document.getElementById('kSt').textContent=trig?'授权自动终止!':'合法有效';
-  document.getElementById('kSt').style.color=trig?'#ef4444':'#10b981';
-  document.getElementById('kPar').textContent=par+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">企业对开源组件依赖度: ${dep}%</text>
-    <rect x="20" y="44" width="${dep*5.4}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="${trig?'#ef4444':'#10b981'}">${trig?'触发专利反制条款 → 吊销全线软件授权，业务瘫痪 '+par+'%':'未发起专利诉讼 → 和平共享免费专利池'}</text>
-    <rect x="20" y="112" width="${Math.max(10,par*5.4)}" height="24" rx="6" fill="${trig?'#ef4444':'#10b981'}"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">互相保证摧毁式的条款，让大型科技公司彼此不敢轻易打开源专利战</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>Apache 2.0 就像开源界的“核威慑条约”：你依赖这个生态越深（${dep}%），就越不敢对外起诉，因为一旦开枪，你自己的免费授权也会在第一时间自动作废！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const events = {
+      normal: {
+        box: '🕊️【和平期】你的团队开源了一个高性能分布式框架，巨头 X 公司免费将其部署在自己的核心云业务上。',
+        mit: '✅ 极其简洁：只需保留版权声明即可商用，没有任何额外法务负担。',
+        ap: '✅ 同样免费商用：需保留版权声明与 NOTICE 归属文件，并标明修改记录。',
+        mitCls: 'shield', apCls: 'shield',
+        aha: '在和平时期，MIT 与 Apache 2.0 体验几乎完全相同——真正的分水岭出现在专利冲突爆发的那一刻！点「情景 2」或「情景 3」看看。'
+      },
+      submarine: {
+        box: '🦈【潜水艇专利突袭】某公司向你的开源项目提交了一段核心 PR 代码，半年后等全行业都用上了，它突然跳出来起诉所有人侵犯了它暗中申请的该算法专利！',
+        mit: '🚨 陷入法律模糊地带！MIT 协议全文只授权了“著作权（Copyright）”，根本没明确写出“专利免费授权”，全社区用户被迫卷入天价专利敲诈官司！',
+        ap: '🛡️ 直接免疫！Apache 2.0 第 3 条明确规定：任何代码贡献者，自动向全体用户授予其贡献代码所涉必要专利的永久、全球、免版税许可，彻底堵死“潜水艇专利”暗算！',
+        mitCls: 'hit', apCls: 'shield',
+        aha: '🏆 Apache 2.0 显式专利授权（Explicit Patent Grant）：防止贡献者“先贡献代码养肥生态，再拿专利收割用户”！'
+      },
+      attack: {
+        box: '⚔️【巨头专利诉讼反击】巨头 X 免费用着你的开源框架赚大钱，却出于商业竞争反手起诉该开源框架侵犯了它的某项专利！',
+        mit: '🚨 单方面挨打！巨头 X 一边起诉你赔钱，一边依然可以合法免费继续使用你的 MIT 开源代码，毫无后顾之忧！',
+        ap: '⚡ 自动触发“专利反制盾牌（Patent Retaliation）”！一旦巨头 X 发起专利诉讼，Apache 2.0 授予巨头 X 的全部专利许可在起诉当天<strong>立即自动终止</strong>——巨头自己核心云业务瞬间构成非法侵权，被迫撤销诉讼！',
+        mitCls: 'hit', apCls: 'shield',
+        aha: '🛡️ 相互确保摧毁（MAD）式的开源和平守护者！Apache 2.0 的专利反制条款让商业巨头不敢轻易对开源生态动用专利大棒，成为企业级开源的黄金标准。'
+      }
+    };
+
+    let cur = 'normal';
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const e = events[cur];
+      document.getElementById('eventBox').innerHTML = e.box;
+      document.getElementById('mitBody').innerHTML = e.mit;
+      document.getElementById('apBody').innerHTML = e.ap;
+      document.getElementById('mitCard').className = 'side-card ' + e.mitCls;
+      document.getElementById('apCard').className = 'side-card ' + e.apCls;
+      document.getElementById('ahaBox').innerHTML = `<strong>💡 攻防复盘：</strong>${e.aha}`;
+
+      ['evNormal', 'evSubmarine', 'evAttack'].forEach(id => document.getElementById(id).classList.remove('primary'));
+      const map = { normal: 'evNormal', submarine: 'evSubmarine', attack: 'evAttack' };
+      document.getElementById(map[cur]).classList.add('primary');
+    }
+
+    document.getElementById('evNormal').addEventListener('click', () => { cur = 'normal'; markDone('查看了开源协议和平场景'); render(); });
+    document.getElementById('evSubmarine').addEventListener('click', () => { cur = 'submarine'; markDone('推演了潜水艇专利突袭场景'); render(); });
+    document.getElementById('evAttack').addEventListener('click', () => { cur = 'attack'; markDone('触发了 Apache 2.0 专利反制盾牌'); render(); });
+
+    render();
   </script>
 </body>
 </html>

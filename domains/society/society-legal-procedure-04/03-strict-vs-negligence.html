@@ -1,67 +1,161 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🚗 严格责任 vs 过失责任：社会总成本曲线</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>严格责任 vs 过失责任：社会总成本曲线</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .viz-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .kpi { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
+    svg text { fill: var(--tax-muted); font-family: inherit; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🚗 严格责任 vs 过失责任：社会总成本曲线</h1><p>误区：只要企业做足了所有安全检查（无过失），出了事就不该让它赔钱。真相：对于高危行业，只有用严格责任，才能逼企业连“少开一点产能、别把厂建在闹市区”的危险活动总量也降下来！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>企业安全谨慎投入</span><span id="vCare">60 分</span></label><input type="range" id="sCare" min="10" max="100" value="60" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>高危行业固有危险系数</span><span id="vRisk">70%</span></label><input type="range" id="sRisk" min="20" max="100" value="70" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🚗 严格责任 vs 过失责任：社会总成本曲线</h1>
+      <p>法经济学把事故治理看成一道最优化问题：<strong>社会总成本 = 安全预防投入 + 期望事故损失</strong>（呈 U 型曲线，在 x* 处达到最低点）。切换「过失责任」与「严格责任」，拖动企业安全投入水平 x，看看企业会自发停在哪里！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row" style="margin-bottom:8px;">
+        <button class="toy-btn primary" id="negBtn">⚖️ 过失责任制（达标 x*≥55 即免赔）</button>
+        <button class="toy-btn" id="strBtn">☢️ 严格责任制（出事无论过错一律全赔）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">预期事故损失</div><div class="k-val" id="kAcc" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">社会总事故+防护成本</div><div class="k-val" id="kTot" style="color:#0284c7;">—</div></div>
+      <div class="control-group">
+        <label>企业安全预防投入水平 (x)：<strong id="xVal">55 万</strong></label>
+        <input id="xSlider" type="range" min="10" max="100" step="5" value="55">
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="viz-box">
+      <svg id="costSvg" viewBox="0 0 640 245" style="width:100%;height:auto;display:block;"></svg>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-l">企业自身承担总支出</div>
+          <div class="kpi-v" id="firmVal">55 万</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">未获赔的社会残余损失</div>
+          <div class="kpi-v" id="resVal">38 万</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">全社会总成本（越低越好）</div>
+          <div class="kpi-v" id="socVal">93 万</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 归责机制对比：</strong>先在「过失责任」下拖动滑块越过 55 万法定达标线，看企业支出如何出现悬崖式骤降；再切换到「严格责任」，观察核电/高危爆破等行业为何必须让企业内化全部残余风险！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const care=+document.getElementById('sCare').value, risk=+document.getElementById('sRisk').value/100;
-  document.getElementById('vCare').textContent=care+' 分'; document.getElementById('vRisk').textContent=(risk*100).toFixed(0)+'%';
-  const acc=x=>Math.round(180*risk*Math.exp(-x/35));
-  const tot=x=>x+acc(x);
-  let pts='';
-  for(let x=10;x<=100;x+=3){
-    pts+=`${40+(x-10)/90*520},${160-Math.min(140,tot(x)*0.75)} `;
-  }
-  const cx=40+(care-10)/90*520, cy=160-Math.min(140,tot(care)*0.75);
-  document.getElementById('kAcc').textContent=acc(care)+' 万';
-  document.getElementById('kTot').textContent=tot(care)+' 万';
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="160" x2="560" y2="160" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${pts}"/>
-    <circle cx="${cx}" cy="${cy}" r="6" fill="#0284c7"/>
-    <text x="50" y="32" font-size="12" font-weight="800" fill="#0284c7">U型社会总成本曲线 (防护投入 + 剩余事故损失)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>过失责任只管“操作够不够小心”，但高危行业就算小心翼翼仍有 ${acc(care)} 万残余风险！严格责任强迫企业把全部残余风险内化，从而自主把产能和选址调整到社会最安全水平！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const xSlider = document.getElementById('xSlider');
+    const svg = document.getElementById('costSvg');
+    let regime = 'negligence'; // 'negligence' | 'strict'
+    const X_STAR = 55;
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function expectedDamage(x) {
+      return 210 * Math.exp(-0.031 * x);
+    }
+
+    function firmCost(x, mode) {
+      const dmg = expectedDamage(x);
+      if (mode === 'strict') return x + dmg;
+      return x >= X_STAR ? x : x + dmg;
+    }
+
+    function render() {
+      const x = Number(xSlider.value);
+      document.getElementById('xVal').textContent = x + ' 万';
+
+      const dmg = expectedDamage(x);
+      const soc = x + dmg;
+      const firm = firmCost(x, regime);
+      const residual = regime === 'strict' ? 0 : (x >= X_STAR ? dmg : 0);
+
+      document.getElementById('firmVal').textContent = Math.round(firm) + ' 万';
+      document.getElementById('resVal').textContent = Math.round(residual) + ' 万';
+      document.getElementById('socVal').textContent = Math.round(soc) + ' 万';
+
+      const W = 640, H = 245, padL = 46, padR = 24, padT = 22, padB = 34;
+      const sx = v => padL + ((v - 10) / 90) * (W - padL - padR);
+      const sy = v => H - padB - (v / 220) * (H - padT - padB);
+
+      let pSoc = '', pDmg = '', pFirm = '';
+      for (let t = 10; t <= 100; t += 2) {
+        const cmd = t === 10 ? 'M' : 'L';
+        pSoc += `${cmd}${sx(t).toFixed(1)},${sy(t + expectedDamage(t)).toFixed(1)} `;
+        pDmg += `${cmd}${sx(t).toFixed(1)},${sy(expectedDamage(t)).toFixed(1)} `;
+        const fc = firmCost(t, regime);
+        // Break line at discontinuity for negligence
+        const fCmd = (t === 10 || (regime === 'negligence' && t === 56)) ? 'M' : 'L';
+        pFirm += `${fCmd}${sx(t).toFixed(1)},${sy(fc).toFixed(1)} `;
+      }
+
+      svg.innerHTML = `
+        <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="var(--tax-muted)"/>
+        <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="var(--tax-muted)"/>
+        <line x1="${sx(X_STAR).toFixed(1)}" y1="${padT}" x2="${sx(X_STAR).toFixed(1)}" y2="${H - padB}" stroke="var(--tax-green)" stroke-dasharray="4,3"/>
+        <text x="${sx(X_STAR).toFixed(1)}" y="${padT + 12}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--tax-green)">社会最优 x*=${X_STAR}</text>
+
+        <path d="${pDmg}" fill="none" stroke="var(--tax-amber)" stroke-width="2" stroke-dasharray="5,4"/>
+        <path d="${pSoc}" fill="none" stroke="var(--tax-primary)" stroke-width="2.6" opacity="0.7"/>
+        <path d="${pFirm}" fill="none" stroke="var(--tax-red)" stroke-width="3.2"/>
+
+        <circle cx="${sx(x).toFixed(1)}" cy="${sy(firm).toFixed(1)}" r="6" fill="var(--tax-red)" stroke="var(--tax-surface)" stroke-width="2"/>
+        <circle cx="${sx(x).toFixed(1)}" cy="${sy(soc).toFixed(1)}" r="4.5" fill="var(--tax-primary)"/>
+
+        <text x="${W - padR - 6}" y="${padT + 14}" text-anchor="end" font-size="11" font-weight="700" fill="var(--tax-red)">━━ 企业实际承担成本</text>
+        <text x="${W - padR - 6}" y="${padT + 30}" text-anchor="end" font-size="11" fill="var(--tax-primary)">━━ 社会总成本 (U 型)</text>
+        <text x="${W - padR - 6}" y="${padT + 46}" text-anchor="end" font-size="11" fill="var(--tax-amber)">--- 事故期望损失</text>
+        ${[10, 30, 55, 80, 100].map(v => `<text x="${sx(v).toFixed(1)}" y="${H - padB + 17}" text-anchor="middle" font-size="11">${v}万</text>`).join('')}
+      `;
+
+      const aha = document.getElementById('ahaBox');
+      if (regime === 'negligence') {
+        if (x < X_STAR) {
+          aha.innerHTML = `<strong>⚠️ 过失责任下未达标（x = ${x} 万 &lt; 55 万）：</strong>企业既要掏预防费，出事还要全赔，总支出高达 <strong>${Math.round(firm)} 万</strong>——倒逼它赶紧加大投入跨过 55 万红线！`;
+        } else {
+          aha.innerHTML = `<strong>⚖️ 过失责任的“悬崖免赔”效应：</strong>一跨过法定标准 <strong>55 万</strong>，企业支出骤降至 <strong>${Math.round(firm)} 万</strong>，剩余 <strong>${Math.round(residual)} 万</strong>不可避免的意外由受害人自担。缺点是企业不会主动缩减高危业务规模！`;
+        }
+      } else {
+        aha.innerHTML = `<strong>☢️ 严格责任制（风险完全内化）：</strong>无论企业投入多少，出事一律全赔，红线与蓝线完全重合！这不仅迫使企业精准停在社会最优点 <strong>x* = 55 万</strong>，还会让核电、化工厂等高危行业连“开不开工、开多大”都把残余风险算进账本！`;
+      }
+    }
+
+    xSlider.addEventListener('input', () => { markDone('探索了社会总事故成本 U 型曲线'); render(); });
+    document.getElementById('negBtn').addEventListener('click', () => {
+      regime = 'negligence';
+      document.getElementById('negBtn').classList.add('primary');
+      document.getElementById('strBtn').classList.remove('primary');
+      markDone('切换至过失责任制模型');
+      render();
+    });
+    document.getElementById('strBtn').addEventListener('click', () => {
+      regime = 'strict';
+      document.getElementById('strBtn').classList.add('primary');
+      document.getElementById('negBtn').classList.remove('primary');
+      markDone('切换至严格责任制模型');
+      render();
+    });
+
+    render();
   </script>
 </body>
 </html>

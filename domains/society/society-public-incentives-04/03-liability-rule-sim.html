@@ -1,67 +1,137 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏛️ 产权规则 vs 责任规则：卡拉布雷西大教堂</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>产权规则 vs 责任规则：卡拉布雷西大教堂</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .case-box { padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    @media (max-width: 600px) { .pair { grid-template-columns: 1fr; } }
+    .opt-btn {
+      text-align: left; padding: 12px; border-radius: 10px; border: 1.5px solid var(--tax-border);
+      background: var(--tax-surface); color: var(--tax-ink); cursor: pointer;
+    }
+    .opt-btn.ok { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .opt-btn.bad { border-color: var(--tax-red); background: var(--tax-red-soft); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🏛️ 产权规则 vs 责任规则：卡拉布雷西大教堂</h1><p>误区：任何时候都应该绝对保护所有权，未经主人同意一分钱都不能动。真相：如果紧急救灾要借用邻居的一块地，双方谈不拢时，“先征收后由法院按市价赔偿”的责任规则效率最高！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>双方私下谈判阻塞度 (高=难谈拢)</span><span id="vB">70%</span></label><input type="range" id="sB" min="10" max="100" value="70" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>法院评估赔偿的误差率</span><span id="vE">20%</span></label><input type="range" id="sE" min="5" max="80" value="20" oninput="upd()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🏛️ 产权规则 vs 责任规则：大法官裁判台（情景）</h1>
+      <p>法经济学名著《大教堂的一瞥》把法律保护分为两种武器：<strong>🔒 财产规则</strong>（未经我同意绝对不准碰，必须事前自愿谈判）；<strong>⚖️ 责任规则</strong>（允许你先行动，事后由法院核定公平赔偿）。为下面 3 起经典案卷选择最优规则！</p>
+    </header>
+
+    <section class="toy-card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;color:var(--tax-muted);">
+        <span id="idxTag">最高法判例 1 / 3</span>
+        <span id="scoreTag" style="color:var(--tax-primary);font-weight:700;">精准裁判：0 / 3</span>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">产权规则总损耗</div><div class="k-val" id="kP">—</div></div>
-        <div class="kpi"><div class="k-lbl">责任规则总损耗</div><div class="k-val" id="kL">—</div></div>
-        <div class="kpi"><div class="k-lbl">最优法律规则</div><div class="k-val" id="kW" style="color:#0284c7;">—</div></div>
+
+      <div class="case-box">
+        <div style="font-size:16px;font-weight:800;" id="cTitle"></div>
+        <div style="font-size:12.5px;color:var(--tax-muted);margin-top:5px;" id="cDesc"></div>
+        <div class="pair">
+          <button class="opt-btn" id="btnProp">
+            <div style="font-weight:800;font-size:14px;">🔒 适用【财产规则】</div>
+            <div style="font-size:12px;color:var(--tax-muted);margin-top:3px;">必须事前谈妥价格，否则法院下禁令禁止侵犯</div>
+          </button>
+          <button class="opt-btn" id="btnLiab">
+            <div style="font-weight:800;font-size:14px;">⚖️ 适用【责任规则】</div>
+            <div style="font-size:12px;color:var(--tax-muted);margin-top:3px;">允许先行动/发生侵权，事后按法院估价赔钱</div>
+          </button>
+        </div>
       </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span id="fbLine" style="font-size:13px;color:var(--tax-muted);">关键判准：事前双方有没有条件低成本谈妥？</span>
+        <button class="toy-btn secondary" id="nextBtn" style="display:none;">下一个判例 →</button>
+      </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>大教堂黄金判准：</strong>交易成本<strong>低</strong>（买卖二手车/房屋）→ 用<strong>财产规则</strong>保护主观估值；交易成本<strong>极高</strong>（紧急避险/车祸/修高铁拆迁）→ 用<strong>责任规则</strong>防止敲竹杠与死锁！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const b=+document.getElementById('sB').value, e=+document.getElementById('sE').value;
-  document.getElementById('vB').textContent=b+'%'; document.getElementById('vE').textContent=e+'%';
-  const lossP=Math.round(b*0.9), lossL=Math.round(e*0.85+10);
-  const win=lossP<=lossL?'产权规则 (必须同意才能买)':'责任规则 (先使用、法院定损赔)';
-  document.getElementById('kP').textContent=lossP+' 分';
-  document.getElementById('kL').textContent=lossL+' 分';
-  document.getElementById('kW').textContent=win;
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">产权规则损耗 (谈判僵局成本): ${lossP}</text>
-    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${lossP*5.4}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#8b5cf6">责任规则损耗 (法院估价偏差): ${lossL}</text>
-    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${lossL*5.4}" height="24" rx="6" fill="#8b5cf6"/>
-    <text x="20" y="166" font-size="13" font-weight="800" fill="#10b981">推荐制度: ${win}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当谈判阻塞高（如紧急征地、排污侵权）且法院估价误差可控时，<strong>责任规则（损害赔偿）</strong>能绕过敲竹杠僵局；当双方容易面对面谈价时，<strong>产权规则</strong>最能保护真实估值！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const CASES = [
+      {
+        title: '⛵ 案卷 1：突遇 12 级台风，货船紧急强行拴在私人码头避险（经典 Vincent 案）',
+        desc: '狂风大作来不及找码头老板谈判，强行靠岸虽撞坏 ¥5,000 木板，却救下了价值 ¥500 万的船和船员！',
+        best: 'liab',
+        fb: '必须适用【责任规则】！紧急避险时交易成本趋近无穷大（根本没时间讨价还价），法律允许船长先靠岸保命，事后照价赔偿 ¥5,000 修木板费！'
+      },
+      {
+        title: '🏠 案卷 2：邻居看上了你家珍藏的一幅传家名画，想直接拿走再按市场价给你转账',
+        desc: '双方天天见面、完全可以坐下来谈价，且这幅画对你有着极高的个人情感价值。',
+        best: 'prop',
+        fb: '必须适用【财产规则】！交易成本极低时绝不能允许“强买强卖事后赔钱”，否则市场秩序崩塌，法官也根本测不出你对传家宝的真实主观估值！'
+      },
+      {
+        title: '🚗 案卷 3：每天马路上千万辆车行驶，万一发生剐蹭交通事故该如何定规矩？',
+        desc: '司机出发前不可能和路上的 100 万个陌生路人挨个签合同约定“撞了赔多少”。',
+        best: 'liab',
+        fb: '必须适用【责任规则（侵权法+交强险）】！陌生人之间事前谈判成本无穷大，只能允许大家先合法上路，一旦出事故再由法律按统一标准定损赔偿！'
+      }
+    ];
+
+    let idx = 0, score = 0, locked = false, done = false;
+    const btnP = document.getElementById('btnProp');
+    const btnL = document.getElementById('btnLiab');
+    const fbLine = document.getElementById('fbLine');
+    const nextBtn = document.getElementById('nextBtn');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const c = CASES[idx];
+      locked = false;
+      nextBtn.style.display = 'none';
+      btnP.className = 'opt-btn';
+      btnL.className = 'opt-btn';
+      document.getElementById('idxTag').textContent = `最高法判例 ${idx + 1} / ${CASES.length}`;
+      document.getElementById('cTitle').textContent = c.title;
+      document.getElementById('cDesc').textContent = c.desc;
+      fbLine.textContent = '根据事前交易成本高低选择法律保护规则';
+    }
+
+    function judge(choice) {
+      if (locked) return;
+      locked = true;
+      const c = CASES[idx];
+      const ok = choice === c.best;
+      (choice === 'prop' ? btnP : btnL).classList.add(ok ? 'ok' : 'bad');
+      if (ok) score++;
+      document.getElementById('scoreTag').textContent = `精准裁判：${score} / ${CASES.length}`;
+      fbLine.textContent = ok ? '✓ 大法官级精准裁判！' : '⚠️ 规则错配会引发效率灾难，看下方解析';
+      ahaBox.innerHTML = `<strong>法经济学裁判理由：</strong>${c.fb}`;
+      if (idx === CASES.length - 1) {
+        markDone(`完成卡拉布雷西大教堂三案裁判（${score}/3）`);
+        nextBtn.textContent = '↺ 重新审案';
+      } else {
+        nextBtn.textContent = '下一个判例 →';
+      }
+      nextBtn.style.display = 'inline-block';
+    }
+
+    btnP.onclick = () => judge('prop');
+    btnL.onclick = () => judge('liab');
+    nextBtn.onclick = () => {
+      if (idx === CASES.length - 1) { idx = 0; score = 0; document.getElementById('scoreTag').textContent = '精准裁判：0 / 3'; }
+      else idx++;
+      render();
+    };
+    render();
   </script>
 </body>
 </html>

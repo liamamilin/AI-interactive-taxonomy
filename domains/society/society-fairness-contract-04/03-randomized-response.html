@@ -1,63 +1,160 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🪙 随机回答法：如何让受访者放心承认尴尬秘密？</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>随机回答法：如何让受访者放心承认尴尬秘密？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .flow-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 16px; }
+    .step-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0; }
+    @media (max-width: 680px) { .step-row { grid-template-columns: 1fr; } }
+    .step-box { background: var(--tax-surface); border: 1.5px solid var(--tax-border); border-radius: 10px; padding: 12px; text-align: center; }
+    .step-box.hi { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .big-emoji { font-size: 26px; margin: 4px 0; }
+    .sim-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .s-box { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .s-l { font-size: 12px; color: var(--tax-muted); }
+    .s-v { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🪙 随机回答法：如何让受访者放心承认尴尬秘密？</h1><p>误区：问卷调查问“你有没有偷逃过税或考试作弊”，除了匿名信箱之外没有办法让人敢说真话。真相：让受访者先偷偷抛硬币，正面才答真话、反面随机乱填——调查员永远不知道你是不是真的，却能精准反推出全校真实作弊率！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>硬币正面 (必须答真话) 概率</span><span id="vP">50%</span></label><input type="range" id="sP" min="20" max="80" value="50" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>群体真实作弊比例 (上帝视角)</span><span id="vTrue">24%</span></label><input type="range" id="sTrue" min="5" max="60" value="24" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🪙 随机回答法：如何让受访者放心承认尴尬秘密？</h1>
+      <p>想调查“有多少人在上班时间偷偷摸鱼/考试作弊”，直接问没人会说实话。华纳随机回答法让你<strong>背着调查员抛两枚硬币</strong>：第一枚正面就说真话；反面就看第二枚（正面答“是”，反面答“否”）。试试看！</p>
+    </header>
+
+    <div class="flow-card">
+      <div style="font-size:13.5px;font-weight:700;color:var(--tax-ink);margin-bottom:8px;">步骤 1：先诚实选定你内心的真实秘密（仅你自己知道）：</div>
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="truthYesBtn">🤫 我的真相：是（做过）</button>
+        <button class="toy-btn" id="truthNoBtn">😇 我的真相：否（没做过）</button>
+        <button class="toy-btn" id="flipBtn">🪙 秘密抛硬币生成提交答案</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">问卷表面“是”的比例</div><div class="k-val" id="kObs">—</div></div>
-        <div class="kpi"><div class="k-lbl">公式反推真实比例</div><div class="k-val" id="kEst" style="color:#10b981;">—</div></div>
+
+      <div class="step-row">
+        <div class="step-box" id="coin1Box">
+          <div style="font-size:12px;color:var(--tax-muted);">第 1 枚硬币（决定真话/随机）</div>
+          <div class="big-emoji" id="c1Emoji">🪙</div>
+          <div style="font-size:12px;" id="c1Text">待抛掷</div>
+        </div>
+        <div class="step-box" id="coin2Box">
+          <div style="font-size:12px;color:var(--tax-muted);">第 2 枚硬币（反面时启用）</div>
+          <div class="big-emoji" id="c2Emoji">🪙</div>
+          <div style="font-size:12px;" id="c2Text">待抛掷</div>
+        </div>
+        <div class="step-box hi">
+          <div style="font-size:12px;color:var(--tax-muted);">最终交给调查员的答案</div>
+          <div class="big-emoji" id="ansEmoji">❓</div>
+          <div style="font-size:12px;font-weight:700;" id="ansText">等待生成</div>
+        </div>
+      </div>
+
+      <hr style="border:none;border-top:1px dashed var(--tax-border);margin:14px 0;">
+
+      <div class="control-group">
+        <label>步骤 2：群体 2,000 人模拟 — 设定隐藏的真实“摸鱼/作弊”比例：<strong id="truePctVal">30%</strong></label>
+        <input id="truePctSlider" type="range" min="5" max="80" step="5" value="30">
+      </div>
+      <div class="toy-btn-row" style="margin-top:8px;">
+        <button class="toy-btn primary" id="surveyBtn">📊 对 2,000 人发起随机回答法调研</button>
+      </div>
+
+      <div class="sim-strip">
+        <div class="s-box">
+          <div class="s-l">回收问卷“答是”比例</div>
+          <div class="s-v" id="obsVal">--</div>
+        </div>
+        <div class="s-box">
+          <div class="s-l">公式反推真实比例</div>
+          <div class="s-v" id="estVal" style="color:var(--tax-green);">--</div>
+        </div>
+        <div class="s-box">
+          <div class="s-l">隐藏设定真相</div>
+          <div class="s-v" id="realVal">30%</div>
+        </div>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 合理推诿的魔力：</strong>先点击「秘密抛硬币」感受个人如何安全隐身，再点击「发起 2,000 人调研」，看统计学家如何用小学算术 <code>真实比例 = 2 × (观察答是率 - 25%)</code> 精准还原群体真相！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const p=+document.getElementById('sP').value/100, tr=+document.getElementById('sTrue').value/100;
-  document.getElementById('vP').textContent=(p*100).toFixed(0)+'%'; document.getElementById('vTrue').textContent=(tr*100).toFixed(0)+'%';
-  const obs=p*tr + (1-p)*0.5;
-  const est=(obs-(1-p)*0.5)/p;
-  document.getElementById('kObs').textContent=(obs*100).toFixed(1)+'%';
-  document.getElementById('kEst').textContent=(est*100).toFixed(1)+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#64748b">上帝视角真实比例: ${(tr*100).toFixed(1)}%</text>
-    <rect x="20" y="44" width="${tr*540}" height="22" rx="6" fill="#64748b"/>
-    <text x="20" y="96" font-size="13" font-weight="800" fill="#f59e0b">掺入硬币噪音后表面答“是”: ${(obs*100).toFixed(1)}%</text>
-    <rect x="20" y="106" width="${obs*540}" height="22" rx="6" fill="#f59e0b"/>
-    <text x="20" y="156" font-size="13" font-weight="800" fill="#10b981">脱噪反推 (Obs - 0.5×(1-p)) / p = ${(est*100).toFixed(1)}% (完美还原!)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>哪怕你在问卷上勾了“是”，也可以理直气壮说“我是抛硬币反面随机选的”——<strong>个体拥有绝对的合理推诿权</strong>，而统计学家依然能精准算出群体真相 <strong>${(est*100).toFixed(1)}%</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let myTruth = true;
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    document.getElementById('truthYesBtn').addEventListener('click', () => {
+      myTruth = true;
+      document.getElementById('truthYesBtn').classList.add('primary');
+      document.getElementById('truthNoBtn').classList.remove('primary');
+      markDone('选择了随机回答法个人真相');
+    });
+
+    document.getElementById('truthNoBtn').addEventListener('click', () => {
+      myTruth = false;
+      document.getElementById('truthNoBtn').classList.add('primary');
+      document.getElementById('truthYesBtn').classList.remove('primary');
+      markDone('选择了随机回答法个人真相');
+    });
+
+    document.getElementById('flipBtn').addEventListener('click', () => {
+      const c1 = Math.random() < 0.5; // true = Heads (tell truth)
+      const c2 = Math.random() < 0.5; // true = Heads (say Yes)
+      const finalYes = c1 ? myTruth : c2;
+
+      document.getElementById('c1Emoji').textContent = c1 ? '🌞' : '🌙';
+      document.getElementById('c1Text').textContent = c1 ? '正面 → 说真话' : '反面 → 听第2枚';
+      document.getElementById('c2Emoji').textContent = c1 ? '➖' : (c2 ? '🌞' : '🌙');
+      document.getElementById('c2Text').textContent = c1 ? '无需使用' : (c2 ? '正面 → 强答“是”' : '反面 → 强答“否”');
+      document.getElementById('ansEmoji').textContent = finalYes ? '✅ 是' : '❌ 否';
+      document.getElementById('ansText').textContent = finalYes ? '提交：是（调查员猜不透真假）' : '提交：否（调查员猜不透真假）';
+
+      markDone('体验了随机回答法个人抛硬币保护');
+      const aha = document.getElementById('ahaBox');
+      if (finalYes) {
+        aha.innerHTML = `<strong>🛡️ 完美“合理推诿”生效！</strong>你向调查员提交了「是」，但因为所有清白的人也有 25% 概率被硬币逼着答“是”，老板或老师<strong>永远无法指控你真的做过</strong>！这就是本地差分隐私（LDP）的原型。`;
+      } else {
+        aha.innerHTML = `<strong>🛡️ 隐私安全受保护！</strong>你提交了「否」${myTruth ? '（硬币帮你巧妙藏起了真相！）' : '（如实或随机掩护）'}。现在试试下方的「2,000 人群体调研」，看噪声如何在大数定律下奇迹般抵消！`;
+      }
+    });
+
+    const slider = document.getElementById('truePctSlider');
+    slider.addEventListener('input', () => {
+      document.getElementById('truePctVal').textContent = slider.value + '%';
+      document.getElementById('realVal').textContent = slider.value + '%';
+      markDone('调整了随机回答法群体真实比例');
+    });
+
+    document.getElementById('surveyBtn').addEventListener('click', () => {
+      const p = Number(slider.value) / 100;
+      const N = 2000;
+      let yesCount = 0;
+      for (let i = 0; i < N; i++) {
+        const truth = Math.random() < p;
+        const c1 = Math.random() < 0.5;
+        const ans = c1 ? truth : (Math.random() < 0.5);
+        if (ans) yesCount++;
+      }
+      const obs = yesCount / N;
+      const est = Math.max(0, Math.min(1, 2 * (obs - 0.25)));
+
+      document.getElementById('obsVal').textContent = (obs * 100).toFixed(1) + '%';
+      document.getElementById('estVal').textContent = (est * 100).toFixed(1) + '%';
+      markDone('运行了 2000 人随机回答法群体反推实验');
+
+      document.getElementById('ahaBox').innerHTML = `<strong>🎯 群体真相精准还原！</strong>在 2,000 份加噪问卷中，观察到 <strong>${(obs * 100).toFixed(1)}%</strong> 答“是”。减去硬币随机贡献的 25% 再乘以 2，反推出真实比例为 <strong>${(est * 100).toFixed(1)}%</strong>（与隐藏真相 <strong>${slider.value}%</strong> 几乎分毫不差）——个人隐私 100% 受保护，群体统计依然精准！`;
+    });
   </script>
 </body>
 </html>

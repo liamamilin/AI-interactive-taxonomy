@@ -1,66 +1,186 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏠 调整赢家算法：分房分车分股权怎么才不打架？</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>调整赢家算法：分房分车分股权怎么才不打架？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .table-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .asset-row { display: grid; grid-template-columns: 110px 1fr 1fr; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--tax-border); }
+    .asset-row:last-child { border-bottom: none; }
+    .a-name { font-weight: 800; font-size: 13.5px; color: var(--tax-ink); }
+    .s-wrap { font-size: 12px; color: var(--tax-muted); }
+    .s-wrap strong { color: var(--tax-ink); }
+    .out-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    @media (max-width: 640px) { .asset-row { grid-template-columns: 1fr; } .out-grid { grid-template-columns: 1fr; } }
+    .out-card { background: var(--tax-surface); border: 1.5px solid var(--tax-green); border-radius: 10px; padding: 12px; }
+    .out-title { font-weight: 800; font-size: 14px; color: var(--tax-ink); display: flex; justify-content: space-between; }
+    .out-items { font-size: 12.5px; color: var(--tax-muted); margin-top: 6px; line-height: 1.6; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🏠 调整赢家算法：分房分车分股权怎么才不打架？</h1><p>误区：不可拆分的财产（房子、宠物、股权）只能拍卖变现或者每人一半硬砍，不可能公平。真相：只要让双方把 100 点自由分配给各项资产，算法就能找到既无嫉妒、总分又最高的帕累托最优分配！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>甲方把多少点数押在“房产”上</span><span id="vA">70 点</span></label><input type="range" id="sA" min="10" max="90" value="70" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>乙方把多少点数押在“房产”上</span><span id="vB">35 点</span></label><input type="range" id="sB" min="10" max="90" value="35" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">房产归属</div><div class="k-val" id="kH" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">双方各自获得总点数</div><div class="k-val" id="kPts" style="color:#10b981;">—</div></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🏠 调整赢家算法：分房分车分股权怎么才不打架？</h1>
+      <p>合伙人散伙或夫妻离婚分家产，最怕“每样都想抢”。布拉姆斯-泰勒「调整赢家（Adjusted Winner）」算法：双方各自按喜好给 4 项资产打分（系统自动归一化为 100 分），最多只需切分 <strong>1 项</strong>资产，就能让双方拿到<strong>完全相等且远超 50 分</strong>的满意份额！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="preset1">场景：合伙人散伙分股权</button>
+        <button class="toy-btn" id="preset2">场景：家庭和平分房产现金</button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="table-card">
+      <div id="assetRows"></div>
+
+      <div class="out-grid">
+        <div class="out-card">
+          <div class="out-title"><span>🧑 甲方最终所得</span><strong id="scoreA" style="color:var(--tax-green);">-- 分</strong></div>
+          <div class="out-items" id="itemsA"></div>
+        </div>
+        <div class="out-card">
+          <div class="out-title"><span>👩 乙方最终所得</span><strong id="scoreB" style="color:var(--tax-green);">-- 分</strong></div>
+          <div class="out-items" id="itemsB"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 调整赢家算法奥秘：</strong>拖动任意一项资产的双方打分，观察算法如何自动把每件物品先分给更看重它的人，再精准微调“性价比最接近 1”的那一项，达成双赢平局！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const aH=+document.getElementById('sA').value, bH=+document.getElementById('sB').value;
-  document.getElementById('vA').textContent=aH+' 点'; document.getElementById('vB').textContent=bH+' 点';
-  const aS=100-aH, bS=100-bH;
-  const aWinsH=aH>=bH;
-  const x=aWinsH?(aH/(aH+bS)):(bH/(bH+aS));
-  const score=Math.round((aWinsH?aH:aS)+0);
-  const eqScore=Math.round(Math.max(aH,bH) + (1-x)*(aWinsH?aS:bS));
-  document.getElementById('kH').textContent=aWinsH?'甲方得房产':'乙方得房产';
-  document.getElementById('kPts').textContent=`各得约 ${Math.min(95,Math.max(55,Math.round((aH+bS+Math.abs(aH-bH))/2)))} 点 (>50!)`;
-  document.getElementById('svg').innerHTML=`
-    <rect x="30" y="34" width="240" height="55" rx="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
-    <text x="150" y="66" text-anchor="middle" font-size="14" font-weight="850" fill="#0369a1">🏠 房产 → ${aWinsH?'甲方 ('+aH+'点)':'乙方 ('+bH+'点)'}</text>
-    <rect x="330" y="34" width="240" height="55" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
-    <text x="450" y="66" text-anchor="middle" font-size="14" font-weight="850" fill="#b45309">📈 股票 → ${aWinsH?'乙方 ('+bS+'点)':'甲方 ('+aS+'点)'}</text>
-    <text x="30" y="138" font-size="13" font-weight="800" fill="#10b981">若某一方总分偏低，自动将高分项按比例微调折现补齐，让双方同时拿到 > 50% 的心理价值！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>调整赢家算法利用了“大家在乎的东西不一样”——把房产给最在乎房产的 ${aWinsH?'甲方':'乙方'}，把股票给另一方，两人都能拿走远超 50 点的满足感！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const assets = [
+      { name: '🏢 核心房产', a: 45, b: 25 },
+      { name: '📈 公司股权', a: 30, b: 15 },
+      { name: '🚗 代步豪车', a: 10, b: 30 },
+      { name: '💰 现金存款', a: 15, b: 30 }
+    ];
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function buildUI() {
+      const box = document.getElementById('assetRows');
+      box.innerHTML = assets.map((it, i) => `
+        <div class="asset-row">
+          <div class="a-name">${it.name}</div>
+          <div class="s-wrap">
+            甲方重视度：<strong id="la_${i}"></strong>
+            <input type="range" min="5" max="80" step="5" value="${it.a}" data-who="a" data-i="${i}">
+          </div>
+          <div class="s-wrap">
+            乙方重视度：<strong id="lb_${i}"></strong>
+            <input type="range" min="5" max="80" step="5" value="${it.b}" data-who="b" data-i="${i}">
+          </div>
+        </div>
+      `).join('');
+
+      box.querySelectorAll('input').forEach(inp => {
+        inp.addEventListener('input', () => {
+          assets[Number(inp.dataset.i)][inp.dataset.who] = Number(inp.value);
+          markDone('调整了调整赢家算法的资产偏好权重');
+          solve();
+        });
+      });
+    }
+
+    function solve() {
+      // Normalize A and B weights to 100
+      const sumA = assets.reduce((s, x) => s + x.a, 0);
+      const sumB = assets.reduce((s, x) => s + x.b, 0);
+      const items = assets.map((x, i) => {
+        const na = (x.a / sumA) * 100;
+        const nb = (x.b / sumB) * 100;
+        document.getElementById('la_' + i).textContent = na.toFixed(1) + ' 分';
+        document.getElementById('lb_' + i).textContent = nb.toFixed(1) + ' 分';
+        return { name: x.name, a: na, b: nb, shareA: na >= nb ? 1 : 0 };
+      });
+
+      // Initial allocation: winner gets each item
+      let totalA = items.reduce((s, x) => s + x.a * x.shareA, 0);
+      let totalB = items.reduce((s, x) => s + x.b * (1 - x.shareA), 0);
+
+      let splitItemName = null;
+      // Transfer from richer side to poorer side in ascending order of winner/loser ratio
+      if (Math.abs(totalA - totalB) > 0.05) {
+        const aRicher = totalA > totalB;
+        const pool = items
+          .filter(x => (aRicher ? x.shareA === 1 : x.shareA === 0))
+          .sort((x, y) => {
+            const rx = aRicher ? x.a / Math.max(0.01, x.b) : x.b / Math.max(0.01, x.a);
+            const ry = aRicher ? y.a / Math.max(0.01, y.b) : y.b / Math.max(0.01, y.a);
+            return rx - ry;
+          });
+
+        for (const it of pool) {
+          const curA = items.reduce((s, x) => s + x.a * x.shareA, 0);
+          const curB = items.reduce((s, x) => s + x.b * (1 - x.shareA), 0);
+          if (aRicher) {
+            if (curA - it.a >= curB + it.b) {
+              it.shareA = 0;
+            } else {
+              // Partial transfer t from A to B: curA - t*a = curB + t*b => t = (curA - curB)/(a + b)
+              const t = (curA - curB) / (it.a + it.b);
+              it.shareA = Math.max(0, Math.min(1, 1 - t));
+              splitItemName = it.name;
+              break;
+            }
+          } else {
+            if (curB - it.b >= curA + it.a) {
+              it.shareA = 1;
+            } else {
+              const t = (curB - curA) / (it.a + it.b);
+              it.shareA = Math.max(0, Math.min(1, t));
+              splitItemName = it.name;
+              break;
+            }
+          }
+        }
+      }
+
+      totalA = items.reduce((s, x) => s + x.a * x.shareA, 0);
+      totalB = items.reduce((s, x) => s + x.b * (1 - x.shareA), 0);
+
+      document.getElementById('scoreA').textContent = totalA.toFixed(1) + ' 分';
+      document.getElementById('scoreB').textContent = totalB.toFixed(1) + ' 分';
+
+      const listA = items.filter(x => x.shareA > 0.005).map(x => `${x.name}（${Math.round(x.shareA * 100)}%）`);
+      const listB = items.filter(x => x.shareA < 0.995).map(x => `${x.name}（${Math.round((1 - x.shareA) * 100)}%）`);
+      document.getElementById('itemsA').innerHTML = listA.map(s => `• ${s}`).join('<br>');
+      document.getElementById('itemsB').innerHTML = listB.map(s => `• ${s}`).join('<br>');
+
+      const aha = document.getElementById('ahaBox');
+      if (totalA >= 62) {
+        aha.innerHTML = `<strong>🏆 超级双赢分家方案！</strong>双方不仅一分不差地各拿到 <strong>${totalA.toFixed(1)} 分</strong>（远高于简单对半分的 50 分！），而且最多只需切分 <strong>${splitItemName || '0 项资产'}</strong>。因为彼此偏好越不同，算法就能创造越大的“交易剩余”！`;
+      } else {
+        aha.innerHTML = `<strong>⚖️ 严格公平平局（各 ${totalA.toFixed(1)} 分）：</strong>当双方对各项资产的喜好非常相似时，算法依然能保证无嫉妒且得分相等${splitItemName ? `（精准切分了 ${splitItemName}）` : ''}。试着把双方最看重的资产错开，看看总分如何飙升到 70+！`;
+      }
+    }
+
+    document.getElementById('preset1').addEventListener('click', () => {
+      const vals = [[20, 45], [50, 10], [10, 20], [20, 25]];
+      vals.forEach((v, i) => { assets[i].a = v[0]; assets[i].b = v[1]; });
+      buildUI(); solve(); markDone('加载了合伙人分股权预设');
+    });
+    document.getElementById('preset2').addEventListener('click', () => {
+      const vals = [[55, 25], [15, 35], [10, 20], [20, 20]];
+      vals.forEach((v, i) => { assets[i].a = v[0]; assets[i].b = v[1]; });
+      buildUI(); solve(); markDone('加载了家庭分房产预设');
+    });
+
+    buildUI();
+    solve();
   </script>
 </body>
 </html>

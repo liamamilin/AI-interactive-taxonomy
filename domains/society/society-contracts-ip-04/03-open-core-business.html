@@ -1,64 +1,136 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>💎 Open Core 商业化边界权衡仪</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open Core 商业化边界权衡仪</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+    .feat-card { background: var(--tax-surface-alt); border: 2px solid var(--tax-border); border-radius: 12px; padding: 12px; cursor: pointer; text-align: left; transition: border-color .2s, background .2s; }
+    .feat-card.oss { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .feat-card.pro { border-color: var(--tax-amber); background: var(--tax-amber-soft); }
+    .f-head { display: flex; justify-content: space-between; font-weight: 800; font-size: 13.5px; color: var(--tax-ink); }
+    .f-tag { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--tax-surface); border: 1px solid var(--tax-border); }
+    .f-desc { font-size: 12px; color: var(--tax-muted); margin-top: 5px; line-height: 1.45; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .kpi { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 10px; padding: 12px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 21px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>💎 Open Core 商业化边界权衡仪</h1><p>误区：开源项目想赚钱就必须把核心功能越阉割越好，逼大家买付费版。真相：开源部分太残废没人用，生态死掉就没有付费漏斗；开源部分太全又没人买单——全靠精准切分“个人用免费、大厂治理收费”！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>开源核心免费功能占比</span><span id="vCore">70%</span></label><input type="range" id="sCore" min="15" max="98" value="70" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>企业级合规/权限刚需度</span><span id="vEnt">75%</span></label><input type="range" id="sEnt" min="10" max="100" value="75" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>💎 Open Core 商业化边界权衡仪</h1>
+      <p>开源项目怎么赚钱？最主流的模式叫<strong>「开放核心（Open Core）」</strong>：把个人开发者需要的功能免费开源吸粉，把大企业 CIO 掏钱买单的管控功能做成闭源商业版！<strong>点击下方 6 项功能卡片</strong>在「🟢 免费开源」与「🟡 付费企业版」之间切换，冲击双赢商业模型！</p>
+    </header>
+
+    <div class="feat-grid" id="featGrid"></div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-l">GitHub 社区生态热度</div>
+        <div class="kpi-v" id="commVal">85 分</div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">开发者社区增速</div><div class="k-val" id="kCom" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">企业版付费转化</div><div class="k-val" id="kRev" style="color:#10b981;">—</div></div>
+      <div class="kpi">
+        <div class="kpi-l">预估企业年营收 (ARR)</div>
+        <div class="kpi-v" id="arrVal">$420 万</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">商业模式健康评级</div>
+        <div class="kpi-v" id="gradeVal">待调优</div>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 Open Core 黄金切分法则（买家导向）：</strong>个人开发者关心「能不能跑起来、好用不好用」；企业采购部门（CTO/CIO）愿意为「合规审计、权限隔离、多机房高可用」爽快签支票！试试按“使用者 vs 买家”切分这 6 项功能！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const core=+document.getElementById('sCore').value, ent=+document.getElementById('sEnt').value;
-  document.getElementById('vCore').textContent=core+'%'; document.getElementById('vEnt').textContent=ent+'%';
-  const com=Math.round(core*0.95);
-  const conv=Math.max(5, Math.round((100-core)*0.6 + ent*0.45));
-  const total=Math.round(com*conv/45);
-  document.getElementById('kCom').textContent=com+' 分';
-  document.getElementById('kRev').textContent=total+' 万 MRR';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">社区传播热度 (开源占比 ${core}%): ${com} 分</text>
-    <rect x="20" y="44" width="${com*5.2}" height="22" rx="6" fill="#0284c7"/>
-    <text x="20" y="98" font-size="13" font-weight="800" fill="#10b981">商业化总营收 (流量 × 企业转化): ${total} 万 MRR</text>
-    <rect x="20" y="108" width="${Math.min(540,total*4.2)}" height="24" rx="6" fill="#10b981"/>
-    <text x="20" y="164" font-size="12.5" font-weight="750" fill="var(--tax-muted)">黄金法则：把个人开发者需要的功能全开源，把大公司才要的 SSO/审计锁进付费版</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>开源与赚钱并不矛盾！当开源核心达到 70%~80% 赢得海量开发者口碑，同时把大企业刚需的审计/高可用留在商业版时，总营收反而最高（${total} 万）！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const features = [
+      { id: 'core', name: '⚙️ 核心引擎与完整 API', ideal: 'oss', commLoss: 45, arrGain: 20, tier: 'oss', desc: '个人开发者跑通业务的核心基座，不开源就没人用。' },
+      { id: 'cli',  name: '💻 本地 CLI 调试与插件生态', ideal: 'oss', commLoss: 25, arrGain: 10, tier: 'oss', desc: '决定开发者口碑与 GitHub Star 增长的关键体验。' },
+      { id: 'doc',  name: '📊 单机基础监控面板', ideal: 'oss', commLoss: 15, arrGain: 15, tier: 'oss', desc: '小团队日常运维必需，开源可大幅降低上手门槛。' },
+      { id: 'sso',  name: '🔐 企业级 SSO / RBAC 细粒度权限', ideal: 'pro', commLoss: 5, arrGain: 150, tier: 'oss', desc: '个人用不上，但 500 人以上大公司安全合规必买！' },
+      { id: 'audit',name: '🧾 SOC2 合规审计日志与数据加密', ideal: 'pro', commLoss: 4, arrGain: 180, tier: 'oss', desc: '金融/政企客户过等保审计的刚性付费点。' },
+      { id: 'ha',   name: '🌐 多地域跨云高可用集群灾备', ideal: 'pro', commLoss: 6, arrGain: 210, tier: 'oss', desc: '百万级并发大厂愿意花重金买单的 SLA 保障能力。' }
+    ];
+
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const grid = document.getElementById('featGrid');
+      grid.innerHTML = '';
+
+      let comm = 100;
+      let rawArr = 0;
+      let coreClosed = false;
+
+      features.forEach(f => {
+        const isPro = f.tier === 'pro';
+        if (isPro) {
+          comm -= f.commLoss;
+          rawArr += f.arrGain;
+          if (f.id === 'core') coreClosed = true;
+        }
+        const btn = document.createElement('button');
+        btn.className = 'feat-card ' + (isPro ? 'pro' : 'oss');
+        btn.innerHTML = `
+          <div class="f-head">
+            <span>${f.name}</span>
+            <span class="f-tag">${isPro ? '🟡 付费企业版' : '🟢 免费开源'}</span>
+          </div>
+          <div class="f-desc">${f.desc}</div>
+        `;
+        btn.addEventListener('click', () => {
+          f.tier = isPro ? 'oss' : 'pro';
+          markDone('设计了 Open Core 开源与商业边界');
+          render();
+        });
+        grid.appendChild(btn);
+      });
+
+      comm = Math.max(5, comm);
+      // Enterprise ARR also depends on having a vibrant developer funnel!
+      const funnelMult = comm >= 75 ? 1.0 : comm >= 45 ? 0.55 : 0.15;
+      const finalArr = Math.round(rawArr * funnelMult);
+
+      document.getElementById('commVal').textContent = comm + ' 分';
+      document.getElementById('arrVal').textContent = '$' + finalArr + ' 万';
+
+      const gradeEl = document.getElementById('gradeVal');
+      const aha = document.getElementById('ahaBox');
+
+      if (rawArr === 0) {
+        gradeEl.textContent = '为爱发电';
+        gradeEl.style.color = 'var(--tax-amber)';
+        aha.innerHTML = `<strong>❤️ 全员免费开源（ARR = $0）：</strong>社区口碑拉满（100 分），但公司没有任何商业变现抓手，很容易沦为被云厂商白嫖的“为爱发电”项目！试着把大企业才需要的 SSO、审计日志、高可用集群切进付费版！`;
+      } else if (coreClosed || comm < 45) {
+        gradeEl.textContent = '假开源萎缩';
+        gradeEl.style.color = 'var(--tax-red)';
+        aha.innerHTML = `<strong>🚨 阉割过头引发社区逃离（热度仅 ${comm} 分）！</strong>你把个人开发者刚需的核心引擎/CLI 锁进了付费墙，导致 GitHub 没人用、没人布道，企业采购漏斗彻底干涸（ARR 惨跌至 $${finalArr} 万）！`;
+      } else if (comm >= 80 && finalArr >= 500) {
+        gradeEl.textContent = '🏆 S 级独角兽切分';
+        gradeEl.style.color = 'var(--tax-green)';
+        aha.innerHTML = `<strong>🏆 教科书级 Open Core 黄金切分！</strong>开发者喜爱的核心引擎、CLI 和基础监控全免费开源（热度 <strong>${comm} 分</strong>），靠极佳口碑打进大厂内部；等大厂上线生产环境时，自然为 SSO、合规审计和跨云高可用爽快签下 <strong>$${finalArr} 万/年</strong>企业大单（GitLab / HashiCorp 经典范式）！`;
+      } else {
+        gradeEl.textContent = '良性探索中';
+        gradeEl.style.color = 'var(--tax-primary)';
+        aha.innerHTML = `<strong>⚖️ 正在逼近最佳平衡（社区 ${comm} 分 · ARR $${finalArr} 万）：</strong>记住 GitLab 提出的「买家导向切分法」——个人工程师用的全开源，老板/CIO/安全合规官买单的全收费！`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

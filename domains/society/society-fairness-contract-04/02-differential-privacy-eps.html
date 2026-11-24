@@ -1,65 +1,148 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌫️ 差分隐私预算 ε：加多少噪声才安全？</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>差分隐私预算 ε：加多少噪声才安全？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .viz-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .kpi { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
+    svg text { fill: var(--tax-muted); font-family: inherit; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌫️ 差分隐私预算 ε：加多少噪声才安全？</h1><p>误区：只要在数据里加一点随机噪声，就既能保护隐私又不影响数据分析。真相：噪声加得太少，黑客对比两次查询依然能反推出个人秘密；噪声加得太多，统计结果直接变成乱码！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>隐私预算 ε (越小越隐私)</span><span id="vEps">1.0</span></label><input type="range" id="sEps" min="2" max="50" value="10" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>统计样本人数 N</span><span id="vN">1000 人</span></label><input type="range" id="sN" min="100" max="5000" step="100" value="1000" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🌫️ 差分隐私预算 ε：加多少噪声才安全？</h1>
+      <p>差分隐私的核心承诺：在数据库查询结果里加入精确 calibrated 的拉普拉斯噪声，让攻击者看着结果<strong>分不清“张三在不在数据库里”</strong>。拖动隐私预算 ε，观察两条分布曲线的重叠度与数据误差的博弈！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="control-group">
+        <label>隐私预算 ε（越小越保护隐私，越大越精准）：<strong id="epsVal">0.8</strong></label>
+        <input id="epsSlider" type="range" min="0.1" max="4.0" step="0.1" value="0.8">
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">个人隐私安全度</div><div class="k-val" id="kPriv" style="color:#10b981;">—</div></div>
-        <div class="kpi"><div class="k-lbl">宏观统计误差率</div><div class="k-val" id="kErr" style="color:#0284c7;">—</div></div>
+      <div class="toy-btn-row">
+        <button class="toy-btn" data-e="0.2">极强隐私 (ε=0.2)</button>
+        <button class="toy-btn primary" data-e="0.8">工业平衡点 (ε=0.8)</button>
+        <button class="toy-btn" data-e="3.5">弱隐私高精度 (ε=3.5)</button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="viz-box">
+      <svg id="dpSvg" viewBox="0 0 640 245" style="width:100%;height:auto;display:block;"></svg>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-l">曲线不可区分重叠率</div>
+          <div class="kpi-v" id="ovVal">67%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">攻击者最多猜中胜率</div>
+          <div class="kpi-v" id="atkVal">69%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">平均统计噪声误差 (±人)</div>
+          <div class="kpi-v" id="errVal">±1.25</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 差分隐私直觉：</strong>蓝线是「不含张三（真实计数 50）」的输出分布，橙线是「包含张三（真实计数 51）」的输出分布。两者重叠越多，攻击者就越难反推张三是否在表里！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const eps=+document.getElementById('sEps').value/10, n=+document.getElementById('sN').value;
-  document.getElementById('vEps').textContent=eps.toFixed(1); document.getElementById('vN').textContent=n+' 人';
-  const priv=Math.max(5, Math.min(99, Math.round(100*Math.exp(-eps/2.5))));
-  const err=Math.min(45, (100/(eps*Math.sqrt(n))*3.2)).toFixed(2);
-  document.getElementById('kPriv').textContent=priv+'%';
-  document.getElementById('kErr').textContent='±'+err+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#10b981">个人隐私安全保障度 (ε=${eps.toFixed(1)}): ${priv}%</text>
-    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${priv*5.4}" height="24" rx="6" fill="#10b981"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">宏观数据统计可用性: ${(100-parseFloat(err)).toFixed(1)}% (误差 ±${err}%)</text>
-    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${Math.max(10,(100-parseFloat(err)*2)*5.4)}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">样本量越大 (${n}人)，噪声在总均值里越容易相互抵消，既护隐私又保精度</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>苹果和人口普查局都在用的<strong>差分隐私</strong>核心直觉是：往每个人的汇报里掺一点数学噪声，大样本统计误差仅 <strong>±${err}%</strong>，但黑客永远无法确认你在不在库里！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const epsSlider = document.getElementById('epsSlider');
+    const svg = document.getElementById('dpSvg');
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function laplacePdf(x, mu, b) {
+      return (1 / (2 * b)) * Math.exp(-Math.abs(x - mu) / b);
+    }
+
+    function render() {
+      const eps = Number(epsSlider.value);
+      document.getElementById('epsVal').textContent = eps.toFixed(1);
+
+      const b = 1 / eps; // sensitivity Δf = 1
+      const mu1 = 50, mu2 = 51;
+
+      const W = 640, H = 245, padL = 44, padR = 20, padT = 22, padB = 34;
+      const xMin = 42, xMax = 59;
+      const maxPdf = laplacePdf(mu1, mu1, b) * 1.15;
+      const sx = x => padL + ((x - xMin) / (xMax - xMin)) * (W - padL - padR);
+      const sy = y => H - padB - (y / maxPdf) * (H - padT - padB);
+
+      let p1 = '', p2 = '', pMin = `M${sx(xMin).toFixed(1)},${sy(0).toFixed(1)} `;
+      const steps = 140;
+      let overlapArea = 0;
+      const dx = (xMax - xMin) / steps;
+
+      for (let i = 0; i <= steps; i++) {
+        const x = xMin + i * dx;
+        const y1 = laplacePdf(x, mu1, b);
+        const y2 = laplacePdf(x, mu2, b);
+        const ym = Math.min(y1, y2);
+        if (i < steps) overlapArea += ym * dx;
+        const cmd = i === 0 ? 'M' : 'L';
+        p1 += `${cmd}${sx(x).toFixed(1)},${sy(y1).toFixed(1)} `;
+        p2 += `${cmd}${sx(x).toFixed(1)},${sy(y2).toFixed(1)} `;
+        pMin += `L${sx(x).toFixed(1)},${sy(ym).toFixed(1)} `;
+      }
+      pMin += `L${sx(xMax).toFixed(1)},${sy(0).toFixed(1)} Z`;
+
+      // Exact theoretical overlap for Laplace(0, 1/eps) vs Laplace(1, 1/eps) is exp(-eps/2)
+      const exactOverlap = Math.exp(-eps / 2);
+      const maxGuessProb = Math.exp(eps) / (1 + Math.exp(eps));
+
+      document.getElementById('ovVal').textContent = Math.round(exactOverlap * 100) + '%';
+      document.getElementById('atkVal').textContent = Math.round(maxGuessProb * 100) + '%';
+      document.getElementById('errVal').textContent = '±' + b.toFixed(2);
+
+      svg.innerHTML = `
+        <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="var(--tax-muted)"/>
+        <path d="${pMin}" fill="rgba(16,185,129,0.22)"/>
+        <path d="${p1}" fill="none" stroke="var(--tax-primary)" stroke-width="2.8"/>
+        <path d="${p2}" fill="none" stroke="var(--tax-amber)" stroke-width="2.8" stroke-dasharray="6,3"/>
+        <text x="${W - padR - 6}" y="${padT + 14}" text-anchor="end" font-size="11" font-weight="700" fill="var(--tax-primary)">━━ 不含张三（真实值=50）</text>
+        <text x="${W - padR - 6}" y="${padT + 30}" text-anchor="end" font-size="11" font-weight="700" fill="var(--tax-amber)">--- 包含张三（真实值=51）</text>
+        <text x="${W - padR - 6}" y="${padT + 46}" text-anchor="end" font-size="11" fill="var(--tax-green)">绿色阴影 = 不可区分保护区</text>
+        ${[44, 47, 50, 51, 54, 57].map(v => `<text x="${sx(v).toFixed(1)}" y="${H - padB + 17}" text-anchor="middle" font-size="11">${v}</text>`).join('')}
+      `;
+
+      const aha = document.getElementById('ahaBox');
+      if (eps <= 0.3) {
+        aha.innerHTML = `<strong>🛡️ 钢铁级隐私护盾（ε = ${eps.toFixed(1)}）：</strong>两条分布重叠高达 <strong>${Math.round(exactOverlap * 100)}%</strong>，攻击者几乎像抛硬币一样猜不透张三在不在表里！代价是单次查询平均噪声高达 <strong>±${b.toFixed(1)}</strong>，只适合大样本宏观统计。`;
+      } else if (eps <= 1.2) {
+        aha.innerHTML = `<strong>⚖️ 黄金平衡区间（ε = ${eps.toFixed(1)}）：</strong>拉普拉斯噪声误差仅 <strong>±${b.toFixed(2)}</strong>（对万人级统计几乎无感），同时保留了 <strong>${Math.round(exactOverlap * 100)}%</strong> 的分布重叠保护！苹果、谷歌和美国人口普查局常将单次隐私预算控制在此区间。`;
+      } else {
+        aha.innerHTML = `<strong>⚠️ 隐私护盾变薄（ε = ${eps.toFixed(1)}）：</strong>噪声虽小（±${b.toFixed(2)}），但两座尖峰已明显分离（重叠仅 <strong>${Math.round(exactOverlap * 100)}%</strong>），攻击者通过差分比对能以最高 <strong>${Math.round(maxGuessProb * 100)}%</strong> 的把握锁定张三是否存在！`;
+      }
+    }
+
+    epsSlider.addEventListener('input', () => { markDone('调节了差分隐私预算 ε'); render(); });
+    document.querySelectorAll('[data-e]').forEach(b => {
+      b.addEventListener('click', () => {
+        epsSlider.value = b.dataset.e;
+        markDone('切换了差分隐私预算预设');
+        render();
+      });
+    });
+
+    render();
   </script>
 </body>
 </html>

@@ -1,63 +1,128 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎟️ 天赋彩票与起跑线重置实验</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>天赋彩票与起跑线重置实验</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .mode-grid { grid-template-columns: 1fr; } }
+    .stadium { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .st-title { font-weight: 800; font-size: 14.5px; color: var(--tax-ink); margin-bottom: 10px; display: flex; justify-content: space-between; }
+    .runner-row { margin-bottom: 12px; }
+    .r-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--tax-muted); margin-bottom: 4px; }
+    .lane-track { height: 22px; background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 99px; position: relative; overflow: hidden; }
+    .lane-fill { height: 100%; border-radius: 99px; transition: width .3s linear; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; font-size: 12px; font-weight: 700; color: #fff; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎟️ 天赋彩票与起跑线重置实验</h1><p>误区：只要考试分数公平，富家子弟考上名校全靠个人努力，和运气无关。真相：连“高智商基因、专注力、健康体魄和好学区”本身都是一场未经选择的先天彩票！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>家庭背景对成才的继承权重</span><span id="vFam">65%</span></label><input type="range" id="sFam" min="10" max="95" value="65" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>公共免费教育均等化补偿</span><span id="vEdu">45%</span></label><input type="range" id="sEdu" min="0" max="100" value="45" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🎟️ 天赋彩票与起跑线重置实验</h1>
+      <p>三位努力程度<strong>完全相同</strong>的年轻人（同样勤奋、同样坚持），唯一的区别是「出生家庭彩票」。按下开跑，对比“放任起跑线”与“公共教育医疗重置起跑线”两条赛道的终点差距！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="startBtn">🏁 鸣枪开跑（30 年人生赛程）</button>
+        <button class="toy-btn" id="resetBtn">回到起点</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">寒门跃升顶层概率</div><div class="k-val" id="kMob" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">阶层固化指数</div><div class="k-val" id="kSt">—</div></div>
+      <span style="font-size:13px;color:var(--tax-muted);">赛程进度：<strong id="yrVal" style="color:var(--tax-ink);">0 / 30 年</strong></span>
+    </div>
+
+    <div class="mode-grid">
+      <div class="stadium">
+        <div class="st-title"><span>🚧 赛道 A：放任原生起跑线</span><span style="font-size:12px;color:var(--tax-red);">无公共兜底</span></div>
+        <div id="trackA"></div>
+      </div>
+      <div class="stadium">
+        <div class="st-title"><span>🌱 赛道 B：公共投入重置起跑线</span><span style="font-size:12px;color:var(--tax-green);">优质公办+助学+医保</span></div>
+        <div id="trackB"></div>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 罗尔斯“自然彩票”洞察：</strong>我们常以为成功全靠个人努力，但你的家庭背景、基因健康甚至出生年代，本质上都是一场你未曾付出努力就抽中的彩票。点击开跑看看制度如何缩小运气霸权！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const fam=+document.getElementById('sFam').value, edu=+document.getElementById('sEdu').value;
-  document.getElementById('vFam').textContent=fam+'%'; document.getElementById('vEdu').textContent=edu+'%';
-  const mob=Math.max(3, Math.min(48, Math.round(25 - fam*0.22 + edu*0.24)));
-  const sticky=Math.max(15, Math.min(95, Math.round(fam*0.85 - edu*0.35 + 20)));
-  document.getElementById('kMob').textContent=mob+'%';
-  document.getElementById('kSt').textContent=sticky+' 分';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">寒门向上流动机会率: ${mob}% (完全随机理想为 20%)</text>
-    <rect x="20" y="44" width="${mob*10}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="${sticky>60?'#ef4444':'#10b981'}">阶层固化粘性: ${sticky} 分</text>
-    <rect x="20" y="112" width="${sticky*5.2}" height="24" rx="6" fill="${sticky>60?'#ef4444':'#10b981'}"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">公共教育无法消除基因差异，但能极大对冲出生彩票的随机不公</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当家庭背景继承权重高达 ${fam}% 时，个人努力的杠杆会变小；把公共教育均等化拉高到 ${edu}% 后，寒门跃升率能立刻回升到 <strong>${mob}%</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const runners = [
+      { name: '👑 精英家庭（含金钥匙）', color: '#f59e0b', startA: 34, speedA: 2.15, startB: 26, speedB: 2.10 },
+      { name: '🏠 普通中产（稳步成长）', color: '#3b82f6', startA: 18, speedA: 1.95, startB: 22, speedB: 2.05 },
+      { name: '🎒 偏远低收入（同样勤奋）', color: '#10b981', startA: 4, speedA: 1.55, startB: 18, speedB: 2.02 }
+    ];
+
+    let year = 0;
+    let timer = null;
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function renderTrack(containerId, mode) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = runners.map(r => {
+        const start = mode === 'A' ? r.startA : r.startB;
+        const spd = mode === 'A' ? r.speedA : r.speedB;
+        const pos = Math.min(100, start + year * spd);
+        return `
+          <div class="runner-row">
+            <div class="r-meta"><span>${r.name}</span><strong>${pos.toFixed(0)} 分</strong></div>
+            <div class="lane-track">
+              <div class="lane-fill" style="width:${pos.toFixed(1)}%;background:${r.color};">${pos >= 16 ? Math.round(pos) : ''}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function render() {
+      document.getElementById('yrVal').textContent = `${year} / 30 年`;
+      renderTrack('trackA', 'A');
+      renderTrack('trackB', 'B');
+
+      const aha = document.getElementById('ahaBox');
+      if (year === 0) {
+        aha.innerHTML = `<strong>💡 起跑前对比：</strong>在赛道 A 中，三位同等勤奋的选手起跑线就差了 <strong>30 分</strong>；而在赛道 B 中，免费优质基础教育与儿童医疗将起跑线差距压缩到 <strong>8 分</strong>。点击开跑！`;
+      } else if (year < 30) {
+        aha.innerHTML = `<strong>🏃 第 ${year} 年赛程中：</strong>注意看赛道 A 里，起跑落后的人因为缺乏抗风险医疗和资源杠杆，连奔跑速度都被拖慢，差距越拉越大。`;
+      } else {
+        const gapA = Math.round(Math.min(100, runners[0].startA + 30 * runners[0].speedA) - Math.min(100, runners[2].startA + 30 * runners[2].speedA));
+        const gapB = Math.round(Math.min(100, runners[0].startB + 30 * runners[0].speedB) - Math.min(100, runners[2].startB + 30 * runners[2].speedB));
+        aha.innerHTML = `<strong>🏁 30 年终点揭晓！</strong>同样付出 100% 努力，赛道 A 最终拉开了 <strong>${gapA} 分</strong>的阶层鸿沟；而赛道 B 通过公共教育与医疗重置起跑线，将结果差距压缩至 <strong>${gapB} 分</strong>——公平的真谛不是拖慢跑得快的人，而是不让出身决定终点。`;
+      }
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      markDone('运行了天赋彩票与起跑线重置竞赛');
+      if (year >= 30) year = 0;
+      if (timer) clearInterval(timer);
+      timer = setInterval(() => {
+        year += 2;
+        if (year >= 30) {
+          year = 30;
+          clearInterval(timer);
+          timer = null;
+        }
+        render();
+      }, 150);
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (timer) { clearInterval(timer); timer = null; }
+      year = 0;
+      markDone('重置了起跑线竞赛');
+      render();
+    });
+
+    render();
   </script>
 </body>
 </html>

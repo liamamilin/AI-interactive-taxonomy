@@ -1,73 +1,144 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚖️ 无知之幕社会契约投票器（SVG）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>无知之幕社会契约投票器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .society-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 720px) { .society-grid { grid-template-columns: 1fr; } }
+    .soc-card { background: var(--tax-surface-alt); border: 2px solid var(--tax-border); border-radius: 12px; padding: 14px; cursor: pointer; text-align: left; transition: border-color .2s, transform .15s, background .2s; }
+    .soc-card:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .soc-card.picked { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .soc-title { font-weight: 800; font-size: 15px; color: var(--tax-ink); margin-bottom: 6px; }
+    .tier-row { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--tax-muted); padding: 4px 0; border-bottom: 1px dashed var(--tax-border); }
+    .tier-row:last-child { border-bottom: none; }
+    .reveal-box { margin-top: 14px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 16px; text-align: center; }
+    .fate-big { font-size: 24px; font-weight: 900; color: var(--tax-ink); margin: 8px 0; }
+    .fate-sub { font-size: 13px; color: var(--tax-muted); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚖️ 无知之幕社会契约投票器（SVG）</h1><p>误区：公平的制度全靠富人发善心施舍，否则谁也不会支持高保障社会。真相：只要在制定规则时蒙上“无知之幕”（不知道自己会投胎成谁），纯粹自利的理性人也会拼命把底线兜牢！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>社会保障与再分配力度</span><span id="vTax">40%</span></label><input type="range" id="sTax" min="0" max="80" value="40" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>你对“万一投胎成最穷者”的恐惧度</span><span id="vRisk">75%</span></label><input type="range" id="sRisk" min="10" max="100" value="75" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>⚖️ 无知之幕社会契约投票器</h1>
+      <p>想象你尚未降生，被一道「无知之幕」遮住双眼：你完全不知道自己会抽中<strong>顶层 10%</strong>、<strong>中产 40%</strong> 还是<strong>底层 50%</strong>。请先选定一个你愿意托付终身的社会制度，再揭开幕布抽签！</p>
+    </header>
+
+    <div class="society-grid" id="socGrid"></div>
+
+    <div class="reveal-box">
+      <div class="toy-btn-row" style="justify-content:center;">
+        <button class="toy-btn primary" id="revealBtn" disabled>🎭 揭开无知之幕，抽取我的人生！</button>
+        <button class="toy-btn" id="reRollBtn" style="display:none;">🔄 再投胎一次（验证大数概率）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">顶层 20% 收入</div><div class="k-val" id="kTop">—</div></div>
-        <div class="kpi"><div class="k-lbl">底层 20% 保底收入</div><div class="k-val" id="kBot" style="color:#10b981;">—</div></div>
-        <div class="kpi"><div class="k-lbl">你是否愿投胎进此社会</div><div class="k-val" id="kVote">—</div></div>
-      </div>
+      <div class="fate-big" id="fateBig">幕布尚未揭开</div>
+      <div class="fate-sub" id="fateSub">请先在上方点击选择一个社会契约方案</div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 哲学实验提示：</strong>在不知道自己身份时，你是会赌一把去搏顶层 500 万，还是优先确保万一掉进底层 50% 也能体面生活？选一个方案试试！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const t=+document.getElementById('sTax').value/100, risk=+document.getElementById('sRisk').value/100;
-  document.getElementById('vTax').textContent=(t*100).toFixed(0)+'%'; document.getElementById('vRisk').textContent=(risk*100).toFixed(0)+'%';
-  const eff=1-t*t*0.55;
-  const top=Math.round(300*(1-t*0.65)*eff);
-  const mid=Math.round(90*eff + 35*t);
-  const bot=Math.round((15 + 115*t)*eff);
-  const ok=bot >= 40*risk;
-  document.getElementById('kTop').textContent=top+' 万';
-  document.getElementById('kBot').textContent=bot+' 万';
-  document.getElementById('kVote').textContent=ok?'愿意签署契约':'拒签 (底层太惨)';
-  document.getElementById('kVote').style.color=ok?'#10b981':'#ef4444';
-  const bars=[['顶层 (20%概率)',top,'#0284c7'],['中产 (60%概率)',mid,'#8b5cf6'],['底层 (20%概率)',bot,'#10b981']];
-  let svg='';
-  bars.forEach(([nm,val,col],i)=>{
-    const y=26+i*50;
-    svg+=`<text x="20" y="${y+16}" font-size="13" font-weight="800" fill="var(--tax-text)">${nm}</text>
-    <rect x="155" y="${y}" width="380" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="155" y="${y}" width="${Math.min(380,val*1.2)}" height="24" rx="6" fill="${col}"/>
-    <text x="${165+Math.min(380,val*1.2)}" y="${y+17}" font-size="12.5" font-weight="850" fill="${col}">${val} 万</text>`;
-  });
-  document.getElementById('svg').innerHTML=svg;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>罗尔斯的“无知之幕”把道德问题变成了理性风险决策：不知道自己会抽中哪张人生彩票时，你最关心的不再是顶层能赚 ${top} 万，而是底层能不能有 <strong>${bot} 万</strong> 尊严兜底！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const societies = [
+      {
+        id: 'winner',
+        name: '🎰 A. 赢家通吃社会',
+        avg: '人均 82 万',
+        tiers: [
+          { label: '顶层 10%', prob: 0.1, income: 500, desc: '超级富豪，财富自由' },
+          { label: '中产 40%', prob: 0.4, income: 60, desc: '体面中产，但焦虑内卷' },
+          { label: '底层 50%', prob: 0.5, income: 16, desc: '无医保兜底，抗风险极弱' }
+        ]
+      },
+      {
+        id: 'rawls',
+        name: '⚖️ B. 罗尔斯差异原则社会',
+        avg: '人均 74 万',
+        tiers: [
+          { label: '顶层 10%', prob: 0.1, income: 220, desc: '鼓励创新，仍有丰厚回报' },
+          { label: '中产 40%', prob: 0.4, income: 75, desc: '稳健上升通道与公共保障' },
+          { label: '底层 50%', prob: 0.5, income: 44, desc: '免费教育医疗 + 体面底线' }
+        ]
+      },
+      {
+        id: 'equal',
+        name: '📏 C. 绝对平均主义社会',
+        avg: '人均 36 万',
+        tiers: [
+          { label: '顶层 10%', prob: 0.1, income: 36, desc: '干多干少完全一样' },
+          { label: '中产 40%', prob: 0.4, income: 36, desc: '激励不足，整体蛋糕缩小' },
+          { label: '底层 50%', prob: 0.5, income: 36, desc: '虽无贫富差，但绝对生活水平低于 B' }
+        ]
+      }
+    ];
+
+    let pickedId = null;
+    let rolls = 0;
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function renderCards() {
+      const grid = document.getElementById('socGrid');
+      grid.innerHTML = '';
+      societies.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'soc-card' + (pickedId === s.id ? ' picked' : '');
+        btn.innerHTML = `
+          <div class="soc-title">${s.name}</div>
+          <div style="font-size:12px;color:var(--tax-primary);font-weight:700;margin-bottom:8px;">${s.avg}</div>
+          ${s.tiers.map(t => `<div class="tier-row"><span>${t.label}</span><strong>年入 ${t.income} 万</strong></div>`).join('')}
+        `;
+        btn.addEventListener('click', () => {
+          pickedId = s.id;
+          document.getElementById('revealBtn').disabled = false;
+          document.getElementById('fateBig').textContent = `已选定：${s.name}`;
+          document.getElementById('fateSub').textContent = '点击上方按钮揭开无知之幕，抽取你的出生阶层！';
+          markDone('在无知之幕后选定了社会契约');
+          renderCards();
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    function drawFate() {
+      const soc = societies.find(s => s.id === pickedId);
+      if (!soc) return;
+      rolls++;
+      const r = Math.random();
+      const tier = r < 0.1 ? soc.tiers[0] : r < 0.5 ? soc.tiers[1] : soc.tiers[2];
+
+      document.getElementById('fateBig').textContent = `🎲 你出生在：${tier.label}（年入 ${tier.income} 万）`;
+      document.getElementById('fateSub').textContent = `第 ${rolls} 次投胎结果 · ${tier.desc}`;
+      document.getElementById('reRollBtn').style.display = 'inline-flex';
+      markDone('揭开无知之幕完成了人生抽签');
+
+      const aha = document.getElementById('ahaBox');
+      if (pickedId === 'winner' && tier.label.includes('底层')) {
+        aha.innerHTML = `<strong>😱 欢迎来到“极小极大”的顿悟时刻！</strong>你在 50% 的大概率下掉进了底层（仅 16 万且无兜底）。罗尔斯指出：在无知之幕背后，理性人不会为了 10% 当首富的机会去赌自己承受不起的悲惨底线！`;
+      } else if (pickedId === 'winner') {
+        aha.innerHTML = `<strong>🍀 这局你运气不错抽中了 ${tier.label}！</strong>但别忘了，你有整整 <strong>50%</strong> 的概率抽中底层。多点几次「再投胎一次」，看看在无知之幕下你还敢不敢选赢家通吃？`;
+      } else if (pickedId === 'rawls') {
+        aha.innerHTML = `<strong>⚖️ 命中罗尔斯最优契约！</strong>无论你抽中哪个阶层，最差也能拿到 <strong>44 万 + 公共兜底</strong>——甚至比绝对平均主义（36 万）还高！这正是「极小极大（Maximin）」原则的魅力：先抬高地板，再保留合理的天花板激励。`;
+      } else {
+        aha.innerHTML = `<strong>📏 绝对平均主义的盲区：</strong>虽然消除了差距，但因为完全消灭了创新激励，整体蛋糕萎缩，结果连底层收入（36 万）都比方案 B（44 万）更低。公平不等于“一起变穷”！`;
+      }
+    }
+
+    document.getElementById('revealBtn').addEventListener('click', drawFate);
+    document.getElementById('reRollBtn').addEventListener('click', drawFate);
+
+    renderCards();
   </script>
 </body>
 </html>

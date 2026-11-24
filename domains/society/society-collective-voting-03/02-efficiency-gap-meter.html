@@ -1,71 +1,101 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📏 浪费选票与效率差距检测仪</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>浪费选票与效率差距检测仪</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+    .m-card { padding: 10px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; }
+    .m-val { font-size: 20px; font-weight: 800; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📏 浪费选票与效率差距检测仪</h1><p>误区：选区地图是否被操纵全凭肉眼看形状够不够像“蝾螈”，无法量化。真相：超过胜选半数线（50%+1）的多余票和败选方全部票都是“浪费选票”，效率差距一算便知！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>把红党“集中打包”在 1 区的得票率</span><span id="vP">88%</span></label><input type="range" id="sP" min="55" max="98" value="88" oninput="calc()"></div>
-        <div class="ctrl-box"><label><span>蓝党在其余 4 个险胜区的平均得票率</span><span id="vC">55%</span></label><input type="range" id="sC" min="51" max="75" value="55" oninput="calc()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>📏 浪费选票与效率差距检测仪（数学鉴伪器）</h1>
+      <p>法院如何用数学证明一张选区地图存在恶意作弊？答案是<strong>效率差距（Efficiency Gap）</strong>：统计双方被“浪费的选票”（败选者的全部票 + 胜选者超过 51% 的多余票），差距超过 <strong>7%</strong> 即亮起违宪红灯！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="ctrl-box">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>✂️ 模拟划区倾斜程度（0 = 公平对称 → 100 = 极致 Pack &amp; Crack）</span>
+          <strong id="skewVal" style="color:var(--tax-primary);">50%</strong>
+        </div>
+        <input type="range" id="skewRange" min="0" max="100" value="50" style="width:100%;" />
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">蓝党浪费票比例</div><div class="k-val" id="kWB">—</div></div>
-        <div class="kpi"><div class="k-lbl">红党浪费票比例</div><div class="k-val" id="kWR">—</div></div>
-        <div class="kpi"><div class="k-lbl">效率差距 (红线 7%)</div><div class="k-val" id="kEG">—</div></div>
+
+      <svg id="egSvg" viewBox="0 0 680 160" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="双方浪费选票与效率差距检测条"></svg>
+
+      <div class="metrics">
+        <div class="m-card"><div style="font-size:11.5px;color:var(--tax-muted);">🔵 蓝方浪费选票</div><div class="m-val" id="wbVal" style="color:var(--tax-primary);">—</div></div>
+        <div class="m-card"><div style="font-size:11.5px;color:var(--tax-muted);">🔴 红方浪费选票</div><div class="m-val" id="wrVal" style="color:var(--tax-red);">—</div></div>
+        <div class="m-card"><div style="font-size:11.5px;color:var(--tax-muted);">效率差距（红线 7%）</div><div class="m-val" id="egVal">—</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>司法检测红线（7%）：</strong>拖动滑块观察双方“浪费选票”如何失衡——杰利蝾螈的本质就是让对手浪费极多选票，而自己每一张选票都刚好踩在 52% 险胜的刀刃上！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function calc(){
-  const p=+document.getElementById('sP').value, c=+document.getElementById('sC').value;
-  document.getElementById('vP').textContent=p+'%'; document.getElementById('vC').textContent=c+'%';
-  const wR_pack=(p-50), wB_pack=(100-p);
-  const wB_crack=4*(c-50), wR_crack=4*(100-c);
-  const tot=500;
-  const wB=Math.round((wB_pack+wB_crack)/tot*100), wR=Math.round((wR_pack+wR_crack)/tot*100);
-  const eg=Math.abs(wR-wB);
-  document.getElementById('kWB').textContent=wB+'%';
-  document.getElementById('kWR').textContent=wR+'%';
-  document.getElementById('kEG').textContent=eg+'%';
-  document.getElementById('kEG').style.color=eg>=7?'#ef4444':'#10b981';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">蓝党浪费选票: ${wB}%</text>
-    <rect x="20" y="44" width="540" height="26" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${wB*5.4}" height="26" rx="6" fill="#0284c7"/>
-    <text x="20" y="100" font-size="13" font-weight="800" fill="#ef4444">红党浪费选票: ${wR}%</text>
-    <rect x="20" y="110" width="540" height="26" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="110" width="${wR*5.4}" height="26" rx="6" fill="#ef4444"/>
-    <text x="20" y="168" font-size="13.5" font-weight="850" fill="${eg>=7?'#ef4444':'#10b981'}">效率差距 EG = |${wR}% - ${wB}%| = ${eg}% ${eg>=7?'⚠️ 触发操纵预警':'✅ 处于公平区间'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“精妙的杰利蝾螈”会让本方每个区刚好以 ${c}% 险胜（几乎不浪费票），却把对手塞进 ${p}% 的超级铁票仓和 4 个输掉的区里疯狂浪费票！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-calc();
+    const skewRange = document.getElementById('skewRange');
+    const svg = document.getElementById('egSvg');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const s = Number(skewRange.value);
+      document.getElementById('skewVal').textContent = s + '%';
+
+      // Total votes = 500 (5 districts of 100 each)
+      // At s=0: Blue wastes 125, Red wastes 125 -> EG = 0%
+      // At s=100: Blue wastes 205 (packed + cracked), Red wastes 45 -> EG = 32%
+      const wBlue = Math.round(125 + s * 0.8);
+      const wRed  = Math.round(125 - s * 0.8);
+      const eg = ((wBlue - wRed) / 500) * 100;
+      const guilty = eg > 7;
+
+      document.getElementById('wbVal').textContent = `${wBlue} 票`;
+      document.getElementById('wrVal').textContent = `${wRed} 票`;
+      document.getElementById('egVal').textContent = `${eg.toFixed(1)}%`;
+      document.getElementById('egVal').style.color = guilty ? 'var(--tax-red)' : 'var(--tax-green)';
+
+      let html = '';
+      html += `<text x="24" y="28" fill="var(--tax-ink)" font-size="13" font-weight="800">总选票 500 票 · 效率差距 = |${wBlue} − ${wRed}| ÷ 500 = ${eg.toFixed(1)}% ${guilty ? '🚨 超过 7% 作弊警报！' : '✅ 公平合法区'}</text>`;
+
+      // Blue wasted bar
+      html += `<text x="24" y="64" fill="var(--tax-primary)" font-size="12" font-weight="700">🔵 蓝方浪费</text>`;
+      html += `<rect x="112" y="48" width="520" height="22" rx="7" fill="rgba(148,163,184,0.14)"/>`;
+      html += `<rect x="112" y="48" width="${(wBlue / 250) * 520}" height="22" rx="7" fill="var(--tax-primary)"/>`;
+
+      // Red wasted bar
+      html += `<text x="24" y="106" fill="var(--tax-red)" font-size="12" font-weight="700">🔴 红方浪费</text>`;
+      html += `<rect x="112" y="90" width="520" height="22" rx="7" fill="rgba(148,163,184,0.14)"/>`;
+      html += `<rect x="112" y="90" width="${(wRed / 250) * 520}" height="22" rx="7" fill="var(--tax-red)"/>`;
+
+      html += `<text x="24" y="144" fill="${guilty ? 'var(--tax-red)' : 'var(--tax-green)'}" font-size="12" font-weight="700">${guilty ? '⚠️ 蓝方被刻意打包/打散，比红方多浪费了 ' + (wBlue - wRed) + ' 张有效选票！' : '✅ 双方选票利用效率基本对称，未发现系统性划区操纵。'}</text>`;
+      svg.innerHTML = html;
+
+      ahaBox.innerHTML = guilty
+        ? `<strong>违宪级划区倾斜（EG = ${eg.toFixed(1)}% > 7%）：</strong>在多起美国联邦诉讼案（如威斯康星州案）中，学者与法院直接用效率差距量化“到底画得有多偏心”，把主观口水战变成了铁板钉钉的数学证据！`
+        : `<strong>公平对称区间（EG = ${eg.toFixed(1)}% ≤ 7%）：</strong>两党在全州范围内的浪费选票大致相当，席位分布公正反映民意。试着把倾斜滑块往右拉看看警报触发！`;
+    }
+
+    skewRange.oninput = () => { markDone('使用效率差距检测仪量化了选区倾斜'); render(); };
+    render();
   </script>
 </body>
 </html>

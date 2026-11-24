@@ -1,74 +1,98 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚖️ 阿罗不可能定理四公理权衡仪</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>阿罗不可能定理四公理权衡仪</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ax-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .ax-grid { grid-template-columns: 1fr; } }
+    .ax-btn {
+      text-align: left; padding: 12px; border-radius: 10px; border: 1.5px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); cursor: pointer;
+    }
+    .ax-btn.on { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .ax-btn.popped { border-color: var(--tax-red); background: var(--tax-red-soft); }
+    .verdict { padding: 12px 14px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); font-size: 13.5px; line-height: 1.6; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚖️ 阿罗不可能定理四公理权衡仪</h1><p>误区：只要数学家再聪明一点，总能发明一种“绝对公平且无漏洞”的完美投票算法。真相：阿罗证明了不存在完美的投票规则——每套制度都必须牺牲至少一条公理！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>⚖️ 阿罗不可能定理：4 项公平公理权衡仪（构建器）</h1>
+      <p>诺奖得主肯尼斯·阿罗在 1951 年用数学证明：只要候选人 <strong>≥ 3 位</strong>，下面 4 条听起来天经地义的民主公理<strong>永远不可能同时满足</strong>！试着把 4 个开关同时打开，看看哪一条被迫弹飞！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="ax-grid" id="axGrid"></div>
+      <div class="verdict" id="verdictBox"></div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>阿罗不可能定理：</strong>世界上不存在“绝对完美、毫无漏洞”的排序投票制度！试着去点亮第 4 个熄灭的开关，亲眼看数学矛盾如何强行弹掉另一条公理！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>排序信息保真度 (牺牲 IIA)</span><span id="vA">65%</span></label><input type="range" id="sA" min="10" max="100" value="65" oninput="calc()"></div>
-        <div class="ctrl-box"><label><span>权力集中度 (接近独裁)</span><span id="vB">15%</span></label><input type="range" id="sB" min="0" max="100" value="15" oninput="calc()"></div>
-        <div class="ctrl-box"><label><span>选项限制严格度 (限制域)</span><span id="vC">25%</span></label><input type="range" id="sC" min="0" max="100" value="25" oninput="calc()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">无关选项独立性 (IIA)</div><div class="k-val" id="kI">—</div></div>
-        <div class="kpi"><div class="k-lbl">非独裁公平度</div><div class="k-val" id="kD">—</div></div>
-        <div class="kpi"><div class="k-lbl">制度原型</div><div class="k-val" id="kM">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function calc(){
-  const a=+document.getElementById('sA').value, b=+document.getElementById('sB').value, c=+document.getElementById('sC').value;
-  document.getElementById('vA').textContent=a+'%'; document.getElementById('vB').textContent=b+'%'; document.getElementById('vC').textContent=c+'%';
-  const iia=Math.max(5, Math.min(98, Math.round(100 - a*0.75 + b*0.35 + c*0.3)));
-  const nondict=Math.max(0, 100-b);
-  const pareto=Math.min(100, Math.round(60 + a*0.25 + b*0.15));
-  const domain=Math.max(5, 100-c);
-  document.getElementById('kI').textContent=iia+'%';
-  document.getElementById('kD').textContent=nondict+'%';
-  let mod='排序复选 / 波达计数';
-  if(b>60) mod='强主席/独裁拍板'; else if(c>60) mod='单峰偏好限定投票'; else if(iia>75) mod='简单多数决（易分票）';
-  document.getElementById('kM').textContent=mod;
-  const bars=[['帕累托一致',pareto,'#10b981'],['无限制域',domain,'#0284c7'],['非独裁性',nondict,'#8b5cf6'],['IIA 独立性',iia,'#f59e0b']];
-  let svg='';
-  bars.forEach(([nm,val,col],i)=>{
-    const y=22+i*40, w=val*3.6;
-    svg+=`<text x="15" y="${y+18}" font-size="13" font-weight="750" fill="var(--tax-text)">${nm}</text>
-    <rect x="135" y="${y}" width="360" height="24" rx="6" fill="var(--tax-border)" opacity="0.35"/>
-    <rect x="135" y="${y}" width="${w}" height="24" rx="6" fill="${col}"/>
-    <text x="${145+w}" y="${y+17}" font-size="12.5" font-weight="800" fill="${col}">${val}%</text>`;
-  });
-  document.getElementById('svg').innerHTML=svg;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>阿罗不可能定理就像制度设计的“能量守恒”：你想提高非独裁性与排序保真度，<strong>IIA 独立性（不被凑数候选人搅局）</strong>就必然下降！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-calc();
+    const AXIOMS = [
+      { id: 'nodict', name: '👑 1. 非独裁（Non-dictatorship）', sub: '不能永远只听某一个独裁者说了算', on: true },
+      { id: 'pareto', name: '🤝 2. 帕累托一致（Unanimity）',   sub: '如果所有人都觉得 A 比 B 好，结果必须 A 胜 B', on: true },
+      { id: 'iia',    name: '🧱 3. 无关选项独立（IIA）',       sub: 'A 和 B 谁排前面，不能受退选酱油 C 的干扰', on: true },
+      { id: 'trans',  name: '📏 4. 无死循环（严格传递性）',    sub: '必须给出确定排名，不能出现 A>B>C>A 悖论', on: false }
+    ];
+
+    const SYSTEMS = {
+      trans:  { title: '当前退化为：两两多数决（放弃了【无死循环】）', desc: '满足非独裁、一致性和 IIA，但在孔多塞循环下会陷入 A>B>C>A 无解僵局！' },
+      iia:    { title: '当前退化为：波达计数 / 排序复选（放弃了【无关选项独立】）', desc: '能稳定排出唯一名次，但多塞进一个毫无胜算的“分票酱油 C”就可能篡改 A 和 B 的胜负！' },
+      nodict: { title: '当前退化为：独裁制（放弃了【非独裁】）', desc: '只要宣布“全场只按选民 #1 的清单排”，其余 3 条数学公理立刻 100% 完美成立！' },
+      pareto: { title: '当前退化为：固定常值 / 随机抽签（放弃了【一致性】）', desc: '不管大家怎么投，永远硬性规定按字母顺序排——无循环、无独裁、满足 IIA，但完全无视民意！' }
+    };
+
+    let poppedId = 'trans', done = false;
+    const axGrid = document.getElementById('axGrid');
+    const verdictBox = document.getElementById('verdictBox');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      axGrid.innerHTML = '';
+      AXIOMS.forEach(ax => {
+        const b = document.createElement('button');
+        b.className = 'ax-btn ' + (ax.on ? 'on' : 'popped');
+        b.innerHTML = `<div style="font-weight:800;font-size:13.5px;">${ax.on ? '✅ ' : '💥 被迫牺牲：'}${ax.name}</div><div style="font-size:11.5px;color:var(--tax-muted);margin-top:4px;">${ax.sub}</div>`;
+        b.onclick = () => {
+          markDone('测试了阿罗不可能定理四公理冲突');
+          if (!ax.on) {
+            // Turn this one ON, mathematically force another one OFF!
+            ax.on = true;
+            const others = AXIOMS.filter(x => x.id !== ax.id && x.on);
+            // Pop a predictable conflicting axiom
+            const victim = others.find(x => x.id === 'iia') || others[0];
+            victim.on = false;
+            poppedId = victim.id;
+            ahaBox.innerHTML = `<strong>数学警报！</strong>你刚把「${ax.name}」强行打开，阿罗定理立刻把「${victim.name}」弹飞了！这正是现实中各国设计投票制度只能在“允许分票效应”或“改用打分制（脱离纯排序框架）”之间妥协的根本原因。`;
+          } else {
+            ax.on = false;
+            poppedId = ax.id;
+          }
+          render();
+        };
+        axGrid.appendChild(b);
+      });
+
+      const sys = SYSTEMS[poppedId] || SYSTEMS.trans;
+      verdictBox.innerHTML = `<strong style="color:var(--tax-primary);">${sys.title}</strong><div style="margin-top:4px;color:var(--tax-muted);">${sys.desc}</div>`;
+    }
+
+    render();
   </script>
 </body>
 </html>

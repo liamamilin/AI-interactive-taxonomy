@@ -1,76 +1,251 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌐 小世界网络重连器：几根跨圈弦线缩短全世界（SVG）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小世界网络重连器：几根跨圈弦线缩短全世界</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .net-wrap { display: grid; grid-template-columns: 1fr 220px; gap: 14px; align-items: start; }
+    @media (max-width: 720px) { .net-wrap { grid-template-columns: 1fr; } }
+    .canvas-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 12px; }
+    .stats-col { display: flex; flex-direction: column; gap: 10px; }
+    .s-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px 12px; }
+    .s-l { font-size: 12px; color: var(--tax-muted); }
+    .s-v { font-size: 22px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
+    .hint { font-size: 12px; color: var(--tax-muted); text-align: center; margin-top: 6px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌐 小世界网络重连器：几根跨圈弦线缩短全世界（SVG）</h1><p>误区：要想让世界上任意两个人只需 6 步就能认识，每个人都必须加满几千个跨国好友。真相：你只需要保持本地朋友圈，再随机连出几条跨圈“弱连接捷径”，全网平均路径瞬间坍缩！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>跨圈随机弱连接重连率 p</span><span id="vP">10%</span></label><input type="range" id="sP" min="0" max="50" value="10" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>本地圈子节点数 N</span><span id="vN">18 人</span></label><input type="range" id="sN" min="12" max="24" step="2" value="18" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🌐 小世界网络重连器：几根跨圈弦线缩短全世界</h1>
+      <p>圆环上 20 个人原本只认识左右相邻的 4 位熟人（规则晶格）。拖动跨圈弦线数量，或直接<strong>依次点击任意两个圆点</strong>手工拉起一根跨圈“弱连接”，看全网平均距离如何暴跌！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="control-group">
+        <label>跨圈弱连接弦线数：<strong id="chordVal">0 根</strong></label>
+        <input id="chordSlider" type="range" min="0" max="12" step="1" value="0">
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 200"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">跨圈弱连接数</div><div class="k-val" id="kSh">—</div></div>
-        <div class="kpi"><div class="k-lbl">平均触达步数</div><div class="k-val" id="kLen" style="color:#0284c7;">—</div></div>
+      <div class="toy-btn-row">
+        <button class="toy-btn" id="clearBtn">清空弦线</button>
+        <button class="toy-btn primary" id="magicBtn">体验 3 根弦线奇迹</button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="net-wrap">
+      <div class="canvas-card">
+        <svg id="netSvg" viewBox="0 0 360 320" style="width:100%;max-width:380px;margin:0 auto;display:block;"></svg>
+        <div class="hint" id="pickHint">点击任意两个节点，可手动建立/移除一条跨圈弱连接</div>
+      </div>
+
+      <div class="stats-col">
+        <div class="s-card">
+          <div class="s-l">全网平均最短路径</div>
+          <div class="s-v" id="pathVal">2.89 步</div>
+        </div>
+        <div class="s-card">
+          <div class="s-l">最远两人距离（直径）</div>
+          <div class="s-v" id="diamVal">5 步</div>
+        </div>
+        <div class="s-card">
+          <div class="s-l">本地熟人聚集度</div>
+          <div class="s-v" id="clusVal">0.50</div>
+        </div>
+        <div class="s-card">
+          <div class="s-l">当前跨圈弱连接</div>
+          <div class="s-v" id="edgeVal">0 根</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 小世界奥秘：</strong>目前网络是纯熟人圆环，平均要走 <strong>2.89 步</strong>、最远要 <strong>5 步</strong>。试着只加 <strong>3 根</strong>跨圈弱连接，看看距离下降幅度有多惊人！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const p=+document.getElementById('sP').value, n=+document.getElementById('sN').value;
-  document.getElementById('vP').textContent=p+'%'; document.getElementById('vN').textContent=n+' 人';
-  const shortcuts=Math.round(n*p/100*1.5);
-  const avgLen=(1 + (n/4)/(1+shortcuts*1.8)).toFixed(1);
-  document.getElementById('kSh').textContent=shortcuts+' 条捷径';
-  document.getElementById('kLen').textContent=avgLen+' 跳';
-  const cx=160, cy=100, R=76;
-  let svg='';
-  for(let i=0;i<n;i++){
-    const a1=i/n*Math.PI*2, a2=((i+1)%n)/n*Math.PI*2;
-    svg+=`<line x1="${cx+R*Math.cos(a1)}" y1="${cy+R*Math.sin(a1)}" x2="${cx+R*Math.cos(a2)}" y2="${cy+R*Math.sin(a2)}" stroke="#94a3b8" stroke-width="1.5"/>`;
-  }
-  for(let k=0;k<shortcuts;k++){
-    const i=(k*5)%n, j=(i+Math.floor(n/2)+k)%n;
-    const a1=i/n*Math.PI*2, a2=j/n*Math.PI*2;
-    svg+=`<line x1="${cx+R*Math.cos(a1)}" y1="${cy+R*Math.sin(a1)}" x2="${cx+R*Math.cos(a2)}" y2="${cy+R*Math.sin(a2)}" stroke="#0284c7" stroke-width="2.5"/>`;
-  }
-  for(let i=0;i<n;i++){
-    const a=i/n*Math.PI*2;
-    svg+=`<circle cx="${cx+R*Math.cos(a)}" cy="${cy+R*Math.sin(a)}" r="5" fill="#0284c7"/>`;
-  }
-  svg+=`<text x="295" y="72" font-size="14" font-weight="850" fill="var(--tax-text)">仅增加 ${shortcuts} 条弱连接捷径</text>
-  <text x="295" y="106" font-size="22" font-weight="900" fill="#0284c7">平均距离骤降至 ${avgLen} 跳</text>
-  <text x="295" y="138" font-size="12" fill="var(--tax-muted)">高度聚簇的熟人圈 + 少量跨圈弱连接 = 小世界网络</text>`;
-  document.getElementById('svg').innerHTML=svg;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>只需要 ${p}% 的跨圈捷径（${shortcuts} 条蓝线），信息穿透整个社交网络的平均步数就暴跌到了 <strong>${avgLen} 跳</strong>——这就是“六度分隔”的几何秘密！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const N = 20;
+    const presetChords = [
+      [0, 10], [5, 15], [2, 12], [7, 17], [3, 14], [8, 19],
+      [1, 11], [6, 16], [4, 13], [9, 18], [0, 7], [5, 12]
+    ];
+    let customChords = [];
+    let selectedNode = null;
+    let interacted = false;
+
+    const slider = document.getElementById('chordSlider');
+    const svg = document.getElementById('netSvg');
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function buildAdj() {
+      const adj = Array.from({ length: N }, () => new Set());
+      for (let i = 0; i < N; i++) {
+        [1, 2].forEach(d => {
+          const j = (i + d) % N;
+          adj[i].add(j);
+          adj[j].add(i);
+        });
+      }
+      customChords.forEach(([u, v]) => {
+        adj[u].add(v);
+        adj[v].add(u);
+      });
+      return adj;
+    }
+
+    function computeMetrics(adj) {
+      let totalDist = 0, pairs = 0, diam = 0;
+      for (let s = 0; s < N; s++) {
+        const dist = new Array(N).fill(-1);
+        dist[s] = 0;
+        const q = [s];
+        while (q.length) {
+          const u = q.shift();
+          adj[u].forEach(v => {
+            if (dist[v] === -1) {
+              dist[v] = dist[u] + 1;
+              q.push(v);
+            }
+          });
+        }
+        for (let t = s + 1; t < N; t++) {
+          totalDist += dist[t];
+          pairs++;
+          if (dist[t] > diam) diam = dist[t];
+        }
+      }
+      // Average clustering coefficient
+      let sumC = 0;
+      for (let i = 0; i < N; i++) {
+        const nbrs = Array.from(adj[i]);
+        const k = nbrs.length;
+        if (k < 2) continue;
+        let tri = 0;
+        for (let a = 0; a < k; a++) {
+          for (let b = a + 1; b < k; b++) {
+            if (adj[nbrs[a]].has(nbrs[b])) tri++;
+          }
+        }
+        sumC += (2 * tri) / (k * (k - 1));
+      }
+      return {
+        avgPath: totalDist / pairs,
+        diam,
+        clustering: sumC / N
+      };
+    }
+
+    function render() {
+      const adj = buildAdj();
+      const m = computeMetrics(adj);
+      const count = customChords.length;
+
+      document.getElementById('chordVal').textContent = count + ' 根';
+      document.getElementById('pathVal').textContent = m.avgPath.toFixed(2) + ' 步';
+      document.getElementById('diamVal').textContent = m.diam + ' 步';
+      document.getElementById('clusVal').textContent = m.clustering.toFixed(2);
+      document.getElementById('edgeVal').textContent = count + ' 根';
+
+      const cx = 180, cy = 160, R = 126;
+      const pts = [];
+      for (let i = 0; i < N; i++) {
+        const ang = (i / N) * Math.PI * 2 - Math.PI / 2;
+        pts.push({ x: cx + R * Math.cos(ang), y: cy + R * Math.sin(ang) });
+      }
+
+      let baseEdges = '';
+      for (let i = 0; i < N; i++) {
+        [1, 2].forEach(d => {
+          const j = (i + d) % N;
+          baseEdges += `<line x1="${pts[i].x.toFixed(1)}" y1="${pts[i].y.toFixed(1)}" x2="${pts[j].x.toFixed(1)}" y2="${pts[j].y.toFixed(1)}" stroke="var(--tax-border)" stroke-width="1.6"/>`;
+        });
+      }
+
+      let chordLines = '';
+      customChords.forEach(([u, v]) => {
+        chordLines += `<line x1="${pts[u].x.toFixed(1)}" y1="${pts[u].y.toFixed(1)}" x2="${pts[v].x.toFixed(1)}" y2="${pts[v].y.toFixed(1)}" stroke="var(--tax-amber)" stroke-width="2.6" opacity="0.9"/>`;
+      });
+
+      let nodesHtml = '';
+      pts.forEach((p, i) => {
+        const isSel = selectedNode === i;
+        nodesHtml += `
+          <g class="node-g" data-idx="${i}" style="cursor:pointer;">
+            <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${isSel ? 11 : 8.5}" fill="${isSel ? 'var(--tax-amber)' : 'var(--tax-primary)'}" stroke="var(--tax-surface)" stroke-width="2"/>
+            <text x="${p.x.toFixed(1)}" y="${(p.y + 3.5).toFixed(1)}" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" pointer-events="none">${i + 1}</text>
+          </g>
+        `;
+      });
+
+      svg.innerHTML = baseEdges + chordLines + nodesHtml;
+      svg.querySelectorAll('.node-g').forEach(g => {
+        g.addEventListener('click', () => {
+          const idx = Number(g.dataset.idx);
+          markDone('手动连接了小世界网络节点');
+          if (selectedNode === null) {
+            selectedNode = idx;
+            document.getElementById('pickHint').textContent = `已选中节点 ${idx + 1}，请点击另一个节点建立跨圈弱连接`;
+          } else if (selectedNode === idx) {
+            selectedNode = null;
+            document.getElementById('pickHint').textContent = '已取消选中，点击任意两个节点可连线';
+          } else {
+            const u = Math.min(selectedNode, idx), v = Math.max(selectedNode, idx);
+            const exist = customChords.findIndex(([a, b]) => (a === u && b === v) || (a === v && b === u));
+            if (exist >= 0) customChords.splice(exist, 1);
+            else customChords.push([u, v]);
+            selectedNode = null;
+            slider.value = Math.min(12, customChords.length);
+            document.getElementById('pickHint').textContent = `已更新节点 ${u + 1} ↔ ${v + 1} 的跨圈连接！`;
+          }
+          render();
+        });
+      });
+
+      const dropPct = Math.round(((2.89 - m.avgPath) / 2.89) * 100);
+      const aha = document.getElementById('ahaBox');
+      if (count === 0) {
+        aha.innerHTML = `<strong>💡 纯熟人规则网络：</strong>每个人只认识身边 4 个邻里，聚集度高（0.50），但跨城传递要绕半个地球（平均 <strong>2.89 步</strong>）。试着加上几根跨圈弦线！`;
+      } else if (count <= 4) {
+        aha.innerHTML = `<strong>⚡ 小世界奇迹触发！</strong>仅仅增加了 <strong>${count} 根</strong>跨圈弱连接，全网平均距离就骤降了 <strong>${Math.max(0, dropPct)}%</strong>（降至 ${m.avgPath.toFixed(2)} 步），同时本地熟人聚集度几乎没掉（${m.clustering.toFixed(2)}）！`;
+      } else {
+        aha.innerHTML = `<strong>🌐 高度连通小世界：</strong>有了 <strong>${count} 根</strong>跨圈捷径，最远两人也只需 <strong>${m.diam} 步</strong>可达（平均 ${m.avgPath.toFixed(2)} 步）。你不需要认识所有人，只需少数跨圈桥梁就能把世界折叠。`;
+      }
+    }
+
+    slider.addEventListener('input', () => {
+      const k = Number(slider.value);
+      customChords = presetChords.slice(0, k).map(p => p.slice());
+      selectedNode = null;
+      markDone('调节了小世界网络跨圈弦线数量');
+      render();
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      customChords = [];
+      slider.value = 0;
+      selectedNode = null;
+      markDone('清空了跨圈弱连接');
+      render();
+    });
+
+    document.getElementById('magicBtn').addEventListener('click', () => {
+      customChords = presetChords.slice(0, 3).map(p => p.slice());
+      slider.value = 3;
+      selectedNode = null;
+      markDone('体验了 3 根弦线的小世界奇迹');
+      render();
+    });
+
+    render();
   </script>
 </body>
 </html>

@@ -1,68 +1,166 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔍 K-匿名重识别攻击透视镜（SVG）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K-匿名重识别攻击透视镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .lab-grid { display: grid; grid-template-columns: 240px 1fr; gap: 14px; align-items: start; }
+    @media (max-width: 720px) { .lab-grid { grid-template-columns: 1fr; } }
+    .clue-card, .table-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .clue-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: var(--tax-surface); border: 1.5px solid var(--tax-border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; font-size: 13px; }
+    .clue-item.active { border-color: var(--tax-red); background: var(--tax-red-soft); }
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th, td { padding: 7px 8px; text-align: left; border-bottom: 1px solid var(--tax-border); color: var(--tax-ink); }
+    th { color: var(--tax-muted); font-weight: 700; }
+    tr.match { background: var(--tax-amber-soft); }
+    tr.exposed { background: var(--tax-red-soft); font-weight: 800; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔍 K-匿名重识别攻击透视镜（SVG）</h1><p>误区：只要把姓名、手机号、身份证删掉，公开医院或出行数据就绝对安全了。真相：87% 的美国人仅凭【出生日期 + 性别 + 5位邮编】这三个“准标识符”就能在全美唯一锁定身份！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>年龄公开精细度</span><span id="vAge">精确到岁</span></label><input type="range" id="sAge" min="1" max="3" value="3" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>地区/邮编公开精细度</span><span id="vZip">精确到街道</span></label><input type="range" id="sZip" min="1" max="3" value="3" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🔍 K-匿名重识别攻击透视镜</h1>
+      <p>某医院公开了一张<strong>已删除姓名与身份证</strong>的“匿名病历表”。你从公开社交媒体得知：目标人物「老王」<strong>男、1988 年生、住 100083 邮编</strong>。点击左侧线索逐项交叉比对，看能不能把老王的隐私病历精准揪出来！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="rawModeBtn">🔓 原始脱敏表（仅删姓名）</button>
+        <button class="toy-btn" id="kAnonBtn">🛡️ 开启 K=3 匿名泛化保护</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">满足的匿名度 K</div><div class="k-val" id="kK">—</div></div>
-        <div class="kpi"><div class="k-lbl">身份被唯一锁定风险</div><div class="k-val" id="kRsk" style="color:#ef4444;">—</div></div>
+      <span style="font-size:13px;color:var(--tax-muted);">当前候选命中：<strong id="hitVal" style="color:var(--tax-ink);">8 条</strong></span>
+    </div>
+
+    <div class="lab-grid">
+      <div class="clue-card">
+        <div style="font-weight:800;font-size:14px;margin-bottom:8px;color:var(--tax-ink);">🕵️ 公开社媒线索（点击启用）</div>
+        <div class="clue-item" data-f="gender"><span>性别：男</span><strong id="st_gender">未用</strong></div>
+        <div class="clue-item" data-f="zip"><span>邮编：100083</span><strong id="st_zip">未用</strong></div>
+        <div class="clue-item" data-f="year"><span>出生年：1988</span><strong id="st_year">未用</strong></div>
+      </div>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr><th>邮编</th><th>出生年</th><th>性别</th><th>敏感诊断（病历）</th></tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 侦探任务：</strong>逐一点击左侧的 3 条公开线索，看看删掉姓名后，老王的真实病情是否依然“裸奔”！随后再点击「开启 K=3 匿名泛化保护」对比效果。
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const age=+document.getElementById('sAge').value, zip=+document.getElementById('sZip').value;
-  document.getElementById('vAge').textContent=['20岁一档','5岁一档','精确到岁'][age-1];
-  document.getElementById('vZip').textContent=['仅保留省','精确到区','精确到街道'][zip-1];
-  const score=age*zip;
-  const K=score>=6?1:(score>=4?3:(score>=2?8:18));
-  const risk=K===1?89:(K<=3?42:(K<=8?14:3));
-  document.getElementById('kK').textContent='K = '+K+(K===1?' (孤立暴露!)':'');
-  document.getElementById('kRsk').textContent=risk+'%';
-  document.getElementById('kRsk').style.color=risk>40?'#ef4444':'#10b981';
-  let dots='';
-  for(let i=0;i<18;i++){
-    const col=(i<K)?(K===1?'#ef4444':'#0284c7'):'#cbd5e1';
-    const x=42+(i%9)*58, y=48+Math.floor(i/9)*48;
-    dots+=`<circle cx="${x}" cy="${y}" r="14" fill="${col}"/>`;
-  }
-  document.getElementById('svg').innerHTML=dots+`
-    <text x="30" y="155" font-size="13" font-weight="800" fill="${K===1?'#ef4444':'#10b981'}">${K===1?'❌ 红点就是你：该特征组合全表只有你 1 个人，删掉名字也能秒认出！':'✅ 共有 '+K+' 个人与你完全同组（'+K+'-匿名），无法区分谁是谁'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>匿名化不是“删掉名字”这么简单！必须把年龄段和邮编泛化到足够粗，保证任何一条记录至少有 <strong>K 个一模一样的替身</strong>，才能挡住重识别攻击！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const rawRows = [
+      { zip: '100083', year: '1988', gender: '男', diag: '重度抑郁症（老王！）', isTarget: true },
+      { zip: '100083', year: '1989', gender: '男', diag: '季节性过敏' },
+      { zip: '100083', year: '1988', gender: '女', diag: '轻度贫血' },
+      { zip: '100081', year: '1988', gender: '男', diag: '腰椎间盘突出' },
+      { zip: '100084', year: '1986', gender: '男', diag: '高血压' },
+      { zip: '100083', year: '1985', gender: '女', diag: '甲状腺结节' },
+      { zip: '100082', year: '1988', gender: '男', diag: '胃溃疡' },
+      { zip: '100085', year: '1987', gender: '女', diag: '偏头痛' }
+    ];
+
+    const filters = { gender: false, zip: false, year: false };
+    let kMode = false;
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function genDisplay(row) {
+      if (!kMode) return row;
+      return {
+        zip: '10008*',
+        year: '1985-1989',
+        gender: row.gender,
+        diag: row.diag.replace('（老王！）', ''),
+        isTarget: row.isTarget
+      };
+    }
+
+    function matches(row) {
+      if (!kMode) {
+        if (filters.gender && row.gender !== '男') return false;
+        if (filters.zip && row.zip !== '100083') return false;
+        if (filters.year && row.year !== '1988') return false;
+        return true;
+      } else {
+        // Under K=3 generalization, zip 10008* matches all, year 1985-1989 matches all, only gender narrows to 4 men
+        if (filters.gender && row.gender !== '男') return false;
+        return true;
+      }
+    }
+
+    function render() {
+      ['gender', 'zip', 'year'].forEach(k => {
+        const el = document.querySelector(`[data-f="${k}"]`);
+        el.classList.toggle('active', filters[k]);
+        document.getElementById('st_' + k).textContent = filters[k] ? '已锁定' : '未用';
+      });
+
+      const matched = rawRows.filter(matches);
+      document.getElementById('hitVal').textContent = matched.length + ' 条';
+
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = rawRows.map(r => {
+        const d = genDisplay(r);
+        const isHit = matches(r);
+        const cls = isHit ? (matched.length === 1 ? 'exposed' : 'match') : '';
+        return `<tr class="${cls}"><td>${d.zip}</td><td>${d.year}</td><td>${d.gender}</td><td>${d.diag}</td></tr>`;
+      }).join('');
+
+      const activeCount = Object.values(filters).filter(Boolean).length;
+      const aha = document.getElementById('ahaBox');
+      if (activeCount === 0) {
+        aha.innerHTML = `<strong>💡 侦探任务：</strong>点击左侧 3 条公开线索交叉比对，看看不靠姓名能不能唯一锁定老王！`;
+      } else if (!kMode && matched.length === 1) {
+        aha.innerHTML = `<strong>🚨 重识别攻击成功！</strong>虽然删掉了姓名，但「邮编 + 出生年份 + 性别」这 3 个准标识符组合把老王唯一锁定（1/8），他的私密病历彻底暴露！拉塔尼亚·斯威尼研究证明，仅凭这 3 项就能唯一识别美国 <strong>87%</strong> 的人口。现在点击「开启 K=3 匿名泛化保护」试试！`;
+      } else if (kMode) {
+        aha.innerHTML = `<strong>🛡️ K-匿名防御生效！</strong>将邮编泛化为 <code>10008*</code>、出生年泛化为 <code>1985-1989</code> 后，即使动用全部 3 条社媒线索，老王依然藏身在 <strong>${matched.length} 条</strong>完全 indistinguishable（不可区分）的记录之中，无法被精准定位！`;
+      } else {
+        aha.innerHTML = `<strong>🔍 缩小包围圈：</strong>目前匹配缩小至 <strong>${matched.length} 条</strong>记录。继续点击剩余线索，看看能否把候选缩到唯一 1 人！`;
+      }
+    }
+
+    document.querySelectorAll('.clue-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const f = item.dataset.f;
+        filters[f] = !filters[f];
+        markDone('执行了 K-匿名准标识符链接攻击测试');
+        render();
+      });
+    });
+
+    document.getElementById('rawModeBtn').addEventListener('click', () => {
+      kMode = false;
+      document.getElementById('rawModeBtn').classList.add('primary');
+      document.getElementById('kAnonBtn').classList.remove('primary');
+      markDone('切换回原始脱敏表模式');
+      render();
+    });
+
+    document.getElementById('kAnonBtn').addEventListener('click', () => {
+      kMode = true;
+      document.getElementById('kAnonBtn').classList.add('primary');
+      document.getElementById('rawModeBtn').classList.remove('primary');
+      markDone('开启了 K-匿名泛化保护');
+      render();
+    });
+
+    render();
   </script>
 </body>
 </html>

@@ -1,69 +1,159 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📈 专利保护年限倒 U 型福利曲线（SVG）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>专利保护年限倒 U 型福利曲线</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .viz-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .kpi { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
+    svg text { fill: var(--tax-muted); font-family: inherit; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📈 专利保护年限倒 U 型福利曲线（SVG）</h1><p>误区：保护知识产权就是保护得越久越好，最好永久专利。真相：专利本质上是“用临时垄断换取公开技术”——保护太短没人研发，保护太久高价垄断会饿死消费者并卡死后续改良！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>专利垄断保护年限 T</span><span id="vT">20 年</span></label><input type="range" id="sT" min="0" max="35" value="20" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>行业研发沉没成本</span><span id="vCost">55 分</span></label><input type="range" id="sCost" min="20" max="90" value="55" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>📈 专利保护年限倒 U 型福利曲线</h1>
+      <p>专利的本质是国家与发明人的一场交易：<strong>“你公开技术方案，我给你限时独占垄断权。”</strong>太短没人肯砸钱研发，太长消费者长期承受垄断高价！切换不同行业并拖动保护年限，寻找社会总福利的倒 U 型峰顶。</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row" style="margin-bottom:8px;">
+        <button class="toy-btn" data-ind="software">💻 软件算法（迭代极快）</button>
+        <button class="toy-btn primary" data-ind="pharma">💊 创新药（十年十亿美元）</button>
+        <button class="toy-btn" data-ind="hardware">⚙️ 精密制造（中等周期）</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">新发明诞生概率</div><div class="k-val" id="kInn" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">垄断高价社会损耗</div><div class="k-val" id="kDwl" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">社会净福利</div><div class="k-val" id="kWel" style="color:#10b981;">—</div></div>
+      <div class="control-group">
+        <label>设定专利法定保护年限：<strong id="yrVal">20 年</strong></label>
+        <input id="yrSlider" type="range" min="0" max="50" step="1" value="20">
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="viz-box">
+      <svg id="curveSvg" viewBox="0 0 640 245" style="width:100%;height:auto;display:block;"></svg>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-l">激发的新技术供给</div>
+          <div class="kpi-v" id="innVal" style="color:var(--tax-green);">82 分</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">长期垄断无谓损失</div>
+          <div class="kpi-v" id="dwlVal" style="color:var(--tax-red);">-26 分</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">社会净福利总分</div>
+          <div class="kpi-v" id="netVal" style="color:var(--tax-primary);">56 分</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 倒 U 型权衡核心：</strong>观察切换「软件算法」与「创新药」时，社会最优保护年限峰值如何左右剧烈漂移——这正是为什么学界常争论“一刀切 20 年对软件太长、对新药刚好”！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const T=+document.getElementById('sT').value, cost=+document.getElementById('sCost').value;
-  document.getElementById('vT').textContent=T+' 年'; document.getElementById('vCost').textContent=cost+' 分';
-  const wel=t=>{ const inn=100*(1-Math.exp(-t/(cost*0.22))); const dwl=t*1.9; return Math.round(inn - dwl); };
-  const inn=Math.round(100*(1-Math.exp(-T/(cost*0.22)))), dwl=Math.round(T*1.9), w=wel(T);
-  document.getElementById('kInn').textContent=inn+'%';
-  document.getElementById('kDwl').textContent=dwl+' 分';
-  document.getElementById('kWel').textContent=w+' 分';
-  let pts='';
-  for(let t=0;t<=35;t++){
-    pts+=`${40+t*14.8},${155-Math.max(-10,wel(t))*1.5} `;
-  }
-  const cx=40+T*14.8, cy=155-Math.max(-10,w)*1.5;
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="155" x2="560" y2="155" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="#10b981" stroke-width="3" points="${pts}"/>
-    <circle cx="${cx}" cy="${cy}" r="6" fill="#0284c7"/>
-    <text x="${Math.min(480,cx+8)}" y="${Math.max(24,cy-8)}" font-size="12" font-weight="800" fill="#0284c7">T=${T}年 (净福利 ${w})</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>国际公约把发明专利定在 <strong>20 年</strong>，正是卡在“研发激励边际递增放缓，而垄断无谓损失持续线性上升”的倒 U 型顶点附近！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const industries = {
+      software: { name: '软件算法', kInn: 0.28, dwlSlope: 2.2, optHint: '6~10 年' },
+      hardware: { name: '精密制造', kInn: 0.14, dwlSlope: 1.5, optHint: '14~18 年' },
+      pharma:   { name: '创新药',   kInn: 0.085, dwlSlope: 1.15, optHint: '18~24 年' }
+    };
+
+    let curInd = 'pharma';
+    const yrSlider = document.getElementById('yrSlider');
+    const svg = document.getElementById('curveSvg');
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function calc(t, ind) {
+      const cfg = industries[ind];
+      const inn = 115 * (1 - Math.exp(-cfg.kInn * t));
+      const dwl = cfg.dwlSlope * t + 0.018 * t * t;
+      const net = Math.max(-20, inn - dwl);
+      return { inn, dwl, net };
+    }
+
+    function render() {
+      const t = Number(yrSlider.value);
+      document.getElementById('yrVal').textContent = t + ' 年';
+      const cur = calc(t, curInd);
+
+      // Find peak t for current industry
+      let bestT = 0, bestNet = -999;
+      for (let x = 0; x <= 50; x++) {
+        const v = calc(x, curInd).net;
+        if (v > bestNet) { bestNet = v; bestT = x; }
+      }
+
+      document.getElementById('innVal').textContent = Math.round(cur.inn) + ' 分';
+      document.getElementById('dwlVal').textContent = '-' + Math.round(cur.dwl) + ' 分';
+      document.getElementById('netVal').textContent = Math.round(cur.net) + ' 分';
+
+      const W = 640, H = 245, padL = 46, padR = 24, padT = 22, padB = 34;
+      const sx = x => padL + (x / 50) * (W - padL - padR);
+      const sy = y => H - padB - ((y + 10) / 130) * (H - padT - padB);
+
+      let pInn = '', pDwl = '', pNet = '';
+      for (let x = 0; x <= 50; x++) {
+        const m = calc(x, curInd);
+        const cmd = x === 0 ? 'M' : 'L';
+        pInn += `${cmd}${sx(x).toFixed(1)},${sy(m.inn).toFixed(1)} `;
+        pDwl += `${cmd}${sx(x).toFixed(1)},${sy(m.dwl).toFixed(1)} `;
+        pNet += `${cmd}${sx(x).toFixed(1)},${sy(m.net).toFixed(1)} `;
+      }
+
+      svg.innerHTML = `
+        <line x1="${padL}" y1="${sy(0)}" x2="${W - padR}" y2="${sy(0)}" stroke="var(--tax-muted)"/>
+        <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="var(--tax-muted)"/>
+        <line x1="${sx(bestT).toFixed(1)}" y1="${padT}" x2="${sx(bestT).toFixed(1)}" y2="${H - padB}" stroke="var(--tax-green)" stroke-dasharray="4,3"/>
+        <text x="${sx(bestT).toFixed(1)}" y="${padT + 12}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--tax-green)">本行业最优约 ${bestT} 年</text>
+
+        <path d="${pInn}" fill="none" stroke="var(--tax-green)" stroke-width="2" stroke-dasharray="5,4" opacity="0.7"/>
+        <path d="${pDwl}" fill="none" stroke="var(--tax-red)" stroke-width="2" stroke-dasharray="5,4" opacity="0.7"/>
+        <path d="${pNet}" fill="none" stroke="var(--tax-primary)" stroke-width="3.5"/>
+
+        <circle cx="${sx(t).toFixed(1)}" cy="${sy(cur.net).toFixed(1)}" r="6.5" fill="var(--tax-primary)" stroke="var(--tax-surface)" stroke-width="2"/>
+
+        <text x="${W - padR - 6}" y="${padT + 14}" text-anchor="end" font-size="11" font-weight="700" fill="var(--tax-primary)">━━ 社会净福利（倒 U 型）</text>
+        <text x="${W - padR - 6}" y="${padT + 30}" text-anchor="end" font-size="11" fill="var(--tax-green)">--- 研发创新收益</text>
+        <text x="${W - padR - 6}" y="${padT + 46}" text-anchor="end" font-size="11" fill="var(--tax-red)">--- 垄断高价损失</text>
+        ${[0, 10, 20, 30, 40, 50].map(v => `<text x="${sx(v).toFixed(1)}" y="${H - padB + 17}" text-anchor="middle" font-size="11">${v}年</text>`).join('')}
+      `;
+
+      const cfg = industries[curInd];
+      const aha = document.getElementById('ahaBox');
+      if (t < bestT - 5) {
+        aha.innerHTML = `<strong>📉 保护期过短（${cfg.name} · ${t} 年）：</strong>刚花重金研发出来就被免费抄袭，企业根本收不回成本，研发供给严重萎缩（社会净福利仅 <strong>${Math.round(cur.net)} 分</strong>）。`;
+      } else if (Math.abs(t - bestT) <= 5) {
+        aha.innerHTML = `<strong>🏆 命中【${cfg.name}】黄金保护区间（${t} 年，最优约 ${bestT} 年）！</strong>既让发明人收回研发成本并获利，又及时在技术过时前进入公共领域，实现社会净福利最大化（<strong>${Math.round(cur.net)} 分</strong>）！`;
+      } else {
+        aha.innerHTML = `<strong>⚠️ 过度垄断拖累社会（${cfg.name} · ${t} 年）：</strong>边际创新激励已经见顶，但延长的垄断期持续制造高价药/专利壁垒与二次创新阻碍（无谓损失高达 <strong>-${Math.round(cur.dwl)} 分</strong>），拖垮净福利！`;
+      }
+    }
+
+    yrSlider.addEventListener('input', () => { markDone('探索了专利保护年限倒 U 型曲线'); render(); });
+    document.querySelectorAll('[data-ind]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        curInd = btn.dataset.ind;
+        document.querySelectorAll('[data-ind]').forEach(b => b.classList.remove('primary'));
+        btn.classList.add('primary');
+        markDone('切换了专利保护行业对比');
+        render();
+      });
+    });
+
+    render();
   </script>
 </body>
 </html>

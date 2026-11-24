@@ -1,64 +1,164 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>👑 多元无知与“皇帝的新衣”破局点</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多元无知与“皇帝的新衣”破局点</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .hall-wrap { display: grid; grid-template-columns: 1fr 220px; gap: 14px; align-items: start; }
+    @media (max-width: 720px) { .hall-wrap { grid-template-columns: 1fr; } }
+    .hall-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .seats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .seat { background: var(--tax-surface); border: 2px solid var(--tax-border); border-radius: 10px; padding: 8px 4px; text-align: center; cursor: pointer; transition: transform .15s, border-color .2s, background .2s; }
+    .seat:hover { transform: translateY(-2px); border-color: var(--tax-primary); }
+    .seat.spoken { background: var(--tax-green-soft); border-color: var(--tax-green); }
+    .seat.spark { background: var(--tax-amber-soft); border-color: var(--tax-amber); }
+    .seat-icon { font-size: 20px; line-height: 1.2; }
+    .seat-th { font-size: 11px; color: var(--tax-muted); margin-top: 2px; }
+    .side-col { display: flex; flex-direction: column; gap: 10px; }
+    .k-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px 12px; }
+    .k-l { font-size: 12px; color: var(--tax-muted); }
+    .k-v { font-size: 22px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>👑 多元无知与“皇帝的新衣”破局点</h1><p>误区：如果全场 90% 的人都鼓掌称赞，那说明至少大多数人心里真的喜欢它。真相：很可能 85% 的人心里都在吐槽，只是每个人以为只有自己觉得傻、害怕被孤立而假装鼓掌——这就是“多元无知”！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>大家私下真实不认可比例</span><span id="vPriv">80%</span></label><input type="range" id="sPriv" min="20" max="95" value="80" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>公开站出来“做第一批反对者”比例</span><span id="vBrk">18%</span></label><input type="range" id="sBrk" min="0" max="45" value="18" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">公开表达真相比例</div><div class="k-val" id="kPub" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">全场状态</div><div class="k-val" id="kSt">—</div></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>👑 多元无知与“皇帝的新衣”破局点</h1>
+      <p>会场里 25 个人<strong>私下全都觉得这项荒唐方案行不通</strong>，但每个人都以为别人赞成，于是集体鼓掌。格子里的数字是每个人的「敢言门槛」（需要看到几个人先站出来才敢附和）。<strong>点击任意一人让他率先发声！</strong></p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="resetBtn">重新安静坐好</button>
+        <button class="toy-btn" id="fragileBtn">加载“高顺从度”会场</button>
+        <button class="toy-btn" id="dominoBtn">加载“多米诺链条”会场</button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="hall-wrap">
+      <div class="hall-card">
+        <div class="seats-grid" id="seatsGrid"></div>
+      </div>
+
+      <div class="side-col">
+        <div class="k-box">
+          <div class="k-l">私下反对人数</div>
+          <div class="k-v">25 / 25</div>
+        </div>
+        <div class="k-box">
+          <div class="k-l">公开反对人数</div>
+          <div class="k-v" id="spokenVal">0 / 25</div>
+        </div>
+        <div class="k-box">
+          <div class="k-l">会场共识状态</div>
+          <div class="k-v" id="stateVal" style="font-size:17px;">假性一致</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 沉默螺旋破局：</strong>现在全场 25 人都在违心鼓掌。点击任意一位座位（哪怕是门槛最高的员工）让他成为第一个喊出“皇帝没穿衣服”的小男孩，看看会不会引爆连锁起立！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const priv=+document.getElementById('sPriv').value, brk=+document.getElementById('sBrk').value;
-  document.getElementById('vPriv').textContent=priv+'%'; document.getElementById('vBrk').textContent=brk+'%';
-  const collapse=brk>=15 && priv>=50;
-  const pub=collapse?priv:brk;
-  document.getElementById('kPub').textContent=pub+'%';
-  document.getElementById('kSt').textContent=collapse?'假象崩塌 (全员说真话)':'沉默螺旋锁死';
-  document.getElementById('kSt').style.color=collapse?'#10b981':'#ef4444';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#64748b">私下真实想法 (不认可): ${priv}%</text>
-    <rect x="20" y="44" width="${priv*5.4}" height="24" rx="6" fill="#64748b"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="${collapse?'#10b981':'#ef4444'}">公开站出来说真话比例: ${pub}%</text>
-    <rect x="20" y="112" width="${pub*5.4}" height="24" rx="6" fill="${collapse?'#10b981':'#ef4444'}"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">${collapse?'🎉 第一批勇敢者打破了“只有我这么想”的幻觉，真相瞬间释放！':'🤫 公开反对声太弱，多数人继续偏好伪装'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“偏好伪装”让社会表面风平浪静、实则一触即溃——不需要说服所有人改变看法，只要 ${brk}% 的人敢公开说真话，就能瞬间引爆其余 ${priv}% 早已存在的不满！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const DOMINO_THRESHOLDS = [
+      1, 1, 2, 2, 3,
+      3, 4, 5, 5, 6,
+      7, 8, 9, 10, 11,
+      12, 13, 14, 15, 16,
+      17, 18, 20, 21, 22
+    ];
+    const FRAGILE_THRESHOLDS = [
+      1, 2, 3, 5, 5,
+      6, 6, 7, 8, 8,
+      9, 10, 10, 12, 12,
+      14, 15, 16, 17, 18,
+      19, 20, 21, 22, 23
+    ];
+
+    let thresholds = DOMINO_THRESHOLDS.slice();
+    let spoken = new Array(25).fill(false);
+    let sparkSet = new Set();
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function cascadeCheck() {
+      let changed = true;
+      while (changed) {
+        changed = false;
+        const count = spoken.filter(Boolean).length;
+        for (let i = 0; i < 25; i++) {
+          if (!spoken[i] && count >= thresholds[i]) {
+            spoken[i] = true;
+            changed = true;
+          }
+        }
+      }
+    }
+
+    function render() {
+      const grid = document.getElementById('seatsGrid');
+      grid.innerHTML = '';
+      for (let i = 0; i < 25; i++) {
+        const isSpoken = spoken[i];
+        const isSpark = sparkSet.has(i);
+        const div = document.createElement('button');
+        div.className = 'seat' + (isSpark ? ' spark' : isSpoken ? ' spoken' : '');
+        div.innerHTML = `
+          <div class="seat-icon">${isSpark ? '📣' : isSpoken ? '🙋' : '🤐'}</div>
+          <div class="seat-th">${isSpoken ? '已公开反对' : '门槛 ' + thresholds[i] + ' 人'}</div>
+        `;
+        div.addEventListener('click', () => {
+          if (spoken[i]) return;
+          spoken[i] = true;
+          sparkSet.add(i);
+          cascadeCheck();
+          markDone('触发了多元无知破局连锁反应');
+          render();
+        });
+        grid.appendChild(div);
+      }
+
+      const cnt = spoken.filter(Boolean).length;
+      document.getElementById('spokenVal').textContent = `${cnt} / 25`;
+      const st = document.getElementById('stateVal');
+      const aha = document.getElementById('ahaBox');
+
+      if (cnt === 0) {
+        st.textContent = '假性一致';
+        aha.innerHTML = `<strong>🤐 典型的“多元无知”：</strong>25 个人内心全都反对，却因为门槛都 ≥ 1 而无人先开口。点任意一人替大家迈出第一步！`;
+      } else if (cnt === 25) {
+        st.textContent = '真相雪崩！';
+        aha.innerHTML = `<strong>💥 沉默螺旋彻底崩塌（25/25 站起）！</strong>仅仅因为 <strong>${sparkSet.size} 位“小男孩”</strong>率先打破沉默，门槛为 1→2→3… 的多米诺骨牌瞬间推倒全场。专断或荒唐共识看似铁板一块，其实极其脆弱！`;
+      } else {
+        st.textContent = `局部发声 (${cnt}人)`;
+        aha.innerHTML = `<strong>🧱 遇到“门槛断层”！</strong>目前已有 <strong>${cnt} 人</strong>公开反对，但剩下的人最低门槛高于 ${cnt}，导致雪崩暂时卡壳。再多点 1 位勇敢者，看看能否跨过断层引爆全场！`;
+      }
+    }
+
+    function resetHall(mode) {
+      if (mode === 'fragile') thresholds = FRAGILE_THRESHOLDS.slice();
+      else if (mode === 'domino') thresholds = DOMINO_THRESHOLDS.slice();
+      spoken = new Array(25).fill(false);
+      sparkSet.clear();
+      render();
+    }
+
+    document.getElementById('resetBtn').addEventListener('click', () => { markDone('重置了圆桌会场'); resetHall(); });
+    document.getElementById('fragileBtn').addEventListener('click', () => { markDone('切换了高顺从度会场'); resetHall('fragile'); });
+    document.getElementById('dominoBtn').addEventListener('click', () => { markDone('切换了多米诺链条会场'); resetHall('domino'); });
+
+    render();
   </script>
 </body>
 </html>

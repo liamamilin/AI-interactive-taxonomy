@@ -1,84 +1,121 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📈 群体智慧放大曲线（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>群体智慧放大曲线</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .ctrl-grid { grid-template-columns: 1fr; } }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📈 群体智慧放大曲线（SVG）</h1><p>误区：三个臭皮匠一定顶个诸葛亮，人越多投票越准。真相：只有当每个人判断准确率 > 50% 时人越多越准；一旦低于 50%，人越多反而越接近 100% 犯错！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>📈 孔多塞陪审团定理：群体智慧放大（或放大愚蠢！）曲线</h1>
+      <p>如果每位陪审员独立判断的正确率是 <strong>p</strong>：只要 <strong>p &gt; 50%</strong>，人越多群体正确率越逼近 <strong>100%</strong>；可一旦 <strong>p &lt; 50%</strong>（受偏见误导），人越多反而越坚定地冲向 <strong>0% 集体犯错</strong>！拖动 p 跨过 50% 悬崖！</p>
+    </header>
+
+    <section class="toy-card">
       <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>单个陪审员准确率 p</span><span id="vP">0.60</span></label><input type="range" id="sP" min="30" max="80" value="60" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>陪审团人数 N (奇数)</span><span id="vN">15 人</span></label><input type="range" id="sN" min="1" max="51" step="2" value="15" oninput="upd()"></div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+            <span>🧠 单人独立判断正确率 p</span>
+            <strong id="pVal" style="color:var(--tax-green);">60%（略强于抛硬币）</strong>
+          </div>
+          <input type="range" id="pRange" min="35" max="75" value="60" style="width:100%;" />
+        </div>
+        <div class="ctrl-box">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+            <span>👥 陪审团人数 N（奇数）</span>
+            <strong id="nVal" style="color:var(--tax-primary);">21 人</strong>
+          </div>
+          <input type="range" id="nRange" min="1" max="51" step="2" value="21" style="width:100%;" />
+        </div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">个体准确率</div><div class="k-val" id="kInd">—</div></div>
-        <div class="kpi"><div class="k-lbl">群体多数决准确率</div><div class="k-val" id="kGrp">—</div></div>
-        <div class="kpi"><div class="k-lbl">群体效应方向</div><div class="k-val" id="kDir">—</div></div>
-      </div>
+
+      <svg id="jurySvg" viewBox="0 0 680 215" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="孔多塞陪审团群体正确率曲线"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>50% 相变分水岭：</strong>把 <code>p</code> 从 58% 轻轻拉到 <strong>42%</strong>（仅仅差了 16%），原本冲向 100% 的群体智慧曲线立刻倒扣砸向 0%——这就是“乌合之众”与“群体智慧”的精确数学边界！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function majProb(n,p){
-  let sum=0, comb=1;
-  const kMin=Math.floor(n/2)+1;
-  for(let k=0;k<=n;k++){
-    if(k>0) comb=comb*(n-k+1)/k;
-    if(k>=kMin) sum+=comb*Math.pow(p,k)*Math.pow(1-p,n-k);
-  }
-  return sum;
-}
-function upd(){
-  const p=+document.getElementById('sP').value/100, n=+document.getElementById('sN').value;
-  document.getElementById('vP').textContent=p.toFixed(2); document.getElementById('vN').textContent=n+' 人';
-  const gp=majProb(n,p);
-  document.getElementById('kInd').textContent=(p*100).toFixed(0)+'%';
-  document.getElementById('kGrp').textContent=(gp*100).toFixed(1)+'%';
-  const good=p>0.5, eq=Math.abs(p-0.5)<0.001;
-  document.getElementById('kDir').textContent=eq?'随机抛硬币':(good?'群体智慧放大':'群体愚蠢放大');
-  document.getElementById('kDir').style.color=eq?'#64748b':(good?'#10b981':'#ef4444');
-  let pts='';
-  for(let i=1;i<=51;i+=2){
-    const x=40+(i-1)/50*520, y=160-majProb(i,p)*135;
-    pts+=`${x.toFixed(1)},${y.toFixed(1)} `;
-  }
-  const cx=40+(n-1)/50*520, cy=160-gp*135;
-  const col=good?'#10b981':(eq?'#64748b':'#ef4444');
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="92.5" x2="560" y2="92.5" stroke="#94a3b8" stroke-dasharray="4 4"/>
-    <text x="45" y="86" font-size="11" fill="var(--tax-muted)">50% 分水岭</text>
-    <polyline fill="none" stroke="${col}" stroke-width="3" points="${pts}"/>
-    <circle cx="${cx}" cy="${cy}" r="6" fill="${col}"/>
-    <text x="${Math.min(510,cx+8)}" y="${Math.max(22,cy-8)}" font-size="12" font-weight="800" fill="${col}">N=${n}: ${(gp*100).toFixed(1)}%</text>`;
-  document.getElementById('ahaBox').innerHTML=good
-    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>只要每人有 ${(p*100).toFixed(0)}% 的微弱优势且独立判断，${n} 人多数决的准确率就飙升到 <strong>${(gp*100).toFixed(1)}%</strong>！`
-    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>一旦个体准确率跌破 50%（${(p*100).toFixed(0)}%），扩大陪审团不仅没用，反而会把错误率放大到 <strong>${(100-gp*100).toFixed(1)}%</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const pRange = document.getElementById('pRange');
+    const nRange = document.getElementById('nRange');
+    const svg = document.getElementById('jurySvg');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function majorityProb(n, p) {
+      const kMin = Math.floor(n / 2) + 1;
+      let sum = 0, comb = 1;
+      for (let k = 0; k <= n; k++) {
+        if (k > 0) comb = comb * (n - k + 1) / k;
+        if (k >= kMin) sum += comb * Math.pow(p, k) * Math.pow(1 - p, n - k);
+      }
+      return sum;
+    }
+
+    function render() {
+      const pPct = Number(pRange.value);
+      const p = pPct / 100;
+      const N = Number(nRange.value);
+      const acc = majorityProb(N, p) * 100;
+
+      const pEl = document.getElementById('pVal');
+      pEl.textContent = pPct > 50 ? `${pPct}%（✅ 群体放大智慧）` : (pPct < 50 ? `${pPct}%（💥 群体放大愚蠢！）` : '50%（纯抛硬币）');
+      pEl.style.color = pPct > 50 ? 'var(--tax-green)' : (pPct < 50 ? 'var(--tax-red)' : 'var(--tax-amber)');
+      document.getElementById('nVal').textContent = `${N} 人（群体正确率 ${acc.toFixed(1)}%）`;
+
+      const xOf = n => 52 + ((n - 1) / 50) * 588;
+      const yOf = v => 182 - (v / 100) * 145;
+
+      const pts = [];
+      for (let n = 1; n <= 51; n += 2) {
+        pts.push(`${xOf(n).toFixed(1)},${yOf(majorityProb(n, p) * 100).toFixed(1)}`);
+      }
+
+      const col = pPct > 50 ? 'var(--tax-green)' : (pPct < 50 ? 'var(--tax-red)' : 'var(--tax-amber)');
+      let html = '';
+      [0, 25, 50, 75, 100].forEach(v => {
+        const y = yOf(v);
+        html += `<line x1="52" y1="${y}" x2="640" y2="${y}" stroke="var(--tax-border)" stroke-dasharray="3 3"/>`;
+        html += `<text x="44" y="${y + 4}" text-anchor="end" fill="var(--tax-muted)" font-size="11">${v}%</text>`;
+      });
+      [1, 11, 21, 31, 41, 51].forEach(n => {
+        html += `<text x="${xOf(n)}" y="202" text-anchor="middle" fill="var(--tax-muted)" font-size="11">${n}人</text>`;
+      });
+
+      html += `<polyline points="${pts.join(' ')}" fill="none" stroke="${col}" stroke-width="3.5"/>`;
+      html += `<circle cx="${xOf(N)}" cy="${yOf(acc)}" r="7.5" fill="${col}" stroke="#fff" stroke-width="2"/>`;
+      html += `<text x="${xOf(N)}" y="${yOf(acc) - 12}" text-anchor="middle" fill="${col}" font-size="12.5" font-weight="800">${acc.toFixed(1)}%</text>`;
+      svg.innerHTML = html;
+
+      if (pPct > 50) {
+        ahaBox.innerHTML = `<strong>群体智慧放大（单人 ${pPct}% → ${N} 人飙至 ${acc.toFixed(1)}%）：</strong>这正是机器学习<strong>随机森林（Bagging 集成学习）</strong>的数学祖师爷——把几十个各自只比猜好一点点的弱分类器投票集成，就能变出超高精度的大师！`;
+      } else if (pPct < 50) {
+        ahaBox.innerHTML = `<strong>群体愚蠢放大（单人 ${pPct}% → ${N} 人暴跌至 ${acc.toFixed(1)}%）：</strong>如果系统性谣言或偏见让大众平均判断低于 50%，扩大投票规模不会纠偏，反而会以接近 100% 的绝对把握投出错误答案！`;
+      } else {
+        ahaBox.innerHTML = '<strong>50% 临界点：</strong>如果每个人都在瞎猜，哪怕拉来一亿人投票，正确率依然死死卡在 50.0%！';
+      }
+    }
+
+    pRange.oninput = () => { markDone('拖动单人正确率观察孔多塞定理50%相变'); render(); };
+    nRange.oninput = () => { markDone('调节陪审团人数观察群体放大效应'); render(); };
+    render();
   </script>
 </body>
 </html>

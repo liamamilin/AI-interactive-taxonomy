@@ -1,66 +1,145 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🕸️ 专利丛林与反公地悲剧（芯片/手机授权僵局）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>专利丛林与反公地悲剧（芯片/手机授权僵局）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .chip-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    @media (max-width: 680px) { .chip-grid { grid-template-columns: repeat(2, 1fr); } }
+    .mod-card { background: var(--tax-surface-alt); border: 2px solid var(--tax-border); border-radius: 12px; padding: 12px; cursor: pointer; text-align: left; transition: border-color .2s, background .2s; }
+    .mod-card.holdout { border-color: var(--tax-red); background: var(--tax-red-soft); }
+    .mod-card.licensed { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .m-head { display: flex; justify-content: space-between; font-weight: 800; font-size: 13.5px; color: var(--tax-ink); }
+    .m-fee { font-size: 12px; font-weight: 700; margin-top: 6px; color: var(--tax-muted); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .kpi { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🕸️ 专利丛林与反公地悲剧（芯片/手机授权僵局）</h1><p>误区：把一项技术拆成越多小专利分给不同公司，越能促进竞争。真相：如果造一台设备需要集齐 15 家互不妥协的专利持有人签字，每人收一笔过路费就能把产品价格推到没人买得起——这就是“反公地悲剧”！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>产品涉及独立专利持有人数 N</span><span id="vN">12 家</span></label><input type="range" id="sN" min="1" max="25" value="12" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>单家专利漫天要价摩擦度</span><span id="vF">60%</span></label><input type="range" id="sF" min="10" max="100" value="60" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">累加授权成本占比</div><div class="k-val" id="kFee" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">产品成功上市概率</div><div class="k-val" id="kLaunch">—</div></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🕸️ 专利丛林与反公地悲剧（芯片/手机授权僵局）</h1>
+      <p>你要造一台售价 <strong>3,000 元</strong>（单机毛利上限 <strong>900 元</strong>）的 5G 智能手机，必须同时集齐以下 <strong>6 大核心模块</strong>的专利授权——缺任何一个都无法上市！试着逐一点击谈判，看看“分散收费”如何制造<strong>反公地悲剧</strong>，再用 FRAND 专利池破局！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="siloBtn">🧩 各自为战谈判（专利丛林）</button>
+        <button class="toy-btn" id="poolBtn">🤝 启动 FRAND 行业专利池（打包交叉授权）</button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="chip-grid" id="chipGrid"></div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-l">单机累计专利授权费</div>
+        <div class="kpi-v" id="feeVal">1,280 元</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">手机厂商单机净利润</div>
+        <div class="kpi-v" id="profVal" style="color:var(--tax-red);">-380 元（亏本停产）</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">新品上市状态</div>
+        <div class="kpi-v" id="shipVal">🚫 被卡死</div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 反公地悲剧（Tragedy of the Anticommons）：</strong>公地悲剧是“太多人有权使用导致资源耗竭”；反公地悲剧恰恰相反——<strong>“太多人握有一票否决权（碎片化专利）”导致谁也用不成、整个市场陷入僵局</strong>！点击模块或切换专利池试试。
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const n=+document.getElementById('sN').value, f=+document.getElementById('sF').value;
-  document.getElementById('vN').textContent=n+' 家'; document.getElementById('vF').textContent=f+'%';
-  const fee=Math.min(180, Math.round(n*(f/10)*0.85));
-  const launch=Math.max(2, Math.round(100*Math.pow(1-f/260, n)));
-  document.getElementById('kFee').textContent=fee+'% 售价';
-  document.getElementById('kLaunch').textContent=launch+'%';
-  document.getElementById('kLaunch').style.color=launch>50?'#10b981':'#ef4444';
-  let dots='';
-  for(let i=0;i<n;i++){
-    const x=40+i*21, h=20+f*0.8;
-    dots+=`<rect x="${x}" y="${145-h}" width="14" height="${h}" rx="3" fill="${fee>80?'#ef4444':'#0284c7'}"/>`;
-  }
-  document.getElementById('svg').innerHTML=dots+`
-    <text x="20" y="28" font-size="13" font-weight="800" fill="${launch>50?'#10b981':'#ef4444'}">${n} 道专利收费站叠加 → 产品落地概率仅 ${launch}%</text>
-    <text x="20" y="172" font-size="12" fill="var(--tax-muted)">公地悲剧是“谁都能用导致用光”，反公地悲剧是“谁都能否决导致谁也用不成”</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当 ${n} 家公司各自握有一小块不可或缺的专利却互不打包（专利池）时，叠加过路费会吃掉 ${fee}% 的售价，让新产品胎死腹中！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const modules = [
+      { id: 'bb', name: '📡 5G 基带专利', owner: '巨头 A', siloFee: 260, poolFee: 90, holdout: false },
+      { id: 'rf', name: '📶 射频前端天线', owner: '巨头 B', siloFee: 210, poolFee: 70, holdout: false },
+      { id: 'vid', name: '🎬 H.265 视频编解码', owner: '专利联盟 C', siloFee: 190, poolFee: 60, holdout: false },
+      { id: 'chg', name: '⚡ 超级快充协议', owner: '厂商 D', siloFee: 180, poolFee: 55, holdout: false },
+      { id: 'cam', name: '📷 潜望防抖镜头', owner: '光学厂 E', siloFee: 220, poolFee: 65, holdout: false },
+      { id: 'npe', name: '🦈 边缘界面交互专利', owner: '专利流氓 NPE', siloFee: 220, poolFee: 40, holdout: true }
+    ];
+
+    let poolMode = false;
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const grid = document.getElementById('chipGrid');
+      grid.innerHTML = '';
+
+      let totalFee = 0;
+      let anyHoldout = false;
+
+      modules.forEach(m => {
+        const fee = poolMode ? m.poolFee : (m.holdout ? m.siloFee + 160 : m.siloFee);
+        totalFee += fee;
+        if (!poolMode && m.holdout) anyHoldout = true;
+
+        const btn = document.createElement('button');
+        btn.className = 'mod-card ' + (poolMode ? 'licensed' : (m.holdout ? 'holdout' : ''));
+        btn.innerHTML = `
+          <div class="m-head"><span>${m.name}</span><span>${poolMode ? '✅ FRAND' : (m.holdout ? '🚫 坐地起价' : '⚠️ 独立收费')}</span></div>
+          <div class="m-fee">持有人：${m.owner} · 要价 <strong>${fee} 元/台</strong></div>
+          <div style="font-size:11px;color:var(--tax-muted);margin-top:4px;">${poolMode ? '已纳入一站式公平合理打包授权' : '点击切换该权利人是否“漫天要价/拒绝授权”'}</div>
+        `;
+        btn.addEventListener('click', () => {
+          if (poolMode) return;
+          m.holdout = !m.holdout;
+          markDone('交互测试了专利丛林敲竹杠效应');
+          render();
+        });
+        grid.appendChild(btn);
+      });
+
+      const netProfit = 900 - totalFee;
+      const canShip = netProfit > 0 && !anyHoldout;
+
+      document.getElementById('feeVal').textContent = totalFee.toLocaleString() + ' 元';
+      const profEl = document.getElementById('profVal');
+      profEl.textContent = (netProfit >= 0 ? '+' : '') + netProfit + ' 元/台';
+      profEl.style.color = netProfit > 0 ? 'var(--tax-green)' : 'var(--tax-red)';
+
+      const shipEl = document.getElementById('shipVal');
+      shipEl.textContent = canShip ? '🚀 顺利量产上市' : '🚫 僵局停产';
+      shipEl.style.color = canShip ? 'var(--tax-green)' : 'var(--tax-red)';
+
+      const aha = document.getElementById('ahaBox');
+      if (poolMode) {
+        aha.innerHTML = `<strong>🤝 FRAND 专利池成功破局！</strong>6 家专利权人将互补专利打包成一站式「公平、合理、无歧视（FRAND）」授权池，单机总授权费从 1,280+ 元骤降至 <strong>${totalFee} 元</strong>，手机顺利上市，<strong>每一家专利权人反而因为销量爆发赚到了更多总版税</strong>！`;
+      } else {
+        aha.innerHTML = `<strong>🕸️ 陷入“专利叠加（Royalty Stacking）”僵局！</strong>每家权利人只盯着自己的小模块要价 200 元，看似都不算离谱，但 6 家叠加直接干到 <strong>${totalFee} 元</strong>（吃光整机 900 元毛利还倒亏 ${Math.abs(netProfit)} 元）！点击上方「启动 FRAND 专利池」看看行业如何自救！`;
+      }
+    }
+
+    document.getElementById('siloBtn').addEventListener('click', () => {
+      poolMode = false;
+      document.getElementById('siloBtn').classList.add('primary');
+      document.getElementById('poolBtn').classList.remove('primary');
+      markDone('切换至专利丛林分散授权模式');
+      render();
+    });
+    document.getElementById('poolBtn').addEventListener('click', () => {
+      poolMode = true;
+      document.getElementById('poolBtn').classList.add('primary');
+      document.getElementById('siloBtn').classList.remove('primary');
+      markDone('启用了 FRAND 专利池破局');
+      render();
+    });
+
+    render();
   </script>
 </body>
 </html>

@@ -1,73 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏛️ 奥斯特罗姆自治制度 20 年演化沙盘</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>奥斯特罗姆自治制度 20 年演化沙盘</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .rule-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    @media (max-width: 640px) { .rule-grid { grid-template-columns: 1fr; } }
+    .rule-btn {
+      text-align: left; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); font-size: 12.5px; cursor: pointer;
+    }
+    .rule-btn.on { border-color: var(--tax-green); background: var(--tax-green-soft); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🏛️ 奥斯特罗姆自治制度 20 年演化沙盘</h1><p>误区：解决公地悲剧只有两条路——要么全部私有化，要么由中央政府强力接管。真相：奥斯特罗姆证明，只要社区建立透明监督与梯度惩罚机制，自治同样能保住公共资源！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🏛️ 奥斯特罗姆自治制度 20 年演化沙盘（构建器）</h1>
+      <p>人们曾以为破解公地悲剧只有两条路：“彻底私有化”或“政府强管”。首位女性诺贝尔经济学奖得主<strong>埃莉诺·奥斯特罗姆</strong>证明了第三条路——<strong>社区自主治理</strong>！为村里的公共渔场装配她的 3 条核心自治规则，看 20 年鱼群存量曲线如何逆转！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="rule-grid" id="ruleGrid"></div>
+
+      <svg id="simSvg" viewBox="0 0 680 195" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="奥斯特罗姆自治20年渔场存量演化曲线"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>无规则基准（0/3 规则）：</strong>完全放任捕捞时，鱼群在第 6 年就被捞空彻底崩溃！逐个点亮上方奥斯特罗姆 3 条自治设计原则，把渔场救回 20 年永续丰收！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>社区互相监督覆盖率</span><span id="vMon">60%</span></label><input type="range" id="sMon" min="0" max="100" value="60" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>偷采违规罚金倍数</span><span id="vPen">2.5x</span></label><input type="range" id="sPen" min="0" max="50" value="25" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">20年后资源存量</div><div class="k-val" id="kRes">—</div></div>
-        <div class="kpi"><div class="k-lbl">偷采诱因</div><div class="k-val" id="kInc">—</div></div>
-        <div class="kpi"><div class="k-lbl">治理结果</div><div class="k-val" id="kSt">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const mon=+document.getElementById('sMon').value/100, pen=+document.getElementById('sPen').value/10;
-  document.getElementById('vMon').textContent=(mon*100).toFixed(0)+'%'; document.getElementById('vPen').textContent=pen.toFixed(1)+'x';
-  const deter=mon*pen;
-  const overUse=Math.max(0, 1.4 - deter*1.1);
-  let stock=100, pts='40,35 ';
-  for(let y=1;y<=20;y++){
-    const regen=stock*0.18*(1-stock/120);
-    const harvest=stock*0.14*(1+overUse*0.9);
-    stock=Math.max(0, Math.min(120, stock+regen-harvest));
-    pts+=`${40+y*26},${160-stock*1.2} `;
-  }
-  const end=Math.round(stock);
-  document.getElementById('kRes').textContent=end+'%';
-  document.getElementById('kInc').textContent=deter>=1?'已压制':'强烈诱惑';
-  document.getElementById('kSt').textContent=end>65?'可持续自治':(end>20?'缓慢退化':'资源枯竭');
-  document.getElementById('kSt').style.color=end>65?'#10b981':(end>20?'#f59e0b':'#ef4444');
-  const col=end>65?'#10b981':(end>20?'#f59e0b':'#ef4444');
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="160" x2="560" y2="160" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="${col}" stroke-width="3" points="${pts}"/>
-    <text x="555" y="30" text-anchor="end" font-size="12.5" font-weight="800" fill="${col}">第20年存量: ${end}%</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当 <code>监督率 × 罚金倍数 ≥ 1</code>（当前威慑力 ${deter.toFixed(2)}）时，社区自治无需外部接管就能实现资源的长期稳态再生！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const RULES = [
+      { id: 'bound', name: '🗺️ 1. 清晰边界与配额', sub: '明确哪些村民有权捕鱼，拒绝对外无限开放', on: false },
+      { id: 'mon',   name: '👀 2. 社区互相监督',   sub: '渔民日常作业顺手互查渔网，极低监督成本', on: false },
+      { id: 'sanc',  name: '⚖️ 3. 分级递增处罚',   sub: '初犯口头警告，累犯停权罚款，既宽容又有威慑', on: false }
+    ];
+
+    let done = false;
+    const ruleGrid = document.getElementById('ruleGrid');
+    const svg = document.getElementById('simSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function simulate(cnt) {
+      // 20-year stock trajectory (start 100)
+      const pts = [];
+      let stock = 100;
+      for (let y = 0; y <= 20; y++) {
+        pts.push({ y, s: Math.round(stock) });
+        if (cnt === 0) stock = Math.max(0, stock * 0.68 - 6);
+        else if (cnt === 1) stock = Math.max(8, stock * 0.86 - 3);
+        else if (cnt === 2) stock = Math.max(42, stock * 0.94 + 2.5);
+        else stock = Math.min(96, stock * 0.97 + 2.8); // Sustainable steady state ~92!
+      }
+      return pts;
+    }
+
+    function render() {
+      ruleGrid.innerHTML = '';
+      RULES.forEach(r => {
+        const b = document.createElement('button');
+        b.className = 'rule-btn' + (r.on ? ' on' : '');
+        b.innerHTML = `<div style="font-weight:800;">${r.on ? '✓ ' : '○ '}${r.name}</div><div style="font-size:11.5px;color:var(--tax-muted);margin-top:3px;">${r.sub}</div>`;
+        b.onclick = () => { r.on = !r.on; markDone('装配了奥斯特罗姆公共池塘自治制度'); render(); };
+        ruleGrid.appendChild(b);
+      });
+
+      const cnt = RULES.filter(r => r.on).length;
+      const data = simulate(cnt);
+      const endS = data[20].s;
+      const col = cnt === 3 ? 'var(--tax-green)' : (cnt === 2 ? 'var(--tax-primary)' : (cnt === 1 ? 'var(--tax-amber)' : 'var(--tax-red)'));
+
+      const xOf = y => 48 + (y / 20) * 592;
+      const yOf = s => 165 - (s / 100) * 125;
+
+      let html = '';
+      [0, 50, 100].forEach(v => {
+        html += `<line x1="48" y1="${yOf(v)}" x2="640" y2="${yOf(v)}" stroke="var(--tax-border)" stroke-dasharray="3 3"/>`;
+        html += `<text x="40" y="${yOf(v) + 4}" text-anchor="end" fill="var(--tax-muted)" font-size="11">${v}%</text>`;
+      });
+      [0, 5, 10, 15, 20].forEach(y => {
+        html += `<text x="${xOf(y)}" y="185" text-anchor="middle" fill="var(--tax-muted)" font-size="11">第${y}年</text>`;
+      });
+
+      const poly = data.map(p => `${xOf(p.y).toFixed(1)},${yOf(p.s).toFixed(1)}`).join(' ');
+      html += `<polyline points="${poly}" fill="none" stroke="${col}" stroke-width="3.5"/>`;
+      html += `<circle cx="${xOf(20)}" cy="${yOf(endS)}" r="7" fill="${col}" stroke="#fff" stroke-width="2"/>`;
+      html += `<text x="340" y="24" text-anchor="middle" fill="${col}" font-size="13" font-weight="800">已装配 ${cnt}/3 项自治原则 · 第 20 年鱼群存量：${endS}%</text>`;
+      svg.innerHTML = html;
+
+      if (cnt === 3) {
+        ahaBox.innerHTML = `<strong>奥斯特罗姆永续自治达成（20 年稳态存量 ${endS}%）！</strong>从瑞士高山牧场、日本百年村落森林到现代 Wikipedia 与开源社区，只要具备<strong>清晰边界 + 互助监督 + 分级处罚</strong>，人类完全能自发打破公地悲剧！`;
+      } else {
+        ahaBox.innerHTML = `<strong>当前第 20 年存量 ${endS}%（已装 ${cnt}/3 项）：</strong>缺少监督或处罚的规则只是一纸空文！把剩下的 ${3 - cnt} 条原则全部点亮看看 20 年稳态曲线！`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

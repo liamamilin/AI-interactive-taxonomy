@@ -1,69 +1,145 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⚖️ 汉德公式天平：B < P × L 过失判定器</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>汉德公式天平：B &lt; P × L 过失判定器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .scale-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .kpi { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
+    svg text { font-family: inherit; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⚖️ 汉德公式天平：B < P × L 过失判定器</h1><p>误区：只要发生了意外造成巨大伤害，当事方就一定构成过失并承担赔偿。真相：如果预防这场万分之一小概率意外需要花掉几亿元成本（B > P×L），法律不认为你有义务这么做！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>安全预防成本 B</span><span id="vB">15 万元</span></label><input type="range" id="sB" min="1" max="80" value="15" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>事故发生概率 P</span><span id="vP">10%</span></label><input type="range" id="sP" min="1" max="50" value="10" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>潜在事故总损失 L</span><span id="vL">200 万元</span></label><input type="range" id="sL" min="20" max="500" step="10" value="200" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>⚖️ 汉德公式天平：B &lt; P × L 过失判定器</h1>
+      <p>1947 年勒尼德·汉德法官在「卡罗尔拖船案」中写下法经济学最著名的公式：如果<strong>预防成本 B &lt; 事故概率 P × 潜在损失 L</strong>，说明花小钱本可以防大灾却偷懒不做，即构成法律上的<strong>过失侵权</strong>！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row" style="margin-bottom:8px;">
+        <button class="toy-btn primary" data-preset="100,15,2000">🛒 商场雨天铺防滑垫</button>
+        <button class="toy-btn" data-preset="800,10,15000">🚢 经典卡罗尔驳船雇看守</button>
+        <button class="toy-btn" data-preset="5000,1,30000">☄️ 餐厅屋顶装防陨石装甲</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">预防成本 B</div><div class="k-val" id="kB">—</div></div>
-        <div class="kpi"><div class="k-lbl">预期事故损失 P × L</div><div class="k-val" id="kPL" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">法律判定</div><div class="k-val" id="kJ">—</div></div>
+      <div class="control-group">
+        <label>预防措施成本 B：<strong id="bVal">100 元</strong></label>
+        <input id="bSlider" type="range" min="50" max="6000" step="50" value="100">
+      </div>
+      <div class="control-group">
+        <label>事故发生概率 P：<strong id="pVal">15%</strong></label>
+        <input id="pSlider" type="range" min="1" max="50" step="1" value="15">
+      </div>
+      <div class="control-group">
+        <label>一旦出事的损失 L：<strong id="lVal">2,000 元</strong></label>
+        <input id="lSlider" type="range" min="500" max="40000" step="500" value="2000">
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="scale-box">
+      <svg id="scaleSvg" viewBox="0 0 600 185" style="width:100%;height:auto;display:block;"></svg>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-l">预防成本 (B)</div>
+          <div class="kpi-v" id="kB">100 元</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">期望事故损失 (P × L)</div>
+          <div class="kpi-v" id="kPL">300 元</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">法庭过失判定</div>
+          <div class="kpi-v" id="kVerdict">构成过失</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 汉德公式精髓：</strong>法律不要求你花一百万去防一场损失十块钱的意外，但如果你连一百块钱的防滑垫都省，导致期望损失远超预防成本，法庭就会判你承担过失赔偿！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const B=+document.getElementById('sB').value, P=+document.getElementById('sP').value/100, L=+document.getElementById('sL').value;
-  document.getElementById('vB').textContent=B+' 万元'; document.getElementById('vP').textContent=(P*100).toFixed(0)+'%'; document.getElementById('vL').textContent=L+' 万元';
-  const pl=P*L, neg=B<pl;
-  document.getElementById('kB').textContent=B+' 万元';
-  document.getElementById('kPL').textContent=pl.toFixed(1)+' 万元';
-  document.getElementById('kJ').textContent=neg?'构成过失 (需赔)':'无过失 (免责)';
-  document.getElementById('kJ').style.color=neg?'#ef4444':'#10b981';
-  const maxV=Math.max(B,pl,30);
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="36" font-size="13" font-weight="800" fill="#64748b">预防投入成本 B = ${B} 万元</text>
-    <rect x="20" y="46" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="46" width="${B/maxV*520}" height="24" rx="6" fill="#64748b"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="${neg?'#ef4444':'#10b981'}">预期风险损失 P×L = ${pl.toFixed(1)} 万元</text>
-    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${pl/maxV*520}" height="24" rx="6" fill="${neg?'#ef4444':'#10b981'}"/>
-    <text x="20" y="168" font-size="13.5" font-weight="850" fill="${neg?'#ef4444':'#10b981'}">B (${B}) ${neg?'<':'≥'} P×L (${pl.toFixed(1)}) → ${neg?'花小钱就能防大灾却没花，构成过失！':'预防成本高于期望损失，不强求过度防御'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>法律经济学鼻祖汉德法官用 <code>B &lt; P × L</code> 一句话打通了正义与效率：只惩罚那些“明明花小钱（${B}万）就能挡住更大期望灾难（${pl.toFixed(1)}万）却偷懒不作为”的人！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const bSlider = document.getElementById('bSlider');
+    const pSlider = document.getElementById('pSlider');
+    const lSlider = document.getElementById('lSlider');
+    const svg = document.getElementById('scaleSvg');
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const B = Number(bSlider.value);
+      const P = Number(pSlider.value) / 100;
+      const L = Number(lSlider.value);
+      const PL = P * L;
+      const negligent = B < PL;
+
+      document.getElementById('bVal').textContent = B.toLocaleString() + ' 元';
+      document.getElementById('pVal').textContent = Math.round(P * 100) + '%';
+      document.getElementById('lVal').textContent = L.toLocaleString() + ' 元';
+
+      document.getElementById('kB').textContent = B.toLocaleString() + ' 元';
+      document.getElementById('kPL').textContent = Math.round(PL).toLocaleString() + ' 元';
+      const vEl = document.getElementById('kVerdict');
+      vEl.textContent = negligent ? '⚠️ 构成过失' : '✅ 无过失免责';
+      vEl.style.color = negligent ? 'var(--tax-red)' : 'var(--tax-green)';
+
+      // Tilt angle: positive tilts right (P*L heavier -> negligent)
+      const diffRatio = Math.max(-1, Math.min(1, (PL - B) / Math.max(500, PL + B)));
+      const deg = diffRatio * 14;
+
+      svg.innerHTML = `
+        <polygon points="300,165 275,182 325,182" fill="var(--tax-muted)"/>
+        <line x1="300" y1="78" x2="300" y2="168" stroke="var(--tax-muted)" stroke-width="5" stroke-linecap="round"/>
+        <g transform="rotate(${deg.toFixed(1)} 300 84)">
+          <line x1="120" y1="84" x2="480" y2="84" stroke="var(--tax-ink)" stroke-width="4.5" stroke-linecap="round"/>
+          <!-- Left pan: B -->
+          <line x1="145" y1="84" x2="145" y2="122" stroke="var(--tax-border)" stroke-width="2"/>
+          <rect x="85" y="122" width="120" height="36" rx="8" fill="var(--tax-primary-soft)" stroke="var(--tax-primary)" stroke-width="2"/>
+          <text x="145" y="138" text-anchor="middle" font-size="11" fill="var(--tax-muted)">预防成本 B</text>
+          <text x="145" y="153" text-anchor="middle" font-size="13" font-weight="800" fill="var(--tax-primary)">¥${B.toLocaleString()}</text>
+          <!-- Right pan: P*L -->
+          <line x1="455" y1="84" x2="455" y2="122" stroke="var(--tax-border)" stroke-width="2"/>
+          <rect x="395" y="122" width="120" height="36" rx="8" fill="${negligent ? 'var(--tax-red-soft)' : 'var(--tax-green-soft)'}" stroke="${negligent ? 'var(--tax-red)' : 'var(--tax-green)'}" stroke-width="2"/>
+          <text x="455" y="138" text-anchor="middle" font-size="11" fill="var(--tax-muted)">期望损失 P×L</text>
+          <text x="455" y="153" text-anchor="middle" font-size="13" font-weight="800" fill="${negligent ? 'var(--tax-red)' : 'var(--tax-green)'}">¥${Math.round(PL).toLocaleString()}</text>
+        </g>
+        <circle cx="300" cy="84" r="7" fill="var(--tax-ink)"/>
+      `;
+
+      const aha = document.getElementById('ahaBox');
+      if (negligent) {
+        aha.innerHTML = `<strong>⚠️ 判定构成过失（B = ¥${B.toLocaleString()} &lt; P×L = ¥${Math.round(PL).toLocaleString()}）：</strong>只要花 ¥${B.toLocaleString()} 就能省下全社会 ¥${Math.round(PL).toLocaleString()} 的期望损失，却心存侥幸不做预防，属于典型的「未尽合理注意义务」，依法须赔偿！`;
+      } else {
+        aha.innerHTML = `<strong>✅ 判定无过失（B = ¥${B.toLocaleString()} ≥ P×L = ¥${Math.round(PL).toLocaleString()}）：</strong>要求行为人花 ¥${B.toLocaleString()} 去防一场期望损失仅 ¥${Math.round(PL).toLocaleString()} 的极小概率意外，属于过度防卫、浪费社会资源，因此不构成过失！`;
+      }
+    }
+
+    [bSlider, pSlider, lSlider].forEach(el => {
+      el.addEventListener('input', () => { markDone('调节了汉德公式 B/P/L 参数'); render(); });
+    });
+    document.querySelectorAll('[data-preset]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const [b, p, l] = btn.dataset.preset.split(',');
+        bSlider.value = b; pSlider.value = p; lSlider.value = l;
+        markDone('切换了汉德公式典型案例');
+        render();
+      });
+    });
+
+    render();
   </script>
 </body>
 </html>

@@ -1,63 +1,174 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>💼 强连接 vs 弱连接：谁带来真正的新机会？</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>强连接 vs 弱连接：谁带来真正的新机会？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .race-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 680px) { .race-grid { grid-template-columns: 1fr; } }
+    .track { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .t-head { display: flex; justify-content: space-between; align-items: center; font-weight: 800; color: var(--tax-ink); margin-bottom: 10px; }
+    .bar-row { margin-bottom: 10px; }
+    .bar-lbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--tax-muted); margin-bottom: 4px; }
+    .bar-bg { height: 14px; border-radius: 99px; background: var(--tax-surface); border: 1px solid var(--tax-border); overflow: hidden; }
+    .bar-fg { height: 100%; transition: width .35s ease; }
+    .log-box { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--tax-muted); min-height: 92px; line-height: 1.5; }
+    .dup { color: var(--tax-red); }
+    .fresh { color: var(--tax-green); font-weight: 700; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>💼 强连接 vs 弱连接：谁带来真正的新机会？</h1><p>误区：找工作、找资源当然要靠铁哥们和闺蜜（强连接），普通点头之交根本指望不上。真相：你的铁哥们天天和你混在同一个圈子，你知道的信息他全知道（冗余度 85%）；反而是半生不熟的弱连接才能跨圈带来全新信息！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>强连接圈信息重叠冗余率</span><span id="vRed">80%</span></label><input type="range" id="sRed" min="20" max="95" value="80" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>保持联系的跨圈弱连接人数</span><span id="vWeak">24 人</span></label><input type="range" id="sWeak" min="5" max="60" value="24" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>💼 强连接 vs 弱连接：谁带来真正的新机会？</h1>
+      <p>同样花 6 周时间托人打听内推机会：A 组只找天天吃饭的「铁哥们强连接」，B 组联系半年不聊一次的「前同事/校友弱连接」。按下开跑，看谁拿到更多<strong>不重复的新机会</strong>！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="runBtn">🏁 开始 6 周求职竞速</button>
+        <button class="toy-btn" id="stepBtn">推进 1 周</button>
+        <button class="toy-btn" id="resetBtn">重置比赛</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">10 个强连接新增有效线索</div><div class="k-val" id="kStr">—</div></div>
-        <div class="kpi"><div class="k-lbl">弱连接新增有效线索</div><div class="k-val" id="kWk" style="color:#0284c7;">—</div></div>
+      <span style="font-size:13px;color:var(--tax-muted);">当前进度：<strong id="weekVal" style="color:var(--tax-ink);">第 0 / 6 周</strong></span>
+    </div>
+
+    <div class="race-grid">
+      <div class="track">
+        <div class="t-head">
+          <span>🤝 赛道 A：铁哥们强连接</span>
+          <span style="font-size:12px;color:var(--tax-amber);">高信任 / 高重叠</span>
+        </div>
+        <div class="bar-row">
+          <div class="bar-lbl"><span>独家新岗位</span><strong id="sUnique">0 个</strong></div>
+          <div class="bar-bg"><div class="bar-fg" id="sUniqueBar" style="width:0%;background:var(--tax-primary);"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-lbl"><span>重复听过的旧消息</span><strong id="sDup">0 条</strong></div>
+          <div class="bar-bg"><div class="bar-fg" id="sDupBar" style="width:0%;background:var(--tax-red);"></div></div>
+        </div>
+        <div class="log-box" id="sLog">等待发令...</div>
+      </div>
+
+      <div class="track">
+        <div class="t-head">
+          <span>🌐 赛道 B：点头之交弱连接</span>
+          <span style="font-size:12px;color:var(--tax-green);">跨圈层 / 低重叠</span>
+        </div>
+        <div class="bar-row">
+          <div class="bar-lbl"><span>独家新岗位</span><strong id="wUnique">0 个</strong></div>
+          <div class="bar-bg"><div class="bar-fg" id="wUniqueBar" style="width:0%;background:var(--tax-green);"></div></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-lbl"><span>重复听过的旧消息</span><strong id="wDup">0 条</strong></div>
+          <div class="bar-bg"><div class="bar-fg" id="wDupBar" style="width:0%;background:var(--tax-red);"></div></div>
+        </div>
+        <div class="log-box" id="wLog">等待发令...</div>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 格兰诺维特假说：</strong>点击「开始 6 周求职竞速」，看看为什么强连接虽然最热心，却很难帮你打破信息茧房。
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const red=+document.getElementById('sRed').value/100, wk=+document.getElementById('sWeak').value;
-  document.getElementById('vRed').textContent=(red*100).toFixed(0)+'%'; document.getElementById('vWeak').textContent=wk+' 人';
-  const effStr=Math.max(1, Math.round(10*(1-red)*3));
-  const effWk=Math.round(wk*0.85*1.5);
-  document.getElementById('kStr').textContent=effStr+' 条新线索';
-  document.getElementById('kWk').textContent=effWk+' 条新线索';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#f59e0b">10 个死党 (强连接 · 重叠率 ${(red*100).toFixed(0)}%): 仅 ${effStr} 条不重样线索</text>
-    <rect x="20" y="44" width="${Math.min(540,effStr*6)}" height="24" rx="6" fill="#f59e0b"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">${wk} 个点头之交 (弱连接 · 跨圈异质): 带来 ${effWk} 条全新线索</text>
-    <rect x="20" y="112" width="${Math.min(540,effWk*6)}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">强连接给你情绪支持，弱连接给你跨圈信息差</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>社会学家格兰诺维特发现，超过一半的高薪工作来自“一年聊不到两次的弱连接”——因为死党圈信息高度重复（${(red*100).toFixed(0)}%），只有弱连接能把你桥接到全新行业！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const strongEvents = [
+      { u: 2, d: 1, msg: '第1周：铁哥们秒回！分享了本行业 2 个熟悉团队的坑位。' },
+      { u: 1, d: 3, msg: '第2周：另一位死党热心推荐——但 3 条里有 2 条你昨天刚听说过。' },
+      { u: 0, d: 4, msg: '第3周：大家在同一个微信群，转来转去全是重复招聘帖。' },
+      { u: 1, d: 3, msg: '第4周：死党帮你内推了 1 个岗位，但圈子边界已经摸到头。' },
+      { u: 0, d: 4, msg: '第5周：强连接网络高度闭合，新信息增量趋近于零。' },
+      { u: 0, d: 3, msg: '第6周：累计仅获 4 个不重复新机会，冗余消息高达 18 条！' }
+    ];
+
+    const weakEvents = [
+      { u: 1, d: 0, msg: '第1周：发了 5 条消息给前同事，只有 2 人回复，但带来 1 个陌生赛道机会。' },
+      { u: 2, d: 1, msg: '第2周：大学校友转发了跨行业创业团队的隐形核心岗！' },
+      { u: 3, d: 0, msg: '第3周：一次行业沙龙认识的“点赞之交”拉你进了新圈子，解锁 3 个新坑位。' },
+      { u: 2, d: 1, msg: '第4周：前甲方对接人提到一个尚未公开发布的海外业务线岗位。' },
+      { u: 3, d: 1, msg: '第5周：跨圈弱连接持续桥接完全不同的信息池，几乎没有重复！' },
+      { u: 2, d: 0, msg: '第6周：累计斩获 13 个跨圈独家机会，冗余消息仅 3 条！' }
+    ];
+
+    let week = 0;
+    let sU = 0, sD = 0, wU = 0, wD = 0;
+    let sLogs = [], wLogs = [];
+    let timer = null;
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function resetRace() {
+      if (timer) { clearInterval(timer); timer = null; }
+      week = 0; sU = 0; sD = 0; wU = 0; wD = 0;
+      sLogs = []; wLogs = [];
+      render();
+    }
+
+    function stepWeek() {
+      if (week >= 6) {
+        if (timer) { clearInterval(timer); timer = null; }
+        return;
+      }
+      const se = strongEvents[week];
+      const we = weakEvents[week];
+      sU += se.u; sD += se.d; sLogs.push(se.msg);
+      wU += we.u; wD += we.d; wLogs.push(we.msg);
+      week++;
+      render();
+    }
+
+    function render() {
+      document.getElementById('weekVal').textContent = `第 ${week} / 6 周`;
+      document.getElementById('sUnique').textContent = sU + ' 个';
+      document.getElementById('sDup').textContent = sD + ' 条';
+      document.getElementById('wUnique').textContent = wU + ' 个';
+      document.getElementById('wDup').textContent = wD + ' 条';
+
+      document.getElementById('sUniqueBar').style.width = Math.min(100, (sU / 14) * 100) + '%';
+      document.getElementById('sDupBar').style.width = Math.min(100, (sD / 20) * 100) + '%';
+      document.getElementById('wUniqueBar').style.width = Math.min(100, (wU / 14) * 100) + '%';
+      document.getElementById('wDupBar').style.width = Math.min(100, (wD / 20) * 100) + '%';
+
+      document.getElementById('sLog').innerHTML = sLogs.length ? sLogs.slice(-3).map(l => `<div>• ${l}</div>`).join('') : '等待发令...';
+      document.getElementById('wLog').innerHTML = wLogs.length ? wLogs.slice(-3).map(l => `<div>• ${l}</div>`).join('') : '等待发令...';
+
+      const aha = document.getElementById('ahaBox');
+      if (week === 0) {
+        aha.innerHTML = `<strong>💡 格兰诺维特假说：</strong>强连接情感深、回应快，但为什么社会学调查发现多数高薪跳槽反而来自“不怎么联系的弱连接”？开跑看看！`;
+      } else if (week < 6) {
+        aha.innerHTML = `<strong>🏃 第 ${week} 周战报：</strong>强连接已收到 <strong>${sD} 条重复消息</strong>（因为你的铁哥们之间彼此也都认识），而弱连接正不断从陌生圈层搬运独家信息（<strong>${wU} 个新机会</strong>）。`;
+      } else {
+        aha.innerHTML = `<strong>🏆 弱连接大胜（${wU} 个 vs ${sU} 个独家机会）！</strong>强连接适合在顺境中抱团、逆境中兜底，但<strong>只有充当“结构洞桥梁”的弱连接</strong>，才能把完全不同的信息池接通，带来真正的新机会。`;
+      }
+    }
+
+    document.getElementById('runBtn').addEventListener('click', () => {
+      markDone('运行了强弱连接求职机会竞速');
+      if (week >= 6) resetRace();
+      if (timer) clearInterval(timer);
+      timer = setInterval(stepWeek, 650);
+    });
+    document.getElementById('stepBtn').addEventListener('click', () => {
+      markDone('单周推进了强弱连接对比');
+      if (timer) { clearInterval(timer); timer = null; }
+      stepWeek();
+    });
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      markDone('重置了强弱连接竞速');
+      resetRace();
+    });
+
+    render();
   </script>
 </body>
 </html>

@@ -1,70 +1,87 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🧭 紧致度 vs 比例代表性权衡仪</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>紧致度 vs 比例代表性权衡仪</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .opt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+    @media (max-width: 640px) { .opt-grid { grid-template-columns: 1fr; } }
+    .r-btn {
+      text-align: left; padding: 12px; border-radius: 10px; border: 1.5px solid var(--tax-border);
+      background: var(--tax-surface-alt); color: var(--tax-ink); cursor: pointer;
+    }
+    .r-btn.active { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .eval-box { padding: 14px; border-radius: 12px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); font-size: 13.5px; line-height: 1.65; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🧭 紧致度 vs 比例代表性权衡仪</h1><p>误区：只要把选区画成正方形或圆形，就一定能得到完全按人口比例分配的席位。真相：当某群体高度聚居在市中心时，死守几何方正反而会制造“天然杰利蝾螈”！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🧭 紧致度 vs 比例代表性：如何彻底根除杰利蝾螈？（制度情景）</h1>
+      <p>既然政党画线一定会作弊，那规定“所有选区必须画成方方正正的圆润方块（高紧致度）”就能彻底解决吗？对比下面 <strong>3 套制度改革方案</strong>，揭开意想不到的“天然地理打包”真相！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="opt-grid" id="optGrid"></div>
+      <div class="eval-box" id="evalBox"></div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>制度设计洞察：</strong>只要还保留“单席位小选区赢者通吃”，哪怕完全交给无私的几何算法画最规整的方块，依然逃不掉“地理自发打包”陷阱！点开第 3 个方案看治本良药！
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>几何紧致度硬性要求</span><span id="vComp">75%</span></label><input type="range" id="sComp" min="10" max="100" value="75" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>少数派城市聚居集中度</span><span id="vClus">80%</span></label><input type="range" id="sClus" min="10" max="100" value="80" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">选区几何规整分</div><div class="k-val" id="kG">—</div></div>
-        <div class="kpi"><div class="k-lbl">席位比例公平分</div><div class="k-val" id="kF">—</div></div>
-        <div class="kpi"><div class="k-lbl">制度矛盾度</div><div class="k-val" id="kC">—</div></div>
-      </div>
-    </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const comp=+document.getElementById('sComp').value, clus=+document.getElementById('sClus').value;
-  document.getElementById('vComp').textContent=comp+'%'; document.getElementById('vClus').textContent=clus+'%';
-  const fair=Math.max(15, Math.min(98, Math.round(95 - (comp*clus)/130)));
-  const conflict=Math.round(comp*clus/100);
-  document.getElementById('kG').textContent=comp+' 分';
-  document.getElementById('kF').textContent=fair+' 分';
-  document.getElementById('kC').textContent=conflict>50?'高冲突':'低冲突';
-  const r1=20+(100-comp)*0.35;
-  document.getElementById('svg').innerHTML=`
-    <rect x="55" y="25" width="140" height="135" rx="${comp*0.4}" fill="#e0f2fe" stroke="#0284c7" stroke-width="3"/>
-    <circle cx="125" cy="92" r="${25+clus*0.28}" fill="#ef4444" opacity="0.45"/>
-    <text x="125" y="176" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-muted)">紧致度 ${comp}% vs 聚居度 ${clus}%</text>
-    <text x="240" y="55" font-size="13" font-weight="800" fill="#0284c7">几何紧致度: ${comp} 分</text>
-    <rect x="240" y="65" width="320" height="22" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="240" y="65" width="${comp*3.2}" height="22" rx="6" fill="#0284c7"/>
-    <text x="240" y="115" font-size="13" font-weight="800" fill="#10b981">席位比例公平度: ${fair} 分</text>
-    <rect x="240" y="125" width="320" height="22" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="240" y="125" width="${fair*3.2}" height="22" rx="6" fill="#10b981"/>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当城市选民高度聚居（${clus}%）时，无脑追求“几何规整”会把所有市中心选民天然打包成一个区，造成“无心插柳的席位失真”！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const REMEDIES = [
+      {
+        id: 'compact', name: '📐 方案 1：纯几何“最紧凑方块”算法',
+        sub: '只按周长面积比画最工整的方格，禁止奇形怪状的蝾螈线',
+        detail: '⚠️ <strong>意外翻车（天然地理杰利蝾螈）！</strong>现实中进步派选民高度聚居在市中心公寓，保守派均匀分布在郊区。画最方正的格子，反而会自动把市中心选民打包成 90%:10% 的超高溢出区，导致即便没人作弊，席位依然严重偏向郊区政党！',
+        aha: '<strong>几何规整 ≠ 政治公平：</strong>形状好看的选区只防止了“肉眼可见的丑陋作弊”，却无法解决人口地理聚居带来的天然选票浪费！'
+      },
+      {
+        id: 'comm', name: '⚖️ 方案 2：独立无党派公民委员会',
+        sub: '由两党+无党派普通公民抽签组成独立委员会，禁用政党数据划区',
+        detail: '✅ <strong>显著改善（加州/密歇根州实证有效）：</strong>把画笔从在任政客手里夺走，极大压低了恶意效率差距，竞争性选区数量翻倍；但仍需反复在“社区完整性”与“党派平衡”间做微妙博弈。',
+        aha: '<strong>程序分权止损：</strong>绝不能让“运动员兼任裁判”，把划区权交回独立公民委员会是单选区制度下最务实的改良！'
+      },
+      {
+        id: 'pr', name: '🌐 方案 3：多席位比例代表制（PR / STV）',
+        sub: '把 5 个小选区合并成 1 个产生 5 名代表的大选区，按得票比例分席位',
+        detail: '🏆 <strong>终极降维打击（彻底消灭划区作弊！）：</strong>只要全区拿 60% 票就分 3 席、拿 40% 票就分 2 席——画线者无论怎么切分边界都改变不了总席位，“杰利蝾螈”从数学根源上直接绝迹！',
+        aha: '<strong>从“修补漏洞”到“换掉游戏引擎”：</strong>北欧、德国与新西兰采用比例代表制后，彻底终结了绵延 200 年的选区划界恶斗！'
+      }
+    ];
+
+    let cur = REMEDIES[0], done = false;
+    const optGrid = document.getElementById('optGrid');
+    const evalBox = document.getElementById('evalBox');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      optGrid.innerHTML = '';
+      REMEDIES.forEach(r => {
+        const b = document.createElement('button');
+        b.className = 'r-btn' + (r.id === cur.id ? ' active' : '');
+        b.innerHTML = `<div style="font-weight:800;font-size:13.5px;">${r.name}</div><div style="font-size:11.5px;color:var(--tax-muted);margin-top:4px;">${r.sub}</div>`;
+        b.onclick = () => { cur = r; markDone(`评估了反杰利蝾螈改革方案：${r.name}`); render(); };
+        optGrid.appendChild(b);
+      });
+      evalBox.innerHTML = cur.detail;
+      ahaBox.innerHTML = cur.aha;
+    }
+
+    render();
   </script>
 </body>
 </html>

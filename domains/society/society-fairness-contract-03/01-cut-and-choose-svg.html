@@ -1,75 +1,167 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔪 你切我选：无嫉妒切分实验室（SVG）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>你切我选：无嫉妒切分实验室</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .cake-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 16px; }
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .p-card { background: var(--tax-surface); border: 1.5px solid var(--tax-border); border-radius: 10px; padding: 12px; }
+    .p-card.happy { border-color: var(--tax-green); }
+    .p-card.envy { border-color: var(--tax-red); }
+    .p-name { font-size: 13px; font-weight: 800; color: var(--tax-ink); }
+    .p-score { font-size: 24px; font-weight: 900; margin: 4px 0; }
+    .p-note { font-size: 12px; color: var(--tax-muted); }
+    svg text { font-family: inherit; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔪 你切我选：无嫉妒切分实验室（SVG）</h1><p>误区：公平切蛋糕就是拿尺子量出几何面积完全相同的两半。真相：如果 A 爱吃草莓、B 爱吃巧克力，只要按各自主观价值切分，两个人甚至可以同时觉得自己拿到了 70% 以上的价值！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>切刀位置 (0%=最左草莓, 100%=最右)</span><span id="vCut">50%</span></label><input type="range" id="sCut" min="10" max="90" value="50" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>选蛋糕者 B 对右侧巧克力的偏爱度</span><span id="vPref">75%</span></label><input type="range" id="sPref" min="20" max="90" value="75" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🔪 你切我选：无嫉妒切分实验室</h1>
+      <p>这是一条左半边<strong>🍫 巧克力（0~50%）</strong>、右半边<strong>🍓 草莓（50~100%）</strong>的蛋糕。你是<strong>切蛋糕者</strong>（70% 偏爱巧克力，30% 爱草莓），对手先挑走他认为更值钱的那一半！拖动切刀寻找“你绝不吃亏、他也绝不嫉妒”的黄金落刀点。</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="control-group">
+        <label>你的落刀位置：<strong id="cutVal">50%</strong></label>
+        <input id="cutSlider" type="range" min="10" max="90" step="1" value="50">
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">B 挑走的那块 主观价值</div><div class="k-val" id="kB" style="color:#10b981;">—</div></div>
-        <div class="kpi"><div class="k-lbl">切刀者 A 剩下的主观价值</div><div class="k-val" id="kA" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">A 是否后悔没切好</div><div class="k-val" id="kEnv">—</div></div>
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="oppDiffBtn">对手口味：偏爱草莓 (80/20)</button>
+        <button class="toy-btn" id="oppSameBtn">对手口味：与你相同 (70/30)</button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="cake-box">
+      <svg id="cakeSvg" viewBox="0 0 640 155" style="width:100%;height:auto;display:block;"></svg>
+
+      <div class="result-grid">
+        <div class="p-card" id="meCard">
+          <div class="p-name">🧑 你（切蛋糕者 · 拿剩下的）</div>
+          <div class="p-score" id="meScore">50%</div>
+          <div class="p-note" id="meNote"></div>
+        </div>
+        <div class="p-card" id="oppCard">
+          <div class="p-name">🤖 对手（先选者 · 挑更大的）</div>
+          <div class="p-score" id="oppScore">50%</div>
+          <div class="p-note" id="oppNote"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 机制设计奇迹：</strong>试试把切刀从 50% 往左移到 <strong>36%</strong> 附近（按你自己的主观估值刚好 50/50 平分），看看当对手口味与你不同时，你们竟然能同时拿走超过 50% 的主观价值！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const cut=+document.getElementById('sCut').value, prefB=+document.getElementById('sPref').value;
-  document.getElementById('vCut').textContent=cut+'%'; document.getElementById('vPref').textContent=prefB+'%';
-  const valB_L=(Math.min(50,cut)/50)*(100-prefB) + (Math.max(0,cut-50)/50)*prefB;
-  const valB_R=100-valB_L;
-  const pickR=valB_R>=valB_L;
-  const bGet=Math.round(Math.max(valB_L,valB_R));
-  const aGet=Math.round(pickR?cut:(100-cut));
-  const envy=aGet<50;
-  document.getElementById('kB').textContent=bGet+'%';
-  document.getElementById('kA').textContent=aGet+'%';
-  document.getElementById('kEnv').textContent=envy?'亏了 (嫉妒B)':'无嫉妒 (≥50%)';
-  document.getElementById('kEnv').style.color=envy?'#ef4444':'#10b981';
-  const cx=40+cut*5.2;
-  document.getElementById('svg').innerHTML=`
-    <rect x="40" y="50" width="260" height="75" rx="8" fill="#fda4af" opacity="0.75"/>
-    <rect x="300" y="50" width="260" height="75" rx="8" fill="#92400e" opacity="0.75"/>
-    <text x="170" y="92" text-anchor="middle" font-size="14" font-weight="850" fill="#881337">🍓 草莓半边</text>
-    <text x="430" y="92" text-anchor="middle" font-size="14" font-weight="850" fill="#fef3c7">🍫 巧克力半边</text>
-    <line x1="${cx}" y1="30" x2="${cx}" y2="145" stroke="#0284c7" stroke-width="4"/>
-    <text x="${cx}" y="22" text-anchor="middle" font-size="12" font-weight="850" fill="#0284c7">刀位 ${cut}%</text>
-    <text x="40" y="166" font-size="13" font-weight="800" fill="var(--tax-text)">B 选走${pickR?'右半块':'左半块'} (B觉得值 ${bGet}%)，A 拿走另一块 (A觉得值 ${aGet}%)</text>`;
-  document.getElementById('ahaBox').innerHTML=envy
-    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>刀切歪了！B 毫不客气挑走了更肥的那块，留给切刀者 A 的只值 ${aGet}%——这就是为什么“你切我选”能逼切蛋糕的人老老实实切出自己心里精确的 50%！`
-    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>因为 B 更偏爱巧克力而 A 均匀看重两半，刀切在 50% 时，B 觉得自己拿了 <strong>${bGet}%</strong>，A 也觉得自己拿了 <strong>${aGet}%</strong>——双方同时实现“无嫉妒”双赢！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const cutSlider = document.getElementById('cutSlider');
+    const svg = document.getElementById('cakeSvg');
+    let oppPref = { choco: 0.2, berry: 0.8, label: '偏爱草莓' };
+    const myPref = { choco: 0.7, berry: 0.3 };
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function valueOfLeft(cutPct, pref) {
+      const chocoFrac = Math.min(cutPct, 50) / 50;
+      const berryFrac = Math.max(0, cutPct - 50) / 50;
+      return chocoFrac * pref.choco + berryFrac * pref.berry;
+    }
+
+    function render() {
+      const cut = Number(cutSlider.value);
+      document.getElementById('cutVal').textContent = cut + '%';
+
+      const myLeft = valueOfLeft(cut, myPref);
+      const myRight = 1 - myLeft;
+      const oppLeft = valueOfLeft(cut, oppPref);
+      const oppRight = 1 - oppLeft;
+
+      // Opponent greedily picks whichever side is worth more to them
+      const oppPicksLeft = oppLeft >= oppRight;
+      const oppVal = oppPicksLeft ? oppLeft : oppRight;
+      const myVal = oppPicksLeft ? myRight : myLeft;
+      const myEnvy = myVal < 0.495;
+
+      const W = 640, padX = 28, cakeY = 42, cakeH = 74, cakeW = W - padX * 2;
+      const cutX = padX + (cut / 100) * cakeW;
+      const midX = padX + cakeW * 0.5;
+
+      svg.innerHTML = `
+        <!-- Left half: Chocolate, Right half: Strawberry -->
+        <rect x="${padX}" y="${cakeY}" width="${cakeW / 2}" height="${cakeH}" rx="10" fill="rgba(146, 64, 14, 0.78)" stroke="var(--tax-border)"/>
+        <rect x="${midX}" y="${cakeY}" width="${cakeW / 2}" height="${cakeH}" rx="10" fill="rgba(244, 63, 94, 0.75)" stroke="var(--tax-border)"/>
+        <rect x="${midX - 6}" y="${cakeY}" width="12" height="${cakeH}" fill="rgba(244, 63, 94, 0.75)"/>
+
+        <!-- Owner badges -->
+        <text x="${(padX + cutX) / 2}" y="${cakeY - 12}" text-anchor="middle" font-size="12" font-weight="800" fill="${oppPicksLeft ? 'var(--tax-amber)' : 'var(--tax-green)'}">
+          ${oppPicksLeft ? '🤖 对手先拿走左块' : '🧑 你留下左块'}
+        </text>
+        <text x="${(cutX + padX + cakeW) / 2}" y="${cakeY - 12}" text-anchor="middle" font-size="12" font-weight="800" fill="${!oppPicksLeft ? 'var(--tax-amber)' : 'var(--tax-green)'}">
+          ${!oppPicksLeft ? '🤖 对手先拿走右块' : '🧑 你留下右块'}
+        </text>
+
+        <text x="${padX + cakeW * 0.25}" y="${cakeY + 42}" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">🍫 巧克力半区</text>
+        <text x="${padX + cakeW * 0.75}" y="${cakeY + 42}" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">🍓 草莓半区</text>
+
+        <!-- Knife line -->
+        <line x1="${cutX.toFixed(1)}" y1="${cakeY - 8}" x2="${cutX.toFixed(1)}" y2="${cakeY + cakeH + 16}" stroke="var(--tax-ink)" stroke-width="3.2" stroke-dasharray="6,3"/>
+        <circle cx="${cutX.toFixed(1)}" cy="${cakeY + cakeH + 16}" r="5" fill="var(--tax-primary)"/>
+        <text x="${cutX.toFixed(1)}" y="${cakeY + cakeH + 34}" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--tax-primary)">切刀 ${cut}%</text>
+      `;
+
+      const meCard = document.getElementById('meCard');
+      const oppCard = document.getElementById('oppCard');
+      meCard.className = 'p-card ' + (myEnvy ? 'envy' : 'happy');
+      oppCard.className = 'p-card happy';
+
+      document.getElementById('meScore').textContent = Math.round(myVal * 100) + '%';
+      document.getElementById('meScore').style.color = myEnvy ? 'var(--tax-red)' : 'var(--tax-green)';
+      document.getElementById('meNote').textContent = myEnvy
+        ? `你只拿到心目中的 ${Math.round(myVal * 100)}%，切偏了导致吃亏嫉妒！`
+        : `达到 ≥50% 无嫉妒底线（拿走${oppPicksLeft ? '右块' : '左块'}）`;
+
+      document.getElementById('oppScore').textContent = Math.round(oppVal * 100) + '%';
+      document.getElementById('oppScore').style.color = 'var(--tax-green)';
+      document.getElementById('oppNote').textContent = `对手（${oppPref.label}）优先挑走${oppPicksLeft ? '左块' : '右块'}，绝对不嫉妒`;
+
+      const aha = document.getElementById('ahaBox');
+      if (myEnvy) {
+        aha.innerHTML = `<strong>😬 你切偏了！</strong>你在 ${cut}% 处落刀，让自己眼里左右两块不等值（${Math.round(myLeft * 100)}% vs ${Math.round(myRight * 100)}%），结果被对手挑走更肥的一块，你只剩 <strong>${Math.round(myVal * 100)}%</strong>。试着把刀移到 <strong>36%</strong>！`;
+      } else if (oppVal >= 0.65 && myVal >= 0.49) {
+        aha.innerHTML = `<strong>🍰 完美无嫉妒均衡 + 口味套利！</strong>你在 <strong>${cut}%</strong> 处把自己眼里的蛋糕刚好切成 50/50，保底拿到 <strong>${Math.round(myVal * 100)}%</strong>；更神奇的是，由于对手更爱草莓，他挑走右块竟然拿到了心目中 <strong>${Math.round(oppVal * 100)}%</strong> 的超高价值——双方总满足度高达 <strong>${Math.round((myVal + oppVal) * 100)}%</strong>！`;
+      } else {
+        aha.innerHTML = `<strong>✅ 无嫉妒公平达成！</strong>即使完全不知道对手的真实口味，只要你严格按自己的内心估值切成 50/50（36% 位置），“你切我选”就能用制度自动迫使切刀者保持诚实，双方都稳赚 ≥50%。`;
+      }
+    }
+
+    cutSlider.addEventListener('input', () => { markDone('拖动了你切我选切刀位置'); render(); });
+    document.getElementById('oppDiffBtn').addEventListener('click', () => {
+      oppPref = { choco: 0.2, berry: 0.8, label: '偏爱草莓' };
+      document.getElementById('oppDiffBtn').classList.add('primary');
+      document.getElementById('oppSameBtn').classList.remove('primary');
+      markDone('切换了对手口味偏好');
+      render();
+    });
+    document.getElementById('oppSameBtn').addEventListener('click', () => {
+      oppPref = { choco: 0.7, berry: 0.3, label: '同样爱巧克力' };
+      document.getElementById('oppSameBtn').classList.add('primary');
+      document.getElementById('oppDiffBtn').classList.remove('primary');
+      markDone('切换了对手同质口味');
+      render();
+    });
+
+    render();
   </script>
 </body>
 </html>

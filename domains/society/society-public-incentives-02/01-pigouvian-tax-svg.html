@@ -1,73 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📉 庇古税校准：消除负外部性无谓损失（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>庇古税校准：消除负外部性无谓损失</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ctrl-box { padding: 10px 12px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); margin-bottom: 12px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+    .m-card { padding: 10px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; }
+    .m-val { font-size: 19px; font-weight: 800; margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📉 庇古税校准：消除负外部性无谓损失（SVG）</h1><p>误区：收环保税只是政府为了多收钱，一定会降低整体经济效率。真相：当存在负外部性时，自由市场会过度生产；恰当的庇古税反而能消除社会无谓损失！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>单位污染社会危害 E</span><span id="vE">30 元</span></label><input type="range" id="sE" min="10" max="60" value="30" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>政府征收庇古税 t</span><span id="vT">15 元</span></label><input type="range" id="sT" min="0" max="60" value="15" oninput="upd()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>📉 庇古税校准：把污染成本塞回工厂账本（模拟器）</h1>
+      <p>化工厂每生产 1 吨产品，自己只付私人成本，却悄悄给下游居民造成 <strong>¥30/吨的空气污染外部损失</strong>！拖动下方「环保庇古税」滑块，把红色<strong>社会无谓损失三角形</strong>压到彻底归零！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="ctrl-box">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span>💸 政府征收环保庇古税（每吨税额 t）</span>
+          <strong id="tVal" style="color:var(--tax-red);">¥0 / 吨（放任污染）</strong>
+        </div>
+        <input type="range" id="tRange" min="0" max="50" step="2" value="0" style="width:100%;" />
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 190"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">实际产量 Q</div><div class="k-val" id="kQ">—</div></div>
-        <div class="kpi"><div class="k-lbl">社会最优产量 Q*</div><div class="k-val" id="kOpt" style="color:#10b981;">—</div></div>
-        <div class="kpi"><div class="k-lbl">社会无谓损失 DWL</div><div class="k-val" id="kDwl" style="color:#ef4444;">—</div></div>
+
+      <svg id="pigSvg" viewBox="0 0 680 215" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="庇古税消除负外部性供需图"></svg>
+
+      <div class="metrics">
+        <div class="m-card"><div style="font-size:11.5px;color:var(--tax-muted);">当前产量 Q（最优 45 吨）</div><div class="m-val" id="qVal">60 吨</div></div>
+        <div class="m-card"><div style="font-size:11.5px;color:var(--tax-muted);">污染外部成本 MEC</div><div class="m-val" style="color:var(--tax-amber);">¥30 / 吨</div></div>
+        <div class="m-card"><div style="font-size:11.5px;color:var(--tax-muted);">社会无谓损失 DWL</div><div class="m-val" id="dwlVal" style="color:var(--tax-red);">¥225</div></div>
       </div>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>庇古税黄金公式（<code>t* = MEC</code>）：</strong>把滑块精准调到 <strong>¥30 / 吨</strong>，使工厂的账面成本与真实社会成本完全重合，过度生产和无谓损失瞬间归零！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const E=+document.getElementById('sE').value, t=+document.getElementById('sT').value;
-  document.getElementById('vE').textContent=E+' 元'; document.getElementById('vT').textContent=t+' 元';
-  const qAct=Math.max(10, Math.round((100-t)/2)), qOpt=Math.max(10, Math.round((100-E)/2));
-  const dwl=Math.round(0.5*Math.abs(qAct-qOpt)*Math.abs(E-t));
-  document.getElementById('kQ').textContent=qAct+' 吨';
-  document.getElementById('kOpt').textContent=qOpt+' 吨';
-  document.getElementById('kDwl').textContent=dwl+' 元';
-  const xQ=q=>60+q*9, yP=p=>165-p*1.4;
-  document.getElementById('svg').innerHTML=`
-    <line x1="60" y1="165" x2="550" y2="165" stroke="#94a3b8"/>
-    <line x1="60" y1="20" x2="60" y2="165" stroke="#94a3b8"/>
-    <line x1="${xQ(5)}" y1="${yP(95)}" x2="${xQ(50)}" y2="${yP(50)}" stroke="#0284c7" stroke-width="2.5"/>
-    <line x1="${xQ(5)}" y1="${yP(5+E)}" x2="${xQ(50)}" y2="${yP(50+E)}" stroke="#ef4444" stroke-width="2.5"/>
-    <line x1="${xQ(5)}" y1="${yP(5+t)}" x2="${xQ(50)}" y2="${yP(50+t)}" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5 3"/>
-    <polygon points="${xQ(qOpt)},${yP(100-qOpt)} ${xQ(qAct)},${yP(100-qAct)} ${xQ(qAct)},${yP(qAct+E)}" fill="#ef4444" opacity="0.28"/>
-    <circle cx="${xQ(qOpt)}" cy="${yP(100-qOpt)}" r="5" fill="#10b981"/>
-    <circle cx="${xQ(qAct)}" cy="${yP(100-qAct)}" r="5" fill="#0284c7"/>
-    <text x="430" y="34" font-size="11.5" font-weight="750" fill="#ef4444">红线: 真实社会成本 MSC</text>
-    <text x="430" y="52" font-size="11.5" font-weight="750" fill="#f59e0b">虚线: 含税私人成本 MPC+t</text>`;
-  document.getElementById('ahaBox').innerHTML=Math.abs(t-E)<=2
-    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>当庇古税 <code>t ≈ E</code>（${t} 元）时，外部伤害完美内化进企业账本，社会无谓损失归零！`
-    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>当前税率 ${t} 元与真实污染危害 ${E} 元存在缺口，产生了 <strong>${dwl} 元</strong> 的红色无谓损失三角——把滑块拉到 t = ${E} 试试！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    // Demand: P = 140 - Q
+    // Private MC: MCp = 20 + Q  -> Market eq without tax: Qm = 60, P = 80
+    // External Damage MEC = 30 -> Social MC: MCs = 50 + Q -> Optimal eq: Q* = 45, P* = 95
+    // With tax t: MC_eff = 20 + t + Q -> Q(t) = (120 - t) / 2
+    // DWL = 0.5 * |Q(t) - 45| * |t - 30|
+    const tRange = document.getElementById('tRange');
+    const svg = document.getElementById('pigSvg');
+    const ahaBox = document.getElementById('ahaBox');
+    let done = false;
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const t = Number(tRange.value);
+      const Q = (120 - t) / 2;
+      const P = 140 - Q;
+      const dwl = Math.round(0.5 * Math.abs(Q - 45) * Math.abs(t - 30));
+      const optimal = Math.abs(t - 30) <= 2;
+
+      const tEl = document.getElementById('tVal');
+      tEl.textContent = optimal ? `¥${t} / 吨（🎯 精准校准！）` : (t < 30 ? `¥${t} / 吨（税太低，仍在过度排污）` : `¥${t} / 吨（税太重，误伤正常产能）`);
+      tEl.style.color = optimal ? 'var(--tax-green)' : (t < 30 ? 'var(--tax-red)' : 'var(--tax-amber)');
+
+      document.getElementById('qVal').textContent = `${Q.toFixed(0)} 吨`;
+      document.getElementById('dwlVal').textContent = dwl === 0 ? '¥0（完美消除！）' : `¥${dwl}`;
+      document.getElementById('dwlVal').style.color = dwl <= 10 ? 'var(--tax-green)' : 'var(--tax-red)';
+
+      const xOf = q => 60 + (q / 90) * 560;
+      const yOf = p => 185 - (p / 150) * 150;
+
+      let html = '';
+      // Axes
+      html += `<line x1="60" y1="185" x2="620" y2="185" stroke="var(--tax-border)" stroke-width="2"/>`;
+      html += `<line x1="60" y1="26" x2="60" y2="185" stroke="var(--tax-border)" stroke-width="2"/>`;
+
+      // Demand curve: P = 140 - Q
+      html += `<line x1="${xOf(0)}" y1="${yOf(140)}" x2="${xOf(90)}" y2="${yOf(50)}" stroke="var(--tax-primary)" stroke-width="2.5"/>`;
+      html += `<text x="${xOf(86)}" y="${yOf(50) - 8}" fill="var(--tax-primary)" font-size="11.5" font-weight="700">需求 D</text>`;
+
+      // Social MC: P = 50 + Q (Target!)
+      html += `<line x1="${xOf(0)}" y1="${yOf(50)}" x2="${xOf(90)}" y2="${yOf(140)}" stroke="var(--tax-green)" stroke-width="2.5" stroke-dasharray="6 4"/>`;
+      html += `<text x="${xOf(84)}" y="${yOf(134) - 8}" text-anchor="end" fill="var(--tax-green)" font-size="11.5" font-weight="700">社会真实成本 MCs</text>`;
+
+      // Effective taxed MC: P = 20 + t + Q
+      html += `<line x1="${xOf(0)}" y1="${yOf(20 + t)}" x2="${xOf(90)}" y2="${yOf(110 + t)}" stroke="var(--tax-amber)" stroke-width="3"/>`;
+      html += `<text x="${xOf(10)}" y="${yOf(30 + t) + 16}" fill="var(--tax-amber)" font-size="11" font-weight="700">税后供给 MC+t</text>`;
+
+      // Deadweight Loss triangle between Q and Q*=45
+      if (Math.abs(Q - 45) > 0.5) {
+        const pOpt = 95;
+        const pDem = 140 - Q;
+        const pSoc = 50 + Q;
+        html += `<polygon points="${xOf(45)},${yOf(pOpt)} ${xOf(Q)},${yOf(pDem)} ${xOf(Q)},${yOf(pSoc)}" fill="rgba(239,68,68,0.34)" stroke="var(--tax-red)" stroke-width="1.5"/>`;
+      }
+
+      // Optimal & Current dots
+      html += `<circle cx="${xOf(45)}" cy="${yOf(95)}" r="6" fill="var(--tax-green)"/>`;
+      html += `<circle cx="${xOf(Q)}" cy="${yOf(P)}" r="7" fill="${optimal ? 'var(--tax-green)' : 'var(--tax-red)'}" stroke="#fff" stroke-width="2"/>`;
+      html += `<text x="${xOf(Q)}" y="203" text-anchor="middle" fill="var(--tax-ink)" font-size="11.5" font-weight="800">Q=${Q.toFixed(0)}</text>`;
+
+      svg.innerHTML = html;
+
+      if (optimal) {
+        ahaBox.innerHTML = '<strong>外部性完美内部化（税额 ¥30 = 边际污染损失 ¥30）！</strong>红色无谓损失三角形彻底消失！庇古税的核心不是“惩罚企业”，而是把偷偷转嫁给社会的空气污染账单原封不动塞回定价里，让市场自动回到社会最优产量！';
+      } else if (t < 30) {
+        ahaBox.innerHTML = `<strong>负外部性未清零（当前无谓损失 ¥${dwl}）：</strong>因为排污费低于真实损害，工厂多生产了 ${(Q - 45).toFixed(0)} 吨“社会净亏本”的高污染产品！继续把税额调到 ¥30/吨！`;
+      } else {
+        ahaBox.innerHTML = `<strong>矫枉过正（税额 ¥${t} > ¥30）：</strong>环保税高于实际污染损失也会产生新的无谓损失（¥${dwl}），误伤了原本利大于弊的正常生产！往回调回 ¥30/吨！`;
+      }
+    }
+
+    tRange.oninput = () => { markDone('校准了庇古税消除负外部性无谓损失'); render(); };
+    render();
   </script>
 </body>
 </html>

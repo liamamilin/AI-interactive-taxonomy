@@ -1,70 +1,134 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>⛓️ 独立证据链叠加 vs 同一证据重复计分</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>独立证据链叠加 vs 同一证据重复计分</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .ev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+    .ev-card { background: var(--tax-surface-alt); border: 2px solid var(--tax-border); border-radius: 12px; padding: 12px; cursor: pointer; text-align: left; transition: border-color .2s, background .2s; }
+    .ev-card.on { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .ev-head { display: flex; justify-content: space-between; font-weight: 800; font-size: 13.5px; color: var(--tax-ink); }
+    .ev-tag { font-size: 11px; padding: 2px 7px; border-radius: 99px; background: var(--tax-surface); border: 1px solid var(--tax-border); color: var(--tax-muted); }
+    .ev-desc { font-size: 12px; color: var(--tax-muted); margin-top: 5px; line-height: 1.45; }
+    .cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    @media (max-width: 640px) { .cmp-grid { grid-template-columns: 1fr; } }
+    .cmp-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 12px; padding: 14px; text-align: center; }
+    .cmp-val { font-size: 28px; font-weight: 900; margin: 4px 0; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>⛓️ 独立证据链叠加 vs 同一证据重复计分</h1><p>误区：只要有 5 个证人或 5 份线索指向同一人，定罪概率就一定接近 100%。真相：如果这 5 个证人其实都在案后一起看过同一篇新闻报道（高度相关），他们加起来只相当于 1 份证据！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>间接证据/证人数量</span><span id="vN">5 个</span></label><input type="range" id="sN" min="1" max="8" value="5" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>证据之间相互串通/同源相关性</span><span id="vC">75%</span></label><input type="range" id="sC" min="0" max="95" value="75" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>⛓️ 独立证据链叠加 vs 同一证据重复计分</h1>
+      <p>在经典的「柯林斯案」和「莎莉·克拉克冤案」中，检方把高度相关的线索当成<strong>相互独立的事件直接相乘</strong>，凭空算出了“百万分之一巧合”！点击下方证据构建证据链，对比「天真连乘」与「真实去重贝叶斯」的惊人落差。</p>
+    </header>
+
+    <div class="ev-grid" id="evGrid"></div>
+
+    <div class="cmp-grid">
+      <div class="cmp-box">
+        <div style="font-size:12px;color:var(--tax-muted);">⚠️ 天真独立连乘（忽略相关性）</div>
+        <div class="cmp-val" id="naiveVal" style="color:var(--tax-red);">1.0%</div>
+        <div style="font-size:12px;color:var(--tax-muted);" id="naiveSub">虚假高置信度风险</div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">假设独立误算概率</div><div class="k-val" id="kId" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">扣除同源后的真实概率</div><div class="k-val" id="kRe" style="color:#0284c7;">—</div></div>
+      <div class="cmp-box">
+        <div style="font-size:12px;color:var(--tax-muted);">✅ 真实去重贝叶斯后验概率</div>
+        <div class="cmp-val" id="realVal" style="color:var(--tax-green);">1.0%</div>
+        <div style="font-size:12px;color:var(--tax-muted);" id="realSub">扣除同源重复计分后</div>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 证据构建提示：</strong>试着把「同源特征（如黄色敞篷车 + 情侣同乘 + 女生扎马尾）」一起勾上，再对比勾上真正跨维度的「基站定位 + 现场指纹 + 独立目击」，看看水分有多大！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const n=+document.getElementById('sN').value, corr=+document.getElementById('sC').value/100;
-  document.getElementById('vN').textContent=n+' 个'; document.getElementById('vC').textContent=(corr*100).toFixed(0)+'%';
-  const post=k=>{ const o=0.05*Math.pow(3.2,k); return o/(1+o)*100; };
-  const eff=1+(n-1)*(1-corr);
-  const pId=post(n), pRe=post(eff);
-  document.getElementById('kId').textContent=pId.toFixed(1)+'%';
-  document.getElementById('kRe').textContent=pRe.toFixed(1)+'%';
-  let ptsI='40,155 ', ptsR='40,155 ';
-  for(let k=1;k<=n;k++){
-    const x=40+k/8*500;
-    ptsI+=`${x},${155-post(k)*1.25} `;
-    ptsR+=`${x},${155-post(1+(k-1)*(1-corr))*1.25} `;
-  }
-  document.getElementById('svg').innerHTML=`
-    <line x1="40" y1="155" x2="550" y2="155" stroke="#94a3b8"/>
-    <polyline fill="none" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="5 3" points="${ptsI}"/>
-    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${ptsR}"/>
-    <text x="50" y="34" font-size="12" font-weight="800" fill="#ef4444">虚线 (误当独立): ${pId.toFixed(1)}%</text>
-    <text x="50" y="54" font-size="12" font-weight="800" fill="#0284c7">实线 (扣除同源): ${pRe.toFixed(1)}%</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>如果证据之间有 ${(corr*100).toFixed(0)}% 的同源相关性，${n} 个看似独立的线索其实只等价于 <strong>${eff.toFixed(1)} 个</strong> 有效证据，真实确信度只有 ${pRe.toFixed(1)}%！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    // Base prior odds: 1 guilty out of 100 suspects (prior = 1%, odds = 1/99)
+    const evidences = [
+      { id: 'car', group: 'visual', name: '🚗 驾驶黄色敞篷车', lr: 10, desc: '路人看到逃逸车辆为黄色敞篷车（似然比 10×）' },
+      { id: 'hair', group: 'visual', name: '👱‍♀️ 同乘者扎金色马尾', lr: 10, desc: '同一目击者回忆副驾特征（与车辆同源记忆，相关性高）' },
+      { id: 'beard', group: 'visual', name: '🧔 司机留着小胡子', lr: 10, desc: '同一目击者补充描述（昏暗光线易受先入为主污染）' },
+      { id: 'cell', group: 'cell', name: '📡 手机基站深夜定位', lr: 18, desc: '运营商独立日志显示被告手机案发时在现场 300 米内（独立来源）' },
+      { id: 'print', group: 'forensic', name: '🧬 门把手半枚生物痕迹', lr: 35, desc: '法医物证室独立提取比对（与目击和基站完全独立）' },
+      { id: 'bank', group: 'finance', name: '💳 案发次日异常大额存现', lr: 15, desc: '银行反洗钱系统独立记录，数额与失窃现金吻合（独立来源）' }
+    ];
+
+    const picked = new Set();
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function oddsToProb(odds) {
+      return (odds / (1 + odds)) * 100;
+    }
+
+    function render() {
+      const grid = document.getElementById('evGrid');
+      grid.innerHTML = '';
+      evidences.forEach(ev => {
+        const on = picked.has(ev.id);
+        const btn = document.createElement('button');
+        btn.className = 'ev-card' + (on ? ' on' : '');
+        const tagText = ev.group === 'visual' ? '同源目击群' : '独立物证维度';
+        btn.innerHTML = `
+          <div class="ev-head"><span>${ev.name}</span><span class="ev-tag">${tagText}</span></div>
+          <div class="ev-desc">${ev.desc}</div>
+        `;
+        btn.addEventListener('click', () => {
+          if (picked.has(ev.id)) picked.delete(ev.id);
+          else picked.add(ev.id);
+          markDone('组合构建了多源法庭证据链');
+          render();
+        });
+        grid.appendChild(btn);
+      });
+
+      const baseOdds = 1 / 99;
+      let naiveLR = 1;
+      let realLR = 1;
+      let visualCount = 0;
+
+      evidences.forEach(ev => {
+        if (!picked.has(ev.id)) return;
+        naiveLR *= ev.lr;
+        if (ev.group === 'visual') {
+          visualCount++;
+          // Diminishing returns for correlated same-source eyewitness details
+          realLR *= (visualCount === 1 ? ev.lr : Math.pow(ev.lr, 0.25));
+        } else {
+          realLR *= ev.lr;
+        }
+      });
+
+      const pNaive = oddsToProb(baseOdds * naiveLR);
+      const pReal = oddsToProb(baseOdds * realLR);
+
+      document.getElementById('naiveVal').textContent = pNaive.toFixed(1) + '%';
+      document.getElementById('realVal').textContent = pReal.toFixed(1) + '%';
+
+      const gap = pNaive - pReal;
+      const aha = document.getElementById('ahaBox');
+      if (picked.size === 0) {
+        aha.innerHTML = `<strong>💡 证据构建提示：</strong>假设最初有 100 名嫌疑人（先验有罪率 1%）。点击上方卡片叠加证据，对比“同源特征连乘”与“跨维度独立印证”的差别！`;
+      } else if (visualCount >= 2 && gap >= 20) {
+        aha.innerHTML = `<strong>🚨 发现“重复计分”大泡沫！</strong>你勾选了 ${visualCount} 条来自同一目击者的相关描述：天真连乘虚构出了 <strong>${pNaive.toFixed(1)}%</strong> 的定罪幻觉，而扣除相关性后真实概率其实只有 <strong>${pReal.toFixed(1)}%</strong>（虚高了 <strong>+${gap.toFixed(1)}%</strong>）！`;
+      } else if (pReal >= 95) {
+        aha.innerHTML = `<strong>✅ 真正的跨维度铁证闭环（真实概率 ${pReal.toFixed(1)}%）！</strong>当通信基站、生物物证、资金流水等<strong>彼此物理独立</strong>的证据共同指向同一人时，似然比才真正具备指数级相乘威力！`;
+      } else {
+        aha.innerHTML = `<strong>⛓️ 证据链构建中（真实概率 ${pReal.toFixed(1)}%）：</strong>目前尚不足以排除合理怀疑（需 ≥95%）。试着加入不同维度的独立物证，看看真实概率如何稳健跃升。`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

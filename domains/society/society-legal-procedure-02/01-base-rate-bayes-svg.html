@@ -1,67 +1,120 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔬 贝叶斯 DNA 匹配面积透视镜（SVG）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>贝叶斯 DNA 匹配面积透视镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .viz-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .kpi { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
+    .dots-box { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px; background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; min-height: 92px; align-items: center; justify-content: center; }
+    .person-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; }
+    .dot-guilty { background: var(--tax-red-soft); border: 2px solid var(--tax-red); }
+    .dot-innocent { background: var(--tax-primary-soft); border: 2px solid var(--tax-primary); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔬 贝叶斯 DNA 匹配面积透视镜（SVG）</h1><p>误区：“DNA 随机匹配概率是百万分之一”等价于“嫌疑人是无辜的概率只有百万分之一”。真相：这是把条件概率 P(匹配|无辜) 和 P(无辜|匹配) 搞反了！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>数据库检索城市人口</span><span id="vPop">1000 万人</span></label><input type="range" id="sPop" min="1" max="20" value="10" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>随机撞脸/DNA 误配率 (每百万人)</span><span id="vErr">1 人</span></label><input type="range" id="sErr" min="1" max="5" value="1" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🔬 贝叶斯 DNA 匹配面积透视镜</h1>
+      <p>犯罪现场提取到一份 DNA，检验误匹配率极低（仅 <strong>1 / 100,000</strong>）。警方没有任何其他线索，直接把全城人口库扫了一遍，抓到一名匹配者！检察官高喊：“他无辜的概率只有十万分之一！”——<strong>真的吗？</strong></p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="control-group">
+        <label>无差别搜查的人口库规模：<strong id="popVal">100 万人</strong></label>
+        <input id="popSlider" type="range" min="10" max="500" step="10" value="100">
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">匹配总人数</div><div class="k-val" id="kTot">—</div></div>
-        <div class="kpi"><div class="k-lbl">真凶在其中概率</div><div class="k-val" id="kGuilt" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">无辜却被匹配概率</div><div class="k-val" id="kInn" style="color:#ef4444;">—</div></div>
+      <div class="control-group">
+        <label>DNA 检验随机误匹配率（每百万人误撞人数）：<strong id="fprVal">10 人 / 百万 (1/10万)</strong></label>
+        <input id="fprSlider" type="range" min="1" max="20" step="1" value="10">
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="viz-card">
+      <div style="font-size:12.5px;color:var(--tax-muted);margin-bottom:8px;text-align:center;">
+        全城所有 DNA 匹配者一览（🔴 真凶仅 1 人，🔵 全是偶然撞脸的无辜市民）：
+      </div>
+      <div class="dots-box" id="dotsBox"></div>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-l">全城总匹配人数</div>
+          <div class="kpi-v" id="totVal">11 人</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">他是真凶的真实概率</div>
+          <div class="kpi-v" id="postVal" style="color:var(--tax-red);">9.1%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">他是无辜者的真实概率</div>
+          <div class="kpi-v" id="innVal" style="color:var(--tax-green);">90.9%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>🤯 检察官谬误当场现形！</strong>试着把「人口库规模」从 100 万缩减到 10 万（相当于先用不在场证明和监控缩小嫌疑圈），看看真凶后验概率如何瞬间暴涨！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const pop=+document.getElementById('sPop').value, err=+document.getElementById('sErr').value;
-  document.getElementById('vPop').textContent=pop+'00 万人'; document.getElementById('vErr').textContent=err+' 人';
-  const falseMatches=pop*err, total=1+falseMatches;
-  const pGuilt=(1/total*100), pInn=(falseMatches/total*100);
-  document.getElementById('kTot').textContent=total+' 人';
-  document.getElementById('kGuilt').textContent=pGuilt.toFixed(1)+'%';
-  document.getElementById('kInn').textContent=pInn.toFixed(1)+'%';
-  let dots='';
-  for(let i=0;i<Math.min(50,total);i++){
-    const col=i===0?'#10b981':'#ef4444';
-    const x=38+(i%15)*36, y=38+Math.floor(i/15)*36;
-    dots+=`<circle cx="${x}" cy="${y}" r="11" fill="${col}"/>
-    <text x="${x}" y="${y+4}" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">${i===0?'凶':'冤'}</text>`;
-  }
-  document.getElementById('svg').innerHTML=dots+`<text x="30" y="172" font-size="12.5" font-weight="800" fill="var(--tax-text)">库中共有 ${total} 个完全匹配者：1 个真凶 (绿) + ${falseMatches} 个纯属巧合的无辜者 (红)</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>在 ${pop}00 万人的大库里盲搜，百万分之一的巧合会命中 <strong>${falseMatches} 个无辜路人</strong>！仅凭单一数据库匹配就定罪，嫌疑人无辜的概率高达 <strong>${pInn.toFixed(1)}%</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const popSlider = document.getElementById('popSlider');
+    const fprSlider = document.getElementById('fprSlider');
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const popWan = Number(popSlider.value); // in 10k units (100 = 100万 = 1M)
+      const fprPerMil = Number(fprSlider.value); // false matches per 1M people
+
+      document.getElementById('popVal').textContent = popWan + ' 万人';
+      const denom = Math.round(1000000 / fprPerMil);
+      document.getElementById('fprVal').textContent = `${fprPerMil} 人/百万 (约 1/${(denom / 10000).toFixed(1)}万)`;
+
+      const falseMatches = (popWan / 100) * fprPerMil;
+      const totalMatches = 1 + falseMatches;
+      const pGuilty = (1 / totalMatches) * 100;
+      const pInnocent = 100 - pGuilty;
+
+      document.getElementById('totVal').textContent = totalMatches.toFixed(1) + ' 人';
+      document.getElementById('postVal').textContent = pGuilty.toFixed(1) + '%';
+      document.getElementById('innVal').textContent = pInnocent.toFixed(1) + '%';
+
+      const displayFalse = Math.min(48, Math.round(falseMatches));
+      let dots = `<div class="person-dot dot-guilty" title="真正的凶手 (1人)">😈</div>`;
+      for (let i = 0; i < displayFalse; i++) {
+        dots += `<div class="person-dot dot-innocent" title="偶然 DNA 撞脸的无辜市民">🙂</div>`;
+      }
+      if (Math.round(falseMatches) > 48) {
+        dots += `<span style="font-size:12px;color:var(--tax-muted);font-weight:700;">… 还有 ${Math.round(falseMatches) - 48} 位无辜撞脸者</span>`;
+      }
+      document.getElementById('dotsBox').innerHTML = dots;
+
+      const aha = document.getElementById('ahaBox');
+      if (pGuilty < 20) {
+        aha.innerHTML = `<strong>🚨 惊天大反转！</strong>在 <strong>${popWan} 万人</strong>里撒网搜查，除了 1 个真凶，还会顺手捞出约 <strong>${falseMatches.toFixed(1)} 个偶然撞脸的无辜者</strong>！因此单凭 DNA 匹配，他反而是清白者的概率高达 <strong>${pInnocent.toFixed(1)}%</strong>——检察官把 P(匹配|无辜) 偷换成了 P(无辜|匹配)！`;
+      } else if (pGuilty < 70) {
+        aha.innerHTML = `<strong>⚠️ 仍远不够定罪（真凶概率 ${pGuilty.toFixed(1)}%）：</strong>虽然缩小了排查基数，但无辜撞脸者仍有约 ${falseMatches.toFixed(1)} 人，完全达不到刑事诉讼 95% 排除合理怀疑的标准。`;
+      } else {
+        aha.innerHTML = `<strong>✅ 先验缩小 + 极低误报 = 高可信证据（${pGuilty.toFixed(1)}%）：</strong>只有先通过监控、动机、不在场证明把嫌疑圈缩小到极少人群，DNA 匹配才能真正成为一锤定音的铁证！`;
+      }
+    }
+
+    popSlider.addEventListener('input', () => { markDone('调节了贝叶斯搜查人口基数'); render(); });
+    fprSlider.addEventListener('input', () => { markDone('调节了 DNA 误匹配率'); render(); });
+    render();
   </script>
 </body>
 </html>

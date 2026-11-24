@@ -1,66 +1,138 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🚫 非法证据排除法则：威慑力模拟器（SVG）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>非法证据排除法则：威慑力模拟器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .viz-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .kpi { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
+    svg text { fill: var(--tax-muted); font-family: inherit; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🚫 非法证据排除法则：威慑力模拟器（SVG）</h1><p>误区：把非法搜来的铁证直接作废，只是在纵容坏人、浪费破案心血。真相：如果不把非法得来的果子扔掉，执法者就永远有动力先破门再补手续——长远来看每个普通人都不再安全！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>非法证据被法庭排除率</span><span id="vEx">85%</span></label><input type="range" id="sEx" min="0" max="100" value="85" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>破大案的额外晋升激励</span><span id="vBon">60 分</span></label><input type="range" id="sBon" min="10" max="100" value="60" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🚫 非法证据排除法则：威慑力模拟器</h1>
+      <p>如果法官允许把“无证破门搜查”得来的赃物当作定罪铁证，眼前确实多判了一个罪犯——但<strong>5 年后</strong>整个社会的无证搜查会变成什么样？拖动排除法则执行严格度，观察长期激励如何重塑执法生态！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="control-group">
+        <label>非法证据排除严格度：<strong id="exVal">80%</strong></label>
+        <input id="exSlider" type="range" min="0" max="100" step="5" value="80">
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">违规取证净期望收益</div><div class="k-val" id="kNet">—</div></div>
-        <div class="kpi"><div class="k-lbl">执法合规率</div><div class="k-val" id="kComp" style="color:#10b981;">—</div></div>
+      <div class="control-group">
+        <label>合法侦查技术与经费投入：<strong id="invVal">60%</strong></label>
+        <input id="invSlider" type="range" min="20" max="100" step="10" value="60">
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="viz-box">
+      <svg id="simSvg" viewBox="0 0 640 235" style="width:100%;height:auto;display:block;"></svg>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-l">第 5 年非法搜查占比</div>
+          <div class="kpi-v" id="illVal">12%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">第 5 年合规破案率</div>
+          <div class="kpi-v" id="solVal">78%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">公民宪法安全感</div>
+          <div class="kpi-v" id="secVal">86 分</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 博弈激励视角：</strong>把「非法证据排除严格度」拖到 <strong>0%</strong>（只要结果对，过程随便），观察红线如何在 5 年内失控飙升！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const ex=+document.getElementById('sEx').value/100, bon=+document.getElementById('sBon').value;
-  document.getElementById('vEx').textContent=(ex*100).toFixed(0)+'%'; document.getElementById('vBon').textContent=bon+' 分';
-  const net=Math.round((1-ex)*bon - ex*25);
-  const comp=Math.max(10, Math.min(98, Math.round(95 - Math.max(0, net)*1.2)));
-  document.getElementById('kNet').textContent=(net>0?'+':'')+net+' 分';
-  document.getElementById('kNet').style.color=net>0?'#ef4444':'#10b981';
-  document.getElementById('kComp').textContent=comp+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="${net>0?'#ef4444':'#10b981'}">违规取证期望净收益: ${net>0?'+':''}${net} 分</text>
-    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${Math.max(8,Math.min(540,(net+30)*6))}" height="24" rx="6" fill="${net>0?'#ef4444':'#10b981'}"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">公民隐私受保护与执法合规率: ${comp}%</text>
-    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${comp*5.4}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">一旦排除率降到无法抵消破案收益，违规取证就会成为常态</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“毒树之果”规则不是为了救眼前的被告，而是为了彻底抽干违法取证的收益激励——当排除率达到 ${(ex*100).toFixed(0)}% 时，违规收益降至 ${net} 分，守法才成为唯一理性选择！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const exSlider = document.getElementById('exSlider');
+    const invSlider = document.getElementById('invSlider');
+    const svg = document.getElementById('simSvg');
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const ex = Number(exSlider.value) / 100;
+      const inv = Number(invSlider.value) / 100;
+      document.getElementById('exVal').textContent = Math.round(ex * 100) + '%';
+      document.getElementById('invVal').textContent = Math.round(inv * 100) + '%';
+
+      // Simulate Years 0..5
+      const illegal = [35];
+      const legalSolve = [55];
+      for (let y = 1; y <= 5; y++) {
+        // When exclusion is strict, shortcutting loses payoff -> illegal rate drops exponentially
+        const targetIll = 68 * (1 - ex) + 4;
+        const nextIll = illegal[y - 1] + (targetIll - illegal[y - 1]) * 0.45;
+        illegal.push(nextIll);
+
+        // Strict exclusion forces investment into professional forensic/warrant workflows
+        const shortPain = (y === 1 && ex > 0.7) ? -5 * ex : 0;
+        const targetSolve = 46 + 38 * inv + 10 * ex;
+        const nextSolve = Math.min(95, Math.max(30, legalSolve[y - 1] + (targetSolve - legalSolve[y - 1]) * 0.42 + shortPain));
+        legalSolve.push(nextSolve);
+      }
+
+      const endIll = Math.round(illegal[5]);
+      const endSolve = Math.round(legalSolve[5]);
+      const secScore = Math.max(15, Math.min(98, Math.round(96 - endIll * 1.15)));
+
+      document.getElementById('illVal').textContent = endIll + '%';
+      document.getElementById('illVal').style.color = endIll > 30 ? 'var(--tax-red)' : 'var(--tax-green)';
+      document.getElementById('solVal').textContent = endSolve + '%';
+      document.getElementById('secVal').textContent = secScore + ' 分';
+
+      const W = 640, H = 235, padL = 46, padR = 24, padT = 22, padB = 34;
+      const sx = y => padL + (y / 5) * (W - padL - padR);
+      const sy = v => H - padB - (v / 100) * (H - padT - padB);
+      const toPath = arr => arr.map((v, i) => `${i === 0 ? 'M' : 'L'}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+
+      svg.innerHTML = `
+        <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="var(--tax-muted)"/>
+        <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="var(--tax-muted)"/>
+        ${[25, 50, 75].map(g => `<line x1="${padL}" y1="${sy(g)}" x2="${W - padR}" y2="${sy(g)}" stroke="var(--tax-border)" stroke-dasharray="3,4"/>`).join('')}
+        <path d="${toPath(illegal)}" fill="none" stroke="var(--tax-red)" stroke-width="3"/>
+        <path d="${toPath(legalSolve)}" fill="none" stroke="var(--tax-green)" stroke-width="3"/>
+        ${[0,1,2,3,4,5].map(y => `
+          <circle cx="${sx(y).toFixed(1)}" cy="${sy(illegal[y]).toFixed(1)}" r="4" fill="var(--tax-red)"/>
+          <circle cx="${sx(y).toFixed(1)}" cy="${sy(legalSolve[y]).toFixed(1)}" r="4" fill="var(--tax-green)"/>
+          <text x="${sx(y).toFixed(1)}" y="${H - padB + 17}" text-anchor="middle" font-size="11">第 ${y} 年</text>
+        `).join('')}
+        <text x="${W - padR - 6}" y="${padT + 14}" text-anchor="end" font-size="11" font-weight="700" fill="var(--tax-red)">━━ 非法搜查/越权占比</text>
+        <text x="${W - padR - 6}" y="${padT + 30}" text-anchor="end" font-size="11" font-weight="700" fill="var(--tax-green)">━━ 合法专业破案率</text>
+      `;
+
+      const aha = document.getElementById('ahaBox');
+      if (ex <= 0.2) {
+        aha.innerHTML = `<strong>🚨 捷径泛滥，人人自危！</strong>当排除严格度仅为 ${Math.round(ex * 100)}% 时，违法取证省时省力且依然能定罪，5 年后非法搜查飙升至 <strong>${endIll}%</strong>，公民隐私安全感暴跌至 <strong>${secScore} 分</strong>。`;
+      } else if (ex >= 0.75) {
+        aha.innerHTML = `<strong>🛡️ 斩断违法收益，倒逼专业升级！</strong>虽然第 1 年因排除瑕疵证据出现短暂阵痛，但从第 2 年起，办案人员知道“违法搜来的全作废”，非法搜查锐减至 <strong>${endIll}%</strong>，合法专业破案率反而稳步升至 <strong>${endSolve}%</strong>！`;
+      } else {
+        aha.innerHTML = `<strong>⚖️ 半松半紧的灰色地带：</strong>排除严格度在 ${Math.round(ex * 100)}% 时仍有 <strong>${endIll}%</strong> 的越权侥幸心理。只有把规则执行到足够刚性，才能彻底改变一线激励结构。`;
+      }
+    }
+
+    exSlider.addEventListener('input', () => { markDone('模拟了非法证据排除法则威慑力'); render(); });
+    invSlider.addEventListener('input', () => { markDone('调整了合法侦查投入参数'); render(); });
+    render();
   </script>
 </body>
 </html>

@@ -1,71 +1,142 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌿 毒树之果证据链条追溯树</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>毒树之果证据链条追溯树</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .tree-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .node-info { margin-top: 12px; background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 12px; font-size: 13px; color: var(--tax-ink); line-height: 1.55; }
+    svg text { font-family: inherit; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌿 毒树之果证据链条追溯树</h1><p>误区：只要最初的线索违法，后面找到的所有证据就绝对永远不能用。真相：如果检方能证明“即便没有那次违法，警方按正常巡逻也必然会发现它”，果实就可以被豁免！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="btn-row">
-        <button class="btn active" onclick="setRoot(false,this)">源头违法：无证破门窃听</button>
-        <button class="btn" onclick="setRoot(true,this)">源头合法：持有法官搜查令</button>
-      </div>
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>独立合法线索存在概率 (必然发现例外)</span><span id="vInd">20%</span></label><input type="range" id="sInd" min="0" max="100" value="20" oninput="draw()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">毒树本体 (直接供词)</div><div class="k-val" id="kT1">—</div></div>
-        <div class="kpi"><div class="k-lbl">衍生果实 (凶器/账本)</div><div class="k-val" id="kT2">—</div></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🌿 毒树之果证据链条追溯树</h1>
+      <p>如果树根（源头取证）是违法的，顺藤摸瓜衍生出的证据（果实）原则上也会一起被污染排除——但法律也留了<strong>「独立来源」</strong>与<strong>「必然发现」</strong>两道豁免出口！<strong>点击下方任意节点</strong>检查它的法庭效力。</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="poisonRootBtn">☠️ 树根状态：无证非法监听</button>
+        <button class="toy-btn" id="cleanRootBtn">📜 树根状态：持法院合法监听令</button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="tree-box">
+      <svg id="treeSvg" viewBox="0 0 640 270" style="width:100%;height:auto;display:block;"></svg>
+      <div class="node-info" id="nodeInfo">👆 点击树上的任意证据节点，查看法官是否采纳它以及背后的法理依据。</div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 毒树之果核心：</strong>对比左侧被污染的“顺藤摸瓜果实”与右侧两枚“豁免绿果”——为什么即使树根有毒，右下角那两份证据依然可以在法庭上合法使用？点击它们一探究竟！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-let legal=false;
-function setRoot(ok,btn){ legal=ok; document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); draw(); }
-function draw(){
-  const ind=+document.getElementById('sInd').value; document.getElementById('vInd').textContent=ind+'%';
-  const treeOk=legal, fruitOk=legal||(ind>=65);
-  document.getElementById('kT1').textContent=treeOk?'合法采信':'全部排除';
-  document.getElementById('kT2').textContent=fruitOk?(legal?'合法采信':'触发例外豁免'):'连带排除';
-  const cT=treeOk?'#10b981':'#ef4444', cF=fruitOk?'#10b981':'#ef4444';
-  document.getElementById('svg').innerHTML=`
-    <rect x="40" y="65" width="150" height="55" rx="10" fill="${cT}" opacity="0.2" stroke="${cT}" stroke-width="2.5"/>
-    <text x="115" y="90" text-anchor="middle" font-size="13" font-weight="800" fill="${cT}">源头取证手段</text>
-    <text x="115" y="109" text-anchor="middle" font-size="12" fill="var(--tax-text)">${legal?'有搜查令':'无证窃听(毒树)'}</text>
-    <line x1="190" y1="92" x2="265" y2="50" stroke="${cT}" stroke-width="2.5"/>
-    <line x1="190" y1="92" x2="265" y2="135" stroke="${cF}" stroke-width="2.5"/>
-    <rect x="265" y="22" width="290" height="52" rx="10" fill="${cT}" opacity="0.18" stroke="${cT}" stroke-width="2"/>
-    <text x="410" y="52" text-anchor="middle" font-size="13.5" font-weight="800" fill="${cT}">直接证据 (供词/录音): ${treeOk?'✅ 可用':'❌ 排除'}</text>
-    <rect x="265" y="110" width="290" height="52" rx="10" fill="${cF}" opacity="0.18" stroke="${cF}" stroke-width="2"/>
-    <text x="410" y="140" text-anchor="middle" font-size="13.5" font-weight="800" fill="${cF}">衍生证据 (凶器/账本): ${fruitOk?'✅ 可用':'❌ 毒果排除'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“毒树之果”原则既防止了程序滥权，又通过“独立来源 / 必然发现”例外（当前独立度 ${ind}%）避免社会陷入机械教条！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-draw();
+    let rootPoisoned = true;
+    let selectedId = 'root';
+    let interacted = false;
+
+    const nodes = [
+      { id: 'root', x: 320, y: 36, label: '源头：监听电话录音', parent: null, exception: false,
+        poisonDesc: '☠️【毒树之根 — 排除】未经法院批准私自监听，直接侵犯公民通信秘密，该录音本身绝对不可采纳。',
+        cleanDesc: '✅【合法之根 — 采纳】经法院依法签发监听令获取，程序合法，整棵证据树全部有效。' },
+      { id: 'n1', x: 140, y: 125, label: '顺藤搜出：密室账本', parent: 'root', exception: false,
+        poisonDesc: '☠️【毒树之果 — 排除】完全依赖非法监听里听到的地址才找到密室账本，属于直接衍生污染证据，必须一并排除！',
+        cleanDesc: '✅【合法衍生 — 采纳】源头监听合法，据此申请搜查令查获的账本完全有效。' },
+      { id: 'n2', x: 140, y: 218, label: '账本牵出：共犯口供', parent: 'n1', exception: false,
+        poisonDesc: '☠️【二级毒果 — 排除】拿着被污染的账本逼问出的下游线索，因果链条未中断，依然沾染源头之毒！',
+        cleanDesc: '✅【合法证据 — 采纳】基于合法账本依法讯问取得的证言，具备完全证明力。' },
+      { id: 'n3', x: 350, y: 125, label: '必然发现：路边弃车', parent: 'root', exception: true,
+        poisonDesc: '🌿【豁免：必然发现例外 — 采纳】虽然通过非法线索提前找到了弃车，但交警例行拖车巡逻 2 小时内也必然会发现它，因此依法豁免排除！',
+        cleanDesc: '✅【合法证据 — 采纳】程序合法，正常采纳。' },
+      { id: 'n4', x: 525, y: 125, label: '独立来源：银行报案', parent: null, exception: true,
+        poisonDesc: '🛡️【豁免：独立来源例外 — 采纳】银行风控系统完全独立地发现洗钱流水并主动报案，与非法监听毫无因果关系，完全不受污染！',
+        cleanDesc: '✅【独立铁证 — 采纳】独立第三方主动移交的金融证据，合法有效。' }
+    ];
+
+    const svg = document.getElementById('treeSvg');
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function isNodePoisoned(n) {
+      if (!rootPoisoned) return false;
+      return !n.exception;
+    }
+
+    function render() {
+      let edges = '';
+      nodes.forEach(n => {
+        if (n.parent) {
+          const p = nodes.find(x => x.id === n.parent);
+          const bad = isNodePoisoned(n);
+          edges += `<line x1="${p.x}" y1="${p.y + 20}" x2="${n.x}" y2="${n.y - 20}" stroke="${bad ? 'var(--tax-red)' : 'var(--tax-green)'}" stroke-width="2.6" stroke-dasharray="${n.exception ? '5,4' : 'none'}"/>`;
+        }
+      });
+
+      let boxes = '';
+      nodes.forEach(n => {
+        const bad = isNodePoisoned(n);
+        const sel = selectedId === n.id;
+        const fill = bad ? 'rgba(239,68,68,0.16)' : 'rgba(16,185,129,0.16)';
+        const stroke = bad ? 'var(--tax-red)' : 'var(--tax-green)';
+        const icon = bad ? '☠️' : '✅';
+        boxes += `
+          <g class="t-node" data-id="${n.id}" style="cursor:pointer;">
+            <rect x="${n.x - 86}" y="${n.y - 22}" width="172" height="44" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="${sel ? 3.2 : 1.8}"/>
+            <text x="${n.x}" y="${n.y + 4}" text-anchor="middle" font-size="12" font-weight="800" fill="var(--tax-ink)">${icon} ${n.label}</text>
+          </g>
+        `;
+      });
+
+      svg.innerHTML = edges + boxes;
+      svg.querySelectorAll('.t-node').forEach(g => {
+        g.addEventListener('click', () => {
+          selectedId = g.dataset.id;
+          markDone('交互排查了毒树之果证据链节点');
+          render();
+        });
+      });
+
+      const cur = nodes.find(x => x.id === selectedId);
+      document.getElementById('nodeInfo').innerHTML = rootPoisoned ? cur.poisonDesc : cur.cleanDesc;
+
+      const excludedCount = nodes.filter(isNodePoisoned).length;
+      const aha = document.getElementById('ahaBox');
+      if (!rootPoisoned) {
+        aha.innerHTML = `<strong>📜 程序合法，全链有效（5/5 采纳）：</strong>事前多花两小时申请合法监听令，就能让所有衍生铁证在法庭上稳如磐石——遵守程序反而是效率最高的捷径！`;
+      } else if (cur.exception) {
+        aha.innerHTML = `<strong>⚖️ 精妙的例外防线：</strong>毒树之果并非盲目放纵罪犯！对于「独立来源」与「必然发现」的证据，排除它起不到威慑警察的作用，反而白白放跑真凶，因此法律精准予以豁免。`;
+      } else {
+        aha.innerHTML = `<strong>🌳 一根染毒，连坐三果（${excludedCount} 项被排除）：</strong>源头非法监听不仅让自身作废，还连带报废了顺藤摸瓜查到的账本与下游口供！点击右侧两枚绿色节点看看什么情况可以豁免。`;
+      }
+    }
+
+    document.getElementById('poisonRootBtn').addEventListener('click', () => {
+      rootPoisoned = true;
+      document.getElementById('poisonRootBtn').classList.add('primary');
+      document.getElementById('cleanRootBtn').classList.remove('primary');
+      markDone('切换了非法取证树根');
+      render();
+    });
+    document.getElementById('cleanRootBtn').addEventListener('click', () => {
+      rootPoisoned = false;
+      document.getElementById('cleanRootBtn').classList.add('primary');
+      document.getElementById('poisonRootBtn').classList.remove('primary');
+      markDone('切换了合法监听令树根');
+      render();
+    });
+
+    render();
   </script>
 </body>
 </html>

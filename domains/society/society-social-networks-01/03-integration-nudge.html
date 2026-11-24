@@ -1,63 +1,142 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌈 破冰助推：如何低成本打破自我隔离？</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>破冰助推：如何低成本打破自我隔离？</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .policy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+    .policy-card { background: var(--tax-surface-alt); border: 2px solid var(--tax-border); border-radius: 12px; padding: 12px 14px; cursor: pointer; transition: border-color .2s, background .2s, transform .15s; text-align: left; }
+    .policy-card:hover { transform: translateY(-1px); }
+    .policy-card.active { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .p-head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; color: var(--tax-ink); font-size: 14px; }
+    .p-cost { font-size: 12px; padding: 2px 8px; border-radius: 99px; background: var(--tax-surface); border: 1px solid var(--tax-border); color: var(--tax-muted); }
+    .p-desc { font-size: 12px; color: var(--tax-muted); margin-top: 6px; line-height: 1.45; }
+    .result-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .r-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: 10px; padding: 12px; text-align: center; }
+    .r-label { font-size: 12px; color: var(--tax-muted); }
+    .r-val { font-size: 22px; font-weight: 800; color: var(--tax-ink); margin-top: 3px; }
+    .meter-track { height: 14px; border-radius: 99px; background: var(--tax-surface); border: 1px solid var(--tax-border); overflow: hidden; margin-top: 12px; }
+    .meter-fill { height: 100%; transition: width .35s ease, background .35s ease; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌈 破冰助推：如何低成本打破自我隔离？</h1><p>误区：一旦城市形成了隔离区，除非强制行政拆迁，否则永远无法融合。真相：谢林发现只要一部分人稍微主动偏好“多元混居社区”，就能像催化剂一样把整座城市重新融在一起！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>愿意主动混居的“破冰者”比例</span><span id="vIce">20%</span></label><input type="range" id="sIce" min="0" max="60" value="20" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>公共混居配套吸引力</span><span id="vPub">50 分</span></label><input type="range" id="sPub" min="0" max="100" value="50" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🌈 破冰助推：如何低成本打破自我隔离？</h1>
+      <p>假设社区居民默认有 40% 的温和同类偏好（放任不管隔离度将高达 84%）。你是城市规划师，手握 <strong>100 万预算</strong>，请点击组合破冰政策，把隔离度压到 <strong>60% 以下</strong>！</p>
+    </header>
+
+    <div class="policy-grid" id="policyGrid"></div>
+
+    <div class="result-bar">
+      <div class="r-card">
+        <div class="r-label">已用预算（上限 100 万）</div>
+        <div class="r-val" id="budgetVal">0 万</div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">城市隔离度降幅</div><div class="k-val" id="kDrop" style="color:#10b981;">—</div></div>
-        <div class="kpi"><div class="k-lbl">最终混居健康度</div><div class="k-val" id="kMix">—</div></div>
+      <div class="r-card">
+        <div class="r-label">预测社区隔离度</div>
+        <div class="r-val" id="segVal">84%</div>
+      </div>
+      <div class="r-card">
+        <div class="r-label">融合性价比评级</div>
+        <div class="r-val" id="gradeVal">待设计</div>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="meter-track">
+      <div class="meter-fill" id="meterFill" style="width:84%;background:var(--tax-red);"></div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 政策设计提示：</strong>不要一上来就花大钱强行补贴搬家——谢林模型的妙处在于「锚定效应」，少数几个不搬走的跨界节点就能截断整条多米诺骨牌。试试不同组合！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const ice=+document.getElementById('sIce').value, pub=+document.getElementById('sPub').value;
-  document.getElementById('vIce').textContent=ice+'%'; document.getElementById('vPub').textContent=pub+' 分';
-  const drop=Math.min(45, Math.round(ice*0.55 + pub*0.18));
-  const mix=Math.min(95, 42+drop);
-  document.getElementById('kDrop').textContent='-'+drop+'%';
-  document.getElementById('kMix').textContent=mix+' 分';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">无干预稳态隔离度: 88%</text>
-    <rect x="20" y="44" width="${88*5.4}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#10b981">破冰助推后隔离度: ${88-drop}% (混居健康度 ${mix})</text>
-    <rect x="20" y="112" width="${(88-drop)*5.4}" height="24" rx="6" fill="#10b981"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">不需要改变所有人，只需 ${ice}% 的人喜欢多元环境即可稳定邻里边界</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>既然微小排斥能滚雪球成大隔离，反过来只要 ${ice}% 的居民愿意充当混居粘合剂，就能把孤岛重新缝合，隔离度直降 <strong>${drop}%</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const policies = [
+      { id: 'pioneers', name: '🌟 10% 多元先锋家庭', cost: 25, drop: 14, desc: '招募 10% 偏好多元化的“不敏感住户”分散入住，充当社区防隔离锚点。' },
+      { id: 'park', name: '🌳 边界公共公园与市集', cost: 20, drop: 10, desc: '在社区交界处建设高频共享空间，降低居民对异类邻居的心理戒备阈值。' },
+      { id: 'school', name: '🏫 跨片区混合学区抽签', cost: 30, drop: 13, desc: '切断“居住隔离 → 教育隔离”的强化回路，削弱择校驱动的二次迁徙。' },
+      { id: 'subsidy', name: '💸 高额跨区租房现金补贴', cost: 65, drop: 11, desc: '直接发钱鼓励住户搬去异类片区，但预算高昂且补贴一停容易反弹。' },
+      { id: 'info', name: '📊 社区真实好感度公示', cost: 15, drop: 7, desc: '消除“以为别人讨厌我”的误解，略微降低搬家冲动。' },
+      { id: 'quota', name: '🏛️ 强硬行政配额限购', cost: 45, drop: 8, desc: '强制规定每栋楼比例，虽压低短期隔离但引发规避与低满意度。' }
+    ];
+
+    const selected = new Set();
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const grid = document.getElementById('policyGrid');
+      grid.innerHTML = '';
+      policies.forEach(p => {
+        const active = selected.has(p.id);
+        const btn = document.createElement('button');
+        btn.className = 'policy-card' + (active ? ' active' : '');
+        btn.innerHTML = `
+          <div class="p-head"><span>${p.name}</span><span class="p-cost">${p.cost} 万</span></div>
+          <div class="p-desc">${p.desc}</div>
+        `;
+        btn.addEventListener('click', () => {
+          if (selected.has(p.id)) selected.delete(p.id);
+          else selected.add(p.id);
+          markDone('组合设计了谢林破冰助推方案');
+          render();
+        });
+        grid.appendChild(btn);
+      });
+
+      let cost = 0, drop = 0;
+      policies.forEach(p => {
+        if (selected.has(p.id)) { cost += p.cost; drop += p.drop; }
+      });
+      // Synergy bonus: pioneers + park or school creates structural anchoring
+      const synergy = (selected.has('pioneers') && (selected.has('park') || selected.has('school'))) ? 5 : 0;
+      const finalSeg = Math.max(48, 84 - drop - synergy);
+
+      const budgetEl = document.getElementById('budgetVal');
+      budgetEl.textContent = cost + ' 万';
+      budgetEl.style.color = cost > 100 ? 'var(--tax-red)' : 'var(--tax-ink)';
+
+      const segEl = document.getElementById('segVal');
+      segEl.textContent = finalSeg + '%';
+      segEl.style.color = finalSeg <= 60 ? 'var(--tax-green)' : finalSeg <= 72 ? 'var(--tax-amber)' : 'var(--tax-red)';
+
+      const fill = document.getElementById('meterFill');
+      fill.style.width = finalSeg + '%';
+      fill.style.background = finalSeg <= 60 ? 'var(--tax-green)' : finalSeg <= 72 ? 'var(--tax-amber)' : 'var(--tax-red)';
+
+      const gradeEl = document.getElementById('gradeVal');
+      const aha = document.getElementById('ahaBox');
+
+      if (selected.size === 0) {
+        gradeEl.textContent = '待设计';
+        aha.innerHTML = `<strong>💡 政策设计提示：</strong>点击上方卡片组合政策，目标是在 <strong>100 万预算内</strong> 将社区隔离度从 84% 降至 <strong>60% 以下</strong>。`;
+      } else if (cost > 100) {
+        gradeEl.textContent = '预算超支';
+        aha.innerHTML = `<strong>⚠️ 预算超支（${cost} 万 / 100 万）：</strong>虽然隔离度降到了 <strong>${finalSeg}%</strong>，但财政不可持续。试着去掉昂贵的现金补贴或行政配额，改用高杠杆的「先锋家庭 + 共享空间」组合。`;
+      } else if (finalSeg <= 56 && cost <= 85) {
+        gradeEl.textContent = 'S 级巧破局';
+        aha.innerHTML = `<strong>🏆 S 级低成本破局！</strong>你只花了 <strong>${cost} 万</strong>就把隔离度压到 <strong>${finalSeg}%</strong>${synergy ? '（触发了结构锚定协同效应 -5%）' : ''}。因为只要把关键节点的搬迁链条截断，不需要说服 100% 的人也能维持多元融合。`;
+      } else if (finalSeg <= 60) {
+        gradeEl.textContent = 'A 级达标';
+        aha.innerHTML = `<strong>✅ 成功打破隔离均衡！</strong>预算 ${cost} 万，隔离度降至 <strong>${finalSeg}%</strong>。想拿 S 级可以尝试用「多元先锋家庭 + 公园/学区」替代高成本补贴。`;
+      } else {
+        gradeEl.textContent = '仍偏隔离';
+        aha.innerHTML = `<strong>🧩 尚未跨过破冰阈值：</strong>当前隔离度 <strong>${finalSeg}%</strong>（目标 ≤ 60%）。单一温和措施容易被连锁搬迁吞没，试试叠加「先锋家庭」与「共享空间/混合学区」形成协同锚点。`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>

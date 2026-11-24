@@ -1,79 +1,163 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔔 布莱克斯通比率：定罪阈值分布透视镜（SVG）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>布莱克斯通比率：定罪阈值分布透视镜</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .viz-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .kpi { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
+    svg text { fill: var(--tax-muted); font-family: inherit; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔔 布莱克斯通比率：定罪阈值分布透视镜（SVG）</h1><p>误区：好法官一定能做到“既不错判一个好人，也不放过一个坏人”。真相：证据本身永远存在模糊重叠区，降低冤案率的唯一代价就是提高漏网率！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>定罪证据阈值线 T</span><span id="vT">75 分</span></label><input type="range" id="sT" min="20" max="95" value="75" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>案件先验有罪比例</span><span id="vG">30%</span></label><input type="range" id="sG" min="10" max="70" value="30" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🔔 布莱克斯通比率：定罪阈值分布透视镜</h1>
+      <p>任何司法系统都无法做到 100% 零误差。英国法学家布莱克斯通提出著名准则：<strong>“宁愿放走 10 个有罪之人，也不可冤枉 1 个无辜者。”</strong>拖动定罪证据阈值，直观感受两类错误的生死权衡！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="control-group">
+        <label>法庭定罪证据门槛（0~100）：<strong id="thVal">62</strong></label>
+        <input id="thSlider" type="range" min="25" max="88" step="1" value="62">
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">冤枉好人率</div><div class="k-val" id="kInn" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">放跑坏人率</div><div class="k-val" id="kGui" style="color:#f59e0b;">—</div></div>
-        <div class="kpi"><div class="k-lbl">放跑/冤枉比</div><div class="k-val" id="kRat">—</div></div>
+      <div class="toy-btn-row">
+        <button class="toy-btn" data-t="46">严打低门槛 (46)</button>
+        <button class="toy-btn" data-t="55">对称平衡点 (55)</button>
+        <button class="toy-btn primary" data-t="66">布莱克斯通 10:1 (66)</button>
+        <button class="toy-btn" data-t="80">极致疑罪从无 (80)</button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="viz-box">
+      <svg id="distSvg" viewBox="0 0 640 245" style="width:100%;height:auto;display:block;"></svg>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-l">冤枉无辜率（假阳性 FP）</div>
+          <div class="kpi-v" id="fpVal" style="color:var(--tax-red);">1.5%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">放纵真凶率（假阴性 FN）</div>
+          <div class="kpi-v" id="fnVal" style="color:var(--tax-amber);">18.4%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">放纵 / 冤枉比（布氏比）</div>
+          <div class="kpi-v" id="ratioVal">12.3 : 1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 司法权衡法则：</strong>把滑块往左拉，真凶几乎跑不掉，但红区（冤案）会急剧膨胀；往右拉，无辜者更安全，但更多真凶会逃脱制裁。定罪门槛的本质，是一个社会对「冤枉好人有多可怕」的道德定价！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function gauss(x,mu,s){ return Math.exp(-0.5*Math.pow((x-mu)/s,2)); }
-function upd(){
-  const T=+document.getElementById('sT').value, gPct=+document.getElementById('sG').value/100;
-  document.getElementById('vT').textContent=T+' 分'; document.getElementById('vG').textContent=(gPct*100).toFixed(0)+'%';
-  let fp=0, fn=0, totI=0, totG=0;
-  let ptsI='40,155 ', ptsG='40,155 ';
-  for(let x=0;x<=100;x+=2){
-    const gi=gauss(x,35,16)*(1-gPct), gg=gauss(x,68,16)*gPct;
-    totI+=gi; totG+=gg;
-    if(x>=T) fp+=gi; else fn+=gg;
-    const px=40+x*5.2;
-    ptsI+=`${px},${155-gi*130} `;
-    ptsG+=`${px},${155-gg*130} `;
-  }
-  ptsI+='560,155'; ptsG+='560,155';
-  const rFP=(fp/totI*100), rFN=(fn/totG*100);
-  const ratio=rFP>0.05?(fn/(fp)).toFixed(1)+' : 1':'∞ : 1';
-  document.getElementById('kInn').textContent=rFP.toFixed(1)+'%';
-  document.getElementById('kGui').textContent=rFN.toFixed(1)+'%';
-  document.getElementById('kRat').textContent=ratio;
-  const tx=40+T*5.2;
-  document.getElementById('svg').innerHTML=`
-    <polygon points="${ptsI}" fill="#10b981" opacity="0.28" stroke="#10b981" stroke-width="2"/>
-    <polygon points="${ptsG}" fill="#ef4444" opacity="0.25" stroke="#ef4444" stroke-width="2"/>
-    <line x1="${tx}" y1="15" x2="${tx}" y2="165" stroke="#0284c7" stroke-width="3"/>
-    <text x="${tx+6}" y="28" font-size="12" font-weight="850" fill="#0284c7">阈值 T=${T}</text>
-    <text x="50" y="30" font-size="11.5" font-weight="800" fill="#10b981">绿峰: 实际无辜人群</text>
-    <text x="545" y="30" text-anchor="end" font-size="11.5" font-weight="800" fill="#ef4444">红峰: 实际有罪人群</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>布莱克斯通名言“宁放十个坏人，不冤一个好人”不是口号，而是把阈值拉到右侧（当前 ${T} 分），宁可承担 ${rFN.toFixed(1)}% 的漏网率，也要把冤案率压到 ${rFP.toFixed(1)}%！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const slider = document.getElementById('thSlider');
+    const svg = document.getElementById('distSvg');
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    // Two normal distributions: Innocent ~ N(36, 12), Guilty ~ N(72, 13)
+    const muI = 36, sdI = 12;
+    const muG = 72, sdG = 13;
+
+    function normPdf(x, mu, sd) {
+      return Math.exp(-0.5 * Math.pow((x - mu) / sd, 2)) / (sd * Math.sqrt(2 * Math.PI));
+    }
+    // Abramowitz-Stegun erf approximation
+    function erf(x) {
+      const sign = x >= 0 ? 1 : -1;
+      x = Math.abs(x);
+      const t = 1 / (1 + 0.3275911 * x);
+      const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+      return sign * y;
+    }
+    function normCdf(x, mu, sd) {
+      return 0.5 * (1 + erf((x - mu) / (sd * Math.SQRT2)));
+    }
+
+    function render() {
+      const th = Number(slider.value);
+      document.getElementById('thVal').textContent = th;
+
+      const fp = 1 - normCdf(th, muI, sdI); // Innocent convicted
+      const fn = normCdf(th, muG, sdG);     // Guilty acquitted
+      const ratio = fp > 0.0005 ? (fn / fp) : 999;
+
+      document.getElementById('fpVal').textContent = (fp * 100).toFixed(2) + '%';
+      document.getElementById('fnVal').textContent = (fn * 100).toFixed(1) + '%';
+      document.getElementById('ratioVal').textContent = ratio >= 100 ? '>100 : 1' : ratio.toFixed(1) + ' : 1';
+
+      const W = 640, H = 245, padL = 36, padR = 20, padT = 22, padB = 34;
+      const maxPdf = normPdf(muI, muI, sdI) * 1.15;
+      const sx = x => padL + (x / 100) * (W - padL - padR);
+      const sy = y => H - padB - (y / maxPdf) * (H - padT - padB);
+
+      let pI = '', pG = '';
+      let fpArea = `M${sx(th).toFixed(1)},${sy(0).toFixed(1)} `;
+      let fnArea = `M${sx(0).toFixed(1)},${sy(0).toFixed(1)} `;
+
+      for (let x = 0; x <= 100; x += 1) {
+        const yI = normPdf(x, muI, sdI);
+        const yG = normPdf(x, muG, sdG);
+        const cmd = x === 0 ? 'M' : 'L';
+        pI += `${cmd}${sx(x).toFixed(1)},${sy(yI).toFixed(1)} `;
+        pG += `${cmd}${sx(x).toFixed(1)},${sy(yG).toFixed(1)} `;
+        if (x >= th) fpArea += `L${sx(x).toFixed(1)},${sy(yI).toFixed(1)} `;
+        if (x <= th) fnArea += `L${sx(x).toFixed(1)},${sy(yG).toFixed(1)} `;
+      }
+      fpArea += `L${sx(100).toFixed(1)},${sy(0).toFixed(1)} Z`;
+      fnArea += `L${sx(th).toFixed(1)},${sy(0).toFixed(1)} Z`;
+
+      const tx = sx(th);
+      svg.innerHTML = `
+        <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="var(--tax-muted)"/>
+        <path d="${fnArea}" fill="rgba(245,158,11,0.22)"/>
+        <path d="${fpArea}" fill="rgba(239,68,68,0.34)"/>
+        <path d="${pI}" fill="none" stroke="var(--tax-green)" stroke-width="2.6"/>
+        <path d="${pG}" fill="none" stroke="var(--tax-primary)" stroke-width="2.6"/>
+        <line x1="${tx.toFixed(1)}" y1="${padT}" x2="${tx.toFixed(1)}" y2="${H - padB}" stroke="var(--tax-ink)" stroke-width="2.6" stroke-dasharray="5,3"/>
+        <text x="${tx.toFixed(1)}" y="${padT - 5}" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--tax-ink)">定罪门槛 = ${th}</text>
+        <text x="${sx(26)}" y="${padT + 18}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--tax-green)">清白者证据分布</text>
+        <text x="${sx(78)}" y="${padT + 18}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--tax-primary)">真凶证据分布</text>
+        <text x="${padL + 6}" y="${H - 8}" font-size="11">← 证据不足（判无罪）</text>
+        <text x="${W - padR - 6}" y="${H - 8}" text-anchor="end" font-size="11">证据充分（判有罪）→</text>
+      `;
+
+      const aha = document.getElementById('ahaBox');
+      if (th < 50) {
+        aha.innerHTML = `<strong>🚨 严打模式冤案激增（门槛=${th}）：</strong>虽然放纵真凶率降到 <strong>${(fn * 100).toFixed(1)}%</strong>，但高达 <strong>${(fp * 100).toFixed(1)}%</strong> 的清白者将被错判入狱！当冤枉好人的代价远大于放过坏人时，社会信任会迅速瓦解。`;
+      } else if (th >= 62 && th <= 70) {
+        aha.innerHTML = `<strong>⚖️ 经典布莱克斯通均衡（${ratio.toFixed(1)} : 1）：</strong>冤案率被死死压低在 <strong>${(fp * 100).toFixed(2)}%</strong>，代价是容忍约 <strong>${(fn * 100).toFixed(1)}%</strong> 证据不足的嫌疑人获释。这正是现代刑事司法“无罪推定”的数学灵魂！`;
+      } else if (th > 74) {
+        aha.innerHTML = `<strong>🛡️ 极高门槛的另一面（门槛=${th}）：</strong>几乎零冤案（${(fp * 100).toFixed(2)}%），但超过 <strong>${(fn * 100).toFixed(1)}%</strong> 的真凶会因证明标准过高而逃脱法网，导致法律威慑力严重下降。`;
+      } else {
+        aha.innerHTML = `<strong>📏 对称权衡区间（门槛=${th}）：</strong>目前放纵与冤枉比例约 <strong>${ratio.toFixed(1)} : 1</strong>，更接近民事纠纷的“优势证据”逻辑，对涉及人身自由的刑事案件仍偏宽松。`;
+      }
+    }
+
+    slider.addEventListener('input', () => { markDone('调节了布莱克斯通定罪阈值'); render(); });
+    document.querySelectorAll('[data-t]').forEach(b => {
+      b.addEventListener('click', () => {
+        slider.value = b.dataset.t;
+        markDone('切换了布莱克斯通比率预设');
+        render();
+      });
+    });
+    render();
   </script>
 </body>
 </html>

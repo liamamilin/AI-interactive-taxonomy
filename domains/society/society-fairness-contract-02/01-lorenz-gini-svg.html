@@ -1,74 +1,169 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📊 洛伦兹曲线与基尼系数实时绘测（SVG）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>洛伦兹曲线与基尼系数实时绘测</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .layout { display: grid; grid-template-columns: 1fr 270px; gap: 14px; align-items: start; }
+    @media (max-width: 740px) { .layout { grid-template-columns: 1fr; } }
+    .chart-card, .panel-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .q-row { margin-bottom: 10px; }
+    .q-head { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--tax-muted); margin-bottom: 3px; }
+    .q-head strong { color: var(--tax-ink); }
+    .gini-big { text-align: center; padding: 10px; background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; margin-bottom: 12px; }
+    .gini-num { font-size: 30px; font-weight: 900; color: var(--tax-primary); }
+    svg text { fill: var(--tax-muted); font-family: inherit; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>📊 洛伦兹曲线与基尼系数实时绘测（SVG）</h1><p>误区：基尼系数只是一个拍脑袋打的“贫富差距评分”。真相：它有着极其优美的几何定义——就是“绝对平等对角线”与“真实累计收入洛伦兹曲线”之间夹出的那个弓形面积占比！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>最富 20% 人群拿走社会总收入</span><span id="vTop">48%</span></label><input type="range" id="sTop" min="20" max="80" value="48" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>最穷 40% 人群拿走社会总收入</span><span id="vBot">14%</span></label><input type="range" id="sBot" min="2" max="38" value="14" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">基尼系数 (Gini)</div><div class="k-val" id="kGini">—</div></div>
-        <div class="kpi"><div class="k-lbl">贫富警戒状态</div><div class="k-val" id="kSt">—</div></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>📊 洛伦兹曲线与基尼系数实时绘测</h1>
+      <p>基尼系数就是洛伦兹曲线与「绝对平等对角线」之间夹出的<strong>月牙面积占比</strong>（G = A / (A + B)）。拖动右侧五个收入阶层的权重，亲手捏出不同国家的贫富分布曲线！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn" data-p="20,20,20,20,20">绝对平等 (0.00)</button>
+        <button class="toy-btn" data-p="10,15,19,24,32">北欧福利型 (~0.22)</button>
+        <button class="toy-btn primary" data-p="5,10,16,24,45">中等分化 (~0.39)</button>
+        <button class="toy-btn" data-p="2,6,11,21,60">高度极化 (~0.56)</button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="layout">
+      <div class="chart-card">
+        <svg id="lorenzSvg" viewBox="0 0 380 340" style="width:100%;max-width:400px;margin:0 auto;display:block;"></svg>
+      </div>
+
+      <div class="panel-card">
+        <div class="gini-big">
+          <div style="font-size:12px;color:var(--tax-muted);">实时基尼系数 (Gini)</div>
+          <div class="gini-num" id="giniVal">0.39</div>
+          <div style="font-size:12px;color:var(--tax-muted);" id="giniTag">警戒线边缘</div>
+        </div>
+        <div id="slidersBox"></div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 几何直觉：</strong>曲线越往下“弯腰”，月牙阴影面积 A 越大，基尼系数越接近 1。试着把“顶层 20%”拉满并把底层拉低，观察基尼系数如何突破 0.40 国际警戒线！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const top=+document.getElementById('sTop').value;
-  let bot=+document.getElementById('sBot').value;
-  if(top+bot>95){ bot=95-top; document.getElementById('sBot').value=bot; }
-  document.getElementById('vTop').textContent=top+'%'; document.getElementById('vBot').textContent=bot+'%';
-  const mid=100-top-bot;
-  const pts=[[0,0],[0.2,bot*0.35],[0.4,bot],[0.6,bot+mid*0.45],[0.8,100-top],[1,100]];
-  let area=0;
-  for(let i=0;i<5;i++){ area+=(pts[i][1]+pts[i+1][1])/200*0.2; }
-  const gini=Math.max(0, Math.min(0.95, 1-2*area));
-  document.getElementById('kGini').textContent=gini.toFixed(3);
-  document.getElementById('kSt').textContent=gini<0.3?'高度平等':(gini<0.4?'相对合理':(gini<0.5?'偏高 (过0.4警戒线)':'悬殊'));
-  document.getElementById('kSt').style.color=gini>=0.4?'#ef4444':'#10b981';
-  const sx=x=>50+x*160, sy=y=>180-y*1.5;
-  const poly=pts.map(([x,y])=>`${sx(x)},${sy(y)}`).join(' ');
-  document.getElementById('svg').innerHTML=`
-    <line x1="50" y1="180" x2="210" y2="180" stroke="#94a3b8"/>
-    <line x1="50" y1="30" x2="50" y2="180" stroke="#94a3b8"/>
-    <polygon points="50,180 210,30 ${poly.split(' ').reverse().join(' ')}" fill="#0284c7" opacity="0.25"/>
-    <line x1="50" y1="180" x2="210" y2="30" stroke="#10b981" stroke-width="2" stroke-dasharray="4 3"/>
-    <polyline fill="none" stroke="#0284c7" stroke-width="3" points="${poly}"/>
-    <text x="245" y="70" font-size="14" font-weight="850" fill="var(--tax-text)">基尼系数 G = 弓形面积 A / 三角总面积</text>
-    <text x="245" y="106" font-size="24" font-weight="900" fill="${gini>=0.4?'#ef4444':'#0284c7'}">G = ${gini.toFixed(3)}</text>
-    <text x="245" y="140" font-size="12.5" fill="var(--tax-muted)">0 = 绝对均等（重合绿线）；1 = 一个人拿走全部收入</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>洛伦兹曲线向下弯得越厉害，蓝色弓形面积越大，基尼系数就越高（当前 <strong>${gini.toFixed(3)}</strong>）。国际公认 0.40 是贫富差距警戒线！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const labels = ['底层 20% 收入权重', '次低 20% 收入权重', '中层 20% 收入权重', '次高 20% 收入权重', '顶层 20% 收入权重'];
+    let weights = [5, 10, 16, 24, 45];
+    let interacted = false;
+
+    const svg = document.getElementById('lorenzSvg');
+    const slidersBox = document.getElementById('slidersBox');
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function buildSliders() {
+      slidersBox.innerHTML = weights.map((w, i) => `
+        <div class="q-row">
+          <div class="q-head"><span>${labels[i]}</span><strong id="share_${i}"></strong></div>
+          <input type="range" min="1" max="100" step="1" value="${w}" data-idx="${i}">
+        </div>
+      `).join('');
+      slidersBox.querySelectorAll('input').forEach(inp => {
+        inp.addEventListener('input', () => {
+          weights[Number(inp.dataset.idx)] = Number(inp.value);
+          markDone('手动调整了洛伦兹曲线阶层权重');
+          render();
+        });
+      });
+    }
+
+    function render() {
+      // Sort weights ascending so Lorenz curve is always mathematically valid (poorest to richest)
+      const sorted = weights.slice().sort((a, b) => a - b);
+      const sum = sorted.reduce((a, b) => a + b, 0);
+      const shares = sorted.map(v => v / sum);
+
+      // Display normalized share next to each slider (in current slider order)
+      const rawSum = weights.reduce((a, b) => a + b, 0);
+      weights.forEach((v, i) => {
+        const el = document.getElementById('share_' + i);
+        if (el) el.textContent = Math.round((v / rawSum) * 100) + '%';
+      });
+
+      const pts = [{ x: 0, y: 0 }];
+      let cumY = 0;
+      for (let i = 0; i < 5; i++) {
+        cumY += shares[i];
+        pts.push({ x: (i + 1) * 0.2, y: cumY });
+      }
+
+      // Trapezoidal area under Lorenz curve (B)
+      let areaB = 0;
+      for (let i = 0; i < 5; i++) {
+        areaB += 0.5 * (pts[i].y + pts[i + 1].y) * 0.2;
+      }
+      const gini = Math.max(0, Math.min(1, 1 - 2 * areaB));
+
+      document.getElementById('giniVal').textContent = gini.toFixed(2);
+      const tagEl = document.getElementById('giniTag');
+      if (gini < 0.25) { tagEl.textContent = '高度平等'; tagEl.style.color = 'var(--tax-green)'; }
+      else if (gini < 0.40) { tagEl.textContent = '相对合理区间'; tagEl.style.color = 'var(--tax-primary)'; }
+      else if (gini < 0.50) { tagEl.textContent = '超过 0.40 警戒线'; tagEl.style.color = 'var(--tax-amber)'; }
+      else { tagEl.textContent = '悬殊极化风险'; tagEl.style.color = 'var(--tax-red)'; }
+
+      const W = 380, H = 340, padL = 46, padR = 22, padT = 22, padB = 42;
+      const sx = x => padL + x * (W - padL - padR);
+      const sy = y => H - padB - y * (H - padT - padB);
+
+      const curvePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(' ');
+      const areaAPath = `M${sx(0)},${sy(0)} L${sx(1)},${sy(1)} ` + pts.slice().reverse().map(p => `L${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(' ') + ' Z';
+
+      svg.innerHTML = `
+        <rect x="${padL}" y="${padT}" width="${W - padL - padR}" height="${H - padT - padB}" fill="var(--tax-surface)" stroke="var(--tax-border)"/>
+        ${[0.2, 0.4, 0.6, 0.8].map(v => `
+          <line x1="${sx(v)}" y1="${padT}" x2="${sx(v)}" y2="${H - padB}" stroke="var(--tax-border)" stroke-dasharray="3,3"/>
+          <line x1="${padL}" y1="${sy(v)}" x2="${W - padR}" y2="${sy(v)}" stroke="var(--tax-border)" stroke-dasharray="3,3"/>
+        `).join('')}
+        <path d="${areaAPath}" fill="rgba(59,130,246,0.22)"/>
+        <line x1="${sx(0)}" y1="${sy(0)}" x2="${sx(1)}" y2="${sy(1)}" stroke="var(--tax-green)" stroke-width="2" stroke-dasharray="6,4"/>
+        <path d="${curvePath}" fill="none" stroke="var(--tax-primary)" stroke-width="3.2"/>
+        ${pts.map(p => `<circle cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="4.5" fill="var(--tax-primary)" stroke="var(--tax-surface)" stroke-width="1.5"/>`).join('')}
+        <text x="${sx(0.45)}" y="${sy(0.32)}" font-size="12" font-weight="800" fill="var(--tax-primary)">面积 A</text>
+        <text x="${W / 2}" y="${H - 8}" text-anchor="middle" font-size="12" font-weight="600">人口累计比例（从穷到富 0% → 100%）</text>
+        <text x="14" y="${H / 2}" text-anchor="middle" font-size="12" font-weight="600" transform="rotate(-90 14 ${H / 2})">收入累计占比</text>
+      `;
+
+      const topShare = Math.round(shares[4] * 100);
+      const botShare = Math.round(shares[0] * 100);
+      const aha = document.getElementById('ahaBox');
+      if (gini < 0.15) {
+        aha.innerHTML = `<strong>📏 贴近绝对平等线（G = ${gini.toFixed(2)}）：</strong>洛伦兹曲线几乎与对角线重合，顶层 20% 仅占 <strong>${topShare}%</strong> 收入，底层 20% 占 <strong>${botShare}%</strong>。`;
+      } else if (gini >= 0.40) {
+        aha.innerHTML = `<strong>⚠️ 突破 0.40 警戒线（G = ${gini.toFixed(2)}）：</strong>顶层 20% 拿走了全社会 <strong>${topShare}%</strong> 的收入，而底层 20% 仅分到 <strong>${botShare}%</strong>（贫富比约 <strong>${(shares[4] / Math.max(0.001, shares[0])).toFixed(1)} 倍</strong>）！此时“人均收入”会被顶层严重拉高，掩盖普通人的真实体感。`;
+      } else {
+        aha.innerHTML = `<strong>⚖️ 温和分化区间（G = ${gini.toFixed(2)}）：</strong>顶层 20% 占 <strong>${topShare}%</strong>，底层 20% 占 <strong>${botShare}%</strong>。既保留了收入阶梯激励，又避免了社会严重撕裂。`;
+      }
+    }
+
+    document.querySelectorAll('[data-p]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        weights = btn.dataset.p.split(',').map(Number);
+        buildSliders();
+        markDone('切换了洛伦兹曲线国家类型预设');
+        render();
+      });
+    });
+
+    buildSliders();
+    render();
   </script>
 </body>
 </html>

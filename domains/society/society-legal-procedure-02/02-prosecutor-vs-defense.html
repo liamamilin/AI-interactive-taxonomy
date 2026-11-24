@@ -1,67 +1,142 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎭 检察官谬误 vs 辩护人谬误话术解码</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>检察官谬误 vs 辩护人谬误话术解码</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .quiz-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 16px; }
+    .quote-box { background: var(--tax-surface); border-left: 4px solid var(--tax-primary); border-radius: 8px; padding: 14px; font-size: 14.5px; line-height: 1.65; color: var(--tax-ink); margin: 10px 0 14px; font-weight: 600; }
+    .opt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    @media (max-width: 680px) { .opt-grid { grid-template-columns: 1fr; } }
+    .opt-btn { padding: 12px; border-radius: 10px; border: 2px solid var(--tax-border); background: var(--tax-surface); cursor: pointer; font-weight: 700; color: var(--tax-ink); transition: border-color .2s, background .2s; }
+    .opt-btn:hover { border-color: var(--tax-primary); }
+    .opt-btn.right { border-color: var(--tax-green); background: var(--tax-green-soft); color: var(--tax-green); }
+    .opt-btn.wrong { border-color: var(--tax-red); background: var(--tax-red-soft); color: var(--tax-red); }
+    .prog-line { display: flex; justify-content: space-between; font-size: 13px; color: var(--tax-muted); margin-top: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎭 检察官谬误 vs 辩护人谬误话术解码</h1><p>误区：只有检察官会用概率误导陪审团，辩护律师说的比例都是客观的。真相：辩方最爱说“全城有 1000 人同血型，所以他只有千分之一有罪”——这是故意无视他本来就在现场的先验线索！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🎭 检察官谬误 vs 辩护人谬误话术解码</h1>
+      <p>法庭上控辩双方都爱挥舞概率大棒，但两边常常各犯一种致命的贝叶斯错误！请盲测诊断以下 4 段法庭陈词，揪出隐藏的概率陷阱。</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row" id="qTabs"></div>
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>全城匹配该特征人数</span><span id="vM">200 人</span></label><input type="range" id="sM" min="10" max="500" step="10" value="200" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>此人被列为嫌疑人的先验概率</span><span id="vPr">20%</span></label><input type="range" id="sPr" min="1" max="80" value="20" oninput="upd()"></div>
+
+    <div class="quiz-card">
+      <div style="font-size:12px;color:var(--tax-muted);font-weight:700;" id="qMeta">第 1 / 4 题</div>
+      <div class="quote-box" id="quoteBox"></div>
+
+      <div class="opt-grid" id="optGrid">
+        <button class="opt-btn" data-ans="prosecutor">⚖️ 检察官谬误<br><span style="font-size:11px;font-weight:400;color:var(--tax-muted);">倒置条件概率</span></button>
+        <button class="opt-btn" data-ans="defense">🛡️ 辩护人谬误<br><span style="font-size:11px;font-weight:400;color:var(--tax-muted);">忽略额外线索只谈总人口</span></button>
+        <button class="opt-btn" data-ans="valid">✅ 严谨贝叶斯表述<br><span style="font-size:11px;font-weight:400;color:var(--tax-muted);">逻辑无误</span></button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">辩方误导话术</div><div class="k-val" id="kDef" style="color:#10b981;">—</div></div>
-        <div class="kpi"><div class="k-lbl">贝叶斯真实有罪率</div><div class="k-val" id="kReal" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">检方误导话术</div><div class="k-val" id="kPros" style="color:#ef4444;">—</div></div>
+
+      <div class="prog-line">
+        <span>已完成诊断：<strong id="doneVal">0 / 4</strong></span>
+        <span>准确率：<strong id="accVal">--</strong></span>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 盲测说明：</strong>仔细阅读上方引号里的法庭发言，分辨它到底是在偷换条件概率、刻意稀释先验，还是严谨陈述事实。
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const m=+document.getElementById('sM').value, pr=+document.getElementById('sPr').value/100;
-  document.getElementById('vM').textContent=m+' 人'; document.getElementById('vPr').textContent=(pr*100).toFixed(0)+'%';
-  const defRate=(1/m*100), lr=1000000/m;
-  const real=((pr*1)/(pr*1 + (1-pr)*(m/100000)))*100;
-  const prosRate=(100 - m/100000*100);
-  document.getElementById('kDef').textContent=defRate.toFixed(2)+'%';
-  document.getElementById('kReal').textContent=real.toFixed(1)+'%';
-  document.getElementById('kPros').textContent=prosRate.toFixed(2)+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#10b981">辩护人谬误 (假装全城人等概率): ${defRate.toFixed(2)}%</text>
-    <rect x="20" y="44" width="${Math.max(4,defRate*5.4)}" height="22" rx="5" fill="#10b981"/>
-    <text x="20" y="96" font-size="13" font-weight="800" fill="#0284c7">真实贝叶斯后验概率: ${real.toFixed(1)}%</text>
-    <rect x="20" y="106" width="${real*5.4}" height="22" rx="5" fill="#0284c7"/>
-    <text x="20" y="156" font-size="13" font-weight="800" fill="#ef4444">检察官谬误 (偷换匹配率): ${prosRate.toFixed(2)}%</text>
-    <rect x="20" y="166" width="${prosRate*5.4}" height="14" rx="4" fill="#ef4444"/>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>辩方故意抹掉“他就在案发现场”的先验概率，检方故意抹掉“全城还有 ${m-1} 个同样匹配的人”——真相永远在结合先验的<strong>贝叶斯后验 (${real.toFixed(1)}%)</strong>里！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const questions = [
+      {
+        tab: '陈词 1',
+        quote: '“陪审团请听好：无辜路人刚好匹配这份血迹的概率只有千分之一！因此，被告无辜的概率也只有千分之一，他有 99.9% 的概率就是凶手！”',
+        ans: 'prosecutor',
+        explain: '经典「检察官谬误」！发言者把 P(匹配|无辜)=0.1% 直接偷换成了 P(无辜|匹配)=0.1%，完全无视如果城市有 100 万人，会有 1000 个无辜者同样匹配！'
+      },
+      {
+        tab: '陈词 2',
+        quote: '“法官大人，全城 200 万人里有 200 人符合该罕见血型，所以即便我当事人血型吻合，他犯罪的概率也只有 1/200——哪怕监控拍到了他案发时冲出大楼，这血型证据也没任何意义！”',
+        ans: 'defense',
+        explain: '经典「辩护人谬误」！辩护人故意假装被告是从 200 万市民里完全随机抓来的，刻意抹掉了“监控拍到他冲出大楼”这一大幅提高先验概率的关键辅助证据！'
+      },
+      {
+        tab: '陈词 3',
+        quote: '“检验报告只说明一件事：如果被告是真凶，样本匹配概率接近 100%；如果被告无辜，随机匹配概率为十万分之一。结合他无不在场证明等其他独立线索，请陪审团综合评估其有罪概率。”',
+        ans: 'valid',
+        explain: '教科书级的「严谨贝叶斯表述」！清晰区分了“证据似然比（Likelihood Ratio）”与“最终有罪后验概率”，不替陪审团偷换先验，逻辑严密无懈可击。'
+      },
+      {
+        tab: '陈词 4',
+        quote: '“过去十年统计显示，家暴受害者最终被配偶杀害的案例只占所有家暴案的 0.1%，所以丈夫曾经家暴过妻子这一事实，在本起凶杀案中几乎不构成嫌疑依据！”',
+        ans: 'defense',
+        explain: '辛普森案中著名的「辩护人谬误」！辩方问的是“家暴者杀妻的概率（分母是所有活着的家暴家庭）”，但本案中<strong>妻子已经被杀了</strong>！在“被家暴且已被谋杀”的条件下，凶手是施暴配偶的概率其实超过 80%！'
+      }
+    ];
+
+    let cur = 0;
+    const picked = {};
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const tabs = document.getElementById('qTabs');
+      tabs.innerHTML = '';
+      questions.forEach((q, i) => {
+        const b = document.createElement('button');
+        b.className = 'toy-btn' + (i === cur ? ' primary' : '');
+        const icon = picked[i] ? (picked[i] === q.ans ? '✅ ' : '❌ ') : '';
+        b.textContent = icon + q.tab;
+        b.addEventListener('click', () => { cur = i; render(); });
+        tabs.appendChild(b);
+      });
+
+      const q = questions[cur];
+      document.getElementById('qMeta').textContent = `法庭话术盲测 · 第 ${cur + 1} / ${questions.length} 题`;
+      document.getElementById('quoteBox').textContent = q.quote;
+
+      const userAns = picked[cur];
+      document.querySelectorAll('.opt-btn').forEach(btn => {
+        btn.classList.remove('right', 'wrong');
+        if (userAns) {
+          if (btn.dataset.ans === q.ans) btn.classList.add('right');
+          else if (btn.dataset.ans === userAns) btn.classList.add('wrong');
+        }
+      });
+
+      const done = Object.keys(picked).length;
+      const right = Object.keys(picked).filter(k => picked[k] === questions[k].ans).length;
+      document.getElementById('doneVal').textContent = `${done} / ${questions.length}`;
+      document.getElementById('accVal').textContent = done ? Math.round((right / done) * 100) + '%' : '--';
+
+      const aha = document.getElementById('ahaBox');
+      if (!userAns) {
+        aha.innerHTML = `<strong>💡 盲测提示：</strong>判断这段话术是否把条件概率写反了，或者偷偷换掉了分母条件！`;
+      } else {
+        const ok = userAns === q.ans;
+        aha.innerHTML = `<strong>${ok ? '🎯 火眼金睛，诊断正确！' : '🧩 差点被话术绕进去：'}</strong>${q.explain}`;
+      }
+    }
+
+    document.querySelectorAll('.opt-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        picked[cur] = btn.dataset.ans;
+        markDone('完成了法庭概率谬误话术盲测');
+        render();
+      });
+    });
+
+    render();
   </script>
 </body>
 </html>

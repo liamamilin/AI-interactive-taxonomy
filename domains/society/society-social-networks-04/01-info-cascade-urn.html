@@ -1,68 +1,170 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌊 信息级联：盲从锁死模拟器（SVG）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>信息级联：盲从锁死模拟器</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .lab-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 16px; }
+    .queue-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    .person-chip { padding: 6px 10px; border-radius: 10px; font-size: 12px; font-weight: 700; border: 1.5px solid var(--tax-border); background: var(--tax-surface); color: var(--tax-ink); }
+    .chip-blue { border-color: var(--tax-primary); background: var(--tax-primary-soft); color: var(--tax-primary); }
+    .chip-amber { border-color: var(--tax-amber); background: var(--tax-amber-soft); color: var(--tax-amber); }
+    .signal-box { background: var(--tax-surface); border: 2px dashed var(--tax-border); border-radius: 12px; padding: 14px; text-align: center; margin: 12px 0; }
+    .ball { display: inline-block; width: 22px; height: 22px; border-radius: 50%; vertical-align: middle; margin: 0 6px; }
+    .decision-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .stat-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--tax-muted); margin-top: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌊 信息级联：盲从锁死模拟器（SVG）</h1><p>误区：只要每个后续参与者都理性思考，群体就不可能全员犯错。真相：理性的后来者发现“前面已经连着两个人选 A 了”，就会觉得“他们加起来比我一个人准”，于是理性地抛弃自己的真信号跟风选 A！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>每个人手里的私人信息准确率</span><span id="vSig">65%</span></label><input type="range" id="sSig" min="52" max="88" value="65" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>前 2 位带节奏的人误选错边的概率</span><span id="vLead">85%</span></label><input type="range" id="sLead" min="10" max="100" value="85" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🌊 信息级联：盲从锁死模拟器</h1>
+      <p>桌上有一个神秘盲盒：要么是<strong>「蓝罐」</strong>（2 蓝 1 橙），要么是<strong>「橙罐」</strong>（2 橙 1 蓝），两者概率各 50%。每人轮流偷看 1 颗球（私有信号）并公开大喊自己的猜测——轮到你了！</p>
+    </header>
+
+    <div class="lab-card">
+      <div style="font-size:13px;color:var(--tax-muted);font-weight:700;">前面几位参与者公开喊出的猜测（你看不到他们抽到什么球）：</div>
+      <div class="queue-row" id="queueRow"></div>
+
+      <div class="signal-box" id="signalBox"></div>
+
+      <div class="decision-row" id="decisionRow">
+        <button class="toy-btn primary" id="guessBlue">🔵 我公开猜：蓝罐</button>
+        <button class="toy-btn" id="guessAmber" style="border-color:var(--tax-amber);color:var(--tax-amber);">🟠 我公开猜：橙罐</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">前 2 人错选引发级联风险</div><div class="k-val" id="kCas" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">后续独立信息被浪费率</div><div class="k-val" id="kWst">—</div></div>
+
+      <div class="toy-btn-row" style="margin-top:12px;">
+        <button class="toy-btn" id="nextRoundBtn">🔄 换一局盲盒</button>
+        <button class="toy-btn" id="forceWrongBtn">⚡ 体验“前两人偶然抽偏”级联</button>
+      </div>
+
+      <div class="stat-row">
+        <span>已完成实验：<strong id="roundsVal">0 局</strong></span>
+        <span>触发盲从锁死：<strong id="casVal">0 次</strong></span>
+        <span>猜中真相：<strong id="winVal">0 次</strong></span>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 盲测规则：</strong>别急着乱点！先看看前面几个人喊了什么，再看看你自己暗中抽到的球颜色，做出你的贝叶斯理性判断。
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const sig=+document.getElementById('sSig').value/100, lead=+document.getElementById('sLead').value/100;
-  document.getElementById('vSig').textContent=(sig*100).toFixed(0)+'%'; document.getElementById('vLead').textContent=(lead*100).toFixed(0)+'%';
-  const casRisk=Math.round(lead*92);
-  const waste=Math.round(lead*80);
-  document.getElementById('kCas').textContent=casRisk+'%';
-  document.getElementById('kWst').textContent=waste+'%';
-  let nodes='';
-  for(let i=0;i<10;i++){
-    const x=42+i*54, wrong=(i<2)?(lead>0.5):(lead>0.5);
-    const col=wrong?'#ef4444':'#10b981';
-    nodes+=`<circle cx="${x}" cy="88" r="18" fill="${col}" opacity="${i<2?0.95:0.75}"/>
-    <text x="${x}" y="93" text-anchor="middle" font-size="11.5" font-weight="850" fill="#fff">${i<2?'带头':'跟'+(i+1)}</text>`;
-    if(i<9) nodes+=`<line x1="${x+18}" y1="88" x2="${x+36}" y2="88" stroke="${col}" stroke-width="2.5"/>`;
-  }
-  document.getElementById('svg').innerHTML=nodes+`
-    <text x="30" y="34" font-size="13" font-weight="800" fill="var(--tax-text)">第 1、2 人公开行动定调 → 第 3~10 人停止披露私人信号，集体跟风</text>
-    <text x="30" y="148" font-size="12.5" font-weight="750" fill="var(--tax-muted)">即使第 3~10 人手里握有 ${(sig*100).toFixed(0)}% 正确的反面证据，也会被前两人的公开选择淹没</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>排队买奶茶、网红店打卡、股市追高都是“信息级联”：一旦前两人定调，后面的人不再提供新信息，整条队列都在盲从最前面两个偶然的样本！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    let truth = 'blue'; // 'blue' or 'amber'
+    let priorGuesses = [];
+    let myBall = 'blue';
+    let answered = false;
+    let rounds = 0, cascades = 0, wins = 0;
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function drawBall(urn) {
+      const r = Math.random();
+      if (urn === 'blue') return r < 2 / 3 ? 'blue' : 'amber';
+      return r < 2 / 3 ? 'amber' : 'blue';
+    }
+
+    function newRound(forceWrongCascade = false) {
+      answered = false;
+      truth = Math.random() < 0.5 ? 'blue' : 'amber';
+      const wrong = truth === 'blue' ? 'amber' : 'blue';
+      priorGuesses = [];
+
+      if (forceWrongCascade) {
+        // First 2 people unluckily drew the minority color -> rational cascade starts!
+        priorGuesses = [wrong, wrong, wrong];
+        myBall = truth; // You actually drew the TRUE color!
+      } else {
+        const nPrior = 2 + Math.floor(Math.random() * 3); // 2 to 4 people ahead
+        let blueVotes = 0, amberVotes = 0;
+        for (let i = 0; i < nPrior; i++) {
+          const sig = drawBall(truth);
+          let guess;
+          if (blueVotes - amberVotes >= 2) guess = 'blue';
+          else if (amberVotes - blueVotes >= 2) guess = 'amber';
+          else guess = sig;
+          priorGuesses.push(guess);
+          if (guess === 'blue') blueVotes++; else amberVotes++;
+        }
+        myBall = drawBall(truth);
+      }
+      render();
+    }
+
+    function render() {
+      const qEl = document.getElementById('queueRow');
+      qEl.innerHTML = priorGuesses.map((g, i) => `
+        <span class="person-chip ${g === 'blue' ? 'chip-blue' : 'chip-amber'}">
+          第 ${i + 1} 人：猜${g === 'blue' ? '蓝罐' : '橙罐'}
+        </span>
+      `).join('');
+
+      const ballColor = myBall === 'blue' ? 'var(--tax-primary)' : 'var(--tax-amber)';
+      const ballName = myBall === 'blue' ? '蓝色球' : '橙色球';
+      document.getElementById('signalBox').innerHTML = `
+        <div style="font-size:13px;color:var(--tax-muted);">你作为第 <strong>${priorGuesses.length + 1}</strong> 位决策者，秘密摸出了一颗：</div>
+        <div style="font-size:20px;font-weight:800;margin-top:6px;color:var(--tax-ink);">
+          <span class="ball" style="background:${ballColor};"></span>${ballName}
+        </div>
+      `;
+
+      document.getElementById('guessBlue').disabled = answered;
+      document.getElementById('guessAmber').disabled = answered;
+      document.getElementById('roundsVal').textContent = rounds + ' 局';
+      document.getElementById('casVal').textContent = cascades + ' 次';
+      document.getElementById('winVal').textContent = wins + ' 次';
+    }
+
+    function handleGuess(choice) {
+      if (answered) return;
+      answered = true;
+      rounds++;
+      markDone('完成了信息级联盲盒实验');
+
+      const allSamePrior = priorGuesses.every(g => g === priorGuesses[0]) && priorGuesses.length >= 2;
+      const followedCrowdAgainstSignal = allSamePrior && choice === priorGuesses[0] && choice !== myBall;
+      const isWin = choice === truth;
+      if (isWin) wins++;
+      if (followedCrowdAgainstSignal) cascades++;
+
+      render();
+
+      const truthName = truth === 'blue' ? '🔵 蓝罐' : '🟠 橙罐';
+      const aha = document.getElementById('ahaBox');
+      if (followedCrowdAgainstSignal && !isWin) {
+        aha.innerHTML = `<strong>🌊 教科书级“错误级联”发生！</strong>真相其实是 <strong>${truthName}</strong>！你明明亲手抽到了真相球，但因为前几个人一致猜错，你理性地选择忽略自己的信号随大流——结果导致后面所有人永远看不到你的正确信息，全员锁死在错误答案上！`;
+      } else if (followedCrowdAgainstSignal && isWin) {
+        aha.innerHTML = `<strong>✅ 理性跟风猜对了（真相：${truthName}），但隐患已埋下！</strong>即使你忽略了自己抽到的反信号，后面的人会误以为“又多了一个独立证据”，这就是热门排队网红店和资本泡沫的底层机制。`;
+      } else if (!isWin && choice === myBall) {
+        aha.innerHTML = `<strong>🎯 你坚持了私有信号，但这局真相是 ${truthName}。</strong>虽然这局猜偏了，但把真实私有信号公开出去，恰恰是打破集体盲从级联的唯一方法！`;
+      } else {
+        aha.innerHTML = `<strong>🏆 猜中真相（${truthName}）！</strong>当你的私有信号与多数人一致，或者你顶住压力揭示了真实信号时，群体智慧就能发挥作用。点「体验前两人偶然抽偏」看看最魔幻的锁死局面！`;
+      }
+    }
+
+    document.getElementById('guessBlue').addEventListener('click', () => handleGuess('blue'));
+    document.getElementById('guessAmber').addEventListener('click', () => handleGuess('amber'));
+    document.getElementById('nextRoundBtn').addEventListener('click', () => {
+      markDone('开启了新一局信息级联盲测');
+      newRound(false);
+    });
+    document.getElementById('forceWrongBtn').addEventListener('click', () => {
+      markDone('触发了经典错误级联测试场景');
+      newRound(true);
+      document.getElementById('ahaBox').innerHTML = `<strong>⚡ 高能场景已加载：</strong>前面 3 个人全部猜了同一个颜色，而你摸到的球却完全相反！现在，你会相信自己的眼睛，还是随大流？`;
+    });
+
+    newRound(true);
   </script>
 </body>
 </html>

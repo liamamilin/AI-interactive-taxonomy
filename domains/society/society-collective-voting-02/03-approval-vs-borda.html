@@ -1,72 +1,110 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>✅ 批准投票 vs 波达计分策略战</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>批准投票 vs 波达计分策略战</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .voter-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; font-size: 12px; }
+    .v-box { padding: 9px; border-radius: 9px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>✅ 批准投票 vs 波达计分策略战</h1><p>误区：让选民给所有候选人打分排序的“波达计数”一定比简单打勾更客观。真相：打分制极易诱发“把主要对手故意排到最后一名”的策略性埋葬行为！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>策略性埋葬对手比例</span><span id="vBur">60%</span></label><input type="range" id="sBur" min="0" max="100" value="60" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>中庸候选人 M 真实受认可度</span><span id="vM">72%</span></label><input type="range" id="sM" min="30" max="90" value="72" oninput="upd()"></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>✅ 批准投票 vs 波达计分：同一群选民，三种截然不同的赢家（构建器）</h1>
+      <p>100 位选民里：40 人死忠极左 L、38 人死忠极右 R，但<strong>双方都觉得中间温和派 M “完全可以接受”</strong>！切换下面 3 套计票规则，看“改个规则就换个总统”的惊人效应！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="voter-strip">
+        <div class="v-box"><strong>40% 左翼选民</strong><div style="color:var(--tax-muted);margin-top:3px;">最爱 L · 接受 M · 极恨 R</div></div>
+        <div class="v-box"><strong>22% 中间选民</strong><div style="color:var(--tax-muted);margin-top:3px;">最爱 M · 接受 L/R</div></div>
+        <div class="v-box"><strong>38% 右翼选民</strong><div style="color:var(--tax-muted);margin-top:3px;">最爱 R · 接受 M · 极恨 L</div></div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">波达计数胜者</div><div class="k-val" id="kBor">—</div></div>
-        <div class="kpi"><div class="k-lbl">批准投票胜者</div><div class="k-val" id="kApp">—</div></div>
-        <div class="kpi"><div class="k-lbl">策略失真风险</div><div class="k-val" id="kRsk">—</div></div>
+
+      <div class="btn-row">
+        <button class="toy-btn" id="rPlur">1️⃣ 简单多数决（每人限投 1 票）</button>
+        <button class="toy-btn secondary" id="rAppr">✅ 批准投票（可勾所有可接受人选）</button>
+        <button class="toy-btn secondary" id="rBorda">🔢 波达计分（第1名2分 / 第2名1分）</button>
       </div>
+
+      <svg id="sysSvg" viewBox="0 0 680 185" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="三种投票制度结果对比"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>制度塑造政治生态：</strong>在「简单多数决」下，受全城 100% 人认可的温和派 M 居然垫底惨败！切换到「✅ 批准投票」和「🔢 波达计分」看看谁赢了！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const bur=+document.getElementById('sBur').value, m0=+document.getElementById('sM').value;
-  document.getElementById('vBur').textContent=bur+'%'; document.getElementById('vM').textContent=m0+'%';
-  const bA=Math.round(70 - bur*0.28), bB=Math.round(68 - bur*0.25), bM=Math.round(52 + m0*0.35 + bur*0.12);
-  const appA=54, appB=52, appM=m0;
-  const wBor=bM>=Math.max(bA,bB)?'中庸 M':(bA>=bB?'强硬 A':'强硬 B');
-  const wApp=appM>=Math.max(appA,appB)?'中庸 M':'强硬 A';
-  document.getElementById('kBor').textContent=`${wBor} (${Math.max(bA,bB,bM)}分)`;
-  document.getElementById('kApp').textContent=`${wApp} (${Math.max(appA,appB,appM)}%)`;
-  document.getElementById('kRsk').textContent=bur>50?'高 (互相拉踩失真)':'可控';
-  document.getElementById('kRsk').style.color=bur>50?'#ef4444':'#10b981';
-  const rows=[['波达 · A',bA,'#0284c7'],['波达 · M',bM,'#8b5cf6'],['批准 · A',appA,'#38bdf8'],['批准 · M',appM,'#10b981']];
-  let svg='';
-  rows.forEach(([nm,val,col],i)=>{
-    const y=22+i*40, w=val*3.8;
-    svg+=`<text x="16" y="${y+17}" font-size="13" font-weight="750" fill="var(--tax-text)">${nm}</text>
-    <rect x="115" y="${y}" width="380" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="115" y="${y}" width="${w}" height="24" rx="6" fill="${col}"/>
-    <text x="${125+w}" y="${y+17}" font-size="12.5" font-weight="800" fill="${col}">${val}</text>`;
-  });
-  document.getElementById('svg').innerHTML=svg;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>当两派互相把对方垫底（埋葬策略 ${bur}%）时，波达计分剧烈波动；而批准投票允许你同时勾选多个可接受选项，天然选出最大公约数 <strong>${wApp}</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const RULES = {
+      plur: {
+        title: '简单多数决（每人只能勾 1 人）', unit: '票', max: 100,
+        bars: [
+          { name: '🔵 极左派 L', val: 40, col: 'var(--tax-primary)', win: true },
+          { name: '🟢 温和派 M', val: 22, col: 'var(--tax-green)',   win: false },
+          { name: '🔴 极右派 R', val: 38, col: 'var(--tax-red)',     win: false }
+        ],
+        aha: '<strong>多数决鼓励极端化（L 胜，但 38% 极恨他）：</strong>温和派 M 明明是全场最大公约数，却因为不是左右两派的“第一志愿”而在第一轮垫底出局！'
+      },
+      appr: {
+        title: '批准投票 Approval（勾出所有你认可的候选人！）', unit: '% 认可', max: 105,
+        bars: [
+          { name: '🔵 极左派 L', val: 51, col: 'var(--tax-primary)', win: false },
+          { name: '🟢 温和派 M', val: 100, col: 'var(--tax-green)',  win: true },
+          { name: '🔴 极右派 R', val: 49, col: 'var(--tax-red)',     win: false }
+        ],
+        aha: '<strong>批准投票选出最大公约数（M 100% 认可完胜）！</strong>允许选民同时勾选“最爱 + 备胎”，操作极其简单（只需多打几个勾），天然奖励能凝聚共识的温和派！'
+      },
+      borda: {
+        title: '波达计分 Borda（第1名=2分，第2名=1分，第3名=0分）', unit: '分', max: 130,
+        bars: [
+          { name: '🔵 极左派 L', val: 91,  col: 'var(--tax-primary)', win: false },
+          { name: '🟢 温和派 M', val: 122, col: 'var(--tax-green)',   win: true },
+          { name: '🔴 极右派 R', val: 87,  col: 'var(--tax-red)',     win: false }
+        ],
+        aha: '<strong>波达计分（M 122 分胜）：</strong>综合考量了每个选民的完整顺位，同样能选出共识派！但波达计分怕“策略性埋葬”（故意把最大对手排倒数第一压分）。'
+      }
+    };
+
+    let cur = 'plur', done = false;
+    const svg = document.getElementById('sysSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      ['plur', 'appr', 'borda'].forEach(k => {
+        const id = k === 'plur' ? 'rPlur' : (k === 'appr' ? 'rAppr' : 'rBorda');
+        document.getElementById(id).className = cur === k ? 'toy-btn' : 'toy-btn secondary';
+      });
+      const r = RULES[cur];
+      let html = `<text x="24" y="26" fill="var(--tax-ink)" font-size="13.5" font-weight="800">${r.title}</text>`;
+      r.bars.forEach((b, i) => {
+        const y = 48 + i * 44;
+        const w = (b.val / r.max) * 390;
+        html += `<text x="130" y="${y + 18}" text-anchor="end" fill="var(--tax-ink)" font-size="13" font-weight="700">${b.name}</text>`;
+        html += `<rect x="142" y="${y + 2}" width="390" height="24" rx="7" fill="rgba(148,163,184,0.14)"/>`;
+        html += `<rect x="142" y="${y + 2}" width="${w.toFixed(1)}" height="24" rx="7" fill="${b.col}"/>`;
+        html += `<text x="${(150 + w).toFixed(1)}" y="${y + 19}" fill="${b.win ? 'var(--tax-green)' : 'var(--tax-ink)'}" font-size="13" font-weight="900">${b.val}${r.unit} ${b.win ? '🏆 胜出' : ''}</text>`;
+      });
+      svg.innerHTML = html;
+      ahaBox.innerHTML = r.aha;
+    }
+
+    document.getElementById('rPlur').onclick = () => { cur = 'plur'; markDone('对比了简单多数决极端化效应'); render(); };
+    document.getElementById('rAppr').onclick = () => { cur = 'appr'; markDone('体验了批准投票选出最大公约数'); render(); };
+    document.getElementById('rBorda').onclick = () => { cur = 'borda'; markDone('体验了波达计分规则'); render(); };
+    render();
   </script>
 </body>
 </html>

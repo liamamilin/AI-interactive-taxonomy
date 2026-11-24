@@ -1,89 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔄 孔多塞循环透视镜（SVG）</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>孔多塞循环透视镜</title>
   <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .voter-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .v-card { padding: 10px; border-radius: 10px; background: var(--tax-surface-alt); border: 1px solid var(--tax-border); text-align: center; font-size: 13px; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔄 孔多塞循环透视镜（SVG）</h1><p>误区：只要每个选民都理性且偏好稳定，汇总起来的群体意志也一定是清晰一致的。真相：群体偏好可以出现 A 赢 B、B 赢 C、C 又赢 A 的死循环！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>甲派 (A&gt;B&gt;C)</span><span id="v1">35%</span></label><input type="range" id="r1" min="10" max="60" value="35" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>乙派 (B&gt;C&gt;A)</span><span id="v2">33%</span></label><input type="range" id="r2" min="10" max="60" value="33" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>丙派 (C&gt;A&gt;B) 占比自动补足</span><span id="v3">32%</span></label><input type="range" id="r3" min="5" max="80" value="32" disabled></div>
+<body>
+  <main class="toy-shell">
+    <header class="toy-header">
+      <h1>🔄 孔多塞循环透视镜：理性个体为何投出“石头剪刀布”？</h1>
+      <p>下面 3 位选民每个人都极其理性（偏好严格排序、绝不自相矛盾）。点击下方三场<strong>一对一单挑投票</strong>，亲眼见证集体偏好如何闭合成荒诞的死循环：<strong>A &gt; B &gt; C &gt; A</strong>！</p>
+    </header>
+
+    <section class="toy-card">
+      <div class="voter-grid">
+        <div class="v-card"><strong>选民 1</strong><div style="color:var(--tax-primary);font-weight:800;margin-top:4px;">A &gt; B &gt; C</div></div>
+        <div class="v-card"><strong>选民 2</strong><div style="color:var(--tax-amber);font-weight:800;margin-top:4px;">B &gt; C &gt; A</div></div>
+        <div class="v-card"><strong>选民 3</strong><div style="color:var(--tax-green);font-weight:800;margin-top:4px;">C &gt; A &gt; B</div></div>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 210"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">A vs B 胜者</div><div class="k-val" id="kAB">—</div></div>
-        <div class="kpi"><div class="k-lbl">B vs C 胜者</div><div class="k-val" id="kBC">—</div></div>
-        <div class="kpi"><div class="k-lbl">C vs A 胜者</div><div class="k-val" id="kCA">—</div></div>
-        <div class="kpi"><div class="k-lbl">群体状态</div><div class="k-val" id="kSt">—</div></div>
+
+      <div class="btn-row">
+        <button class="toy-btn secondary" id="abBtn">⚔️ 单挑 1：A vs B</button>
+        <button class="toy-btn secondary" id="bcBtn">⚔️ 单挑 2：B vs C</button>
+        <button class="toy-btn secondary" id="caBtn">⚔️ 单挑 3：C vs A</button>
+        <button class="toy-btn" id="allBtn">🔄 一键展开三场循环</button>
       </div>
+
+      <svg id="cycSvg" viewBox="0 0 680 215" width="100%" style="display:block;border-radius:12px;background:var(--tax-surface-alt);border:1px solid var(--tax-border);" aria-label="孔多塞投票循环三角图"></svg>
+    </section>
+
+    <div class="toy-aha" id="ahaBox">
+      <strong>动手验证：</strong>依次点击三场一对一单挑，看看为什么 3 个完全理性的选民凑在一起，居然选不出任何一个“众望所归”的冠军！
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
-  </div>
+  </main>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  let p1=+document.getElementById('r1').value;
-  let p2=+document.getElementById('r2').value;
-  if(p1+p2>90){ p2=90-p1; document.getElementById('r2').value=p2; }
-  const p3=100-p1-p2;
-  document.getElementById('r3').value=p3;
-  document.getElementById('v1').textContent=p1+'%';
-  document.getElementById('v2').textContent=p2+'%';
-  document.getElementById('v3').textContent=p3+'%';
-  const ab=p1+p3, bc=p1+p2, ca=p2+p3;
-  const wAB=ab>50?'A':'B', wBC=bc>50?'B':'C', wCA=ca>50?'C':'A';
-  const cycle=(wAB==='A'&&wBC==='B'&&wCA==='C')||(wAB==='B'&&wBC==='C'&&wCA==='A');
-  document.getElementById('kAB').textContent=wAB+' ('+Math.max(ab,100-ab)+'%)';
-  document.getElementById('kBC').textContent=wBC+' ('+Math.max(bc,100-bc)+'%)';
-  document.getElementById('kCA').textContent=wCA+' ('+Math.max(ca,100-ca)+'%)';
-  document.getElementById('kSt').textContent=cycle?'陷入死循环':'存在唯一胜者';
-  document.getElementById('kSt').style.color=cycle?'#ef4444':'#10b981';
-  const col=cycle?'#ef4444':'#0284c7';
-  const pts=[[300,38],[170,168],[430,168]];
-  const labels=['A','B','C'];
-  let svg=`<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${col}"/></marker></defs>`;
-  const edges=[[0,1,wAB==='A',ab],[1,2,wBC==='B',bc],[2,0,wCA==='C',ca]];
-  edges.forEach(([u,v,fwd,sc])=>{
-    const [x1,y1]=pts[fwd?u:v], [x2,y2]=pts[fwd?v:u];
-    const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy);
-    const sx=x1+dx*26/len, sy=y1+dy*26/len, ex=x2-dx*28/len, ey=y2-dy*28/len;
-    svg+=`<line x1="${sx}" y1="${sy}" x2="${ex}" y2="${ey}" stroke="${col}" stroke-width="3" marker-end="url(#arr)"/>`;
-    svg+=`<text x="${(x1+x2)/2}" y="${(y1+y2)/2-6}" text-anchor="middle" font-size="12" font-weight="750" fill="var(--tax-text)">${Math.max(sc,100-sc)}%</text>`;
-  });
-  pts.forEach(([x,y],i)=>{
-    svg+=`<circle cx="${x}" cy="${y}" r="24" fill="var(--tax-surface)" stroke="${col}" stroke-width="3"/>
-    <text x="${x}" y="${y+6}" text-anchor="middle" font-size="18" font-weight="850" fill="${col}">${labels[i]}</text>`;
-  });
-  document.getElementById('svg').innerHTML=svg;
-  document.getElementById('ahaBox').innerHTML=cycle
-    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>三派势均力敌时形成 <strong>A &gt; B &gt; C &gt; A</strong> 循环！“多数决”根本不存在客观唯一的赢家，谁主持议程谁就能操控结果！`
-    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>当某一派突破临界占比（>50%优势边被打破），循环解开，出现唯一能击败其他所有人的孔多塞胜者。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const tested = new Set();
+    let done = false;
+    const svg = document.getElementById('cycSvg');
+    const ahaBox = document.getElementById('ahaBox');
+
+    function markDone(note) {
+      if (!done) {
+        done = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const A = { x: 340, y: 44 }, B = { x: 185, y: 174 }, C = { x: 495, y: 174 };
+      let html = `
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--tax-red)"/>
+          </marker>
+        </defs>`;
+
+      // Edges
+      if (tested.has('ab')) {
+        html += `<line x1="316" y1="64" x2="212" y2="152" stroke="var(--tax-red)" stroke-width="3.5" marker-end="url(#arr)"/>`;
+        html += `<text x="234" y="96" fill="var(--tax-red)" font-size="12" font-weight="800">A 胜 B (2:1)</text>`;
+      }
+      if (tested.has('bc')) {
+        html += `<line x1="220" y1="174" x2="458" y2="174" stroke="var(--tax-red)" stroke-width="3.5" marker-end="url(#arr)"/>`;
+        html += `<text x="340" y="198" text-anchor="middle" fill="var(--tax-red)" font-size="12" font-weight="800">B 胜 C (2:1)</text>`;
+      }
+      if (tested.has('ca')) {
+        html += `<line x1="472" y1="152" x2="366" y2="64" stroke="var(--tax-red)" stroke-width="3.5" marker-end="url(#arr)"/>`;
+        html += `<text x="456" y="96" fill="var(--tax-red)" font-size="12" font-weight="800">C 胜 A (2:1)</text>`;
+      }
+
+      // Nodes
+      [
+        { k: 'A', p: A, col: 'var(--tax-primary)' },
+        { k: 'B', p: B, col: 'var(--tax-amber)' },
+        { k: 'C', p: C, col: 'var(--tax-green)' }
+      ].forEach(n => {
+        html += `<circle cx="${n.p.x}" cy="${n.p.y}" r="26" fill="${n.col}" opacity="0.2" stroke="${n.col}" stroke-width="2.5"/>`;
+        html += `<text x="${n.p.x}" y="${n.p.y + 6}" text-anchor="middle" fill="var(--tax-ink)" font-size="17" font-weight="900">${n.k}</text>`;
+      });
+
+      if (tested.size === 3) {
+        html += `<text x="340" y="128" text-anchor="middle" fill="var(--tax-red)" font-size="14" font-weight="900">🔄 孔多塞死循环！</text>`;
+        html += `<text x="340" y="148" text-anchor="middle" fill="var(--tax-muted)" font-size="11.5">无论选谁，都有 2/3 的人不服！</text>`;
+      } else {
+        html += `<text x="340" y="128" text-anchor="middle" fill="var(--tax-muted)" font-size="12">已测 ${tested.size} / 3 场单挑</text>`;
+      }
+      svg.innerHTML = html;
+
+      if (tested.size === 3) {
+        markDone('验证了孔多塞三方投票循环悖论');
+        ahaBox.innerHTML = '<strong>孔多塞悖论（1785 年）：</strong>即使每个选民的偏好都完全理性传递，但多数决加总后却出现了 <strong>A &gt; B &gt; C &gt; A</strong> 的非传递死循环！这意味着“所谓的唯一民意”有时在数学上根本不存在！';
+      } else if (tested.size > 0) {
+        ahaBox.innerHTML = `<strong>已解锁 ${tested.size} / 3 场单挑：</strong>继续把剩下的单挑也点完，亲眼看箭头如何首尾相咬形成死循环！`;
+      }
+    }
+
+    document.getElementById('abBtn').onclick = () => { tested.add('ab'); render(); };
+    document.getElementById('bcBtn').onclick = () => { tested.add('bc'); render(); };
+    document.getElementById('caBtn').onclick = () => { tested.add('ca'); render(); };
+    document.getElementById('allBtn').onclick = () => { tested.add('ab'); tested.add('bc'); tested.add('ca'); render(); };
+    render();
   </script>
 </body>
 </html>

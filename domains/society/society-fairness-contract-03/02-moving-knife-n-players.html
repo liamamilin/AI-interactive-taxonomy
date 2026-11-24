@@ -1,65 +1,193 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🔪 多人分蛋糕：移动刀法 (Moving Knife)</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多人分蛋糕：移动刀法 (Moving Knife)</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .stage { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .players-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+    @media (max-width: 720px) { .players-grid { grid-template-columns: repeat(2, 1fr); } }
+    .pl-card { background: var(--tax-surface); border: 1.5px solid var(--tax-border); border-radius: 10px; padding: 10px; }
+    .pl-card.done { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .pl-name { font-size: 13px; font-weight: 800; color: var(--tax-ink); }
+    .pl-pref { font-size: 11.5px; color: var(--tax-muted); margin: 3px 0 6px; }
+    .pl-val { font-size: 18px; font-weight: 900; color: var(--tax-primary); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🔪 多人分蛋糕：移动刀法 (Moving Knife)</h1><p>误区：两个人可以“你切我选”，三个人分蛋糕就只能靠大家猜拳碰运气了。真相：让一把刀从左往右匀速移动，谁觉得左边刚好够 1/3 就立刻喊停拿走它——这能保证每个人绝对不嫉妒！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>移动切刀当前扫过进度</span><span id="vKnife">33%</span></label><input type="range" id="sKnife" min="5" max="90" value="33" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>最心急的甲对左端草莓的偏爱</span><span id="vA">55%</span></label><input type="range" id="sA" min="34" max="80" value="55" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🔪 多人分蛋糕：移动刀法 (Moving Knife)</h1>
+      <p>如果是 <strong>4 个人</strong>分一块口味不均的蛋糕，怎么保证每人至少拿到心目中的 1/4（25%）？杜宾斯-斯帕尼尔移动刀法：切刀从左到右缓缓滑过，<strong>谁先觉得刀左侧够自己心里的 25% 就大喊“停！”</strong>拿走并离场！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="startBtn">▶️ 启动移动切刀</button>
+        <button class="toy-btn" id="resetBtn">重置蛋糕</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">甲眼中左侧蛋糕价值</div><div class="k-val" id="kVal" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">是否触发喊“停”拿走</div><div class="k-val" id="kStop">—</div></div>
-      </div>
+      <span style="font-size:13px;color:var(--tax-muted);">切刀位置：<strong id="posVal" style="color:var(--tax-ink);">0%</strong></span>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="stage">
+      <svg id="knifeSvg" viewBox="0 0 640 120" style="width:100%;height:auto;display:block;"></svg>
+      <div class="players-grid" id="playersGrid"></div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 移动刀法看点：</strong>点击「启动移动切刀」，看 4 位分别偏爱坚果、抹茶、草莓、奶油的玩家如何在不同位置精准喊停，最后一位留守玩家往往还能拿走远超 25% 的大礼！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const k=+document.getElementById('sKnife').value, a=+document.getElementById('sA').value;
-  document.getElementById('vKnife').textContent=k+'%'; document.getElementById('vA').textContent=a+'%';
-  const valA=Math.min(100, Math.round(k*(a/35)));
-  const stop=valA>=33;
-  document.getElementById('kVal').textContent=valA+'%';
-  document.getElementById('kStop').textContent=stop?'✋ 甲喊停！拿走左侧':'继续向右滑...';
-  document.getElementById('kStop').style.color=stop?'#10b981':'#64748b';
-  const kx=40+k*5.2;
-  document.getElementById('svg').innerHTML=`
-    <rect x="40" y="55" width="520" height="60" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
-    <rect x="40" y="55" width="${k*5.2}" height="60" rx="8" fill="${stop?'#10b981':'#38bdf8'}" opacity="0.5"/>
-    <line x1="${kx}" y1="35" x2="${kx}" y2="135" stroke="#ef4444" stroke-width="3.5"/>
-    <text x="${kx}" y="26" text-anchor="middle" font-size="12.5" font-weight="850" fill="#ef4444">移动刀 ${k}%</text>
-    <text x="40" y="162" font-size="12.5" font-weight="800" fill="var(--tax-text)">先喊停的人拿走自认为 ≥33.3% 的一块；剩下两人退回“你切我选”！</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>移动刀法把 N 人公平分蛋糕递归降维成 N-1 人：谁先觉得够 1/3 就先喊停拿走，没喊停的人心里依然觉得剩下的 ≥ 2/3，全员无怨言！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    // 4 flavor zones across 0..100: [0-25 Nut], [25-50 Matcha], [50-75 Berry], [75-100 Cream]
+    const zoneColors = ['rgba(180,83,9,0.75)', 'rgba(16,185,129,0.75)', 'rgba(244,63,94,0.75)', 'rgba(59,130,246,0.75)'];
+    const zoneNames = ['🌰 坚果', '🍵 抹茶', '🍓 草莓', '🍦 奶油'];
+
+    const basePlayers = [
+      { id: 0, name: '玩家 A', prefText: '最爱坚果', w: [0.55, 0.15, 0.15, 0.15] },
+      { id: 1, name: '玩家 B', prefText: '最爱抹茶', w: [0.15, 0.55, 0.15, 0.15] },
+      { id: 2, name: '玩家 C', prefText: '最爱草莓', w: [0.15, 0.15, 0.55, 0.15] },
+      { id: 3, name: '玩家 D', prefText: '最爱奶油', w: [0.10, 0.15, 0.20, 0.55] }
+    ];
+
+    let knifePos = 0;
+    let lastCut = 0;
+    let cuts = [];
+    let claims = {}; // playerId -> { start, end, val }
+    let timer = null;
+    let interacted = false;
+
+    const svg = document.getElementById('knifeSvg');
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function calcIntervalValue(p, startPct, endPct) {
+      let total = 0;
+      for (let z = 0; z < 4; z++) {
+        const zStart = z * 25, zEnd = (z + 1) * 25;
+        const overlap = Math.max(0, Math.min(endPct, zEnd) - Math.max(startPct, zStart));
+        total += (overlap / 25) * p.w[z];
+      }
+      return total;
+    }
+
+    function resetSim() {
+      if (timer) { clearInterval(timer); timer = null; }
+      knifePos = 0;
+      lastCut = 0;
+      cuts = [];
+      claims = {};
+      render();
+    }
+
+    function tick() {
+      knifePos += 1;
+      const remaining = basePlayers.filter(p => !claims[p.id]);
+
+      if (remaining.length === 1) {
+        // Last player gets everything left!
+        const lastP = remaining[0];
+        const v = calcIntervalValue(lastP, lastCut, 100);
+        claims[lastP.id] = { start: lastCut, end: 100, val: v };
+        knifePos = 100;
+        clearInterval(timer);
+        timer = null;
+        render();
+        return;
+      }
+
+      // Check if any remaining player hits >= 25% on [lastCut, knifePos]
+      for (const p of remaining) {
+        const v = calcIntervalValue(p, lastCut, knifePos);
+        if (v >= 0.25) {
+          claims[p.id] = { start: lastCut, end: knifePos, val: v };
+          cuts.push({ pos: knifePos, who: p.name });
+          lastCut = knifePos;
+          break;
+        }
+      }
+
+      if (knifePos >= 100) {
+        clearInterval(timer);
+        timer = null;
+      }
+      render();
+    }
+
+    function render() {
+      document.getElementById('posVal').textContent = knifePos + '%';
+      const W = 640, padX = 20, y = 26, h = 58, cw = W - padX * 2;
+      const sx = pct => padX + (pct / 100) * cw;
+
+      let zonesHtml = '';
+      for (let z = 0; z < 4; z++) {
+        const x = sx(z * 25);
+        zonesHtml += `
+          <rect x="${x.toFixed(1)}" y="${y}" width="${(cw / 4).toFixed(1)}" height="${h}" fill="${zoneColors[z]}" stroke="var(--tax-surface)" stroke-width="1"/>
+          <text x="${(x + cw / 8).toFixed(1)}" y="${y + 34}" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${zoneNames[z]}</text>
+        `;
+      }
+
+      let cutsHtml = cuts.map(c => `
+        <line x1="${sx(c.pos).toFixed(1)}" y1="${y - 6}" x2="${sx(c.pos).toFixed(1)}" y2="${y + h + 8}" stroke="var(--tax-ink)" stroke-width="2.5"/>
+        <text x="${sx(c.pos).toFixed(1)}" y="${y + h + 22}" text-anchor="middle" font-size="10.5" font-weight="700" fill="var(--tax-ink)">${c.who}喊停(${c.pos}%)</text>
+      `).join('');
+
+      const kx = sx(knifePos);
+      const knifeLine = knifePos < 100
+        ? `<line x1="${kx.toFixed(1)}" y1="${y - 12}" x2="${kx.toFixed(1)}" y2="${y + h + 10}" stroke="var(--tax-amber)" stroke-width="3.2" stroke-dasharray="5,3"/>`
+        : '';
+
+      svg.innerHTML = zonesHtml + cutsHtml + knifeLine;
+
+      const grid = document.getElementById('playersGrid');
+      grid.innerHTML = basePlayers.map(p => {
+        const c = claims[p.id];
+        const liveVal = c ? c.val : calcIntervalValue(p, lastCut, knifePos);
+        return `
+          <div class="pl-card ${c ? 'done' : ''}">
+            <div class="pl-name">${p.name} ${c ? '✅' : ''}</div>
+            <div class="pl-pref">${p.prefText}</div>
+            <div class="pl-val">${Math.round(liveVal * 100)}%</div>
+            <div style="font-size:11px;color:var(--tax-muted);">${c ? `拿走 ${c.start}%~${c.end}% 区间` : '盯紧当前待切区...'}</div>
+          </div>
+        `;
+      }).join('');
+
+      const doneCount = Object.keys(claims).length;
+      const aha = document.getElementById('ahaBox');
+      if (knifePos === 0) {
+        aha.innerHTML = `<strong>💡 移动刀法看点：</strong>点击「启动移动切刀」，看 4 位不同口味的玩家如何通过“谁先满意谁先喊停”完成比例公平分配。`;
+      } else if (doneCount < 4) {
+        aha.innerHTML = `<strong>🔪 切刀滑动中（${knifePos}%）：</strong>已有 <strong>${doneCount} 位玩家</strong>在恰好达到心目中 25% 估值时果断喊停离场！注意：其他人没喊停，说明在他们眼里剩下的部分依然大于 75%（或 50%）。`;
+      } else {
+        const lastVal = Math.round(claims[3].val * 100);
+        aha.innerHTML = `<strong>🎉 4 人全部达成比例公平（均 ≥ 25%）！</strong>前三位玩家分别在最合口味的区域精准喊停拿走 25%，而最后一位留守玩家 D 竟然独享了自己最爱的奶油整块——主观满足度高达 <strong>${lastVal}%</strong>！`;
+      }
+    }
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      markDone('启动了多人移动刀法分蛋糕竞速');
+      if (knifePos >= 100) resetSim();
+      if (timer) clearInterval(timer);
+      timer = setInterval(tick, 45);
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      markDone('重置了移动刀法蛋糕');
+      resetSim();
+    });
+
+    render();
   </script>
 </body>
 </html>

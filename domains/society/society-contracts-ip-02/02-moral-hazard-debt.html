@@ -1,67 +1,113 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎲 有限责任的阴暗面：高杠杆“赌一把”道德风险</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>有限责任的阴暗面：高杠杆“赌一把”道德风险</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 680px) { .grid2 { grid-template-columns: 1fr; } }
+    .p-card { background: var(--tax-surface-alt); border: 2px solid var(--tax-border); border-radius: 12px; padding: 14px; }
+    .p-card.tempt { border-color: var(--tax-red); background: var(--tax-red-soft); }
+    .p-card.safe { border-color: var(--tax-green); background: var(--tax-green-soft); }
+    .p-title { font-weight: 800; font-size: 14.5px; color: var(--tax-ink); margin-bottom: 8px; }
+    .row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 1px dashed var(--tax-border); color: var(--tax-muted); }
+    .row:last-child { border-bottom: none; font-weight: 800; color: var(--tax-ink); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎲 有限责任的阴暗面：高杠杆“赌一把”道德风险</h1><p>误区：股东永远最希望公司稳健赚钱，绝不会选期望收益为负的烂项目。真相：当公司快破产或极高负债时，反正亏光也只亏 0，股东会疯狂赌一个大波动烂项目来博一线生机！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>公司外部借债杠杆率</span><span id="vLev">80%</span></label><input type="range" id="sLev" min="10" max="95" value="80" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>激进赌博项目的波动幅度</span><span id="vVol">75 分</span></label><input type="range" id="sVol" min="10" max="100" value="75" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🎲 有限责任的阴暗面：高杠杆“赌一把”道德风险</h1>
+      <p>公司总资产 <strong>100 万</strong>。你作为股东面临两个项目：<strong>项目 A（稳健，100% 变成 105 万）</strong>，或<strong>项目 B（豪赌，30% 暴赚到 200 万，70% 亏到只剩 20 万，期望总值仅 74 万的烂项目！）</strong>。拖动银行债务比例，看看高杠杆如何把理智股东变成赌徒！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="control-group">
+        <label>公司背负银行债务（资产负债率）：<strong id="debtVal">85 万 (85% 高杠杆)</strong></label>
+        <input id="debtSlider" type="range" min="0" max="95" step="5" value="85">
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">稳健方案股东期望</div><div class="k-val" id="kSafe">—</div></div>
-        <div class="kpi"><div class="k-lbl">激进豪赌股东期望</div><div class="k-val" id="kGam" style="color:#ef4444;">—</div></div>
-        <div class="kpi"><div class="k-lbl">债权人预期亏损</div><div class="k-val" id="kCred">—</div></div>
+      <div class="toy-btn-row">
+        <button class="toy-btn" data-d="10">低杠杆 10%</button>
+        <button class="toy-btn" data-d="50">中杠杆 50%</button>
+        <button class="toy-btn primary" data-d="90">濒危高杠杆 90%</button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="grid2">
+      <div class="p-card" id="safeCard">
+        <div class="p-title">🌱 项目 A：稳健经营（社会总值 105 万）</div>
+        <div class="row"><span>银行债主期望收回</span><strong id="sBank">--</strong></div>
+        <div class="row"><span>股东（你）期望到手</span><strong id="sEq">--</strong></div>
+        <div class="row"><span>全社会期望总价值</span><strong>105.0 万（优）</strong></div>
+      </div>
+
+      <div class="p-card" id="gambleCard">
+        <div class="p-title">🎰 项目 B：孤注一掷豪赌（社会总值仅 74 万！）</div>
+        <div class="row"><span>银行债主期望收回</span><strong id="gBank">--</strong></div>
+        <div class="row"><span>股东（你）期望到手</span><strong id="gEq">--</strong></div>
+        <div class="row"><span>全社会期望总价值</span><strong style="color:var(--tax-red);">74.0 万（毁灭价值）</strong></div>
+      </div>
+    </div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 风险转移（Risk Shifting）效应：</strong>把债务从 10 万拉到 90 万，看看为什么股东会故意抛弃稳赚 105 万的好项目，转身去赌期望只值 74 万的烂项目！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const lev=+document.getElementById('sLev').value, vol=+document.getElementById('sVol').value;
-  document.getElementById('vLev').textContent=lev+'%'; document.getElementById('vVol').textContent=vol+' 分';
-  const safeSh=Math.max(5, 110-lev), gamSh=Math.round(0.5*Math.max(0, 100+vol-lev));
-  const credLoss=Math.round(0.5*Math.max(0, lev - (100-vol)));
-  document.getElementById('kSafe').textContent=safeSh+' 万';
-  document.getElementById('kGam').textContent=gamSh+' 万';
-  document.getElementById('kCred').textContent='-'+credLoss+' 万';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#0284c7">稳健经营 · 股东期望: ${safeSh} 万</text>
-    <rect x="20" y="44" width="${safeSh*4.5}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#ef4444">豪赌波动 · 股东期望: ${gamSh} 万 ${gamSh>safeSh?'⚠️ 诱发豪赌!':''}</text>
-    <rect x="20" y="112" width="${gamSh*4.5}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="166" font-size="13" font-weight="800" fill="#f59e0b">债权人替赌局兜底亏损: -${credLoss} 万</text>`;
-  document.getElementById('ahaBox').innerHTML=gamSh>safeSh
-    ? `💡 <strong>顿悟时刻（Aha! Moment）：</strong>当负债率飙到 ${lev}% 时，股东的收益变成单向看涨期权——赌赢了拿 ${gamSh*2} 万，赌输了拍拍屁股破产，把 <strong>${credLoss} 万</strong> 窟窿甩给债主！`
-    : `💡 <strong>顿悟时刻（Aha! Moment）：</strong>自有资金比例够高时，赌输了先亏自己的本钱，股东就会自动回归稳健经营。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const slider = document.getElementById('debtSlider');
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const D = Number(slider.value);
+      const tag = D >= 80 ? '高杠杆濒危' : D >= 45 ? '中等杠杆' : '低杠杆稳健';
+      document.getElementById('debtVal').textContent = `${D} 万 (${D}% ${tag})`;
+
+      // Project A: 100% -> 105
+      const sBank = Math.min(D, 105);
+      const sEq = Math.max(0, 105 - D);
+
+      // Project B: 30% -> 200, 70% -> 20 (Limited liability caps equity loss at 0!)
+      const gBank = 0.3 * Math.min(D, 200) + 0.7 * Math.min(D, 20);
+      const gEq = 0.3 * Math.max(0, 200 - D) + 0.7 * Math.max(0, 20 - D);
+
+      document.getElementById('sBank').textContent = sBank.toFixed(1) + ' 万';
+      document.getElementById('sEq').textContent = sEq.toFixed(1) + ' 万';
+      document.getElementById('gBank').textContent = gBank.toFixed(1) + ' 万';
+      document.getElementById('gEq').textContent = gEq.toFixed(1) + ' 万';
+
+      const willGamble = gEq > sEq;
+      document.getElementById('safeCard').className = 'p-card' + (!willGamble ? ' safe' : '');
+      document.getElementById('gambleCard').className = 'p-card' + (willGamble ? ' tempt' : '');
+
+      const aha = document.getElementById('ahaBox');
+      if (!willGamble) {
+        aha.innerHTML = `<strong>🌱 低杠杆下激励对齐（负债 ${D} 万）：</strong>因为输了亏的全是股东自己的真金白银，股东选稳健项目能拿 <strong>${sEq.toFixed(1)} 万</strong>，选豪赌只剩 <strong>${gEq.toFixed(1)} 万</strong>，自然老老实实选好项目！`;
+      } else {
+        const bankLoss = (sBank - gBank).toFixed(1);
+        aha.innerHTML = `<strong>🚨 道德风险引爆（负债 ${D} 万）！</strong>在有限责任保护下，赌赢了超额暴利归股东，赌输了亏空全由银行买单！股东选豪赌期望拿到 <strong>${gEq.toFixed(1)} 万</strong>（反超稳健的 ${sEq.toFixed(1)} 万），代价是硬生生坑掉银行 <strong>${bankLoss} 万</strong>、毁灭全社会 31 万财富——这就是银行贷款必须设定“负债率红线与担保条款”的原因！`;
+      }
+    }
+
+    slider.addEventListener('input', () => { markDone('模拟了高杠杆有限责任道德风险'); render(); });
+    document.querySelectorAll('[data-d]').forEach(b => {
+      b.addEventListener('click', () => {
+        slider.value = b.dataset.d;
+        markDone('切换了企业杠杆率预设');
+        render();
+      });
+    });
+    render();
   </script>
 </body>
 </html>

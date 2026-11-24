@@ -4,7 +4,7 @@
   "order": 4,
   "title": "隐私保护与差分隐私",
   "icon": "🕵️",
-  "subtitle": "明明把姓名和身份证号全删掉了，为什么黑客还是能从“脱敏公开数据”里精准认出你？",
+  "subtitle": "删掉姓名和手机号，你的医疗记录就真的匿名了吗？",
   "difficulty": "进阶",
   "related": [
     "ai/ai-infra-safety-01",
@@ -12,25 +12,25 @@
   ],
   "toys": {
     "01-k-anonymity-reid.html": {
-      "title": "K-匿名重识别攻击透视镜（SVG）",
+      "title": "K-匿名重识别攻击透视镜",
       "icon": "🔍",
-      "archetype": "spatial",
-      "concept": "准标识符 · K-匿名性 · 重识别攻击",
-      "summary": "调节公开表里的“年龄段粒度”和“邮编精确位数”，亲眼看见只需 3 个无害字段就能把你从人群里唯一揪出来！"
+      "archetype": "blind-lab",
+      "concept": "准标识符链接攻击与 K-匿名脱敏",
+      "summary": "扮演数据侦探，尝试仅用邮编、出生年份和性别从“匿名病历表”中精准揪出目标人物，再开启 K-匿名泛化验证防御。"
     },
     "02-differential-privacy-eps.html": {
       "title": "差分隐私预算 ε：加多少噪声才安全？",
       "icon": "🌫️",
-      "archetype": "tradeoff",
-      "concept": "差分隐私 (Differential Privacy) · 隐私预算 ε",
-      "summary": "调节隐私预算 ε 与查询样本量 N，观察加噪声后“黑客能否猜出你在不在数据集里”与统计误差的权衡！"
+      "archetype": "simulation",
+      "concept": "拉普拉斯机制与隐私预算 ε 权衡",
+      "summary": "调节隐私预算 ε，对比“含/不含个人记录”两条噪声分布的重叠度，直观掌握隐私保护与数据精度的黄金平衡。"
     },
     "03-randomized-response.html": {
       "title": "随机回答法：如何让受访者放心承认尴尬秘密？",
       "icon": "🪙",
-      "archetype": "simulation",
-      "concept": "随机回答法 (Randomized Response) · 合理推诿",
-      "summary": "调节抛硬币说真话的概率与真实敏感行为比例，看统计学如何在保护“每个人都能矢口否认”的同时算出群体真相！"
+      "archetype": "scenario",
+      "concept": "华纳随机回答法与本地差分隐私",
+      "summary": "亲身体验双硬币“合理推诿”保护机制，再模拟千人群体调研，见证如何从加噪答案中精准反推真实敏感比例。"
     }
   }
 }

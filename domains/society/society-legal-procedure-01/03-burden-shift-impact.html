@@ -1,65 +1,159 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎒 举证责任倒置：当“自证清白”成本高到离谱</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>举证责任倒置：当“自证清白”成本高到离谱</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .race-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 700px) { .race-grid { grid-template-columns: 1fr; } }
+    .lane { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .l-head { display: flex; justify-content: space-between; font-weight: 800; color: var(--tax-ink); margin-bottom: 10px; font-size: 14px; }
+    .bar-item { margin-bottom: 10px; }
+    .bar-lbl { display: flex; justify-content: space-between; font-size: 12px; color: var(--tax-muted); margin-bottom: 4px; }
+    .bar-bg { height: 14px; border-radius: 99px; background: var(--tax-surface); border: 1px solid var(--tax-border); overflow: hidden; }
+    .bar-fg { height: 100%; transition: width .35s ease; }
+    .step-log { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 8px; padding: 10px; font-size: 12px; color: var(--tax-muted); min-height: 84px; line-height: 1.55; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🎒 举证责任倒置：当“自证清白”成本高到离谱</h1><p>误区：身正不怕影子斜，谁有理谁就能拿出证据，举证责任给谁都一样。真相：证明“一件事情从未发生过”成本极高，把举证责任倒置给弱者往往等于直接判他败诉！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>弱势方搜证/自证成本</span><span id="vCost">75 分</span></label><input type="range" id="sCost" min="10" max="100" value="75" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>强势方内部信息掌握度</span><span id="vInfo">85%</span></label><input type="range" id="sInfo" min="20" max="100" value="85" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🎒 举证责任倒置：当“自证清白”成本高到离谱</h1>
+      <p>上游化工厂疑似偷排废水导致下游村民鱼塘绝收。常规诉讼实行「谁主张谁举证」，但村民根本进不去化工厂内部拿排污日志！点击开跑，对比「普通举证」与「举证责任倒置」两条维权赛道的命运！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="runBtn">🏁 启动 4 阶段诉讼竞速</button>
+        <button class="toy-btn" id="resetBtn">重置诉讼</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">常规举证误判率</div><div class="k-val" id="kNorm">—</div></div>
-        <div class="kpi"><div class="k-lbl">合理倒置后误判率</div><div class="k-val" id="kInv" style="color:#10b981;">—</div></div>
+      <span style="font-size:13px;color:var(--tax-muted);">审理阶段：<strong id="stageVal" style="color:var(--tax-ink);">0 / 4</strong></span>
+    </div>
+
+    <div class="race-grid">
+      <div class="lane">
+        <div class="l-head"><span>⚖️ 赛道 A：谁主张谁举证</span><span style="color:var(--tax-red);font-size:12px;">村民自证因果</span></div>
+        <div class="bar-item">
+          <div class="bar-lbl"><span>胜诉证据完成度</span><strong id="aProg">0%</strong></div>
+          <div class="bar-bg"><div class="bar-fg" id="aProgBar" style="width:0%;background:var(--tax-red);"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-lbl"><span>村民维权消耗成本</span><strong id="aCost">0 万元</strong></div>
+          <div class="bar-bg"><div class="bar-fg" id="aCostBar" style="width:0%;background:var(--tax-amber);"></div></div>
+        </div>
+        <div class="step-log" id="aLog">等待立案...</div>
+      </div>
+
+      <div class="lane">
+        <div class="l-head"><span>🔄 赛道 B：举证责任倒置</span><span style="color:var(--tax-green);font-size:12px;">药企/化工厂自证无害</span></div>
+        <div class="bar-item">
+          <div class="bar-lbl"><span>胜诉证据完成度</span><strong id="bProg">0%</strong></div>
+          <div class="bar-bg"><div class="bar-fg" id="bProgBar" style="width:0%;background:var(--tax-green);"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-lbl"><span>村民维权消耗成本</span><strong id="bCost">0 万元</strong></div>
+          <div class="bar-bg"><div class="bar-fg" id="bCostBar" style="width:0%;background:var(--tax-primary);"></div></div>
+        </div>
+        <div class="step-log" id="bLog">等待立案...</div>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 法律经济学原理：</strong>举证责任本质上是在分配“查明真相的成本”。点击启动，看看在严重信息不对称领域，为什么法律必须把证明责任倒扣给掌握核心数据的一方！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const c=+document.getElementById('sCost').value, info=+document.getElementById('sInfo').value;
-  document.getElementById('vCost').textContent=c+' 分'; document.getElementById('vInfo').textContent=info+'%';
-  const errNorm=Math.round(c*0.55 + (info-50)*0.3);
-  const errInv=Math.max(8, Math.round((100-info)*0.45 + 10));
-  document.getElementById('kNorm').textContent=errNorm+'%';
-  document.getElementById('kInv').textContent=errInv+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#ef4444">强迫弱者自证 (传统规则) 败诉冤屈率: ${errNorm}%</text>
-    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${Math.min(540,errNorm*5.4)}" height="24" rx="6" fill="#ef4444"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#10b981">举证责任倒置 (高掌握度方自证) 误判率: ${errInv}%</text>
-    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${Math.min(540,errInv*5.4)}" height="24" rx="6" fill="#10b981"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">核心原则：谁最容易低成本拿到证据，举证责任就该落在谁头上</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>刑事案件保护个人，所以由掌握公权力的检方举证；而医疗事故或环境污染中，病历和排污数据全在机构手里，法律便会反转使用<strong>举证责任倒置</strong>！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const stages = [
+      {
+        aP: 20, aC: 2, aMsg: '阶段1：村民拍到死鱼照片，但化工厂拒绝门卫放行，拿不到排污口水样。',
+        bP: 35, bC: 1, bMsg: '阶段1：村民只需提交死鱼损失与化工厂位于上游的初步关联，法院即予立案！'
+      },
+      {
+        aP: 32, aC: 8, aMsg: '阶段2：村民自费 6 万做水质检测，化工厂称“可能是下游农药，与我无关”。',
+        bP: 68, bC: 2, bMsg: '阶段2：法院责令化工厂提交近 3 个月内部排污监测原始日志，自证排放达标！'
+      },
+      {
+        aP: 38, aC: 16, aMsg: '阶段3：要证明分子级排污因果链需高端仪器鉴定，村民已负债累累被迫撤诉。',
+        bP: 90, bC: 2.5, bMsg: '阶段3：化工厂拿不出合规排放记录（且夜间监测数据缺失），无法自证清白！'
+      },
+      {
+        aP: 38, aC: 18, aMsg: '结局：因“证据链不足”败诉！村民耗尽 18 万积蓄，污染企业毫发无伤。',
+        bP: 100, bC: 3, bMsg: '结局：化工厂举证不能，依法推定因果成立！村民低成本获赔，倒逼企业合规留痕。'
+      }
+    ];
+
+    let step = 0;
+    let timer = null;
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      document.getElementById('stageVal').textContent = `${step} / 4`;
+      if (step === 0) {
+        document.getElementById('aProg').textContent = '0%';
+        document.getElementById('aCost').textContent = '0 万元';
+        document.getElementById('bProg').textContent = '0%';
+        document.getElementById('bCost').textContent = '0 万元';
+        document.getElementById('aProgBar').style.width = '0%';
+        document.getElementById('aCostBar').style.width = '0%';
+        document.getElementById('bProgBar').style.width = '0%';
+        document.getElementById('bCostBar').style.width = '0%';
+        document.getElementById('aLog').textContent = '等待立案...';
+        document.getElementById('bLog').textContent = '等待立案...';
+        return;
+      }
+
+      const st = stages[step - 1];
+      document.getElementById('aProg').textContent = st.aP + '%';
+      document.getElementById('aCost').textContent = st.aC + ' 万元';
+      document.getElementById('bProg').textContent = st.bP + '%';
+      document.getElementById('bCost').textContent = st.bC + ' 万元';
+
+      document.getElementById('aProgBar').style.width = st.aP + '%';
+      document.getElementById('aCostBar').style.width = Math.min(100, (st.aC / 20) * 100) + '%';
+      document.getElementById('bProgBar').style.width = st.bP + '%';
+      document.getElementById('bCostBar').style.width = Math.min(100, (st.bC / 20) * 100) + '%';
+
+      document.getElementById('aLog').innerHTML = stages.slice(0, step).slice(-2).map(s => `<div>• ${s.aMsg}</div>`).join('');
+      document.getElementById('bLog').innerHTML = stages.slice(0, step).slice(-2).map(s => `<div>• ${s.bMsg}</div>`).join('');
+
+      const aha = document.getElementById('ahaBox');
+      if (step < 4) {
+        aha.innerHTML = `<strong>🏃 审理推进中（第 ${step} 阶段）：</strong>注意双方成本的悬殊分化——在信息极度不对称的场景下，强行要求受害者拿“对手保险柜里的证据”等同于剥夺救济权。`;
+      } else {
+        aha.innerHTML = `<strong>⚖️ 举证责任倒置的制度智慧：</strong>《民法典》在环境污染、医疗损害、高空抛物等领域实行举证倒置，正是把取证责任交给<strong>“举证成本最低、掌握核心数据”</strong>的一方，既护住了弱者，也倒逼巨头平时老实保留合规记录！`;
+      }
+    }
+
+    document.getElementById('runBtn').addEventListener('click', () => {
+      markDone('运行了举证责任倒置诉讼竞速');
+      if (step >= 4) step = 0;
+      if (timer) clearInterval(timer);
+      timer = setInterval(() => {
+        step++;
+        render();
+        if (step >= 4) { clearInterval(timer); timer = null; }
+      }, 900);
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (timer) { clearInterval(timer); timer = null; }
+      step = 0;
+      markDone('重置了举证责任对比赛道');
+      render();
+    });
+
+    render();
   </script>
 </body>
 </html>

@@ -1,66 +1,168 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌋 帕累托 80/20 法则与财富马太效应</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>帕累托 80/20 法则与财富马太效应</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .viz-card { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 14px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .kpi { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .kpi-l { font-size: 12px; color: var(--tax-muted); }
+    .kpi-v { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌋 帕累托 80/20 法则与财富马太效应</h1><p>误区：只要起点完全公平、规则一模一样，大家长期玩下去财富也会呈正态分布。真相：在“按比例乘以随机回报”的复利游戏里，哪怕起跑线完全一样，纯粹的运气迭代也会必然造出 20% 人拿走 80% 财富！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
-    </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>财富复利乘数波动幅度</span><span id="vVol">55%</span></label><input type="range" id="sVol" min="10" max="90" value="55" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>经济迭代轮次</span><span id="vRound">15 轮</span></label><input type="range" id="sRound" min="3" max="30" value="15" oninput="upd()"></div>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🌋 帕累托 80/20 法则与财富马太效应</h1>
+      <p>经典的「庭院拍卖（Yard-Sale）」实验：100 个人起步时<strong>每人完全平等各持 100 元</strong>。每轮两两随机掷硬币交易（完全公平 50/50 胜率，赌注为较穷者当前财富的 20%）。按下开跑，看公平随机游戏如何自发催生 80/20 寡头！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row">
+        <button class="toy-btn primary" id="runBtn">🏁 开始百轮公平交易竞速</button>
+        <button class="toy-btn" id="stepBtn">+20 轮交易</button>
+        <button class="toy-btn" id="resetBtn">重置所有人 = 100 元</button>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">前 20% 头部占比</div><div class="k-val" id="kTop" style="color:#0284c7;">—</div></div>
-        <div class="kpi"><div class="k-lbl">分布形态</div><div class="k-val" id="kShp">—</div></div>
+      <span style="font-size:13px;color:var(--tax-muted);">累计轮次：<strong id="roundVal" style="color:var(--tax-ink);">0 轮</strong></span>
+    </div>
+
+    <div class="viz-card">
+      <svg id="barSvg" viewBox="0 0 640 230" style="width:100%;height:auto;display:block;"></svg>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-l">最富 20% 掌握总财富</div>
+          <div class="kpi-v" id="top20Val">20.0%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">最穷 50% 掌握总财富</div>
+          <div class="kpi-v" id="bot50Val">50.0%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">首富当前资产</div>
+          <div class="kpi-v" id="maxVal">100 元</div>
+        </div>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 庭院拍卖悖论：</strong>规则绝对公平、起跑线绝对相同、没有腐败也没有智商差距——点击「开始百轮公平交易竞速」，亲眼见证财富为何会自动向极少数人坍缩！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const vol=+document.getElementById('sVol').value/100, rnd=+document.getElementById('sRound').value;
-  document.getElementById('vVol').textContent=(vol*100).toFixed(0)+'%'; document.getElementById('vRound').textContent=rnd+' 轮';
-  const alpha=Math.min(3.5, 0.5 + vol*rnd*0.18);
-  let vals=[];
-  for(let i=0;i<15;i++){ vals.push(Math.exp(-alpha*i/14)); }
-  const sum=vals.reduce((a,b)=>a+b,0);
-  const top20=Math.round((vals[0]+vals[1]+vals[2])/sum*100);
-  document.getElementById('kTop').textContent=top20+'%';
-  document.getElementById('kShp').textContent=top20>=70?'典型 80/20 幂律':'温和偏态';
-  let svg='';
-  vals.forEach((v,i)=>{
-    const h=(v/vals[0])*125, x=40+i*35;
-    svg+=`<rect x="${x}" y="${155-h}" width="25" height="${h}" rx="4" fill="${i<3?'#ef4444':'#0284c7'}"/>`;
-  });
-  document.getElementById('svg').innerHTML=svg+`<text x="45" y="28" font-size="12.5" font-weight="800" fill="var(--tax-text)">红柱为最富前 20% 群体，合计占有 ${top20}% 总财富</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>“加法产生正态分布（比如身高），乘法产生幂律分布（比如财富）。”即使起点完全平等，乘法复利只要跑上 ${rnd} 轮，前 20% 人就会自然聚集 <strong>${top20}%</strong> 的财富！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const N = 100;
+    let wealth = new Array(N).fill(100);
+    let rounds = 0;
+    let timer = null;
+    let interacted = false;
+
+    const svg = document.getElementById('barSvg');
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function resetSim() {
+      if (timer) { clearInterval(timer); timer = null; }
+      wealth = new Array(N).fill(100);
+      rounds = 0;
+      render();
+    }
+
+    function stepRounds(k) {
+      for (let r = 0; r < k; r++) {
+        // 50 random pairs per round
+        for (let p = 0; p < 50; p++) {
+          const i = Math.floor(Math.random() * N);
+          let j = Math.floor(Math.random() * N);
+          if (i === j) j = (j + 1) % N;
+          const stake = Math.min(wealth[i], wealth[j]) * 0.22;
+          if (Math.random() < 0.5) {
+            wealth[i] += stake;
+            wealth[j] -= stake;
+          } else {
+            wealth[j] += stake;
+            wealth[i] -= stake;
+          }
+        }
+        rounds++;
+      }
+      render();
+    }
+
+    function render() {
+      const sorted = wealth.slice().sort((a, b) => a - b);
+      const total = sorted.reduce((a, b) => a + b, 0);
+      const top20 = sorted.slice(80).reduce((a, b) => a + b, 0) / total * 100;
+      const bot50 = sorted.slice(0, 50).reduce((a, b) => a + b, 0) / total * 100;
+      const maxW = sorted[N - 1];
+
+      document.getElementById('roundVal').textContent = rounds + ' 轮';
+      document.getElementById('top20Val').textContent = top20.toFixed(1) + '%';
+      document.getElementById('bot50Val').textContent = bot50.toFixed(1) + '%';
+      document.getElementById('maxVal').textContent = Math.round(maxW) + ' 元';
+
+      const W = 640, H = 230, padL = 36, padR = 16, padT = 20, padB = 28;
+      const maxScale = Math.max(220, maxW * 1.05);
+      const bw = (W - padL - padR) / N;
+
+      let bars = '';
+      for (let i = 0; i < N; i++) {
+        const bh = (sorted[i] / maxScale) * (H - padT - padB);
+        const x = padL + i * bw;
+        const y = H - padB - bh;
+        const color = i >= 80 ? 'var(--tax-amber)' : i < 50 ? 'var(--tax-primary)' : 'var(--tax-green)';
+        bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${Math.max(1.5, bw - 1).toFixed(1)}" height="${bh.toFixed(1)}" fill="${color}" opacity="0.88"/>`;
+      }
+
+      svg.innerHTML = `
+        <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="var(--tax-muted)"/>
+        ${bars}
+        <text x="${padL + 6}" y="${H - 8}" font-size="11" fill="var(--tax-muted)">最穷 50%（蓝色）</text>
+        <text x="${W - padR - 6}" y="${H - 8}" text-anchor="end" font-size="11" font-weight="700" fill="var(--tax-amber)">最富 20%（橙色尖峰）→</text>
+      `;
+
+      const aha = document.getElementById('ahaBox');
+      if (rounds === 0) {
+        aha.innerHTML = `<strong>📏 绝对平等起跑线：</strong>100 个人全部手持 100 元，前 20% 刚好占 20% 财富。点击开跑，观察完全公平的随机交易会发生什么！`;
+      } else if (top20 < 55) {
+        aha.innerHTML = `<strong>🌊 财富开始向右聚集（第 ${rounds} 轮）：</strong>前 20% 已悄然掌握 <strong>${top20.toFixed(1)}%</strong> 财富。因为穷人每次输掉后本金变小，翻盘筹码越来越薄！`;
+      } else if (top20 < 78) {
+        aha.innerHTML = `<strong>🌋 逼近帕累托 80/20 分布（第 ${rounds} 轮）：</strong>前 20% 掌握 <strong>${top20.toFixed(1)}%</strong>，后 50% 仅剩 <strong>${bot50.toFixed(1)}%</strong>，首富已膨胀至 <strong>${Math.round(maxW)} 元</strong>。再点「+20 轮」继续看寡头坍缩！`;
+      } else {
+        aha.innerHTML = `<strong>🤯 震撼的马太效应（前 20% 掌握 ${top20.toFixed(1)}%）！</strong>全程没有任何作弊、特权或能力差异，仅仅因为「乘法随机波动 + 较穷者赌注受限」，系统就会不可逆地走向极度集中——这就是为什么所有现代经济体都需要反垄断与再分配稳定器。`;
+      }
+    }
+
+    document.getElementById('runBtn').addEventListener('click', () => {
+      markDone('运行了帕累托马太效应公平交易竞速');
+      if (rounds >= 160) resetSim();
+      if (timer) clearInterval(timer);
+      timer = setInterval(() => {
+        stepRounds(10);
+        if (rounds >= 160) { clearInterval(timer); timer = null; }
+      }, 160);
+    });
+
+    document.getElementById('stepBtn').addEventListener('click', () => {
+      markDone('推进了 20 轮随机财富交换');
+      if (timer) { clearInterval(timer); timer = null; }
+      stepRounds(20);
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      markDone('重置了帕累托财富实验');
+      resetSim();
+    });
+
+    render();
   </script>
 </body>
 </html>

@@ -1,66 +1,154 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🗡️ 刺破公司面纱风险雷达（连带责任测试）</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>刺破公司面纱风险雷达（连带责任测试）</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .case-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 16px; }
+    .dossier { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 14px; margin: 10px 0 14px; }
+    .d-title { font-weight: 800; font-size: 15.5px; color: var(--tax-ink); margin-bottom: 6px; }
+    .d-list { margin: 0; padding-left: 18px; font-size: 13px; color: var(--tax-muted); line-height: 1.65; }
+    .btn-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .v-btn { padding: 12px; border-radius: 10px; border: 2px solid var(--tax-border); background: var(--tax-surface); font-weight: 800; font-size: 13.5px; cursor: pointer; color: var(--tax-ink); }
+    .v-btn.ok { border-color: var(--tax-green); background: var(--tax-green-soft); color: var(--tax-green); }
+    .v-btn.bad { border-color: var(--tax-red); background: var(--tax-red-soft); color: var(--tax-red); }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🗡️ 刺破公司面纱风险雷达（连带责任测试）</h1><p>误区：只要注册了一家“有限责任公司”，老板把公司钱转进自己微信当零花钱，破产后也绝对不用自己还债。真相：只要财产混同或空壳欺诈，法院会“刺破公司面纱”，直接追索老板个人财产！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🗡️ 刺破公司面纱风险雷达（连带责任测试）</h1>
+      <p>有限责任是保护诚实创业者的盾牌，绝不是老赖逃债的保护伞！如果老板滥用法人独立地位，法院将依法<strong>“刺破公司面纱（法人人格否认）”</strong>，判决老板用个人全部家产连带还债！请盲测审查以下 4 家欠债公司档案。</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row" id="tabsRow"></div>
+      <span style="font-size:13px;color:var(--tax-muted);">已裁决：<strong id="progVal" style="color:var(--tax-ink);">0 / 4</strong></span>
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>公私账目混同度</span><span id="vMix">65%</span></label><input type="range" id="sMix" min="0" max="100" value="65" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>资本严重不足/空壳度</span><span id="vCap">50%</span></label><input type="range" id="sCap" min="0" max="100" value="50" oninput="upd()"></div>
+
+    <div class="case-box">
+      <div class="dossier">
+        <div class="d-title" id="dTitle"></div>
+        <ul class="d-list" id="dList"></ul>
       </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">面纱被刺破概率</div><div class="k-val" id="kPr">—</div></div>
-        <div class="kpi"><div class="k-lbl">风险等级</div><div class="k-val" id="kLv">—</div></div>
+
+      <div class="btn-pair">
+        <button class="v-btn" data-v="pierce">🗡️ 刺破公司面纱（老板个人连带还债）</button>
+        <button class="v-btn" data-v="shield">🛡️ 维持有限责任保护（仅以公司财产清偿）</button>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 商事法官提示：</strong>逐项查看公司财务独立性与经营记录，判断哪家公司只是正常商业失败，哪家已经踩穿了「人格混同 / 恶意逃债」红线！
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const mix=+document.getElementById('sMix').value, cap=+document.getElementById('sCap').value;
-  document.getElementById('vMix').textContent=mix+'%'; document.getElementById('vCap').textContent=cap+'%';
-  const pr=Math.min(99, Math.round(mix*0.65 + cap*0.35));
-  const danger=pr>=60;
-  document.getElementById('kPr').textContent=pr+'%';
-  document.getElementById('kPr').style.color=danger?'#ef4444':'#10b981';
-  document.getElementById('kLv').textContent=danger?'极高 (个人房产危险)':'安全 (隔离有效)';
-  document.getElementById('svg').innerHTML=`
-    <rect x="40" y="34" width="180" height="110" rx="12" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
-    <text x="130" y="92" text-anchor="middle" font-size="15" font-weight="850" fill="#0369a1">公司独立外壳</text>
-    <line x1="220" y1="89" x2="360" y2="89" stroke="${danger?'#ef4444':'#10b981'}" stroke-width="${danger?5:2}" stroke-dasharray="${danger?'0':'6 4'}"/>
-    <text x="290" y="75" text-anchor="middle" font-size="12.5" font-weight="850" fill="${danger?'#ef4444':'#10b981'}">${danger?'面纱刺破!':'防火墙稳固'}</text>
-    <rect x="360" y="34" width="190" height="110" rx="12" fill="${danger?'#fee2e2':'#f0fdf4'}" stroke="${danger?'#ef4444':'#10b981'}" stroke-width="2.5"/>
-    <text x="455" y="82" text-anchor="middle" font-size="14" font-weight="850" fill="${danger?'#b91c1c':'#047857'}">股东个人资产</text>
-    <text x="455" y="108" text-anchor="middle" font-size="13" font-weight="800" fill="${danger?'#ef4444':'#10b981'}">穿透风险: ${pr}%</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>有限责任的前提是“把公司当成独立的人”！一旦账目混同度达到 ${mix}%、变成你的私人钱袋，法院就会直接穿透追责（穿透概率 ${pr}%）！`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const dossiers = [
+      {
+        tab: '公司 A',
+        title: '档案 A：星辰科技（欠供应商 300 万，账面清零）',
+        bullets: [
+          '公司收款长期直接打入老板个人微信与私人银行卡；',
+          '老板用公司对公账户给自家买别墅、交孩子国际学校学费；',
+          '未做规范财务记账，公司资金与家庭开支完全混为一谈。'
+        ],
+        ans: 'pierce',
+        explain: '典型「财产混同」踩穿红线！老板自己都没把公司当独立法人看待，法律自然不会再给他提供有限责任护盾——依法刺破面纱，老板须以个人全部财产连带清偿！'
+      },
+      {
+        tab: '公司 B',
+        title: '档案 B：蓝鲸新能源（欠银行 800 万，研发失败破产）',
+        bullets: [
+          '实缴注册资本 500 万全部用于合规研发与员工发薪，有完整审计报告；',
+          '对公账户与股东个人账户界限清晰，无任何私自挪用记录；',
+          '因行业技术路线突然迭代导致产品滞销，最终依法申请破产清算。'
+        ],
+        ans: 'shield',
+        explain: '必须坚决维持有限责任保护！这是典型的诚实商业失败——只要财务独立、无恶意逃债，老板最多亏光投入的 500 万股本，个人家庭房产受法律严格保护！'
+      },
+      {
+        tab: '公司 C',
+        title: '档案 C：金蝉脱壳贸易（欠货款 500 万，突击转移资产）',
+        bullets: [
+          '收到法院传票前一周，将公司名下 400 万核心设备以“1 万元”低价卖给老板小舅子新开的关联公司；',
+          '原公司员工、仓库、客户名单全部原封不动搬进新公司继续营业；',
+          '原公司只剩一个空壳和 500 万债务。'
+        ],
+        ans: 'pierce',
+        explain: '典型「过度控制 + 恶意转移资产逃债（横向人格混同）」！法院不仅会刺破面纱追究老板个人连带责任，还会把新设的关联空壳公司一并拉下水连带赔偿！'
+      },
+      {
+        tab: '公司 D',
+        title: '档案 D：独行侠一人有限公司（欠房租 80 万）',
+        bullets: [
+          '该公司只有老板 1 名自然人股东（一人有限责任公司）；',
+          '庭审中老板口头坚称“公私分明”，但拿不出近三年经会计师事务所出具的年度独立财务审计报告；',
+          '账目残缺，无法证明公司财产独立于自己个人财产。'
+        ],
+        ans: 'pierce',
+        explain: '《公司法》对「一人有限责任公司」实行严格的<strong>举证责任倒置</strong>：只要股东拿不出独立审计证明公私财产分离，法院直接推定财产混同、刺破面纱承担连带责任！'
+      }
+    ];
+
+    let cur = 0;
+    const answers = {};
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const tabs = document.getElementById('tabsRow');
+      tabs.innerHTML = '';
+      dossiers.forEach((d, i) => {
+        const b = document.createElement('button');
+        b.className = 'toy-btn' + (i === cur ? ' primary' : '');
+        const mark = answers[i] ? (answers[i] === d.ans ? '✅ ' : '❌ ') : '';
+        b.textContent = mark + d.tab;
+        b.addEventListener('click', () => { cur = i; render(); });
+        tabs.appendChild(b);
+      });
+
+      const d = dossiers[cur];
+      document.getElementById('dTitle').textContent = d.title;
+      document.getElementById('dList').innerHTML = d.bullets.map(x => `<li>${x}</li>`).join('');
+
+      const picked = answers[cur];
+      document.querySelectorAll('.v-btn').forEach(btn => {
+        btn.classList.remove('ok', 'bad');
+        if (picked) {
+          if (btn.dataset.v === d.ans) btn.classList.add('ok');
+          else if (btn.dataset.v === picked) btn.classList.add('bad');
+        }
+      });
+
+      document.getElementById('progVal').textContent = `${Object.keys(answers).length} / ${dossiers.length}`;
+      const aha = document.getElementById('ahaBox');
+      if (!picked) {
+        aha.innerHTML = `<strong>💡 审查提示：</strong>判断【${d.tab}】的老板是否应当承担个人连带责任！`;
+      } else {
+        const ok = picked === d.ans;
+        aha.innerHTML = `<strong>${ok ? '⚖️ 裁决精准！' : '⚠️ 法律红线判断偏差：'}</strong>${d.explain}`;
+      }
+    }
+
+    document.querySelectorAll('.v-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        answers[cur] = btn.dataset.v;
+        markDone('完成了刺破公司面纱连带责任盲测');
+        render();
+      });
+    });
+
+    render();
   </script>
 </body>
 </html>

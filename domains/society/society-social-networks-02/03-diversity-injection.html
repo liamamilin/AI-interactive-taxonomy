@@ -1,65 +1,174 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌱 破茧实验：推荐系统里的“探索率 vs 留存率”</title>
-  <link rel="stylesheet" href="../../../shared/toy-base.css" />
-  <script src="../../../shared/toy-sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>破茧实验：推荐系统里的“探索率 vs 留存率”</title>
+  <link rel="stylesheet" href="../../../shared/toy-base.css">
   <style>
-    .ctrl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-bottom:14px; }
-    .ctrl-box { padding:10px 12px; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); }
-    .ctrl-box label { display:flex; justify-content:space-between; font-size:13px; font-weight:750; margin-bottom:6px; }
-    .ctrl-box input[type=range] { width:100%; accent-color:var(--tax-primary); }
-    .btn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid var(--tax-border); background:var(--tax-surface); color:inherit; font-weight:750; font-size:13px; cursor:pointer; }
-    .btn.active, .btn.primary { background:var(--tax-primary); color:#fff; border-color:var(--tax-primary); }
-    .kpi-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
-    .kpi { padding:10px 12px; border-radius:12px; border:1px solid var(--tax-border); background:var(--tax-surface); }
-    .kpi .k-lbl { font-size:12px; color:var(--tax-muted); font-weight:650; }
-    .kpi .k-val { font-size:19px; font-weight:850; margin-top:2px; }
-    .svg-box { width:100%; height:auto; border:1px solid var(--tax-border); border-radius:12px; background:var(--tax-surface); display:block; }
+    .scenario-box { background: var(--tax-surface-alt); border: 1px solid var(--tax-border); border-radius: var(--tax-radius); padding: 16px; }
+    .scene-tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; background: var(--tax-primary-soft); color: var(--tax-primary); margin-bottom: 8px; }
+    .scene-title { font-size: 17px; font-weight: 800; color: var(--tax-ink); margin: 0 0 6px; }
+    .scene-desc { font-size: 13.5px; color: var(--tax-muted); line-height: 1.55; margin: 0 0 14px; }
+    .choice-list { display: grid; gap: 10px; }
+    .choice-btn { background: var(--tax-surface); border: 2px solid var(--tax-border); border-radius: 12px; padding: 12px 14px; text-align: left; cursor: pointer; transition: border-color .2s, background .2s; }
+    .choice-btn:hover { border-color: var(--tax-primary); }
+    .choice-btn.picked { border-color: var(--tax-primary); background: var(--tax-primary-soft); }
+    .c-title { font-weight: 700; font-size: 14px; color: var(--tax-ink); }
+    .c-sub { font-size: 12px; color: var(--tax-muted); margin-top: 3px; }
+    .score-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .s-box { background: var(--tax-surface); border: 1px solid var(--tax-border); border-radius: 10px; padding: 10px; text-align: center; }
+    .s-l { font-size: 12px; color: var(--tax-muted); }
+    .s-v { font-size: 20px; font-weight: 800; color: var(--tax-ink); margin-top: 2px; }
   </style>
 </head>
-<body class="tax-toy">
-  <div class="tax-wrap">
-    <div class="tax-topbar">
-      <div><h1>🌱 破茧实验：推荐系统里的“探索率 vs 留存率”</h1><p>误区：平台之所以不破除信息茧房，纯属程序员忘了加“随机推荐不同观点”的代码。真相：一旦强行推送用户反感的异质内容超过阈值，用户会立刻滑走甚至卸载 App——平台面临留存与极化的两难！</p></div>
-      <a class="tax-back" href="./index.html">← 返回主题目录</a>
+<body>
+  <div class="toy-shell">
+    <header class="toy-header">
+      <h1>🌱 破茧实验：推荐系统里的“探索率 vs 留存率”</h1>
+      <p>作为推荐算法负责人，你在 4 个真实业务场景中必须权衡「短期点击留存」与「长期信息多样性」。选错策略，要么用户流失，要么平台彻底极化！</p>
+    </header>
+
+    <div class="toy-controls">
+      <div class="toy-btn-row" id="sceneTabs"></div>
     </div>
-    <div class="tax-panel">
-      <div class="ctrl-grid">
-        <div class="ctrl-box"><label><span>跨圈层异质内容强插比例</span><span id="vDiv">25%</span></label><input type="range" id="sDiv" min="0" max="80" value="25" oninput="upd()"></div>
-        <div class="ctrl-box"><label><span>用户对异见的耐受度</span><span id="vTol">50%</span></label><input type="range" id="sTol" min="15" max="90" value="50" oninput="upd()"></div>
-      </div>
-      <svg id="svg" class="svg-box" viewBox="0 0 600 185"></svg>
-      <div class="kpi-row">
-        <div class="kpi"><div class="k-lbl">信息茧房破除度</div><div class="k-val" id="kBrk" style="color:#10b981;">—</div></div>
-        <div class="kpi"><div class="k-lbl">用户 7 日留存率</div><div class="k-val" id="kRet" style="color:#0284c7;">—</div></div>
+
+    <div class="scenario-box">
+      <span class="scene-tag" id="sceneTag">场景 1 / 4</span>
+      <h2 class="scene-title" id="sceneTitle"></h2>
+      <p class="scene-desc" id="sceneDesc"></p>
+      <div class="choice-list" id="choiceList"></div>
+
+      <div class="score-strip">
+        <div class="s-box">
+          <div class="s-l">次日留存表现</div>
+          <div class="s-v" id="retVal">--</div>
+        </div>
+        <div class="s-box">
+          <div class="s-l">观点破茧指数</div>
+          <div class="s-v" id="divVal">--</div>
+        </div>
+        <div class="s-box">
+          <div class="s-l">已完成决策</div>
+          <div class="s-v" id="progVal">0 / 4</div>
+        </div>
       </div>
     </div>
-    <div class="tax-aha" id="ahaBox"></div>
+
+    <div class="aha-box" id="ahaBox">
+      <strong>💡 决策提示：</strong>点击上方任意一种推荐策略，查看它对用户留存与信息茧房的真实影响。
+    </div>
   </div>
+
+  <script src="../../../shared/toy-sdk.js"></script>
   <script>
-function upd(){
-  const div=+document.getElementById('sDiv').value, tol=+document.getElementById('sTol').value;
-  document.getElementById('vDiv').textContent=div+'%'; document.getElementById('vTol').textContent=tol+'%';
-  const brk=Math.min(96, Math.round(div*1.25));
-  const ret=Math.max(15, Math.min(92, Math.round(85 - Math.max(0, div - tol*0.6)*0.9)));
-  document.getElementById('kBrk').textContent=brk+'%';
-  document.getElementById('kRet').textContent=ret+'%';
-  document.getElementById('svg').innerHTML=`
-    <text x="20" y="34" font-size="13" font-weight="800" fill="#10b981">信息破茧多元度: ${brk}%</text>
-    <rect x="20" y="44" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="44" width="${brk*5.4}" height="24" rx="6" fill="#10b981"/>
-    <text x="20" y="102" font-size="13" font-weight="800" fill="#0284c7">平台用户留存率: ${ret}%</text>
-    <rect x="20" y="112" width="540" height="24" rx="6" fill="var(--tax-border)" opacity="0.3"/>
-    <rect x="20" y="112" width="${ret*5.4}" height="24" rx="6" fill="#0284c7"/>
-    <text x="20" y="166" font-size="12.5" font-weight="750" fill="var(--tax-muted)">${div>tol*0.6?'⚠️ 跨圈内容过猛，用户因不适开始流失':'✅ 温和探索区：既拓宽视野又保住留存'}</text>`;
-  document.getElementById('ahaBox').innerHTML=`💡 <strong>顿悟时刻（Aha! Moment）：</strong>温和的“20% 惊喜探索”能在几乎不伤留存的情况下打破回音壁；一旦硬塞超过用户耐受阈值，商业平台就会在 KPI 压力下退回安全的信息茧房。`;
-  if(window.ToySDK) window.ToySDK.markCompleted();
-}
-upd();
+    const scenes = [
+      {
+        tab: '热点争议',
+        title: '场景 1：社会公共议题爆发激烈争论',
+        desc: '用户连续点赞了 5 条支持某一方的短视频。此时信息流第 6 条该推什么？',
+        options: [
+          { title: 'A. 100% 顺着偏好继续推送情绪更激烈的同类视频', sub: '纯点击率（CTR）最大化', ret: '+8% 高留存', div: '15 分（重度茧房）', note: '短期完播率飙升，但用户迅速进入情绪回音室，平台被批制造撕裂。', ok: false },
+          { title: 'B. 强行插入一条措辞尖锐的对立阵营反驳视频', sub: '硬核对冲破茧', ret: '-14% 划走流失', div: '22 分（逆火效应）', note: '心理学中的「逆火效应」爆发：强硬对立内容不仅让用户关掉 App，反而强化了原有偏见！', ok: false },
+          { title: 'C. 插入 15% 温和中立的事实核查 / 跨视角故事', sub: '桥梁内容探索（Bridging）', ret: '+3% 稳健留存', div: '88 分（有效破茧）', note: '命中「有界信任半径」内的温和桥梁内容，既不引起反感，又能悄悄拓宽用户认知边界。', ok: true }
+        ]
+      },
+      {
+        tab: '理财投资',
+        title: '场景 2：散户狂热追涨单一高风险板块',
+        desc: '某用户三天内高频搜索“某概念股翻倍逻辑”，算法如何处理他的首页推荐？',
+        options: [
+          { title: 'A. 全屏推送“财富自由/抓紧上车”喊单帖', sub: '顺从当下强意图', ret: '+10% 暴涨', div: '10 分（羊群陷阱）', note: '短期停留时长漂亮，但行情反转后用户亏损退场，长期信任崩塌。', ok: false },
+          { title: 'B. 80% 行业基本面分析 + 20% 历史回撤与风险案例', sub: '多元风险平衡探索', ret: '+2% 良性留存', div: '90 分（理性决策）', note: '保留用户兴趣主线，同时用 20% 探索槽位注入历史反例，是金融信息流的最佳平衡点。', ok: true },
+          { title: 'C. 直接屏蔽该板块，改推国债与定存科普', sub: '家长式强制纠偏', ret: '-18% 严重流失', div: '35 分（信任断裂）', note: '粗暴剥夺用户兴趣会让他们直接转向其他更极端的社区。', ok: false }
+        ]
+      },
+      {
+        tab: '健康养生',
+        title: '场景 3：用户频繁浏览“极端断食疗法”',
+        desc: '用户点赞了多条未经证实的极端减肥偏方，推荐系统如何介入？',
+        options: [
+          { title: 'A. 推送循证营养师的温和拆解 + 安全替代方案', sub: '高信任度权威探索', ret: '+4% 稳定留存', div: '92 分（健康破茧）', note: '回应用户「想变瘦」的真实需求，同时用科学方案平滑替换偏方，留存与社会价值双赢。', ok: true },
+          { title: 'B. 按协同过滤继续推荐更极端的排毒偏方', sub: '零探索纯利用', ret: '+6% 短期留存', div: '8 分（健康风险）', note: '算法沿着“越来越极端”的梯度滑坡，极易酿成真实伤害。', ok: false },
+          { title: 'C. 弹窗警告“你正在看伪科学”并清空兴趣标签', sub: '羞辱式打断', ret: '-12% 反感离开', div: '30 分（抵触心理）', note: '说教式打断激发心理抗拒，用户更容易产生“主流在隐瞒真相”的逆反。', ok: false }
+        ]
+      },
+      {
+        tab: '日常兴趣',
+        title: '场景 4：老用户刷腻了同质化猫狗视频',
+        desc: '用户长期只看宠物视频，近期打开频次缓慢下降，出现“茧房审美疲劳”。',
+        options: [
+          { title: 'A. 继续死磕宠物垂直品类，只换更高清的视频', sub: '局部最优陷阱', ret: '-5% 缓慢疲劳', div: '25 分（兴趣萎缩）', note: '缺乏探索率的推荐系统会陷入“越推越窄、越刷越腻”的长期留存衰退。', ok: false },
+          { title: 'B. 开启 12% 邻近兴趣探索（动物纪录片/露营/摄影）', sub: 'ε-贪心邻近扩展', ret: '+9% 唤醒增长', div: '89 分（惊喜破圈）', note: '经典探索-利用平衡！适量邻近探索不仅破茧，反而提升了长期留存与天花板。', ok: true },
+          { title: 'C. 随机塞入 50% 完全无关的硬核冷门内容', sub: '过度随机噪声', ret: '-16% 体验崩坏', div: '45 分（低效噪声）', note: '探索率过高会毁掉相关性体验，破茧需要“精准邻近”而非盲目乱推。', ok: false }
+        ]
+      }
+    ];
+
+    let currentIdx = 0;
+    const answers = {};
+    let interacted = false;
+
+    function markDone(note) {
+      if (!interacted) {
+        interacted = true;
+        if (window.ToySDK) window.ToySDK.markCompleted(note);
+      }
+    }
+
+    function render() {
+      const tabsEl = document.getElementById('sceneTabs');
+      tabsEl.innerHTML = '';
+      scenes.forEach((s, i) => {
+        const b = document.createElement('button');
+        b.className = 'toy-btn' + (i === currentIdx ? ' primary' : '');
+        b.textContent = (answers[i] !== undefined ? '✓ ' : '') + s.tab;
+        b.addEventListener('click', () => { currentIdx = i; render(); });
+        tabsEl.appendChild(b);
+      });
+
+      const sc = scenes[currentIdx];
+      document.getElementById('sceneTag').textContent = `场景 ${currentIdx + 1} / ${scenes.length}`;
+      document.getElementById('sceneTitle').textContent = sc.title;
+      document.getElementById('sceneDesc').textContent = sc.desc;
+
+      const listEl = document.getElementById('choiceList');
+      listEl.innerHTML = '';
+      const picked = answers[currentIdx];
+
+      sc.options.forEach((opt, oi) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn' + (picked === oi ? ' picked' : '');
+        btn.innerHTML = `<div class="c-title">${opt.title}</div><div class="c-sub">${opt.sub}</div>`;
+        btn.addEventListener('click', () => {
+          answers[currentIdx] = oi;
+          markDone('完成了推荐系统破茧策略决策');
+          render();
+        });
+        listEl.appendChild(btn);
+      });
+
+      const doneCount = Object.keys(answers).length;
+      document.getElementById('progVal').textContent = `${doneCount} / ${scenes.length}`;
+
+      const aha = document.getElementById('ahaBox');
+      if (picked === undefined) {
+        document.getElementById('retVal').textContent = '--';
+        document.getElementById('divVal').textContent = '--';
+        aha.innerHTML = `<strong>💡 决策提示：</strong>请为「${sc.tab}」选择一种算法策略，观察短期留存与长期破茧之间的微妙权衡。`;
+      } else {
+        const opt = sc.options[picked];
+        document.getElementById('retVal').textContent = opt.ret;
+        document.getElementById('divVal').textContent = opt.div;
+        const badge = opt.ok ? '✅ 最佳破茧策略！' : '⚠️ 陷入算法陷阱：';
+        const extra = doneCount === scenes.length
+          ? ' 你已通关全部 4 个场景——真正的好推荐不是“强塞对立面”，而是保持 10%~20% 的温和桥梁探索。'
+          : '';
+        aha.innerHTML = `<strong>${badge}</strong>${opt.note}${extra}`;
+      }
+    }
+
+    render();
   </script>
 </body>
 </html>
